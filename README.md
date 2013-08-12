@@ -1,16 +1,8 @@
-<div>
-
-<a href="https://travis-ci.org/robertjchristian/service-nucleus">
-<img src="https://travis-ci.org/robertjchristian/service-nucleus.png" />
-</a>
-
-</div>
-
-<h1>service-nucleus</h1>
+# service-nucleus
 
 Service-Nucleus is largely made up of two core projects, <a href="https://github.com/Netflix/karyon">NetFlix Karyon</a> and <a href="https://github.com/robertjchristian/angular-enterprise-seed">Angular-Enterprise-Seed</a>.
 
-<h3>About</h3>
+### About
 Service-nucleus is a starting point for developing homogenous, SOA/Enterprise-friendly webservices.  It is a fork of the Netflix/karyon project found on github, with added functionality, examples, and a UI.  Out of the box, this project offers:
 
 * Rich Client-MVC-Based UI built on Angular with: 
@@ -29,11 +21,11 @@ Service-nucleus is a starting point for developing homogenous, SOA/Enterprise-fr
 * Administrative console
  * Always exposes an administrative console on port 8077, regardless of deployment/container configuration.
 
-<h3>Pre-requisites</h3>
+### Pre-requisites
 * Gradle >= 1.6
 * JDK >= 6 
-* 
-<h3>To run</h3>
+
+### To run
 
 * From the project root, "gradle jettyRun"
  * Checkout the admin console at http://localhost:8077
@@ -43,11 +35,11 @@ Service-nucleus is a starting point for developing homogenous, SOA/Enterprise-fr
  * Checkout the dynamic services landing page
   * localhost:8989/dyn
 
-<h3>To deploy</h3>
+### To deploy
 * From the project root, "gradle war"
 * Then copy (deploy) to your container of choice
 
-<h3>Developing a concrete service from the seed</h3>
+### Developing a concrete service from the seed
 
 There are currently four modules within the seed:
 
@@ -62,11 +54,11 @@ The service-framework module, like the admin modules, contain the homogenous fun
 
 The service-implementation module is the module everyone will be concerned with.  Out of the box, it defines a hello-world project with two endpoints (one static and one that takes a template parameter), and a simple health check servlet.  This module is meant to be refactored into a useful service implementation.
 
-<h3>Example</h3>
+### Example
 
 Let's say you wanted to develop a service called "math" that multiplies two template parameters and returns the result.  
 
-<h4>First step, barebones implementation</h4>
+#### First step, barebones implementation
 * Get/fork the project, (ie) git clone github:robertjchristian/service-nucleus
  * As a sanity check, perform the steps in "to run" outlined above` 
 * nano service-implementation/src/main/java/com/liaison/service/HelloworldResource
@@ -77,7 +69,7 @@ Let's say you wanted to develop a service called "math" that multiplies two temp
 
 That's it!
 
-<h4>Second step, productize</h4>
+#### Second step, productize
 
 Realistically you will want to productize your service, which basically means fixing up the namespace from hello-world to something more specific to your particular service.  These steps outline that process.  Note that scaffolding is on the near-term roadmap, and will make most or all of these steps obsolete:
 
@@ -89,19 +81,19 @@ Realistically you will want to productize your service, which basically means fi
  * Make sure to update math.properties to reflect any high-level namespace change, ie com.netflix.karyon.server.base.packages=com.liaison
 to com.netflix.karyon.server.base.packages=com.acme
 
-<h5>Building LESS</h5>
+##### Building LESS
 In addition to the prerequisites outlined above, you'll need npm, less, and uglify-js to build Twtter Bootstrap.
 
-<h3>Keeping up with changes</h3>
+### Keeping up with changes
 
 This project is going to be in flux for the foreseeable future (see roadmap).
 
 Adding the service-nucleus as a remote tracking branch is a low cost and easy way to stay current. It's recommended to do something like:
 
 <pre>
-git remote add --track master service-nucleus git@github.com:robertjchristian/service-nucleus.git
-git fetch service-nucleus
-git merge service-nucleus/master
+git remote add --track master service-nucleus git@gitlab.com:g2/liaison-service-nucleus.git
+git fetch liaison-service-nucleus
+git merge liaison-service-nucleus/master
 </pre>
 
 <i>Note that similarly, when developing on this project, a remote tracking branch should be setup against NetFlix/karyon.</i>
