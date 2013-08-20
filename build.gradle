@@ -1,34 +1,53 @@
+/*
+ * Copyright 2013 Liaison Technologies
+ *
+ * A RESTful Cryptography Key Management system
+ *
+ */
+
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral() // maven { url 'http://jcenter.bintray.com' }
-    }
-    apply from: file('gradle/buildscript.gradle'), to: buildscript 
+	repositories {
+        	mavenCentral() // maven { url 'http://jcenter.bintray.com' }
+	}
+	apply from: file('gradle/buildscript.gradle'), to: buildscript 
 }
 
 allprojects {
+    group = 'com.liaison.template'
     repositories { 
         mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
+
+        maven { url releasesArtifactRepoURL }
+        maven { url snapshotsArtifactRepoURL }
+	maven { url thirdpartyArtifactRepoURL }
     }
+    
+    configurations {
+        all {
+            // check for updates every build
+            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }
+    }    
 }
 
 apply from: file('gradle/convention.gradle')
 apply from: file('gradle/maven.gradle')
 apply from: file('gradle/check.gradle')
-apply from: file('gradle/license.gradle')
-apply from: file('gradle/release.gradle')
+//apply from: file('gradle/license.gradle')
+//apply from: file('gradle/release.gradle')
+
+war {
+	//a hack to take the empty war of project_root of the mix
+	archiveName=".ignore_me_seriously_thanks"
+}
 
 subprojects {
-    group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
-
-    dependencies {
-        compile     'javax.ws.rs:jsr311-api:1.1.1'
-        compile     'com.sun.jersey:jersey-core:1.11'
-        testCompile 'org.testng:testng:6.1.1'
-        testCompile 'org.mockito:mockito-core:1.8.5'
+    test {
+        // workaround for Java7 and Cobutura/Emma instrumentation problem
+        jvmArgs '-XX:-UseSplitVerifier'    
     }
 }
 

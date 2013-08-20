@@ -3,7 +3,6 @@
 *.com
 *.class
 *.dll
-*.exe
 *.o
 *.so
 
@@ -14,6 +13,7 @@
 *.7z
 *.dmg
 *.gz
+*.tgz
 *.iso
 *.jar
 *.rar
@@ -23,6 +23,7 @@
 # Logs and databases #
 ######################
 *.log
+*.ser
 
 # OS generated files #
 ######################
@@ -35,16 +36,20 @@ Thumbs.db
 ################
 *~
 *.swp
+*/~provisionDB.sql
 
 # Gradle Files #
 ################
-.gradle
+.gradle/
+gradle-app.setting
+.m2
 
 # Build output directies
 /target
 */target
 /build
 */build
+install/
 
 # IntelliJ specific files/directories
 out
@@ -62,3 +67,4 @@ atlassian-ide-plugin.xml
 
 # NetBeans specific files/directories
 .nbattrs
+
