@@ -3,6 +3,7 @@
 Service-Nucleus is largely made up of two core projects, <a href="https://github.com/Netflix/karyon">NetFlix Karyon</a> and <a href="https://github.com/robertjchristian/angular-enterprise-seed">Angular-Enterprise-Seed</a>.
 
 ### About
+THIS SPECIFIC PROJECT IS FOR OFS PROTOTYPES
 Service-nucleus is a starting point for developing homogenous, SOA/Enterprise-friendly webservices.  It is a fork of the Netflix/karyon project found on github, with added functionality, examples, and a UI.  Out of the box, this project offers:
 
 * Rich Client-MVC-Based UI built on Angular with: 
