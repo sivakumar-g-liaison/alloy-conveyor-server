@@ -31,6 +31,7 @@ allprojects {
 
         maven { url releasesArtifactRepoURL }
         maven { url snapshotsArtifactRepoURL }
+		maven { url thirdpartyArtifactRepoURL }
     }
     group = 'com.liaison.seed'
 }

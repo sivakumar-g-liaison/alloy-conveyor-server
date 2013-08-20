@@ -8,36 +8,32 @@ project.war.baseName = 'g2mailbox'
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
-test {
-    // TODO temp exclusion of j2ep
-    exclude 'org/sf/j2ep/*'
-}
+test { // TODO temp exclusion of j2ep
+	exclude 'org/sf/j2ep/*' }
 
 
 buildscript {
-    repositories { mavenCentral() }
-    apply from: file('../gradle/buildscript.gradle'), to: buildscript
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6'
-    }
+	repositories { mavenCentral() }
+	apply from: file('../gradle/buildscript.gradle'), to: buildscript
+	dependencies { classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6' }
 
 }
 
 allprojects {
-    repositories { mavenCentral() }
+	repositories { mavenCentral() }
 	configurations.all {
-		// This is an incubating gradle language feature (as of 1.5) allowing, in this 
+		// This is an incubating gradle language feature (as of 1.5) allowing, in this
 		// case, for FOO.pom to be swapped for any sub-dependencies of BAR.pom.
-	    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-	        if (details.requested.name == 'slf4j-simple') {
-	            //prefer 'slf4j-log4j2' over 'slf4j-simple', because
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.name == 'slf4j-simple') {
+				//prefer 'slf4j-log4j2' over 'slf4j-simple', because
 				//it's required that only one logger.jar be present for deterministic behavior of slf4j
 				details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta7"
-	        }
+			}
 
-	
-	    }
-		
+
+		}
+
 	}
 }
 
@@ -48,29 +44,29 @@ apply from: file('../gradle/license.gradle')
 
 war {
 
-    from('resources') {
-        include '*.properties'
-        into 'WEB-INF/classes/'
-    }
+	from('resources') {
+		include '*.properties'
+		into 'WEB-INF/classes/'
+	}
 
-    // TODO
-    // Resources used for the Dynamic Services landing page are intentionally kept in the
-    // service-framework module (where dynamic services framework is also defined), and
-    // outside of the service-implementation.  Eventually the service-framework will be an
-    // artifact, and we will be unable to pull in resources like this.
-    from('../service-framework/src/main/resources') {
-        include '**/**';
-        into 'WEB-INF/classes/'
-    }
+	// TODO
+	// Resources used for the Dynamic Services landing page are intentionally kept in the
+	// service-framework module (where dynamic services framework is also defined), and
+	// outside of the service-implementation.  Eventually the service-framework will be an
+	// artifact, and we will be unable to pull in resources like this.
+	from('../service-framework/src/main/resources') {
+		include '**/**';
+		into 'WEB-INF/classes/'
+	}
 
-    // TODO Needed?  I believe is is, since this is not
-    // the conventional location for webapp root
-    from('src/main/webapp/') {
-        include '**/**';
-        into '/'
-    }
+	// TODO Needed?  I believe is is, since this is not
+	// the conventional location for webapp root
+	from('src/main/webapp/') {
+		include '**/**';
+		into '/'
+	}
 
-    //webXml = file('src/main/webapp/WEB-INF/web.xml')
+	//webXml = file('src/main/webapp/WEB-INF/web.xml')
 }
 
 dependencies {
@@ -79,79 +75,85 @@ dependencies {
 
 	compile 'org.slf4j:slf4j-api:1.7.5'
 	//compile 'org.slf4j:slf4j-log4j12:1.7.5'
-	
+
 	def log4j2Version = '2.0-beta7';
 	compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
 	compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
 	compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
-	
-    compile "com.netflix.karyon:karyon-extensions:${karyonVersion}" 
 
-    compile project(':karyon-admin-web')
-    compile project(':service-framework')
+	compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
 
-    // ************************************* beg cargo *********************************************
-    def cargoVersion = "1.4.0"
-    cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
-            "org.codehaus.cargo:cargo-ant:$cargoVersion"
-    // ************************************* end cargo *********************************************
+	compile project(':karyon-admin-web')
+	compile project(':service-framework')
+
+	// ************************************* beg cargo *********************************************
+	def cargoVersion = "1.4.0"
+	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
+		  "org.codehaus.cargo:cargo-ant:$cargoVersion"
+	// ************************************* end cargo *********************************************
+
+	// Liaison code
+	// A Maven SNAPSHOT module (where the module you request can change over time, even for the same version) is a Gradle "changing module".
+	// This syntax will make sure you get the latest version of the SNAPSHOT.
+	compile group: "com.liaison", name: "commons-lib", version: "0.0.2-SNAPSHOT", changing: true
+
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
 // http://cargo.codehaus.org/
 cargo {
-    containerId = 'tomcat7x'
-    port = new Integer(tomcatHttpPort)
-    
-    deployable{
-        // NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
-        //        file = file('target/contivo-conversion-service-0.0.1.war')
-        context = project.war.baseName
+	containerId = 'tomcat7x'
+	port = new Integer(tomcatHttpPort)
 
-        // wait on this URL before continuing
-        def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/v1/hello/to/world"
-    }
+	deployable{
+		// NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
+		//        file = file('target/contivo-conversion-service-0.0.1.war')
+		context = project.war.baseName
 
-    local {
-        // NOTE: uncomment following line to use existing tomcat install
-        // homeDir = file('/Library/Tomcat')    // TODO should be set from CATALINA_HOME
-        // output = file('build/tomcat-out.log')
+		// wait on this URL before continuing
+		def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/v1/hello/to/world"
+	}
 
-        // TODO INSTALL OUTSIDE OF BUILDDIR... SO CLEAN DOESN'T KILL TOMCAT INSTALL UNLESS EXPLICITLY TOLD TO DO SO.
-        installer {
-            installUrl = "http://apache.osuosl.org/tomcat/tomcat-7/v${tomcatVersion}/bin/apache-tomcat-${tomcatVersion}.zip"
-            downloadDir = file("$buildDir/download") 
-            extractDir = file("$buildDir/extract")
-        }
+	local {
+		// NOTE: uncomment following line to use existing tomcat install
+		// homeDir = file('/Library/Tomcat')    // TODO should be set from CATALINA_HOME
+		// output = file('build/tomcat-out.log')
 
-       tomcat {
-            ajpPort = new Integer(tomcatAjpPort)
-        }
+		// TODO INSTALL OUTSIDE OF BUILDDIR... SO CLEAN DOESN'T KILL TOMCAT INSTALL UNLESS EXPLICITLY TOLD TO DO SO.
+		installer {
+			installUrl = "http://apache.osuosl.org/tomcat/tomcat-7/v${tomcatVersion}/bin/apache-tomcat-${tomcatVersion}.zip"
+			downloadDir = file("$buildDir/download")
+			extractDir = file("$buildDir/extract")
+		}
 
-        if(containerJVMArgs) {
-            jvmArgs = "$containerJVMArgs"        
-        } else {
-            jvmArgs = "-Darchaius.deployment.applicationId=${project.war.baseName} -Darchaius.deployment.environment=dev"
-        }
-           
-        // if containerDebug, append tomcat debug args to jvm args
-        if(containerDebug) {
-            jvmArgs += " $containerDebugJVMArgs"
-        }
-        
-        logger.info "=====jvmArgs===="
-        logger.info "$jvmArgs"
-    }
+		tomcat {
+			ajpPort = new Integer(tomcatAjpPort)
+		}
+
+		if(containerJVMArgs) {
+			jvmArgs = "$containerJVMArgs"
+		} else {
+			jvmArgs = "-Darchaius.deployment.applicationId=${project.war.baseName} -Darchaius.deployment.environment=dev"
+		}
+
+		// if containerDebug, append tomcat debug args to jvm args
+		if(containerDebug) {
+			jvmArgs += " $containerDebugJVMArgs"
+		}
+
+		logger.info "=====jvmArgs===="
+		logger.info "$jvmArgs"
+	}
 }
 
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
 task jettyRunSetProperties {
 	logger.info "Setting jettyRun system properties"
-    // use the default port of the ws-backend-simulation module
-    System.setProperty('archaius.deployment.applicationId', project.war.baseName)
-    System.setProperty('archaius.deployment.environment', 'dev')
-    // we only use jettyRun in dev... might as well output log4j debug
-    System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
+	// use the default port of the ws-backend-simulation module
+	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
+	System.setProperty('archaius.deployment.environment', 'dev')
+	// we only use jettyRun in dev... might as well output log4j debug
+	System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
 }
 
 
@@ -159,9 +161,9 @@ task jettyRunSetProperties {
 jettyRun {
 	dependsOn 'jettyRunSetProperties'
 	logger.info "Running jetty"
-    httpPort = new Integer(jettyHttpPort)
-    reload = 'automatic'
-    scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
-    daemon = false
+	httpPort = new Integer(jettyHttpPort)
+	reload = 'automatic'
+	scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
+	daemon = false
 }
 
