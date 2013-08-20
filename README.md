@@ -61,6 +61,15 @@ git merge build/master
 
 WARNING! Merging into an established project may result in merge conflict.
 
+If you are working directly on this project, you should include the Netflix tracking branch.
+
+```
+git remote add --track multi-project netflix-gradle git@github.com:Netflix/gradle-template.git
+git fetch netflix-gradle
+git merge netflix-gradle/multi-project
+```
+
+
 
 ### Updating 
 
