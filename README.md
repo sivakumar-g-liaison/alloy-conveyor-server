@@ -10,6 +10,15 @@ This project is a fork of the Netflix gradle-template project. (See https://gith
 This project also has the scripting and configuration required for building in continuous integration, and publishing artifacts to Liaison's internal maven repository.
 
 
+## Branches
+----
+There are 4 branches associated with this project:
+1. gradle - this is a modified for Liaison version of the Netflix gradle-template project
+    * https://github.com/Netflix/gradle-template
+2. linux - this is the gradle branch plus some linux scripting to set up a Dev/CI build environment
+3. windows - this is the gradle branch plus some windows scripting to set up a Dev/CI build environment
+4. *master* - this is a roll-up of the previous 3 branches
+
 ### Features
 
 The environment setup scripting will deploy the following.
@@ -34,12 +43,12 @@ The following environment varibles will be set:
 
 To run
 ----
-* setenv.sh (setenv.bat) - will bootstrap build dependencies via curl (HTTP GET) and install them.
+* setenv (setenv.cmd) - will bootstrap build dependencies via curl (HTTP GET) and install them.
     * very useful for Jenkins integration
     * creates a local environment gradle.properties from a template
     * needs some work to NOT automatically install dependencies without asking
     
-* do.sh (do.bat)        - will execute setenv.sh (setenv.bat) and then the specified command line in a sub-process.
+* do (do.cmd)        - will execute setenv (setenv.cmd) and then the specified command line in a sub-process.
 
 
 ## Keeping Up With Change
