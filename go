@@ -9,14 +9,14 @@ then
     # 
     # RUN THE NAMED SCRIPT
     #
-    source ./setenv.sh -q 
+    source ./setenv -q 
     source $*
 
 else
     echo ''
     echo ''
     echo '.................................................................................'
-    echo 'A script runner for executing scripts in an environment configured by sentenv.sh'
+    echo 'A script runner for executing scripts in an environment configured by sentenv'
     echo '.................................................................................'
     echo ''
     echo 'Usage:'

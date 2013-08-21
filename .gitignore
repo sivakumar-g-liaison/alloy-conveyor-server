@@ -50,6 +50,7 @@ gradle-app.setting
 /build
 */build
 install/
+tools/
 
 # IntelliJ specific files/directories
 out

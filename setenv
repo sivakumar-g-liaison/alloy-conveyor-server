@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # 
 # CACHE ORIGINAL PATH
@@ -26,7 +26,7 @@ fi
 # COMMAND LINE ARGUMENTS
 #
 QUIET=
-if [ "$1" = "-quiet" -o "$1" = "-q" ]; then
+if [[ "$1" = "-quiet" || "$1" = "-q" ]]; then
     export QUIET=true
 fi
 
@@ -45,54 +45,98 @@ rm ./temp.sh
 # (Assume CentOS/RedHat if not Debian/Ubuntu)
 #
 # make sure curl is installed
-command -v curl >/dev/null 2>&1 || { 
-    [ "$UID" -eq 0 ] || sudo bash "$0" "$@";
-    if [ "$IS_DEBIAN" = "true" ]; then
-        sudo -y apt-get install curl; 
-    else
-        sudo yum install curl --assumeyes; 
+command -V curl >/dev/null 2>&1 || {
+    if [[ ! -f "$PWD/tools/no-curl" ]]; then
+        if [[ "$QUIET" != "true" ]]; then
+            read -e -p "Install curl? This script will fail without curl. (y/n): " -i "y" INSTALL_CURL
+        fi
+        if [[ "$INSTALL_CURL" = "y" || "$QUIET" = "true" ]]; then
+            if [[ "$IS_DEBIAN" = "true" ]]; then
+                sudo apt-get install curl -y;
+            else
+                sudo yum install curl --assumeyes;
+            fi
+        else
+            read -e -p "Remember this decision? (y/n): " -i "y" REMEMBER
+            if [[ "$REMEMBER" = "y" ]]; then
+                echo none > "$PWD/tools/no-curl"
+            fi
+        fi
     fi
-} 
-# make sure unzip is installed
-command -v unzip >/dev/null 2>&1 || { 
-    [ "$UID" -eq 0 ] || sudo bash "$0" "$@";
-    if [ "$IS_DEBIAN" = "true" ]; then
-        sudo -y apt-get install unzip; 
-    else
-        sudo yum install unzip --assumeyes; 
-    fi
-} 
+}
 
-# TODO - enable when gradle supports UML javadocs
+# make sure unzip is installed
+command -v unzip >/dev/null 2>&1 || {
+    if [[ ! -f "$PWD/tools/no-unzip" ]]; then
+        if [[ "$QUIET" != "true" ]]; then
+            read -e -p "Install unzip? This script will fail without unzip. (y/n): " -i "y" INSTALL_UNZIP
+        fi
+        if [[ "$INSTALL_UNZIP" = "y" || "$QUIET" = "true" ]]; then
+            if [[ "$IS_DEBIAN" = "true" ]]; then
+                sudo apt-get install unzip -y; 
+            else
+                sudo yum install unzip --assumeyes; 
+            fi
+        else
+            read -e -p "Remember this decision? (y/n): " -i "y" REMEMBER
+            if [[ "$REMEMBER" = "y" ]]; then
+                echo none > "$PWD/tools/no-unzip"
+            fi
+        fi
+    fi
+}
+
 # make sure graphviz dot is installed
-#command -V dot >/dev/null 2>&1 || { 
-#    [ "$UID" -eq 0 ] || sudo bash "$0" "$@";
-#    if [ "$IS_DEBIAN" = "true" ]; then
-#        sudo -y apt-get install graphviz; 
-#    else
-#        sudo yum install graphviz --assumeyes; 
-#    fi
-#} 
+command -V dot >/dev/null 2>&1 || {
+    if [[ ! -f "$PWD/tools/no-graphviz" ]]; then
+        if [[ "$QUIET" != "true" ]]; then
+            read -e -p "Install graphviz? Required for diagrams embedded in Javadoc. (y/n): " -i "y" INSTALL_DOT
+        fi
+        if [[ "$INSTALL_DOT" = "y" || "$QUIET" = "true" ]]; then
+            if [[ "$IS_DEBIAN" = "true" ]]; then
+                sudo apt-get install graphviz -y; 
+            else
+                sudo yum install graphviz --assumeyes; 
+            fi
+        else
+            read -e -p "Remember this decision? (y/n): " -i "y" REMEMBER
+            if [[ "$REMEMBER" = "y" ]]; then
+                echo none > "$PWD/tools/no-graphviz"
+            fi
+        fi
+    fi
+}
 
 
 # 
 # SETUP JDK
 #
-export JDK_HOME=$PWD/tools/jdk-$JAVA_FULL_VERSION
-export URL_JDK=$ARTIFACT_REPO_URL/releases/com/oracle/java/liaison/jdk-$_PLATFORM-x64/$JAVA_FULL_VERSION/jdk-$_PLATFORM-x64-$JAVA_FULL_VERSION.zip
-if [ ! -f $JDK_HOME/bin/java ]; then
-    echo '.................................................................................'
-    echo ' Downloading '$URL_JDK
-    curl -o "$_ROOT/tools/jdk-$_PLATFORM-x64-$JAVA_FULL_VERSION.zip" $URL_JDK
-    unzip "$_ROOT/tools/jdk-$_PLATFORM-x64-$JAVA_FULL_VERSION.zip" -d "$_ROOT/tools"
-    mv "$_ROOT/tools/jdk-$JAVA_FULL_VERSION-$_PLATFORM-x64" "$_ROOT/tools/jdk-$JAVA_FULL_VERSION"
-    rm "$_ROOT/tools/jdk-$_PLATFORM-x64-$JAVA_FULL_VERSION.zip"
+export JDK_HOME=$PWD/tools/jdk$JAVA_FULL_VERSION
+export URL_JDK=$ARTIFACT_REPO_URL/thirdparty/com/oracle/java/jdk-$_PLATFORM-x64/${JAVA_VER}u${JAVA_REL_VER}/jdk-$_PLATFORM-x64-${JAVA_VER}u${JAVA_REL_VER}.tar.gz
+JDK_VER=`java -version 2>&1 | grep "java version" | awk '{print $3}' | tr -d \" | awk '{split($0, array, ".")} END{print array[2]}'`
+if [[ (! -f "$JDK_HOME/bin/java") && ("$JDK_VER" != "$JAVA_VER") ]]; then
+    if [[ ! -f "$PWD/tools/no-jdk" ]]; then
+        if [[ "$QUIET" != "true" ]]; then
+            read -e -p "JDK $JAVA_VER was not found. JDK $JAVA_VER is required for this project. Download local to this project? (y/n): " -i "y" INSTALL_JDK
+        fi
+        if [[ "$INSTALL_JDK" = "y" || "$QUIET" = "true" ]]; then
+            echo '.................................................................................'
+            echo ' Downloading '$URL_JDK
+            curl -o "$_ROOT/tools/jdk-$_PLATFORM-x64-${JAVA_VER}u${JAVA_REL_VER}.tar.gz" $URL_JDK
+            tar xvzf "$_ROOT/tools/jdk-$_PLATFORM-x64-${JAVA_VER}u${JAVA_REL_VER}.tar.gz" -C "$_ROOT/tools/"
+            rm "$_ROOT/tools/jdk-$_PLATFORM-x64-${JAVA_VER}u${JAVA_REL_VER}.tar.gz"
+        else
+            read -e -p "Remember this decision? (y/n): " -i "y" REMEMBER
+            if [[ "$REMEMBER" = "y" ]]; then
+                echo none > "$PWD/tools/no-jdk"
+            fi
+        fi
+    fi
 fi
 
-export JAVA_HOME=$JDK_HOME
-
-chmod -R +x $JAVA_HOME/bin/
-chmod -R +x $JAVA_HOME/jre/bin/
+if [[ -f "$JDK_HOME/bin/java" ]]; then
+    export JAVA_HOME=$JDK_HOME
+fi
 
 # build with JDK runtime, not JRE runtime
 export BUILD_PATH=$JAVA_HOME/bin
@@ -100,19 +144,14 @@ export BUILD_PATH=$JAVA_HOME/bin
 # set the build path
 export PATH=$BUILD_PATH:$_ORIGINAL_PATH
 
-if [ ! -f $JDK_HOME/bin/java ]; then
-    echo 'WARNING!'
-    echo '"gradle.properties" was generated from "gradle.properties.template"'
-    echo 'Please modify the new properties file to match your environment!'
-    cp "./gradle.properties.template" "./gradle.properties"
-fi
 
-
-if [ "$QUIET" != "true" ]; then
+if [[ "$QUIET" != "true" ]]; then
     echo '................................................................................'
     echo $PATH
     echo '................................................................................'
     java -version
     echo '................................................................................'
 fi
+
+exit 0
 
