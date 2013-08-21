@@ -5,7 +5,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.g2mailboxservice.pluggable;
+package com.liaison.service.g2mailboxservice.tasks;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -27,11 +28,11 @@ import com.liaison.service.g2mailboxservice.core.dto.SweepConditions;
  * @version 1.0
  */
 
-public class SweepDirectoryTask implements Task {
+public class SweepDirectoryTask implements Task<List<java.nio.file.Path>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SweepDirectoryTask.class);
 	private String path = null;
-	private Object response = null;
+	private List<java.nio.file.Path> response = null;
 	
 	public SweepDirectoryTask(String path) {
 		this.path = path;
@@ -47,8 +48,8 @@ public class SweepDirectoryTask implements Task {
 
         try {
         	
-            List<java.nio.file.Path> files = sweepDirectory(path,false, false, null);
-            response = files;
+           response = sweepDirectory(path,false, false, null);
+           
         } catch (IOException e) {
             LOGGER.error("Error in directory sweeping.", e);
         }catch (Exception e) {
@@ -104,10 +105,13 @@ public class SweepDirectoryTask implements Task {
 
         return filter;
     }
-    
+
 	@Override
-	public Object getResponse() {
-		// TODO Auto-generated method stub
+	public List<Path> getResponse() {
 		return response;
 	}
+
+	
+    
+	
 }

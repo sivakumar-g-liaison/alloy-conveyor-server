@@ -24,10 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.service.g2mailboxservice.core.DirectorySweeper;
-import com.liaison.service.g2mailboxservice.core.JavaScriptExecutor;
 import com.liaison.service.g2mailboxservice.core.dto.MetaDataDTO;
+import com.liaison.service.g2mailboxservice.core.util.JavaScriptExecutor;
 import com.liaison.service.g2mailboxservice.core.util.MailBoxSweeperUtil;
-import com.liaison.service.g2mailboxservice.pluggable.DirectorySweeperTaskHandler;
+import com.liaison.service.g2mailboxservice.tasks.DirectorySweeperTaskHandler;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -120,11 +120,9 @@ public class DirectorySweeperResource {
         	
         	executor = new DirectorySweeperTaskHandler(path);
         	executor.run();
-        	Object executorResponse = executor.getResponse();
-        	
-            String jsonResponse = (String) executorResponse;
+        	String jsonResponse = executor.getResponse();        	
             LOGGER.info("Returns json response.{}",new JSONObject(jsonResponse).toString(2));
-            response.put("sweepresults", new JSONObject(jsonResponse));
+            response.put("sweepresults",new JSONObject(jsonResponse) );
             return Response.ok(response.toString()).build();
         } catch (Exception e) {
 

@@ -5,14 +5,15 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.g2mailboxservice.pluggable;
+package com.liaison.service.g2mailboxservice.tasks;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.service.g2mailboxservice.core.JavaScriptExecutor;
+import com.liaison.service.g2mailboxservice.core.util.JavaScriptExecutor;
 
 /**
  * JavaScriptExecutorTask
@@ -21,12 +22,12 @@ import com.liaison.service.g2mailboxservice.core.JavaScriptExecutor;
  * @version 1.0
  */
 
-public class JavaScriptExecutorTask implements Task {
+public class JavaScriptExecutorTask implements Task<List<List<java.nio.file.Path>>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JavaScriptExecutorTask.class);
 	
 	private List<java.nio.file.Path> files;
-	private Object response = null;
+	private List<List<Path>> response = null;
 	
 	public JavaScriptExecutorTask(List<java.nio.file.Path> files) {
 		this.files = files;
@@ -55,7 +56,7 @@ public class JavaScriptExecutorTask implements Task {
 	}
 	
 	@Override
-	public Object getResponse() {
+	public List<List<Path>> getResponse() {
 		// TODO Auto-generated method stub
 		return response;
 	}

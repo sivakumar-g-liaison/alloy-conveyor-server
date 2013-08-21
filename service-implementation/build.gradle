@@ -96,7 +96,8 @@ dependencies {
 	// A Maven SNAPSHOT module (where the module you request can change over time, even for the same version) is a Gradle "changing module".
 	// This syntax will make sure you get the latest version of the SNAPSHOT.
 	compile group: "com.liaison", name: "commons-lib", version: "0.0.2-SNAPSHOT", changing: true
-
+	
+	
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.

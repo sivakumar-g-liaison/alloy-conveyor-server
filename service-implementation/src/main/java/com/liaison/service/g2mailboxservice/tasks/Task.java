@@ -5,7 +5,9 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.g2mailboxservice.pluggable;
+package com.liaison.service.g2mailboxservice.tasks;
+
+import java.util.List;
 
 /**
  * The <code>Task</code> interface should be implemented by any
@@ -15,7 +17,7 @@ package com.liaison.service.g2mailboxservice.pluggable;
  * @author Sivakumar Gopalakrishnan
  * @version 1.0
  */
-public interface Task {
+public interface Task<T> {
 
 	/**
 	 * When an object implementing interface <code>Task</code> is used
@@ -24,5 +26,5 @@ public interface Task {
      * The general contract of the method <code>run</code> is the common protocol for all Mail box task.
 	 */
 	public void run();
-	public Object getResponse();
+	public T getResponse();
 }

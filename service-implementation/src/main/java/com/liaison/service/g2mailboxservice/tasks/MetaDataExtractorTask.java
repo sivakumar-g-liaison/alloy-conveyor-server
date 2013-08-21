@@ -5,7 +5,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.g2mailboxservice.pluggable;
+package com.liaison.service.g2mailboxservice.tasks;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,19 +18,19 @@ import com.liaison.service.g2mailboxservice.core.dto.MetaDataDTO;
 import com.liaison.service.g2mailboxservice.core.util.MailBoxSweeperUtil;
 
 /**
- * MetaInfoCreatorTask
+ * MetaDataExtractorTask
  * 
  * @author Sivakumar Gopalakrishnan
  * @version 1.0
  */
 
-public class MetaInfoCreatorTask implements Task {
+public class MetaDataExtractorTask implements Task<String> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MetaInfoCreatorTask.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetaDataExtractorTask.class);
 	private List<List<java.nio.file.Path>> fileGroups;
-	private Object response = null;
+	private String response = null;
 	
-	public MetaInfoCreatorTask(List<List<java.nio.file.Path>> fileGroups) {
+	public MetaDataExtractorTask(List<List<java.nio.file.Path>> fileGroups) {
 		this.fileGroups = fileGroups;
 	}
 	@Override
@@ -55,7 +55,7 @@ public class MetaInfoCreatorTask implements Task {
 	}
 	
 	@Override
-	public Object getResponse() {
+	public String getResponse() {
 		// TODO Auto-generated method stub
 		return response;
 	}

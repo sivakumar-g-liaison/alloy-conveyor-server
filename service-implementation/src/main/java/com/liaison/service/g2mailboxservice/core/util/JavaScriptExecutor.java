@@ -5,7 +5,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.g2mailboxservice.core;
+package com.liaison.service.g2mailboxservice.core.util;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

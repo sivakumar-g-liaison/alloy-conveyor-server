@@ -5,7 +5,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.g2mailboxservice.pluggable;
+package com.liaison.service.g2mailboxservice.tasks;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,12 +27,12 @@ import com.liaison.service.g2mailboxservice.core.util.MailBoxSweeperConstants;
  * @version 1.0
  */
 
-public class FileMarkerTask implements Task {
+public class FileMarkerTask implements Task<Boolean> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileMarkerTask.class);
 	
 	private List<java.nio.file.Path> files;
-	private Object response = null;
+	private Boolean taskStatus = false;
 	
 	public FileMarkerTask(List<java.nio.file.Path> files) {
 		this.files = files;
@@ -49,6 +49,7 @@ public class FileMarkerTask implements Task {
         	
             List<java.nio.file.Path> sweepList = new ArrayList<>(files); 
             markAsSweeped(sweepList);
+            taskStatus = true;
         } catch (IOException e) {
             LOGGER.error("Error in directory sweeping.", e);
         }catch (Exception e) {
@@ -94,8 +95,8 @@ public class FileMarkerTask implements Task {
         Files.move(file, target, StandardCopyOption.ATOMIC_MOVE);
     }
 	@Override
-	public Object getResponse() {
+	public  Boolean getResponse() {
 		// TODO Auto-generated method stub
-		return response;
+		return taskStatus;
 	}
 }
