@@ -79,8 +79,6 @@ if not exist %EXE_7ZIP% (
 )
 set TOOL_PATH=%TOOL_PATH%;%PATH_7ZIP%
 
-
-:: TODO - enable when gradle supports UML javadocs
 :: GRAPHVIZ
 set VERSION_GRAPHVIZ=2.30
 set PATH_GRAPHVIZ=%_ROOT%\tools\Graphviz%VERSION_GRAPHVIZ%
@@ -107,7 +105,7 @@ for /F "tokens=1*" %%A IN ('echo "%PATH%" ^| find /c "Graphviz"') DO (
 ::
 set DOWNLOAD_JDK=n
 set JDK_HOME=%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%
-set URL_JDK=%ARTIFACT_REPO_URL%/releases/com/oracle/java/liaison/jdk-%_PLATFORM%-%JDK_ARCH%/%JAVA_FULL_VERSION%/jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_FULL_VERSION%.zip
+set URL_JDK=%ARTIFACT_REPO_URL%/thirdparty/com/oracle/java/jdk-%_PLATFORM%-%JDK_ARCH%/%JAVA_VER%u%JAVA_REL_VER%/jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip
 if not exist "%JDK_HOME%\no-jdk.txt" (
     if not exist "%JDK_HOME%\bin\java.exe" (
         :: if not automatically accepting default behavior, ask
@@ -125,10 +123,10 @@ if not exist "%JDK_HOME%\no-jdk.txt" (
 if /I ""%DOWNLOAD_JDK%""==""y"" (
     echo ................................................................................
     echo Downloading %URL_JDK%
-    %EXE_CURL% -o "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_FULL_VERSION%.zip" %URL_JDK%
-    %EXE_7ZIP% x -y "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_FULL_VERSION%.zip" -o%_ROOT%\tools 
+    %EXE_CURL% -o "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" %URL_JDK%
+    %EXE_7ZIP% x -y "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" -o%_ROOT%\tools 
     ren "%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%-%_PLATFORM%-%JDK_ARCH%" jdk-%JAVA_FULL_VERSION%
-    del "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_FULL_VERSION%.zip"
+    del "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip"
 ) else (
     if not exist "%JDK_HOME%\no-jdk.txt" (
         if not exist "%JDK_HOME%" mkdir "%JDK_HOME%"
@@ -145,31 +143,13 @@ set TOOL_PATH=%TOOL_PATH%;%JAVA_HOME%\bin
 :: set the build path
 set PATH=%TOOL_PATH%;%_ORIGINAL_PATH%
 
-:: 
-:: DEPLOYMENT SCRIPTS
-::
-set BOOTSTRAP_SCRIPT_SET=bootstrap-jboss7-%_PLATFORM%
-set URL_SCRIPTS_JBOSS7=%ARTIFACT_REPO_URL%/releases/com/liaison/%BOOTSTRAP_SCRIPT_SET%/%BOOTSTRAP_VERSION%/%BOOTSTRAP_SCRIPT_SET%-%BOOTSTRAP_VERSION%.zip
-if not exist "%SCRIPTS_HOME%" mkdir "%SCRIPTS_HOME%"
-
-:: TODO - make this happen on a test of version rather than existence
-if not exist "%SCRIPTS_HOME%\jboss-stage.cmd" (
-    echo ................................................................................
-    echo Downloading %URL_SCRIPTS_JBOSS7%
-    %EXE_CURL% -o "%_ROOT%\%BOOTSTRAP_SCRIPT_SET%-%BOOTSTRAP_VERSION%.zip" %URL_SCRIPTS_JBOSS7%
-    %EXE_7ZIP% x -y "%_ROOT%\%BOOTSTRAP_SCRIPT_SET%-%BOOTSTRAP_VERSION%.zip" -o%_ROOT%
-    MOVE "%_ROOT%\%BOOTSTRAP_SCRIPT_SET%\*.*" "%SCRIPTS_HOME%"
-    RMDIR "%_ROOT%\%BOOTSTRAP_SCRIPT_SET%"
-    del "%_ROOT%\%BOOTSTRAP_SCRIPT_SET%-%BOOTSTRAP_VERSION%.zip"
-)
-
+:: GRADLE TEMPLATING
 if not exist "gradle.properties" (
     echo WARNING!
     echo "gradle.properties" was generated from "gradle.properties.template"
     echo Please modify the new properties file to match your environment!
     copy /Y "gradle.properties.template" "gradle.properties"
 )
-
 
 if ""%QUIET%"" == """" (
 ::    cls
