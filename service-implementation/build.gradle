@@ -42,6 +42,13 @@ apply from: file('../gradle/maven.gradle')
 apply from: file('../gradle/check.gradle')
 apply from: file('../gradle/license.gradle')
 
+configurations {
+	//Need for enhancering via datanucleus.
+	jdo {
+		extendsFrom compile
+	}
+}
+
 war {
 
 	from('resources') {
@@ -161,6 +168,25 @@ task jettyRunSetProperties {
 	System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
 }
 
+// JPA (datanucleus) bytecode enhancement
+task enhance  << {
+	logger.info("... Enhancing ...");
+	ant.taskdef(
+		name      : 'datanucleusenhancer',
+		classpath : project.runtimeClasspath.asPath,
+		classname : 'org.datanucleus.enhancer.EnhancerTask'
+	)
+
+	ant.datanucleusenhancer(
+		classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
+		verbose     : true,
+		api : "JPA",
+		persistenceUnit : "mailbox-pu",
+		failonerror : true) {
+			fileset( dir : "$buildDir/classes/main" ) { }
+		}
+}
+classes.dependsOn('enhance')
 
 // jettyRun configuration properties
 jettyRun {
