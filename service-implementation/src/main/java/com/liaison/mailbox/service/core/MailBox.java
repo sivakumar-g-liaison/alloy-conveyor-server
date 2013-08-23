@@ -24,4 +24,25 @@ public class MailBox {
 		
 	 }
 
+	/**
+	 * Method inserts the analytic config details into the mail box.
+	 *
+	 * @param name
+	 * @param profile
+	 * @param url
+	 * @param id
+	 */
+	public void insertProfileComponents(String name, String profile, String url, String id) {
+
+		LOGGER.info("call receive to insert the profile ::{}", profile);
+		MailBoxComponent mbc = new MailBoxComponent();
+		mbc.setId(id);
+		mbc.setName(name);
+		mbc.setUrl(url);
+		mbc.setProfile(profile);
+
+		MailBoxComponentDAO componenDao = new MailBoxComponentDAOBase();
+		componenDao.persist(mbc);
+	}
+
 }
