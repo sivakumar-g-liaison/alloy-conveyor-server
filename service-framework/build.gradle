@@ -3,41 +3,33 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 
 buildscript {
     repositories { mavenCentral() }
-    apply from: file('../gradle/buildscript.gradle'), to: buildscript
+    apply from: file("$rootDir/gradle/buildscript.gradle"), to: buildscript
 }
 
-allprojects {
-    repositories { mavenCentral() }
+test {
+    // TODO temp exclusion of j2ep
+   exclude 'net/sf/j2ep/*'
 }
-
-apply from: file('../gradle/convention.gradle')
-apply from: file('../gradle/maven.gradle')
-apply from: file('../gradle/check.gradle')
-apply from: file('../gradle/license.gradle')
 
 dependencies {
-
-    //compile 'javax.servlet:servlet-api:2.5'
-
-
-
-    /** BEGIN ASYNC SERVLET SUPPORT **/
-
-
-    //compile 'javax:javaee-web-api:6.0'
-
-    /** **/
+	// JPA2.0 API
+	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+	
+    // Oracle OJDBC
+    compile 'com.oracle:ojdbc6:11g-11.2.0.3.0'
+    compile 'com.oracle:ucp:11g-11.2.0.3.0'
 
 
+    // Liaison code
+    compile group: "com.liaison", name: "commons-lib", version: "0.0.2-SNAPSHOT", changing: true
+	def slf4jVersion = '1.7.5';
+    compile 'org.slf4j:slf4j-api:${slf4jVersion}'
+    runtime 'org.slf4j:slf4j-simple:${slf4jVersion}'
 
+    // TODO - find and kill all log4j v1.x usages
+    compile 'log4j:log4j:1.2.17'
+        
 /** BEGIN PROXY SUPPORT **/
-
-// TODO port to JUNIT 4
-// TODO ressurect as GitHub project
-
-
-
-
 	compile "commons-beanutils:commons-beanutils:1.8.3"
 	compile "commons-codec:commons-codec:1.8"
 	compile "commons-digester:commons-digester:2.1"
@@ -46,19 +38,16 @@ dependencies {
 	compile "aspectj:aspectjrt:1.5.4"
     compile "cactus:cactus:13-1.7.2"
 
-//compile "http://repo1.maven.org/maven2/cactus/cactus/13-1.7.2/cactus-13-1.7.2.jar"
-
-        
-//testCompile "junit:junit:4.11"
-        testCompile "junit:junit:3.8.2"
+    // TODO - port to TestNG
+    testCompile "junit:junit:3.8.2"
 
 /** END PROXY SUPPORT **/
 
 	def log4j2Version = '2.0-beta7';
-	compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
-	compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+	compile "org.apache.logging.log4j:log4j-api:${log4j2Version}"
+	compile "org.apache.logging.log4j:log4j-core:${log4j2Version}"
+	compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2Version}"
 
-	
 	def jacksonVersion='1.9.12'
 	// JACKSON 1.9.x (2.x would supplant these w/ different name spaces)
 	compile "org.codehaus.jackson:jackson-core-asl:${jacksonVersion}"
@@ -70,14 +59,9 @@ dependencies {
 	compile "org.codehaus.jackson:jackson-smile:${jacksonVersion}"
 	compile "org.codehaus.jackson:jackson-mrbean:${jacksonVersion}"
 	runtime 'javax.xml.bind:jaxb-api:2.1'
-	
-
+    
     compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
     compile project(':karyon-admin-web')
-	
-
-	
 }
-
 
 
