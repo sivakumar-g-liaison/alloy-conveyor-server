@@ -15,9 +15,14 @@ test {
 
 
 buildscript {
-    repositories { mavenCentral() }
-    apply from: file('../gradle/buildscript.gradle'), to: buildscript
+    repositories { 
+        mavenCentral() 
+        maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
+        maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
+    }
+    apply from: file("$rootDir/gradle/buildscript.gradle"), to: buildscript
     dependencies {
+        // Cargo Plugin
         classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6'
     }
 
@@ -41,11 +46,6 @@ allprojects {
 	}
 }
 
-apply from: file('../gradle/convention.gradle')
-apply from: file('../gradle/maven.gradle')
-apply from: file('../gradle/check.gradle')
-apply from: file('../gradle/license.gradle')
-
 war {
 
     from('resources') {
@@ -58,7 +58,7 @@ war {
     // service-framework module (where dynamic services framework is also defined), and
     // outside of the service-implementation.  Eventually the service-framework will be an
     // artifact, and we will be unable to pull in resources like this.
-    from('../service-framework/src/main/resources') {
+    from("$rootDir/service-framework/src/main/resources") {
         include '**/**';
         into 'WEB-INF/classes/'
     }
@@ -99,44 +99,49 @@ dependencies {
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
 // http://cargo.codehaus.org/
+// https://github.com/bmuschko/gradle-cargo-plugin
+def installRootPath = "${rootDir}/install"
+def tomcatInstallPath = "${installRootPath}/tomcat"
 cargo {
     containerId = 'tomcat7x'
     port = new Integer(tomcatHttpPort)
     
     deployable{
         // NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
-        //        file = file('target/contivo-conversion-service-0.0.1.war')
-        context = project.war.baseName
-
+        // file = file('target/contivo-conversion-service-0.0.1.war')
+        context = project.war.baseName + "-${versionName}"
+                
         // wait on this URL before continuing
-        def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/v1/hello/to/world"
+        def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/ping"
     }
 
     local {
-        // NOTE: uncomment following line to use existing tomcat install
-        // homeDir = file('/Library/Tomcat')    // TODO should be set from CATALINA_HOME
-        // output = file('build/tomcat-out.log')
+        homeDir = file(tomcatInstallPath) // TODO - should this be set from CATALINA_HOME?
+        output = file("$buildDir/tomcat-out.log")
 
-        // TODO INSTALL OUTSIDE OF BUILDDIR... SO CLEAN DOESN'T KILL TOMCAT INSTALL UNLESS EXPLICITLY TOLD TO DO SO.
-        installer {
-            installUrl = "http://apache.osuosl.org/tomcat/tomcat-7/v${tomcatVersion}/bin/apache-tomcat-${tomcatVersion}.zip"
-            downloadDir = file("$buildDir/download") 
-            extractDir = file("$buildDir/extract")
-        }
-
-       tomcat {
+        tomcat {
             ajpPort = new Integer(tomcatAjpPort)
         }
-
+         
+        // set the initial value
         if(containerJVMArgs) {
-            jvmArgs = "$containerJVMArgs"        
+            jvmArgs = "$containerJVMArgs"
         } else {
-            jvmArgs = "-Darchaius.deployment.applicationId=${project.war.baseName} -Darchaius.deployment.environment=dev"
+            jvmArgs = ''
         }
-           
+
+        // the leading space is important
+        jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
+        jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+        
         // if containerDebug, append tomcat debug args to jvm args
-        if(containerDebug) {
-            jvmArgs += " $containerDebugJVMArgs"
+        if(project.hasProperty('containerDebug')) {
+            jvmArgs += ' '
+            if (project.hasProperty('suspendDebug')) {
+                jvmArgs += containerDebugJVMArgs.replace('suspend=n', 'suspend=y')
+            } else {
+                jvmArgs += containerDebugJVMArgs
+            }
         }
         
         logger.info "=====jvmArgs===="
@@ -144,12 +149,35 @@ cargo {
     }
 }
 
+// This is for default config of Tomcat
+task configureTomcat(dependsOn: ['stageTomcat']) << {
+    //TODO replace tokens would be a nicer but heavier weight way of doing this.
+    logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
+    copy {
+        from ("${tomcatInstallPath}-configs/common") {
+            include '**/*.*'
+        }
+        into tomcatInstallPath
+    }
+    copy {
+        from ("${tomcatInstallPath}-configs/${deployEnvironment}")  {
+            include '**/*.*'
+        }
+        into tomcatInstallPath
+    }
+}
+project.afterEvaluate {
+    cargoRunLocal.dependsOn('configureTomcat')
+    cargoStartLocal.dependsOn('configureTomcat')
+}
+
+
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
 task jettyRunSetProperties {
-	logger.info "Setting jettyRun system properties"
+    logger.info "Setting jettyRun system properties"
     // use the default port of the ws-backend-simulation module
     System.setProperty('archaius.deployment.applicationId', project.war.baseName)
-    System.setProperty('archaius.deployment.environment', 'dev')
+    System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
     // we only use jettyRun in dev... might as well output log4j debug
     System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
 }
@@ -157,8 +185,8 @@ task jettyRunSetProperties {
 
 // jettyRun configuration properties
 jettyRun {
-	dependsOn 'jettyRunSetProperties'
-	logger.info "Running jetty"
+    dependsOn 'jettyRunSetProperties'
+    logger.info "Running jetty"
     httpPort = new Integer(jettyHttpPort)
     reload = 'automatic'
     scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
