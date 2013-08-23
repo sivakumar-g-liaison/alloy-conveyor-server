@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="mailbox-pu" transaction-type="RESOURCE_LOCAL">
+		<mapping-file>META-INF/orm.xml</mapping-file>
+		<class>com.liaison.mailbox.jpa.model.MailBoxComponent</class>
+		<properties>
+			<property name="javax.persistence.transactionType" value="JTA" />
+			<property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" />
+			<!-- datanucleus.connectionPool.maxPoolSize : max size of pool datanucleus.connectionPool.initialPoolSize 
+				: initial size of pool -->
+		</properties>
+	</persistence-unit>
+</persistence>
