@@ -63,9 +63,9 @@ In order to do so, a project must have a tracking branch back to this project. I
 This will pull in the template:
 
 ```
-git remote add --track master build git@gitlab.hs.com:g2/liaison-gradle-template.git
-git fetch build
-git merge build/master
+git remote add --track master liaison-gradle git@gitlab.hs.com:g2/liaison-gradle-template.git
+git fetch liaison-gradle
+git merge liaison-gradle/master
 ```
 
 WARNING! Merging into an established project may result in merge conflict.
