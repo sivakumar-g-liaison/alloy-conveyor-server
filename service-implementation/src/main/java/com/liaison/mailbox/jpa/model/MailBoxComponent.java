@@ -14,7 +14,7 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name="MAILBOX_COMPONENT")
-public class MailBoxComponent implements Identifiable{
+public class MailBoxComponent implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 	private String id;
@@ -22,8 +22,6 @@ public class MailBoxComponent implements Identifiable{
 	private String url;
 	private String profile;
 	
-	
-
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
@@ -38,7 +36,7 @@ public class MailBoxComponent implements Identifiable{
 	}
 
 	@Id
-	@Column(unique=true, nullable=false)
+	@Column(name="ID", unique=true, nullable=false)
 	public String getId() {
 		return id;
 	}
@@ -80,4 +78,5 @@ public class MailBoxComponent implements Identifiable{
 		return "MailBoxComponent [id=" + id + ", name=" + name + ", url=" + url
 				+ ", profile=" + profile + "]";
 	}
+
 }
