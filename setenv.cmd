@@ -99,57 +99,62 @@ for /F "tokens=1*" %%A IN ('echo "%PATH%" ^| find /c "Graphviz"') DO (
     set TOOL_PATH=%TOOL_PATH%;%PATH_GRAPHVIZ%\bin
 )
 
-
 :: 
 :: SETUP JDK
 ::
 set DOWNLOAD_JDK=n
 set JDK_HOME=%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%
 set URL_JDK=%ARTIFACT_REPO_URL%/thirdparty/com/oracle/java/jdk-%_PLATFORM%-%JDK_ARCH%/%JAVA_VER%u%JAVA_REL_VER%/jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip
-if not exist "%JDK_HOME%\no-jdk.txt" (
+for /F "tokens=1,2,3" %%A IN ('java -version 2^>^&1 ^| find "java version ""1.7."') DO set MY_JDK_VERSION=%%~C
+set MY_JDK_MAJOR=%MY_JDK_VERSION:~2,-5%
+if not "%MY_JDK_MAJOR%" == "7" (
     if not exist "%JDK_HOME%\bin\java.exe" (
-        :: if not automatically accepting default behavior, ask
-        if not ""%USE_DEFAULTS%""==""true"" (
-            call set /P DOWNLOAD_JDK="JDK 7 was not found. Download JDK for this project? (y/n) ": %=%
-        ) else (
-            set DOWNLOAD_JDK=y
+        if not exist "%JDK_HOME%\no-jdk.txt" (    
+            if not ""%USE_DEFAULTS%""==""true"" (
+                call set /P DOWNLOAD_JDK="JDK 7 was not found. Download JDK for this project? (y/n) ": %=%
+            ) else (
+                set DOWNLOAD_JDK=y
+            )
         )
     )
-) else (
-    if not exist "%JAVA_HOME%\bin\java.exe" (
-        echo You have chosen to skip downloading JDK 7 and the JAVA_HOME environment variable is not set. Please set JAVA_HOME to an install of JDK 7.
+    if /I ""%DOWNLOAD_JDK%""==""y"" (
+        echo ................................................................................
+        echo Downloading %URL_JDK%
+        %EXE_CURL% -o "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" %URL_JDK%
+        %EXE_7ZIP% x -y "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" -o%_ROOT%\tools 
+        ren "%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%-%_PLATFORM%-%JDK_ARCH%" jdk-%JAVA_FULL_VERSION%
+        del "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip"
+    ) else (
+        call set /P REMEMBER="Remember this decision? (y/n) ": %=%
+        if /I ""%REMEMBER%""==""y"" ( 
+            echo You have chosen to skip downloading JDK 7 and the JAVA_HOME environment variable is not set. Please set JAVA_HOME to an install of JDK 7.
+            if not exist "%JDK_HOME%" mkdir "%JDK_HOME%"
+            echo "no java">"%JDK_HOME%\no-jdk.txt"
+        )
     )
 )
-if /I ""%DOWNLOAD_JDK%""==""y"" (
-    echo ................................................................................
-    echo Downloading %URL_JDK%
-    %EXE_CURL% -o "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" %URL_JDK%
-    %EXE_7ZIP% x -y "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" -o%_ROOT%\tools 
-    ren "%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%-%_PLATFORM%-%JDK_ARCH%" jdk-%JAVA_FULL_VERSION%
-    del "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip"
-) else (
-    if not exist "%JDK_HOME%\no-jdk.txt" (
-        if not exist "%JDK_HOME%" mkdir "%JDK_HOME%"
-        echo "no java">"%JDK_HOME%\no-jdk.txt"
-    )
-)
-
-if exist "%JDK_HOME%\bin\java.exe"  (
+if exist ""%JDK_HOME%\bin\java.exe""  (
     set JAVA_HOME=%JDK_HOME%
 )
-set TOOL_PATH=%TOOL_PATH%;%JAVA_HOME%\bin
+if exist ""%ProgramFiles%\Java\%MY_JDK_VERSION%""  (
+    set JAVA_HOME=%ProgramFiles%\Java\%MY_JDK_VERSION%
+)
+if exist ""%ProgramFiles(x86)%\Java\%MY_JDK_VERSION%"" (
+    set JAVA_HOME=%ProgramFiles(x86)%\Java\%MY_JDK_VERSION%
+)
+if exist ""%ProgramW6432%\Java\%MY_JDK_VERSION%"" (
+    set JAVA_HOME=%ProgramW6432%\Java\%MY_JDK_VERSION%
+)
+for /F "tokens=1* delims=\" %%A IN ('echo %JAVA_HOME%') DO set FOUND_JAVA_HOME=true
+if [%FOUND_JAVA_HOME%]==[true] ( 
+    set TOOL_PATH=%TOOL_PATH%;%JAVA_HOME%\bin
+) else (
+    echo Unable to determine JAVA_HOME. Please make sure JDK 7 is installed.
+)
 :JDK_COMPLETE
 
 :: set the build path
 set PATH=%TOOL_PATH%;%_ORIGINAL_PATH%
-
-:: GRADLE TEMPLATING
-if not exist "gradle.properties" (
-    echo WARNING!
-    echo "gradle.properties" was generated from "gradle.properties.template"
-    echo Please modify the new properties file to match your environment!
-    copy /Y "gradle.properties.template" "gradle.properties"
-)
 
 if ""%QUIET%"" == """" (
 ::    cls
@@ -157,6 +162,7 @@ if ""%QUIET%"" == """" (
     echo ................................................................................
     path
     echo ................................................................................
+    echo JAVA_HOME=%JAVA_HOME%
     java -version
     echo ................................................................................
 )
