@@ -1,0 +1,36 @@
+// Common Bundler Tasks
+// ==================================================
+
+def installPath = file("$rootDir/install").getCanonicalPath()
+
+// http://www.gradle.org/docs/current/userguide/application_plugin.html
+apply plugin:'war'
+
+
+
+task distTar(type: Tar, description:"Creates build distribution tarball") {
+    from 'install'
+	compression = Compression.GZIP
+}
+
+
+// TODO - should these go in the root build.gradle?
+distTar.dependsOn('stageJRE')
+distTar.dependsOn('stageTomcat')
+distTar.dependsOn('copyWarToInstall')
+
+
+// cleanup task for the installer bundle staginf folder
+// =======================================================================
+task cleanBundleStaging(description: "Cleans the bundler staging folder") << {
+	out.println('Cleaning Install Bundle staging folder...' + installPath)
+    ant.delete( 
+        dir:"$installPath", 
+        includes:'**/*', 
+        includeemptydirs:true, 
+        deleteonexit:true, 
+        performGCOnFailedDelete:true
+    )
+}
+
+task cleanAll(description: "Cleans the bundler staging folder", dependsOn:['clean','cleanBundleStaging'])

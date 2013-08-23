@@ -1,0 +1,72 @@
+// Framework Bundler Staging Tasks
+// ==================================================
+
+def installPath = file("$rootDir/install").getCanonicalPath()
+def installTomcat = "$installPath/tomcat"
+
+configurations {
+    deployJre
+    deployTomcat
+}
+
+dependencies {
+    deployJre    "com.oracle.java:jre-linux-x64:${javaRelease}"
+    deployTomcat "com.liaison.modified.tomcat:liaison-tomcat-linux-x64-dev:${tomcatVersion}"   
+}
+
+// stage JRE in the installer path
+// =======================================================================
+//TODO write original file name into jre.version.txt
+task stageJRE(description: "Stages JRE for bundler") << {
+    copy {
+        from(tarTree(configurations.deployJre.fileCollection{dep -> dep.name == 'jre-linux-x64'}.singleFile))
+        into "$installPath"
+    }
+    ant.move( toDir:"$installPath/jre", overwrite:true ) {
+        fileset(dir: "$installPath/jre${javaVersion}")
+    }
+}
+stageJRE.outputs.dir("$installPath/jre")
+
+
+// stage Tomcat in the installer path
+// =======================================================================
+//TODO write original file name into tomcat.version.txt
+
+task untarTomcat(description: "Untars Tomcat") << {
+    copy {
+        from(tarTree(configurations.deployTomcat.fileCollection{dep -> dep.name == 'liaison-tomcat-linux-x64-dev'}.singleFile));
+        into "$installPath";
+    }
+    ant.move( toDir:"$installPath/tomcat", overwrite:true ) {
+        fileset(dir: "$installPath/liaison-tomcat-dev-${tomcatVersion}")
+    }   
+}
+untarTomcat.outputs.dir("$installPath/tomcat")
+
+task stageTomcatConfig(type: Copy, description: "Stages Tomcat Configurations for bundler") {
+    from ("$rootDir/src/tomcat-configs") {
+        include '**/*.*'
+    }
+    into "$installPath/configs/tomcat"
+}
+
+stageTomcatConfig.outputs.dir("$installPath/tomcat-configs")
+
+task stageTomcat << {
+    untarTomcat.execute()
+    stageTomcatConfig.execute()
+}
+
+//TODO write original file name into war.version.txt
+task copyWarToInstall(type: Copy, description: "Copies wars (from output of war) to tomcat/webapps and strips version") {
+    from war.outputs
+    into "$installTomcat/webapps"
+    rename '(.+)-\\d\\.\\d\\.\\d-SNAPSHOT(.+)', '$1$2' //TODO discuss with Israel naming and versioning assumptions
+    include '**/*.war'
+}
+
+copyWarToInstall.dependsOn('stageTomcat','war')
+
+
+
