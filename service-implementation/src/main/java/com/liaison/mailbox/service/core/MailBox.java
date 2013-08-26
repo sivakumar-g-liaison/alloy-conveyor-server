@@ -3,6 +3,8 @@ package com.liaison.mailbox.service.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.mailbox.grammer.dto.ProfileConfigurationRequest;
+import com.liaison.mailbox.grammer.dto.ProfileConfigurationResponse;
 import com.liaison.mailbox.jpa.dao.MailBoxComponentDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxComponentDAOBase;
 import com.liaison.mailbox.jpa.model.MailBoxComponent;
@@ -26,23 +28,27 @@ public class MailBox {
 
 	/**
 	 * Method inserts the analytic config details into the mail box.
-	 *
-	 * @param name
-	 * @param profile
-	 * @param url
-	 * @param id
+	 * 
+	 * @param serviceRequest
+	 * @return
 	 */
-	public void insertProfileComponents(String name, String profile, String url, String id) {
+	public ProfileConfigurationResponse insertProfileComponents(ProfileConfigurationRequest serviceRequest) {
 
-		LOGGER.info("call receive to insert the profile ::{}", profile);
+		LOGGER.info("call receive to insert the profile ::{}", serviceRequest.getProfile());
 		MailBoxComponent mbc = new MailBoxComponent();
-		mbc.setId(id);
-		mbc.setName(name);
-		mbc.setUrl(url);
-		mbc.setProfile(profile);
+		mbc.setId(serviceRequest.getId());
+		mbc.setName(serviceRequest.getName());
+		mbc.setUrl(serviceRequest.getUrl());
+		mbc.setProfile(serviceRequest.getProfile());
 
 		MailBoxComponentDAO componenDao = new MailBoxComponentDAOBase();
 		componenDao.persist(mbc);
+		
+		//Temporarily returns the id alone.
+		ProfileConfigurationResponse serviceResponse = new ProfileConfigurationResponse();
+		serviceResponse.setId(mbc.getId());
+		
+		return serviceResponse;
 	}
 
 }
