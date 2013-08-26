@@ -4,15 +4,16 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 	<persistence-unit name="mailbox-pu" transaction-type="RESOURCE_LOCAL">
 		<mapping-file>META-INF/orm.xml</mapping-file>
-		<class>com.liaison.mailbox.jpa.model.MailBoxComponent</class>
+		
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
 		<properties>
 			<property name="javax.persistence.transactionType" value="JTA" />
-			<!--<property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" />-->
+			<property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" />
 
-            <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@10.0.6.109:1521:kili1"/>
+           <!--  <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@10.0.6.109:1521:kili1"/>
             <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
             <property name="javax.persistence.jdbc.user" value="gramamurthy"/>
-            <property name="javax.persistence.jdbc.password" value="sonjava123"/>
+            <property name="javax.persistence.jdbc.password" value="sonjava123"/>  -->
 
 			<!-- datanucleus.connectionPool.maxPoolSize : max size of pool datanucleus.connectionPool.initialPoolSize 
 				: initial size of pool -->

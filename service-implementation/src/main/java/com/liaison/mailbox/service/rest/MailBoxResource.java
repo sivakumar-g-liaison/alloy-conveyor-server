@@ -56,6 +56,10 @@ public class MailBoxResource {
         }
 	return null;
     }
+    
+    //TODO offshore - this method should ideally consume a JSON in the post body.
+    //This should rather be PUT read http://10.0.2.8/display/ARCH/G2+REST+API+Standard?focusedCommentId=16089354#comment-16089354 including comments
+    //Also the method param should be  @Context HttpServletRequest request , refer to keymanager  com.liaison.keymanage.service.rest.KeyUploadResource
 
 	/**
 	 * REST Method to insert the analytic profile details.

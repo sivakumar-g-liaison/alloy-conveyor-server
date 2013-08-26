@@ -75,7 +75,16 @@ dependencies {
     compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
     compile project(':karyon-admin-web')
 	
+	// JPA2.0 API
+	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+	
+	// Oracle OJDBC
+	compile 'com.oracle:ojdbc6:11g-11.2.0.3.0'
+	compile 'com.oracle:ucp:11g-11.2.0.3.0'
 
+
+	// Liaison code
+	compile group: "com.liaison", name: "commons-lib", version: "0.0.2-SNAPSHOT", changing: true
 	
 }
 

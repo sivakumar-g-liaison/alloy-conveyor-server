@@ -109,6 +109,15 @@ dependencies {
     compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
     compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
 	
+	// geronimo jpa spec
+	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+	
+	// Oracle OJDBC
+	// (This dependency is stored in the Liaison Nexus server.)
+	// def oracleVersion = '11g-11.2.0.3.0'
+	runtime 'com.oracle:ojdbc6:${oracleVersion}'
+	compile 'com.oracle:ucp:${oracleVersion}'
+	
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
