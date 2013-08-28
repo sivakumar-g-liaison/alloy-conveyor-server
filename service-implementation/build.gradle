@@ -1,6 +1,7 @@
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'cargo'
+apply from: file("$rootDir/gradle/bundler/framework.gradle")
 
 // set base name (impacts war name and context path)
 project.war.baseName = 'hello-world'
