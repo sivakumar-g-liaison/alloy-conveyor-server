@@ -5,7 +5,6 @@
 
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
-apply plugin: 'eclipse' //provides tasks for eclipse. If you don't use eclipse, simply don't use these tasks :)
 
 buildscript {
 	repositories {
