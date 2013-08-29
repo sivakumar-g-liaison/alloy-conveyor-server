@@ -23,7 +23,7 @@ configurations {
 }
 
 dependencies {
-    deployJre    "com.oracle.java.liaison:jre-linux-x64:${javaVersion}@zip"
+    deployJre    "com.oracle.java:jre-linux-x64:${javaRelease}"
     deployTomcat "com.liaison.modified.tomcat:liaison-tomcat-linux-x64-dev:${tomcatVersion}"   
 }
 
@@ -32,11 +32,11 @@ dependencies {
 //TODO write original file name into jre.version.txt
 task stageJRE(description: "Fetches and stages JRE for bundler", group: "Production Bundler") << {
     copy {
-        from(zipTree(configurations.deployJre.fileCollection{dep -> dep.name == 'jre-linux-x64'}.singleFile))
+        from(tarTree(configurations.deployJre.fileCollection{dep -> dep.name == 'jre-linux-x64'}.singleFile))
         into "$installPath"
     }
     ant.move( toDir:"$installPath/jre", overwrite:true ) {
-        fileset(dir: "$installPath/jre-${javaVersion}-linux-x64")
+        fileset(dir: "$installPath/jre${javaVersion}")
     }
 }
 stageJRE.outputs.dir("$installPath/jre")
