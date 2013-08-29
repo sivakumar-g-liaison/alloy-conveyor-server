@@ -64,11 +64,11 @@ public class MailBoxComponent implements Identifiable {
 	}
 	
 	
+	@Column(name="PROFILE", nullable=false)
 	public String getProfile() {
 		return profile;
 	}
 	
-	@Column(name="PROFILE", nullable=false)
 	public void setProfile(String profile) {
 		this.profile = profile;
 	}
