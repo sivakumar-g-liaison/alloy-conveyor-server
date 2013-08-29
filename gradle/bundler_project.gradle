@@ -1,5 +1,0 @@
-// Project Specific Bundler Tasks
-// ==================================================
-
-def installPath = file("$rootDir/install").getCanonicalPath()
-

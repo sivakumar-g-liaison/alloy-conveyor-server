@@ -60,10 +60,12 @@ task stageTomcat << {
 
 //TODO write original file name into war.version.txt
 task copyWarToInstall(type: Copy, description: "Copies wars (from output of war) to tomcat/webapps and strips version") {
-    from war.outputs
-    into "$installTomcat/webapps"
-    rename '(.+)-\\d\\.\\d\\.\\d-SNAPSHOT(.+)', '$1$2' //TODO discuss with Israel naming and versioning assumptions
-    include '**/*.war'
+
+    from (war.outputs.getFiles()) {
+		include '**/*.war'
+	}
+	rename '(.+)-\\d\\.\\d\\.\\d-SNAPSHOT(.+)', '$1$2' //TODO discuss with Israel naming and versioning assumptions
+    into "$rootDir/install/tomcat/webapps"
 }
 
 copyWarToInstall.dependsOn('stageTomcat','war')
