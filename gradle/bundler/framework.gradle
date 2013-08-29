@@ -82,20 +82,6 @@ task copyWarToInstall(type: Copy, description: "Copies wars (from output of war)
     into "$rootDir/install/tomcat/webapps"
 }
 
-//task displayWars () {
-//	println  ",,,jj,,"
-//	
-////	println war.outputs.getFiles().getAsPath()
-//
-//	println  ",,,,,"
-//}
-
-//task copyFreeWarToInstall(type: Copy, description: "Copies wars (from output of war) to tomcat/webapps and strips version") {
-//    from (war.outputs) {
-//        include '**/*.war'
-//    }
-//    into "$installPath"
-//}
 
 copyWarToInstall.dependsOn('stageTomcat','war')
 
