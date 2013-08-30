@@ -23,8 +23,8 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name="MAILBOXES")
-@NamedQuery(name="Mailbox.findAll", query="SELECT m FROM Mailbox m")
-public class Mailbox implements Identifiable {
+@NamedQuery(name="MailBox.findAll", query="SELECT m FROM MailBox m")
+public class MailBox implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,10 +35,10 @@ public class Mailbox implements Identifiable {
 	private BigDecimal serviceInstId;
 	private String shardKey;
 
-	private List<MailboxProperty> mailboxProperties;
+	private List<MailBoxProperty> mailboxProperties;
 	private List<MailboxSchedProfile> mailboxSchedProfiles;
 
-	public Mailbox() {
+	public MailBox() {
 	}
 
 	@Id
@@ -99,22 +99,22 @@ public class Mailbox implements Identifiable {
 
 	//bi-directional many-to-one association to MailboxProperty
 	@OneToMany(mappedBy="mailbox", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
-	public List<MailboxProperty> getMailboxProperties() {
+	public List<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
 	}
 
-	public void setMailboxProperties(List<MailboxProperty> mailboxProperties) {
+	public void setMailboxProperties(List<MailBoxProperty> mailboxProperties) {
 		this.mailboxProperties = mailboxProperties;
 	}
 
-	public MailboxProperty addMailboxProperty(MailboxProperty mailboxProperty) {
+	public MailBoxProperty addMailboxProperty(MailBoxProperty mailboxProperty) {
 		getMailboxProperties().add(mailboxProperty);
 		mailboxProperty.setMailbox(this);
 
 		return mailboxProperty;
 	}
 
-	public MailboxProperty removeMailboxProperty(MailboxProperty mailboxProperty) {
+	public MailBoxProperty removeMailboxProperty(MailBoxProperty mailboxProperty) {
 		getMailboxProperties().remove(mailboxProperty);
 		mailboxProperty.setMailbox(null);
 

@@ -22,17 +22,17 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name="MAILBOX_PROPERTIES")
-@NamedQuery(name="MailboxProperty.findAll", query="SELECT m FROM MailboxProperty m")
-public class MailboxProperty implements Identifiable {
+@NamedQuery(name="MailBoxProperty.findAll", query="SELECT m FROM MailBoxProperty m")
+public class MailBoxProperty implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String pguid;
 	private String mbxPropName;
 	private String mbxPropValue;
-	private Mailbox mailbox;
+	private MailBox mailbox;
 
-	public MailboxProperty() {
+	public MailBoxProperty() {
 	}
 
 	@Id
@@ -67,11 +67,11 @@ public class MailboxProperty implements Identifiable {
 	//bi-directional many-to-one association to Mailbox
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="MAILBOX_GUID", nullable=false)
-	public Mailbox getMailbox() {
+	public MailBox getMailbox() {
 		return this.mailbox;
 	}
 
-	public void setMailbox(Mailbox mailbox) {
+	public void setMailbox(MailBox mailbox) {
 		this.mailbox = mailbox;
 	}
 
