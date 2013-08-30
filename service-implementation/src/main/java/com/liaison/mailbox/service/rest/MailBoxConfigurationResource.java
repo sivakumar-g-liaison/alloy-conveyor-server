@@ -98,14 +98,7 @@ public class MailBoxConfigurationResource {
 			serviceResponse = mailbox.createMailBox(serviceRequest);
 
 			//populate the response body
-			String responseBody;
-			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
-				responseBody = JAXBUtility.marshalToXML(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			} else {
-				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			}
+			return serviceResponse.constructResponse(marshallingMediaType);
 
 		} catch (Exception e) {
 
