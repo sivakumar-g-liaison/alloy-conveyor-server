@@ -13,9 +13,9 @@ import com.liaison.mailbox.jpa.model.MailBoxComponent;
  * @author ganeshramr
  *
  */
-public class MailBoxService {
+public class MailBoxComponentService {
 	
-	 private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxComponentService.class);
 	
 	public void invokeProfileComponents(String profile){
 		
