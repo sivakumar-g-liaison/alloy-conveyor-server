@@ -42,7 +42,7 @@ public abstract class Processor implements Identifiable {
 
 	private Credential credentials;
 	private Folder folders;
-	private MailboxSchedProfile mailboxSchedProfile;
+	private MailBoxSchedProfile mailboxSchedProfile;
 
 	public Processor() {
 	}
@@ -133,11 +133,11 @@ public abstract class Processor implements Identifiable {
 	//bi-directional many-to-one association to MailboxSchedProfile
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="MAILBOX_SCHED_PROFILES_GUID", nullable=false)
-	public MailboxSchedProfile getMailboxSchedProfile() {
+	public MailBoxSchedProfile getMailboxSchedProfile() {
 		return this.mailboxSchedProfile;
 	}
 
-	public void setMailboxSchedProfile(MailboxSchedProfile mailboxSchedProfile) {
+	public void setMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
 		this.mailboxSchedProfile = mailboxSchedProfile;
 	}
 

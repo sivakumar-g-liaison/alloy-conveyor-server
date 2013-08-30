@@ -29,7 +29,7 @@ public class ScheduleProfilesRef implements Identifiable {
 
 	private String pguid;
 	private String schProfName;
-	private List<MailboxSchedProfile> mailboxSchedProfiles;
+	private List<MailBoxSchedProfile> mailboxSchedProfiles;
 
 	public ScheduleProfilesRef() {
 	}
@@ -56,22 +56,22 @@ public class ScheduleProfilesRef implements Identifiable {
 
 	//bi-directional many-to-one association to MailboxSchedProfile
 	@OneToMany(mappedBy="scheduleProfilesRef", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
-	public List<MailboxSchedProfile> getMailboxSchedProfiles() {
+	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
 		return this.mailboxSchedProfiles;
 	}
 
-	public void setMailboxSchedProfiles(List<MailboxSchedProfile> mailboxSchedProfiles) {
+	public void setMailboxSchedProfiles(List<MailBoxSchedProfile> mailboxSchedProfiles) {
 		this.mailboxSchedProfiles = mailboxSchedProfiles;
 	}
 
-	public MailboxSchedProfile addMailboxSchedProfile(MailboxSchedProfile mailboxSchedProfile) {
+	public MailBoxSchedProfile addMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
 		getMailboxSchedProfiles().add(mailboxSchedProfile);
 		mailboxSchedProfile.setScheduleProfilesRef(this);
 
 		return mailboxSchedProfile;
 	}
 
-	public MailboxSchedProfile removeMailboxSchedProfile(MailboxSchedProfile mailboxSchedProfile) {
+	public MailBoxSchedProfile removeMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
 		getMailboxSchedProfiles().remove(mailboxSchedProfile);
 		mailboxSchedProfile.setScheduleProfilesRef(null);
 

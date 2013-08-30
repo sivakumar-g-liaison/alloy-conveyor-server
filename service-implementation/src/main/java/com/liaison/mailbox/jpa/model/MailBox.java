@@ -36,7 +36,7 @@ public class MailBox implements Identifiable {
 	private String shardKey;
 
 	private List<MailBoxProperty> mailboxProperties;
-	private List<MailboxSchedProfile> mailboxSchedProfiles;
+	private List<MailBoxSchedProfile> mailboxSchedProfiles;
 
 	public MailBox() {
 	}
@@ -124,22 +124,22 @@ public class MailBox implements Identifiable {
 
 	//bi-directional many-to-one association to MailboxSchedProfile
 	@OneToMany(mappedBy="mailbox", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
-	public List<MailboxSchedProfile> getMailboxSchedProfiles() {
+	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
 		return this.mailboxSchedProfiles;
 	}
 
-	public void setMailboxSchedProfiles(List<MailboxSchedProfile> mailboxSchedProfiles) {
+	public void setMailboxSchedProfiles(List<MailBoxSchedProfile> mailboxSchedProfiles) {
 		this.mailboxSchedProfiles = mailboxSchedProfiles;
 	}
 
-	public MailboxSchedProfile addMailboxSchedProfile(MailboxSchedProfile mailboxSchedProfile) {
+	public MailBoxSchedProfile addMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
 		getMailboxSchedProfiles().add(mailboxSchedProfile);
 		mailboxSchedProfile.setMailbox(this);
 
 		return mailboxSchedProfile;
 	}
 
-	public MailboxSchedProfile removeMailboxSchedProfile(MailboxSchedProfile mailboxSchedProfile) {
+	public MailBoxSchedProfile removeMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
 		getMailboxSchedProfiles().remove(mailboxSchedProfile);
 		mailboxSchedProfile.setMailbox(null);
 

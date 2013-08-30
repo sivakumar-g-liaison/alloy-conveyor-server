@@ -25,19 +25,19 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name="MAILBOX_SCHED_PROFILES")
-@NamedQuery(name="MailboxSchedProfile.findAll", query="SELECT m FROM MailboxSchedProfile m")
-public class MailboxSchedProfile implements Identifiable {
+@NamedQuery(name="MailBoxSchedProfile.findAll", query="SELECT m FROM MailBoxSchedProfile m")
+public class MailBoxSchedProfile implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String pguid;
 	private String mbxProfileStatus;
 
-	private Mailbox mailbox;
+	private MailBox mailbox;
 	private ScheduleProfilesRef scheduleProfilesRef;
 	private List<Processor> processors;
 
-	public MailboxSchedProfile() {
+	public MailBoxSchedProfile() {
 	}
 
 	@Id
@@ -63,11 +63,11 @@ public class MailboxSchedProfile implements Identifiable {
 	//bi-directional many-to-one association to Mailbox
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="MAILBOX_PROFILE_GUID", nullable=false)
-	public Mailbox getMailbox() {
+	public MailBox getMailbox() {
 		return this.mailbox;
 	}
 
-	public void setMailbox(Mailbox mailbox) {
+	public void setMailbox(MailBox mailbox) {
 		this.mailbox = mailbox;
 	}
 
