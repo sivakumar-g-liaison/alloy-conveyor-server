@@ -23,11 +23,20 @@ import com.liaison.mailbox.jpa.model.MailBoxProperty;
  */
 public class MailBoxDTO {
 
+	private String guid;
 	private String name;
 	private String description;
 	private String status;
 	private List<MailBoxPropertyDTO> properties;
 	
+	public String getGuid() {
+		return guid;
+	}
+
+	public void setGuid(String guid) {
+		this.guid = guid;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -79,7 +88,7 @@ public class MailBoxDTO {
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
 		}
-		
+		mailBox.setMailboxProperties(properties);
 	}
 
 	public void copyFromEntity(Object entity) {

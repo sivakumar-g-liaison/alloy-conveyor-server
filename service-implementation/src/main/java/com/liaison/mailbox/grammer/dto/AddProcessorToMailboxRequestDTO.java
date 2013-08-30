@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.grammer.dto;
 
+import com.liaison.mailbox.jpa.model.Processor;
+
 
 /**
  * Data Transfer Object that implements fields required for mailbox
@@ -29,7 +31,7 @@ public class AddProcessorToMailboxRequestDTO {
 		this.processor = processor;
 	}
 	
-	public void copyToEntity(Object entity) {
+	public void copyToEntity(Processor entity) {
 		this.getProcessor().copyToEntity(entity);
 
 	}

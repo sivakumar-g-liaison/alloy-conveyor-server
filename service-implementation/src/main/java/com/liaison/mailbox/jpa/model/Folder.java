@@ -8,8 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -31,11 +31,11 @@ public class Folder implements Identifiable {
 	private String fldrDesc;
 	private String fldrType;
 	private String fldrUri;
-
 	private Processor processor;
 
 	public Folder() {
 	}
+
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -48,6 +48,7 @@ public class Folder implements Identifiable {
 		this.pguid = pguid;
 	}
 
+
 	@Column(name="FLDR_DESC", length=250)
 	public String getFldrDesc() {
 		return this.fldrDesc;
@@ -56,6 +57,7 @@ public class Folder implements Identifiable {
 	public void setFldrDesc(String fldrDesc) {
 		this.fldrDesc = fldrDesc;
 	}
+
 
 	@Column(name="FLDR_TYPE", nullable=false, length=50)
 	public String getFldrType() {
@@ -66,6 +68,7 @@ public class Folder implements Identifiable {
 		this.fldrType = fldrType;
 	}
 
+
 	@Column(name="FLDR_URI", length=50)
 	public String getFldrUri() {
 		return this.fldrUri;
@@ -75,8 +78,9 @@ public class Folder implements Identifiable {
 		this.fldrUri = fldrUri;
 	}
 
+
 	//bi-directional many-to-one association to Processor
-	@OneToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
+	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="PROCESSORS_GUID", nullable=false)
 	public Processor getProcessor() {
 		return this.processor;
@@ -85,6 +89,7 @@ public class Folder implements Identifiable {
 	public void setProcessor(Processor processor) {
 		this.processor = processor;
 	}
+
 
 	@Override
 	@Transient

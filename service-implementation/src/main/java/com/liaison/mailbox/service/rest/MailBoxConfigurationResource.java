@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -27,6 +29,13 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.util.StreamUtil;
+import com.liaison.mailbox.grammer.GrammerDictionary;
+import com.liaison.mailbox.grammer.dto.AddMailBoxResponseDTO;
+import com.liaison.mailbox.grammer.dto.AddMailboxRequestDTO;
+import com.liaison.mailbox.grammer.dto.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -63,8 +72,53 @@ public class MailBoxConfigurationResource {
 	@Produces(MediaType.APPLICATION_JSON)
     public Response createMailBox(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Create MailBox not yet implemented.").build();
+		serviceCallCounter.addAndGet(1);
 
+		Response returnResponse;
+		InputStream requestStream;
+		AddMailboxRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			String marshallingMediaType = null;
+			if (requestString.startsWith("<")) {
+				serviceRequest = JAXBUtility.unmarshalFromXML(requestStream, GrammerDictionary.getEntityArray());
+				marshallingMediaType = MediaType.APPLICATION_XML;
+			} else {
+				serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
+				marshallingMediaType = MediaType.APPLICATION_JSON;
+			}
+
+			//add the new profile details
+			AddMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+			serviceResponse = mailbox.createMailBox(serviceRequest);
+
+			//populate the response body
+			String responseBody;
+			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
+				responseBody = JAXBUtility.marshalToXML(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			} else {
+				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			}
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+		
     }
 
 	/**
@@ -77,7 +131,7 @@ public class MailBoxConfigurationResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
     public Response updateMailBox(@Context HttpServletRequest request) {
-
+		
 		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update Mailbox not yet implemented.").build();
 
     }
@@ -104,12 +158,46 @@ public class MailBoxConfigurationResource {
 	 * @return 		  Response Object
 	 */
 	@GET
+	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response readMailBox(@Context HttpServletRequest request) {
+    public Response readMailBox(@PathParam(value="id") String guid) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Read Mailbox not yet implemented.").build();
+		serviceCallCounter.addAndGet(1);
 
+		Response returnResponse;
+
+		try {
+
+			String marshallingMediaType = MediaType.APPLICATION_JSON;
+
+			//add the new profile details
+			GetMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+			serviceResponse = mailbox.getMailBox(guid);
+
+			//populate the response body
+			String responseBody;
+			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
+				responseBody = JAXBUtility.marshalToXML(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			} else {
+				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			}
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+		
     }
 
 	/**

@@ -34,6 +34,7 @@ public class ScheduleProfilesRef implements Identifiable {
 	public ScheduleProfilesRef() {
 	}
 
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(unique=true, nullable=false, length=32)
@@ -45,6 +46,7 @@ public class ScheduleProfilesRef implements Identifiable {
 		this.pguid = pguid;
 	}
 
+
 	@Column(name="SCH_PROF_NAME", nullable=false, length=128)
 	public String getSchProfName() {
 		return this.schProfName;
@@ -54,7 +56,8 @@ public class ScheduleProfilesRef implements Identifiable {
 		this.schProfName = schProfName;
 	}
 
-	//bi-directional many-to-one association to MailboxSchedProfile
+
+	//bi-directional many-to-one association to MailBoxSchedProfile
 	@OneToMany(mappedBy="scheduleProfilesRef", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
 	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
 		return this.mailboxSchedProfiles;
@@ -90,5 +93,4 @@ public class ScheduleProfilesRef implements Identifiable {
 	public  Class getEntityClass() {
 		return this.getClass();
 	}
-
 }

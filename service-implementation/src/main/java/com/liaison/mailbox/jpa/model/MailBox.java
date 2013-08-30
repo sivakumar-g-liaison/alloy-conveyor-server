@@ -34,12 +34,12 @@ public class MailBox implements Identifiable {
 	private String mbxStatus;
 	private BigDecimal serviceInstId;
 	private String shardKey;
-
 	private List<MailBoxProperty> mailboxProperties;
 	private List<MailBoxSchedProfile> mailboxSchedProfiles;
 
 	public MailBox() {
 	}
+
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -52,6 +52,7 @@ public class MailBox implements Identifiable {
 		this.pguid = pguid;
 	}
 
+
 	@Column(name="MBX_DESC", length=1024)
 	public String getMbxDesc() {
 		return this.mbxDesc;
@@ -60,6 +61,7 @@ public class MailBox implements Identifiable {
 	public void setMbxDesc(String mbxDesc) {
 		this.mbxDesc = mbxDesc;
 	}
+
 
 	@Column(name="MBX_NAME", nullable=false, length=128)
 	public String getMbxName() {
@@ -70,6 +72,7 @@ public class MailBox implements Identifiable {
 		this.mbxName = mbxName;
 	}
 
+
 	@Column(name="MBX_STATUS", nullable=false, length=128)
 	public String getMbxStatus() {
 		return this.mbxStatus;
@@ -78,6 +81,7 @@ public class MailBox implements Identifiable {
 	public void setMbxStatus(String mbxStatus) {
 		this.mbxStatus = mbxStatus;
 	}
+
 
 	@Column(name="SERVICE_INST_ID")
 	public BigDecimal getServiceInstId() {
@@ -88,6 +92,7 @@ public class MailBox implements Identifiable {
 		this.serviceInstId = serviceInstId;
 	}
 
+
 	@Column(name="SHARD_KEY", length=512)
 	public String getShardKey() {
 		return this.shardKey;
@@ -97,7 +102,8 @@ public class MailBox implements Identifiable {
 		this.shardKey = shardKey;
 	}
 
-	//bi-directional many-to-one association to MailboxProperty
+
+	//bi-directional many-to-one association to MailBoxProperty
 	@OneToMany(mappedBy="mailbox", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
 	public List<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
@@ -122,7 +128,7 @@ public class MailBox implements Identifiable {
 	}
 
 
-	//bi-directional many-to-one association to MailboxSchedProfile
+	//bi-directional many-to-one association to MailBoxSchedProfile
 	@OneToMany(mappedBy="mailbox", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
 	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
 		return this.mailboxSchedProfiles;
@@ -146,7 +152,6 @@ public class MailBox implements Identifiable {
 		return mailboxSchedProfile;
 	}
 
-
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
@@ -159,5 +164,4 @@ public class MailBox implements Identifiable {
 	public  Class getEntityClass() {
 		return this.getClass();
 	}
-
 }

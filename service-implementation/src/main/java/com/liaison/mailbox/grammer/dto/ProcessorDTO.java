@@ -105,15 +105,13 @@ public class ProcessorDTO {
 		this.credentials = credentials;
 	}
 	
-	public void copyToEntity(Object entity) {
+	public void copyToEntity(Processor processor) {
 
-		Processor processor = (Processor) entity;
-		
 		processor.setPguid(this.getGuid());
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrProperties(this.getProperties());
 		processor.setProcsrStatus(this.getStatus());
-		processor.setProcsrType(this.getType());
+		//processor.setProcsrType(this.getType());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
 		
 		//Set the RemoteDownloader properties
@@ -138,7 +136,7 @@ public class ProcessorDTO {
 		
 		//TODO JSON have list of folder. But model have single folder
 		if (!folders.isEmpty()) {
-			processor.setFolders(folders.get(0));
+			processor.setFolders(folders);
 		}
 		
 		Credential credential = null;
@@ -152,19 +150,17 @@ public class ProcessorDTO {
 		
 		//TODO JSON have list of credential. But model have single credential
 		if (!credentialList.isEmpty()) {
-			processor.setCredentials(credentialList.get(0));
+			processor.setCredentials(credentialList);
 		}
 	}
 
-	public void copyFromEntity(Object entity) {
+	public void copyFromEntity(Processor processor) {
 
-		Processor processor = (Processor) entity;
-		
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
 		this.setProperties(processor.getProcsrProperties());
 		this.setStatus(processor.getProcsrStatus());
-		this.setType(processor.getProcsrType());
+		//this.setType(processor.getProcsrType());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 		
 		//TODO missing in JSON
@@ -179,14 +175,14 @@ public class ProcessorDTO {
 		}	
 
 		FolderDTO folderDTO = new FolderDTO();
-		Folder folder = processor.getFolders();
+		Folder folder = processor.getFolders().get(0);
 		folderDTO.copyFromEntity(folder);
 		
 		this.setFolders(new ArrayList<FolderDTO>());
 		this.getFolders().add(folderDTO);
 		
 		CredentialDTO credentialDTO = new CredentialDTO();
-		Credential credential = processor.getCredentials();
+		Credential credential = processor.getCredentials().get(0);
 		credentialDTO.copyFromEntity(credential);
 		this.setCredentials(new ArrayList<CredentialDTO>());
 		this.getCredentials().add(credentialDTO);
