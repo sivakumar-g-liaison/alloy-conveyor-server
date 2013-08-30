@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.liaison.mailbox.service.core.component.tasks.DirectorySweeperTaskHandler;
+import com.liaison.mailbox.service.core.processor.tasks.DirectorySweeperTaskHandler;
 
 /**
  * DirectorySweeperTaskHandlerTest

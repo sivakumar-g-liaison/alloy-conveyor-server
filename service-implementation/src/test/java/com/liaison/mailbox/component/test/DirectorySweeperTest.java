@@ -22,8 +22,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.liaison.mailbox.service.core.component.DirectorySweeper;
-import com.liaison.mailbox.service.util.MailBoxSweeperConstants;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 
 /**
  * DirectorySweeperTest.java
@@ -181,7 +181,7 @@ public class DirectorySweeperTest {
 	List<Path> path = sweeper.sweepDirectory(inbox, false, false, null);
 	sweeper.markAsSweeped(path);
 	
-	String rootPath = inbox + File.separator + MailBoxSweeperConstants.SWEEPED_FOLDER_NAME;
+	String rootPath = inbox + File.separator + MailBoxConstants.SWEEPED_FOLDER_NAME;
 	List<Path> sweepedFiles = sweeper.sweepDirectory(rootPath, false, false, null);
 	
 	Files.delete(sweepedFiles.get(0).toAbsolutePath());

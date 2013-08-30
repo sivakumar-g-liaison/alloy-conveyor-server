@@ -14,17 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.grammer.ResponseDTO;
-import com.liaison.mailbox.grammer.dto.AddMailBoxResponseDTO;
-import com.liaison.mailbox.grammer.dto.AddMailboxRequestDTO;
-import com.liaison.mailbox.grammer.dto.DeActivateMailBoxResponseDTO;
-import com.liaison.mailbox.grammer.dto.GetMailBoxResponseDTO;
-import com.liaison.mailbox.grammer.dto.MailBoxDTO;
-import com.liaison.mailbox.grammer.dto.ReviseMailBoxResponseDTO;
-import com.liaison.mailbox.grammer.dto.ReviseMailboxRequestDTO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
+import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 
 /**
  * Class which has configuration related operations.
@@ -47,8 +47,8 @@ public class MailBoxConfigurationService {
 		MailBox mailBox = new MailBox();
 		request.copyToEntity(mailBox);
 
-		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
-		config.persist(mailBox);
+		MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+		configDao.persist(mailBox);
 
 		//Response construction
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();

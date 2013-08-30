@@ -37,4 +37,16 @@ public interface MailBoxConstants {
 
     public static final String INACTIVE_MAILBOX_SUCCESS = "Mailbox deactivated successfully.";
     public static final String INACTIVE_MAILBOX_FAILURE = "Error occured during mailbox deactivation.";
+    
+    /** File datetime format.*/
+    public final static String FILETIME_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+
+    /** MailBox Sweeper DateTime Format.*/
+    public final static String MAILBOXSWEEPER_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+
+    /**Resolved folder or hidden folder name.*/
+    public final static String SWEEPED_FOLDER_NAME = "sweeped";
+
+    /**The processed file extension*/
+    public final static String SWEEPED_FILE_EXTN = ".queued";
 }
