@@ -14,7 +14,7 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
 
-public class RemoteHttpServerDownloader implements MailBoxComponent {
+public class HttpRemoteDownloader implements MailBoxComponent {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeper.class);
 

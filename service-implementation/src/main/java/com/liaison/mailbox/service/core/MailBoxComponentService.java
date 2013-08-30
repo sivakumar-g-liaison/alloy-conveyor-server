@@ -13,9 +13,9 @@ import com.liaison.mailbox.jpa.model.MailBoxComponent;
  * @author ganeshramr
  *
  */
-public class MailBox {
+public class MailBoxComponentService {
 	
-	 private static final Logger LOGGER = LoggerFactory.getLogger(MailBox.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxComponentService.class);
 	
 	public void invokeProfileComponents(String profile){
 		
@@ -36,7 +36,7 @@ public class MailBox {
 
 		LOGGER.info("call receive to insert the profile ::{}", serviceRequest.getProfile());
 		MailBoxComponent mbc = new MailBoxComponent();
-		mbc.setId(serviceRequest.getId());
+		//mbc.setId(serviceRequest.getId());
 		mbc.setName(serviceRequest.getName());
 		mbc.setUrl(serviceRequest.getUrl());
 		mbc.setProfile(serviceRequest.getProfile());

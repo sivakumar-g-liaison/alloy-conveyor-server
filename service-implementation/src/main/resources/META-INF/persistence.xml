@@ -5,6 +5,16 @@
 	<persistence-unit name="mailbox-pu" transaction-type="RESOURCE_LOCAL">
 		<mapping-file>META-INF/orm.xml</mapping-file>
 		<class>com.liaison.mailbox.jpa.model.MailBoxComponent</class>
+		<class>com.liaison.mailbox.jpa.model.RemoteDownloader</class>
+		<class>com.liaison.mailbox.jpa.model.RemoteUploader</class>
+		<class>com.liaison.mailbox.jpa.model.Sweeper</class>
+		<class>com.liaison.mailbox.jpa.model.Credential</class>
+		<class>com.liaison.mailbox.jpa.model.Folder</class>
+		<class>com.liaison.mailbox.jpa.model.MailBox</class>
+		<class>com.liaison.mailbox.jpa.model.MailBoxProperty</class>
+		<class>com.liaison.mailbox.jpa.model.MailBoxSchedProfile</class>
+		<class>com.liaison.mailbox.jpa.model.Processor</class>
+		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		
 		<properties>
 			<property name="javax.persistence.transactionType" value="JTA" />
