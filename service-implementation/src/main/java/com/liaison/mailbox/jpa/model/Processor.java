@@ -38,7 +38,7 @@ public class Processor implements Identifiable {
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
-	private String procsrType;
+	//private String procsrType;
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private MailBoxSchedProfile mailboxSchedProfile;
@@ -99,14 +99,14 @@ public class Processor implements Identifiable {
 	}
 
 
-	@Column(name="PROCSR_TYPE", nullable=false, length=128)
+	/*@Column(name="PROCSR_TYPE", nullable=false, length=128)
 	public String getProcsrType() {
 		return this.procsrType;
 	}
 
 	public void setProcsrType(String procsrType) {
 		this.procsrType = procsrType;
-	}
+	}*/
 
 
 	//bi-directional many-to-one association to Credential

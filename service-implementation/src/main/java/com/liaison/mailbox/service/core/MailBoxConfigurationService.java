@@ -13,17 +13,21 @@ package com.liaison.mailbox.service.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.grammer.ResponseDTO;
 import com.liaison.mailbox.grammer.dto.AddMailBoxResponseDTO;
 import com.liaison.mailbox.grammer.dto.AddMailboxRequestDTO;
+import com.liaison.mailbox.grammer.dto.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.grammer.dto.GetMailBoxResponseDTO;
 import com.liaison.mailbox.grammer.dto.MailBoxDTO;
+import com.liaison.mailbox.grammer.dto.ReviseMailBoxResponseDTO;
+import com.liaison.mailbox.grammer.dto.ReviseMailboxRequestDTO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 
 /**
- * Class does all configuration related stuffs.
+ * Class which has configuration related operations.
  *
  * @author veerasamyn
  */
@@ -31,6 +35,12 @@ public class MailBoxConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationService.class);
 
+	/**
+	 * Creates Mail Box.
+	 * 
+	 * @param request The request DTO.
+	 * @return The responseDTO.
+	 */
 	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request) {
 
 		LOG.info("Entering into create mailbox.");
@@ -40,12 +50,12 @@ public class MailBoxConfigurationService {
 		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 		config.persist(mailBox);
 
-		//Temporarily returns the id alone.
+		//Response construction
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
 
 		ResponseDTO response = new ResponseDTO();
-		response.setMessage("Mailbox created successfully.");
-		response.setStatus("Success");
+		response.setMessage(MailBoxConstants.CREATE_MAILBOX_SUCCESS);
+		response.setStatus(MailBoxConstants.SUCCESS);
 
 		MailBoxDTO dto = new MailBoxDTO();
 		dto.setGuid(String.valueOf(mailBox.getPrimaryKey()));
@@ -55,27 +65,124 @@ public class MailBoxConfigurationService {
 		return serviceResponse;
 	}
 
+	/**
+	 * Get the mailbox using guid.
+	 * 
+	 * @param guid The guid of the mailbox.
+	 * @return The responseDTO.
+	 */
 	public GetMailBoxResponseDTO getMailBox(String guid) {
 
-		LOG.info("Exit from create mailbox.");
+		LOG.info("Entering into get mailbox.");
+		LOG.info("The retrieve guid is {} ", guid);
+
 		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 		MailBox mailBox = config.find(MailBox.class, guid);
 
-		//Temporarily returns the id alone.
+		//Response Construction
 		GetMailBoxResponseDTO serviceResponse = new GetMailBoxResponseDTO();
 
 		ResponseDTO response = new ResponseDTO();
-		response.setMessage("Mailbox retrieved successfully.");
-		response.setStatus("Success");
+		
+		if (null != mailBox) {
+
+			response.setMessage(MailBoxConstants.GET_MAILBOX_SUCCESS);
+			response.setStatus(MailBoxConstants.SUCCESS);
+
+			MailBoxDTO dto = new MailBoxDTO();
+			dto.copyFromEntity(mailBox);
+
+			serviceResponse.setMailBox(dto);
+			serviceResponse.setResponse(response);
+
+			LOG.info("Exit from get mailbox.");
+			return serviceResponse;
+
+		} else {
+			
+			response.setMessage(MailBoxConstants.GET_MAILBOX_SUCCESS);
+			response.setStatus(MailBoxConstants.SUCCESS);
+
+			serviceResponse.setResponse(response);
+
+			LOG.info("Exit from get mailbox.");
+			return serviceResponse;
+		}
+	}
+
+	/**
+	 * Method revise the mailbox configurations.
+	 * 
+	 * @param guid The mailbox pguid.
+	 */
+	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailboxRequestDTO request) {
+		
+		LOG.info("Entering into revise mailbox.");
+		LOG.info("The revise request guid is {} ", request.getMailbox().getGuid());
+
+		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
+		MailBox mailBox = config.find(MailBox.class, request.getMailbox().getGuid());
+		
+		//Removing the child items.
+		mailBox.getMailboxProperties().clear();
+
+		request.copyToEntity(mailBox);
+		
+		//updates the mail box data
+		config.merge(mailBox);
+		
+		//Response Construction
+		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();
+
+		ResponseDTO response = new ResponseDTO();
+		response.setMessage(MailBoxConstants.REVISE_MAILBOX_SUCCESS);
+		response.setStatus(MailBoxConstants.SUCCESS);
 
 		MailBoxDTO dto = new MailBoxDTO();
-		dto.copyFromEntity(mailBox);
+		dto.setGuid(String.valueOf(mailBox.getPrimaryKey()));
 		serviceResponse.setMailBox(dto);
 
-		LOG.info("Exit from create mailbox.");
+		LOG.info("Exit from revise mailbox.");
 		return serviceResponse;
 	}
 
+	/**
+	 * Method revise the mailbox configurations.
+	 * 
+	 * @param guid The mailbox pguid.
+	 */
+	public DeActivateMailBoxResponseDTO deActivateMailBox(String guid) {
+		
+		LOG.info("Entering into deactivate mailbox.");
+		LOG.info("The deactivate request guid is {} ", guid);
 
+		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
+		int updatedCount = config.inActivateMailBox(guid);
 
+		//Temporarily returns the id alone.
+		DeActivateMailBoxResponseDTO serviceResponse = new DeActivateMailBoxResponseDTO();
+		ResponseDTO response = new ResponseDTO();
+
+		if (1 != updatedCount) {
+
+			response.setMessage(MailBoxConstants.INACTIVE_MAILBOX_FAILURE);
+			response.setStatus(MailBoxConstants.FAILURE);
+
+			serviceResponse.setResponse(response);
+			return serviceResponse;
+		} else {
+
+			response.setMessage(MailBoxConstants.INACTIVE_MAILBOX_SUCCESS);
+			response.setStatus(MailBoxConstants.SUCCESS);
+
+			MailBoxDTO dto = new MailBoxDTO();
+			dto.setGuid(guid);
+
+			serviceResponse.setResponse(response);
+			serviceResponse.setMailBox(dto);
+
+			LOG.info("Exit from revise mailbox.");
+			return serviceResponse;
+		}
+	}
 }

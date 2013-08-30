@@ -19,7 +19,7 @@ import com.liaison.mailbox.jpa.model.MailBox;
  *
  * @author veerasamyn
  */
-public class AddMailboxRequestDTO {
+public class ReviseMailboxRequestDTO {
 
 	private MailBoxDTO mailbox;
 

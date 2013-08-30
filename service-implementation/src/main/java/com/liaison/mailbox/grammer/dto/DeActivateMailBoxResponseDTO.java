@@ -10,30 +10,32 @@
 
 package com.liaison.mailbox.grammer.dto;
 
-import com.liaison.mailbox.jpa.model.MailBox;
-
+import com.liaison.mailbox.grammer.ResponseDTO;
 
 /**
- * Data Transfer Object that implements fields required for mailbox
- * configuration request. 
+ * 
  *
  * @author veerasamyn
  */
-public class AddMailboxRequestDTO {
+public class DeActivateMailBoxResponseDTO {
 
-	private MailBoxDTO mailbox;
+	private ResponseDTO response;
+	private MailBoxDTO mailBox;
 
-	public MailBoxDTO getMailbox() {
-		return mailbox;
+	public MailBoxDTO getMailBox() {
+		return mailBox;
+	}
+
+	public void setMailBox(MailBoxDTO mailBox) {
+		this.mailBox = mailBox;
+	}
+
+	public ResponseDTO getResponse() {
+		return response;
+	}
+
+	public void setResponse(ResponseDTO response) {
+		this.response = response;
 	}
 	
-	public void setMailbox(MailBoxDTO mailbox) {
-		this.mailbox = mailbox;
-	}
-	
-	public void copyToEntity(MailBox entity) {
-		this.getMailbox().copyToEntity(entity);
-
-	}
-
 }

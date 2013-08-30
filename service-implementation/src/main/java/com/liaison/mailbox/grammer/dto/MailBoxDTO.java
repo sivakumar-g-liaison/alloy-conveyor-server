@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.grammer.dto;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class MailBoxDTO {
 	private String name;
 	private String description;
 	private String status;
+	private Integer serviceInstId;
+	private String shardKey;
 	private List<MailBoxPropertyDTO> properties;
 	
 	public String getGuid() {
@@ -61,6 +64,22 @@ public class MailBoxDTO {
 		this.status = status;
 	}
 
+	public Integer getServiceInstId() {
+		return serviceInstId;
+	}
+
+	public void setServiceInstId(Integer serviceInstId) {
+		this.serviceInstId = serviceInstId;
+	}
+
+	public String getShardKey() {
+		return shardKey;
+	}
+
+	public void setShardKey(String shardKey) {
+		this.shardKey = shardKey;
+	}
+
 	public List<MailBoxPropertyDTO> getProperties() {
 
 		if (null == properties) {
@@ -73,12 +92,15 @@ public class MailBoxDTO {
 		this.properties = properties;
 	}
 
-	public void copyToEntity(Object entity) {
+	public void copyToEntity(MailBox mailBox) {
 
-		MailBox mailBox = (MailBox) entity;
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setMbxStatus(this.getStatus());
+		mailBox.setShardKey(this.getShardKey());
+		if (null != this.getServiceInstId()) {
+			mailBox.setServiceInstId(new BigDecimal(this.getServiceInstId()));
+		}
 
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
@@ -91,12 +113,17 @@ public class MailBoxDTO {
 		mailBox.setMailboxProperties(properties);
 	}
 
-	public void copyFromEntity(Object entity) {
+	public void copyFromEntity(MailBox mailBox) {
 
-		MailBox mailBox = (MailBox) entity;
+		this.setGuid(mailBox.getPguid());
 		this.setName(mailBox.getMbxName());
 		this.setDescription(mailBox.getMbxDesc());
 		this.setStatus(mailBox.getMbxStatus());
+		this.setShardKey(mailBox.getShardKey());
+		
+		if (null != mailBox.getServiceInstId()) {
+			this.setServiceInstId(mailBox.getServiceInstId().intValue());
+		}
 
 		MailBoxPropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

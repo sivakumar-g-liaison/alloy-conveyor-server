@@ -10,14 +10,25 @@
 
 package com.liaison.mailbox.grammer.dto;
 
+import java.io.IOException;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.mailbox.grammer.ResponseBuilder;
 import com.liaison.mailbox.grammer.ResponseDTO;
 
 /**
- * 
+ * Data Transfer Object uses for sending Add MailBox Responses.
  *
  * @author veerasamyn
  */
-public class AddMailBoxResponseDTO {
+public class AddMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private MailBoxDTO mailBox;
@@ -36,6 +47,22 @@ public class AddMailBoxResponseDTO {
 
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
+	}
+
+	@Override
+	public Response constructResponse(String mediaType)
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+		
+		String responseBody;
+		if (MediaType.APPLICATION_XML.equals(mediaType)) {
+
+			responseBody = JAXBUtility.marshalToXML(this);
+			return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_XML).build();
+		} else {
+
+			responseBody = JAXBUtility.marshalToJSON(this);
+			return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+		}
 	}
 	
 }

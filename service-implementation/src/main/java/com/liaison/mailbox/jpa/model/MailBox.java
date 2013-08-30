@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -104,7 +105,7 @@ public class MailBox implements Identifiable {
 
 
 	//bi-directional many-to-one association to MailBoxProperty
-	@OneToMany(mappedBy="mailbox", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+	@OneToMany(mappedBy="mailbox", fetch= FetchType.EAGER, orphanRemoval=true, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
 	public List<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
 	}
