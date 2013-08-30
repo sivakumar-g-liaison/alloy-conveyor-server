@@ -30,7 +30,7 @@ import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.grammer.GrammerDictionary;
 import com.liaison.mailbox.grammer.dto.ProfileConfigurationRequest;
 import com.liaison.mailbox.grammer.dto.ProfileConfigurationResponse;
-import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.core.MailBoxComponentService;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 
@@ -67,7 +67,7 @@ public class MailBoxResource {
 
      try {
     	 
-    	 MailBoxService mailBox = new MailBoxService();
+    	 MailBoxComponentService mailBox = new MailBoxComponentService();
     	 mailBox.invokeProfileComponents(profile);
         	
         } catch (Exception e) {
@@ -112,7 +112,7 @@ public class MailBoxResource {
 
 			//add the new profile details
 			ProfileConfigurationResponse serviceResponse = null;
-			MailBoxService mailbox = new MailBoxService();
+			MailBoxComponentService mailbox = new MailBoxComponentService();
 			serviceResponse = mailbox.insertProfileComponents(serviceRequest);
 
 			//populate the response body
