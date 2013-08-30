@@ -1,12 +1,14 @@
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'cargo'
+apply from: file("$rootDir/gradle/bundler/framework.gradle")
 
 // set base name (impacts war name and context path)
 project.war.baseName = 'g2mailboxservice'
 
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
+
 
 test { // TODO temp exclusion of j2ep
 	exclude 'org/sf/j2ep/*' }
@@ -37,6 +39,7 @@ allprojects {
 				//prefer 'slf4j-log4j2' over 'slf4j-simple', because
 				//it's required that only one logger.jar be present for deterministic behavior of slf4j
 				details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta7"
+
 			}
 
 
@@ -55,6 +58,11 @@ configurations {
 	//Need for enhancering via datanucleus.
 	jdo {
 		extendsFrom compile
+
+	        }
+	    }
+		
+
 	}
 }
 
@@ -88,15 +96,49 @@ war {
 
 dependencies {
 
+    // inherited from NetFlix Karyon
+    compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
+
+    // for commons-codec (used in example encoding service)
+    compile 'commons-configuration:commons-configuration:1.8'
+
+    // currently not used during runtime (inherited dependency from NetFlix)
 	compile 'com.netflix.eureka:eureka-client:1.1.97'
+
 
 	compile 'org.slf4j:slf4j-api:1.7.5'
 	//compile 'org.slf4j:slf4j-log4j12:1.7.5'
+
+
+
+    // for file upload
+    // TODO - See that we also depend on "jersey-bundle" inherently
+    // TODO - due to NetFlix... using the bundle is not advised... (remove)
+    compile 'com.sun.jersey:jersey-core:1.17'
+    compile 'com.sun.jersey:jersey-server:1.14'
+    compile 'com.sun.jersey:jersey-json:1.17'
+    compile 'javax.mail:mail:1.4.6'
+    compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
+
+
+	// used for logging
+    compile 'org.slf4j:slf4j-api:1.7.5'
+
+	// used for logging
 
 	def log4j2Version = '2.0-beta7';
 	compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
 	compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
 	compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+
+
+
+    // inherited from NetFlix Karyon (TODO integrate with main UI)
+    compile project(':karyon-admin-web')
+
+    // reusable utilities / framework components
+    compile project(':service-framework')
+
 
 	compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
 

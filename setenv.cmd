@@ -136,14 +136,14 @@ if not "%MY_JDK_MAJOR%" == "7" (
 if exist ""%JDK_HOME%\bin\java.exe""  (
     set JAVA_HOME=%JDK_HOME%
 )
-if exist ""%ProgramFiles%\Java\%MY_JDK_VERSION%""  (
-    set JAVA_HOME=%ProgramFiles%\Java\%MY_JDK_VERSION%
+if exist ""%ProgramFiles%\Java\jdk%MY_JDK_VERSION%""  (
+    set JAVA_HOME=%ProgramFiles%\Java\jdk%MY_JDK_VERSION%
 )
-if exist ""%ProgramFiles(x86)%\Java\%MY_JDK_VERSION%"" (
-    set JAVA_HOME=%ProgramFiles(x86)%\Java\%MY_JDK_VERSION%
+if exist ""%ProgramFiles(x86)%\Java\jdk%MY_JDK_VERSION%"" (
+    set JAVA_HOME=%ProgramFiles(x86)%\Java\jdk%MY_JDK_VERSION%
 )
-if exist ""%ProgramW6432%\Java\%MY_JDK_VERSION%"" (
-    set JAVA_HOME=%ProgramW6432%\Java\%MY_JDK_VERSION%
+if exist ""%ProgramW6432%\Java\jdk%MY_JDK_VERSION%"" (
+    set JAVA_HOME=%ProgramW6432%\Java\jdk%MY_JDK_VERSION%
 )
 for /F "tokens=1* delims=\" %%A IN ('echo %JAVA_HOME%') DO set FOUND_JAVA_HOME=true
 if [%FOUND_JAVA_HOME%]==[true] ( 
