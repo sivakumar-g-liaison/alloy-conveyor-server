@@ -33,9 +33,14 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.grammer.GrammerDictionary;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -103,7 +108,7 @@ public class MailBoxConfigurationResource {
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
 			// should be throwing out of domain scope and into framework using above code
@@ -365,24 +370,151 @@ public class MailBoxConfigurationResource {
 	@Produces(MediaType.APPLICATION_JSON)
     public Response updateProcessor(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update processor not yet implemented.").build();
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		InputStream requestStream;
+		AddProcessorToMailboxRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			String marshallingMediaType = null;
+			if (requestString.startsWith("<")) {
+				serviceRequest = JAXBUtility.unmarshalFromXML(requestStream, GrammerDictionary.getEntityArray());
+				marshallingMediaType = MediaType.APPLICATION_XML;
+			} else {
+				serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
+				marshallingMediaType = MediaType.APPLICATION_JSON;
+			}
+
+			//add the new profile details
+			AddProcessorToMailboxResponseDTO serviceResponse = null;
+			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+			serviceResponse = mailbox.createProcessor(serviceRequest);
+
+			//populate the response body
+			String responseBody;
+			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
+				responseBody = JAXBUtility.marshalToXML(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			} else {
+				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			}
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "processorConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
 
     }
-
+	
 	/**
-	 * REST method to delete a processor. 
-	 *
+	 * REST method to remove a processor details. 
+	 * 
 	 * @param request HttpServletRequest, injected with context annotation
 	 * @return 		  Response Object
 	 */
 	@DELETE
-	@Path("/processor")
+	@Path("/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response deleteProcessor(@Context HttpServletRequest request) {
+    public Response deleteProcessor(@PathParam(value="processorid") String guid) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Delete processor not yet implemented.").build();
+		serviceCallCounter.addAndGet(1);
 
+		Response returnResponse;
+
+		try {
+
+			String marshallingMediaType = MediaType.APPLICATION_JSON;
+
+			//add the new profile details
+			DeActivateProcessorResponseDTO serviceResponse = null;
+			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+			serviceResponse = mailbox.deactivateProcessor(guid);
+
+			//populate the response body
+			String responseBody;
+			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
+				responseBody = JAXBUtility.marshalToXML(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			} else {
+				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			}
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+		
+    }
+	
+	/**
+	 * REST method to retrieve a mailbox details. 
+	 * 
+	 * @param request HttpServletRequest, injected with context annotation
+	 * @return 		  Response Object
+	 */
+	@GET
+	@Path("/processor/{processorid}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+    public Response getProcessor(@PathParam(value="processorid") String guid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			String marshallingMediaType = MediaType.APPLICATION_JSON;
+
+			//add the new profile details
+			GetProcessorResponseDTO serviceResponse = null;
+			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+			serviceResponse = mailbox.getProcessor(guid);
+
+			//populate the response body
+			String responseBody;
+			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
+				responseBody = JAXBUtility.marshalToXML(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			} else {
+				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			}
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "Get Processor failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+		
     }
 
 }
