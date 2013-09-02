@@ -1,5 +1,10 @@
 // Project Specific Bundler Tasks
 // ==================================================
 
-def installPath = file("$rootDir/install").getCanonicalPath()
+// By convention you should tasks that produce files required by deploy here.
+// Make distTar depend on the them to assure they are executed.
+
+
+// See bundler/README.md for more details
+// See bundler/examples for examples
 

@@ -23,11 +23,11 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.mailbox.service.core.component.DirectorySweeper;
-import com.liaison.mailbox.service.core.component.tasks.DirectorySweeperTaskHandler;
-import com.liaison.mailbox.service.dto.MetaDataDTO;
+import com.liaison.mailbox.service.core.processor.DirectorySweeper;
+import com.liaison.mailbox.service.core.processor.tasks.DirectorySweeperTaskHandler;
+import com.liaison.mailbox.service.dto.directorysweeper.MetaDataDTO;
 import com.liaison.mailbox.service.util.JavaScriptExecutor;
-import com.liaison.mailbox.service.util.MailBoxSweeperUtil;
+import com.liaison.mailbox.service.util.MailBoxServiceUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -87,7 +87,7 @@ public class DirectorySweeperResource {
             List<List<java.nio.file.Path>> fileGroups = jsexecutor.groupFiles(files);  
             
             MetaDataDTO metaData = new MetaDataDTO(fileGroups);
-            String jsonResponse = MailBoxSweeperUtil.convertObjectToJson(metaData);  
+            String jsonResponse = MailBoxServiceUtil.convertObjectToJson(metaData);  
             dirSweeper.markAsSweeped(sweepList);
             LOGGER.info("Returns json response.{}",new JSONObject(jsonResponse).toString(2));
             response.put("sweepresults", new JSONObject(jsonResponse));

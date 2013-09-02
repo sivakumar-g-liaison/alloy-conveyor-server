@@ -32,13 +32,13 @@ public class MailBoxSchedProfile implements Identifiable {
 
 	private String pguid;
 	private String mbxProfileStatus;
-
 	private MailBox mailbox;
 	private ScheduleProfilesRef scheduleProfilesRef;
 	private List<Processor> processors;
 
 	public MailBoxSchedProfile() {
 	}
+
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -51,6 +51,7 @@ public class MailBoxSchedProfile implements Identifiable {
 		this.pguid = pguid;
 	}
 
+
 	@Column(name="MBX_PROFILE_STATUS", nullable=false, length=128)
 	public String getMbxProfileStatus() {
 		return this.mbxProfileStatus;
@@ -60,7 +61,8 @@ public class MailBoxSchedProfile implements Identifiable {
 		this.mbxProfileStatus = mbxProfileStatus;
 	}
 
-	//bi-directional many-to-one association to Mailbox
+
+	//bi-directional many-to-one association to MailBox
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="MAILBOX_PROFILE_GUID", nullable=false)
 	public MailBox getMailbox() {
@@ -70,6 +72,7 @@ public class MailBoxSchedProfile implements Identifiable {
 	public void setMailbox(MailBox mailbox) {
 		this.mailbox = mailbox;
 	}
+
 
 	//bi-directional many-to-one association to ScheduleProfilesRef
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
@@ -81,6 +84,7 @@ public class MailBoxSchedProfile implements Identifiable {
 	public void setScheduleProfilesRef(ScheduleProfilesRef scheduleProfilesRef) {
 		this.scheduleProfilesRef = scheduleProfilesRef;
 	}
+
 
 	//bi-directional many-to-one association to Processor
 	@OneToMany(mappedBy="mailboxSchedProfile", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
@@ -118,5 +122,4 @@ public class MailBoxSchedProfile implements Identifiable {
 	public  Class getEntityClass() {
 		return this.getClass();
 	}
-
 }

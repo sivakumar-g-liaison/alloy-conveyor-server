@@ -1,25 +1,28 @@
-## General TODOs
-TODO fix regex for war rename!!!!
-TODO remove application plug and fix tasks
-TODO check/fix test/integration/soapui
-TODO clean and polish
-TODO clean docs
-TODO add preApplicationContainerConfig.py and postApplicationContainterConfig.py hooks to installer and bundler
-TODO make service nucleus have example of project.gradle w/ stagePersisence hook
-TODO test when tomcat-environments missing and error
-
-
-TODO test when tomcat-environments missing
-
 # Gradle Bundler 
-## (a git submodule)
 
-Gradle Bundler is a G2 infrastructure utility that is part of Liaison's Build->Bundle->Deploy tool chain. The Gradle Bundler presents some known project task interfaces for tool automation.
+Gradle Bundler is a G2 infrastructure utility that is part of Liaison's Build->Bundle->Deploy tool chain. The Gradle Bundler presents some known project task interfaces for tool automation. 
+
+## Implementation
+Major categories of implementation:
+
+### Gradle
+ * Conventional Gradle War Task
+ * G2 Bundler Tasks 
+ * _Project Specific Bundler Tasks_
+
+Under gradle/bundler directory, we provide gradle tasks to manage construction of an install bundle consisting of tomcat, jre, application war, and target environment configuration files. The behavior may be extended with project specific tasks, which should be placed in gradle/bundler_project.gradle and made to "dependOn" G2 bundler tasks (such as distTar).
+
+### Convenience Scripting 
+ * Git and Gradle scripting 
+ * Install Script
+	* _Pre-Configuration Script_
+	* _Post-Configuration Script_
+
+Of all these components, customization per project should limited to those underlined above (_Project Specific Bundler Tasks_, _Pre-Configuration Script_, & _Post-Configuration Script_).
+
 
 ## Build->Bundle->Deploy Usage
-See _git submodule_ and _gradle integration_ sections below for implementation details.
-
-Normally, bundler tasks will be used by the gitTagBuildAndBundle.sh script (See BuildBundleDeploy git repo). However they are also available for manual use:
+Normally, bundler tasks will be used by scripts outside of this project. However, they are also available for manual usage. Tasks are self documented under "Production Bundler tasks" in detail. 
 
 ####Create a tarball (tgz) bundle:
 *$ gradle distTar*
@@ -27,8 +30,6 @@ Normally, bundler tasks will be used by the gitTagBuildAndBundle.sh script (See 
 Tarball bundle will be found under build/distributions/
 
 Contents of tarball are the JRE, Tomcat, tomcat environmental configs, and war(s) for your project. These versions of each of these dependencies are stripped from folder name to facilitate simple deploy scripting. Versioning information for the bundle in total remains on the root application bundle folder name and should correspond with git tag and maven artifact versioning.
-
-TODO: add versions.txt to root folder of stripped versions.
 
         versioned_application_folder/
         ├── jre
@@ -64,25 +65,3 @@ Dependencies live in install dir:
                └── application_name.war
 
 
-## Gradle Integration
-
-TODO detail project.gradle
-TODO talk about properties
-TODO talk war tasks
-
-
-## Git Submodule Integration
-
-TODO how to set up submodule
-
-
-
-
-
-
-
-
-
-
-
-hi

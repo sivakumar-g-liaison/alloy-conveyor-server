@@ -107,6 +107,7 @@ def docTasks = [:]
 }
 
 githubPages {
+    // TODO publish to service nucleus
     repoUri = "git@github.com:Netflix/${rootProject.githubProjectName}.git"
     pages {
         docTasks.each { shortName, docTask ->

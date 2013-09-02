@@ -13,8 +13,8 @@ package com.liaison.mailbox.grammer;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.liaison.mailbox.grammer.dto.ProfileConfigurationRequest;
-import com.liaison.mailbox.grammer.dto.ProfileConfigurationResponse;
+import com.liaison.mailbox.service.dto.configuration.request.ProfileConfigurationRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ProfileConfigurationResponse;
 
 /**
  * This is the class programatically describes the JAXB/JSON model.
@@ -29,7 +29,7 @@ public class GrammerDictionary {
     static {
 
         entityMap = new HashMap<String, Class<?>>();
-        entityMap.put("ProfileConfigurationRequest", ProfileConfigurationRequest.class);
+        entityMap.put("ProfileConfigurationRequest", ProfileConfigurationRequestDTO.class);
         entityMap.put("ProfileConfigurationResponse", ProfileConfigurationResponse.class);
 
         entityArray = entityMap.values().toArray(new Class<?>[]{});

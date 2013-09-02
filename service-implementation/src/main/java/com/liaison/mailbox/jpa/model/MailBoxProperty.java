@@ -35,6 +35,7 @@ public class MailBoxProperty implements Identifiable {
 	public MailBoxProperty() {
 	}
 
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(unique=true, nullable=false, length=32)
@@ -46,6 +47,7 @@ public class MailBoxProperty implements Identifiable {
 		this.pguid = pguid;
 	}
 
+
 	@Column(name="MBX_PROP_NAME", length=128)
 	public String getMbxPropName() {
 		return this.mbxPropName;
@@ -54,6 +56,7 @@ public class MailBoxProperty implements Identifiable {
 	public void setMbxPropName(String mbxPropName) {
 		this.mbxPropName = mbxPropName;
 	}
+
 
 	@Column(name="MBX_PROP_VALUE", length=512)
 	public String getMbxPropValue() {
@@ -64,7 +67,8 @@ public class MailBoxProperty implements Identifiable {
 		this.mbxPropValue = mbxPropValue;
 	}
 
-	//bi-directional many-to-one association to Mailbox
+
+	//bi-directional many-to-one association to MailBox
 	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
 	@JoinColumn(name="MAILBOX_GUID", nullable=false)
 	public MailBox getMailbox() {
@@ -87,5 +91,4 @@ public class MailBoxProperty implements Identifiable {
 	public  Class getEntityClass() {
 		return this.getClass();
 	}
-
 }

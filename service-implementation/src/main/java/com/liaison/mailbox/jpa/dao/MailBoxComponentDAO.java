@@ -15,6 +15,7 @@ import com.liaison.mailbox.jpa.model.MailBoxComponent;
 public interface MailBoxComponentDAO extends GenericDAO <MailBoxComponent>{
 	
 	public static final String FIND_MAILBOX_COMP_BY_PROFILE = "findMailBoxCompByProfile";
+	public static final String INACTIVATE = "inActivateMailBoxByGUID";
 	public static final String PROFILE = "profile";
 	public MailBoxComponent find(String profile);
 
