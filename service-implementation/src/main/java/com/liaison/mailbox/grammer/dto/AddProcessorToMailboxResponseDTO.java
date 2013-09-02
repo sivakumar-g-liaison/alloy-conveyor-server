@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.grammer.dto;
 
-import com.liaison.mailbox.grammer.ResponseDTO;
+import com.liaison.mailbox.service.dto.ResponseDTO;
 
 /**
  * 

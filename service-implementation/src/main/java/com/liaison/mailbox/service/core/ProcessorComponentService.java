@@ -4,20 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.enums.ProcessorComponentType;
-import com.liaison.mailbox.grammer.ResponseDTO;
-import com.liaison.mailbox.grammer.dto.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.grammer.dto.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.grammer.dto.ProcessorResponseDTO;
-import com.liaison.mailbox.grammer.dto.ProfileConfigurationRequest;
-import com.liaison.mailbox.grammer.dto.ProfileConfigurationResponse;
-import com.liaison.mailbox.jpa.dao.MailBoxComponentDAO;
-import com.liaison.mailbox.jpa.dao.MailBoxComponentDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorComponentDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorComponentDAOBase;
-import com.liaison.mailbox.jpa.model.MailBoxComponent;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
 import com.liaison.mailbox.jpa.model.RemoteUploader;
+import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 
 /**
  * @author ganeshramr
