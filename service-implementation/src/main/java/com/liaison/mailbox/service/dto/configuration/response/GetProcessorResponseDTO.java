@@ -12,30 +12,28 @@ package com.liaison.mailbox.service.dto.configuration.response;
 
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 
 /**
  * 
  *
- * @author veerasamyn
+ * @author sivakumarg
  */
-public class GetMailBoxResponseDTO {
+public class GetProcessorResponseDTO {
 
 	private ResponseDTO response;
-	private MailBoxDTO mailBox;
-
-	public MailBoxDTO getMailBox() {
-		return mailBox;
-	}
-
-	public void setMailBox(MailBoxDTO mailBox) {
-		this.mailBox = mailBox;
-	}
-
+	private ProcessorDTO processor;
+	
 	public ResponseDTO getResponse() {
 		return response;
 	}
-
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
+	}
+	public ProcessorDTO getProcessor() {
+		return processor;
+	}
+	public void setProcessor(ProcessorDTO processor) {
+		this.processor = processor;
 	}
 }

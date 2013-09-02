@@ -18,7 +18,7 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
  * Data Transfer Object that implements fields required for mailbox
  * configuration request. 
  *
- * @author veerasamyn
+ * @author sivakumarg
  */
 public class AddProcessorToMailboxRequestDTO {
 
