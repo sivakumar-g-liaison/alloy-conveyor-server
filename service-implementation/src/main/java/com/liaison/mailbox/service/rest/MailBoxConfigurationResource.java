@@ -32,8 +32,11 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.grammer.GrammerDictionary;
+import com.liaison.mailbox.grammer.dto.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.core.ProcessorComponentService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -365,7 +368,52 @@ public class MailBoxConfigurationResource {
 	@Produces(MediaType.APPLICATION_JSON)
     public Response updateProcessor(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update processor not yet implemented.").build();
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		InputStream requestStream;
+		AddProcessorToMailboxRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			String marshallingMediaType = null;
+			if (requestString.startsWith("<")) {
+				serviceRequest = JAXBUtility.unmarshalFromXML(requestStream, GrammerDictionary.getEntityArray());
+				marshallingMediaType = MediaType.APPLICATION_XML;
+			} else {
+				serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
+				marshallingMediaType = MediaType.APPLICATION_JSON;
+			}
+
+			//add the new profile details
+			AddProcessorToMailboxResponseDTO serviceResponse = null;
+			ProcessorComponentService mailbox = new ProcessorComponentService();
+			serviceResponse = mailbox.insertProcessorComponents(serviceRequest);
+
+			//populate the response body
+			String responseBody;
+			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
+				responseBody = JAXBUtility.marshalToXML(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			} else {
+				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
+				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			}
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
 
     }
 
