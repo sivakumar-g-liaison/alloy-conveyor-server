@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.model;
 
 import javax.persistence.CascadeType;
@@ -15,16 +25,15 @@ import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
 
-
 /**
  * The persistent class for the CREDENTIALS database table.
  * 
  */
 @Entity
-@Table(name="CREDENTIALS")
-@NamedQuery(name="Credential.findAll", query="SELECT c FROM Credential c")
+@Table(name = "CREDENTIALS")
+@NamedQuery(name = "Credential.findAll", query = "SELECT c FROM Credential c")
 public class Credential implements Identifiable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private String pguid;
@@ -39,10 +48,9 @@ public class Credential implements Identifiable {
 	public Credential() {
 	}
 
-
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false, length=32)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {
 		return this.pguid;
 	}
@@ -51,8 +59,7 @@ public class Credential implements Identifiable {
 		this.pguid = pguid;
 	}
 
-
-	@Column(name="CREDS_IDP_TYPE", length=128)
+	@Column(name = "CREDS_IDP_TYPE", length = 128)
 	public String getCredsIdpType() {
 		return this.credsIdpType;
 	}
@@ -61,8 +68,7 @@ public class Credential implements Identifiable {
 		this.credsIdpType = credsIdpType;
 	}
 
-
-	@Column(name="CREDS_IDP_URI", length=128)
+	@Column(name = "CREDS_IDP_URI", length = 128)
 	public String getCredsIdpUri() {
 		return this.credsIdpUri;
 	}
@@ -71,8 +77,7 @@ public class Credential implements Identifiable {
 		this.credsIdpUri = credsIdpUri;
 	}
 
-
-	@Column(name="CREDS_PASSWORD", length=128)
+	@Column(name = "CREDS_PASSWORD", length = 128)
 	public String getCredsPassword() {
 		return this.credsPassword;
 	}
@@ -81,8 +86,7 @@ public class Credential implements Identifiable {
 		this.credsPassword = credsPassword;
 	}
 
-
-	@Column(name="CREDS_TYPE", nullable=false, length=128)
+	@Column(name = "CREDS_TYPE", nullable = false, length = 128)
 	public String getCredsType() {
 		return this.credsType;
 	}
@@ -91,8 +95,7 @@ public class Credential implements Identifiable {
 		this.credsType = credsType;
 	}
 
-
-	@Column(name="CREDS_URI", length=128)
+	@Column(name = "CREDS_URI", length = 128)
 	public String getCredsUri() {
 		return this.credsUri;
 	}
@@ -101,8 +104,7 @@ public class Credential implements Identifiable {
 		this.credsUri = credsUri;
 	}
 
-
-	@Column(name="CREDS_USERNAME", length=128)
+	@Column(name = "CREDS_USERNAME", length = 128)
 	public String getCredsUsername() {
 		return this.credsUsername;
 	}
@@ -111,10 +113,9 @@ public class Credential implements Identifiable {
 		this.credsUsername = credsUsername;
 	}
 
-
-	//bi-directional many-to-one association to Processor
-	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
-	@JoinColumn(name="PROCESSORS_GUID", nullable=false)
+	// bi-directional many-to-one association to Processor
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@JoinColumn(name = "PROCESSORS_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;
 	}
@@ -126,13 +127,13 @@ public class Credential implements Identifiable {
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
-		return (Object) getPguid();
+		return getPguid();
 	}
 
-
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	@Transient
-	public  Class getEntityClass() {
+	public Class getEntityClass() {
 		return this.getClass();
 	}
 }

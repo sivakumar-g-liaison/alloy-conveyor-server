@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.model;
 
 import javax.persistence.Column;
@@ -15,7 +25,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name="MAILBOX_COMPONENT")
+@Table(name = "MAILBOX_COMPONENT")
 public class MailBoxComponent implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
@@ -23,23 +33,24 @@ public class MailBoxComponent implements Identifiable {
 	private String name;
 	private String url;
 	private String profile;
-	
+
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
 		return getId();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	@Transient
 	public Class getEntityClass() {
-		
+
 		return this.getClass();
 	}
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(unique = true, nullable = false)
 	public String getId() {
 		return id;
 	}
@@ -48,7 +59,7 @@ public class MailBoxComponent implements Identifiable {
 		this.id = id;
 	}
 
-	@Column(name="NAME", nullable=false)
+	@Column(name = "NAME", nullable = false)
 	public String getName() {
 		return name;
 	}
@@ -56,8 +67,8 @@ public class MailBoxComponent implements Identifiable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	@Column(name="URL", nullable=false)
+
+	@Column(name = "URL", nullable = false)
 	public String getUrl() {
 		return url;
 	}
@@ -65,13 +76,12 @@ public class MailBoxComponent implements Identifiable {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
-	
-	@Column(name="PROFILE", nullable=false)
+
+	@Column(name = "PROFILE", nullable = false)
 	public String getProfile() {
 		return profile;
 	}
-	
+
 	public void setProfile(String profile) {
 		this.profile = profile;
 	}

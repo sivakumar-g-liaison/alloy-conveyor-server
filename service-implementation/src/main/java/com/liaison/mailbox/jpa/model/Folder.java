@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.model;
 
 import javax.persistence.CascadeType;
@@ -15,14 +25,13 @@ import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
 
-
 /**
  * The persistent class for the FOLDERS database table.
  * 
  */
 @Entity
-@Table(name="FOLDERS")
-@NamedQuery(name="Folder.findAll", query="SELECT f FROM Folder f")
+@Table(name = "FOLDERS")
+@NamedQuery(name = "Folder.findAll", query = "SELECT f FROM Folder f")
 public class Folder implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
@@ -36,10 +45,9 @@ public class Folder implements Identifiable {
 	public Folder() {
 	}
 
-
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false, length=32)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {
 		return this.pguid;
 	}
@@ -48,8 +56,7 @@ public class Folder implements Identifiable {
 		this.pguid = pguid;
 	}
 
-
-	@Column(name="FLDR_DESC", length=250)
+	@Column(name = "FLDR_DESC", length = 250)
 	public String getFldrDesc() {
 		return this.fldrDesc;
 	}
@@ -58,8 +65,7 @@ public class Folder implements Identifiable {
 		this.fldrDesc = fldrDesc;
 	}
 
-
-	@Column(name="FLDR_TYPE", nullable=false, length=50)
+	@Column(name = "FLDR_TYPE", nullable = false, length = 50)
 	public String getFldrType() {
 		return this.fldrType;
 	}
@@ -68,8 +74,7 @@ public class Folder implements Identifiable {
 		this.fldrType = fldrType;
 	}
 
-
-	@Column(name="FLDR_URI", length=50)
+	@Column(name = "FLDR_URI", length = 50)
 	public String getFldrUri() {
 		return this.fldrUri;
 	}
@@ -78,10 +83,9 @@ public class Folder implements Identifiable {
 		this.fldrUri = fldrUri;
 	}
 
-
-	//bi-directional many-to-one association to Processor
-	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH}, fetch=FetchType.LAZY)
-	@JoinColumn(name="PROCESSORS_GUID", nullable=false)
+	// bi-directional many-to-one association to Processor
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@JoinColumn(name = "PROCESSORS_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;
 	}
@@ -90,17 +94,16 @@ public class Folder implements Identifiable {
 		this.processor = processor;
 	}
 
-
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
-		return (Object) getPguid();
+		return getPguid();
 	}
 
-
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	@Transient
-	public  Class getEntityClass() {
+	public Class getEntityClass() {
 		return this.getClass();
 	}
 

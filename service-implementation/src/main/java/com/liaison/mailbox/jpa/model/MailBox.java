@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.model;
 
 import java.math.BigDecimal;
@@ -17,14 +27,13 @@ import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
 
-
 /**
  * The persistent class for the MAILBOXES database table.
  * 
  */
 @Entity
-@Table(name="MAILBOXES")
-@NamedQuery(name="MailBox.findAll", query="SELECT m FROM MailBox m")
+@Table(name = "MAILBOXES")
+@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m")
 public class MailBox implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
@@ -41,10 +50,9 @@ public class MailBox implements Identifiable {
 	public MailBox() {
 	}
 
-
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(unique=true, nullable=false, length=32)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {
 		return this.pguid;
 	}
@@ -53,8 +61,7 @@ public class MailBox implements Identifiable {
 		this.pguid = pguid;
 	}
 
-
-	@Column(name="MBX_DESC", length=1024)
+	@Column(name = "MBX_DESC", length = 1024)
 	public String getMbxDesc() {
 		return this.mbxDesc;
 	}
@@ -63,8 +70,7 @@ public class MailBox implements Identifiable {
 		this.mbxDesc = mbxDesc;
 	}
 
-
-	@Column(name="MBX_NAME", nullable=false, length=128)
+	@Column(name = "MBX_NAME", nullable = false, length = 128)
 	public String getMbxName() {
 		return this.mbxName;
 	}
@@ -73,8 +79,7 @@ public class MailBox implements Identifiable {
 		this.mbxName = mbxName;
 	}
 
-
-	@Column(name="MBX_STATUS", nullable=false, length=128)
+	@Column(name = "MBX_STATUS", nullable = false, length = 128)
 	public String getMbxStatus() {
 		return this.mbxStatus;
 	}
@@ -83,8 +88,7 @@ public class MailBox implements Identifiable {
 		this.mbxStatus = mbxStatus;
 	}
 
-
-	@Column(name="SERVICE_INST_ID")
+	@Column(name = "SERVICE_INST_ID")
 	public BigDecimal getServiceInstId() {
 		return this.serviceInstId;
 	}
@@ -93,8 +97,7 @@ public class MailBox implements Identifiable {
 		this.serviceInstId = serviceInstId;
 	}
 
-
-	@Column(name="SHARD_KEY", length=512)
+	@Column(name = "SHARD_KEY", length = 512)
 	public String getShardKey() {
 		return this.shardKey;
 	}
@@ -103,9 +106,9 @@ public class MailBox implements Identifiable {
 		this.shardKey = shardKey;
 	}
 
-
-	//bi-directional many-to-one association to MailBoxProperty
-	@OneToMany(mappedBy="mailbox", fetch= FetchType.EAGER, orphanRemoval=true, cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+	// bi-directional many-to-one association to MailBoxProperty
+	@OneToMany(mappedBy = "mailbox", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
 	}
@@ -128,9 +131,8 @@ public class MailBox implements Identifiable {
 		return mailboxProperty;
 	}
 
-
-	//bi-directional many-to-one association to MailBoxSchedProfile
-	@OneToMany(mappedBy="mailbox", cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH})
+	// bi-directional many-to-one association to MailBoxSchedProfile
+	@OneToMany(mappedBy = "mailbox", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
 		return this.mailboxSchedProfiles;
 	}
@@ -156,13 +158,13 @@ public class MailBox implements Identifiable {
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
-		return (Object) getPguid();
+		return getPguid();
 	}
 
-
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	@Transient
-	public  Class getEntityClass() {
+	public Class getEntityClass() {
 		return this.getClass();
 	}
 }
