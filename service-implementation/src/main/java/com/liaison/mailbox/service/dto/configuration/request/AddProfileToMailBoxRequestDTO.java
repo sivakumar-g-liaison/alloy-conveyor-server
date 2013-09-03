@@ -15,57 +15,56 @@ import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
  * 
- *
+ * 
  * @author praveenu
  */
-public class AddProfileToMailboxRequestDTO {
+public class AddProfileToMailBoxRequestDTO {
 
 	private ProfileDTO profile;
-	private String mailboxGuid;
+	private String mailBoxGuid;
 	private String status;
 
-	public String getMailboxGuid() {
-		return mailboxGuid;
+	public String getMailBoxGuid() {
+		return mailBoxGuid;
 	}
-	
-	public void setMailboxGuid(String mailboxGuid) {
-		this.mailboxGuid = mailboxGuid;
+
+	public void setMailBoxGuid(String mailBoxGuid) {
+		this.mailBoxGuid = mailBoxGuid;
 	}
-	
+
 	public ProfileDTO getProfile() {
 		return profile;
 	}
-	
+
 	public void setProfile(ProfileDTO profile) {
 		this.profile = profile;
 	}
-	
+
 	public String getStatus() {
 		return status;
 	}
-	
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
+
 	public void copyToEntity(MailBoxSchedProfile mailboxProfile) {
-		
-		//mailboxProfile.setPguid(this.getMailboxGuid());
+
 		mailboxProfile.setMbxProfileStatus(this.getStatus());
-		
+
 		if (this.getProfile() != null) {
-			
+
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			this.getProfile().copyToEntity(profile);
 			mailboxProfile.setScheduleProfilesRef(profile);
 		}
 	}
-	
+
 	public void copyFromEntity(MailBoxSchedProfile mailboxProfile) {
-		
-		this.setMailboxGuid(mailboxProfile.getPguid());
+
+		this.setMailBoxGuid(mailboxProfile.getPguid());
 		this.setStatus(mailboxProfile.getMbxProfileStatus());
-		
+
 		if (this.getProfile() != null && mailboxProfile.getScheduleProfilesRef() != null) {
 			this.getProfile().copyFromEntity(mailboxProfile.getScheduleProfilesRef());
 		} else if (this.getProfile() == null && mailboxProfile.getScheduleProfilesRef() != null) {

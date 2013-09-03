@@ -28,7 +28,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
  *
  * @author praveenu
  */
-public class AddProfileToMailboxResponseDTO implements ResponseBuilder {
+public class AddProfileToMailBoxResponseDTO implements ResponseBuilder {
 	
 	private ResponseDTO response;
 	private String mailboxProfileLinkGuid;
