@@ -18,17 +18,19 @@ import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Data Transfer Object uses for sending Add MailBox Responses.
- *
+ * 
  * @author veerasamyn
  */
+@JsonRootName("addmailboxresponse")
 public class AddMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
@@ -51,19 +53,9 @@ public class AddMailBoxResponseDTO implements ResponseBuilder {
 	}
 
 	@Override
-	public Response constructResponse(String mediaType)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
-		
-		String responseBody;
-		if (MediaType.APPLICATION_XML.equals(mediaType)) {
-
-			responseBody = JAXBUtility.marshalToXML(this);
-			return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_XML).build();
-		} else {
-
-			responseBody = JAXBUtility.marshalToJSON(this);
-			return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-		}
+	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+		String responseBody = MailBoxUtility.marshalToJSON(this);
+		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
-	
+
 }

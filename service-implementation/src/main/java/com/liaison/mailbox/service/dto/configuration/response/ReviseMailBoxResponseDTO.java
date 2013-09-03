@@ -10,15 +10,28 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+import java.io.IOException;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
+import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- *
+ * 
  * @author veerasamyn
  */
-public class ReviseMailBoxResponseDTO {
+@JsonRootName("revisemailboxresponse")
+public class ReviseMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private MailBoxDTO mailBox;
@@ -38,5 +51,11 @@ public class ReviseMailBoxResponseDTO {
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
-	
+
+	@Override
+	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+		String responseBody = MailBoxUtility.marshalToJSON(this);
+		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+	}
+
 }

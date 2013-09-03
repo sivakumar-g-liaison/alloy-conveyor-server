@@ -16,8 +16,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -49,7 +47,6 @@ public class MailBoxSchedProfile implements Identifiable {
 	}
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {
 		return this.pguid;

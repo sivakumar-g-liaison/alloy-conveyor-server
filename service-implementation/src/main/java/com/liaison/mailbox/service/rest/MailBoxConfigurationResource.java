@@ -36,11 +36,15 @@ import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -48,7 +52,7 @@ import com.netflix.servo.monitor.Monitors;
 
 /**
  * This is the gateway for the mailbox configuration services.
- *
+ * 
  * @author veerasamyn
  */
 @Path("/mailbox")
@@ -56,11 +60,11 @@ public class MailBoxConfigurationResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
 
-    @Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
-    private final static AtomicInteger failureCounter     = new AtomicInteger(0);
+	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
+	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
-    @Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-    private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
+	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
 	public MailBoxConfigurationResource() {
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
@@ -69,13 +73,14 @@ public class MailBoxConfigurationResource {
 	/**
 	 * REST method to initiate mailbox creation.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
-	@PUT
+	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response createMailBox(@Context HttpServletRequest request) {
+	public Response createMailBox(@Context HttpServletRequest request) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -88,23 +93,16 @@ public class MailBoxConfigurationResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			String marshallingMediaType = null;
-			if (requestString.startsWith("<")) {
-				serviceRequest = JAXBUtility.unmarshalFromXML(requestStream, GrammerDictionary.getEntityArray());
-				marshallingMediaType = MediaType.APPLICATION_XML;
-			} else {
-				serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
-				marshallingMediaType = MediaType.APPLICATION_JSON;
-			}
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
 
-			//add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+			// creates new mailbox
 			serviceResponse = mailbox.createMailBox(serviceRequest);
 
-			//populate the response body
-			return serviceResponse.constructResponse(marshallingMediaType);
-
+			// populate the response body
+			return serviceResponse.constructResponse();
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
@@ -112,54 +110,73 @@ public class MailBoxConfigurationResource {
 			LOG.error(errMsg, e);
 
 			// should be throwing out of domain scope and into framework using above code
-            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
 		return returnResponse;
-		
-    }
+
+	}
 
 	/**
-	 * REST method to update existing mailbox. 
+	 * REST method to update existing mailbox.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-    public Response updateMailBox(@Context HttpServletRequest request) {
-		
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update Mailbox not yet implemented.").build();
-
-    }
-
-	/**
-	 * REST method to delete a mailbox. 
-	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
-	 */
-	@DELETE
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-    public Response deleteMailBox(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Delete Mailbox not yet implemented.").build();
-
-    }
-
-	/**
-	 * REST method to retrieve a mailbox details. 
-	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
-	 */
-	@GET
+	@PUT
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response readMailBox(@PathParam(value="id") String guid) {
+	public Response reviseMailBox(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		InputStream requestStream;
+		ReviseMailBoxRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseMailBoxRequestDTO.class);
+
+			ReviseMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+			// updates existing mailbox
+			serviceResponse = mailbox.reviseMailBox(serviceRequest);
+
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
+
+	/**
+	 * REST method to delete a mailbox.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
+	 */
+	@DELETE
+	@Path("/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deactivateMailBox(@PathParam(value = "id") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -167,22 +184,53 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			String marshallingMediaType = MediaType.APPLICATION_JSON;
+			DeActivateMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
-			//add the new profile details
+			// deactivates existing mailbox
+			serviceResponse = mailbox.deActivateMailBox(guid);
+
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
+
+	/**
+	 * REST method to retrieve a mailbox details.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
+	 */
+	@GET
+	@Path("/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response readMailBox(@PathParam(value = "id") String guid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			// add the new profile details
 			GetMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.getMailBox(guid);
 
-			//populate the response body
-			String responseBody;
-			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
-				responseBody = JAXBUtility.marshalToXML(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			} else {
-				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			}
+			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
 
@@ -190,185 +238,207 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
-            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
 		return returnResponse;
-		
-    }
+
+	}
 
 	/**
 	 * REST method to initiate profile creation.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@PUT
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response createProfile(@Context HttpServletRequest request) {
+	public Response createProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Create Profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Create Profile not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
-	 * REST method to update a existing profile. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to update a existing profile.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@POST
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response updateProfile(@Context HttpServletRequest request) {
+	public Response updateProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update profile not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
-	 * REST method to delete a profile. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to delete a profile.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@DELETE
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response deleteProfile(@Context HttpServletRequest request) {
+	public Response deleteProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Delete Profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Delete Profile not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
-	 * REST method to retrieve a profile details. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to retrieve a profile details.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@GET
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response readProfile(@Context HttpServletRequest request) {
+	public Response readProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Read Profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Read Profile not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
-	 * REST method to associate existing profiles to mailbox. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to associate existing profiles to mailbox.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@POST
 	@Path("/linkprofiles")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response linkProfiles(@Context HttpServletRequest request) {
+	public Response linkProfiles(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Link profiles not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Link profiles not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
-	 * REST method to unlink profiles from mailbox. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to unlink profiles from mailbox.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@DELETE
 	@Path("/linkprofiles")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response unlinkProfiles(@Context HttpServletRequest request) {
+	public Response unlinkProfiles(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Unlik profiles not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Unlik profiles not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
 	 * REST method to add the processors to profile.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@PUT
 	@Path("/profile/linkprocessors")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response addProcessorsToProfile(@Context HttpServletRequest request) {
+	public Response addProcessorsToProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Add processors to profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
+				.entity("Add processors to profile not yet implemented.").build();
 
-    }
+	}
 
 	/**
-	 * REST method to remove processors from profile. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to remove processors from profile.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@DELETE
 	@Path("/profile/linkprocessors")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response removeProcessorsFromProfile(@Context HttpServletRequest request) {
+	public Response removeProcessorsFromProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Remove processors from profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
+				.entity("Remove processors from profile not yet implemented.").build();
 
-    }
+	}
 
 	/**
-	 * REST method to retrieve a processor details from profile. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to retrieve a processor details from profile.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@GET
 	@Path("/profile/linkprocessors")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response readProcessorsFromProfile(@Context HttpServletRequest request) {
+	public Response readProcessorsFromProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Read processors from profile not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
+				.entity("Read processors from profile not yet implemented.").build();
 
-    }
+	}
 
 	/**
 	 * REST method to add a processor.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@PUT
 	@Path("/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response addProcessor(@Context HttpServletRequest request) {
+	public Response addProcessor(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Add processor not yet implemented.").build();
+		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Add processor not yet implemented.")
+				.build();
 
-    }
+	}
 
 	/**
-	 * REST method to update a processor. 
-	 *
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * REST method to update a processor.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@POST
 	@Path("/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response updateProcessor(@Context HttpServletRequest request) {
+	public Response updateProcessor(@Context HttpServletRequest request) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -390,12 +460,12 @@ public class MailBoxConfigurationResource {
 				marshallingMediaType = MediaType.APPLICATION_JSON;
 			}
 
-			//add the new profile details
+			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			serviceResponse = mailbox.createProcessor(serviceRequest);
 
-			//populate the response body
+			// populate the response body
 			String responseBody;
 			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
 				responseBody = JAXBUtility.marshalToXML(serviceResponse);
@@ -411,25 +481,27 @@ public class MailBoxConfigurationResource {
 			String errMsg = "processorConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
-            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
 		return returnResponse;
 
-    }
-	
+	}
+
 	/**
-	 * REST method to remove a processor details. 
+	 * REST method to remove a processor details.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@DELETE
 	@Path("/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response deleteProcessor(@PathParam(value="processorid") String guid) {
+	public Response deleteProcessor(@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -439,12 +511,12 @@ public class MailBoxConfigurationResource {
 
 			String marshallingMediaType = MediaType.APPLICATION_JSON;
 
-			//add the new profile details
+			// add the new profile details
 			DeActivateProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			serviceResponse = mailbox.deactivateProcessor(guid);
 
-			//populate the response body
+			// populate the response body
 			String responseBody;
 			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
 				responseBody = JAXBUtility.marshalToXML(serviceResponse);
@@ -460,25 +532,27 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
-            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
 		return returnResponse;
-		
-    }
-	
+
+	}
+
 	/**
-	 * REST method to retrieve a mailbox details. 
+	 * REST method to retrieve a mailbox details.
 	 * 
-	 * @param request HttpServletRequest, injected with context annotation
-	 * @return 		  Response Object
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
 	 */
 	@GET
 	@Path("/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-    public Response getProcessor(@PathParam(value="processorid") String guid) {
+	public Response getProcessor(@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -488,12 +562,12 @@ public class MailBoxConfigurationResource {
 
 			String marshallingMediaType = MediaType.APPLICATION_JSON;
 
-			//add the new profile details
+			// add the new profile details
 			GetProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			serviceResponse = mailbox.getProcessor(guid);
 
-			//populate the response body
+			// populate the response body
 			String responseBody;
 			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
 				responseBody = JAXBUtility.marshalToXML(serviceResponse);
@@ -509,12 +583,13 @@ public class MailBoxConfigurationResource {
 			String errMsg = "Get Processor failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
-            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
 		return returnResponse;
-		
-    }
+
+	}
 
 }

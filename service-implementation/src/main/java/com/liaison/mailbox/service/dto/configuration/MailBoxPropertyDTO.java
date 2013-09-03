@@ -11,10 +11,11 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Data Transfer Object for MailBox Property.
- *
+ * 
  * @author veerasamyn
  */
 public class MailBoxPropertyDTO {
@@ -38,12 +39,11 @@ public class MailBoxPropertyDTO {
 		this.value = value;
 	}
 
-	public void copyToEntity(Object entity) {
+	public void copyToEntity(MailBoxProperty prop) {
 
-		MailBoxProperty prop = (MailBoxProperty) entity;
+		prop.setPguid(MailBoxUtility.getGUID());
 		prop.setMbxPropName(this.getName());
 		prop.setMbxPropValue(this.getValue());
-
 	}
 
 	public void copyFromEntity(Object entity) {

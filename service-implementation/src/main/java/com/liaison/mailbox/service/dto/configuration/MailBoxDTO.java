@@ -16,10 +16,11 @@ import java.util.List;
 
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- *
+ * 
  * @author veerasamyn
  */
 public class MailBoxDTO {
@@ -31,7 +32,7 @@ public class MailBoxDTO {
 	private Integer serviceInstId;
 	private String shardKey;
 	private List<MailBoxPropertyDTO> properties;
-	
+
 	public String getGuid() {
 		return guid;
 	}
@@ -94,6 +95,7 @@ public class MailBoxDTO {
 
 	public void copyToEntity(MailBox mailBox) {
 
+		mailBox.setPguid(MailBoxUtility.getGUID());
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setMbxStatus(this.getStatus());
@@ -107,6 +109,7 @@ public class MailBoxDTO {
 		for (MailBoxPropertyDTO propertyDTO : this.getProperties()) {
 
 			property = new MailBoxProperty();
+			property.setMailbox(mailBox);
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
 		}
@@ -120,7 +123,7 @@ public class MailBoxDTO {
 		this.setDescription(mailBox.getMbxDesc());
 		this.setStatus(mailBox.getMbxStatus());
 		this.setShardKey(mailBox.getShardKey());
-		
+
 		if (null != mailBox.getServiceInstId()) {
 			this.setServiceInstId(mailBox.getServiceInstId().intValue());
 		}

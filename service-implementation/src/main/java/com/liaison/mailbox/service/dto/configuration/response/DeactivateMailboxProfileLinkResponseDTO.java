@@ -50,18 +50,10 @@ public class DeactivateMailboxProfileLinkResponseDTO implements ResponseBuilder 
 	}
 
 	@Override
-	public Response constructResponse(String mediaType)
+	public Response constructResponse()
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
 		
-		String responseBody;
-		if (MediaType.APPLICATION_XML.equals(mediaType)) {
-
-			responseBody = JAXBUtility.marshalToXML(this);
-			return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_XML).build();
-		} else {
-
-			responseBody = JAXBUtility.marshalToJSON(this);
-			return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-		}
+		String responseBody = JAXBUtility.marshalToJSON(this);
+		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 }

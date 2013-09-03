@@ -10,15 +10,23 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
+import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- *
+ * 
  * @author veerasamyn
  */
-public class GetMailBoxResponseDTO {
+@JsonRootName("getmailboxresponse")
+public class GetMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private MailBoxDTO mailBox;
@@ -37,5 +45,11 @@ public class GetMailBoxResponseDTO {
 
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
+	}
+
+	@Override
+	public Response constructResponse() throws Exception {
+		String responseBody = MailBoxUtility.marshalToJSON(this);
+		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 }

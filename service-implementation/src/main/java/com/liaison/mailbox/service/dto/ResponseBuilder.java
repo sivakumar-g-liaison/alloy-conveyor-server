@@ -19,5 +19,5 @@ import javax.ws.rs.core.Response;
  */
 public interface ResponseBuilder {
 
-	public abstract Response constructResponse(String mediaType) throws Exception;
+	public abstract Response constructResponse() throws Exception;
 }
