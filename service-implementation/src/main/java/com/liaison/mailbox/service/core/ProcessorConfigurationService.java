@@ -53,6 +53,7 @@ public class ProcessorConfigurationService {
 		}
 
 		if (processor != null) {
+			serviceRequest.getProcessor().copyToEntity(processor);
 			ProcessorConfigurationDAO componenDao = new ProcessorConfigurationDAOBase();
 			componenDao.persist(processor);
 		}
