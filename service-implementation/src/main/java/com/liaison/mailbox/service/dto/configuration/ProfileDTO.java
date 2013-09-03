@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
@@ -39,6 +40,7 @@ public class ProfileDTO {
 	}
 
 	public void copyToEntity(ScheduleProfilesRef profile) {
+		profile.setPguid(MailBoxUtility.getGUID());
 		profile.setSchProfName(this.getName());
 	}
 

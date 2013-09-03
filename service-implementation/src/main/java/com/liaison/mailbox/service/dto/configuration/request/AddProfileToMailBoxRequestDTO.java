@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
@@ -50,6 +51,7 @@ public class AddProfileToMailBoxRequestDTO {
 
 	public void copyToEntity(MailBoxSchedProfile mailboxProfile) {
 
+		mailboxProfile.setPguid(MailBoxUtility.getGUID());
 		mailboxProfile.setMbxProfileStatus(this.getStatus());
 
 		if (this.getProfile() != null) {
