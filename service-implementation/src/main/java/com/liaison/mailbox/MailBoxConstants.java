@@ -55,4 +55,12 @@ public interface MailBoxConstants {
 
 	/** The processed file extension */
 	public final static String SWEEPED_FILE_EXTN = ".queued";
+
+	public static final String CREATE_PROCESSOR_SUCCESS = "Processor created successfully.";
+	public static final String CREATE_PROCESSOR_FAILURE = "Error occured during processor creation.";
+
+	public static final String DELETE_PROCESSOR_SUCCESS = "Processor delete successfully.";
+
+	public static final String GET_PROCESSOR_SUCCESS = "Processor retrieved successfully.";
+	public static final String GET_PROCESSOR_FAILURE = "Error occured during get processor operation.";
 }

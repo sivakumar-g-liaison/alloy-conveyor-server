@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.grammer.dto;
+package com.liaison.mailbox.service.dto.configuration.response;
 
 import com.liaison.mailbox.service.dto.ResponseDTO;
 

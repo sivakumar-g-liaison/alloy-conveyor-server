@@ -1,13 +1,13 @@
 package com.liaison.mailbox.enums;
 
-public enum ProcessorComponentType {
+public enum ProcessorType {
 	
 	REMOTEDOWNLOADER("remotedownloader"),
 	REMOTEUPLOADER("remoteuploader");
 	
 	 private final String code;
 
-    private ProcessorComponentType(String code) { this.code = code; }
+    private ProcessorType(String code) { this.code = code; }
 
     @Override
     public String toString() { return code; }
