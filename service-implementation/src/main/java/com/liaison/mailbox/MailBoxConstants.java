@@ -63,4 +63,7 @@ public interface MailBoxConstants {
 
 	public static final String GET_PROCESSOR_SUCCESS = "Processor retrieved successfully.";
 	public static final String GET_PROCESSOR_FAILURE = "Error occured during get processor operation.";
+	
+	public static final String REVISE_PROCESSOR_SUCCESS = "Processor revised successfully.";
+	public static final String REVISE_PROCESSOR_FAILURE = "Error occured during processor updation.";
 }
