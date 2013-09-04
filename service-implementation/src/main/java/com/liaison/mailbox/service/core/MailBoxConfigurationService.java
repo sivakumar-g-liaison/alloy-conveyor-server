@@ -25,6 +25,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Class which has configuration related operations.
@@ -47,6 +48,7 @@ public class MailBoxConfigurationService {
 		LOG.info("Entering into create mailbox.");
 		MailBox mailBox = new MailBox();
 		request.copyToEntity(mailBox);
+		mailBox.setPguid(MailBoxUtility.getGUID());
 
 		// persisting the mailbox entity
 		MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();

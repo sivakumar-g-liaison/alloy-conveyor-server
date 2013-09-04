@@ -71,7 +71,7 @@ public class MailBoxProperty implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBox
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
 	public MailBox getMailbox() {
 		return this.mailbox;
