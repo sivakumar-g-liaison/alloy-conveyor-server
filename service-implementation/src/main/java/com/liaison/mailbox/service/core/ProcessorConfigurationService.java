@@ -7,9 +7,12 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
+import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
 import com.liaison.mailbox.jpa.model.RemoteUploader;
@@ -53,7 +56,13 @@ public class ProcessorConfigurationService {
 		}
 
 		if (processor != null) {
-			serviceRequest.getProcessor().copyToEntity(processor);
+
+			serviceRequest.getProcessor().copyToEntity(processor, true);
+			String mailboxId = serviceRequest.getProcessor().getLinkedMailboxId();
+			String profileId = serviceRequest.getProcessor().getLinkedProfileId();
+			MailBoxScheduleProfileConfigurationDAO scheduleProfileDAO = new MailBoxScheduleProfileConfigurationDAOBase();
+			MailBoxSchedProfile scheduleProfile = scheduleProfileDAO.find(mailboxId, profileId);
+			processor.setMailboxSchedProfile(scheduleProfile);
 			ProcessorConfigurationDAO componenDao = new ProcessorConfigurationDAOBase();
 			componenDao.persist(processor);
 		}

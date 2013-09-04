@@ -18,6 +18,7 @@ import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
 import com.liaison.mailbox.jpa.model.RemoteUploader;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
@@ -105,9 +106,11 @@ public class ProcessorDTO {
 		this.credentials = credentials;
 	}
 	
-	public void copyToEntity(Processor processor) {
+	public void copyToEntity(Processor processor, boolean isCreate) {
 
-		processor.setPguid(this.getGuid());
+		if (isCreate) {
+			processor.setPguid(MailBoxUtility.getGUID());
+		}
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrProperties(this.getProperties());
 		processor.setProcsrStatus(this.getStatus());
@@ -131,6 +134,10 @@ public class ProcessorDTO {
 
 			folder = new Folder();
 			folderDTO.copyToEntity(folder);
+			
+			if (isCreate) {
+				folder.setPguid(MailBoxUtility.getGUID());
+			}
 			folders.add(folder);
 		}
 		
@@ -145,6 +152,10 @@ public class ProcessorDTO {
 
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
+			
+			if (isCreate) {
+				credential.setPguid(MailBoxUtility.getGUID());
+			}
 			credentialList.add(credential);
 		}
 		
