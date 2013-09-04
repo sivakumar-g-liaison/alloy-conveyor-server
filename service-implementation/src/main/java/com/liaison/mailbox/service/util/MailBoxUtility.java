@@ -48,7 +48,6 @@ public class MailBoxUtility {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("deprecation")
 	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
 			JsonMappingException, IOException {
 
@@ -58,9 +57,9 @@ public class MailBoxUtility {
 		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
 
 		// make deserializer use JAXB annotations (only)
-		mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
 		// make serializer use JAXB annotations (only)
-		mapper.getSerializationConfig().setAnnotationIntrospector(introspector);
+		mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
 
 		// added to support the root level element
 		mapper.configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
@@ -81,7 +80,6 @@ public class MailBoxUtility {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("deprecation")
 	public static String marshalToJSON(Object object) throws JAXBException, JsonGenerationException, JsonMappingException,
 			IOException {
 
@@ -90,9 +88,9 @@ public class MailBoxUtility {
 		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
 		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
 		// make deserializer use JAXB annotations (only)
-		mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
 		// make serializer use JAXB annotations (only)
-		mapper.getSerializationConfig().setAnnotationIntrospector(introspector);
+		mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
 
 		// added to support root level element.
 		mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, true);
@@ -101,9 +99,9 @@ public class MailBoxUtility {
 	}
 
 	/**
-	 * Method is used to get the unique id for UUIDGen Utility.
+	 * Method is used to get the unique id from UUIDGen Utility.
 	 * 
-	 * @return
+	 * @return UUID The 32bit string.
 	 */
 	public static String getGUID() {
 		return UUID.getUUID();

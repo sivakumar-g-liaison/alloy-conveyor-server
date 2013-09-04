@@ -18,10 +18,11 @@ import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
 import com.liaison.mailbox.jpa.model.RemoteUploader;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- *
+ * 
  * @author sivakumarg
  */
 public class ProcessorDTO {
@@ -37,118 +38,145 @@ public class ProcessorDTO {
 	private String linkedProfileId;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
-	
+
 	public String getGuid() {
 		return guid;
 	}
+
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public String getType() {
 		return type;
 	}
+
 	public void setType(String type) {
 		this.type = type;
 	}
+
 	public String getProperties() {
 		return properties;
 	}
+
 	public void setProperties(String properties) {
 		this.properties = properties;
 	}
+
 	public String getJavaScriptURI() {
 		return javaScriptURI;
 	}
+
 	public void setJavaScriptURI(String javaScriptURI) {
 		this.javaScriptURI = javaScriptURI;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 	public String getStatus() {
 		return status;
 	}
+
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
 	public String getLinkedMailboxId() {
 		return linkedMailboxId;
 	}
+
 	public void setLinkedMailboxId(String linkedMailboxId) {
 		this.linkedMailboxId = linkedMailboxId;
 	}
+
 	public String getLinkedProfileId() {
 		return linkedProfileId;
 	}
+
 	public void setLinkedProfileId(String linkedProfileId) {
 		this.linkedProfileId = linkedProfileId;
 	}
+
 	public List<FolderDTO> getFolders() {
 		return folders;
 	}
+
 	public void setFolders(List<FolderDTO> folders) {
 		this.folders = folders;
 	}
+
 	public List<CredentialDTO> getCredentials() {
 		return credentials;
 	}
+
 	public void setCredentials(List<CredentialDTO> credentials) {
 		this.credentials = credentials;
 	}
-	
-	public void copyToEntity(Processor processor) {
 
-		processor.setPguid(this.getGuid());
+	public void copyToEntity(Processor processor, boolean isCreate) {
+
+		if (isCreate) {
+			processor.setPguid(MailBoxUtility.getGUID());
+		}
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrProperties(this.getProperties());
 		processor.setProcsrStatus(this.getStatus());
-		//processor.setProcsrType(this.getType());
+		// processor.setProcsrType(this.getType());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
-		
-		//Set the RemoteDownloader properties
+
+		// Set the RemoteDownloader properties
 		if (processor instanceof RemoteDownloader) {
 		}
-		
-		//Set the RemoteUploader properties
+
+		// Set the RemoteUploader properties
 		if (processor instanceof RemoteUploader) {
-		}		
-		
-		//TODO missing in JSON
-		//processor.setMailboxSchedProfile();
-		
+		}
+
+		// TODO missing in JSON
+		// processor.setMailboxSchedProfile();
+
 		Folder folder = null;
 		List<Folder> folders = new ArrayList<>();
 		for (FolderDTO folderDTO : this.getFolders()) {
 
 			folder = new Folder();
 			folderDTO.copyToEntity(folder);
+
+			folder.setPguid(MailBoxUtility.getGUID());
 			folders.add(folder);
 		}
-		
-		//TODO JSON have list of folder. But model have single folder
+
+		// TODO JSON have list of folder. But model have single folder
 		if (!folders.isEmpty()) {
 			processor.setFolders(folders);
 		}
-		
+
 		Credential credential = null;
 		List<Credential> credentialList = new ArrayList<>();
 		for (CredentialDTO credentialDTO : this.getCredentials()) {
 
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
+
+			credential.setPguid(MailBoxUtility.getGUID());
 			credentialList.add(credential);
 		}
-		
-		//TODO JSON have list of credential. But model have single credential
+
+		// TODO JSON have list of credential. But model have single credential
 		if (!credentialList.isEmpty()) {
 			processor.setCredentials(credentialList);
 		}
@@ -160,27 +188,27 @@ public class ProcessorDTO {
 		this.setDescription(processor.getProcsrDesc());
 		this.setProperties(processor.getProcsrProperties());
 		this.setStatus(processor.getProcsrStatus());
-		//this.setType(processor.getProcsrType());
+		// this.setType(processor.getProcsrType());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
-		
-		//TODO missing in JSON
-		//processor.getMailboxSchedProfile();
-		
-		//Set the RemoteDownloader properties
+
+		// TODO missing in JSON
+		// processor.getMailboxSchedProfile();
+
+		// Set the RemoteDownloader properties
 		if (processor instanceof RemoteDownloader) {
 		}
-		
-		//Set the RemoteUploader properties
+
+		// Set the RemoteUploader properties
 		if (processor instanceof RemoteUploader) {
-		}	
+		}
 
 		FolderDTO folderDTO = new FolderDTO();
 		Folder folder = processor.getFolders().get(0);
 		folderDTO.copyFromEntity(folder);
-		
+
 		this.setFolders(new ArrayList<FolderDTO>());
 		this.getFolders().add(folderDTO);
-		
+
 		CredentialDTO credentialDTO = new CredentialDTO();
 		Credential credential = processor.getCredentials().get(0);
 		credentialDTO.copyFromEntity(credential);

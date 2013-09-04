@@ -33,7 +33,7 @@ public class AddProcessorToMailboxRequestDTO {
 	}
 	
 	public void copyToEntity(Processor entity) {
-		this.getProcessor().copyToEntity(entity);
+		this.getProcessor().copyToEntity(entity, true);
 
 	}
 }

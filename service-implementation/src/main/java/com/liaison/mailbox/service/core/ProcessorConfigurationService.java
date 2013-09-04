@@ -5,23 +5,23 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.jpa.model.MailBox;
+import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
 import com.liaison.mailbox.jpa.model.RemoteUploader;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 
 /**
  * @author sivakumarg
@@ -53,7 +53,13 @@ public class ProcessorConfigurationService {
 		}
 
 		if (processor != null) {
-			serviceRequest.getProcessor().copyToEntity(processor);
+
+			serviceRequest.getProcessor().copyToEntity(processor, true);
+			String mailboxId = serviceRequest.getProcessor().getLinkedMailboxId();
+			String profileId = serviceRequest.getProcessor().getLinkedProfileId();
+			MailBoxScheduleProfileConfigurationDAO scheduleProfileDAO = new MailBoxScheduleProfileConfigurationDAOBase();
+			MailBoxSchedProfile scheduleProfile = scheduleProfileDAO.find(mailboxId, profileId);
+			processor.setMailboxSchedProfile(scheduleProfile);
 			ProcessorConfigurationDAO componenDao = new ProcessorConfigurationDAOBase();
 			componenDao.persist(processor);
 		}
@@ -140,6 +146,46 @@ public class ProcessorConfigurationService {
 
 		LOGGER.info("Exit from deactivate processor.");
 		return serviceResponse;
+	}
+	
+	/**
+	 * Method revise the mailbox configurations.
+	 * 
+	 * @param request
+	 */
+	
+	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request) {
+		
+		LOGGER.info("Entering into revising processor.");
+		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
+		
+		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+		Processor processor = config.find(Processor.class, request.getProcessor().getGuid());
+		
+		processor.getFolders().clear();
+		processor.getCredentials().clear();
+		
+		request.copyToEntity(processor);
+		
+		config.merge(processor);
+		
+		//Response Construction
+		ReviseProcessorResponseDTO serviceResponse = new ReviseProcessorResponseDTO();
+
+		ResponseDTO response = new ResponseDTO();
+		response.setMessage(MailBoxConstants.REVISE_PROCESSOR_SUCCESS);
+		response.setStatus(MailBoxConstants.SUCCESS);
+
+		ProcessorDTO dto = new ProcessorDTO();
+		dto.setGuid(String.valueOf(processor.getPrimaryKey()));
+		
+		serviceResponse.setProcessor(dto);
+		serviceResponse.setResponse(response);
+
+		LOGGER.info("Exit from revising processor.");
+		
+		return serviceResponse;
+		
 	}
 
 }
