@@ -34,6 +34,7 @@ import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.grammer.GrammerDictionary;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
@@ -364,8 +365,8 @@ public class MailBoxConfigurationResource {
 
 			// add the new profile details
 			AddProfileToMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.addProfileToMailBox(serviceRequest, guid);
+			ProfileConfigurationService profile = new ProfileConfigurationService();
+			serviceResponse = profile.addProfileToMailBox(serviceRequest, guid);
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -407,12 +408,11 @@ public class MailBoxConfigurationResource {
 
 			// deactivate the profile details
 			DeactivateMailboxProfileLinkResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.deactivateMailboxProfileLink(mailGuid, linkGuid);
+			ProfileConfigurationService profile = new ProfileConfigurationService();
+			serviceResponse = profile.deactivateMailboxProfileLink(mailGuid, linkGuid);
 
 			// populate the response body
-			String responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-			returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			return serviceResponse.constructResponse();
 
 		} catch (Exception e) {
 
