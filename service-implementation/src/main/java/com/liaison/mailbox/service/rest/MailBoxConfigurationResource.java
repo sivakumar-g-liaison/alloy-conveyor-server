@@ -113,7 +113,8 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
+			// should be throwing out of domain scope and into framework using
+			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
@@ -161,7 +162,8 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
+			// should be throwing out of domain scope and into framework using
+			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
@@ -201,7 +203,8 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
+			// should be throwing out of domain scope and into framework using
+			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
@@ -402,7 +405,7 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			// add the new profile details
+			// deactivate the profile details
 			DeactivateMailboxProfileLinkResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.deactivateMailboxProfileLink(mailGuid, linkGuid);
@@ -576,8 +579,8 @@ public class MailBoxConfigurationResource {
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8 >>>>>>>
-	 *         origin/for-review
+	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8
+	 *         >>>>>>> origin/for-review
 	 */
 	@DELETE
 	@Path("/processor/{processorid}")
