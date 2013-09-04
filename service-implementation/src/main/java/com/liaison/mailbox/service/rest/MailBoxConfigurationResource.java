@@ -34,10 +34,12 @@ import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.grammer.GrammerDictionary;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
@@ -47,6 +49,7 @@ import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxP
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -113,7 +116,8 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
+			// should be throwing out of domain scope and into framework using
+			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
@@ -161,7 +165,8 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
+			// should be throwing out of domain scope and into framework using
+			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
@@ -201,7 +206,8 @@ public class MailBoxConfigurationResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
-			// should be throwing out of domain scope and into framework using above code
+			// should be throwing out of domain scope and into framework using
+			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 
@@ -361,8 +367,8 @@ public class MailBoxConfigurationResource {
 
 			// add the new profile details
 			AddProfileToMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.addProfileToMailBox(serviceRequest, guid);
+			ProfileConfigurationService profile = new ProfileConfigurationService();
+			serviceResponse = profile.addProfileToMailBox(serviceRequest, guid);
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -402,14 +408,13 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			// add the new profile details
+			// deactivate the profile details
 			DeactivateMailboxProfileLinkResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.deactivateMailboxProfileLink(mailGuid, linkGuid);
+			ProfileConfigurationService profile = new ProfileConfigurationService();
+			serviceResponse = profile.deactivateMailboxProfileLink(mailGuid, linkGuid);
 
 			// populate the response body
-			String responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-			returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+			return serviceResponse.constructResponse();
 
 		} catch (Exception e) {
 
@@ -576,8 +581,8 @@ public class MailBoxConfigurationResource {
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8 >>>>>>>
-	 *         origin/for-review
+	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8
+	 *         >>>>>>> origin/for-review
 	 */
 	@DELETE
 	@Path("/processor/{processorid}")
@@ -672,6 +677,55 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 
+	}
+	
+	/**
+	 * REST method to update existing processor.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
+	 */
+	@PUT
+	@Path("/{mailboxid}/processor/{processorid}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mbGuid,
+			@PathParam(value = "processorid") String pGuid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		InputStream requestStream;
+		ReviseProcessorRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
+
+			ReviseProcessorResponseDTO serviceResponse = null;
+			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+
+			// updates existing processor
+			serviceResponse = mailbox.reviseProcessor(serviceRequest);
+
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
 	}
 
 }

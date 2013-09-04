@@ -106,7 +106,7 @@ public class Processor implements Identifiable {
 	 */
 
 	// bi-directional many-to-one association to Credential
-	@OneToMany(mappedBy = "processor", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
+	@OneToMany(mappedBy = "processor", orphanRemoval=true, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	public List<Credential> getCredentials() {
 		return this.credentials;
@@ -131,7 +131,7 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Folder
-	@OneToMany(mappedBy = "processor", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
+	@OneToMany(mappedBy = "processor", orphanRemoval=true, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	public List<Folder> getFolders() {
 		return this.folders;
