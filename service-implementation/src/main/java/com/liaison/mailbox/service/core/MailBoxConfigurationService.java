@@ -130,14 +130,11 @@ public class MailBoxConfigurationService {
 
 		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 		MailBox mailBox = config.find(MailBox.class, request.getMailbox().getGuid());
-
-		// Removing the child items.
-		mailBox.getMailboxProperties().clear();
-
+		// Removing the child items.		
+		mailBox.getMailboxProperties().clear();		
 		// updates the mail box data
-		request.copyToEntity(mailBox);
-		config.merge(mailBox);
-
+		request.getMailbox().copyToEntity(mailBox);		
+		config.merge(mailBox);		
 		// Response Construction
 		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();
 

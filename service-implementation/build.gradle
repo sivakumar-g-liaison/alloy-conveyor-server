@@ -70,6 +70,8 @@ war {
         include '*.properties'
         into 'WEB-INF/classes/'
     }
+	
+	archiveName="g2mailboxservice.war"
 
     // TODO
     // Resources used for the Dynamic Services landing page are intentionally kept in the
