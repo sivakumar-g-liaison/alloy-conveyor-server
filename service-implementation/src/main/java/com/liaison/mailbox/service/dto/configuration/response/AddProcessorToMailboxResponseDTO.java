@@ -10,14 +10,19 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
  *
  * @author sivakumarg
  */
-public class AddProcessorToMailboxResponseDTO {
+public class AddProcessorToMailboxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private ProcessorResponseDTO processor;
@@ -33,5 +38,12 @@ public class AddProcessorToMailboxResponseDTO {
 	}
 	public void setProcessor(ProcessorResponseDTO processor) {
 		this.processor = processor;
-	}	
+	}
+	
+	@Override
+	public Response constructResponse() throws Exception {
+
+		String responseBody = MailBoxUtility.marshalToJSON(this);
+		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+	}
 }

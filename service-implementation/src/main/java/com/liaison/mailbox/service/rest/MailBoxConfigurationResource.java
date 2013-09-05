@@ -511,10 +511,10 @@ public class MailBoxConfigurationResource {
 	 * @return Response Object
 	 */
 	@POST
-	@Path("/processor")
+	@Path("/{id}/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateProcessor(@Context HttpServletRequest request) {
+	public Response createProcessor(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -527,14 +527,7 @@ public class MailBoxConfigurationResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			String marshallingMediaType = null;
-			if (requestString.startsWith("<")) {
-				serviceRequest = JAXBUtility.unmarshalFromXML(requestStream, GrammerDictionary.getEntityArray());
-				marshallingMediaType = MediaType.APPLICATION_XML;
-			} else {
-				serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
-				marshallingMediaType = MediaType.APPLICATION_JSON;
-			}
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
 
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
@@ -542,14 +535,7 @@ public class MailBoxConfigurationResource {
 			serviceResponse = mailbox.createProcessor(serviceRequest);
 
 			// populate the response body
-			String responseBody;
-			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
-				responseBody = JAXBUtility.marshalToXML(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			} else {
-				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			}
+			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
 
@@ -585,10 +571,10 @@ public class MailBoxConfigurationResource {
 	 *         >>>>>>> origin/for-review
 	 */
 	@DELETE
-	@Path("/processor/{processorid}")
+	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteProcessor(@PathParam(value = "processorid") String guid) {
+	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -596,22 +582,13 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			String marshallingMediaType = MediaType.APPLICATION_JSON;
-
 			// add the new profile details
 			DeActivateProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+			// Deactivating processor
 			serviceResponse = mailbox.deactivateProcessor(guid);
-
-			// populate the response body
-			String responseBody;
-			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
-				responseBody = JAXBUtility.marshalToXML(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			} else {
-				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			}
+			// Constructing response
+			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
 
@@ -647,23 +624,13 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			String marshallingMediaType = MediaType.APPLICATION_JSON;
-
-			// add the new profile details
 			GetProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			serviceResponse = mailbox.getProcessor(guid);
-
-			// populate the response body
-			String responseBody;
-			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
-				responseBody = JAXBUtility.marshalToXML(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			} else {
-				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			}
-
+			//Gets processor details.
+			serviceResponse =  mailbox.getProcessor(guid);
+			//constructs response.
+			returnResponse = serviceResponse.constructResponse();
+			
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
@@ -708,12 +675,11 @@ public class MailBoxConfigurationResource {
 
 			ReviseProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-
-			// updates existing processor
+			// updates existing processor 
 			serviceResponse = mailbox.reviseProcessor(serviceRequest);
-
-			// populate the response body
-			return serviceResponse.constructResponse();
+			// constructs response
+			returnResponse = serviceResponse.constructResponse();
+			
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);

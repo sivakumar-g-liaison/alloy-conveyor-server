@@ -9,6 +9,8 @@
  */
 package com.liaison.mailbox.service.dto.configuration.request;
 
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 
@@ -16,6 +18,8 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
  * @author karthikeyanm
  * 
  */
+
+@JsonRootName("reviseprocessorrequest")
 public class ReviseProcessorRequestDTO {
 
 	private ProcessorDTO processor;

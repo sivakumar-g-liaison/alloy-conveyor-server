@@ -81,7 +81,7 @@ public class Folder implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Processor
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "PROCESSORS_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;
