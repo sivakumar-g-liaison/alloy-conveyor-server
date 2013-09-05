@@ -18,42 +18,43 @@ import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- *
+ * 
  * @author praveenu
  */
+@JsonRootName("deactivatemailboxprofilelink")
 public class DeactivateMailboxProfileLinkResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private String mailboxProfileLinkGuid;
-	
+
 	public String getMailboxProfileLinkGuid() {
 		return mailboxProfileLinkGuid;
 	}
-	
+
 	public void setMailboxProfileLinkGuid(String mailboxProfileLinkGuid) {
 		this.mailboxProfileLinkGuid = mailboxProfileLinkGuid;
 	}
-	
+
 	public ResponseDTO getResponse() {
 		return response;
 	}
-	
+
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
 
 	@Override
-	public Response constructResponse()
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
-		
-		String responseBody = JAXBUtility.marshalToJSON(this);
+	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+
+		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 }

@@ -9,6 +9,8 @@
  */
 package com.liaison.mailbox.service.dto.configuration.request;
 
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
@@ -19,6 +21,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author praveenu
  */
+@JsonRootName("addprofiletomailboxrequest")
 public class AddProfileToMailBoxRequestDTO {
 
 	private ProfileDTO profile;
