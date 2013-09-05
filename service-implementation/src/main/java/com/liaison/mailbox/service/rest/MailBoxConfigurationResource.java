@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
-import com.liaison.mailbox.grammer.GrammerDictionary;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
@@ -363,7 +362,7 @@ public class MailBoxConfigurationResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = JAXBUtility.unmarshalFromJSON(requestString, AddProfileToMailBoxRequestDTO.class);
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddProfileToMailBoxRequestDTO.class);
 
 			// add the new profile details
 			AddProfileToMailBoxResponseDTO serviceResponse = null;
@@ -574,7 +573,8 @@ public class MailBoxConfigurationResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
+	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid,
+			@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -626,11 +626,11 @@ public class MailBoxConfigurationResource {
 
 			GetProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			//Gets processor details.
-			serviceResponse =  mailbox.getProcessor(guid);
-			//constructs response.
+			// Gets processor details.
+			serviceResponse = mailbox.getProcessor(guid);
+			// constructs response.
 			returnResponse = serviceResponse.constructResponse();
-			
+
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
@@ -645,7 +645,7 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
+
 	/**
 	 * REST method to update existing processor.
 	 * 
@@ -675,11 +675,11 @@ public class MailBoxConfigurationResource {
 
 			ReviseProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			// updates existing processor 
+			// updates existing processor
 			serviceResponse = mailbox.reviseProcessor(serviceRequest);
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
-			
+
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
