@@ -511,10 +511,10 @@ public class MailBoxConfigurationResource {
 	 * @return Response Object
 	 */
 	@POST
-	@Path("/processor")
+	@Path("/{id}/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateProcessor(@Context HttpServletRequest request) {
+	public Response updateProcessor(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -585,10 +585,10 @@ public class MailBoxConfigurationResource {
 	 *         >>>>>>> origin/for-review
 	 */
 	@DELETE
-	@Path("/processor/{processorid}")
+	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteProcessor(@PathParam(value = "processorid") String guid) {
+	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
