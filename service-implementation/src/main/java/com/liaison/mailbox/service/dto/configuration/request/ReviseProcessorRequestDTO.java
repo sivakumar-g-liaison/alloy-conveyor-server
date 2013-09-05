@@ -14,7 +14,7 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 
 /**
  * @author karthikeyanm
- *
+ * 
  */
 public class ReviseProcessorRequestDTO {
 
@@ -28,13 +28,14 @@ public class ReviseProcessorRequestDTO {
 	}
 
 	/**
-	 * @param processor the processor to set
+	 * @param processor
+	 *            the processor to set
 	 */
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
 	}
-	
+
 	public void copyToEntity(Processor entity) {
-		this.getProcessor().copyToEntity(entity);
+		this.getProcessor().copyToEntity(entity, false);
 	}
 }

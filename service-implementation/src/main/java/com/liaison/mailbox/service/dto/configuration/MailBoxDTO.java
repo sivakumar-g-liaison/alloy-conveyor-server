@@ -16,7 +16,6 @@ import java.util.List;
 
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
@@ -94,8 +93,7 @@ public class MailBoxDTO {
 	}
 
 	public void copyToEntity(MailBox mailBox) {
-
-		mailBox.setPguid(MailBoxUtility.getGUID());
+		
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setMbxStatus(this.getStatus());
@@ -107,13 +105,14 @@ public class MailBoxDTO {
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
 		for (MailBoxPropertyDTO propertyDTO : this.getProperties()) {
-
-			property = new MailBoxProperty();
-			property.setMailbox(mailBox);
+			 property = new MailBoxProperty();
+			//property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO REMOVE OWNER INCONSISTENT ERROR.STRANGE THOUGH.
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
+			
 		}
 		mailBox.setMailboxProperties(properties);
+		
 	}
 
 	public void copyFromEntity(MailBox mailBox) {
