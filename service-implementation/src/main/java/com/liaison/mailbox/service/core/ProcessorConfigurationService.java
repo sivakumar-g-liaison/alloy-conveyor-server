@@ -22,6 +22,7 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcesso
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
  * @author sivakumarg
@@ -76,75 +77,106 @@ public class ProcessorConfigurationService {
 	/**
 	 * Get the Processor using guid.
 	 * 
-	 * @param guid The guid of the Processor.
+	 * @param processorGuid The guid of the Processor.
 	 * @return The responseDTO.
 	 */
-	public GetProcessorResponseDTO getProcessor(String guid) {
+	public GetProcessorResponseDTO getProcessor(String processorGuid) {
 
-		LOGGER.info("Entering into get processor.");
-		LOGGER.info("The retrieve guid is {} ", guid);
-
-		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		Processor processor = config.find(Processor.class, guid);
-
-		//Response Construction
-		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
-
-		ResponseDTO response = new ResponseDTO();
-		
-		if (null != processor) {
-
-			response.setMessage(MailBoxConstants.GET_PROCESSOR_SUCCESS);
-			response.setStatus(MailBoxConstants.SUCCESS);
-
-			ProcessorDTO dto = new ProcessorDTO();
-			dto.copyFromEntity(processor);
-
-			serviceResponse.setProcessor(dto);
-			serviceResponse.setResponse(response);
-
-			LOGGER.info("Exit from get processor.");
-			return serviceResponse;
-
-		} else {
+		GetProcessorResponseDTO serviceResponse = null;
+		ResponseDTO response = null;
+		try {
 			
-			response.setMessage(MailBoxConstants.GET_PROCESSOR_SUCCESS);
-			response.setStatus(MailBoxConstants.SUCCESS);
+			if (processorGuid == null || processorGuid.equals("")) {
+				throw new MailBoxServicesException("Processor cannot be found");
+			}
+			
+			LOGGER.info("Entering into get processor.");
+			LOGGER.info("The retrieve guid is {} ", processorGuid);
+				
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+			Processor processor = config.find(Processor.class, processorGuid);
+			
+			response = new ResponseDTO();
+			serviceResponse = new GetProcessorResponseDTO();
+					
+			if (null != processor) {
+				
+				response.setMessage(MailBoxConstants.GET_PROCESSOR_SUCCESS);
+				response.setStatus(MailBoxConstants.SUCCESS);
+				
+				ProcessorDTO dto = new ProcessorDTO();
+				dto.copyFromEntity(processor);
+				
+				serviceResponse.setProcessor(dto);
+				serviceResponse.setResponse(response);
+				
+				LOGGER.info("Exit from get processor.");
+				
+			} else {
+				
+				response.setMessage(MailBoxConstants.GET_PROCESSOR_SUCCESS);
+				response.setStatus(MailBoxConstants.SUCCESS);
+				
+				serviceResponse.setResponse(response);
+				
+				LOGGER.info("Exit from get processor.");
+			}
+		} catch (Exception e) {
+
+			response = new ResponseDTO();
+			serviceResponse = new GetProcessorResponseDTO();
+			response.setMessage(MailBoxConstants.GET_PROCESSOR_FAILURE + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
 
 			serviceResponse.setResponse(response);
-
-			LOGGER.info("Exit from get processor.");
-			return serviceResponse;
 		}
+		
+		return serviceResponse;
 	}
 	
 	/**
 	 * Get the Processor using guid.
 	 * 
-	 * @param guid The guid of the Processor.
+	 * @param processorGuid The guid of the Processor.
 	 * @return The responseDTO.
 	 */
-	public DeActivateProcessorResponseDTO deactivateProcessor(String guid) {
+	public DeActivateProcessorResponseDTO deactivateProcessor(String processorGuid) {
+		
+		DeActivateProcessorResponseDTO serviceResponse = null;
+		ResponseDTO response = null;
 
-		LOGGER.info("Entering into get processor.");
-		LOGGER.info("Deacticate guid is {} ", guid);
-
-		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		config.softRemove(guid);
-
-		DeActivateProcessorResponseDTO serviceResponse = new DeActivateProcessorResponseDTO();
-
-		ResponseDTO response = new ResponseDTO();
-
-		response.setMessage(MailBoxConstants.DELETE_PROCESSOR_SUCCESS);
-		response.setStatus(MailBoxConstants.SUCCESS);
-
-		ProcessorResponseDTO dto = new ProcessorResponseDTO();
-		dto.setGuId(guid);
-		serviceResponse.setProcessor(dto);
-		serviceResponse.setResponse(response);
-
-		LOGGER.info("Exit from deactivate processor.");
+		try {
+			
+			if (processorGuid == null || processorGuid.equals("")) {
+				throw new MailBoxServicesException("Processor cannot be found");
+			}
+			
+			LOGGER.info("Entering into get processor.");
+			LOGGER.info("Deactivate guid is {} ", processorGuid);
+			
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+			config.softRemove(processorGuid);
+			
+			response = new ResponseDTO();
+			serviceResponse = new DeActivateProcessorResponseDTO();
+			
+			response.setMessage(MailBoxConstants.DELETE_PROCESSOR_SUCCESS);
+			response.setStatus(MailBoxConstants.SUCCESS);
+			
+			ProcessorResponseDTO dto = new ProcessorResponseDTO();
+			dto.setGuId(processorGuid);
+			serviceResponse.setProcessor(dto);
+			serviceResponse.setResponse(response);
+			
+			LOGGER.info("Exit from deactivate processor.");
+		} catch (Exception e) {
+			
+			response = new ResponseDTO();
+			serviceResponse = new DeActivateProcessorResponseDTO();
+			response.setMessage(MailBoxConstants.DELETE_PROCESSOR_FAILURE + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+		}
+		
 		return serviceResponse;
 	}
 	
