@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 
@@ -33,44 +32,59 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
  */
 public class MailBoxProfileServiceTest extends BaseServiceTest {
 
-	private String mailBoxId;
-	private BaseServiceTest baseServiceTest;
+	private static String mailBoxId;
 
 	@Override
 	public void initialSetUp() throws FileNotFoundException, IOException {
 		super.initialSetUp();
-		baseServiceTest = new BaseServiceTest();
-		baseServiceTest.initialSetUp();
 	}
 
 	@Test
 	public void addProfileToMailBox() throws LiaisonException, JSONException, IOException {
 
+		// reads the addprofile input from JSON file
 		String jsonString = ServiceUtils.readFileFromClassPath("profile.json");
-		JSONObject jsonMaiboxProfile = new JSONObject(jsonString);
-		JSONObject jsonAddProfile = jsonMaiboxProfile.getJSONObject("addprofiletomailboxrequest");
 
+		// Convert string to JSON to fetch the MailBoxId from string
+		JSONObject jsonAddProfile = getRequestJson(jsonString, "addProfileToMailBoxRequest");
 		mailBoxId = jsonAddProfile.getString("mailBoxGuid");
 
+		// URL construction & HTTPRequest execution
 		String addProfile = "/" + mailBoxId + "/profile";
-		HTTPRequest request = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + addProfile, HTTP_METHOD.POST,
-				jsonString, LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
-		HTTPResponse response = request.execute();
-		Assert.assertEquals(true, response.getStatusCode() == 200);
+		HTTPRequest request = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonString,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		request.execute();
+
+		// JSON decoding to obtain status of the request
+		String status = getResponseStatus(getOutput().toString(), "addProfileToMailBoxResponse");
+
+		Assert.assertEquals(true, status.equals("Success"));
 	}
 
 	@Test
 	public void deactivateProfileFromMailBox() throws LiaisonException, JSONException, IOException {
 
-		JSONObject jsonMaiboxProfile = new JSONObject(baseServiceTest.getOutput().toString());
-		JSONObject jsonAddProfileresponse = jsonMaiboxProfile.getJSONObject("addprofiletomailboxresponse");
+		String jsonString = ServiceUtils.readFileFromClassPath("profile.json");
 
-		String addProfile = "/" + mailBoxId + "/profile/" + jsonAddProfileresponse.getString("mailboxProfileLinkGuid");
-		HTTPRequest request = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + addProfile,
-				HTTP_METHOD.DELETE, null,
+		JSONObject jsonAddProfile = getRequestJson(jsonString, "addProfileToMailBoxRequest");
+		mailBoxId = jsonAddProfile.getString("mailBoxGuid");
+
+		String addProfile = "/" + mailBoxId + "/profile";
+
+		HTTPRequest addRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonString,
 				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
-		HTTPResponse response = request.execute();
+		addRequest.execute();
 
-		Assert.assertEquals(true, response.getStatusCode() == 200);
+		JSONObject jsonMaiboxProfile = new JSONObject(getOutput().toString());
+		JSONObject jsonAddProfileresponse = jsonMaiboxProfile.getJSONObject("addProfileToMailBoxResponse");
+
+		String deactivateProfile = addProfile + "/" + jsonAddProfileresponse.getString("mailboxProfileLinkGuid");
+		HTTPRequest deactivateRequest = constructHTTPRequest(getBASE_URL() + deactivateProfile, HTTP_METHOD.DELETE, null,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		deactivateRequest.execute();
+
+		String status = getResponseStatus(getOutput().toString(), "deactivateMailBoxProfileLink");
+
+		Assert.assertEquals(true, status.equals("Success"));
 	}
 }

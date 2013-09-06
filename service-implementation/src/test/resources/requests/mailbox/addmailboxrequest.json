@@ -1,0 +1,15 @@
+{
+    "addMailBoxRequest": {
+        "mailBox": {
+            "name": "TestData",
+            "description": "This is to collect access metrics ",
+            "status": "active",
+            "properties": [
+                {
+                    "name": "filerenameformat",
+                    "value": "*.processed"
+                }
+            ]
+        }
+    }
+}

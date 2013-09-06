@@ -1,0 +1,20 @@
+{
+    "reviseMailBoxRequest": {
+        "mailBox": {
+            "guid": "F346B900NULL0073NULLDAF922B166CD",
+            "name": "MCCWebAnalytics",
+            "description": "Updatedmydescription",
+            "status": "active",
+            "properties": [
+                {
+                    "name": "filerenameformat",
+                    "value": "*.queued"
+                },
+                {
+                    "name": "newproperty",
+                    "value": "newvalue"
+                }
+            ]
+        }
+    }
+}

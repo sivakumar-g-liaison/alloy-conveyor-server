@@ -35,15 +35,17 @@ import com.liaison.mailbox.service.util.HTTPStringOutputStream;
  * @author karthikeyanm
  * 
  */
-public class BaseServiceTest {
+public abstract class BaseServiceTest {
 
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
 
+	public static final String SUCCESS = "Success";
+
 	@Before
 	public void initialSetUp() throws FileNotFoundException, IOException {
 
-		if (null == BASE_URL) {
+		if (BASE_URL == null) {
 
 			Properties prop = new Properties();
 			String properties = ServiceUtils.readFileFromClassPath("config.properties");
