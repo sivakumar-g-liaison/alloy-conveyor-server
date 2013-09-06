@@ -24,10 +24,12 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.service.base.test.BaseServiceTest;
 
 /**
- * @author praveenu
+ * Test class which tests the mailbox profile operations.
  * 
+ * @author praveenu
  */
 public class MailBoxProfileServiceTest extends BaseServiceTest {
 
@@ -51,7 +53,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		mailBoxId = jsonAddProfile.getString("mailBoxGuid");
 
 		String addProfile = "/" + mailBoxId + "/profile";
-		HTTPRequest request = baseServiceTest.httpRequest(baseServiceTest.getBASE_URL() + addProfile, HTTP_METHOD.POST,
+		HTTPRequest request = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + addProfile, HTTP_METHOD.POST,
 				jsonString, LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
 		HTTPResponse response = request.execute();
 		Assert.assertEquals(true, response.getStatusCode() == 200);
@@ -64,7 +66,8 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		JSONObject jsonAddProfileresponse = jsonMaiboxProfile.getJSONObject("addprofiletomailboxresponse");
 
 		String addProfile = "/" + mailBoxId + "/profile/" + jsonAddProfileresponse.getString("mailboxProfileLinkGuid");
-		HTTPRequest request = baseServiceTest.httpRequest(baseServiceTest.getBASE_URL() + addProfile, HTTP_METHOD.DELETE, null,
+		HTTPRequest request = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + addProfile,
+				HTTP_METHOD.DELETE, null,
 				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
 		HTTPResponse response = request.execute();
 

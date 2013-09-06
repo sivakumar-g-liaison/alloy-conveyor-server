@@ -1,4 +1,4 @@
-package com.liaison.mailbox.services.test;
+package com.liaison.mailbox.services.unit.test;
 
 import java.io.IOException;
 
@@ -24,6 +24,11 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBo
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
+/**
+ * Unit test cases for mailbox profile operations.
+ * 
+ * @author praveenu
+ */
 public class MailBoxProfileUtilityTest {
 
 	private String data;
