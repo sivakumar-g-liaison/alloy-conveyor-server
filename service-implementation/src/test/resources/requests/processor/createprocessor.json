@@ -1,0 +1,33 @@
+{ 
+	"addProcessorToMailBoxRequest":{
+		"processor":{ 
+			"guid":"", 
+			"name":"google remote downloader tess", 
+			"type":"remotedownloader", 
+			"status":"active", 
+			"description":"", 
+			"properties":"JSON String", 
+			"javaScriptURI":"file sytem path", 
+			"folders":[ 
+				{ 
+				"folderURI":"http://path", 
+				"folderType":"folder", 
+				"folderDesc":"test" 
+				} 
+			], 
+
+			 "credentials":[ 
+				{ 
+				"credentialType":"db", 
+				"credentialURI":"http://path", 
+				"userId":"karthi", 
+				"password":"krishh", 
+				"idpType":"ffdf", 
+				"idpURI":"fdfd"
+				} 
+			], 
+			"linkedMailboxId":"E8E82C26NULL00B9NULL7523FA8F6F99", 
+			"linkedProfileId":"E914BCE0NULL00C0NULLED5A47F0379E" 
+		} 
+	}
+} 
