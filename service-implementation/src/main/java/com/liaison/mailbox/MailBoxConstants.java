@@ -59,7 +59,8 @@ public interface MailBoxConstants {
 	public static final String CREATE_PROCESSOR_SUCCESS = "Processor created successfully.";
 	public static final String CREATE_PROCESSOR_FAILURE = "Error occured during processor creation.";
 
-	public static final String DELETE_PROCESSOR_SUCCESS = "Processor delete successfully.";
+	public static final String DELETE_PROCESSOR_SUCCESS = "Processor deactivated successfully.";
+	public static final String DELETE_PROCESSOR_FAILURE = "Processor deactivation failed.";
 
 	public static final String GET_PROCESSOR_SUCCESS = "Processor retrieved successfully.";
 	public static final String GET_PROCESSOR_FAILURE = "Error occured during get processor operation.";
