@@ -29,7 +29,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author praveenu
  */
-@JsonRootName("deactivatemailboxprofilelink")
+@JsonRootName("deactivateMailBoxProfileLink")
 public class DeactivateMailboxProfileLinkResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;

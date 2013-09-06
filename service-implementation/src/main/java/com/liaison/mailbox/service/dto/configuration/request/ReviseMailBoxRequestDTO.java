@@ -16,11 +16,12 @@ import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 
 /**
- * Data Transfer Object that implements fields required for mailbox configuration request.
+ * Data Transfer Object that implements fields required for mailbox
+ * configuration request.
  * 
  * @author veerasamyn
  */
-@JsonRootName("revisemailboxrequest")
+@JsonRootName("reviseMailBoxRequest")
 public class ReviseMailBoxRequestDTO {
 
 	private MailBoxDTO mailbox;

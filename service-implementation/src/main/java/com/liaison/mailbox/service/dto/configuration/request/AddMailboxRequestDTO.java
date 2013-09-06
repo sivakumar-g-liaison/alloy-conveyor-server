@@ -16,25 +16,26 @@ import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 
 /**
- * Data Transfer Object that implements fields required for mailbox configuration request.
+ * Data Transfer Object that implements fields required for mailbox
+ * configuration request.
  * 
  * @author veerasamyn
  */
-@JsonRootName("addmailboxrequest")
+@JsonRootName("addMailBoxRequest")
 public class AddMailboxRequestDTO {
 
-	private MailBoxDTO mailbox;
+	private MailBoxDTO mailBox;
 
-	public MailBoxDTO getMailbox() {
-		return mailbox;
+	public MailBoxDTO getMailBox() {
+		return mailBox;
 	}
 
-	public void setMailbox(MailBoxDTO mailbox) {
-		this.mailbox = mailbox;
+	public void setMailBox(MailBoxDTO mailBox) {
+		this.mailBox = mailBox;
 	}
 
 	public void copyToEntity(MailBox entity) {
-		this.getMailbox().copyToEntity(entity);
+		this.getMailBox().copyToEntity(entity);
 	}
 
 }

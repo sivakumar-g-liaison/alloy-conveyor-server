@@ -19,6 +19,7 @@ import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
@@ -63,7 +64,7 @@ public class MailBoxConfigurationService {
 		response.setStatus(MailBoxConstants.SUCCESS);
 		serviceResponse.setResponse(response);
 
-		MailBoxDTO dto = new MailBoxDTO();
+		MailBoxResponseDTO dto = new MailBoxResponseDTO();
 		dto.setGuid(String.valueOf(mailBox.getPrimaryKey()));
 		serviceResponse.setMailBox(dto);
 
@@ -130,11 +131,11 @@ public class MailBoxConfigurationService {
 
 		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 		MailBox mailBox = config.find(MailBox.class, request.getMailbox().getGuid());
-		// Removing the child items.		
-		mailBox.getMailboxProperties().clear();		
+		// Removing the child items.
+		mailBox.getMailboxProperties().clear();
 		// updates the mail box data
-		request.getMailbox().copyToEntity(mailBox);		
-		config.merge(mailBox);		
+		request.getMailbox().copyToEntity(mailBox);
+		config.merge(mailBox);
 		// Response Construction
 		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();
 
@@ -142,7 +143,7 @@ public class MailBoxConfigurationService {
 		response.setMessage(MailBoxConstants.REVISE_MAILBOX_SUCCESS);
 		response.setStatus(MailBoxConstants.SUCCESS);
 
-		MailBoxDTO dto = new MailBoxDTO();
+		MailBoxResponseDTO dto = new MailBoxResponseDTO();
 		dto.setGuid(String.valueOf(mailBox.getPrimaryKey()));
 		serviceResponse.setMailBox(dto);
 
@@ -180,7 +181,7 @@ public class MailBoxConfigurationService {
 			response.setMessage(MailBoxConstants.INACTIVE_MAILBOX_SUCCESS);
 			response.setStatus(MailBoxConstants.SUCCESS);
 
-			MailBoxDTO dto = new MailBoxDTO();
+			MailBoxResponseDTO dto = new MailBoxResponseDTO();
 			dto.setGuid(guid);
 
 			serviceResponse.setResponse(response);

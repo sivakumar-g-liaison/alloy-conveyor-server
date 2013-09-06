@@ -1,0 +1,10 @@
+{
+	"addprofiletomailboxrequest":{ 
+		"mailboxguid":"E9378C7BNULL0047NULLA64E14DA9F46", 
+		"profile":{ 
+			"name":"profilename",
+		 	"id":"profileid" 
+		},
+	 	"status":"active" 
+	}
+}

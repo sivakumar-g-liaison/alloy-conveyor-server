@@ -29,7 +29,6 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
@@ -233,24 +232,12 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			String marshallingMediaType = MediaType.APPLICATION_JSON;
-
 			// add the new profile details
 			GetMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.getMailBox(guid);
 
 			returnResponse = serviceResponse.constructResponse();
-			// populate the response body
-			String responseBody;
-			if (MediaType.APPLICATION_XML.equals(marshallingMediaType)) {
-				responseBody = JAXBUtility.marshalToXML(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			} else {
-				responseBody = JAXBUtility.marshalToJSON(serviceResponse);
-				returnResponse = Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-			}
-
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);

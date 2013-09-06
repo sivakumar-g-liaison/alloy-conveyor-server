@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -30,17 +30,17 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author veerasamyn
  */
-@JsonRootName("revisemailboxresponse")
+@JsonRootName("reviseMailBoxResponse")
 public class ReviseMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private MailBoxDTO mailBox;
+	private MailBoxResponseDTO mailBox;
 
-	public MailBoxDTO getMailBox() {
+	public MailBoxResponseDTO getMailBox() {
 		return mailBox;
 	}
 
-	public void setMailBox(MailBoxDTO mailBox) {
+	public void setMailBox(MailBoxResponseDTO mailBox) {
 		this.mailBox = mailBox;
 	}
 

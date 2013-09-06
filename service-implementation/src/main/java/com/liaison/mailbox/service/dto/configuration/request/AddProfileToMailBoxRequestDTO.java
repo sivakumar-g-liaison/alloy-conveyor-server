@@ -21,7 +21,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author praveenu
  */
-@JsonRootName("addprofiletomailboxrequest")
+@JsonRootName("addProfileToMailBoxRequest")
 public class AddProfileToMailBoxRequestDTO {
 
 	private ProfileDTO profile;

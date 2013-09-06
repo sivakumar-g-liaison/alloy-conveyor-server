@@ -19,7 +19,7 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
  * 
  */
 
-@JsonRootName("reviseprocessorrequest")
+@JsonRootName("reviseProcessorRequest")
 public class ReviseProcessorRequestDTO {
 
 	private ProcessorDTO processor;

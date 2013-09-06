@@ -25,7 +25,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author veerasamyn
  */
-@JsonRootName("getmailboxresponse")
+@JsonRootName("getMailBoxResponse")
 public class GetMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
