@@ -23,7 +23,7 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
  * @author sivakumarg
  */
 
-@JsonRootName("addprocessortomailboxrequest")
+@JsonRootName("addProcessorToMailBoxRequest")
 public class AddProcessorToMailboxRequestDTO {
 
 	private ProcessorDTO processor;

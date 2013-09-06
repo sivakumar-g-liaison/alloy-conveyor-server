@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.dto.configuration.response;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -22,6 +24,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  *
  * @author sivakumarg
  */
+
+@JsonRootName("addProcessorToMailBoxResponse")
 public class AddProcessorToMailboxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
