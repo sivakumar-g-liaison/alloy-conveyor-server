@@ -33,12 +33,10 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 public class MailBoxProfileServiceTest extends BaseServiceTest {
 
 	private static String mailBoxId;
-	private BaseServiceTest baseServiceTest;
 
 	@Override
 	public void initialSetUp() throws FileNotFoundException, IOException {
 		super.initialSetUp();
-		baseServiceTest = new BaseServiceTest();
 	}
 
 	@Test
@@ -48,17 +46,17 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		String jsonString = ServiceUtils.readFileFromClassPath("profile.json");
 
 		// Convert string to JSON to fetch the MailBoxId from string
-		JSONObject jsonAddProfile = baseServiceTest.getRequestJson(jsonString, "addProfileToMailBoxRequest");
+		JSONObject jsonAddProfile = getRequestJson(jsonString, "addProfileToMailBoxRequest");
 		mailBoxId = jsonAddProfile.getString("mailBoxGuid");
 
 		// URL construction & HTTPRequest execution
 		String addProfile = "/" + mailBoxId + "/profile";
-		HTTPRequest request = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + addProfile, HTTP_METHOD.POST,
-				jsonString, LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		HTTPRequest request = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonString,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
 		request.execute();
 
 		// JSON decoding to obtain status of the request
-		String status = baseServiceTest.getResponseStatus(baseServiceTest.getOutput().toString(), "deactivateMailBoxProfileLink");
+		String status = getResponseStatus(getOutput().toString(), "addProfileToMailBoxResponse");
 
 		Assert.assertEquals(true, status.equals("Success"));
 	}
@@ -68,24 +66,24 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 
 		String jsonString = ServiceUtils.readFileFromClassPath("profile.json");
 
-		JSONObject jsonAddProfile = baseServiceTest.getRequestJson(jsonString, "addProfileToMailBoxRequest");
+		JSONObject jsonAddProfile = getRequestJson(jsonString, "addProfileToMailBoxRequest");
 		mailBoxId = jsonAddProfile.getString("mailBoxGuid");
 
 		String addProfile = "/" + mailBoxId + "/profile";
 
-		HTTPRequest addRequest = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + addProfile,
-				HTTP_METHOD.POST, jsonString, LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		HTTPRequest addRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonString,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
 		addRequest.execute();
 
-		JSONObject jsonMaiboxProfile = new JSONObject(baseServiceTest.getOutput().toString());
+		JSONObject jsonMaiboxProfile = new JSONObject(getOutput().toString());
 		JSONObject jsonAddProfileresponse = jsonMaiboxProfile.getJSONObject("addProfileToMailBoxResponse");
 
 		String deactivateProfile = addProfile + "/" + jsonAddProfileresponse.getString("mailboxProfileLinkGuid");
-		HTTPRequest deactivateRequest = baseServiceTest.constructHTTPRequest(baseServiceTest.getBASE_URL() + deactivateProfile,
-				HTTP_METHOD.DELETE, null, LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		HTTPRequest deactivateRequest = constructHTTPRequest(getBASE_URL() + deactivateProfile, HTTP_METHOD.DELETE, null,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
 		deactivateRequest.execute();
 
-		String status = baseServiceTest.getResponseStatus(baseServiceTest.getOutput().toString(), "deactivateMailBoxProfileLink");
+		String status = getResponseStatus(getOutput().toString(), "deactivateMailBoxProfileLink");
 
 		Assert.assertEquals(true, status.equals("Success"));
 	}

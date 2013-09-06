@@ -35,11 +35,11 @@ import com.liaison.mailbox.service.util.HTTPStringOutputStream;
  * @author karthikeyanm
  * 
  */
-public class BaseServiceTest {
+public abstract class BaseServiceTest {
 
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
-	
+
 	public static final String SUCCESS = "Success";
 
 	@Before
