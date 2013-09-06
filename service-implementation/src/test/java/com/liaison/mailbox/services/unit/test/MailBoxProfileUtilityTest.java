@@ -37,7 +37,7 @@ public class MailBoxProfileUtilityTest {
 	@Before
 	public void setUp() throws JSONException {
 
-		data = ServiceUtils.readFileFromClassPath("profile.json");
+		data = ServiceUtils.readFileFromClassPath("requests/profile/profile.json");
 		jsonMaiboxProfile = new JSONObject(data);
 	}
 
@@ -50,7 +50,7 @@ public class MailBoxProfileUtilityTest {
 	public void addProfileToMailBoxRequestTest_ShouldReturn() throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, JSONException {
 
-		JSONObject jsonAddProfile = jsonMaiboxProfile.getJSONObject("addprofiletomailboxrequest");
+		JSONObject jsonAddProfile = jsonMaiboxProfile.getJSONObject("addProfileToMailBoxRequest");
 		JSONObject jsonProfile = jsonAddProfile.getJSONObject("profile");
 
 		AddProfileToMailBoxRequestDTO serviceRequest = MailBoxUtility
@@ -74,7 +74,7 @@ public class MailBoxProfileUtilityTest {
 	public void addProfileToMailBoxRequestTest_invalidProperty() throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, JSONException {
 
-		String data = ServiceUtils.readFileFromClassPath("invalidProfile.json");
+		String data = ServiceUtils.readFileFromClassPath("requests/profile/invalidProfile.json");
 		MailBoxUtility.unmarshalFromJSON(data, AddProfileToMailBoxRequestDTO.class);
 	}
 
@@ -92,7 +92,7 @@ public class MailBoxProfileUtilityTest {
 		mailboxResponse.setResponse(response);
 
 		String jsonProfileResponse = MailBoxUtility.marshalToJSON(mailboxResponse);
-		JSONObject jsonMaiboxProfileResponse = new JSONObject(jsonProfileResponse).getJSONObject("addprofiletomailboxresponse");
+		JSONObject jsonMaiboxProfileResponse = new JSONObject(jsonProfileResponse).getJSONObject("addProfileToMailBoxResponse");
 		JSONObject jsonResponse = jsonMaiboxProfileResponse.getJSONObject("response");
 
 		Assert.assertNotNull(jsonMaiboxProfileResponse.getString("mailboxProfileLinkGuid"));
@@ -114,7 +114,7 @@ public class MailBoxProfileUtilityTest {
 		mailboxResponse.setResponse(response);
 
 		String jsonProfileResponse = MailBoxUtility.marshalToJSON(mailboxResponse);
-		JSONObject jsonMaiboxProfileResponse = new JSONObject(jsonProfileResponse).getJSONObject("deactivatemailboxprofilelink");
+		JSONObject jsonMaiboxProfileResponse = new JSONObject(jsonProfileResponse).getJSONObject("deactivateMailBoxProfileLink");
 		JSONObject jsonResponse = jsonMaiboxProfileResponse.getJSONObject("response");
 
 		Assert.assertNotNull(jsonMaiboxProfileResponse.getString("mailboxProfileLinkGuid"));

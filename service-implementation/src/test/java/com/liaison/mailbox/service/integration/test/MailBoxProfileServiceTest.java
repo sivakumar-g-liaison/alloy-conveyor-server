@@ -43,7 +43,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	public void addProfileToMailBox() throws LiaisonException, JSONException, IOException {
 
 		// reads the addprofile input from JSON file
-		String jsonString = ServiceUtils.readFileFromClassPath("profile.json");
+		String jsonString = ServiceUtils.readFileFromClassPath("requests/profile/profile.json");
 
 		// Convert string to JSON to fetch the MailBoxId from string
 		JSONObject jsonAddProfile = getRequestJson(jsonString, "addProfileToMailBoxRequest");
@@ -64,7 +64,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	@Test
 	public void deactivateProfileFromMailBox() throws LiaisonException, JSONException, IOException {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("profile.json");
+		String jsonString = ServiceUtils.readFileFromClassPath("requests/profile/profile.json");
 
 		JSONObject jsonAddProfile = getRequestJson(jsonString, "addProfileToMailBoxRequest");
 		mailBoxId = jsonAddProfile.getString("mailBoxGuid");

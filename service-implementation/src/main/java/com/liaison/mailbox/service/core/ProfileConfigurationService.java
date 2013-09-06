@@ -52,7 +52,7 @@ public class ProfileConfigurationService {
 
 		try {
 
-			if (mailboxGuid == null || mailboxGuid == "") {
+			if (mailboxGuid == null || mailboxGuid.equals("")) {
 				throw new MailBoxServicesException("MailBox cannot be found");
 			}
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
@@ -110,9 +110,9 @@ public class ProfileConfigurationService {
 
 		try {
 
-			if (mailboxGuid == null || mailboxGuid == "") {
+			if (mailboxGuid == null || mailboxGuid.equals("")) {
 				throw new MailBoxServicesException("MailBox cannot be found");
-			} else if (linkGuid == null || mailboxGuid == "") {
+			} else if (linkGuid == null || linkGuid.equals("")) {
 				throw new MailBoxServicesException("MailBox cannot be found");
 			}
 			// Getting the existing mailBoxSchedProfile from given link GUID
@@ -138,7 +138,7 @@ public class ProfileConfigurationService {
 		} catch (Exception e) {
 
 			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.ADD_PROFILE_FAILURE + e.getMessage());
+			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_FAILURE + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
 
 			serviceResponse.setResponse(response);
