@@ -127,14 +127,14 @@ public class MailBoxConfigurationService {
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request) {
 
 		LOG.info("Entering into revise mailbox.");
-		LOG.info("The revise request guid is {} ", request.getMailbox().getGuid());
+		LOG.info("The revise request guid is {} ", request.getMailBox().getGuid());
 
 		MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
-		MailBox mailBox = config.find(MailBox.class, request.getMailbox().getGuid());
+		MailBox mailBox = config.find(MailBox.class, request.getMailBox().getGuid());
 		// Removing the child items.
 		mailBox.getMailboxProperties().clear();
 		// updates the mail box data
-		request.getMailbox().copyToEntity(mailBox);
+		request.getMailBox().copyToEntity(mailBox);
 		config.merge(mailBox);
 		// Response Construction
 		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();

@@ -94,6 +94,20 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String url = getBASE_URL() + "/" + "F346B900NULL0073NULLDAF922B166CD";
 
+		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonString, logger);
+		request.execute();
+
+		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "reviseMailBoxResponse"));
+
+	}
+
+	@Test
+	public void testReviseMailBoxWithApacheHTTPClient() throws ClientProtocolException, IOException, Exception {
+
+		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+
+		String url = getBASE_URL() + "/" + "F346B900NULL0073NULLDAF922B166CD";
+
 		HttpParams params = new BasicHttpParams();
 		HttpClient httpClient = new DefaultHttpClient(params);
 		HttpResponse response = httpClient.execute(getHttpPut(url, jsonString));
