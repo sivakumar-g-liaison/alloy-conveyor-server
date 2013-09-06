@@ -11,21 +11,20 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 
 
 test { // TODO temp exclusion of j2ep
-	exclude 'org/sf/j2ep/*' }
+	exclude 'org/sf/j2ep/*'
+	ignoreFailures true }
 
 
 buildscript {
 
-    repositories { 
-        mavenCentral() 
-        maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
-        maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
-    }
-    apply from: file("$rootDir/gradle/buildscript.gradle"), to: buildscript
-    dependencies {
-        // Cargo Plugin
-        classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6'
-    }
+	repositories {
+		mavenCentral()
+		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
+		maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
+	}
+	apply from: file("$rootDir/gradle/buildscript.gradle"), to: buildscript
+	dependencies { // Cargo Plugin
+		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6' }
 
 }
 
@@ -56,53 +55,50 @@ apply from: file('../gradle/license.gradle')
 
 configurations {
 	//Need for enhancering via datanucleus.
-	jdo {
-		extendsFrom compile
+	jdo { extendsFrom compile }
+}
 
-	        }
-	    }
-		
 
 
 war {
 
-    from('resources') {
-        include '*.properties'
-        into 'WEB-INF/classes/'
-    }
-	
+	from('resources') {
+		include '*.properties'
+		into 'WEB-INF/classes/'
+	}
+
 	archiveName="g2mailboxservice.war"
 
-    // TODO
-    // Resources used for the Dynamic Services landing page are intentionally kept in the
-    // service-framework module (where dynamic services framework is also defined), and
-    // outside of the service-implementation.  Eventually the service-framework will be an
-    // artifact, and we will be unable to pull in resources like this.
-    from("$rootDir/service-framework/src/main/resources") {
-        include '**/**';
-        into 'WEB-INF/classes/'
-    }
+	// TODO
+	// Resources used for the Dynamic Services landing page are intentionally kept in the
+	// service-framework module (where dynamic services framework is also defined), and
+	// outside of the service-implementation.  Eventually the service-framework will be an
+	// artifact, and we will be unable to pull in resources like this.
+	from("$rootDir/service-framework/src/main/resources") {
+		include '**/**';
+		into 'WEB-INF/classes/'
+	}
 
-    // TODO Needed?  I believe is is, since this is not
-    // the conventional location for webapp root
-    from('src/main/webapp/') {
-        include '**/**';
-        into '/'
-    }
+	// TODO Needed?  I believe is is, since this is not
+	// the conventional location for webapp root
+	from('src/main/webapp/') {
+		include '**/**';
+		into '/'
+	}
 
-    //webXml = file('src/main/webapp/WEB-INF/web.xml')
+	//webXml = file('src/main/webapp/WEB-INF/web.xml')
 
 }
 
 dependencies {
 
-    // inherited from NetFlix Karyon
-    compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
+	// inherited from NetFlix Karyon
+	compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
 
-    // for commons-codec (used in example encoding service)
-    compile 'commons-configuration:commons-configuration:1.8'
+	// for commons-codec (used in example encoding service)
+	compile 'commons-configuration:commons-configuration:1.8'
 
-    // currently not used during runtime (inherited dependency from NetFlix)
+	// currently not used during runtime (inherited dependency from NetFlix)
 	compile 'com.netflix.eureka:eureka-client:1.1.97'
 
 
@@ -111,18 +107,18 @@ dependencies {
 
 
 
-    // for file upload
-    // TODO - See that we also depend on "jersey-bundle" inherently
-    // TODO - due to NetFlix... using the bundle is not advised... (remove)
-    compile 'com.sun.jersey:jersey-core:1.17'
-    compile 'com.sun.jersey:jersey-server:1.14'
-    compile 'com.sun.jersey:jersey-json:1.17'
-    compile 'javax.mail:mail:1.4.6'
-    compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
+	// for file upload
+	// TODO - See that we also depend on "jersey-bundle" inherently
+	// TODO - due to NetFlix... using the bundle is not advised... (remove)
+	compile 'com.sun.jersey:jersey-core:1.17'
+	compile 'com.sun.jersey:jersey-server:1.14'
+	compile 'com.sun.jersey:jersey-json:1.17'
+	compile 'javax.mail:mail:1.4.6'
+	compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
 
 
 	// used for logging
-    compile 'org.slf4j:slf4j-api:1.7.5'
+	compile 'org.slf4j:slf4j-api:1.7.5'
 
 	// used for logging
 
@@ -133,11 +129,11 @@ dependencies {
 
 
 
-    // inherited from NetFlix Karyon (TODO integrate with main UI)
-    compile project(':karyon-admin-web')
+	// inherited from NetFlix Karyon (TODO integrate with main UI)
+	compile project(':karyon-admin-web')
 
-    // reusable utilities / framework components
-    compile project(':service-framework')
+	// reusable utilities / framework components
+	compile project(':service-framework')
 
 
 	compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
@@ -148,7 +144,7 @@ dependencies {
 	// ************************************* beg cargo *********************************************
 	def cargoVersion = "1.4.0"
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
-		  "org.codehaus.cargo:cargo-ant:$cargoVersion"
+			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
 
 	// Liaison code
@@ -156,21 +152,21 @@ dependencies {
 	// This syntax will make sure you get the latest version of the SNAPSHOT.
 	compile group: "com.liaison", name: "commons-lib", version: "0.0.2-SNAPSHOT", changing: true
 	// DataNucleus
-    def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
-    compile "org.datanucleus:datanucleus-core:3.2.5"
-    compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
-    compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
-	
+	def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
+	compile "org.datanucleus:datanucleus-core:3.2.5"
+	compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
+	compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
+
 	// geronimo jpa spec
 	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
-	
+
 	// Oracle OJDBC
 	// (This dependency is stored in the Liaison Nexus server.)
 	// def oracleVersion = '11g-11.2.0.3.0'
 	runtime 'com.oracle:ojdbc6:${oracleVersion}'
 	compile 'com.oracle:ucp:${oracleVersion}'
-	
-	//Junit 
+
+	//Junit
 	testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
@@ -181,85 +177,81 @@ def installRootPath = "${rootDir}/install"
 def tomcatInstallPath = "${installRootPath}/tomcat"
 cargo {
 
-    containerId = 'tomcat7x'
-    port = new Integer(tomcatHttpPort)
-    
-    deployable{
-        // NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
-        // file = file('target/contivo-conversion-service-0.0.1.war')
-        context = project.war.baseName + "-${versionName}"
-                
-        // wait on this URL before continuing
-        def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/ping"
-    }
+	containerId = 'tomcat7x'
+	port = new Integer(tomcatHttpPort)
 
-    local {
-        homeDir = file(tomcatInstallPath) // TODO - should this be set from CATALINA_HOME?
-        output = file("$buildDir/tomcat-out.log")
+	deployable{
+		// NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
+		// file = file('target/contivo-conversion-service-0.0.1.war')
+		context = project.war.baseName + "-${versionName}"
 
-        tomcat {
-            ajpPort = new Integer(tomcatAjpPort)
-        }
-         
-        // set the initial value
-        if(containerJVMArgs) {
-            jvmArgs = "$containerJVMArgs"
-        } else {
-            jvmArgs = ''
-        }
+		// wait on this URL before continuing
+		def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/ping"
+	}
 
-        // the leading space is important
-        jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
-        jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
-        
-        // if containerDebug, append tomcat debug args to jvm args
-        if(project.hasProperty('containerDebug')) {
-            jvmArgs += ' '
-            if (project.hasProperty('suspendDebug')) {
-                jvmArgs += containerDebugJVMArgs.replace('suspend=n', 'suspend=y')
-            } else {
-                jvmArgs += containerDebugJVMArgs
-            }
-        }
-        
-        logger.info "=====jvmArgs===="
-        logger.info "$jvmArgs"
-    }
+	local {
+		homeDir = file(tomcatInstallPath) // TODO - should this be set from CATALINA_HOME?
+		output = file("$buildDir/tomcat-out.log")
+
+		tomcat {
+			ajpPort = new Integer(tomcatAjpPort)
+		}
+
+		// set the initial value
+		if(containerJVMArgs) {
+			jvmArgs = "$containerJVMArgs"
+		} else {
+			jvmArgs = ''
+		}
+
+		// the leading space is important
+		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
+		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+
+		// if containerDebug, append tomcat debug args to jvm args
+		if(project.hasProperty('containerDebug')) {
+			jvmArgs += ' '
+			if (project.hasProperty('suspendDebug')) {
+				jvmArgs += containerDebugJVMArgs.replace('suspend=n', 'suspend=y')
+			} else {
+				jvmArgs += containerDebugJVMArgs
+			}
+		}
+
+		logger.info "=====jvmArgs===="
+		logger.info "$jvmArgs"
+	}
 
 }
 
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: ['stageTomcat']) << {
-    //TODO replace tokens would be a nicer but heavier weight way of doing this.
-    logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
-    copy {
-        from ("${tomcatInstallPath}-configs/common") {
-            include '**/*.*'
-        }
-        into tomcatInstallPath
-    }
-    copy {
-        from ("${tomcatInstallPath}-configs/${deployEnvironment}")  {
-            include '**/*.*'
-        }
-        into tomcatInstallPath
-    }
+	//TODO replace tokens would be a nicer but heavier weight way of doing this.
+	logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
+	copy {
+		from ("${tomcatInstallPath}-configs/common") { include '**/*.*' }
+		into tomcatInstallPath
+	}
+	copy {
+		from ("${tomcatInstallPath}-configs/${deployEnvironment}")  { include '**/*.*' }
+		into tomcatInstallPath
+	}
 }
 project.afterEvaluate {
-    cargoRunLocal.dependsOn('configureTomcat')
-    cargoStartLocal.dependsOn('configureTomcat')
+	cargoRunLocal.dependsOn('configureTomcat')
+	cargoStartLocal.dependsOn('configureTomcat')
 }
 
 
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
 task jettyRunSetProperties {
 
-    logger.info "Setting jettyRun system properties"
-    // use the default port of the ws-backend-simulation module
-    System.setProperty('archaius.deployment.applicationId', project.war.baseName)
-    System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
-    // we only use jettyRun in dev... might as well output log4j debug
-    System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
+	logger.info "Setting jettyRun system properties"
+	// use the default port of the ws-backend-simulation module
+	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
+	System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
+	// we only use jettyRun in dev... might as well output log4j debug
+	System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
 
 }
 
@@ -267,30 +259,30 @@ task jettyRunSetProperties {
 task enhance  << {
 	logger.info("... Enhancing ...");
 	ant.taskdef(
-		name      : 'datanucleusenhancer',
-		classpath : project.runtimeClasspath.asPath,
-		classname : 'org.datanucleus.enhancer.EnhancerTask'
-	)
+			name      : 'datanucleusenhancer',
+			classpath : project.runtimeClasspath.asPath,
+			classname : 'org.datanucleus.enhancer.EnhancerTask'
+			)
 
 	ant.datanucleusenhancer(
-		classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
-		verbose     : true,
-		api : "JPA",
-		persistenceUnit : "mailbox-pu",
-		failonerror : true) {
-			fileset( dir : "$buildDir/classes/main/com/liaison/mailbox/jpa/model/" ) { }
-		}
+			classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
+			verbose     : true,
+			api : "JPA",
+			persistenceUnit : "mailbox-pu",
+			failonerror : true) {
+				fileset( dir : "$buildDir/classes/main/com/liaison/mailbox/jpa/model/" ) { }
+			}
 }
 classes.dependsOn('enhance')
 
 // jettyRun configuration properties
 jettyRun {
-    dependsOn 'jettyRunSetProperties'
-    logger.info "Running jetty"
-    httpPort = new Integer(jettyHttpPort)
-    reload = 'automatic'
-    scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
-    daemon = false
+	dependsOn 'jettyRunSetProperties'
+	logger.info "Running jetty"
+	httpPort = new Integer(jettyHttpPort)
+	reload = 'automatic'
+	scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
+	daemon = false
 
 }
 
