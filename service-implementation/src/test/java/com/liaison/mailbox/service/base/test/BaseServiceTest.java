@@ -43,7 +43,8 @@ public class BaseServiceTest {
 	@Before
 	public void initialSetUp() throws FileNotFoundException, IOException {
 
-		if (null != BASE_URL) {
+		if (null == BASE_URL) {
+
 			Properties prop = new Properties();
 			String properties = ServiceUtils.readFileFromClassPath("config.properties");
 			InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
