@@ -11,6 +11,8 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -106,4 +108,5 @@ public class MailBoxUtility {
 	public static String getGUID() {
 		return UUID.getUUID();
 	}
-}
+	
+	}

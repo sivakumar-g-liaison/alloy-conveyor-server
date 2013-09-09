@@ -13,11 +13,23 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.mailbox.jpa.model.Processor;
 
 public class HttpRemoteDownloader implements MailBoxProcessor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeper.class);
+	private Processor configurationInstance ;
+	
+	private HttpRemoteDownloader() {
+		//to force creation of instance only by passing the processor entity
+	}
+	
+	public HttpRemoteDownloader(Processor processor){
+		this.configurationInstance = processor;
+	}
 
+	
+	
 	@Override
 	public  void invoke() {
 		

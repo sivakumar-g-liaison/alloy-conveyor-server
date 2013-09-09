@@ -45,7 +45,7 @@ public class DirectorySweeper {
 
         long startTime = System.currentTimeMillis();
         List<Path> result = new ArrayList<>();
-
+       
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(root), defineFilter(listDirectoryOnly))) {
             for (Path entry : stream) {
                 result.add(entry);
