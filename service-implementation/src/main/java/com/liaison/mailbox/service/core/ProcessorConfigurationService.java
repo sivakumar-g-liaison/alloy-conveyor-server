@@ -22,7 +22,7 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcesso
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * @author sivakumarg
@@ -87,7 +87,7 @@ public class ProcessorConfigurationService {
 		try {
 			
 			if (processorGuid == null || processorGuid.equals("")) {
-				throw new MailBoxServicesException("Processor cannot be found");
+				throw new MailBoxConfigurationServicesException("Processor cannot be found");
 			}
 			
 			LOGGER.info("Entering into get processor.");
@@ -148,7 +148,7 @@ public class ProcessorConfigurationService {
 		try {
 			
 			if (processorGuid == null || processorGuid.equals("")) {
-				throw new MailBoxServicesException("Processor cannot be found");
+				throw new MailBoxConfigurationServicesException("Processor cannot be found");
 			}
 			
 			LOGGER.info("Entering into get processor.");

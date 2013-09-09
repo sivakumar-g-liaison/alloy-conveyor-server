@@ -15,21 +15,21 @@ package com.liaison.mailbox.service.exception;
  * 
  * @author veerasamyn
  */
-public class MailBoxServicesException extends Exception {
+public class MailBoxConfigurationServicesException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 
 	 */
-	public MailBoxServicesException() {
+	public MailBoxConfigurationServicesException() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param message
 	 */
-	public MailBoxServicesException(String message) {
+	public MailBoxConfigurationServicesException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}

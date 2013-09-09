@@ -25,7 +25,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * Class which has configuration related operations.
@@ -53,14 +53,14 @@ public class ProfileConfigurationService {
 		try {
 
 			if (mailboxGuid == null || mailboxGuid.equals("")) {
-				throw new MailBoxServicesException("MailBox cannot be found");
+				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
 			}
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			// Getting the existing mailbox from given GUID
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 			MailBox mailbox = config.find(MailBox.class, mailboxGuid);
 			if (null == mailbox) {
-				throw new MailBoxServicesException("The given mailbox GUID is not available in the system.");
+				throw new MailBoxConfigurationServicesException("The given mailbox GUID is not available in the system.");
 			}
 
 			// Construct MailBoxSchedProfile entity
@@ -111,16 +111,16 @@ public class ProfileConfigurationService {
 		try {
 
 			if (mailboxGuid == null || mailboxGuid.equals("")) {
-				throw new MailBoxServicesException("MailBox cannot be found");
+				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
 			} else if (linkGuid == null || linkGuid.equals("")) {
-				throw new MailBoxServicesException("MailBox cannot be found");
+				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
 			}
 			// Getting the existing mailBoxSchedProfile from given link GUID
 			MailBoxScheduleProfileConfigurationDAO configDao = new MailBoxScheduleProfileConfigurationDAOBase();
 			MailBoxSchedProfile mailBoxSchedProfile = configDao.find(MailBoxSchedProfile.class, linkGuid);
 
 			if (null == mailBoxSchedProfile) {
-				throw new MailBoxServicesException("No such MailBox Profile found");
+				throw new MailBoxConfigurationServicesException("No such MailBox Profile found");
 			}
 			configDao.remove(mailBoxSchedProfile);
 
