@@ -16,6 +16,7 @@ import java.util.List;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
 import com.liaison.mailbox.jpa.model.RemoteUploader;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -38,6 +39,7 @@ public class ProcessorDTO {
 	private String linkedProfileId;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
+	private List<ProcessorPropertyDTO> procsrProperties;
 
 	public String getGuid() {
 		return guid;
@@ -127,6 +129,14 @@ public class ProcessorDTO {
 		this.credentials = credentials;
 	}
 
+	public List<ProcessorPropertyDTO> getProcsrProperties() {
+		return procsrProperties;
+	}
+
+	public void setProcsrProperties(List<ProcessorPropertyDTO> procsrProperties) {
+		this.procsrProperties = procsrProperties;
+	}
+
 	public void copyToEntity(Processor processor, boolean isCreate) {
 
 		if (isCreate) {
@@ -180,6 +190,18 @@ public class ProcessorDTO {
 		if (!credentialList.isEmpty()) {
 			processor.setCredentials(credentialList);
 		}
+		
+		ProcessorProperty property = null;
+		List<ProcessorProperty> properties = new ArrayList<>();
+		
+		for (ProcessorPropertyDTO propertyDTO : this.getProcsrProperties()) {
+			
+			property = new ProcessorProperty();
+			propertyDTO.copyToEntity(property);
+			properties.add(property);
+		}
+		
+		processor.setProcessorProperties(properties);
 	}
 
 	public void copyFromEntity(Processor processor) {
@@ -214,5 +236,12 @@ public class ProcessorDTO {
 		credentialDTO.copyFromEntity(credential);
 		this.setCredentials(new ArrayList<CredentialDTO>());
 		this.getCredentials().add(credentialDTO);
+		
+		ProcessorPropertyDTO propertyDTO = null;
+		for (ProcessorProperty property : processor.getProcessorProperties()) {
+			propertyDTO = new ProcessorPropertyDTO();
+			propertyDTO.copyFromEntity(property);
+			this.getProcsrProperties().add(propertyDTO);
+		}
 	}
 }

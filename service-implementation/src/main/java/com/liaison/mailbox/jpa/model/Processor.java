@@ -49,8 +49,21 @@ public class Processor implements Identifiable {
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private MailBoxSchedProfile mailboxSchedProfile;
+	
+	private List<ProcessorProperty> processorProperties;
 
 	public Processor() {
+	}
+
+	// bi-directional many-to-one association to ProcessorProperty
+	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	public List<ProcessorProperty> getProcessorProperties() {
+		return processorProperties;
+	}
+
+	public void setProcessorProperties(List<ProcessorProperty> processorProperties) {
+		this.processorProperties = processorProperties;
 	}
 
 	@Id

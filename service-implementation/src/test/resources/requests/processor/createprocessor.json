@@ -25,7 +25,15 @@
 				"idpType":"ffdf", 
 				"idpURI":"fdfd"
 				} 
-			], 
+			],
+			
+			"procsrProperties":[ 
+				{
+                    "name": "filerenameformat",
+                    "value": "*.processed"
+                }
+			],
+			 
 			"linkedMailboxId":"E8E82C26NULL00B9NULL7523FA8F6F99", 
 			"linkedProfileId":"E914BCE0NULL00C0NULLED5A47F0379E" 
 		} 

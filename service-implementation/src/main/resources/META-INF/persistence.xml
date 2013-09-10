@@ -15,6 +15,7 @@
 		<class>com.liaison.mailbox.jpa.model.MailBoxSchedProfile</class>
 		<class>com.liaison.mailbox.jpa.model.Processor</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
+		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
 		
 		<properties>
 			<property name="javax.persistence.transactionType" value="JTA" />
