@@ -13,7 +13,8 @@ package com.liaison.mailbox.enums;
 public enum ProcessorType {
 
 	REMOTEDOWNLOADER("remotedownloader"),
-	REMOTEUPLOADER("remoteuploader");
+	REMOTEUPLOADER("remoteuploader"),
+	SWEEPER("sweeper");
 
 	private final String code;
 

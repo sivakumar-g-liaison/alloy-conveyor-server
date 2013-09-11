@@ -11,8 +11,6 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -108,5 +106,19 @@ public class MailBoxUtility {
 	public static String getGUID() {
 		return UUID.getUUID();
 	}
-	
+
+	/**
+	 * Checks the given string is empty or not.
+	 * 
+	 * @param str
+	 *            The input String
+	 * @return boolean
+	 */
+	public static boolean isEmpty(String str) {
+
+		if (str != null && str.length() > 0) {
+			return true;
+		}
+		return false;
 	}
+}

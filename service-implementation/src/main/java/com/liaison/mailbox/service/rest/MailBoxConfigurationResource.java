@@ -153,7 +153,7 @@ public class MailBoxConfigurationResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// updates existing mailbox
-			serviceResponse = mailbox.reviseMailBox(serviceRequest);
+			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid);
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -418,78 +418,6 @@ public class MailBoxConfigurationResource {
 	}
 
 	/**
-	 * REST method to add the processors to profile.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@PUT
-	@Path("/profile/linkprocessors")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response addProcessorsToProfile(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
-				.entity("Add processors to profile not yet implemented.").build();
-
-	}
-
-	/**
-	 * REST method to remove processors from profile.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@DELETE
-	@Path("/profile/linkprocessors")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response removeProcessorsFromProfile(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
-				.entity("Remove processors from profile not yet implemented.").build();
-
-	}
-
-	/**
-	 * REST method to retrieve a processor details from profile.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@GET
-	@Path("/profile/linkprocessors")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response readProcessorsFromProfile(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
-				.entity("Read processors from profile not yet implemented.").build();
-
-	}
-
-	/**
-	 * REST method to add a processor.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@PUT
-	@Path("/processor")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response addProcessor(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Add processor not yet implemented.")
-				.build();
-
-	}
-
-	/**
 	 * REST method to update a processor.
 	 * 
 	 * @param request
@@ -539,7 +467,7 @@ public class MailBoxConfigurationResource {
 	}
 
 	/**
-	 * <<<<<<< HEAD REST method to remove a processor details.
+	 * REST method to remove a processor details.
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
@@ -553,8 +481,8 @@ public class MailBoxConfigurationResource {
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8
-	 *         >>>>>>> origin/for-review
+	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8 >>>>>>>
+	 *         origin/for-review
 	 */
 	@DELETE
 	@Path("/{mailboxid}/processor/{processorid}")

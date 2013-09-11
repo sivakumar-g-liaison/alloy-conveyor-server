@@ -24,29 +24,30 @@ import javax.xml.bind.annotation.XmlEnum;
 @XmlEnum
 public enum ErrorCode {
 
-	INVALID_REQUEST ("The supplied Request is invalid."),
-	MISSING_FIELD ( "A required field is missing." );
+	INVALID_REQUEST("The supplied Request is invalid."),
+	MISSING_FIELD("A required field is missing."),
+	GUID_NOT_AVAIL("The given guid is not availble in the system.");
 
-    private String value;
+	private String value;
 
-    // some caching to provide a better search algorithm
-    private static Map<String, ErrorCode> values = new HashMap<String, ErrorCode>();
-    static {
-        for (ErrorCode r : EnumSet.allOf(ErrorCode.class)) {
-            values.put(r.toString(), r);
-        }
-    }
+	// some caching to provide a better search algorithm
+	private static Map<String, ErrorCode> values = new HashMap<String, ErrorCode>();
+	static {
+		for (ErrorCode r : EnumSet.allOf(ErrorCode.class)) {
+			values.put(r.toString(), r);
+		}
+	}
 
-    public static ErrorCode getKeyAlgorithm(String algorithm) {
-        return values.get(algorithm);
-    }
+	public static ErrorCode getKeyAlgorithm(String algorithm) {
+		return values.get(algorithm);
+	}
 
-    private ErrorCode(String algorithm) {
-        this.value = algorithm;
-    }
+	private ErrorCode(String algorithm) {
+		this.value = algorithm;
+	}
 
-    public String value() {
-        return value;
-    }
+	public String value() {
+		return value;
+	}
 
 }
