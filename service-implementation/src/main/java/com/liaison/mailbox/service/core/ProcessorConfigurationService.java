@@ -155,7 +155,7 @@ public class ProcessorConfigurationService {
 			LOGGER.info("Deactivate guid is {} ", processorGuid);
 			
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-			config.softRemove(processorGuid);
+			config.deactivate(processorGuid);
 			
 			response = new ResponseDTO();
 			serviceResponse = new DeActivateProcessorResponseDTO();

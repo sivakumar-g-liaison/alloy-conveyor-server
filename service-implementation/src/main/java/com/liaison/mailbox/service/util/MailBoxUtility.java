@@ -25,6 +25,10 @@ import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.processor.HttpRemoteDownloader;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 
 /**
  * Utilities for MailBox.
@@ -116,7 +120,25 @@ public class MailBoxUtility {
 	 */
 	public static boolean isEmpty(String str) {
 
-		return str==null || str.isEmpty();
+		return str == null || str.isEmpty();
 
+	}
+
+	/**
+	 * Factory to method to create instances for mailbox processor.
+	 * 
+	 * @param processor
+	 *            The Processor Entity
+	 * @return The MailBox Processor instance.
+	 */
+	public static MailBoxProcessor getInstance(Processor processor) {
+
+		MailBoxProcessor mailBoxProcessor = null;
+
+		if (MailBoxConstants.REMOTE_DOWNLOADER.equals(processor.getDiscriminatorValue())) {
+			mailBoxProcessor = new HttpRemoteDownloader(processor);
+		}
+
+		return mailBoxProcessor;
 	}
 }

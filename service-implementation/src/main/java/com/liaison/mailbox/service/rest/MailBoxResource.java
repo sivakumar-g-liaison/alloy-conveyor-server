@@ -1,25 +1,30 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.rest;
 
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.commons.util.StreamUtil;
-import com.liaison.mailbox.service.core.MailBoxConfigurationService;
-import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -27,7 +32,7 @@ import com.netflix.servo.monitor.Monitors;
 
 @Path("/mailbox/triggerProfile")
 public class MailBoxResource {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -50,15 +55,31 @@ public class MailBoxResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response triggerProfile(@Context HttpServletRequest request) {
+	public Response triggerProfile(@QueryParam(value = "name") String profileName,
+			@QueryParam(value = "excludeMailbox") String mailboxNamePattern) {
 
 		serviceCallCounter.addAndGet(1);
-         // The idea is to post to this service with the following query params 'name' - name of the profile to trigger,'excludeMailbox' - mailbox name pattern to exclude 
-		//Get the all the processors associated to this profile including configuration etc 
-		//Invoke all the processors injecting the configuration . Get the actual processor instance using Factory Pattern.
+		Response returnResponse;
 
-		return null;
+		try {
+
+			LOG.info("Entering into trigger profile resource.");
+			MailBoxService service = new MailBoxService();
+			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern);
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
 
 	}
-
 }

@@ -16,6 +16,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -49,7 +50,7 @@ public class Processor implements Identifiable {
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private MailBoxSchedProfile mailboxSchedProfile;
-	
+
 	private List<ProcessorProperty> processorProperties;
 
 	public Processor() {
@@ -119,7 +120,8 @@ public class Processor implements Identifiable {
 	 */
 
 	// bi-directional many-to-one association to Credential
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval=true, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
+	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	public List<Credential> getCredentials() {
 		return this.credentials;
@@ -144,7 +146,8 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Folder
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval=true, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
+	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	public List<Folder> getFolders() {
 		return this.folders;
@@ -190,5 +193,11 @@ public class Processor implements Identifiable {
 	@Transient
 	public Class getEntityClass() {
 		return this.getClass();
+	}
+
+	@Transient
+	public String getDiscriminatorValue() {
+		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
+		return val == null ? null : val.value();
 	}
 }
