@@ -68,7 +68,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	@Test
 	public void testGetMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
 
-		String url = getBASE_URL() + "/" + "F346B900NULL0073NULLDAF922B166CD";
+		String url = getBASE_URL() + "/" + "40288bc340cffc570140cffc57a10000";
 		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -79,7 +79,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	@Test
 	public void testDeactivateMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
 
-		String url = getBASE_URL() + "/" + "F346B900NULL0073NULLDAF922B166CD";
+		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf2bb8480007";
 		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
 		request.execute();
 
@@ -92,7 +92,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
 
-		String url = getBASE_URL() + "/" + "F346B900NULL0073NULLDAF922B166CD";
+		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf1947e00003";
 
 		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonString, logger);
 		request.execute();
@@ -106,7 +106,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
 
-		String url = getBASE_URL() + "/" + "F346B900NULL0073NULLDAF922B166CD";
+		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf1947e00003";
 
 		HttpParams params = new BasicHttpParams();
 		HttpClient httpClient = new DefaultHttpClient(params);
