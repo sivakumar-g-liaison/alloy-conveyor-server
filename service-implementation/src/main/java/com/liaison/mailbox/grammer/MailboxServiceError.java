@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.liaison.mailbox.enums.ErrorCode;
+import com.liaison.mailbox.enums.ErrorMessages;
 
 /**
  * A Data Transfer Object that implements the fields required for
@@ -26,20 +26,20 @@ import com.liaison.mailbox.enums.ErrorCode;
 @XmlRootElement(namespace = "http://key.management.liaison.com/error")
 public class MailboxServiceError extends DataTransferObject {
 
-	private ErrorCode errorCode;
+	private ErrorMessages errorCode;
     private String errorMessage;
 
     /**
 	 * @return the errorCode
 	 */
-	public ErrorCode getErrorCode() {
+	public ErrorMessages getErrorCode() {
 		return errorCode;
 	}
 
 	/**
 	 * @param errorCode the errorCode to set
 	 */
-	public void setErrorCode(ErrorCode errorCode) {
+	public void setErrorCode(ErrorMessages errorCode) {
 		this.errorCode = errorCode;
 	}
 

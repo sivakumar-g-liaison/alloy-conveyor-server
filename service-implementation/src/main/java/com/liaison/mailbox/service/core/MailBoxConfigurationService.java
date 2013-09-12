@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ErrorCode;
+import com.liaison.mailbox.enums.ErrorMessages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
@@ -58,7 +58,7 @@ public class MailBoxConfigurationService {
 			if (request.getMailBox() == null
 					|| MailBoxUtility.isEmpty(request.getMailBox().getName())
 					|| MailBoxUtility.isEmpty(request.getMailBox().getStatus())) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.toString());
 			}
 
 			MailBox mailBox = new MailBox();
@@ -109,14 +109,14 @@ public class MailBoxConfigurationService {
 		try {
 
 			if (MailBoxUtility.isEmpty(guid)) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.MISSING_FIELD.value());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.value());
 			}
 
 			// Getting mailbox
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = config.find(MailBox.class, guid);
 			if (null == mailBox) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.GUID_NOT_AVAIL.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.GUID_NOT_AVAIL.toString());
 			}
 
 			// Response Construction
@@ -164,7 +164,7 @@ public class MailBoxConfigurationService {
 					|| MailBoxUtility.isEmpty(request.getMailBox().getName())
 					|| MailBoxUtility.isEmpty(request.getMailBox().getStatus())
 					|| MailBoxUtility.isEmpty(request.getMailBox().getGuid())) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.toString());
 			}
 
 			LOG.info("The revise path guid is {} ", guid);
@@ -177,7 +177,7 @@ public class MailBoxConfigurationService {
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = config.find(MailBox.class, request.getMailBox().getGuid());
 			if (null == mailBox) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.GUID_NOT_AVAIL.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.GUID_NOT_AVAIL.toString());
 			}
 
 			// Removing the child items.
@@ -225,7 +225,7 @@ public class MailBoxConfigurationService {
 
 			LOG.info("The deactivate request guid is {} ", guid);
 			if (MailBoxUtility.isEmpty(guid)) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.toString());
 			}
 
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();

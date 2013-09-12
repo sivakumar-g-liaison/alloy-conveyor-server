@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlEnum;
  * @author veerasamyn
  */
 @XmlEnum
-public enum ErrorCode {
+public enum ErrorMessages {
 
 	INVALID_REQUEST("The supplied Request is invalid."),
 	MISSING_FIELD("A required field is missing."),
@@ -31,18 +31,15 @@ public enum ErrorCode {
 	private String value;
 
 	// some caching to provide a better search algorithm
-	private static Map<String, ErrorCode> values = new HashMap<String, ErrorCode>();
+	private static Map<String, ErrorMessages> values = new HashMap<String, ErrorMessages>();
 	static {
-		for (ErrorCode r : EnumSet.allOf(ErrorCode.class)) {
+		for (ErrorMessages r : EnumSet.allOf(ErrorMessages.class)) {
 			values.put(r.toString(), r);
 		}
 	}
 
-	public static ErrorCode getKeyAlgorithm(String algorithm) {
-		return values.get(algorithm);
-	}
-
-	private ErrorCode(String algorithm) {
+	
+	private ErrorMessages(String algorithm) {
 		this.value = algorithm;
 	}
 
