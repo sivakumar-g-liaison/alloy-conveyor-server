@@ -3,6 +3,8 @@ apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
 
+
+
 // set base name (impacts war name and context path)
 project.war.baseName = 'g2mailboxservice'
 
@@ -245,7 +247,7 @@ project.afterEvaluate {
 
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
 task jettyRunSetProperties {
-
+	
 	logger.info "Setting jettyRun system properties"
 	// use the default port of the ws-backend-simulation module
 	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
@@ -285,4 +287,41 @@ jettyRun {
 	daemon = false
 
 }
+
+// jettyRun configuration properties
+jettyRunWar {
+	dependsOn 'jettyRunSetProperties'
+	logger.info "Running jetty"
+	httpPort = new Integer(jettyHttpPort)
+	daemon = true
+	stopKey='stopJetty'
+	stopPort=9999
+
+}
+
+jettyStop{
+	
+	stopKey='stopJetty'
+	stopPort=9999	
+}
+
+
+
+import org.gradle.api.plugins.jetty.internal.Monitor
+[jettyRun, jettyRunWar]*.doLast {
+  /**
+   * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
+   *
+   * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
+   * When that happens, we shouldn't need the custom task any more
+   *
+   * Copied From: AbstractJettyRunTask
+   */
+   if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
+      Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
+      monitor.start();
+   }
+}
+
+
 

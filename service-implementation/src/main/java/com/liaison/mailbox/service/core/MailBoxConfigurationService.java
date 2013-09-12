@@ -80,7 +80,7 @@ public class MailBoxConfigurationService {
 			serviceResponse.setMailBox(dto);
 
 		} catch (Exception e) {
-
+            e.printStackTrace();
 			response = new ResponseDTO();
 			response.setMessage(MailBoxConstants.CREATE_MAILBOX_FAILURE + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
@@ -109,7 +109,7 @@ public class MailBoxConfigurationService {
 		try {
 
 			if (MailBoxUtility.isEmpty(guid)) {
-				throw new MailBoxConfigurationServicesException(ErrorCode.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorCode.MISSING_FIELD.value());
 			}
 
 			// Getting mailbox
@@ -134,7 +134,7 @@ public class MailBoxConfigurationService {
 			return serviceResponse;
 
 		} catch (Exception e) {
-
+            e.printStackTrace();
 			response = new ResponseDTO();
 			response.setMessage(MailBoxConstants.GET_MAILBOX_FAILURE + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
@@ -198,7 +198,7 @@ public class MailBoxConfigurationService {
 			serviceResponse.setResponse(response);
 
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			response = new ResponseDTO();
 			response.setMessage(MailBoxConstants.REVISE_MAILBOX_SUCCESS);
 			response.setStatus(MailBoxConstants.SUCCESS);
@@ -247,7 +247,7 @@ public class MailBoxConfigurationService {
 
 			LOG.info("Exit from revise mailbox.");
 		} catch (Exception e) {
-
+			e.printStackTrace();
 			response.setMessage(MailBoxConstants.INACTIVE_MAILBOX_FAILURE);
 			response.setStatus(MailBoxConstants.FAILURE);
 			serviceResponse.setResponse(response);

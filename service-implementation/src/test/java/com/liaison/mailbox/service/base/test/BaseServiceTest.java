@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 
+import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;
@@ -92,12 +93,14 @@ public abstract class BaseServiceTest {
 	 * @return HTTPRequest The HTTPRequest instance for the given URL and method
 	 * @throws MalformedURLException
 	 * @throws FileNotFoundException
+	 * @throws LiaisonException 
 	 */
 	public HTTPRequest constructHTTPRequest(String URL, HTTP_METHOD method, String input, Logger logger)
-			throws MalformedURLException, FileNotFoundException {
+			throws MalformedURLException, FileNotFoundException, LiaisonException {
 
 		URL url = new URL(URL);
 		HTTPRequest request = new HTTPRequest(method, url, logger);
+		request.setSocketTimeout(300000);
 		request.addHeader("Content-Type", "application/json");
 		output = new HTTPStringOutputStream();
 		request.setOutputStream(output);
