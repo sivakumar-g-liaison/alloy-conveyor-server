@@ -8,24 +8,24 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.dto.configuration.response;
+package com.liaison.mailbox.enums;
 
-/**
- *
- * @author sivakumarg
- */
-public class ProcessorResponseDTO {
-	private String guId;
+
+public enum MailBoxStatus {
+
+	ACTIVE("ACTIVE"),
+	INACTIVE("INACTIVE");
 	
-	public ProcessorResponseDTO(String guid){
-		this.guId = guid;
+
+	private String value;
+	
+
+	private MailBoxStatus(String status) {
+		this.value = status;
 	}
 
-	public String getGuId() {
-		return guId;
+	public String value() {
+		return value;
 	}
 
-	public void setGuId(String guId) {
-		this.guId = guId;
-	}
 }

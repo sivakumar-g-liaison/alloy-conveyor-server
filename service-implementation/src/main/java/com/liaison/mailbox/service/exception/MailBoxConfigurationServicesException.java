@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.service.exception;
 
+import com.liaison.mailbox.enums.Messages;
+
 /**
  * Customized exception for mailbox configuration service operations.
  * 
@@ -29,9 +31,18 @@ public class MailBoxConfigurationServicesException extends Exception {
 	/**
 	 * @param message
 	 */
-	public MailBoxConfigurationServicesException(String message) {
-		super(message);
+	public MailBoxConfigurationServicesException(Messages message,String key) {
+		super(String.format(message.value(),key));
 		// TODO Auto-generated constructor stub
 	}
+	
+	/**
+	 * @param message
+	 */
+	public MailBoxConfigurationServicesException(Messages message) {
+		super(message.value());
+		// TODO Auto-generated constructor stub
+	}
+
 
 }

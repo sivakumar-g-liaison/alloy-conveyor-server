@@ -16,6 +16,7 @@ import java.util.List;
 
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 

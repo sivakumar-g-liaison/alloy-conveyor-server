@@ -16,13 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ErrorMessages;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.processor.MailBoxPrcoessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -57,7 +58,7 @@ public class MailBoxService {
 
 			// validates mandatory value.
 			if (MailBoxUtility.isEmpty(profileName)) {
-				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.value());
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING,"Profile Name");
 			}
 			LOG.info("The given profile name is {}", profileName);
 
@@ -65,7 +66,7 @@ public class MailBoxService {
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern);
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
-				throw new MailBoxServicesException(ErrorMessages.NO_PROC_CONFIG_PROFILE.value());
+				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
 
 			// invoking the Processors
@@ -73,39 +74,25 @@ public class MailBoxService {
 			for (Processor processor : processorMatchingProfile) {
 
 				processorService = MailBoxPrcoessorFactory.getInstance(processor);
-				if (null != processorService) {
-					LOG.info("The running processor is {}", processor.getProcessorType());
+				if (processorService!=null) {
+					LOG.info("The Processer id is {}", processor.getPguid());
+					LOG.info("The Processer type is {}", processor.getProcessorType());
 					processorService.invoke();
 				} else {
 					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
 				}
 			}
-
-			// Response construction
-			response = new ResponseDTO();
-			response.setStatus(MailBoxConstants.SUCCESS);
-			response.setMessage("Profile " + profileName + " triggered successfully.");
-			serviceResponse.setResponse(response);
-
+			
+			// response message construction			
+			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY,profileName,Messages.SUCCESS));			
 			return serviceResponse;
 
 		} catch (MailBoxServicesException e) {
-
-			e.printStackTrace();
-			response = new ResponseDTO();
-			response.setMessage(ErrorMessages.TRG_PROF_FAILURE.value() + profileName + "." + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
-			serviceResponse.setResponse(response);
+			
+			LOG.error(Messages.TRG_PROF_FAILURE.value(), e);			
+			serviceResponse.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE,profileName,Messages.FAILURE,e.getMessage()));
 			return serviceResponse;
 
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			response = new ResponseDTO();
-			response.setMessage(ErrorMessages.TRG_PROF_FAILURE.value() + profileName + "." + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
-			serviceResponse.setResponse(response);
-			return serviceResponse;
-		}
+		} 
 	}
 }

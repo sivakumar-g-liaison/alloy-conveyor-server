@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
@@ -120,5 +121,11 @@ public class MailBoxProfileUtilityTest {
 		Assert.assertNotNull(jsonMaiboxProfileResponse.getString("mailboxProfileLinkGuid"));
 		Assert.assertNotNull(jsonResponse.getString("message"));
 		Assert.assertNotNull(jsonResponse.getString("status"));
+	}
+	
+	@Test
+	public void stringFormatTest(){
+		String data = String.format(Messages.CREATE_OPERATION_FAILED.value(), "test");
+		System.out.println(data);
 	}
 }
