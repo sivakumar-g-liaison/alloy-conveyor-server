@@ -88,7 +88,7 @@ public class MailBoxSchedProfile implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Processor
-	@OneToMany(mappedBy = "mailboxSchedProfile", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+	@OneToMany(mappedBy = "mailboxSchedProfile", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	public List<Processor> getProcessors() {
 		return this.processors;
 	}

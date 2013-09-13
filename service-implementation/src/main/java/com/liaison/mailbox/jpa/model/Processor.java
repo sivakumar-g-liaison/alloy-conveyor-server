@@ -51,6 +51,8 @@ public class Processor implements Identifiable {
 	private List<Folder> folders;
 	private MailBoxSchedProfile mailboxSchedProfile;
 
+	private int executionOrder;
+
 	private List<ProcessorProperty> processorProperties;
 
 	public Processor() {
@@ -172,7 +174,7 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBoxSchedProfile
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "MAILBOX_SCHED_PROFILES_GUID", nullable = false)
 	public MailBoxSchedProfile getMailboxSchedProfile() {
 		return this.mailboxSchedProfile;
@@ -180,6 +182,15 @@ public class Processor implements Identifiable {
 
 	public void setMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
 		this.mailboxSchedProfile = mailboxSchedProfile;
+	}
+
+	@Column(name = "PROCSR_EXECUTION_ORDER")
+	public int getExecutionOrder() {
+		return executionOrder;
+	}
+
+	public void setExecutionOrder(int executionOrder) {
+		this.executionOrder = executionOrder;
 	}
 
 	@Override

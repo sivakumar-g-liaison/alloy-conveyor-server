@@ -40,6 +40,7 @@ public class ProcessorDTO {
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
 	private List<ProcessorPropertyDTO> procsrProperties;
+	private int executionOrder;
 
 	public String getGuid() {
 		return guid;
@@ -137,6 +138,14 @@ public class ProcessorDTO {
 		this.procsrProperties = procsrProperties;
 	}
 
+	public int getExecutionOrder() {
+		return executionOrder;
+	}
+
+	public void setExecutionOrder(int executionOrder) {
+		this.executionOrder = executionOrder;
+	}
+
 	public void copyToEntity(Processor processor, boolean isCreate) {
 
 		if (isCreate) {
@@ -190,17 +199,17 @@ public class ProcessorDTO {
 		if (!credentialList.isEmpty()) {
 			processor.setCredentials(credentialList);
 		}
-		
+
 		ProcessorProperty property = null;
 		List<ProcessorProperty> properties = new ArrayList<>();
-		
+
 		for (ProcessorPropertyDTO propertyDTO : this.getProcsrProperties()) {
-			
+
 			property = new ProcessorProperty();
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
 		}
-		
+
 		processor.setProcessorProperties(properties);
 	}
 
@@ -210,6 +219,7 @@ public class ProcessorDTO {
 		this.setDescription(processor.getProcsrDesc());
 		this.setProperties(processor.getProcsrProperties());
 		this.setStatus(processor.getProcsrStatus());
+		this.setExecutionOrder(processor.getExecutionOrder());
 		// this.setType(processor.getProcsrType());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 
@@ -224,24 +234,43 @@ public class ProcessorDTO {
 		if (processor instanceof RemoteUploader) {
 		}
 
-		FolderDTO folderDTO = new FolderDTO();
-		Folder folder = processor.getFolders().get(0);
-		folderDTO.copyFromEntity(folder);
+		// Set folders
+		FolderDTO folderDTO = null;
+		List<FolderDTO> folders = new ArrayList<>();
+		if (null != processor.getFolders()) {
 
-		this.setFolders(new ArrayList<FolderDTO>());
-		this.getFolders().add(folderDTO);
-
-		CredentialDTO credentialDTO = new CredentialDTO();
-		Credential credential = processor.getCredentials().get(0);
-		credentialDTO.copyFromEntity(credential);
-		this.setCredentials(new ArrayList<CredentialDTO>());
-		this.getCredentials().add(credentialDTO);
-		
-		ProcessorPropertyDTO propertyDTO = null;
-		for (ProcessorProperty property : processor.getProcessorProperties()) {
-			propertyDTO = new ProcessorPropertyDTO();
-			propertyDTO.copyFromEntity(property);
-			this.getProcsrProperties().add(propertyDTO);
+			for (Folder folder : processor.getFolders()) {
+				folderDTO = new FolderDTO();
+				folderDTO.copyFromEntity(folder);
+				folders.add(folderDTO);
+			}
 		}
+		this.setFolders(folders);
+
+		// Set credentials
+		CredentialDTO credentialDTO = null;
+		List<CredentialDTO> credentials = new ArrayList<>();
+		if (null != processor.getCredentials()) {
+
+			for (Credential credential : processor.getCredentials()) {
+				credentialDTO = new CredentialDTO();
+				credentialDTO.copyFromEntity(credential);
+				credentials.add(credentialDTO);
+			}
+		}
+		this.setCredentials(credentials);
+
+		// Set properties
+		ProcessorPropertyDTO propertyDTO = null;
+		List<ProcessorPropertyDTO> properties = new ArrayList<>();
+		if (null != processor.getProcessorProperties()) {
+
+			for (ProcessorProperty property : processor.getProcessorProperties()) {
+				propertyDTO = new ProcessorPropertyDTO();
+				propertyDTO.copyFromEntity(property);
+				properties.add(propertyDTO);
+			}
+		}
+		this.setProcsrProperties(properties);
 	}
 }
