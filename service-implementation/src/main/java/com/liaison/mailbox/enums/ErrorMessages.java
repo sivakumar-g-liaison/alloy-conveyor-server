@@ -26,7 +26,16 @@ public enum ErrorMessages {
 
 	INVALID_REQUEST("The supplied Request is invalid."),
 	MISSING_FIELD("A required field is missing."),
-	GUID_NOT_AVAIL("The given guid is not availble in the system.");
+	GUID_NOT_AVAIL("The given guid is not availble in the system."),
+	MBX_DOES_NOT_EXIST("No such mailbox exists in the system."),
+	GUID_DOES_NOT_MATCH("The given guid does not match with request guid."),
+	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile."),
+	TRG_PROF_FAILURE("Error occured while triggering the profile "),
+
+	MAILBOX_CREATE_FAILURE("MailBox creation failed."),
+	MAILBOX_REVISE_FAILURE("MailBox revise failed."),
+	MAILBOX_GET_FAILURE("Failed to retrieve the MailBox."),
+	MAILBOX_DELETE_FAILURE("MailBox deactivation failed.");
 
 	private String value;
 
@@ -38,7 +47,6 @@ public enum ErrorMessages {
 		}
 	}
 
-	
 	private ErrorMessages(String algorithm) {
 		this.value = algorithm;
 	}
@@ -47,4 +55,9 @@ public enum ErrorMessages {
 		return value;
 	}
 
+	public static void main(String[] args) {
+
+		String s = "Profile  profileName  triggered successfully.";
+		System.out.println(s.replaceAll("profileName", "test"));
+	}
 }

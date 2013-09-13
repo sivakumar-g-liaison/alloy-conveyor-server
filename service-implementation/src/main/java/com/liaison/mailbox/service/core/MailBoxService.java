@@ -20,10 +20,12 @@ import com.liaison.mailbox.enums.ErrorMessages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.processor.MailBoxPrcoessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -45,7 +47,6 @@ public class MailBoxService {
 	 *            The mailbox name pattern to exclude
 	 * @return
 	 */
-	//TODO add log messages based on MAX's suggestions.
 	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern) {
 
 		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
@@ -58,26 +59,22 @@ public class MailBoxService {
 			if (MailBoxUtility.isEmpty(profileName)) {
 				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.value());
 			}
+			LOG.info("The given profile name is {}", profileName);
 
+			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-			
-			//TODO use the same method for both and remove if loop
-			if (MailBoxUtility.isEmpty(mailboxNamePattern)) {
-				processorMatchingProfile = processorDAO.findByProfile(profileName);
-			} else {
-				processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern);
-			}
-
+			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern);
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
-				throw new MailBoxConfigurationServicesException("There are no processors  configured for this profile.");
+				throw new MailBoxServicesException(ErrorMessages.NO_PROC_CONFIG_PROFILE.value());
 			}
 
 			// invoking the Processors
 			MailBoxProcessor processorService = null;
 			for (Processor processor : processorMatchingProfile) {
-                //TODO Add a new MailBoxPrcoessorFactoryClass and get the instance from it. Util might not be right place for this.
-				processorService = MailBoxUtility.getInstance(processor);
+
+				processorService = MailBoxPrcoessorFactory.getInstance(processor);
 				if (null != processorService) {
+					LOG.info("The running processor is {}", processor.getDiscriminatorValue());
 					processorService.invoke();
 				} else {
 					LOG.info("Could not create instance for the processor type {}", processor.getDiscriminatorValue());
@@ -87,16 +84,25 @@ public class MailBoxService {
 			// Response construction
 			response = new ResponseDTO();
 			response.setStatus(MailBoxConstants.SUCCESS);
-			response.setMessage("Profile" + profileName + "triggered successfully.");
+			response.setMessage("Profile " + profileName + " triggered successfully.");
 			serviceResponse.setResponse(response);
 
+			return serviceResponse;
+
+		} catch (MailBoxServicesException e) {
+
+			e.printStackTrace();
+			response = new ResponseDTO();
+			response.setMessage(ErrorMessages.TRG_PROF_FAILURE.value() + profileName + "." + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+			serviceResponse.setResponse(response);
 			return serviceResponse;
 
 		} catch (Exception e) {
 
 			e.printStackTrace();
 			response = new ResponseDTO();
-			response.setMessage("Error occured while triggering the profile " + profileName + "." + e.getMessage());
+			response.setMessage(ErrorMessages.TRG_PROF_FAILURE.value() + profileName + "." + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
 			serviceResponse.setResponse(response);
 			return serviceResponse;

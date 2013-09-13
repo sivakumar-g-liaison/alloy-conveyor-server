@@ -11,25 +11,25 @@
 package com.liaison.mailbox.service.exception;
 
 /**
- * Customized exception for mailbox configuration service operations.
+ * Customized exception for mailbox service operations.
  * 
  * @author veerasamyn
  */
-public class MailBoxConfigurationServicesException extends Exception {
+public class MailBoxServicesException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 
 	 */
-	public MailBoxConfigurationServicesException() {
+	public MailBoxServicesException() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param message
 	 */
-	public MailBoxConfigurationServicesException(String message) {
+	public MailBoxServicesException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}

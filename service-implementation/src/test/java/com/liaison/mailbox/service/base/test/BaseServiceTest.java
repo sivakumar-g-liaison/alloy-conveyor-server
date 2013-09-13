@@ -93,14 +93,14 @@ public abstract class BaseServiceTest {
 	 * @return HTTPRequest The HTTPRequest instance for the given URL and method
 	 * @throws MalformedURLException
 	 * @throws FileNotFoundException
-	 * @throws LiaisonException 
+	 * @throws LiaisonException
 	 */
 	public HTTPRequest constructHTTPRequest(String URL, HTTP_METHOD method, String input, Logger logger)
 			throws MalformedURLException, FileNotFoundException, LiaisonException {
 
 		URL url = new URL(URL);
 		HTTPRequest request = new HTTPRequest(method, url, logger);
-		request.setSocketTimeout(300000);
+		request.setSocketTimeout(60000);
 		request.addHeader("Content-Type", "application/json");
 		output = new HTTPStringOutputStream();
 		request.setOutputStream(output);

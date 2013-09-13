@@ -66,7 +66,7 @@ public class MailBoxSchedProfile implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBox
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "MAILBOX_PROFILE_GUID", nullable = false)
 	public MailBox getMailbox() {
 		return this.mailbox;

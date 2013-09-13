@@ -14,6 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import javax.xml.bind.JAXBException;
+
 import junit.framework.Assert;
 
 import org.apache.http.HttpResponse;
@@ -24,6 +26,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +39,9 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Test class to test mailbox configuration service.
@@ -43,7 +50,10 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
  */
 public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
-	private Logger logger = null;
+	private Logger logger;
+	private String jsonResponse;
+	private String jsonRequest;
+	private HTTPRequest request;
 
 	/**
 	 * @throws java.lang.Exception
@@ -56,61 +66,122 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	@Test
 	public void testCreateMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 
-		HTTPRequest request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonString, logger);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
 
 	}
 
 	@Test
-	public void testGetMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
+	public void testGetMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
+			IOException {
 
-		String url = getBASE_URL() + "/" + "40288bc340cffc570140cffc57a10000";
-		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "getMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "getMailBoxResponse"));
 
 	}
 
 	@Test
-	public void testDeactivateMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
+	public void testDeactivateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+			JAXBException, IOException {
 
-		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf2bb8480007";
-		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "deactivateMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "deactivateMailBoxResponse"));
 
 	}
 
 	@Test
 	public void testReviseMailBoxWithLiaisonHTTPClient() throws ClientProtocolException, IOException, Exception {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 
-		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf1947e00003";
-
-		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonString, logger);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "reviseMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+		ReviseMailBoxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, ReviseMailBoxRequestDTO.class);
+		requestDTO.getMailBox().setGuid(responseDTO.getMailBox().getGuid());
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
 
 	}
 
 	@Test
 	public void testReviseMailBoxWithApacheHTTPClient() throws ClientProtocolException, IOException, Exception {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 
-		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf1947e00003";
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+
+		ReviseMailBoxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, ReviseMailBoxRequestDTO.class);
+		requestDTO.getMailBox().setGuid(responseDTO.getMailBox().getGuid());
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
 
 		HttpParams params = new BasicHttpParams();
 		HttpClient httpClient = new DefaultHttpClient(params);
-		HttpResponse response = httpClient.execute(getHttpPut(url, jsonString));
+		HttpResponse response = httpClient.execute(getHttpPut(url, jsonRequest));
 		Assert.assertEquals(true, response.getStatusLine().getStatusCode() == 200);
 
 	}

@@ -22,10 +22,8 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String INACTIVATE_MAILBOX = "inActivateMailBoxByGUID";
 	public static final String PGUID = "pguid";
 
-	public MailBox find(String guid);
-
 	public MailBox findActiveMailBox(String guid);
 
-	public int inactiveMailBox(String guid);
+	public int deactiveMailBox(String guid);
 
 }

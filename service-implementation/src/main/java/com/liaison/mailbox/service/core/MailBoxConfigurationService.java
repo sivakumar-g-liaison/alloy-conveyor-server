@@ -58,7 +58,7 @@ public class MailBoxConfigurationService {
 			if (request.getMailBox() == null
 					|| MailBoxUtility.isEmpty(request.getMailBox().getName())
 					|| MailBoxUtility.isEmpty(request.getMailBox().getStatus())) {
-				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.value());
 			}
 
 			MailBox mailBox = new MailBox();
@@ -79,10 +79,19 @@ public class MailBoxConfigurationService {
 			dto.setGuid(String.valueOf(mailBox.getPrimaryKey()));
 			serviceResponse.setMailBox(dto);
 
-		} catch (Exception e) {
-            e.printStackTrace();
+		} catch (MailBoxConfigurationServicesException e) {
+
+			e.printStackTrace();
 			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.CREATE_MAILBOX_FAILURE + e.getMessage());
+			response.setMessage(ErrorMessages.MAILBOX_CREATE_FAILURE.value() + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+			serviceResponse.setResponse(response);
+			return serviceResponse;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = new ResponseDTO();
+			response.setMessage(ErrorMessages.MAILBOX_CREATE_FAILURE.value() + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
 			serviceResponse.setResponse(response);
 		}
@@ -116,7 +125,7 @@ public class MailBoxConfigurationService {
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = config.find(MailBox.class, guid);
 			if (null == mailBox) {
-				throw new MailBoxConfigurationServicesException(ErrorMessages.GUID_NOT_AVAIL.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MBX_DOES_NOT_EXIST.value());
 			}
 
 			// Response Construction
@@ -133,10 +142,19 @@ public class MailBoxConfigurationService {
 			LOG.info("Exit from get mailbox.");
 			return serviceResponse;
 
-		} catch (Exception e) {
-            e.printStackTrace();
+		} catch (MailBoxConfigurationServicesException e) {
+
+			e.printStackTrace();
 			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.GET_MAILBOX_FAILURE + e.getMessage());
+			response.setMessage(ErrorMessages.MAILBOX_GET_FAILURE.value() + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+			serviceResponse.setResponse(response);
+			return serviceResponse;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = new ResponseDTO();
+			response.setMessage(ErrorMessages.MAILBOX_GET_FAILURE.value() + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
 			serviceResponse.setResponse(response);
 		}
@@ -164,20 +182,20 @@ public class MailBoxConfigurationService {
 					|| MailBoxUtility.isEmpty(request.getMailBox().getName())
 					|| MailBoxUtility.isEmpty(request.getMailBox().getStatus())
 					|| MailBoxUtility.isEmpty(request.getMailBox().getGuid())) {
-				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.value());
 			}
 
 			LOG.info("The revise path guid is {} ", guid);
 			LOG.info("The revise request guid is {} ", request.getMailBox().getGuid());
 			if (!(request.getMailBox().getGuid().equals(guid))) {
-				throw new MailBoxConfigurationServicesException("The given guid doesn't match with request guid.");
+				throw new MailBoxConfigurationServicesException(ErrorMessages.GUID_DOES_NOT_MATCH.value());
 			}
 
 			// Getting the mailbox.
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = config.find(MailBox.class, request.getMailBox().getGuid());
 			if (null == mailBox) {
-				throw new MailBoxConfigurationServicesException(ErrorMessages.GUID_NOT_AVAIL.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.GUID_NOT_AVAIL.value());
 			}
 
 			// Removing the child items.
@@ -197,11 +215,21 @@ public class MailBoxConfigurationService {
 			serviceResponse.setMailBox(dto);
 			serviceResponse.setResponse(response);
 
-		} catch (Exception e) {
+		} catch (MailBoxConfigurationServicesException e) {
+
 			e.printStackTrace();
 			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.REVISE_MAILBOX_SUCCESS);
-			response.setStatus(MailBoxConstants.SUCCESS);
+			response.setMessage(ErrorMessages.MAILBOX_REVISE_FAILURE.value() + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+			serviceResponse.setResponse(response);
+			return serviceResponse;
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			response = new ResponseDTO();
+			response.setMessage(ErrorMessages.MAILBOX_REVISE_FAILURE.value() + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
 			serviceResponse.setResponse(response);
 		}
 
@@ -215,7 +243,7 @@ public class MailBoxConfigurationService {
 	 * @param guid
 	 *            The mailbox pguid.
 	 */
-	public DeActivateMailBoxResponseDTO deActivateMailBox(String guid) {
+	public DeActivateMailBoxResponseDTO deactivateMailBox(String guid) {
 
 		LOG.info("Entering into deactivate mailbox.");
 		DeActivateMailBoxResponseDTO serviceResponse = new DeActivateMailBoxResponseDTO();
@@ -225,11 +253,11 @@ public class MailBoxConfigurationService {
 
 			LOG.info("The deactivate request guid is {} ", guid);
 			if (MailBoxUtility.isEmpty(guid)) {
-				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.toString());
+				throw new MailBoxConfigurationServicesException(ErrorMessages.MISSING_FIELD.value());
 			}
 
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
-			int updatedCount = config.inactiveMailBox(guid);
+			int updatedCount = config.deactiveMailBox(guid);
 			if (1 != updatedCount) {
 				throw new MailBoxConfigurationServicesException("Failure to update.");
 			}
@@ -241,14 +269,22 @@ public class MailBoxConfigurationService {
 			MailBoxResponseDTO dto = new MailBoxResponseDTO();
 			dto.setGuid(guid);
 
-			response = new ResponseDTO();
 			serviceResponse.setResponse(response);
 			serviceResponse.setMailBox(dto);
+			LOG.info("Exit from deactivate mailbox.");
+		} catch (MailBoxConfigurationServicesException e) {
 
-			LOG.info("Exit from revise mailbox.");
-		} catch (Exception e) {
 			e.printStackTrace();
-			response.setMessage(MailBoxConstants.INACTIVE_MAILBOX_FAILURE);
+			response = new ResponseDTO();
+			response.setMessage(ErrorMessages.MAILBOX_DELETE_FAILURE.value() + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+			serviceResponse.setResponse(response);
+			return serviceResponse;
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			response.setMessage(ErrorMessages.MAILBOX_DELETE_FAILURE.value() + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
 			serviceResponse.setResponse(response);
 

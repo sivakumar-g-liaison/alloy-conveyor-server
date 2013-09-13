@@ -194,7 +194,7 @@ public class MailBoxConfigurationResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// deactivates existing mailbox
-			serviceResponse = mailbox.deActivateMailBox(guid);
+			serviceResponse = mailbox.deactivateMailBox(guid);
 
 			// populate the response body
 			return serviceResponse.constructResponse();

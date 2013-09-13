@@ -17,28 +17,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	}
 
 	@Override
-	public MailBox find(String guid) {
-
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		try {
-
-			List<MailBox> mailBox = entityManager.createNamedQuery(FIND_MAILBOX_BY_PGUID).setParameter(PGUID, guid)
-					.getResultList();
-			Iterator<MailBox> iter = mailBox.iterator();
-
-			while (iter.hasNext()) {
-				return iter.next();
-			}
-
-		} finally {
-			if (entityManager != null) {
-				entityManager.clear();
-			}
-		}
-		return null;
-	}
-
-	@Override
 	public MailBox findActiveMailBox(String guid) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
@@ -61,7 +39,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	}
 
 	@Override
-	public int inactiveMailBox(String guid) {
+	public int deactiveMailBox(String guid) {
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		return entityManager.createNamedQuery(INACTIVATE_MAILBOX).setParameter(PGUID, guid).executeUpdate();
 	}
