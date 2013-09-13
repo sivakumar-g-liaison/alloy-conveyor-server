@@ -196,7 +196,7 @@ public class Processor implements Identifiable {
 	}
 
 	@Transient
-	public String getDiscriminatorValue() {
+	public String getProcessorType() {
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
 		return val == null ? null : val.value();
 	}

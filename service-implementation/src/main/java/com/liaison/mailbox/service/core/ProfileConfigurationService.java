@@ -26,6 +26,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBox
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Class which has configuration related operations.
@@ -52,7 +53,7 @@ public class ProfileConfigurationService {
 
 		try {
 
-			if (mailboxGuid == null || mailboxGuid.equals("")) {
+			if (MailBoxUtility.isEmpty(mailboxGuid)) {
 				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
 			}
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
@@ -83,10 +84,17 @@ public class ProfileConfigurationService {
 
 			LOG.info("Exit from add profile to mailbox.");
 
-		} catch (Exception e) {
+		} catch (MailBoxConfigurationServicesException e) {
 
 			response = new ResponseDTO();
 			response.setMessage(MailBoxConstants.ADD_PROFILE_FAILURE + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+
+			serviceResponse.setResponse(response);
+		} catch (Exception e) {
+
+			response = new ResponseDTO();
+			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_FAILURE + e.getMessage());
 			response.setStatus(MailBoxConstants.FAILURE);
 
 			serviceResponse.setResponse(response);
@@ -110,9 +118,9 @@ public class ProfileConfigurationService {
 
 		try {
 
-			if (mailboxGuid == null || mailboxGuid.equals("")) {
+			if (MailBoxUtility.isEmpty(mailboxGuid)) {
 				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
-			} else if (linkGuid == null || linkGuid.equals("")) {
+			} else if (MailBoxUtility.isEmpty(linkGuid)) {
 				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
 			}
 			// Getting the existing mailBoxSchedProfile from given link GUID
@@ -135,6 +143,13 @@ public class ProfileConfigurationService {
 
 			LOG.info("Exit from deactivate mailbox profile.");
 
+		} catch (MailBoxConfigurationServicesException e) {
+
+			response = new ResponseDTO();
+			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_FAILURE + e.getMessage());
+			response.setStatus(MailBoxConstants.FAILURE);
+
+			serviceResponse.setResponse(response);
 		} catch (Exception e) {
 
 			response = new ResponseDTO();

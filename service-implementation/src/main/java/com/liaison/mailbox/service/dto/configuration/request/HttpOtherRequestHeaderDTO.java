@@ -7,14 +7,30 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.core.processor;
+package com.liaison.mailbox.service.dto.configuration.request;
 
 /**
- * @author Ganesh
+ * @author praveenu
  * 
  */
-public interface MailBoxProcessor {
+public class HttpOtherRequestHeaderDTO {
 
-	public void invoke();
+	private String name;
+	private String value;
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
 }

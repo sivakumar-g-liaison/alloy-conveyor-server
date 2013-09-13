@@ -38,7 +38,7 @@ public class MailBoxPrcoessorFactory {
 
 		MailBoxProcessor mailBoxProcessor = null;
 
-		if (MailBoxConstants.REMOTE_DOWNLOADER.equals(processor.getDiscriminatorValue())) {
+		if (MailBoxConstants.REMOTE_DOWNLOADER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new HttpRemoteDownloader(processor);
 		}
 

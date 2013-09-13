@@ -74,10 +74,10 @@ public class MailBoxService {
 
 				processorService = MailBoxPrcoessorFactory.getInstance(processor);
 				if (null != processorService) {
-					LOG.info("The running processor is {}", processor.getDiscriminatorValue());
+					LOG.info("The running processor is {}", processor.getProcessorType());
 					processorService.invoke();
 				} else {
-					LOG.info("Could not create instance for the processor type {}", processor.getDiscriminatorValue());
+					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
 				}
 			}
 
