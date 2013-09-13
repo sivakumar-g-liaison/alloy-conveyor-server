@@ -1,11 +1,11 @@
 { 
 	"reviseProcessorRequest":{
 		"processor":{ 
-			"guid":"EDABD359NULL01A7NULL9B59E9D34305", 
+			"guid":"1101CCB2NULL00B2NULL776160E0AE73", 
 			"name":"google remote downloader tess", 
 			"type":"remotedownloader", 
 			"status":"active", 
-			"description":"rev from junit", 
+			"description":"reordered", 
 			"properties":"JSON String", 
 			"javaScriptURI":"file sytem path", 
 			"folders":[ 
@@ -25,7 +25,15 @@
 				"idpType":"ffdf", 
 				"idpURI":"fdfd"
 				} 
-			], 
+			],
+			
+			"procsrProperties":[ 
+				{
+                    "name": "filerenameformat",
+                    "value": "*.processed"
+                }
+			],
+			"executionOrder":"1", 
 			"linkedMailboxId":"E8E82C26NULL00B9NULL7523FA8F6F99", 
 			"linkedProfileId":"E914BCE0NULL00C0NULLED5A47F0379E" 
 		} 

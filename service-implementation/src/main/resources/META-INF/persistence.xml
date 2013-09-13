@@ -16,6 +16,7 @@
 		<class>com.liaison.mailbox.jpa.model.Processor</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
+		<class>com.liaison.mailbox.jpa.model.ProcessorForMerge</class>
 		
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
@@ -30,4 +31,5 @@
 				: initial size of pool -->
 		</properties>
 	</persistence-unit>
+	
 </persistence>

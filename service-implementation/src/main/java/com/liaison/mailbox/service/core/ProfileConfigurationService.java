@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAO;
@@ -22,6 +23,8 @@ import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
@@ -37,7 +40,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public class ProfileConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
-
+	private static String PROFILE = "Profile";
+	
 	/**
 	 * Add Profile to MailBox.
 	 * 
@@ -49,20 +53,21 @@ public class ProfileConfigurationService {
 
 		LOG.info("Add Profile to mailbox");
 		AddProfileToMailBoxResponseDTO serviceResponse = new AddProfileToMailBoxResponseDTO();
-		ResponseDTO response = null;
+	
 
 		try {
 
-			if (MailBoxUtility.isEmpty(mailboxGuid)) {
-				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
+			ProfileDTO profileDTO = request.getProfile(); 
+			if(profileDTO == null){
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			// Getting the existing mailbox from given GUID
 			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
 			MailBox mailbox = config.find(MailBox.class, mailboxGuid);
-			if (null == mailbox) {
-				throw new MailBoxConfigurationServicesException("The given mailbox GUID is not available in the system.");
-			}
+			if (mailbox == null) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,mailboxGuid);
+			   }
 
 			// Construct MailBoxSchedProfile entity
 			MailBoxSchedProfile mailBoxSchedProfile = new MailBoxSchedProfile();
@@ -73,33 +78,19 @@ public class ProfileConfigurationService {
 			// Persist the entity
 			MailBoxScheduleProfileConfigurationDAO configDao = new MailBoxScheduleProfileConfigurationDAOBase();
 			configDao.persist(mailBoxSchedProfile);
-
-			// Constructing response
-			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.ADD_PROFILE_SUCCESS);
-			response.setStatus(MailBoxConstants.SUCCESS);
-
-			serviceResponse.setResponse(response);
+			
+			// response message construction			
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY,PROFILE,Messages.SUCCESS));			
 			serviceResponse.setMailboxProfileLinkGuid(String.valueOf(mailBoxSchedProfile.getPrimaryKey()));
-
 			LOG.info("Exit from add profile to mailbox.");
-
+			return serviceResponse;			
+           
 		} catch (MailBoxConfigurationServicesException e) {
-
-			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.ADD_PROFILE_FAILURE + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
-
-			serviceResponse.setResponse(response);
-		} catch (Exception e) {
-
-			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_FAILURE + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
-
-			serviceResponse.setResponse(response);
+			
+			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);			
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED,PROFILE,Messages.FAILURE,e.getMessage()));
+			return serviceResponse;
 		}
-		return serviceResponse;
 
 	}
 
@@ -113,51 +104,33 @@ public class ProfileConfigurationService {
 	public DeactivateMailboxProfileLinkResponseDTO deactivateMailboxProfileLink(String mailboxGuid, String linkGuid) {
 
 		LOG.info("Deactivate Profile from mailbox");
+		LOG.info("input mailbox id {}",mailboxGuid);
+		LOG.info("input linker id {}",linkGuid);
 		DeactivateMailboxProfileLinkResponseDTO serviceResponse = new DeactivateMailboxProfileLinkResponseDTO();
-		ResponseDTO response = null;
-
 		try {
 
-			if (MailBoxUtility.isEmpty(mailboxGuid)) {
-				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
-			} else if (MailBoxUtility.isEmpty(linkGuid)) {
-				throw new MailBoxConfigurationServicesException("MailBox cannot be found");
-			}
 			// Getting the existing mailBoxSchedProfile from given link GUID
 			MailBoxScheduleProfileConfigurationDAO configDao = new MailBoxScheduleProfileConfigurationDAOBase();
 			MailBoxSchedProfile mailBoxSchedProfile = configDao.find(MailBoxSchedProfile.class, linkGuid);
 
-			if (null == mailBoxSchedProfile) {
-				throw new MailBoxConfigurationServicesException("No such MailBox Profile found");
+			if (mailBoxSchedProfile == null) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST,linkGuid);
 			}
 			configDao.remove(mailBoxSchedProfile);
-
-			// Constructing service response
-
-			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_SUCCESS);
-			response.setStatus(MailBoxConstants.SUCCESS);
-
-			serviceResponse.setResponse(response);
+			
+			// response message construction			
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL,PROFILE,Messages.SUCCESS));			
 			serviceResponse.setMailboxProfileLinkGuid(String.valueOf(linkGuid));
+			LOG.info("Exit from deactivate profile.");
+			return serviceResponse;		
+			
+            } catch (MailBoxConfigurationServicesException e) {
 
-			LOG.info("Exit from deactivate mailbox profile.");
+            	LOG.error(Messages.DEACTIVATION_FAILED.value(), e);			
+    			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED,PROFILE,Messages.FAILURE,e.getMessage()));
+    			return serviceResponse;
 
-		} catch (MailBoxConfigurationServicesException e) {
+			} 
 
-			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_FAILURE + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
-
-			serviceResponse.setResponse(response);
-		} catch (Exception e) {
-
-			response = new ResponseDTO();
-			response.setMessage(MailBoxConstants.DEACTIVATE_MAIBOX_PROFILE_FAILURE + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
-
-			serviceResponse.setResponse(response);
-		}
-		return serviceResponse;
 	}
 }

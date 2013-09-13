@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +24,11 @@ import com.liaison.framework.fs2.api.FS2Factory;
 import com.liaison.framework.fs2.api.FS2MetaSnapshot;
 import com.liaison.framework.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -73,8 +73,11 @@ public abstract class MailBoxHandler {
 	 * 
 	 * @return List of files
 	 * @throws MailBoxConfigurationServicesException
+	 * @throws MailBoxServicesException 
 	 */
-	public List<File> getPayload() throws MailBoxConfigurationServicesException {
+	public File[] getPayload() throws MailBoxServicesException {
+
+		File[] files = null;
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -82,27 +85,17 @@ public abstract class MailBoxHandler {
 
 				if (MailBoxUtility.isEmpty(folder.getFldrType()) || MailBoxUtility.isEmpty(folder.getFldrUri())) {
 
-					throw new MailBoxConfigurationServicesException("Payload file location unavailable");
-
-				} else if (folder.getFldrType().equalsIgnoreCase("INPUT")) {
-
-					LOGGER.info("Started receving the payload files");
-
-					List<File> payloadFiles = new ArrayList<File>();
-					File[] files = new File(folder.getFldrUri()).listFiles();
-
-					for (File file : files) {
-						if (file.isFile()) {
-							payloadFiles.add(file);
-						}
-					}
-					LOGGER.info("Payload files received successfully");
-
-					return payloadFiles;
-				}
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+				} 
+				
+				if (folder.getFldrType().equalsIgnoreCase("INPUT")) {
+					LOGGER.debug("Started reading the payload files");
+					files = new File(folder.getFldrUri()).listFiles();
+					LOGGER.debug("Payload files received successfully");
+				   }
 			}
 		}
-		return null;
+		return files;
 	}
 
 	/**
@@ -116,12 +109,7 @@ public abstract class MailBoxHandler {
 		return configurationInstance.getProcsrProperties();
 	}
 
-	/**
-	 * Get HTTPRequest with injected configurations.
-	 * 
-	 * @return configured HTTPRequest
-	 */
-	public abstract Object getClientWithInjectedConfiguration();
+	
 
 	/**
 	 * Get the URI to which the response should be written, this can be used if
@@ -131,7 +119,7 @@ public abstract class MailBoxHandler {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public String getWriteResponseURI() throws MailBoxConfigurationServicesException {
+	public String getWriteResponseURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -139,7 +127,7 @@ public abstract class MailBoxHandler {
 
 				if (MailBoxUtility.isEmpty(folder.getFldrType()) || MailBoxUtility.isEmpty(folder.getFldrUri())) {
 
-					throw new MailBoxConfigurationServicesException("File location unavailable");
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 
 				} else if (folder.getFldrType().equalsIgnoreCase("OUTPUT")) {
 					return folder.getFldrUri();
@@ -151,23 +139,21 @@ public abstract class MailBoxHandler {
 
 	/**
 	 * call back method to write the response back to MailBox from JS
+	 * @throws MailBoxServicesException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
+	 * @throws FS2Exception 
 	 * 
 	 */
-	public void writeResponseToMailBox(ByteArrayOutputStream response) throws MailBoxConfigurationServicesException {
+	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException {
 
-		try {
 			LOGGER.info("Started writing response");
-
 			FlexibleStorageSystem FS2 = FS2Factory.newInstance(new RemoteProcessorFS2Configuration());
 			URI fileLoc = new URI("fs2:" + getWriteResponseURI());
 			FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 			FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
-
 			LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
-
-		} catch (URISyntaxException | FS2Exception | IOException e) {
-			throw new MailBoxConfigurationServicesException("Failure is writing the response" + e.getLocalizedMessage());
-		}
+		
 	}
 
 	/**

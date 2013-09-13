@@ -17,14 +17,13 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 
 @NamedQueries({
-    @NamedQuery(name=MailBoxScheduleProfileConfigurationDAO.GET_MAILBOX_PROFILESCHEDULE, 
-    		query="SELECT profile from MailBoxSchedProfile profile where profile.scheduleProfilesRef.pguid = :" + MailBoxScheduleProfileConfigurationDAO.PROFILEPGUID + " and profile.mailbox.pguid= :" + MailBoxScheduleProfileConfigurationDAO.MAILBOXPGUID) 
+		@NamedQuery(name = MailBoxScheduleProfileConfigurationDAO.GET_MAILBOX_PROFILESCHEDULE,
+				query = "SELECT mbx_profile from MailBoxSchedProfile mbx_profile where mbx_profile.pguid = :"
+						+ MailBoxScheduleProfileConfigurationDAO.PGUID)
 })
 public interface MailBoxScheduleProfileConfigurationDAO extends GenericDAO<MailBoxSchedProfile> {
 
 	public static final String GET_MAILBOX_PROFILESCHEDULE = "processorMailboxProfile";
-	public static final String MAILBOXPGUID = "mailboxpguid";
-	public static final String PROFILEPGUID = "profilepguid";
-	
-	public MailBoxSchedProfile find(String mailboxguid, String profileguid);
+	public static final String PGUID = "pguid";
+
 }

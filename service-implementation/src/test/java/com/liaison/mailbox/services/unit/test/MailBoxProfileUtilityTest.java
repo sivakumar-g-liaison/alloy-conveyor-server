@@ -85,12 +85,9 @@ public class MailBoxProfileUtilityTest {
 
 		AddProfileToMailBoxResponseDTO mailboxResponse = new AddProfileToMailBoxResponseDTO();
 
-		ResponseDTO response = new ResponseDTO();
-		response.setMessage(MailBoxConstants.ADD_PROFILE_SUCCESS);
-		response.setStatus(MailBoxConstants.SUCCESS);
 
 		mailboxResponse.setMailboxProfileLinkGuid("1");
-		mailboxResponse.setResponse(response);
+		mailboxResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY,"Profile",Messages.SUCCESS));
 
 		String jsonProfileResponse = MailBoxUtility.marshalToJSON(mailboxResponse);
 		JSONObject jsonMaiboxProfileResponse = new JSONObject(jsonProfileResponse).getJSONObject("addProfileToMailBoxResponse");
@@ -107,12 +104,8 @@ public class MailBoxProfileUtilityTest {
 
 		DeactivateMailboxProfileLinkResponseDTO mailboxResponse = new DeactivateMailboxProfileLinkResponseDTO();
 
-		ResponseDTO response = new ResponseDTO();
-		response.setMessage(MailBoxConstants.ADD_PROFILE_SUCCESS);
-		response.setStatus(MailBoxConstants.SUCCESS);
-
 		mailboxResponse.setMailboxProfileLinkGuid("1");
-		mailboxResponse.setResponse(response);
+		mailboxResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY,"Profile",Messages.SUCCESS));
 
 		String jsonProfileResponse = MailBoxUtility.marshalToJSON(mailboxResponse);
 		JSONObject jsonMaiboxProfileResponse = new JSONObject(jsonProfileResponse).getJSONObject("deactivateMailBoxProfileLink");
