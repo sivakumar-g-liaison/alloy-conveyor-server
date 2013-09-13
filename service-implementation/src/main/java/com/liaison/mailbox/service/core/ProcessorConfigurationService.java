@@ -73,6 +73,9 @@ public class ProcessorConfigurationService {
 				MailBoxScheduleProfileConfigurationDAO scheduleProfileDAO = new MailBoxScheduleProfileConfigurationDAOBase();
 				MailBoxSchedProfile scheduleProfile = scheduleProfileDAO.find(MailBoxSchedProfile.class, linkerId);
 
+				if(scheduleProfile == null){
+					throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST, linkerId);
+				}
 				if (scheduleProfile.getProcessors() != null) {
 					processor.setExecutionOrder(scheduleProfile.getProcessors().size() + 1);
 				}
@@ -195,6 +198,9 @@ public class ProcessorConfigurationService {
 
 			ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
 			Processor processor = configDao.find(Processor.class, request.getProcessor().getGuid());
+			if(processor == null ){
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,request.getProcessor().getGuid());
+			}
 			if (processor.getFolders() != null) {
 
 				processor.getFolders().clear();
