@@ -1,6 +1,7 @@
 package com.liaison.mailbox.service.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.ProcessorExecutionOrderComparator;
 
 /**
  * @author sivakumarg
@@ -73,7 +75,7 @@ public class ProcessorConfigurationService {
 				MailBoxScheduleProfileConfigurationDAO scheduleProfileDAO = new MailBoxScheduleProfileConfigurationDAOBase();
 				MailBoxSchedProfile scheduleProfile = scheduleProfileDAO.find(MailBoxSchedProfile.class, linkerId);
 
-				if(scheduleProfile == null){
+				if (scheduleProfile == null) {
 					throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST, linkerId);
 				}
 				if (scheduleProfile.getProcessors() != null) {
@@ -85,19 +87,19 @@ public class ProcessorConfigurationService {
 				componenDao.persist(processor);
 			}
 
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY,PROCESSOR,Messages.SUCCESS));			
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(new ProcessorResponseDTO(String.valueOf(processor.getPguid())));
 			LOGGER.info("Exit from create processor.");
 			return serviceResponse;
 
 		} catch (Exception e) {
 
-			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);			
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED,PROCESSOR,Messages.FAILURE,e.getMessage()));
+			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROCESSOR, Messages.FAILURE, e
+					.getMessage()));
 			return serviceResponse;
 
 		}
-
 
 	}
 
@@ -113,7 +115,6 @@ public class ProcessorConfigurationService {
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
 		try {
-
 
 			LOGGER.info("Entering into get processor.");
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
@@ -137,7 +138,8 @@ public class ProcessorConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROCESSOR,Messages.FAILURE, e.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROCESSOR, Messages.FAILURE, e
+					.getMessage()));
 			return serviceResponse;
 		}
 	}
@@ -151,7 +153,7 @@ public class ProcessorConfigurationService {
 	 */
 	public DeActivateProcessorResponseDTO deactivateProcessor(String processorGuid) {
 
-		DeActivateProcessorResponseDTO serviceResponse = new DeActivateProcessorResponseDTO();		
+		DeActivateProcessorResponseDTO serviceResponse = new DeActivateProcessorResponseDTO();
 
 		try {
 
@@ -161,19 +163,19 @@ public class ProcessorConfigurationService {
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			config.deactivate(processorGuid);
 
-			// response message construction			
-			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL,PROCESSOR,Messages.SUCCESS));			
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(new ProcessorResponseDTO(processorGuid));
 			LOGGER.info("Exit from deactivate mailbox.");
-			return serviceResponse;					
+			return serviceResponse;
 
 		} catch (Exception e) {
 
 			LOGGER.error(Messages.DEACTIVATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, PROCESSOR,Messages.FAILURE, e.getMessage()));
-			return serviceResponse;			
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, PROCESSOR, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
 		}
-
 
 	}
 
@@ -192,14 +194,15 @@ public class ProcessorConfigurationService {
 		try {
 
 			ProcessorDTO processorDTO = request.getProcessor();
-			if(processorDTO == null){
+			if (processorDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
 			ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
 			Processor processor = configDao.find(Processor.class, request.getProcessor().getGuid());
-			if(processor == null ){
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,request.getProcessor().getGuid());
+			if (processor == null) {
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, request.getProcessor()
+						.getGuid());
 			}
 			if (processor.getFolders() != null) {
 
@@ -210,7 +213,7 @@ public class ProcessorConfigurationService {
 				processor.getCredentials().clear();
 			}
 
-			processorDTO.copyToEntity(processor,false);
+			processorDTO.copyToEntity(processor, false);
 			configDao.merge(processor);
 
 			int currentExecutionOrder = processor.getExecutionOrder();
@@ -222,13 +225,15 @@ public class ProcessorConfigurationService {
 				// Logic for updating execution order using original Processor entity
 				List<Processor> processorList = processor.getMailboxSchedProfile().getProcessors();
 
-				// Need to add entity objects in another list because calling remove() on original list causes entity object removal
+				// Need to add entity objects in another list because calling remove() on original
+				// list causes entity object removal
 
 				List<Processor> procs = new ArrayList<Processor>();
 				procs.addAll(processorList);
 
-				// TODO  You need not do this since the list is retrived ordered by( look into MailBoxSchedProfile) execution order but pls test though.
-				//Collections.sort(procs, new ProcessorExecutionOrderComparator());
+				// TODO You need not do this since the list is retrived ordered by( look into
+				// MailBoxSchedProfile) execution order but pls test though.
+				Collections.sort(procs, new ProcessorExecutionOrderComparator());
 
 				Processor procsrToSwap = procs.get(currentExecutionOrder - 1);
 				procs.remove(currentExecutionOrder - 1);
@@ -241,18 +246,19 @@ public class ProcessorConfigurationService {
 				}
 			}
 
-			// response message construction	
+			// response message construction
 			ProcessorDTO dto = new ProcessorDTO();
 			dto.setGuid(String.valueOf(processor.getPrimaryKey()));
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,PROCESSOR,Messages.SUCCESS));			
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(dto);
 			LOGGER.info("Exit from deactivate mailbox.");
 
 		} catch (Exception e) {
 
 			LOGGER.error(Messages.REVISE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROCESSOR,Messages.FAILURE, e.getMessage()));
-			return serviceResponse;	
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROCESSOR, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
 		}
 
 		LOGGER.info("Exit from revising processor.");
@@ -260,8 +266,7 @@ public class ProcessorConfigurationService {
 		return serviceResponse;
 	}
 
-
-	//TODO REMOVE LATER IF UNUSED
+	// TODO REMOVE LATER IF UNUSED
 	/**
 	 * Method for changing the execution order using Duplicate Processor(ProcessorForMerge) entity
 	 * 

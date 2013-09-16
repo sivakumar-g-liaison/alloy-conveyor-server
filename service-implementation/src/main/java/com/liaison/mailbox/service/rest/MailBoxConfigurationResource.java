@@ -528,10 +528,11 @@ public class MailBoxConfigurationResource {
 	 * @return Response Object
 	 */
 	@GET
-	@Path("/processor/{processorid}")
+	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getProcessor(@PathParam(value = "processorid") String guid) {
+	public Response getProcessor(@PathParam(value = "mailboxid") String mailboxguid,
+			@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 

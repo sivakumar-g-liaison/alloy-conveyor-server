@@ -15,6 +15,7 @@ import java.util.List;
 
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
+import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.RemoteDownloader;
@@ -223,8 +224,12 @@ public class ProcessorDTO {
 		// this.setType(processor.getProcsrType());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 
-		// TODO missing in JSON
-		// processor.getMailboxSchedProfile();
+		if (processor.getMailboxSchedProfile() != null) {
+
+			MailBoxSchedProfile mbxProfile = processor.getMailboxSchedProfile();
+			this.setLinkedMailboxId(mbxProfile.getMailbox().getPguid());
+			this.setLinkedProfileId(mbxProfile.getPguid());
+		}
 
 		// Set the RemoteDownloader properties
 		if (processor instanceof RemoteDownloader) {
