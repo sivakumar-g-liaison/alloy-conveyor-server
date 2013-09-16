@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -22,6 +25,8 @@ public class ProfileDTO {
 
 	private String name;
 	private String id;
+
+	private List<MailBoxProcessorResponseDTO> processors;
 
 	public String getName() {
 		return name;
@@ -37,6 +42,17 @@ public class ProfileDTO {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public List<MailBoxProcessorResponseDTO> getProcessors() {
+		if (null == processors) {
+			this.processors = new ArrayList<>();
+		}
+		return processors;
+	}
+
+	public void setProcessors(List<MailBoxProcessorResponseDTO> processors) {
+		this.processors = processors;
 	}
 
 	public void copyToEntity(ScheduleProfilesRef profile) {

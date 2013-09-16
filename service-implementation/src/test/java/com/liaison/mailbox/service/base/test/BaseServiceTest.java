@@ -41,7 +41,7 @@ public abstract class BaseServiceTest {
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
 
-	public static final String SUCCESS = "Success";
+	public static final String SUCCESS = "success";
 
 	@Before
 	public void initialSetUp() throws FileNotFoundException, IOException {

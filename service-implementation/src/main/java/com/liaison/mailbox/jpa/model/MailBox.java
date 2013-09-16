@@ -129,7 +129,8 @@ public class MailBox implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBoxSchedProfile
-	@OneToMany(mappedBy = "mailbox", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	@OneToMany(mappedBy = "mailbox", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH },
+			fetch = FetchType.EAGER)
 	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
 		return this.mailboxSchedProfiles;
 	}

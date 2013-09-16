@@ -1,0 +1,11 @@
+{
+    "addMailBoxResponse": {
+        "response": {
+            "message": "Mailbox created successfully.",
+            "status": "success"
+        },
+        "mailBox": {
+            "guid": "252B2CADNULL00A8NULLDD5316EEB409"
+        }
+    }
+}

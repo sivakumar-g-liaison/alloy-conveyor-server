@@ -16,7 +16,8 @@ import java.util.List;
 
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
+import com.liaison.mailbox.jpa.model.Processor;
 
 /**
  * 
@@ -32,6 +33,7 @@ public class MailBoxDTO {
 	private Integer serviceInstId;
 	private String shardKey;
 	private List<MailBoxPropertyDTO> properties;
+	private List<ProfileDTO> profiles;
 
 	public String getGuid() {
 		return guid;
@@ -93,8 +95,21 @@ public class MailBoxDTO {
 		this.properties = properties;
 	}
 
+	public List<ProfileDTO> getProfiles() {
+
+		if (null == profiles) {
+			profiles = new ArrayList<>();
+		}
+
+		return profiles;
+	}
+
+	public void setProfiles(List<ProfileDTO> profiles) {
+		this.profiles = profiles;
+	}
+
 	public void copyToEntity(MailBox mailBox) {
-		
+
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setMbxStatus(this.getStatus());
@@ -106,14 +121,15 @@ public class MailBoxDTO {
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
 		for (MailBoxPropertyDTO propertyDTO : this.getProperties()) {
-			 property = new MailBoxProperty();
-			//property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO REMOVE OWNER INCONSISTENT ERROR.STRANGE THOUGH.
+			property = new MailBoxProperty();
+			// property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO REMOVE OWNER
+			// INCONSISTENT ERROR.STRANGE THOUGH.
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
-			
+
 		}
 		mailBox.setMailboxProperties(properties);
-		
+
 	}
 
 	public void copyFromEntity(MailBox mailBox) {
@@ -130,10 +146,27 @@ public class MailBoxDTO {
 
 		MailBoxPropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {
+
 			propertyDTO = new MailBoxPropertyDTO();
 			propertyDTO.copyFromEntity(property);
 			this.getProperties().add(propertyDTO);
 		}
-	}
 
+		ProfileDTO profile = null;
+		MailBoxProcessorResponseDTO processorDTO = null;
+		for (MailBoxSchedProfile schedProfile : mailBox.getMailboxSchedProfiles()) {
+
+			profile = new ProfileDTO();
+			profile.copyFromEntity(schedProfile.getScheduleProfilesRef());
+
+			for (Processor processor : schedProfile.getProcessors()) {
+
+				processorDTO = new MailBoxProcessorResponseDTO();
+				processorDTO.copyFromEntity(processor);
+				profile.getProcessors().add(processorDTO);
+			}
+			this.getProfiles().add(profile);
+		}
+
+	}
 }

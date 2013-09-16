@@ -17,8 +17,11 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  */
 public class MailBoxResponseDTO {
-	
-	public MailBoxResponseDTO(String guid){
+
+	public MailBoxResponseDTO() { // Added for Deserialization
+	}
+
+	public MailBoxResponseDTO(String guid) {
 		this.guid = guid;
 	}
 

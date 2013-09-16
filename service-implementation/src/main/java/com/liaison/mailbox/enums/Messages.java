@@ -23,17 +23,17 @@ import javax.xml.bind.annotation.XmlEnum;
  */
 @XmlEnum
 public enum Messages {
-    
-	MBX_DOES_NOT_EXIST("Mailbox with the given id %s does not exist."),	
-	PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),	
+
+	MBX_DOES_NOT_EXIST("Mailbox with the given id %s does not exist."),
+	PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),
 	MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
-     //COMMON MESSAGES
+	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
 	REVISE_OPERATION_FAILED("% revise operation failed."),
 	READ_OPERATION_FAILED("Failed to retrieve the %s."),
-	DEACTIVATION_FAILED("%s deactivation failed."),	
+	DEACTIVATION_FAILED("%s deactivation failed."),
 	CREATED_SUCCESSFULLY("%s created successfully."),
-	REVISED_SUCCESSFULLY("% revised successfully."),
+	REVISED_SUCCESSFULLY("%s revised successfully."),
 	READ_SUCCESSFUL("%s read successfully."),
 	DEACTIVATION_SUCCESSFUL("%s deactivated successfully."),
 	SUCCESS("success"),
@@ -42,7 +42,7 @@ public enum Messages {
 	INVALID_REQUEST("The input request is invalid."),
 	GUID_NOT_AVAIL("Input Id is not available in the system."),
 	GUID_DOES_NOT_MATCH("Id in the request does not match the resource."),
-	//TRIGGER PROFILE USECASE
+	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
 	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile."),
 	TRG_PROF_FAILURE("Error triggering the profile %s ."),
@@ -68,5 +68,4 @@ public enum Messages {
 		return value;
 	}
 
-	
 }

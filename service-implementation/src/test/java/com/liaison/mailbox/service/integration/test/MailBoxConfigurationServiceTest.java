@@ -39,8 +39,10 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -82,6 +84,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 			IOException {
 
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
@@ -98,6 +101,11 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+
 		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "getMailBoxResponse"));
 
 	}

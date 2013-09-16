@@ -46,13 +46,10 @@ public class Processor implements Identifiable {
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
-	// private String procsrType;
+	private int executionOrder;
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private MailBoxSchedProfile mailboxSchedProfile;
-
-	private int executionOrder;
-
 	private List<ProcessorProperty> processorProperties;
 
 	public Processor() {
@@ -114,12 +111,6 @@ public class Processor implements Identifiable {
 	public void setProcsrStatus(String procsrStatus) {
 		this.procsrStatus = procsrStatus;
 	}
-
-	/*
-	 * @Column(name="PROCSR_TYPE", nullable=false, length=128) public String getProcsrType() {
-	 * return this.procsrType; } public void setProcsrType(String procsrType) { this.procsrType =
-	 * procsrType; }
-	 */
 
 	// bi-directional many-to-one association to Credential
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,

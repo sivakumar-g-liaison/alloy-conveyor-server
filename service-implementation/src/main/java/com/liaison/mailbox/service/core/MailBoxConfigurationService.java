@@ -10,15 +10,17 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
+import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
@@ -39,9 +41,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public class MailBoxConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationService.class);
-	private static String MAILBOX = "Mailbox";
-	private static String MAILBOX_NAME = "Mailbox Name";
-	
+	private static final String MAILBOX = "Mailbox";
+	private static final String MAILBOX_NAME = "Mailbox Name";
 
 	/**
 	 * Creates Mail Box.
@@ -55,47 +56,49 @@ public class MailBoxConfigurationService {
 		LOG.info("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
 		try {
-			
-			MailBoxDTO mailboxDto = request.getMailBox();
-			if(mailboxDto == null){
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
-			    }
 
-			if (MailBoxUtility.isEmpty(request.getMailBox().getName())){				
-				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING,MAILBOX_NAME);
-			    }
+			MailBoxDTO mailboxDto = request.getMailBox();
+			if (mailboxDto == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			if (MailBoxUtility.isEmpty(request.getMailBox().getName())) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MAILBOX_NAME);
+			}
 
 			MailBox mailBox = new MailBox();
 			mailboxDto.copyToEntity(mailBox);
-			if(mailBox.getMbxStatus() == null){
+			if (mailBox.getMbxStatus() == null) {
 				mailBox.setMbxStatus(MailBoxStatus.ACTIVE.value());
-			    }
+			}
 			mailBox.setPguid(MailBoxUtility.getGUID());
 
 			// persisting the mailbox entity
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			configDao.persist(mailBox);
 
-			// response message construction			
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY,MAILBOX,Messages.SUCCESS));			
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
 			serviceResponse.setMailBox(new MailBoxResponseDTO(String.valueOf(mailBox.getPrimaryKey())));
 			LOG.info("Exit from create mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
-			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);			
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED,MAILBOX,Messages.FAILURE,e.getMessage()));
+			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
+					.getMessage()));
 			return serviceResponse;
 
-		} 
+		}
 
 	}
 
 	/**
 	 * Get the mailbox using guid.
 	 * 
-	 * @param guid The guid of the mailbox.
+	 * @param guid
+	 *            The guid of the mailbox.
 	 * @return The responseDTO.
 	 */
 	public GetMailBoxResponseDTO getMailBox(String guid) {
@@ -104,85 +107,88 @@ public class MailBoxConfigurationService {
 		LOG.info("The retrieve guid is {} ", guid);
 
 		GetMailBoxResponseDTO serviceResponse = new GetMailBoxResponseDTO();
-		
+
 		try {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = configDao.find(MailBox.class, guid);
 			if (mailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,guid);
-			     }
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
+			}
 
 			MailBoxDTO dto = new MailBoxDTO();
 			dto.copyFromEntity(mailBox);
 
 			serviceResponse.setMailBox(dto);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL,MAILBOX,Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			LOG.info("Exit from get mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
-			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);			
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED,MAILBOX,Messages.FAILURE,e.getMessage()));
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
-		
+
 	}
 
 	/**
 	 * Method revise the mailbox configurations.
 	 * 
-	 * @param guid The mailbox pguid.
+	 * @param guid
+	 *            The mailbox pguid.
 	 */
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid) {
 
-		LOG.info("Entering into revise mailbox.The revise request is for {} ",guid);
+		LOG.info("Entering into revise mailbox.The revise request is for {} ", guid);
 
-		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();	
+		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();
 
 		try {
-			
-			MailBoxDTO mailboxDto = request.getMailBox();
-			if(mailboxDto == null){
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
-			    }
 
-			if ( MailBoxUtility.isEmpty(request.getMailBox().getName())) {
-				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING,MAILBOX_NAME);
+			MailBoxDTO mailboxDto = request.getMailBox();
+			if (mailboxDto == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			if (MailBoxUtility.isEmpty(request.getMailBox().getName())) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MAILBOX_NAME);
 			}
 
 			// Getting the mailbox.
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			MailBox retrivedMailBox = configDao.find(MailBox.class, guid);
-			if (retrivedMailBox == null) {
+			MailBox retrievedMailBox = configDao.find(MailBox.class, guid);
+			if (retrievedMailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL);
-			       }
+			}
 
 			// Removing the child items.
-			retrivedMailBox.getMailboxProperties().clear();
+			retrievedMailBox.getMailboxProperties().clear();
 
 			// updates the mail box data
-			mailboxDto.copyToEntity(retrivedMailBox);
-			if(retrivedMailBox.getMbxStatus() == null){
-				retrivedMailBox.setMbxStatus(MailBoxStatus.ACTIVE.value());
-			    }
-			configDao.merge(retrivedMailBox);
+			mailboxDto.copyToEntity(retrievedMailBox);
+			if (retrievedMailBox.getMbxStatus() == null) {
+				retrievedMailBox.setMbxStatus(MailBoxStatus.ACTIVE.value());
+			}
+			configDao.merge(retrievedMailBox);
 
-			// response message construction			
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,MAILBOX,Messages.SUCCESS));			
-			serviceResponse.setMailBox(new MailBoxResponseDTO(String.valueOf(retrivedMailBox.getPrimaryKey())));
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
+			serviceResponse.setMailBox(new MailBoxResponseDTO(String.valueOf(retrievedMailBox.getPrimaryKey())));
 			LOG.info("Exit from revise mailbox.");
-			return serviceResponse;			
+			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
-			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);			
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED,MAILBOX,Messages.FAILURE,e.getMessage()));
+			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
+					.getMessage()));
 			return serviceResponse;
 		}
-		
+
 	}
 
 	/**
@@ -198,25 +204,36 @@ public class MailBoxConfigurationService {
 		try {
 
 			LOG.info("The deactivate request is for {} ", guid);
-			
+
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			//TODO do not use names query, use the conventional update approach using entities
-			if(configDao.deactiveMailBox(guid)!=1) {
-				throw new MailBoxConfigurationServicesException(Messages.DEACTIVATION_FAILED,MAILBOX);
+			MailBox retrievedMailBox = configDao.find(MailBox.class, guid);
+			if (retrievedMailBox == null) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
 
-			// response message construction			
-			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL,MAILBOX,Messages.SUCCESS));			
+			// Changing the status in MailBoxSchedProfile if it is avail
+			List<MailBoxSchedProfile> retrievedSchedProfiles = retrievedMailBox.getMailboxSchedProfiles();
+			if (null != retrievedSchedProfiles) {
+				for (MailBoxSchedProfile schedProfile : retrievedSchedProfiles) {
+					schedProfile.setMbxProfileStatus(MailBoxStatus.INACTIVE.value());
+				}
+			}
+			// Changing the mailbox status
+			retrievedMailBox.setMbxStatus(MailBoxStatus.INACTIVE.value());
+			configDao.merge(retrievedMailBox);
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			serviceResponse.setMailBox(new MailBoxResponseDTO(guid));
 			LOG.info("Exit from deactivate mailbox.");
-			return serviceResponse;				
-			
-		} catch (MailBoxConfigurationServicesException e) {
-
-			LOG.error(Messages.DEACTIVATION_FAILED.value(), e);			
-			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED,MAILBOX,Messages.FAILURE,e.getMessage()));
 			return serviceResponse;
 
-		} 
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.DEACTIVATION_FAILED.value(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+
+		}
 	}
 }
