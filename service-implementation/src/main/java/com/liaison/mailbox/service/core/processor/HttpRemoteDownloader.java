@@ -18,8 +18,10 @@ import java.net.URL;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.xml.bind.JAXBException;
 
-import org.apache.http.HttpResponse;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +42,9 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * @author praveenu
  * 
  */
-public class HttpRemoteDownloader extends MailBoxHandler implements	MailBoxProcessor {
+public class HttpRemoteDownloader extends MailBoxHandler implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(HttpRemoteDownloader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpRemoteDownloader.class);
 
 	// private Processor configurationInstance;
 
@@ -61,83 +62,86 @@ public class HttpRemoteDownloader extends MailBoxHandler implements	MailBoxProce
 	 * Get HTTPRequest with injected configurations.
 	 * 
 	 * @return configured HTTPRequest
-	 * @throws MailBoxServicesException 
+	 * @throws MailBoxServicesException
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws LiaisonException
 	 */
-	private HTTPRequest getClientWithInjectedConfiguration() throws MailBoxServicesException {
+	private HTTPRequest getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
+			IOException, LiaisonException {
 
-			LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
-			// Create HTTPRequest and set the properties
-			 HTTPRequest request = new HTTPRequest(null, LOGGER);
-			
-			try{
-			// Convert the json string to DTO
-			HttpRemoteDownloaderPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
-					                                                                        HttpRemoteDownloaderPropertiesDTO.class);
+		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
+		// Create HTTPRequest and set the properties
+		HTTPRequest request = new HTTPRequest(null, LOGGER);
 
-			// Set url to HTTPRequest
-			URL url = new URL(properties.getUrl());
-			request.setUrl(url);
+		// Convert the json string to DTO
+		HttpRemoteDownloaderPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
+				configurationInstance.getProcsrProperties(), HttpRemoteDownloaderPropertiesDTO.class);
 
-			// Set configurations
-			request.setVersion(properties.getHttpVersion());
-			request.setMethod(properties.getHttpVerb());
-			request.setNumberOfRetries(properties.getRetryAttempts());
-			request.setSocketTimeout(properties.getSocketTimeout());
-			request.setConnectionTimeout(properties.getConnectionTimeout());
-			request.setPort(properties.getPort());
-			request.setChunkedEncoding(properties.isChunkedEncoding());
+		// Set url to HTTPRequest
+		URL url = new URL(properties.getUrl());
+		request.setUrl(url);
 
-			// Set the Other header to HttpRequest
-			if (properties.getOtherRequestHeader() != null) {
-				for (HttpOtherRequestHeaderDTO header : properties
-						.getOtherRequestHeader()) {
-					request.addHeader(header.getName(), header.getValue());
-				}
+		// Set configurations
+		request.setVersion(properties.getHttpVersion());
+		request.setMethod(properties.getHttpVerb());
+		request.setNumberOfRetries(properties.getRetryAttempts());
+		request.setSocketTimeout(properties.getSocketTimeout());
+		request.setConnectionTimeout(properties.getConnectionTimeout());
+		request.setPort(properties.getPort());
+		request.setChunkedEncoding(properties.isChunkedEncoding());
+
+		// Set the Other header to HttpRequest
+		if (properties.getOtherRequestHeader() != null) {
+			for (HttpOtherRequestHeaderDTO header : properties.getOtherRequestHeader()) {
+				request.addHeader(header.getName(), header.getValue());
 			}
+		}
 
-			// Set the content type header to HttpRequest
-			if (MailBoxUtility.isEmpty(properties.getContentType())) {
-				request.addHeader("Content-Type", properties.getContentType());
-			}
+		// Set the content type header to HttpRequest
+		if (MailBoxUtility.isEmpty(properties.getContentType())) {
+			request.addHeader("Content-Type", properties.getContentType());
+		}
 
-			LOGGER.info("Returns HTTP/S configured HTTPClient");
-			
-			}catch(Exception e){
-				LOGGER.error("Injection of properties to HTTP Client failed",e);
-				throw new MailBoxServicesException(Messages.INJECTION_OF_PROPERTIES_FAILED);
-			}
-			return request;
+		LOGGER.info("Returns HTTP/S configured HTTPClient");
 
-		} 		
-	
+		return request;
+
+	}
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * @throws MailBoxServicesException 
-	 * @throws FS2Exception 
-	 * @throws IOException 
-	 * @throws LiaisonException 
-	 * @throws URISyntaxException 
+	 * 
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws URISyntaxException
+	 * @throws JAXBException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception, URISyntaxException  {
+	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException {
 
 		HTTPRequest request = getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
 
-		// Set the pay load value to http client input data for POST & PUT request
+		// Set the pay load value to http client input data for POST & PUT
+		// request
 		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 			// TODO read pay load value from file if exist
 		}
-        
+
 		HTTPResponse response = request.execute();
 		if (response.getStatusCode() != 200) {
-			LOGGER.info("The reponse code recived is {} ",response.getStatusCode());
-			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);	
-				} 
+			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
+		}
 		writeResponseToMailBox(responseStream);
 	}
 
@@ -146,17 +150,20 @@ public class HttpRemoteDownloader extends MailBoxHandler implements	MailBoxProce
 
 		try {
 
-			    // HTTPRequest executed through JavaScript
+			// HTTPRequest executed through JavaScript
 			if (configurationInstance.getJavaScriptUri() != null) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
-				//TODO actually read the JS from the URI stored i mean from the path returned in   getJavaScriptUri()
-				String groupingConfiguration = ServiceUtils	.readFileFromClassPath("HTTPRemoteDataDownloader.js");
+
+				// Read the JS from the URI stored
+				String groupingConfiguration = ServiceUtils.readFileFromClassPath(configurationInstance.getJavaScriptUri());
 				engine.eval(groupingConfiguration);
 				Invocable inv = (Invocable) engine;
-				inv.invokeFunction("handleHttpRequest", this);
-                
+
+				// invoke the method in javascript
+				inv.invokeFunction("handleHTTPRequest", this);
+
 			} else {
 				// HTTPRequest executed through Java
 				executeRequest();
@@ -164,7 +171,7 @@ public class HttpRemoteDownloader extends MailBoxHandler implements	MailBoxProce
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			//TODO Re stage and update status in FSM
+			// TODO Re stage and update status in FSM
 		}
 
 	}
