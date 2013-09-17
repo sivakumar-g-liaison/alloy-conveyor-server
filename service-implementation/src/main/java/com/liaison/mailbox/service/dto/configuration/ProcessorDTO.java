@@ -10,16 +10,24 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
-import com.liaison.mailbox.jpa.model.RemoteDownloader;
-import com.liaison.mailbox.jpa.model.RemoteUploader;
+import com.liaison.mailbox.service.dto.configuration.request.HttpRemoteDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -32,7 +40,7 @@ public class ProcessorDTO {
 	private String guid;
 	private String name;
 	private String type;
-	private String properties;
+	private HttpRemoteDownloaderPropertiesDTO remoteDownloaderProperties;
 	private String javaScriptURI;
 	private String description;
 	private String status;
@@ -40,7 +48,7 @@ public class ProcessorDTO {
 	private String linkedProfileId;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
-	private List<ProcessorPropertyDTO> procsrProperties;
+	private List<ProcessorPropertyDTO> dynamicProperties;
 	private int executionOrder;
 
 	public String getGuid() {
@@ -67,13 +75,12 @@ public class ProcessorDTO {
 		this.type = type;
 	}
 
-	public String getProperties() {
-		
-		return properties;
+	public HttpRemoteDownloaderPropertiesDTO getRemoteDownloaderProperties() {
+		return remoteDownloaderProperties;
 	}
 
-	public void setProperties(String properties) {
-		this.properties = properties;
+	public void setRemoteDownloaderProperties(HttpRemoteDownloaderPropertiesDTO remoteDownloaderProperties) {
+		this.remoteDownloaderProperties = remoteDownloaderProperties;
 	}
 
 	public String getJavaScriptURI() {
@@ -117,8 +124,8 @@ public class ProcessorDTO {
 	}
 
 	public List<FolderDTO> getFolders() {
-		if(folders == null){
-			return new ArrayList<FolderDTO>();
+		if (folders == null) {
+			folders = new ArrayList<FolderDTO>();
 		}
 		return folders;
 	}
@@ -128,8 +135,8 @@ public class ProcessorDTO {
 	}
 
 	public List<CredentialDTO> getCredentials() {
-		if(credentials == null){
-			return new ArrayList<CredentialDTO>();
+		if (credentials == null) {
+			credentials = new ArrayList<CredentialDTO>();
 		}
 		return credentials;
 	}
@@ -138,15 +145,16 @@ public class ProcessorDTO {
 		this.credentials = credentials;
 	}
 
-	public List<ProcessorPropertyDTO> getProcsrProperties() {
-		if(procsrProperties == null){
-			return new ArrayList<ProcessorPropertyDTO>();
+	public List<ProcessorPropertyDTO> getDynamicProperties() {
+
+		if (dynamicProperties == null) {
+			dynamicProperties = new ArrayList<ProcessorPropertyDTO>();
 		}
-		return procsrProperties;
+		return dynamicProperties;
 	}
 
-	public void setProcsrProperties(List<ProcessorPropertyDTO> procsrProperties) {
-		this.procsrProperties = procsrProperties;
+	public void setDynamicProperties(List<ProcessorPropertyDTO> dynamicProperties) {
+		this.dynamicProperties = dynamicProperties;
 	}
 
 	public int getExecutionOrder() {
@@ -157,29 +165,38 @@ public class ProcessorDTO {
 		this.executionOrder = executionOrder;
 	}
 
-	public void copyToEntity(Processor processor, boolean isCreate) {
+	/**
+	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
+	 * MailBoxSchedProfile and Processor. That step will be done in the service.
+	 * 
+	 * @param processor
+	 *            The processor entity
+	 * @param isCreate
+	 *            The boolean value use to differentiate create and revise processor operation.
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonGenerationException
+	 */
+	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException,
+			JsonGenerationException, JsonMappingException, JAXBException, IOException {
 
 		if (isCreate) {
 			processor.setPguid(MailBoxUtility.getGUID());
 		}
-		processor.setProcsrDesc(this.getDescription());		
-		processor.setProcsrProperties(this.getProperties());
-		
-		processor.setProcsrStatus(this.getStatus());
-		// processor.setProcsrType(this.getType());
+
+		HttpRemoteDownloaderPropertiesDTO propertiesDTO = this.getRemoteDownloaderProperties();
+		if (null != propertiesDTO) {
+			String propertiesJSON = MailBoxUtility.marshalToJSON(this.getRemoteDownloaderProperties());
+			processor.setProcsrProperties(propertiesJSON);
+		}
+
+		processor.setProcsrDesc(this.getDescription());
+		processor.setProcsrName(this.getName());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
 
-		// Set the RemoteDownloader properties
-		if (processor instanceof RemoteDownloader) {
-		}
-
-		// Set the RemoteUploader properties
-		if (processor instanceof RemoteUploader) {
-		}
-
-		// TODO missing in JSON
-		// processor.setMailboxSchedProfile();
-
+		// Setting the folders.
 		Folder folder = null;
 		List<Folder> folders = new ArrayList<>();
 		for (FolderDTO folderDTO : this.getFolders()) {
@@ -191,11 +208,11 @@ public class ProcessorDTO {
 			folders.add(folder);
 		}
 
-		// TODO JSON have list of folder. But model have single folder
 		if (!folders.isEmpty()) {
 			processor.setFolders(folders);
 		}
 
+		// Setting the credentials
 		Credential credential = null;
 		List<Credential> credentialList = new ArrayList<>();
 		for (CredentialDTO credentialDTO : this.getCredentials()) {
@@ -207,33 +224,56 @@ public class ProcessorDTO {
 			credentialList.add(credential);
 		}
 
-		// TODO JSON have list of credential. But model have single credential
 		if (!credentialList.isEmpty()) {
 			processor.setCredentials(credentialList);
 		}
 
+		// Setting the property
 		ProcessorProperty property = null;
 		List<ProcessorProperty> properties = new ArrayList<>();
-
-		for (ProcessorPropertyDTO propertyDTO : this.getProcsrProperties()) {
+		for (ProcessorPropertyDTO propertyDTO : this.getDynamicProperties()) {
 
 			property = new ProcessorProperty();
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
 		}
-
-		processor.setProcessorProperties(properties);
+		if (!properties.isEmpty()) {
+			processor.setDynamicProperties(properties);
+		}
 	}
 
-	public void copyFromEntity(Processor processor) {
+	/**
+	 * Copies the values from Entity to DTO.
+	 * 
+	 * @param processor
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 */
+	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		this.setGuid(processor.getPguid());
-		this.setDescription(processor.getProcsrDesc());		
-		this.setProperties(processor.getProcsrProperties());
-		this.setStatus(processor.getProcsrStatus());
+		this.setDescription(processor.getProcsrDesc());
+
+		String propertyJSON = processor.getProcsrProperties();
+		if (!MailBoxUtility.isEmpty(propertyJSON)) {
+
+			HttpRemoteDownloaderPropertiesDTO propertiesDTO = MailBoxUtility.unmarshalFromJSON(propertyJSON,
+					HttpRemoteDownloaderPropertiesDTO.class);
+			this.setRemoteDownloaderProperties(propertiesDTO);
+		}
+
+		String status = processor.getProcsrStatus();
+		if (!MailBoxUtility.isEmpty(status)) {
+			MailBoxStatus foundStatus = MailBoxStatus.findByCode(status);
+			this.setStatus(foundStatus.name());
+		}
+
 		this.setExecutionOrder(processor.getExecutionOrder());
-		// this.setType(processor.getProcsrType());
+		this.setType(processor.getProcessorType().name());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
+		this.setName(processor.getProcsrName());
 
 		if (processor.getMailboxSchedProfile() != null) {
 
@@ -242,51 +282,37 @@ public class ProcessorDTO {
 			this.setLinkedProfileId(mbxProfile.getPguid());
 		}
 
-		// Set the RemoteDownloader properties
-		if (processor instanceof RemoteDownloader) {
-		}
-
-		// Set the RemoteUploader properties
-		if (processor instanceof RemoteUploader) {
-		}
-
 		// Set folders
-		FolderDTO folderDTO = null;
-		List<FolderDTO> folders = new ArrayList<>();
 		if (null != processor.getFolders()) {
 
+			FolderDTO folderDTO = null;
 			for (Folder folder : processor.getFolders()) {
 				folderDTO = new FolderDTO();
 				folderDTO.copyFromEntity(folder);
-				folders.add(folderDTO);
+				this.getFolders().add(folderDTO);
 			}
 		}
-		this.setFolders(folders);
 
 		// Set credentials
-		CredentialDTO credentialDTO = null;
-		List<CredentialDTO> credentials = new ArrayList<>();
 		if (null != processor.getCredentials()) {
 
+			CredentialDTO credentialDTO = null;
 			for (Credential credential : processor.getCredentials()) {
 				credentialDTO = new CredentialDTO();
 				credentialDTO.copyFromEntity(credential);
-				credentials.add(credentialDTO);
+				this.getCredentials().add(credentialDTO);
 			}
 		}
-		this.setCredentials(credentials);
 
 		// Set properties
-		ProcessorPropertyDTO propertyDTO = null;
-		List<ProcessorPropertyDTO> properties = new ArrayList<>();
-		if (null != processor.getProcessorProperties()) {
+		if (null != processor.getDynamicProperties()) {
 
-			for (ProcessorProperty property : processor.getProcessorProperties()) {
+			ProcessorPropertyDTO propertyDTO = null;
+			for (ProcessorProperty property : processor.getDynamicProperties()) {
 				propertyDTO = new ProcessorPropertyDTO();
 				propertyDTO.copyFromEntity(property);
-				properties.add(propertyDTO);
+				this.getDynamicProperties().add(propertyDTO);
 			}
 		}
-		this.setProcsrProperties(properties);
 	}
 }

@@ -28,6 +28,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.enums.ProcessorType;
 
 /**
  * The persistent class for the PROCESSORS database table.
@@ -41,16 +42,21 @@ public class Processor implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String TYPE_REMOTEDOWNLOADER = "remotedownloader";
+	public static final String TYPE_REMOTEUPLOADER = "remoteuploader";
+	public static final String TYPE_SWEEPER = "sweeper";
+
 	private String pguid;
 	private String javaScriptUri;
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
+	private String procsrName;
 	private int executionOrder;
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private MailBoxSchedProfile mailboxSchedProfile;
-	private List<ProcessorProperty> processorProperties;
+	private List<ProcessorProperty> dynamicProperties;
 
 	public Processor() {
 	}
@@ -58,12 +64,12 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ProcessorProperty
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<ProcessorProperty> getProcessorProperties() {
-		return processorProperties;
+	public List<ProcessorProperty> getDynamicProperties() {
+		return dynamicProperties;
 	}
 
-	public void setProcessorProperties(List<ProcessorProperty> processorProperties) {
-		this.processorProperties = processorProperties;
+	public void setDynamicProperties(List<ProcessorProperty> processorProperties) {
+		this.dynamicProperties = processorProperties;
 	}
 
 	@Id
@@ -110,6 +116,15 @@ public class Processor implements Identifiable {
 
 	public void setProcsrStatus(String procsrStatus) {
 		this.procsrStatus = procsrStatus;
+	}
+
+	@Column(name = "PROCSR_NAME", length = 512)
+	public String getProcsrName() {
+		return procsrName;
+	}
+
+	public void setProcsrName(String procsrName) {
+		this.procsrName = procsrName;
 	}
 
 	// bi-directional many-to-one association to Credential
@@ -197,9 +212,39 @@ public class Processor implements Identifiable {
 		return this.getClass();
 	}
 
+	/**
+	 * Method returns the processor type from the discriminator value.
+	 * 
+	 * @return The Processor type
+	 */
 	@Transient
-	public String getProcessorType() {
+	public ProcessorType getProcessorType() {
+
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
-		return val == null ? null : val.value();
+		String code = val.value();
+		return ProcessorType.findByCode(code);
+	}
+
+	/**
+	 * Factory method returns Processor instance corresponding to the input value.
+	 * 
+	 * @param processorType
+	 *            enumeration indicating the type of processor type.
+	 * @return a new instance of Processor of the give type.
+	 */
+	@Transient
+	public static Processor processorInstanceFactory(ProcessorType processorType) {
+
+		Processor processor = null;
+
+		if (ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
+			processor = new RemoteDownloader();
+		} else if (ProcessorType.REMOTEUPLOADER.equals(processorType)) {
+			processor = new RemoteUploader();
+		} else {
+			processor = new Sweeper();
+		}
+
+		return processor;
 	}
 }

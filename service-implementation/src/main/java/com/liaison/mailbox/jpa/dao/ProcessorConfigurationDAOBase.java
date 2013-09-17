@@ -22,16 +22,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		super(PERSISTENCE_UNIT_NAME);
 	}
 
-	@Override
-	public void deactivate(String guId) {
-
-		Processor processor = this.find(Processor.class, guId);
-		if (processor != null) {
-			processor.setProcsrStatus("inactive");
-			this.merge(processor);
-		}
-
-	}
+	/*
+	 * @Override public void deactivate(String guId) { Processor processor =
+	 * this.find(Processor.class, guId); if (processor != null) {
+	 * processor.setProcsrStatus("inactive"); this.merge(processor); } }
+	 */
 
 	@Override
 	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern) {

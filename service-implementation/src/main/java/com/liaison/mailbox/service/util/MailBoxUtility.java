@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.mailbox.service.rest.MailBoxConfigurationResource;
 
 /**
  * Utilities for MailBox.
@@ -54,7 +53,7 @@ public class MailBoxUtility {
 	 */
 	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
 			JsonMappingException, IOException {
-		LOGGER.debug("Input JSON is {}",serializedJson);
+		LOGGER.debug("Input JSON is {}", serializedJson);
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
 		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
@@ -98,8 +97,8 @@ public class MailBoxUtility {
 
 		// added to support root level element.
 		mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, true);
-        String jsonBuilt = mapper.writeValueAsString(object);
-        LOGGER.debug("JSON Built is {}",jsonBuilt);
+		String jsonBuilt = mapper.writeValueAsString(object);
+		LOGGER.debug("JSON Built is {}", jsonBuilt);
 		return jsonBuilt;
 	}
 

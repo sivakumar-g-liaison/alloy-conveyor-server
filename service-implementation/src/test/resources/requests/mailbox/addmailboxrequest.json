@@ -3,7 +3,7 @@
         "mailBox": {
             "name": "TestData",
             "description": "This is to collect access metrics ",
-            "status": "active",
+            "status": "ACTIVE",
             "properties": [
                 {
                     "name": "filerenameformat",

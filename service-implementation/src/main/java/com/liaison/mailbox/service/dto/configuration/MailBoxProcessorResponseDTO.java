@@ -50,7 +50,7 @@ public class MailBoxProcessorResponseDTO {
 	public void copyFromEntity(Processor processor) {
 
 		this.setGuid(processor.getPguid());
-		this.setType(processor.getProcessorType());
-		// this.setName();// TODO change it as processor name
+		this.setType(processor.getProcessorType().name());
+		this.setName(processor.getProcsrName());
 	}
 }

@@ -23,14 +23,13 @@ import com.liaison.framework.fs2.api.FS2Exception;
 import com.liaison.framework.fs2.api.FS2Factory;
 import com.liaison.framework.fs2.api.FS2MetaSnapshot;
 import com.liaison.framework.fs2.api.FlexibleStorageSystem;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * @author praveenu
@@ -50,8 +49,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor
-	 * type.
+	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor type.
 	 * 
 	 * @return
 	 */
@@ -59,9 +57,9 @@ public abstract class AbstractRemoteProcessor {
 
 		switch (configurationInstance.getProcessorType()) {
 
-			case MailBoxConstants.REMOTE_DOWNLOADER:
+			case REMOTEDOWNLOADER:
 				return new HTTPRequest(null, LOGGER);
-			case MailBoxConstants.REMOTE_UPLOADER:
+			case REMOTEUPLOADER:
 				return new HTTPRequest(null, LOGGER);
 			default:
 				return null;
@@ -84,12 +82,11 @@ public abstract class AbstractRemoteProcessor {
 
 			for (Folder folder : configurationInstance.getFolders()) {
 
-				if (MailBoxUtility.isEmpty(folder.getFldrType()) || MailBoxUtility.isEmpty(folder.getFldrUri())) {
-
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
+				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
-				}
+				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 
-				if (folder.getFldrType().equalsIgnoreCase(FolderType.PAYLOAD_LOCATION.toString())) {
 					LOGGER.debug("Started reading the payload files");
 					files = new File(folder.getFldrUri()).listFiles();
 					LOGGER.debug("Payload files received successfully");
@@ -111,9 +108,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the URI to which the response should be written, this can be used if
-	 * the JS decides to write the response straight to the file system or
-	 * database
+	 * Get the URI to which the response should be written, this can be used if the JS decides to
+	 * write the response straight to the file system or database
 	 * 
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
@@ -124,11 +120,10 @@ public abstract class AbstractRemoteProcessor {
 
 			for (Folder folder : configurationInstance.getFolders()) {
 
-				if (MailBoxUtility.isEmpty(folder.getFldrType()) || MailBoxUtility.isEmpty(folder.getFldrUri())) {
-
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
+				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
-
-				} else if (folder.getFldrType().equalsIgnoreCase(FolderType.RESPONSE_LOCATION.toString())) {
+				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return folder.getFldrUri();
 				}
 			}
@@ -158,15 +153,23 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the list of dynamic properties of the MailBox known only to java
-	 * script
+	 * Get the list of dynamic properties of the MailBox known only to java script
 	 * 
 	 * @return MailBox dynamic properties
 	 */
 	public Object getDynamicProperties() {
 
-		// TODO
-		return configurationInstance.getProcessorProperties();
+		return configurationInstance.getDynamicProperties();
+	}
+
+	/**
+	 * Update the dynamic property list of the MailBox known only to java script
+	 * 
+	 */
+	public void addUpdateDynamicProperty(String name, String value) {
+		ProcessorConfigurationService service = new ProcessorConfigurationService();
+		service.addOrUpdateProcessorProperties(configurationInstance, name, value);
+
 	}
 
 	public Object getPassword() {

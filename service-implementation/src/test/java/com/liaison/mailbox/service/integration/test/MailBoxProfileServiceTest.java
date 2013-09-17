@@ -16,7 +16,6 @@ import junit.framework.Assert;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		logger = LoggerFactory.getLogger(MailBoxProfileServiceTest.class);
 	}
 
-	@Test
+	// @Test
 	public void testAddProfileToMailBox() throws LiaisonException, JSONException, IOException {
 
 		// reads the addprofile input from JSON file
@@ -63,7 +62,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseStatus(response, "addProfileToMailBoxResponse"));
 	}
 
-	@Test
+	// @Test
 	public void testDeactivateProfileFromMailBox() throws LiaisonException, JSONException, IOException {
 
 		String jsonString = ServiceUtils.readFileFromClassPath("requests/profile/profile.json");

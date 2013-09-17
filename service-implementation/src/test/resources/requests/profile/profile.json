@@ -1,7 +1,7 @@
 {
 	    "addProfileRequest": {
 	        "profile": {
-	            "name": "profilename",
+	            "name": "onceIn5mins",
 	            "id": "profileid"
 	        }
 	    }

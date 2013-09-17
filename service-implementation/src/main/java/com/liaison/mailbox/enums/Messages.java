@@ -28,6 +28,7 @@ public enum Messages {
 	PROFILE_DOES_NOT_EXIST("Profile with the given id %s does not exist."),
 	PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),
 	MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
+
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
 	REVISE_OPERATION_FAILED("%s revise operation failed."),
@@ -43,13 +44,17 @@ public enum Messages {
 	INVALID_REQUEST("The input request is invalid."),
 	GUID_NOT_AVAIL("Input Id is not available in the system."),
 	GUID_DOES_NOT_MATCH("Id in the request does not match the resource."),
+
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
 	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile."),
 	TRG_PROF_FAILURE("Error triggering the profile %s ."),
 	FOLDERS_CONFIGURATION_INVALID("Folders configured for processors, but they are missing folder type and folder uri."),
 	INJECTION_OF_PROPERTIES_FAILED("Injection of properties while building http client from processor configuration failed."),
-	HTTP_REQUEST_FAILED("HTTP request failed.");
+	HTTP_REQUEST_FAILED("HTTP request failed."),
+
+	// INVALID ENUM
+	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported.");
 
 	private String value;
 

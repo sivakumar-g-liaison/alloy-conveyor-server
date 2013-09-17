@@ -43,6 +43,7 @@ public class MailBoxConfigurationService {
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationService.class);
 	private static final String MAILBOX = "Mailbox";
 	private static final String MAILBOX_NAME = "Mailbox Name";
+	private static final String MAILBOX_STATUS = "MailBox Status";
 
 	/**
 	 * Creates Mail Box.
@@ -62,15 +63,19 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
-			if (MailBoxUtility.isEmpty(request.getMailBox().getName())) {
+			if (MailBoxUtility.isEmpty(mailboxDto.getName())) {
 				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MAILBOX_NAME);
+			}
+
+			// status validation
+			MailBoxStatus foundStatusType = MailBoxStatus.findByName(mailboxDto.getStatus());
+			if (foundStatusType == null) {
+				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, MAILBOX_STATUS);
 			}
 
 			MailBox mailBox = new MailBox();
 			mailboxDto.copyToEntity(mailBox);
-			if (mailBox.getMbxStatus() == null) {
-				mailBox.setMbxStatus(MailBoxStatus.ACTIVE.value());
-			}
+			mailBox.setMbxStatus(foundStatusType.value());// Setting the mailbox status
 			mailBox.setPguid(MailBoxUtility.getGUID());
 
 			// persisting the mailbox entity

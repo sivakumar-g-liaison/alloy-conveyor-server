@@ -11,15 +11,21 @@
 package com.liaison.mailbox.service.core.processor;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FileUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
@@ -29,7 +35,6 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.framework.fs2.api.FS2Exception;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
@@ -134,7 +139,11 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		// Set the pay load value to http client input data for POST & PUT
 		// request
 		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
-			// TODO read pay load value from file if exist
+			StringBuffer buffer = new StringBuffer();
+			for (File entry : getPayload()) {
+				String content = FileUtils.readFileToString(entry, "UTF-8");
+				buffer.append(content);
+			}
 		}
 
 		HTTPResponse response = request.execute();
@@ -143,6 +152,27 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		}
 		writeResponseToMailBox(responseStream);
+	}
+
+	/**
+	 * Method to read the javascript file as string
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * 
+	 */
+	private String getJavaScriptString(String URI) throws IOException, URISyntaxException {
+
+		StringBuffer buffer = new StringBuffer();
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(URI))) {
+			for (Path entry : stream) {
+				String content = FileUtils.readFileToString(entry.toFile(), "UTF-8");
+				buffer.append(content);
+			}
+		} catch (IOException e) {
+			throw e;
+		}
+		return buffer.toString();
 	}
 
 	@Override
@@ -155,16 +185,13 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
-               
-				// Read the JS from the URI stored
-				//TODO this wrong atleast the name of the method "readFileFromClassPath" is misleading .JS file need not be in class path. 
-				//Use standard java FILE IO methods to read the JS file. I remember Siva saying he wrote utility methods to read js from file system
-				String groupingConfiguration = ServiceUtils.readFileFromClassPath(configurationInstance.getJavaScriptUri());
-				engine.eval(groupingConfiguration);
+
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
-				inv.invokeFunction("handleHTTPRequest", this);
+				Object obj = inv.invokeFunction("handleHTTPRequest", this);
+				System.out.println(obj.toString());
 
 			} else {
 				// HTTPRequest executed through Java
@@ -175,7 +202,6 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
-
 	}
 
 }

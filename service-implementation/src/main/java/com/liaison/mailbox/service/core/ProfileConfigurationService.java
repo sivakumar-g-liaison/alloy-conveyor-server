@@ -45,7 +45,7 @@ public class ProfileConfigurationService {
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
 	private static String PROFILE = "Profile";
 	private static final String PROFILE_NAME = "Profile Name";
-	
+
 	/**
 	 * Creates Profile.
 	 * 
@@ -57,21 +57,21 @@ public class ProfileConfigurationService {
 
 		LOG.info("Entering into profile creation.");
 		AddProfileResponseDTO serviceResponse = new AddProfileResponseDTO();
-		
+
 		try {
 
-			ProfileDTO profileDto = request.getProfile();
-			
-			if (profileDto == null) {
+			ProfileDTO profileDTO = request.getProfile();
+
+			if (profileDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
-			if (MailBoxUtility.isEmpty(request.getProfile().getName())) {
+			if (MailBoxUtility.isEmpty(profileDTO.getName())) {
 				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, PROFILE_NAME);
 			}
 
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
-			profileDto.copyToEntity(profile);
+			profileDTO.copyToEntity(profile);
 			profile.setPguid(MailBoxUtility.getGUID());
 
 			// persisting the profile entity
@@ -81,21 +81,21 @@ public class ProfileConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(profile.getPrimaryKey())));
-			
+
 			LOG.info("Exiting from profile creation.");
-			
+
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
 					.getMessage()));
-			
+
 			return serviceResponse;
 		}
 
 	}
-	
+
 	/**
 	 * Add Profile to MailBox.
 	 * 
@@ -107,7 +107,6 @@ public class ProfileConfigurationService {
 
 		LOG.info("Add Profile to mailbox");
 		AddProfileToMailBoxResponseDTO serviceResponse = new AddProfileToMailBoxResponseDTO();
-	
 
 		try {
 
@@ -115,14 +114,14 @@ public class ProfileConfigurationService {
 			MailBoxConfigurationDAO mbConfig = new MailBoxConfigurationDAOBase();
 			MailBox mailbox = mbConfig.find(MailBox.class, mailBoxGuid);
 			if (mailbox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,mailBoxGuid);
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxGuid);
 			}
-			
+
 			// Getting the existing profile from given GUID
 			ProfileConfigurationDAO proConfig = new ProfileConfigurationDAOBase();
 			ScheduleProfilesRef profile = proConfig.find(ScheduleProfilesRef.class, profileGuid);
 			if (profile == null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROFILE_DOES_NOT_EXIST,profileGuid);
+				throw new MailBoxConfigurationServicesException(Messages.PROFILE_DOES_NOT_EXIST, profileGuid);
 			}
 
 			// Construct MailBoxSchedProfile entity
@@ -135,17 +134,18 @@ public class ProfileConfigurationService {
 			// Persist the entity
 			MailBoxScheduleProfileConfigurationDAO configDao = new MailBoxScheduleProfileConfigurationDAOBase();
 			configDao.persist(mailBoxSchedProfile);
-			
-			// response message construction			
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY,PROFILE,Messages.SUCCESS));			
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
 			serviceResponse.setMailboxProfileLinkGuid(String.valueOf(mailBoxSchedProfile.getPrimaryKey()));
 			LOG.info("Exit from add profile to mailbox.");
-			return serviceResponse;			
-           
+			return serviceResponse;
+
 		} catch (MailBoxConfigurationServicesException e) {
-			
-			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);			
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED,PROFILE,Messages.FAILURE,e.getMessage()));
+
+			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
+					.getMessage()));
 			return serviceResponse;
 		}
 
@@ -161,8 +161,8 @@ public class ProfileConfigurationService {
 	public DeactivateMailboxProfileLinkResponseDTO deactivateMailboxProfileLink(String mailboxGuid, String linkGuid) {
 
 		LOG.info("Deactivate Profile from mailbox");
-		LOG.info("input mailbox id {}",mailboxGuid);
-		LOG.info("input linker id {}",linkGuid);
+		LOG.info("input mailbox id {}", mailboxGuid);
+		LOG.info("input linker id {}", linkGuid);
 		DeactivateMailboxProfileLinkResponseDTO serviceResponse = new DeactivateMailboxProfileLinkResponseDTO();
 		try {
 
@@ -171,23 +171,23 @@ public class ProfileConfigurationService {
 			MailBoxSchedProfile mailBoxSchedProfile = configDao.find(MailBoxSchedProfile.class, linkGuid);
 
 			if (mailBoxSchedProfile == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST,linkGuid);
+				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST, linkGuid);
 			}
 			configDao.remove(mailBoxSchedProfile);
-			
-			// response message construction			
-			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL,PROFILE,Messages.SUCCESS));			
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setMailboxProfileLinkGuid(String.valueOf(linkGuid));
 			LOG.info("Exit from deactivate profile.");
-			return serviceResponse;		
-			
-            } catch (MailBoxConfigurationServicesException e) {
+			return serviceResponse;
 
-            	LOG.error(Messages.DEACTIVATION_FAILED.value(), e);			
-    			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED,PROFILE,Messages.FAILURE,e.getMessage()));
-    			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
 
-			} 
+			LOG.error(Messages.DEACTIVATION_FAILED.value(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, PROFILE, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+
+		}
 
 	}
 }
