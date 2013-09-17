@@ -13,21 +13,24 @@ package com.liaison.mailbox.service.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -41,6 +44,57 @@ public class ProfileConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
 	private static String PROFILE = "Profile";
+	private static final String PROFILE_NAME = "Profile Name";
+	
+	/**
+	 * Creates Profile.
+	 * 
+	 * @param request
+	 *            The request DTO.
+	 * @return The responseDTO.
+	 */
+	public AddProfileResponseDTO createProfile(AddProfileRequestDTO request) {
+
+		LOG.info("Entering into profile creation.");
+		AddProfileResponseDTO serviceResponse = new AddProfileResponseDTO();
+		
+		try {
+
+			ProfileDTO profileDto = request.getProfile();
+			
+			if (profileDto == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			if (MailBoxUtility.isEmpty(request.getProfile().getName())) {
+				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, PROFILE_NAME);
+			}
+
+			ScheduleProfilesRef profile = new ScheduleProfilesRef();
+			profileDto.copyToEntity(profile);
+			profile.setPguid(MailBoxUtility.getGUID());
+
+			// persisting the profile entity
+			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+			configDao.persist(profile);
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
+			serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(profile.getPrimaryKey())));
+			
+			LOG.info("Exiting from profile creation.");
+			
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
+					.getMessage()));
+			
+			return serviceResponse;
+		}
+
+	}
 	
 	/**
 	 * Add Profile to MailBox.
@@ -49,7 +103,7 @@ public class ProfileConfigurationService {
 	 *            The request DTO & guid.
 	 * @return The responseDTO.
 	 */
-	public AddProfileToMailBoxResponseDTO addProfileToMailBox(AddProfileToMailBoxRequestDTO request, String mailboxGuid) {
+	public AddProfileToMailBoxResponseDTO addProfileToMailBox(String mailBoxGuid, String profileGuid) {
 
 		LOG.info("Add Profile to mailbox");
 		AddProfileToMailBoxResponseDTO serviceResponse = new AddProfileToMailBoxResponseDTO();
@@ -57,23 +111,26 @@ public class ProfileConfigurationService {
 
 		try {
 
-			ProfileDTO profileDTO = request.getProfile(); 
-			if(profileDTO == null){
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
-			}
-			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			// Getting the existing mailbox from given GUID
-			MailBoxConfigurationDAO config = new MailBoxConfigurationDAOBase();
-			MailBox mailbox = config.find(MailBox.class, mailboxGuid);
+			MailBoxConfigurationDAO mbConfig = new MailBoxConfigurationDAOBase();
+			MailBox mailbox = mbConfig.find(MailBox.class, mailBoxGuid);
 			if (mailbox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,mailboxGuid);
-			   }
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST,mailBoxGuid);
+			}
+			
+			// Getting the existing profile from given GUID
+			ProfileConfigurationDAO proConfig = new ProfileConfigurationDAOBase();
+			ScheduleProfilesRef profile = proConfig.find(ScheduleProfilesRef.class, profileGuid);
+			if (profile == null) {
+				throw new MailBoxConfigurationServicesException(Messages.PROFILE_DOES_NOT_EXIST,profileGuid);
+			}
 
 			// Construct MailBoxSchedProfile entity
 			MailBoxSchedProfile mailBoxSchedProfile = new MailBoxSchedProfile();
-			mailBoxSchedProfile.setScheduleProfilesRef(profile);
+			mailBoxSchedProfile.setPguid(MailBoxUtility.getGUID());
 			mailBoxSchedProfile.setMailbox(mailbox);
-			request.copyToEntity(mailBoxSchedProfile);
+			mailBoxSchedProfile.setScheduleProfilesRef(profile);
+			mailBoxSchedProfile.setMbxProfileStatus(MailBoxStatus.ACTIVE.value());
 
 			// Persist the entity
 			MailBoxScheduleProfileConfigurationDAO configDao = new MailBoxScheduleProfileConfigurationDAOBase();
