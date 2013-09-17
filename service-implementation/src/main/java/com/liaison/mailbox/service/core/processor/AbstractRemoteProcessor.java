@@ -24,6 +24,7 @@ import com.liaison.framework.fs2.api.FS2Factory;
 import com.liaison.framework.fs2.api.FS2MetaSnapshot;
 import com.liaison.framework.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -35,16 +36,16 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * @author praveenu
  * 
  */
-public abstract class MailBoxHandler {
+public abstract class AbstractRemoteProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteProcessor.class);
 
 	protected Processor configurationInstance;
 
-	public MailBoxHandler() {
+	public AbstractRemoteProcessor() {
 	}
 
-	public MailBoxHandler(Processor configurationInstance) {
+	public AbstractRemoteProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
 	}
 
@@ -73,7 +74,7 @@ public abstract class MailBoxHandler {
 	 * 
 	 * @return List of files
 	 * @throws MailBoxConfigurationServicesException
-	 * @throws MailBoxServicesException 
+	 * @throws MailBoxServicesException
 	 */
 	public File[] getPayload() throws MailBoxServicesException {
 
@@ -86,13 +87,13 @@ public abstract class MailBoxHandler {
 				if (MailBoxUtility.isEmpty(folder.getFldrType()) || MailBoxUtility.isEmpty(folder.getFldrUri())) {
 
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
-				} 
-				
-				if (folder.getFldrType().equalsIgnoreCase("INPUT")) {
+				}
+
+				if (folder.getFldrType().equalsIgnoreCase(FolderType.PAYLOAD_LOCATION.toString())) {
 					LOGGER.debug("Started reading the payload files");
 					files = new File(folder.getFldrUri()).listFiles();
 					LOGGER.debug("Payload files received successfully");
-				   }
+				}
 			}
 		}
 		return files;
@@ -108,8 +109,6 @@ public abstract class MailBoxHandler {
 		LOGGER.info("Returns HTTP/S configurations to HTTPClient");
 		return configurationInstance.getProcsrProperties();
 	}
-
-	
 
 	/**
 	 * Get the URI to which the response should be written, this can be used if
@@ -129,7 +128,7 @@ public abstract class MailBoxHandler {
 
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 
-				} else if (folder.getFldrType().equalsIgnoreCase("OUTPUT")) {
+				} else if (folder.getFldrType().equalsIgnoreCase(FolderType.RESPONSE_LOCATION.toString())) {
 					return folder.getFldrUri();
 				}
 			}
@@ -139,21 +138,23 @@ public abstract class MailBoxHandler {
 
 	/**
 	 * call back method to write the response back to MailBox from JS
-	 * @throws MailBoxServicesException 
-	 * @throws URISyntaxException 
-	 * @throws IOException 
-	 * @throws FS2Exception 
+	 * 
+	 * @throws MailBoxServicesException
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws FS2Exception
 	 * 
 	 */
-	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException {
+	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception,
+			MailBoxServicesException {
 
-			LOGGER.info("Started writing response");
-			FlexibleStorageSystem FS2 = FS2Factory.newInstance(new RemoteProcessorFS2Configuration());
-			URI fileLoc = new URI("fs2:" + getWriteResponseURI());
-			FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
-			FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
-			LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
-		
+		LOGGER.info("Started writing response");
+		FlexibleStorageSystem FS2 = FS2Factory.newInstance(new RemoteProcessorFS2Configuration());
+		URI fileLoc = new URI("fs2:" + getWriteResponseURI());
+		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
+		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
+		LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
+
 	}
 
 	/**

@@ -18,12 +18,12 @@ import com.liaison.mailbox.jpa.model.Processor;
  * 
  * @author veerasamyn
  */
-public class MailBoxPrcoessorFactory {
+public class MailBoxProcessorFactory {
 
 	/**
 	 * 
 	 */
-	private MailBoxPrcoessorFactory() {
+	private MailBoxProcessorFactory() {
 		// TODO Auto-generated constructor stub
 	}
 
