@@ -12,8 +12,6 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
-import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
-import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -24,7 +22,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 @JsonRootName("addProfileToMailBoxRequest")
 public class AddProfileToMailBoxRequestDTO {
 
-	private ProfileDTO profile;
+	private String profileGuid;
 	private String mailBoxGuid;
 	private String status;
 
@@ -36,14 +34,6 @@ public class AddProfileToMailBoxRequestDTO {
 		this.mailBoxGuid = mailBoxGuid;
 	}
 
-	public ProfileDTO getProfile() {
-		return profile;
-	}
-
-	public void setProfile(ProfileDTO profile) {
-		this.profile = profile;
-	}
-
 	public String getStatus() {
 		return status;
 	}
@@ -52,30 +42,23 @@ public class AddProfileToMailBoxRequestDTO {
 		this.status = status;
 	}
 
+	public String getProfileGuid() {
+		return profileGuid;
+	}
+	
+	public void setProfileGuid(String profileGuid) {
+		this.profileGuid = profileGuid;
+	}
+
 	public void copyToEntity(MailBoxSchedProfile mailboxProfile) {
 
 		mailboxProfile.setPguid(MailBoxUtility.getGUID());
 		mailboxProfile.setMbxProfileStatus(this.getStatus());
-
-		if (this.getProfile() != null) {
-
-			ScheduleProfilesRef profile = new ScheduleProfilesRef();
-			this.getProfile().copyToEntity(profile);
-			mailboxProfile.setScheduleProfilesRef(profile);
-		}
 	}
 
 	public void copyFromEntity(MailBoxSchedProfile mailboxProfile) {
 
 		this.setMailBoxGuid(mailboxProfile.getPguid());
 		this.setStatus(mailboxProfile.getMbxProfileStatus());
-
-		if (this.getProfile() != null && mailboxProfile.getScheduleProfilesRef() != null) {
-			this.getProfile().copyFromEntity(mailboxProfile.getScheduleProfilesRef());
-		} else if (this.getProfile() == null && mailboxProfile.getScheduleProfilesRef() != null) {
-			ProfileDTO profileDTO = new ProfileDTO();
-			profileDTO.copyFromEntity(mailboxProfile.getScheduleProfilesRef());
-			this.setProfile(profileDTO);
-		}
 	}
 }
