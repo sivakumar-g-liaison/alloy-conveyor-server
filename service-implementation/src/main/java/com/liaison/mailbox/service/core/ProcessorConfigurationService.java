@@ -62,7 +62,8 @@ public class ProcessorConfigurationService {
 				processor = new RemoteUploader();
 			} else {
 				processor = null;
-			}
+			} //TODO this is what i meant as fail fast. You should not really have this else here. Also this code is not telling what to do when processor is null. 
+			  //TODO ideally  you MUST throw a validation error saying the PROCESSOR TYPE is set to an invalid value.
 
 			if (processor != null) {
 
@@ -90,7 +91,7 @@ public class ProcessorConfigurationService {
 			LOGGER.info("Exit from create processor.");
 			return serviceResponse;
 
-		} catch (Exception e) {
+		} catch (Exception e) { //TODO CHANGE THIS TO CATCH THE CUSTOM EXCEPTION .
 
 			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);			
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED,PROCESSOR,Messages.FAILURE,e.getMessage()));
@@ -183,7 +184,7 @@ public class ProcessorConfigurationService {
 	 * @param request
 	 */
 
-	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request) {
+	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request,String mailBoxId,String processorId) {
 
 		LOGGER.info("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());

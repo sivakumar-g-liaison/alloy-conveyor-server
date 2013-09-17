@@ -36,16 +36,16 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * @author praveenu
  * 
  */
-public abstract class MailBoxHandler {
+public abstract class AbstractRemoteProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteProcessor.class);
 
 	protected Processor configurationInstance;
 
-	public MailBoxHandler() {
+	public AbstractRemoteProcessor() {
 	}
 
-	public MailBoxHandler(Processor configurationInstance) {
+	public AbstractRemoteProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
 	}
 

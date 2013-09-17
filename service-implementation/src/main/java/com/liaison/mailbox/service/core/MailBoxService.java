@@ -19,7 +19,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.service.core.processor.MailBoxPrcoessorFactory;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
@@ -69,7 +69,7 @@ public class MailBoxService {
 			MailBoxProcessor processorService = null;
 			for (Processor processor : processorMatchingProfile) {
 
-				processorService = MailBoxPrcoessorFactory.getInstance(processor);
+				processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
 					LOG.info("The Processer id is {}", processor.getPguid());
 					LOG.info("The Processer type is {}", processor.getProcessorType());
@@ -85,7 +85,7 @@ public class MailBoxService {
 
 		} catch (MailBoxServicesException e) {
 
-			LOG.error(Messages.TRG_PROF_FAILURE.value(), e);
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
 			serviceResponse
 					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;

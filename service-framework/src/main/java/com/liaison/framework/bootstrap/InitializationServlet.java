@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.datasource.OracleDataSource;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
@@ -51,6 +52,7 @@ public class InitializationServlet extends HttpServlet {
             try {
                 OracleDataSource.initOracleDataSource(); // TODO This needs to be moved to JMX
                 DAOUtil.init(); // TODO This does the work of loading all JAP entity files.  We should change to allow the query string to be passed.
+                UUIDGen.init();
                 
                 isInitialized = true;
                 DefaultAuditStatement audit = new DefaultAuditStatement(PCIV20Requirement.PCI10_2_6, AuditStatement.Status.SUCCEED, "Initialization via servlet");   	

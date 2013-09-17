@@ -67,6 +67,7 @@ public class ProcessorDTO {
 	}
 
 	public String getProperties() {
+		
 		return properties;
 	}
 
@@ -115,6 +116,9 @@ public class ProcessorDTO {
 	}
 
 	public List<FolderDTO> getFolders() {
+		if(folders == null){
+			return new ArrayList<FolderDTO>();
+		}
 		return folders;
 	}
 
@@ -123,6 +127,9 @@ public class ProcessorDTO {
 	}
 
 	public List<CredentialDTO> getCredentials() {
+		if(credentials == null){
+			return new ArrayList<CredentialDTO>();
+		}
 		return credentials;
 	}
 
@@ -131,6 +138,9 @@ public class ProcessorDTO {
 	}
 
 	public List<ProcessorPropertyDTO> getProcsrProperties() {
+		if(procsrProperties == null){
+			return new ArrayList<ProcessorPropertyDTO>();
+		}
 		return procsrProperties;
 	}
 
@@ -151,8 +161,9 @@ public class ProcessorDTO {
 		if (isCreate) {
 			processor.setPguid(MailBoxUtility.getGUID());
 		}
-		processor.setProcsrDesc(this.getDescription());
+		processor.setProcsrDesc(this.getDescription());		
 		processor.setProcsrProperties(this.getProperties());
+		
 		processor.setProcsrStatus(this.getStatus());
 		// processor.setProcsrType(this.getType());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
@@ -216,7 +227,7 @@ public class ProcessorDTO {
 	public void copyFromEntity(Processor processor) {
 
 		this.setGuid(processor.getPguid());
-		this.setDescription(processor.getProcsrDesc());
+		this.setDescription(processor.getProcsrDesc());		
 		this.setProperties(processor.getProcsrProperties());
 		this.setStatus(processor.getProcsrStatus());
 		this.setExecutionOrder(processor.getExecutionOrder());

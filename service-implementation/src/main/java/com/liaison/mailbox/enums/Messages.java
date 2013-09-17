@@ -29,7 +29,7 @@ public enum Messages {
 	MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
-	REVISE_OPERATION_FAILED("% revise operation failed."),
+	REVISE_OPERATION_FAILED("%s revise operation failed."),
 	READ_OPERATION_FAILED("Failed to retrieve the %s."),
 	DEACTIVATION_FAILED("%s deactivation failed."),
 	CREATED_SUCCESSFULLY("%s created successfully."),

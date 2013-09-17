@@ -1,37 +1,28 @@
 {
     "addProcessorToMailBoxRequest": {
         "processor": {
-            "name": "google remote downloader tess",
+            "name": "SOI Downloader",
             "type": "remotedownloader",
             "status": "active",
             "description": "",
-            "properties": "{\"remotedownloaderproperties\":{\"httpverstion\":\"1.1\",\"httpverb\":\"POST\",\"retryattempts\":\"1\",\"scockettimeout\":\"6000\",\"connectiontimeout\":\"6000\",\"url\":\"htttps://googleanyltics.api.com\",\"port\":\"8090\",\"chunkedencoding\":\"true\",\"otherrequestheader\":[{\"name\":\"\",\"value\":\"\"}],\"contenttype\":\"\",\"encodingformat\":\"\"}}",
+            "properties": ["{\"remotedownloaderproperties\": {\"httpverstion\": \"1.1\",\"httpverb\": \"POST\",\"retryattempts\": \"3\",\"scockettimeout\": \"6000\",\"connectiontimeout\": \"6000\",\"url\": \"http: //soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response\",\"port\": \"\",\"chunkedencoding\": \"true\",\"otherrequestheader\": [{\"name\": \"\",\"value\": \"\"}],\"contenttype\": \"\",\"encodingformat\": \"\"}}"],
             "javaScriptURI": "file sytem path",
             "folders": [
                 {
-                    "folderURI": "http://path",
-                    "folderType": "folder",
-                    "folderDesc": "test"
+                    "folderURI": "C://g2tests//responsedata",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "lcoation to save response"
                 }
             ],
-            "credentials": [
-                {
-                    "credentialType": "db",
-                    "credentialURI": "http://path",
-                    "userId": "test",
-                    "password": "test#01",
-                    "idpType": "test",
-                    "idpURI": "/test"
-                }
-            ],
+            
             "procsrProperties": [
                 {
-                    "name": "filerenameformat",
-                    "value": "*.processed"
+                    "name": "lastSynchDate",
+                    "value": "09/16/2013 12:00:00"
                 }
             ],
-            "linkedMailboxId": "0CD69453NULL000ANULLDFC3EDE72C07",
-            "linkedProfileId": "0CD770B6NULL000ANULLDFC3A5E5A099"
+            "linkedMailboxId": "27E3FD32NULL1974NULL08EE43448F31",
+            "linkedProfileId": "27EE18E4NULL1974NULL08EE8AC8DB1E"
         }
     }
 }

@@ -260,7 +260,7 @@ public class MailBoxConfigurationResource {
 	 *            HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
-	@PUT
+	@POST
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -278,7 +278,7 @@ public class MailBoxConfigurationResource {
 	 *            HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
-	@POST
+	@PUT
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -591,7 +591,7 @@ public class MailBoxConfigurationResource {
 			ReviseProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// updates existing processor
-			serviceResponse = mailbox.reviseProcessor(serviceRequest);
+			serviceResponse = mailbox.reviseProcessor(serviceRequest,mbGuid,pGuid);
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 

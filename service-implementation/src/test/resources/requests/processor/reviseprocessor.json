@@ -1,41 +1,31 @@
-{ 
-	"reviseProcessorRequest":{
-		"processor":{ 
-			"guid":"1101CCB2NULL00B2NULL776160E0AE73", 
-			"name":"google remote downloader tess", 
-			"type":"remotedownloader", 
-			"status":"active", 
-			"description":"reordered", 
-			"properties":"JSON String", 
-			"javaScriptURI":"file sytem path", 
-			"folders":[ 
-				{ 
-				"folderURI":"http://path", 
-				"folderType":"folder revised", 
-				"folderDesc":"test" 
-				} 
-			], 
-
-			 "credentials":[ 
-				{ 
-				"credentialType":"db", 
-				"credentialURI":"http://path", 
-				"userId":"karthi", 
-				"password":"krishh", 
-				"idpType":"ffdf", 
-				"idpURI":"fdfd"
-				} 
-			],
-			
-			"procsrProperties":[ 
-				{
-                    "name": "filerenameformat",
-                    "value": "*.processed"
+{
+    "reviseProcessorRequest": {
+        "processor": {
+            "guid": "",
+            "name": "SOI Downloader",
+            "type": "remotedownloader",
+            "status": "active",
+            "description": "",
+            "properties": [
+                "{\"remotedownloaderproperties\": {\"httpverstion\": \"1.1\",\"httpverb\": \"POST\",\"retryattempts\": \"3\",\"scockettimeout\": \"6000\",\"connectiontimeout\": \"6000\",\"url\": \"http: //soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response\",\"port\": \"\",\"chunkedencoding\": \"true\",\"otherrequestheader\": [{\"name\": \"\",\"value\": \"\"}],\"contenttype\": \"\",\"encodingformat\": \"\"}}"
+            ],
+            "javaScriptURI": "file sytem path",
+            "folders": [
+                {
+                    "folderURI": "C://g2tests//responsedata",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "lcoation to save response"
                 }
-			],
-			"executionOrder":"1", 
-			"linkedMailboxId":"E8E82C26NULL00B9NULL7523FA8F6F99", 
-			"linkedProfileId":"E914BCE0NULL00C0NULLED5A47F0379E" 
-		} 
-	}
-} 
+            ],
+            "procsrProperties": [
+                {
+                    "name": "lastSynchDate",
+                    "value": "09/16/2013 12:00:00"
+                }
+            ],
+            "linkedMailboxId": "27E3FD32NULL1974NULL08EE43448F31",
+            "linkedProfileId": "27EE18E4NULL1974NULL08EE8AC8DB1E",
+            "executionOrder": "1"
+        }
+    }
+}

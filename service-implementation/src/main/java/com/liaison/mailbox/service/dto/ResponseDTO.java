@@ -31,7 +31,7 @@ public class ResponseDTO {
 	}
 
 	public ResponseDTO(Messages message, String key, Messages status, String additionalMessage) {
-		this.message = String.format(message.value(), key) + "." + additionalMessage;
+		this.message = String.format(message.value(), key) +additionalMessage;
 		this.status = status.value();
 	}
 

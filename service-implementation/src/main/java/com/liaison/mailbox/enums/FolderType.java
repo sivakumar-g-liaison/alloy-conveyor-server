@@ -15,7 +15,7 @@ package com.liaison.mailbox.enums;
  */
 public enum FolderType {
 
-	PAYLOAD_LOCATION("PAYLOAD"), RESPONSE_LOCATION("RESPONSE");
+	PAYLOAD_LOCATION("PAYLOAD_LOCATION"), RESPONSE_LOCATION("RESPONSE_LOCATION");
 
 	private final String code;
 

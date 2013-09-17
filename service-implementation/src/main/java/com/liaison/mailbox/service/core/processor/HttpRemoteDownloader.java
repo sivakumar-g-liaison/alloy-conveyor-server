@@ -42,7 +42,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * @author praveenu
  * 
  */
-public class HttpRemoteDownloader extends MailBoxHandler implements MailBoxProcessor {
+public class HttpRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HttpRemoteDownloader.class);
 
@@ -155,8 +155,10 @@ public class HttpRemoteDownloader extends MailBoxHandler implements MailBoxProce
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
-
+               
 				// Read the JS from the URI stored
+				//TODO this wrong atleast the name of the method "readFileFromClassPath" is misleading .JS file need not be in class path. 
+				//Use standard java FILE IO methods to read the JS file. I remember Siva saying he wrote utility methods to read js from file system
 				String groupingConfiguration = ServiceUtils.readFileFromClassPath(configurationInstance.getJavaScriptUri());
 				engine.eval(groupingConfiguration);
 				Invocable inv = (Invocable) engine;
