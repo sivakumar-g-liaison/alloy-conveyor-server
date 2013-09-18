@@ -159,8 +159,12 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
-			if (MailBoxUtility.isEmpty(request.getMailBox().getName())) {
+			if (MailBoxUtility.isEmpty(mailboxDto.getName())) {
 				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MAILBOX_NAME);
+			}
+
+			if (!guid.equals(mailboxDto.getGuid())) {
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
 			}
 
 			// Getting the mailbox.

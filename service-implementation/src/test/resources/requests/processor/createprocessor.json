@@ -27,7 +27,7 @@
             "javaScriptURI": "file sytem path",
             "folders": [
                 {
-                    "folderURI": "E:\",
+                    "folderURI": "C:\\temp",
                     "folderType": "RESPONSE_LOCATION",
                     "folderDesc": "test"
                 }

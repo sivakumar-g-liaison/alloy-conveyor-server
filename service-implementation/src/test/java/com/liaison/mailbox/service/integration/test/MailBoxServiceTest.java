@@ -28,7 +28,9 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
@@ -56,8 +58,6 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	public void testTriggerProfile() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
-		String profileName = "onceIn15mins";
-
 		// Add the Mailbox
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 
@@ -68,20 +68,26 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
-		
-		// Add the Profile
-		jsonRequest = ServiceUtils.readFileFromClassPath("requests/profile/profile.json");
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
+		// Add the Profile
+		String profileName = "once" + System.currentTimeMillis();
+		ProfileDTO profile = new ProfileDTO();
+		profile.setName(profileName);
+		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
+		profileRequstDTO.setProfile(profile);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
 		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addProfileResponse"));
-
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
+
 		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
-
-		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId() ;
+		// Add MailBoxSched Profile
+		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
 		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
 				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
 		profileRequest.execute();

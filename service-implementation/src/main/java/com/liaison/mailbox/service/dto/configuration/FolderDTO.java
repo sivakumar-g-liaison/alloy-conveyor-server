@@ -69,16 +69,22 @@ public class FolderDTO {
 			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Folder");
 		}
 
-		folder.setFldrType(this.getFolderType());
+		folder.setFldrType(foundFolderType.getCode());
 		folder.setFldrUri(this.getFolderURI());
 		folder.setPguid(this.getGuId());
 	}
 
-	public void copyFromEntity(Object entity) {
+	public void copyFromEntity(Object entity) throws MailBoxConfigurationServicesException {
 
 		Folder folder = (Folder) entity;
 		this.setFolderDesc(folder.getFldrDesc());
-		this.setFolderType(folder.getFldrType());
+
+		FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
+		if (foundFolderType == null) {
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Folder");
+		}
+
+		this.setFolderType(foundFolderType.name());
 		this.setFolderURI(folder.getFldrUri());
 		this.setGuId(folder.getPguid());
 	}

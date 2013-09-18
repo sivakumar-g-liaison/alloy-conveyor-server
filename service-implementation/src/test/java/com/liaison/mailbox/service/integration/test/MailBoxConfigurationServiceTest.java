@@ -83,9 +83,8 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
-
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
 		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
@@ -98,7 +97,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "getMailBoxResponse"));
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(requestDTO.getMailBox().getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
@@ -129,9 +128,8 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
-
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
 		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
@@ -144,7 +142,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "getMailBoxResponse"));
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(requestDTO.getMailBox().getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
@@ -175,8 +173,8 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Deactivate the mailbox
 		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
@@ -200,7 +198,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 	}
 
-	// @Test
+	@Test
 	public void testReviseMailBoxWithLiaisonHTTPClient() throws ClientProtocolException, IOException, Exception {
 
 		// Adding the mailbox
@@ -215,8 +213,8 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Constructing the revise
 		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
@@ -242,10 +240,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
-		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 		// Assertion
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "getMailBoxResponse"));
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 		Assert.assertEquals(mbxDTO.getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(mbxDTO.getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
@@ -274,8 +271,8 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "addMailBoxResponse"));
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Constructing the revise
 		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
@@ -305,7 +302,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
-		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "getMailBoxResponse"));
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(mbxDTO.getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(mbxDTO.getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());

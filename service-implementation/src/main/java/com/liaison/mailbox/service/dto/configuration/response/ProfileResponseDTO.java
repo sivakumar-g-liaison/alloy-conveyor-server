@@ -11,16 +11,17 @@
 package com.liaison.mailbox.service.dto.configuration.response;
 
 /**
- *
+ * 
  * @author karthikeyanm
  */
 public class ProfileResponseDTO {
-	
+
 	private String guId;
-	
-	public ProfileResponseDTO() {}
-	
-	public ProfileResponseDTO(String guid){
+
+	public ProfileResponseDTO() {
+	}
+
+	public ProfileResponseDTO(String guid) {
 		this.guId = guid;
 	}
 

@@ -29,6 +29,7 @@ import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxPropertyDTO;
 import com.liaison.mailbox.service.util.HTTPStringOutputStream;
@@ -36,7 +37,7 @@ import com.liaison.mailbox.service.util.HTTPStringOutputStream;
 /**
  * Base Test class for initial setup and cleanup.
  * 
- * @author karthikeyanm
+ * @author easwaripriyak
  * 
  */
 public abstract class BaseServiceTest {
@@ -44,7 +45,7 @@ public abstract class BaseServiceTest {
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
 
-	public static final String SUCCESS = "success";
+	public static final String SUCCESS = Messages.SUCCESS.value();
 
 	@Before
 	public void initialSetUp() throws FileNotFoundException, IOException {

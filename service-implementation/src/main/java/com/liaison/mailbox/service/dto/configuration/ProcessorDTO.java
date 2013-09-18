@@ -51,6 +51,10 @@ public class ProcessorDTO {
 	private List<ProcessorPropertyDTO> dynamicProperties;
 	private int executionOrder;
 
+	public ProcessorDTO() {
+		super();
+	}
+
 	public String getGuid() {
 		return guid;
 	}
@@ -250,8 +254,10 @@ public class ProcessorDTO {
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
+	 * @throws MailBoxConfigurationServicesException
 	 */
-	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException {
+	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException,
+			MailBoxConfigurationServicesException {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());

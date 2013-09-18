@@ -368,7 +368,7 @@ public class MailBoxConfigurationResource {
 	@Path("/{mailboxid}/profile/{profileid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addProfileToMailBox(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailBoxGuid, 
+	public Response addProfileToMailBox(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailBoxGuid,
 			@PathParam(value = "profileid") String profileGuid) {
 
 		serviceCallCounter.addAndGet(1);
@@ -472,7 +472,7 @@ public class MailBoxConfigurationResource {
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			serviceResponse = mailbox.createProcessor(serviceRequest);
+			serviceResponse = mailbox.createProcessor(guid, serviceRequest);
 
 			// populate the response body
 			returnResponse = serviceResponse.constructResponse();
@@ -527,7 +527,7 @@ public class MailBoxConfigurationResource {
 			DeActivateProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Deactivating processor
-			serviceResponse = mailbox.deactivateProcessor(guid);
+			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
 			// Constructing response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -569,7 +569,7 @@ public class MailBoxConfigurationResource {
 			GetProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Gets processor details.
-			serviceResponse = mailbox.getProcessor(guid);
+			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
 			// constructs response.
 			returnResponse = serviceResponse.constructResponse();
 
@@ -599,8 +599,8 @@ public class MailBoxConfigurationResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mbGuid,
-			@PathParam(value = "processorid") String pGuid) {
+	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailboxguid,
+			@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -618,7 +618,7 @@ public class MailBoxConfigurationResource {
 			ReviseProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// updates existing processor
-			serviceResponse = mailbox.reviseProcessor(serviceRequest,mbGuid,pGuid);
+			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 

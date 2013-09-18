@@ -24,10 +24,11 @@ import javax.xml.bind.annotation.XmlEnum;
 @XmlEnum
 public enum Messages {
 
-	MBX_DOES_NOT_EXIST("Mailbox with the given id %s does not exist."), PROFILE_DOES_NOT_EXIST(
-			"Profile with the given id %s does not exist."), PROCESSOR_DOES_NOT_EXIST(
-			"Processor with the given id %s does not exist."), MBX_PROFILE_LINK_DOES_NOT_EXIST(
-			"Mailbox-Profile link with the given id %s does not exist."), PROFILE_ALREADY_EXISTS("Profile Already exists"),
+	MBX_DOES_NOT_EXIST("Mailbox with the given id %s does not exist."),
+	PROFILE_DOES_NOT_EXIST("Profile with the given id %s does not exist."),
+	PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),
+	MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
+	PROFILE_ALREADY_EXISTS("Profile Already exists"),
 
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
@@ -43,7 +44,7 @@ public enum Messages {
 	MANDATORY_FIELD_MISSING("%s is mandatory"),
 	INVALID_REQUEST("The input request is invalid."),
 	GUID_NOT_AVAIL("Input Id is not available in the system."),
-	GUID_DOES_NOT_MATCH("Id in the request does not match the resource."),
+	GUID_DOES_NOT_MATCH("%s Id in the request does not match the resource."),
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
@@ -54,7 +55,10 @@ public enum Messages {
 	HTTP_REQUEST_FAILED("HTTP request failed."),
 
 	// INVALID ENUM
-	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported.");
+	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
+
+	// MBX GUID DOES NOT MATCH WITH THE GIVEN PROCESSOR
+	PROC_DOES_NOT_BELONG_TO_MBX("The given processor is not belongs to given mailbox.");
 
 	private String value;
 
