@@ -182,7 +182,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		try {
 
 			// HTTPRequest executed through JavaScript
-			if (configurationInstance.getJavaScriptUri() != null) {
+			if (MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
