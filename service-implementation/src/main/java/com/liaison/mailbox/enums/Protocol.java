@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.enums;
 
+import com.liaison.mailbox.service.util.MailBoxUtility;
+
 public enum Protocol {
 
 	FTP("ftp"),
@@ -22,9 +24,41 @@ public enum Protocol {
 		this.code = code;
 	}
 
-	@Override
-	public String toString() {
+	public String getCode() {
 		return code;
+	}
+
+	public static Protocol findByCode(String code) {
+
+		Protocol found = null;
+		for (Protocol value : Protocol.values()) {
+
+			if (!MailBoxUtility.isEmpty(code)) {
+				if (code.equals(value.getCode())) {
+					found = value;
+					break;
+				}
+			}
+		}
+
+		return found;
+	}
+
+	public static Protocol findByName(String name) {
+
+		Protocol found = null;
+		for (Protocol value : Protocol.values()) {
+
+			if (!MailBoxUtility.isEmpty(name)) {
+				if (name.equals(value.name())) {
+					found = value;
+					break;
+				}
+			}
+		}
+
+		return found;
+
 	}
 
 }
