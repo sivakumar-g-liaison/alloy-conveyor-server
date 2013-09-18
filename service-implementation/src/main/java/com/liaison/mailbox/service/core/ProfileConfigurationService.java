@@ -44,6 +44,7 @@ public class ProfileConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
 	private static String PROFILE = "Profile";
+	private static String MAILBOX_PROFILE = "MBX_Profile Link";
 	private static final String PROFILE_NAME = "Profile Name";
 
 	/**
@@ -70,12 +71,17 @@ public class ProfileConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, PROFILE_NAME);
 			}
 
+			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+
+			if (configDao.findProfileByName(profileDTO.getName()) != null) {
+				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS);
+			}
+
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			profileDTO.copyToEntity(profile);
 			profile.setPguid(MailBoxUtility.getGUID());
 
 			// persisting the profile entity
-			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 			configDao.persist(profile);
 
 			// response message construction
@@ -136,7 +142,7 @@ public class ProfileConfigurationService {
 			configDao.persist(mailBoxSchedProfile);
 
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, MAILBOX_PROFILE, Messages.SUCCESS));
 			serviceResponse.setMailboxProfileLinkGuid(String.valueOf(mailBoxSchedProfile.getPrimaryKey()));
 			LOG.info("Exit from add profile to mailbox.");
 			return serviceResponse;
@@ -144,7 +150,7 @@ public class ProfileConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, MAILBOX_PROFILE, Messages.FAILURE, e
 					.getMessage()));
 			return serviceResponse;
 		}
