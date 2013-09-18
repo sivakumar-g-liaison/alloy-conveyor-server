@@ -28,6 +28,9 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxPropertyDTO;
 import com.liaison.mailbox.service.util.HTTPStringOutputStream;
 
 /**
@@ -143,6 +146,45 @@ public abstract class BaseServiceTest {
 		JSONObject rootJson = new JSONObject(requestString);
 		JSONObject serviceJson = rootJson.getJSONObject(serivceName);
 		return serviceJson;
+	}
+
+	/**
+	 * Construct dummy mailbox DTO for testing.
+	 * 
+	 * @param uniqueValue
+	 * @return
+	 */
+	public MailBoxDTO constructDummyMailBoxDTO(Long uniqueValue, boolean isCreate) {
+
+		MailBoxDTO mailBoxDTO = new MailBoxDTO();
+		MailBoxPropertyDTO property = new MailBoxPropertyDTO();
+
+		if (isCreate) {
+
+			mailBoxDTO.setName("MBX_TEST" + uniqueValue);
+			mailBoxDTO.setDescription("MBX_TEST_DESCRIPTION" + uniqueValue);
+			mailBoxDTO.setServiceInstId(uniqueValue.intValue());
+			mailBoxDTO.setShardKey("MBX_SHARD_KEY" + uniqueValue);
+			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+
+			property.setName("MBX_SIZE");
+			property.setValue("1024");
+
+		} else {
+
+			mailBoxDTO.setName("MBX_REV_TEST" + uniqueValue);
+			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
+			mailBoxDTO.setServiceInstId(uniqueValue.intValue());
+			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
+			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+
+			property.setName("MBX_REV_SIZE");
+			property.setValue("1024");
+
+		}
+
+		mailBoxDTO.getProperties().add(property);
+		return mailBoxDTO;
 	}
 
 }
