@@ -49,7 +49,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor type.
+	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor
+	 * type.
 	 * 
 	 * @return
 	 */
@@ -108,8 +109,9 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the URI to which the response should be written, this can be used if the JS decides to
-	 * write the response straight to the file system or database
+	 * Get the URI to which the response should be written, this can be used if
+	 * the JS decides to write the response straight to the file system or
+	 * database
 	 * 
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
@@ -153,7 +155,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the list of dynamic properties of the MailBox known only to java script
+	 * Get the list of dynamic properties of the MailBox known only to java
+	 * script
 	 * 
 	 * @return MailBox dynamic properties
 	 */
@@ -168,7 +171,7 @@ public abstract class AbstractRemoteProcessor {
 	 */
 	public void addUpdateDynamicProperty(String name, String value) {
 		ProcessorConfigurationService service = new ProcessorConfigurationService();
-		service.addOrUpdateProcessorProperties(configurationInstance, name, value);
+		service.addOrUpdateProcessorProperties(String.valueOf(configurationInstance.getPrimaryKey()), name, value);
 
 	}
 

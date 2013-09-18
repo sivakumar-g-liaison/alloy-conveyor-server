@@ -33,6 +33,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.util.ProcessorExecutionOrderComparator;
 
 /**
@@ -75,7 +76,8 @@ public class ProcessorConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, PROCESSOR_STATUS);
 			}
 
-			// Instantiate the processor and copying the values from DTO to entity.
+			// Instantiate the processor and copying the values from DTO to
+			// entity.
 			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
 			serviceRequest.getProcessor().copyToEntity(processor, true);
 			processor.setProcsrStatus(foundStatusType.value());
@@ -212,7 +214,8 @@ public class ProcessorConfigurationService {
 	 * @param request
 	 *            The Revise Processor Request DTO
 	 * @param mailBoxId
-	 *            The guid of the mailbox.The given processor should belongs to the given mailbox.
+	 *            The guid of the mailbox.The given processor should belongs to
+	 *            the given mailbox.
 	 * @param processorId
 	 *            The processor guid which is to be revised.
 	 * @return The Revise Processor ResponseDTO
@@ -263,7 +266,8 @@ public class ProcessorConfigurationService {
 			processorDTO.copyToEntity(processor, false);
 			configDao.merge(processor);
 
-			// Change the execution order if existing and incoming does not matche
+			// Change the execution order if existing and incoming does not
+			// matche
 			changeExecutionOrder(request, configDao, processor);
 
 			// response message construction
@@ -285,8 +289,9 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Changing the execution order using duplicate Processor entity.The change will occur when the
-	 * incoming execution order does not match with the existing one.
+	 * Changing the execution order using duplicate Processor entity.The change
+	 * will occur when the incoming execution order does not match with the
+	 * existing one.
 	 * 
 	 * @param request
 	 *            The revise processor request DTO.
@@ -302,19 +307,23 @@ public class ProcessorConfigurationService {
 
 		if (currentExecutionOrder != inputExecution) {
 
-			// Logic for updating execution order using original Processor entity
+			// Logic for updating execution order using original Processor
+			// entity
 			List<Processor> processorList = processor.getMailboxSchedProfile().getProcessors();
 
-			// Need to add entity objects in another list because calling remove() on original
+			// Need to add entity objects in another list because calling
+			// remove() on original
 			// list causes entity object removal
 			List<Processor> procs = new ArrayList<Processor>();
 			procs.addAll(processorList);
 
-			// TODO When we use order by, we are facing NPE in JPA level. Need to look into
+			// TODO When we use order by, we are facing NPE in JPA level. Need
+			// to look into
 			// that.
 			Collections.sort(procs, new ProcessorExecutionOrderComparator());
 
-			// Changing the processor entity as per given one. This rearrangement taken care by
+			// Changing the processor entity as per given one. This
+			// rearrangement taken care by
 			// arraylist.
 			Processor procsrToSwap = procs.get(currentExecutionOrder - 1);
 			procs.remove(currentExecutionOrder - 1);
@@ -330,18 +339,20 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Method for add and update the dynamic processorProperty to Processor entity
+	 * Method for add and update the dynamic processorProperty to Processor
+	 * entity
 	 * 
 	 * @param processor
-	 *            The processor entity
+	 *            The processor guid
 	 * @param name
 	 *            The property name
 	 * @param value
 	 *            The property value
 	 */
-	public void addOrUpdateProcessorProperties(Processor processor, String name, String value) {
+	public void addOrUpdateProcessorProperties(String guid, String name, String value) {
 
 		ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
+		Processor processor = configDao.find(Processor.class, guid);
 		ProcessorProperty processorProperty = null;
 
 		// update the property
@@ -351,6 +362,7 @@ public class ProcessorConfigurationService {
 		if (existingProperties == null || existingProperties.isEmpty()) {
 
 			processorProperty = new ProcessorProperty();
+			processorProperty.setPguid(MailBoxUtility.getGUID());
 			processorProperty.setProcsrPropName(name);
 			processorProperty.setProcsrPropValue(value);
 
@@ -371,14 +383,16 @@ public class ProcessorConfigurationService {
 				} else {
 					// add new property name and value
 					processorProperty = new ProcessorProperty();
+					processorProperty.setPguid(MailBoxUtility.getGUID());
 					processorProperty.setProcsrPropName(name);
 					processorProperty.setProcsrPropValue(value);
 
-					existingProperties.add(processorProperty);
 				}
 			}
+			if (null != processorProperty) {
+				existingProperties.add(processorProperty);
+			}
 		}
-
 		configDao.merge(processor);
 	}
 

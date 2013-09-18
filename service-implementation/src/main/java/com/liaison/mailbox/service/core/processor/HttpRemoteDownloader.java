@@ -151,6 +151,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		}
+
 		writeResponseToMailBox(responseStream);
 	}
 
