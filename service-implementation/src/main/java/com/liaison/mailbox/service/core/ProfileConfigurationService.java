@@ -44,7 +44,7 @@ public class ProfileConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
 	private static String PROFILE = "Profile";
-	private static String MAILBOX_PROFILE = "MBX_Profile Link";
+	private static String MAILBOX_PROFILE = "Mailbox-Profile Link";
 	private static final String PROFILE_NAME = "Profile Name";
 
 	/**
@@ -179,6 +179,11 @@ public class ProfileConfigurationService {
 			if (mailBoxSchedProfile == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST, linkGuid);
 			}
+
+			if (mailboxGuid.equals(mailBoxSchedProfile.getMailbox().getPrimaryKey())) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_MATCH, linkGuid);
+			}
+
 			configDao.remove(mailBoxSchedProfile);
 
 			// response message construction

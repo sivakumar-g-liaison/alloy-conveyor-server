@@ -32,11 +32,9 @@ public enum MailBoxStatus {
 		MailBoxStatus found = null;
 		for (MailBoxStatus value : MailBoxStatus.values()) {
 
-			if (!MailBoxUtility.isEmpty(code)) {
-				if (code.equals(value.value())) {
-					found = value;
-					break;
-				}
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.value())) {
+				found = value;
+				break;
 			}
 		}
 
@@ -48,11 +46,9 @@ public enum MailBoxStatus {
 		MailBoxStatus found = null;
 		for (MailBoxStatus value : MailBoxStatus.values()) {
 
-			if (!MailBoxUtility.isEmpty(name)) {
-				if (name.equals(value.name())) {
-					found = value;
-					break;
-				}
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
 			}
 		}
 

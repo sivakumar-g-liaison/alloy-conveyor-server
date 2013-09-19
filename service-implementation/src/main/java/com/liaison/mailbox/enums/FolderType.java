@@ -40,11 +40,9 @@ public enum FolderType {
 		FolderType found = null;
 		for (FolderType value : FolderType.values()) {
 
-			if (!MailBoxUtility.isEmpty(code)) {
-				if (code.equals(value.getCode())) {
-					found = value;
-					break;
-				}
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+				found = value;
+				break;
 			}
 		}
 
@@ -56,11 +54,9 @@ public enum FolderType {
 		FolderType found = null;
 		for (FolderType value : FolderType.values()) {
 
-			if (!MailBoxUtility.isEmpty(name)) {
-				if (name.equals(value.name())) {
-					found = value;
-					break;
-				}
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
 			}
 		}
 

@@ -25,7 +25,9 @@ import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -227,8 +229,7 @@ public class ProcessorConfigurationService {
 	 * @param request
 	 *            The Revise Processor Request DTO
 	 * @param mailBoxId
-	 *            The guid of the mailbox.The given processor should belongs to
-	 *            the given mailbox.
+	 *            The guid of the mailbox.The given processor should belongs to the given mailbox.
 	 * @param processorId
 	 *            The processor guid which is to be revised.
 	 * @return The Revise Processor ResponseDTO
@@ -314,9 +315,8 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Changing the execution order using duplicate Processor entity.The change
-	 * will occur when the incoming execution order does not match with the
-	 * existing one.
+	 * Changing the execution order using duplicate Processor entity.The change will occur when the
+	 * incoming execution order does not match with the existing one.
 	 * 
 	 * @param request
 	 *            The revise processor request DTO.
@@ -364,8 +364,7 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Method for add and update the dynamic processorProperty to Processor
-	 * entity
+	 * Method for add and update the dynamic processorProperty to Processor entity
 	 * 
 	 * @param processor
 	 *            The processor guid
@@ -374,7 +373,7 @@ public class ProcessorConfigurationService {
 	 * @param value
 	 *            The property value
 	 */
-	public void addOrUpdateProcessorProperties(String guid, String name, String value) {
+	public void addOrUpdateProcessorProperties(String guid, DynamicPropertiesDTO propertyDTO) {
 
 		ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
 		Processor processor = configDao.find(Processor.class, guid);
@@ -382,42 +381,48 @@ public class ProcessorConfigurationService {
 
 		// update the property
 		List<ProcessorProperty> existingProperties = processor.getDynamicProperties();
+		// new property from DTO
+		List<ProcessorPropertyDTO> newProperties = propertyDTO.getDynamicProperties();
+		// new property to add entity
+		List<ProcessorProperty> processorPropertyList = new ArrayList<ProcessorProperty>();
 
-		// Add the property if empty
-		if (existingProperties == null || existingProperties.isEmpty()) {
+		for (ProcessorPropertyDTO properties : newProperties) {
 
-			processorProperty = new ProcessorProperty();
-			processorProperty.setPguid(MailBoxUtility.getGUID());
-			processorProperty.setProcsrPropName(name);
-			processorProperty.setProcsrPropValue(value);
+			// Add the property if empty
+			if (existingProperties == null || existingProperties.isEmpty()) {
 
-			List<ProcessorProperty> processorPropertyList = new ArrayList<ProcessorProperty>();
-			processorPropertyList.add(processorProperty);
+				processorProperty = new ProcessorProperty();
+				processorProperty.setPguid(MailBoxUtility.getGUID());
+				processorProperty.setProcsrPropName(properties.getName());
+				processorProperty.setProcsrPropValue(properties.getValue());
 
-			processor.setDynamicProperties(processorPropertyList);
+				processorPropertyList.add(processorProperty);
+				processor.setDynamicProperties(processorPropertyList);
 
-		} else {
+			} else {
 
-			for (ProcessorProperty property : existingProperties) {
+				for (ProcessorProperty property : existingProperties) {
 
-				String existingName = property.getProcsrPropName();
+					String existingName = property.getProcsrPropName();
 
-				// Update the property value if property name already exist
-				if (existingName != null && existingName.equals(name)) {
-					property.setProcsrPropValue(value);
-				} else {
-					// add new property name and value
-					processorProperty = new ProcessorProperty();
-					processorProperty.setPguid(MailBoxUtility.getGUID());
-					processorProperty.setProcsrPropName(name);
-					processorProperty.setProcsrPropValue(value);
+					// Update the property value if property name already exist
+					if (existingName != null && existingName.equals(properties.getName())) {
+						property.setProcsrPropValue(properties.getValue());
+					} else {
+						// add new property name and value
+						processorProperty = new ProcessorProperty();
+						processorProperty.setPguid(MailBoxUtility.getGUID());
+						processorProperty.setProcsrPropName(properties.getName());
+						processorProperty.setProcsrPropValue(properties.getValue());
 
+					}
+				}
+				if (null != processorProperty) {
+					existingProperties.add(processorProperty);
 				}
 			}
-			if (null != processorProperty) {
-				existingProperties.add(processorProperty);
-			}
 		}
+
 		configDao.merge(processor);
 	}
 

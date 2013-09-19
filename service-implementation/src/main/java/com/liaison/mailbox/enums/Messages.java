@@ -28,6 +28,7 @@ public enum Messages {
 	PROFILE_DOES_NOT_EXIST("Profile with the given id %s does not exist."),
 	PROCESSOR_DOES_NOT_EXIST("Processor with the given id %s does not exist."),
 	MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
+	MBX_PROFILE_LINK_DOES_NOT_MATCH("Mailbox-Profile link with the given id %s does not match the given Mailbox."),
 	PROFILE_ALREADY_EXISTS("Profile Already exists"),
 
 	// COMMON MESSAGES

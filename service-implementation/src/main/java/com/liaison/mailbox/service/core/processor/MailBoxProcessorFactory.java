@@ -40,6 +40,8 @@ public class MailBoxProcessorFactory {
 
 		if (ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new HttpRemoteDownloader(processor);
+		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
+			mailBoxProcessor = new HttpRemoteUploader(processor);
 		}
 
 		return mailBoxProcessor;

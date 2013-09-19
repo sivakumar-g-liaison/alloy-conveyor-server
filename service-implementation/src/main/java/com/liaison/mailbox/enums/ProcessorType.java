@@ -33,11 +33,9 @@ public enum ProcessorType {
 		ProcessorType found = null;
 		for (ProcessorType value : ProcessorType.values()) {
 
-			if (!MailBoxUtility.isEmpty(code)) {
-				if (code.equals(value.getCode())) {
-					found = value;
-					break;
-				}
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+				found = value;
+				break;
 			}
 		}
 
@@ -49,11 +47,9 @@ public enum ProcessorType {
 		ProcessorType found = null;
 		for (ProcessorType value : ProcessorType.values()) {
 
-			if (!MailBoxUtility.isEmpty(name)) {
-				if (name.equals(value.name())) {
-					found = value;
-					break;
-				}
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
 			}
 		}
 

@@ -24,10 +24,10 @@
                 "contentType": "",
                 "encodingFormat": ""
             },
-            "javaScriptURI": "file sytem path",
+            "javaScriptURI": null,
             "folders": [
                 {
-                    "folderURI": "C:\\temp",
+                    "folderURI": "//temp",
                     "folderType": "RESPONSE_LOCATION",
                     "folderDesc": "test"
                 }
@@ -35,7 +35,7 @@
             "credentials": [
                 {
                     "credentialType": "db",
-                    "credentialURI": "http://path",
+                    "credentialURI": "http: //path",
                     "userId": "karthi",
                     "password": "krishh",
                     "idpType": "ffdf",

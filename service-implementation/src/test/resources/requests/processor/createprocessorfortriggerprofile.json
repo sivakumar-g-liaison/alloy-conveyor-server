@@ -27,7 +27,7 @@
             "javaScriptURI": null,
             "folders": [
                 {
-                    "folderURI": "/temp",
+                    "folderURI": "//trigger",
                     "folderType": "RESPONSE_LOCATION",
                     "folderDesc": "test"
                 }

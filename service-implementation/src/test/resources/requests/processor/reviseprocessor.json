@@ -25,10 +25,10 @@
                 "contentType": "",
                 "encodingFormat": ""
             },
-            "javaScriptURI": "file sytem path",
+            "javaScriptURI": null,
             "folders": [
                 {
-                    "folderURI": "C:\\test",
+                    "folderURI": "//test",
                     "folderType": "RESPONSE_LOCATION",
                     "folderDesc": "test"
                 }
