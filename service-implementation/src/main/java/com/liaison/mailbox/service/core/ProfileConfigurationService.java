@@ -180,7 +180,7 @@ public class ProfileConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_EXIST, linkGuid);
 			}
 
-			if (mailboxGuid.equals(mailBoxSchedProfile.getMailbox().getPrimaryKey())) {
+			if (!mailboxGuid.equals(mailBoxSchedProfile.getMailbox().getPrimaryKey())) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_PROFILE_LINK_DOES_NOT_MATCH, linkGuid);
 			}
 
