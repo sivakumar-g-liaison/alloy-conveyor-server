@@ -13,10 +13,8 @@ package com.liaison.mailbox.jpa.model;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import com.liaison.mailbox.MailBoxConstants;
-
 @Entity
-@DiscriminatorValue(MailBoxConstants.REMOTE_DOWNLOADER)
+@DiscriminatorValue(value = Processor.TYPE_REMOTEDOWNLOADER)
 public class RemoteDownloader extends Processor {
 
 	private static final long serialVersionUID = 1L;

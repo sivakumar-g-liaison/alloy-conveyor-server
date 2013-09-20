@@ -31,7 +31,7 @@ public class ResponseDTO {
 	}
 
 	public ResponseDTO(Messages message, String key, Messages status, String additionalMessage) {
-		this.message = String.format(message.value(), key) +additionalMessage;
+		this.message = String.format(message.value(), key) + additionalMessage;
 		this.status = status.value();
 	}
 
@@ -52,7 +52,17 @@ public class ResponseDTO {
 	}
 
 	public void setAdditionalMessage(String addMessage) {
-		message.concat(addMessage);
+		message = message.concat(addMessage);
 	}
 
+	public static void main(String[] args) {
+
+		ResponseDTO dto = new ResponseDTO();
+
+		dto.message = "test";
+		System.out.println(dto.getMessage());
+		dto.setAdditionalMessage("oops");
+		System.out.println(dto.getMessage());
+
+	}
 }

@@ -18,10 +18,6 @@ package com.liaison.mailbox;
 public interface MailBoxConstants {
 
 	// Key descriminator values
-	public static final String REMOTE_UPLOADER = "REMOTE_UPLOADER";
-	public static final String REMOTE_DOWNLOADER = "REMOTE_DOWNLOADER";
-	public static final String SWEEPER = "SWEEPER";
-
 	/** File datetime format. */
 	public final static String FILETIME_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
@@ -34,5 +30,4 @@ public interface MailBoxConstants {
 	/** The processed file extension */
 	public final static String SWEEPED_FILE_EXTN = ".queued";
 
-	
 }

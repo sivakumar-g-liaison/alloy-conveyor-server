@@ -2,30 +2,55 @@
     "reviseProcessorRequest": {
         "processor": {
             "guid": "",
-            "name": "SOI Downloader",
-            "type": "remotedownloader",
-            "status": "active",
-            "description": "",
-            "properties": [
-                "{\"remotedownloaderproperties\": {\"httpverstion\": \"1.1\",\"httpverb\": \"POST\",\"retryattempts\": \"3\",\"scockettimeout\": \"6000\",\"connectiontimeout\": \"6000\",\"url\": \"http: //soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response\",\"port\": \"\",\"chunkedencoding\": \"true\",\"otherrequestheader\": [{\"name\": \"\",\"value\": \"\"}],\"contenttype\": \"\",\"encodingformat\": \"\"}}"
-            ],
-            "javaScriptURI": "file sytem path",
+            "name": "google remote downloader",
+            "type": "REMOTEDOWNLOADER",
+            "status": "ACTIVE",
+            "description": "Sample revise description",
+            "executionOrder":1,
+            "remoteDownloaderProperties": {
+                "httpVersion": "1.1",
+                "httpVerb": "GET",
+                "retryAttempts": "1",
+                "socketTimeout": "60000",
+                "connectionTimeout": "60000",
+                "url": "http://soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response",
+                "port": "",
+                "chunkedEncoding": "true",
+                "otherRequestHeader": [
+                    {
+                        "name": "",
+                        "value": ""
+                    }
+                ],
+                "contentType": "",
+                "encodingFormat": ""
+            },
+            "javaScriptURI": null,
             "folders": [
                 {
-                    "folderURI": "C://g2tests//responsedata",
+                    "folderURI": "//test",
                     "folderType": "RESPONSE_LOCATION",
-                    "folderDesc": "lcoation to save response"
+                    "folderDesc": "test"
                 }
             ],
-            "procsrProperties": [
+            "credentials": [
                 {
-                    "name": "lastSynchDate",
-                    "value": "09/16/2013 12:00:00"
+                    "credentialType": "db",
+                    "credentialURI": "http://path",
+                    "userId": "karthi",
+                    "password": "krishh",
+                    "idpType": "ffdf",
+                    "idpURI": "fdfd"
                 }
             ],
-            "linkedMailboxId": "27E3FD32NULL1974NULL08EE43448F31",
-            "linkedProfileId": "27EE18E4NULL1974NULL08EE8AC8DB1E",
-            "executionOrder": "1"
+            "dynamicProperties": [
+                {
+                    "name": "filename",
+                    "value": "test"
+                }
+            ],
+            "linkedMailboxId": "2CA5B1B6C0A801AD0B4385E4060808F5",
+            "linkedProfileId": "2CB89C44C0A801AD0B4385E41F305C5E"
         }
     }
 }

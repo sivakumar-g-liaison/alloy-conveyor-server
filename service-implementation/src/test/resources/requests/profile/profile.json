@@ -1,11 +1,9 @@
 {
-	    "addProfileToMailBoxRequest": {
-	        "mailBoxGuid": "E955A2C4NULL00E2NULLC241B724F400",
+	    "addProfileRequest": {
 	        "profile": {
-	            "name": "profilename",
+	            "name": "onceIn5mins",
 	            "id": "profileid"
-	        },
-	        "status": "active"
+	        }
 	    }
 	    
-	}
+}

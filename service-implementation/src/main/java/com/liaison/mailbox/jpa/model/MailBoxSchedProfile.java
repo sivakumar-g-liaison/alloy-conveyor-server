@@ -21,7 +21,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -78,7 +77,7 @@ public class MailBoxSchedProfile implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to ScheduleProfilesRef
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE }, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SCHEDULE_PROFILES_REF_GUID", nullable = false)
 	public ScheduleProfilesRef getScheduleProfilesRef() {
 		return this.scheduleProfilesRef;
@@ -90,7 +89,7 @@ public class MailBoxSchedProfile implements Identifiable {
 
 	// bi-directional many-to-one association to Processor
 	@OneToMany(mappedBy = "mailboxSchedProfile", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@OrderBy("executionOrder ASC")
+	// @OrderBy ("executionOrder ASC")
 	public List<Processor> getProcessors() {
 		return this.processors;
 	}

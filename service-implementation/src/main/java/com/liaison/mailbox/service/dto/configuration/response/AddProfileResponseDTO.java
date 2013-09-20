@@ -7,11 +7,17 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
+
 package com.liaison.mailbox.service.dto.configuration.response;
+
+import java.io.IOException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
@@ -19,44 +25,35 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * @author karthikeyanm
  * 
+ * @author karthikeyanm
  */
-
-@JsonRootName("reviseProcessorResponse")
-public class ReviseProcessorResponseDTO implements ResponseBuilder {
+@JsonRootName("addProfileResponse")
+public class AddProfileResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private ProcessorResponseDTO processor;
 
-	/**
-	 * @return the response
-	 */
+	private ProfileResponseDTO profile;
+	
 	public ResponseDTO getResponse() {
 		return response;
 	}
 
-	/**
-	 * @param response
-	 *            the response to set
-	 */
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
 
-	public ProcessorResponseDTO getProcessor() {
-		return processor;
+	public ProfileResponseDTO getProfile() {
+		return profile;
 	}
-
-	public void setProcessor(ProcessorResponseDTO processor) {
-		this.processor = processor;
+	
+	public void setProfile(ProfileResponseDTO profile) {
+		this.profile = profile;
 	}
-
+	
 	@Override
-	public Response constructResponse() throws Exception {
-
+	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
 		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
-
 }

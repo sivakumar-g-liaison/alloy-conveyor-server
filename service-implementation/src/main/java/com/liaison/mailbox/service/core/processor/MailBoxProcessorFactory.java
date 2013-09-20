@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.service.core.processor;
 
-import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.model.Processor;
 
 /**
@@ -38,8 +38,10 @@ public class MailBoxProcessorFactory {
 
 		MailBoxProcessor mailBoxProcessor = null;
 
-		if (MailBoxConstants.REMOTE_DOWNLOADER.equals(processor.getProcessorType())) {
+		if (ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new HttpRemoteDownloader(processor);
+		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
+			mailBoxProcessor = new HttpRemoteUploader(processor);
 		}
 
 		return mailBoxProcessor;

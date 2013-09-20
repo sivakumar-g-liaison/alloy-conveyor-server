@@ -35,11 +35,12 @@ import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddProfileToMailBoxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
@@ -266,8 +267,39 @@ public class MailBoxConfigurationResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createProfile(@Context HttpServletRequest request) {
 
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Create Profile not yet implemented.")
-				.build();
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		InputStream requestStream;
+		AddProfileRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
+
+			AddProfileResponseDTO serviceResponse = null;
+			ProfileConfigurationService profile = new ProfileConfigurationService();
+
+			// creates new profile
+			serviceResponse = profile.createProfile(serviceRequest);
+
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
 
 	}
 
@@ -333,28 +365,22 @@ public class MailBoxConfigurationResource {
 	 * @return Response Object
 	 */
 	@POST
-	@Path("/{id}/profile")
+	@Path("/{mailboxid}/profile/{profileid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addProfileToMailBox(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
+	public Response addProfileToMailBox(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailBoxGuid,
+			@PathParam(value = "profileid") String profileGuid) {
 
 		serviceCallCounter.addAndGet(1);
 
 		Response returnResponse;
-		InputStream requestStream;
-		AddProfileToMailBoxRequestDTO serviceRequest;
 
 		try {
-
-			requestStream = request.getInputStream();
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddProfileToMailBoxRequestDTO.class);
 
 			// add the new profile details
 			AddProfileToMailBoxResponseDTO serviceResponse = null;
 			ProfileConfigurationService profile = new ProfileConfigurationService();
-			serviceResponse = profile.addProfileToMailBox(serviceRequest, guid);
+			serviceResponse = profile.addProfileToMailBox(mailBoxGuid, profileGuid);
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -446,7 +472,7 @@ public class MailBoxConfigurationResource {
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			serviceResponse = mailbox.createProcessor(serviceRequest);
+			serviceResponse = mailbox.createProcessor(guid, serviceRequest);
 
 			// populate the response body
 			returnResponse = serviceResponse.constructResponse();
@@ -501,7 +527,7 @@ public class MailBoxConfigurationResource {
 			DeActivateProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Deactivating processor
-			serviceResponse = mailbox.deactivateProcessor(guid);
+			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
 			// Constructing response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -528,10 +554,11 @@ public class MailBoxConfigurationResource {
 	 * @return Response Object
 	 */
 	@GET
-	@Path("/processor/{processorid}")
+	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getProcessor(@PathParam(value = "processorid") String guid) {
+	public Response getProcessor(@PathParam(value = "mailboxid") String mailboxguid,
+			@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -542,7 +569,7 @@ public class MailBoxConfigurationResource {
 			GetProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Gets processor details.
-			serviceResponse = mailbox.getProcessor(guid);
+			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
 			// constructs response.
 			returnResponse = serviceResponse.constructResponse();
 
@@ -572,8 +599,8 @@ public class MailBoxConfigurationResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mbGuid,
-			@PathParam(value = "processorid") String pGuid) {
+	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailboxguid,
+			@PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -591,7 +618,7 @@ public class MailBoxConfigurationResource {
 			ReviseProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// updates existing processor
-			serviceResponse = mailbox.reviseProcessor(serviceRequest,mbGuid,pGuid);
+			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 

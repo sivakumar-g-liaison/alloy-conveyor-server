@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
@@ -112,7 +113,6 @@ public class MailBoxDTO {
 
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
-		mailBox.setMbxStatus(this.getStatus());
 		mailBox.setShardKey(this.getShardKey());
 		if (null != this.getServiceInstId()) {
 			mailBox.setServiceInstId(new BigDecimal(this.getServiceInstId()));
@@ -137,7 +137,12 @@ public class MailBoxDTO {
 		this.setGuid(mailBox.getPguid());
 		this.setName(mailBox.getMbxName());
 		this.setDescription(mailBox.getMbxDesc());
-		this.setStatus(mailBox.getMbxStatus());
+
+		if (null != mailBox.getMbxStatus()) {
+			MailBoxStatus status = MailBoxStatus.findByCode(mailBox.getMbxStatus());
+			this.setStatus(status.name());
+		}
+
 		this.setShardKey(mailBox.getShardKey());
 
 		if (null != mailBox.getServiceInstId()) {

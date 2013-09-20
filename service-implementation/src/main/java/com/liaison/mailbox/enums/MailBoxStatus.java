@@ -10,15 +10,14 @@
 
 package com.liaison.mailbox.enums;
 
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 public enum MailBoxStatus {
 
-	ACTIVE("ACTIVE"),
-	INACTIVE("INACTIVE");
-	
+	ACTIVE("active"),
+	INACTIVE("inactive");
 
 	private String value;
-	
 
 	private MailBoxStatus(String status) {
 		this.value = status;
@@ -26,6 +25,35 @@ public enum MailBoxStatus {
 
 	public String value() {
 		return value;
+	}
+
+	public static MailBoxStatus findByCode(String code) {
+
+		MailBoxStatus found = null;
+		for (MailBoxStatus value : MailBoxStatus.values()) {
+
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.value())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+	}
+
+	public static MailBoxStatus findByName(String name) {
+
+		MailBoxStatus found = null;
+		for (MailBoxStatus value : MailBoxStatus.values()) {
+
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+
 	}
 
 }

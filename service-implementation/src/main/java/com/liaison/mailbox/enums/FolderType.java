@@ -9,13 +9,16 @@
  */
 package com.liaison.mailbox.enums;
 
+import com.liaison.mailbox.service.util.MailBoxUtility;
+
 /**
  * @author praveenu
  * 
  */
 public enum FolderType {
 
-	PAYLOAD_LOCATION("PAYLOAD_LOCATION"), RESPONSE_LOCATION("RESPONSE_LOCATION");
+	PAYLOAD_LOCATION("payload_location"),
+	RESPONSE_LOCATION("response_location");
 
 	private final String code;
 
@@ -26,6 +29,39 @@ public enum FolderType {
 	@Override
 	public String toString() {
 		return code;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public static FolderType findByCode(String code) {
+
+		FolderType found = null;
+		for (FolderType value : FolderType.values()) {
+
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+	}
+
+	public static FolderType findByName(String name) {
+
+		FolderType found = null;
+		for (FolderType value : FolderType.values()) {
+
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+
 	}
 
 }

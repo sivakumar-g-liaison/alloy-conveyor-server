@@ -10,16 +10,21 @@
 
 package com.liaison.mailbox.service.dto.configuration.request;
 
+import java.io.IOException;
+
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
-
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
- * Data Transfer Object that implements fields required for mailbox
- * configuration request. 
- *
+ * Data Transfer Object that implements fields required for mailbox configuration request.
+ * 
  * @author sivakumarg
  */
 
@@ -35,8 +40,9 @@ public class AddProcessorToMailboxRequestDTO {
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
 	}
-	
-	public void copyToEntity(Processor entity) {
+
+	public void copyToEntity(Processor entity) throws MailBoxConfigurationServicesException, JsonGenerationException,
+			JsonMappingException, JAXBException, IOException {
 		this.getProcessor().copyToEntity(entity, true);
 
 	}

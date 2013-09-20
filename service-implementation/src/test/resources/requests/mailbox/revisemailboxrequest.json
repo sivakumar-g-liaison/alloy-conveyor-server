@@ -4,7 +4,7 @@
             "guid": "40288bc340cf19460140cf1947e00003",
             "name": "MCCWebAnalytics",
             "description": "Updatedmydescription",
-            "status": "active",
+            "status": "ACTIVE",
             "properties": [
                 {
                     "name": "filerenameformat",

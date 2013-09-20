@@ -45,5 +45,5 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param guId
 	 *            The primary key
 	 */
-	public void deactivate(String guId);
+	// public void deactivate(String guId);
 }
