@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.jpa.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -28,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
 
 /**
@@ -247,4 +249,33 @@ public class Processor implements Identifiable {
 
 		return processor;
 	}
+
+	/**
+	 * Gets the configured email receivers from the mailbox for the processor.
+	 * 
+	 * @param processor
+	 *            The processor instance
+	 * @return List of receivers
+	 */
+	@Transient
+	public List<String> getEmailAddress(Processor processor) {
+
+		MailBox mailBox = processor.getMailboxSchedProfile().getMailbox();
+		List<MailBoxProperty> properties = mailBox.getMailboxProperties();
+
+		if (null != properties) {
+
+			for (MailBoxProperty property : properties) {
+
+				if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
+					String address = property.getMbxPropValue();
+					return Arrays.asList(address.split(","));
+				}
+			}
+		}
+
+		return null;
+
+	}
+
 }

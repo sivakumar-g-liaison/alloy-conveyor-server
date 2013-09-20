@@ -30,4 +30,7 @@ public interface MailBoxConstants {
 	/** The processed file extension */
 	public final static String SWEEPED_FILE_EXTN = ".queued";
 
+	/** Property which is used to get the configured receivers from mailbox. */
+	public final static String MBX_RCVR_PROPERTY = "receivers";
+
 }

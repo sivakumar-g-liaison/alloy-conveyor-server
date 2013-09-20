@@ -19,6 +19,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -39,6 +40,7 @@ import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
@@ -54,6 +56,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public abstract class AbstractRemoteProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteProcessor.class);
+
+	private static final EmailNotifier NOTIFIER = new EmailNotifier();
 
 	private static FlexibleStorageSystem FS2 = null;
 
@@ -298,6 +302,28 @@ public abstract class AbstractRemoteProcessor {
 			throw e;
 		}
 		return buffer.toString();
+	}
+
+	/**
+	 * Sent notifications for trigger system failure.
+	 * 
+	 * @param toEmailAddrList
+	 *            The extra receivers. The default receiver will be available in the mailbox.
+	 * @param subject
+	 *            The notification subject
+	 * @param emailBody
+	 *            The body of the notification
+	 * @param type
+	 *            The notification type(TEXT/HTML).
+	 */
+	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
+
+		List<String> configuredEmailAddress = configurationInstance.getEmailAddress(configurationInstance);
+		if (null != configuredEmailAddress) {
+			toEmailAddrList.addAll(configuredEmailAddress);
+		}
+
+		NOTIFIER.sendEmail(toEmailAddrList, subject, emailBody, type);
 	}
 
 }
