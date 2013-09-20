@@ -258,9 +258,9 @@ public class Processor implements Identifiable {
 	 * @return List of receivers
 	 */
 	@Transient
-	public List<String> getEmailAddress(Processor processor) {
+	public List<String> getEmailAddress() {
 
-		MailBox mailBox = processor.getMailboxSchedProfile().getMailbox();
+		MailBox mailBox = getMailboxSchedProfile().getMailbox();
 		List<MailBoxProperty> properties = mailBox.getMailboxProperties();
 
 		if (null != properties) {

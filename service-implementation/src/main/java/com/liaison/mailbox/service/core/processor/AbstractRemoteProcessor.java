@@ -318,7 +318,7 @@ public abstract class AbstractRemoteProcessor {
 	 */
 	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
 
-		List<String> configuredEmailAddress = configurationInstance.getEmailAddress(configurationInstance);
+		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
 		if (null != configuredEmailAddress) {
 			toEmailAddrList.addAll(configuredEmailAddress);
 		}
