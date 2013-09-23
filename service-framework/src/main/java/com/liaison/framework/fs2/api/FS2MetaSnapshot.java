@@ -15,31 +15,31 @@ import java.util.Set;
  */
 public interface FS2MetaSnapshot {
 
-  Date createdOn();
+	Date getCreatedOn();
 
-  String createdBy();
-  
-  void dump(PrintStream printStream);
+	String getCreatedBy();
 
-  // obtain a single header
-  String[] getHeader(String key);
+	void dump(PrintStream printStream);
 
-  // get the set of all header names
-  Set<String> getHeaderNames();
+	// obtain a single header
+	String[] getHeader(String key);
 
-  // set of key/value pairs providing metadata for this object
-  FS2ObjectHeaders getHeaders();
+	// get the set of all header names
+	Set<String> getHeaderNames();
 
-  URI getURI();
+	// set of key/value pairs providing metadata for this object
+	FS2ObjectHeaders getHeaders();
 
-  // when was this snapshot taken?
-  Date snapshotTime();
+	URI getURI();
 
-  // TODO add these later... should be pluggable config...
-  // boolean isEncrypted();
-  // boolean isCompressed();
+	// when was this snapshot taken?
+	Date snapshotTime();
 
-  // JSON representation of this snapshot
-  String toJSON();
+	// TODO add these later... should be pluggable config...
+	// boolean isEncrypted();
+	// boolean isCompressed();
+
+	// JSON representation of this snapshot
+	String toJSON();
 
 }

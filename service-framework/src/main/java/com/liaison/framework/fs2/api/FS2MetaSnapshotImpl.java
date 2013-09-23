@@ -20,124 +20,126 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties({ "headerNames" })
 public class FS2MetaSnapshotImpl implements FS2MetaSnapshot {
 
-  // time this object was initially created
-  protected Date createdOn;
+	// time this object was initially created
+	protected Date createdOn;
 
-  protected String createdBy;
-  
-  // time this object was fetched, and this snapshot was taken (time of last
-  // read by FS2)
-  protected Date snapshotCreatedOn;
+	protected String createdBy;
 
-  protected FS2ObjectHeaders headers;
+	// time this object was fetched, and this snapshot was taken (time of last
+	// read by FS2)
+	protected Date snapshotCreatedOn;
 
-  private URI uri;
+	protected FS2ObjectHeaders headers;
 
-  // eager-load and maintain an unmutable reference to the toString() value
-  protected String cachedJSON;
+	private URI uri;
 
-  /**
-   * Methods below this line are here to support de-serialization only.
-   */
+	// eager-load and maintain an unmutable reference to the toString() value
+	protected String cachedJSON;
 
-  public FS2MetaSnapshotImpl() {
-  }
+	/**
+	 * Methods below this line are here to support de-serialization only.
+	 */
 
-  // convenience
-  public FS2MetaSnapshotImpl(URI uri, Date createdOn, String createdBy) {
-    this(uri, createdOn, createdBy, new FS2ObjectHeaders());
-  }
+	public FS2MetaSnapshotImpl() {
+	}
 
-  public FS2MetaSnapshotImpl(URI uri, Date createdOn, String createdBy, FS2ObjectHeaders headers) {
-    this.uri = uri;
-    headers = null == headers.clone() ? new FS2ObjectHeaders() : headers;
-    this.headers = headers;
-    this.createdBy = createdBy;
-    snapshotCreatedOn = new Date();
-  }
+	// convenience
+	public FS2MetaSnapshotImpl(URI uri, Date createdOn, String createdBy) {
+		this(uri, createdOn, createdBy, new FS2ObjectHeaders());
+	}
 
-  @Override
-  public Date createdOn() {
-    return createdOn;
-  }
-  
-  @Override
-  public String createdBy() {
-    return createdBy;
-  }
+	public FS2MetaSnapshotImpl(URI uri, Date createdOn, String createdBy, FS2ObjectHeaders headers) {
+		this.uri = uri;
+		headers = null == headers.clone() ? new FS2ObjectHeaders() : headers;
+		this.headers = headers;
+		this.createdBy = createdBy;
+		snapshotCreatedOn = new Date();
+	}
 
-  @Override
-  public void dump(PrintStream printStream) {
-    printStream.println(this);
-  }
+	@Override
+	public Date getCreatedOn() {
+		return createdOn;
+	}
 
-  @Override
-  public String[] getHeader(String key) {
-    List<String> values = headers.getHeaders().get(key);
-    return values.toArray(new String[values.size()]);
-  }
+	@Override
+	public String getCreatedBy() {
+		return createdBy;
+	}
 
-  @Override
-  public Set<String> getHeaderNames() {
-    return headers.getHeaders().keySet();
-  }
+	@Override
+	public void dump(PrintStream printStream) {
+		printStream.println(this);
+	}
 
-  @Override
-  public FS2ObjectHeaders getHeaders() {
-    return headers;
-  }
+	@Override
+	public String[] getHeader(String key) {
+		List<String> values = headers.getHeaders().get(key);
+		return values.toArray(new String[values.size()]);
+	}
 
-  @Override
-  public URI getURI() {
-    return uri;
-  }
+	@Override
+	public Set<String> getHeaderNames() {
+		return headers.getHeaders().keySet();
+	}
 
-  public void setCreatedOn(Date createdOn) {
-    this.createdOn = createdOn;
-  }
+	@Override
+	public FS2ObjectHeaders getHeaders() {
+		return headers;
+	}
 
-  public void setDescription(String description) {
-    cachedJSON = description;
-  }
+	@Override
+	public URI getURI() {
+		return uri;
+	}
 
-  public void setHeaders(FS2ObjectHeaders headers) {
-    this.headers = headers;
-  }
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
 
-  public void setSnapshotCreatedOn(Date snapshotCreatedOn) {
-    this.snapshotCreatedOn = snapshotCreatedOn;
-  }
+	public void setDescription(String description) {
+		cachedJSON = description;
+	}
 
-  public void setUri(URI uri) {
-    this.uri = uri;
-  }
+	public void setHeaders(FS2ObjectHeaders headers) {
+		this.headers = headers;
+	}
 
-  @Override
-  public Date snapshotTime() {
-    return snapshotCreatedOn;
-  }
+	public void setSnapshotCreatedOn(Date snapshotCreatedOn) {
+		this.snapshotCreatedOn = snapshotCreatedOn;
+	}
 
-  @Override
-  public String toJSON() {
-    // we set this once because the "snapshot" should be immutable
-    // ... the setters are not included in the interface
-    if (cachedJSON != null) { return cachedJSON; }
-    cachedJSON = CoreFS2Utils.toJSON(this);
-    return toJSON();
-  }
+	public void setUri(URI uri) {
+		this.uri = uri;
+	}
 
-  // override the cache
-  protected String toJSON(boolean refresh) {
-    if (refresh) {
-      cachedJSON = null;
-    }
-    return toJSON();
-  }
+	@Override
+	public Date snapshotTime() {
+		return snapshotCreatedOn;
+	}
 
-  @Override
-  public String toString() {
-    // return toJSON();
-    return uri.toString();
-  }
+	@Override
+	public String toJSON() {
+		// we set this once because the "snapshot" should be immutable
+		// ... the setters are not included in the interface
+		if (cachedJSON != null) {
+			return cachedJSON;
+		}
+		cachedJSON = CoreFS2Utils.toJSON(this);
+		return toJSON();
+	}
+
+	// override the cache
+	protected String toJSON(boolean refresh) {
+		if (refresh) {
+			cachedJSON = null;
+		}
+		return toJSON();
+	}
+
+	@Override
+	public String toString() {
+		// return toJSON();
+		return uri.toString();
+	}
 
 }
