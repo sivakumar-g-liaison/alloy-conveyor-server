@@ -31,11 +31,11 @@ public class MailBoxConfigurationServicesException extends Exception {
 	/**
 	 * @param message
 	 */
-	public MailBoxConfigurationServicesException(Messages message,String key) {
-		super(String.format(message.value(),key));
+	public MailBoxConfigurationServicesException(Messages message, String key) {
+		super(String.format(message.value(), key));
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	/**
 	 * @param message
 	 */
@@ -44,5 +44,11 @@ public class MailBoxConfigurationServicesException extends Exception {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * @param message
+	 */
+	public MailBoxConfigurationServicesException(String message) {
+		super(message);
+	}
 
 }

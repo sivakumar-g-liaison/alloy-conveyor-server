@@ -14,11 +14,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.validation.DataValidation;
+import com.liaison.mailbox.service.validation.Mandatory;
 
 /**
  * 
@@ -44,6 +47,7 @@ public class MailBoxDTO {
 		this.guid = guid;
 	}
 
+	@Mandatory(errorMessage = "MailBox name is mandatory.")
 	public String getName() {
 		return name;
 	}
@@ -60,6 +64,8 @@ public class MailBoxDTO {
 		this.description = description;
 	}
 
+	@Mandatory(errorMessage = "MailBox status is mandatory.")
+	@DataValidation(errorMessage = "MailBox status set to a value that is not supported.", type = MailBoxConstants.MBX_STATUS)
 	public String getStatus() {
 		return status;
 	}
@@ -109,6 +115,12 @@ public class MailBoxDTO {
 		this.profiles = profiles;
 	}
 
+	/**
+	 * Copies all data from DTO to entity except PGUID.
+	 * 
+	 * @param mailBox
+	 *            The MailBox Entity
+	 */
 	public void copyToEntity(MailBox mailBox) {
 
 		mailBox.setMbxName(this.getName());
@@ -130,8 +142,16 @@ public class MailBoxDTO {
 		}
 		mailBox.setMailboxProperties(properties);
 
+		MailBoxStatus status = MailBoxStatus.findByName(this.getStatus());
+		mailBox.setMbxStatus(status.value());
 	}
 
+	/**
+	 * Copies all data from Entity to DTO.
+	 * 
+	 * @param mailBox
+	 *            The MailBox Entity
+	 */
 	public void copyFromEntity(MailBox mailBox) {
 
 		this.setGuid(mailBox.getPguid());

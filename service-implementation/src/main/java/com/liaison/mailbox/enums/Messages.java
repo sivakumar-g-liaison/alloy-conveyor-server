@@ -59,7 +59,10 @@ public enum Messages {
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
 
 	// MBX GUID DOES NOT MATCH WITH THE GIVEN PROCESSOR
-	PROC_DOES_NOT_BELONG_TO_MBX("The given processor is not belongs to given mailbox.");
+	PROC_DOES_NOT_BELONG_TO_MBX("The given processor is not belongs to given mailbox."),
+
+	ERROR_MSG("Validation failed with the following error(s):"),
+	VALIDATOR_ERROR_MSG("Error in validator, object cannot be null.");
 
 	private String value;
 

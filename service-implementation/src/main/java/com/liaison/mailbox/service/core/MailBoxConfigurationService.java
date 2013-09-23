@@ -32,6 +32,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has mailbox configuration related operations.
@@ -42,8 +43,8 @@ public class MailBoxConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationService.class);
 	private static final String MAILBOX = "Mailbox";
-	private static final String MAILBOX_NAME = "Mailbox Name";
-	private static final String MAILBOX_STATUS = "MailBox Status";
+
+	private static final GenericValidator validator = new GenericValidator();
 
 	/**
 	 * Creates Mail Box.
@@ -58,24 +59,16 @@ public class MailBoxConfigurationService {
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
 		try {
 
-			MailBoxDTO mailboxDto = request.getMailBox();
-			if (mailboxDto == null) {
+			MailBoxDTO mailboxDTO = request.getMailBox();
+			if (mailboxDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
-			if (MailBoxUtility.isEmpty(mailboxDto.getName())) {
-				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MAILBOX_NAME);
-			}
-
-			// status validation
-			MailBoxStatus foundStatusType = MailBoxStatus.findByName(mailboxDto.getStatus());
-			if (foundStatusType == null) {
-				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, MAILBOX_STATUS);
-			}
+			// validation
+			validator.validate(mailboxDTO);
 
 			MailBox mailBox = new MailBox();
-			mailboxDto.copyToEntity(mailBox);
-			mailBox.setMbxStatus(foundStatusType.value());// Setting the mailbox status
+			mailboxDTO.copyToEntity(mailBox);
 			mailBox.setPguid(MailBoxUtility.getGUID());
 
 			// persisting the mailbox entity
@@ -154,16 +147,15 @@ public class MailBoxConfigurationService {
 
 		try {
 
-			MailBoxDTO mailboxDto = request.getMailBox();
-			if (mailboxDto == null) {
+			MailBoxDTO mailboxDTO = request.getMailBox();
+			if (mailboxDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
-			if (MailBoxUtility.isEmpty(mailboxDto.getName())) {
-				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, MAILBOX_NAME);
-			}
+			// Validation
+			validator.validate(mailboxDTO);
 
-			if (!guid.equals(mailboxDto.getGuid())) {
+			if (!guid.equals(mailboxDTO.getGuid())) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
 			}
 
@@ -178,10 +170,7 @@ public class MailBoxConfigurationService {
 			retrievedMailBox.getMailboxProperties().clear();
 
 			// updates the mail box data
-			mailboxDto.copyToEntity(retrievedMailBox);
-			if (retrievedMailBox.getMbxStatus() == null) {
-				retrievedMailBox.setMbxStatus(MailBoxStatus.ACTIVE.value());
-			}
+			mailboxDTO.copyToEntity(retrievedMailBox);
 			configDao.merge(retrievedMailBox);
 
 			// response message construction
