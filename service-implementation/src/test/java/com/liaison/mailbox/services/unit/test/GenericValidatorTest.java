@@ -10,10 +10,13 @@
 
 package com.liaison.mailbox.services.unit.test;
 
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -70,7 +73,28 @@ public class GenericValidatorTest {
 		MailBoxDTO dto = new MailBoxDTO();
 		dto.setName("MBXNAME");
 		dto.setStatus("INACTIVE");
-		validator.validate(dto);
+
+		Assert.assertEquals(true, validator.validate(dto));
+	}
+
+	public void testProfile() throws MailBoxConfigurationServicesException {
+
+		ProfileDTO profile = new ProfileDTO();
+		profile.setName("oncein5mins");
+
+		Assert.assertEquals(true, validator.validate(profile));
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testProfile_WithoutName_ShouldThrowException() throws MailBoxConfigurationServicesException {
+
+		ProfileDTO profile = new ProfileDTO();
+		validator.validate(profile);
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testProfile_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
+		validator.validate(null);
 	}
 
 }

@@ -218,7 +218,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
-		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor"
+		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor/"
 				+ processorResponseDTO.getProcessor().getGuId();
 		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
@@ -239,10 +239,11 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
-		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
-		Assert.assertEquals(addProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
-		Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
-		Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+		Assert.assertEquals(reviseProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
+		Assert.assertEquals(reviseProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
+		Assert.assertEquals(reviseProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
+		Assert.assertEquals(reviseProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor()
+				.getJavaScriptURI());
 	}
 
 	@Test

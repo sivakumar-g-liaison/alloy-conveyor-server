@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
+import com.liaison.mailbox.service.validation.Mandatory;
 
 /**
  * 
@@ -27,6 +28,7 @@ public class ProfileDTO {
 
 	private List<MailBoxProcessorResponseDTO> processors;
 
+	@Mandatory(errorMessage = "Profile name is mandatory.")
 	public String getName() {
 		return name;
 	}

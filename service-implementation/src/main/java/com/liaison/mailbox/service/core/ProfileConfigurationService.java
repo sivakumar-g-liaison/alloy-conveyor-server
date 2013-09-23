@@ -33,6 +33,7 @@ import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxP
 import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has configuration related operations.
@@ -45,7 +46,8 @@ public class ProfileConfigurationService {
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
 	private static String PROFILE = "Profile";
 	private static String MAILBOX_PROFILE = "Mailbox-Profile Link";
-	private static final String PROFILE_NAME = "Profile Name";
+
+	private final GenericValidator validator = new GenericValidator();
 
 	/**
 	 * Creates Profile.
@@ -62,14 +64,11 @@ public class ProfileConfigurationService {
 		try {
 
 			ProfileDTO profileDTO = request.getProfile();
-
 			if (profileDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 
-			if (MailBoxUtility.isEmpty(profileDTO.getName())) {
-				throw new MailBoxConfigurationServicesException(Messages.MANDATORY_FIELD_MISSING, PROFILE_NAME);
-			}
+			validator.validate(profileDTO);
 
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 
