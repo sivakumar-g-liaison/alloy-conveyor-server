@@ -18,8 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
@@ -187,6 +189,16 @@ public class GenericValidator {
 
 		if (MailBoxConstants.MBX_STATUS.equals(annotationDetails.type())) {
 			if (MailBoxStatus.findByName(String.valueOf(value)) == null) {
+				errorMessage.append(annotationDetails.errorMessage());
+				return false;
+			}
+		} else if (MailBoxConstants.PROCESSOR_TYPE.equals(annotationDetails.type())) {
+			if (ProcessorType.findByName(String.valueOf(value)) == null) {
+				errorMessage.append(annotationDetails.errorMessage());
+				return false;
+			}
+		} else if (MailBoxConstants.FOLDER_TYPE.equals(annotationDetails.type())) {
+			if (FolderType.findByName(String.valueOf(value)) == null) {
 				errorMessage.append(annotationDetails.errorMessage());
 				return false;
 			}

@@ -35,7 +35,8 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote downloader to perform pull operation, also it has support methods for JavaScript.
+ * Http remote downloader to perform pull operation, also it has support methods
+ * for JavaScript.
  * 
  * @author praveenu
  */
@@ -69,8 +70,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
-				Object obj = inv.invokeFunction("handleHTTPRequest", this);
-				System.out.println(obj.toString());
+				inv.invokeFunction("init", this);
 
 			} else {
 				// HTTPRequest executed through Java
@@ -118,7 +118,6 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		}
-
 		writeResponseToMailBox(responseStream);
 	}
 

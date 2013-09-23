@@ -10,11 +10,15 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.jpa.model.Credential;
+import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
+import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.validation.Mandatory;
 
 /**
  * 
- *
+ * 
  * @author sivakumarg
  */
 public class CredentialDTO {
@@ -26,70 +30,92 @@ public class CredentialDTO {
 	private String password;
 	private String idpType;
 	private String idpURI;
-	
+
 	public String getGuId() {
 		return guId;
 	}
+
 	public void setGuId(String guId) {
 		this.guId = guId;
 	}
+
+	@Mandatory(errorMessage = "Credential Type is mandatory.")
 	public String getCredentialType() {
 		return credentialType;
 	}
+
 	public void setCredentialType(String credentialType) {
 		this.credentialType = credentialType;
 	}
+
 	public String getCredentialURI() {
 		return credentialURI;
 	}
+
 	public void setCredentialURI(String credentialURI) {
 		this.credentialURI = credentialURI;
 	}
+
 	public String getUserId() {
 		return userId;
 	}
+
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+
 	public String getPassword() {
 		return password;
 	}
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
 	public String getIdpType() {
 		return idpType;
 	}
+
 	public void setIdpType(String idpType) {
 		this.idpType = idpType;
 	}
+
 	public String getIdpURI() {
 		return idpURI;
 	}
+
 	public void setIdpURI(String idpURI) {
 		this.idpURI = idpURI;
 	}
-	
-	public void copyToEntity(Object entity) {
+
+	public void copyToEntity(Object entity) throws SymmetricAlgorithmException {
 
 		Credential credential = (Credential) entity;
 		credential.setCredsIdpType(this.getIdpType());
 		credential.setCredsIdpUri(this.getIdpURI());
-		credential.setCredsPassword(this.getPassword());
+
+		if (!MailBoxUtility.isEmpty(this.getPassword())) {
+
+			credential.setCredsPassword(MailBoxCryptoUtil.doPasswordEncryption(this.getPassword(), 1));
+		}
 		credential.setCredsType(this.getCredentialType());
 		credential.setCredsUri(this.getCredentialURI());
 		credential.setCredsUsername(this.getUserId());
 		credential.setPguid(this.getGuId());
-		
+
 	}
 
-	public void copyFromEntity(Object entity) {
+	public void copyFromEntity(Object entity) throws SymmetricAlgorithmException {
 
 		Credential credential = (Credential) entity;
-		
+
 		this.setIdpType(credential.getCredsIdpType());
 		this.setIdpURI(credential.getCredsIdpUri());
-		this.setPassword(credential.getCredsPassword());
+
+		if (!MailBoxUtility.isEmpty(credential.getCredsPassword())) {
+
+			this.setPassword(MailBoxCryptoUtil.doPasswordEncryption(credential.getCredsPassword(), 2));
+		}
 		this.setCredentialType(credential.getCredsType());
 		this.setCredentialURI(credential.getCredsUri());
 		this.setUserId(credential.getCredsUsername());

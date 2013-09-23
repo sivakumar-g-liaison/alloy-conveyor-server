@@ -10,10 +10,13 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.validation.DataValidation;
+import com.liaison.mailbox.service.validation.Mandatory;
 
 /**
  * 
@@ -43,6 +46,8 @@ public class FolderDTO {
 		this.folderURI = folderURI;
 	}
 
+	@Mandatory(errorMessage = "Folder Type is mandatory.")
+	@DataValidation(errorMessage = "Folder type set to a value that is not supported.", type = MailBoxConstants.FOLDER_TYPE)
 	public String getFolderType() {
 		return folderType;
 	}

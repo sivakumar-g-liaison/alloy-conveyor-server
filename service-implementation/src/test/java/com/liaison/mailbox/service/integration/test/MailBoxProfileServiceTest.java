@@ -123,6 +123,45 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, deactivateResponseDTO.getResponse().getStatus());
 	}
 
+	@Test
+	public void testDeactivateProfileFromMailBox_Invalid_MailBoxId() throws LiaisonException, JSONException, IOException,
+			JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile();
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, mbProfileResponseDTO.getResponse().getStatus());
+
+		// Deactivate Link
+		String deactivateProfile = "/" + "1425633662225144" + "/profile/" + mbProfileResponseDTO.getMailboxProfileLinkGuid();
+		HTTPRequest deactivateRequest = constructHTTPRequest(getBASE_URL() + deactivateProfile, HTTP_METHOD.DELETE, null,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		deactivateRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		DeactivateMailboxProfileLinkResponseDTO deactivateResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				DeactivateMailboxProfileLinkResponseDTO.class);
+		Assert.assertEquals(FAILURE, deactivateResponseDTO.getResponse().getStatus());
+	}
+
 	private AddMailBoxResponseDTO createMailBox() throws JAXBException, JsonParseException, JsonMappingException, IOException,
 			JsonGenerationException, MalformedURLException, FileNotFoundException, LiaisonException {
 

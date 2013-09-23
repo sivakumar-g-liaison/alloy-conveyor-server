@@ -46,6 +46,7 @@ public abstract class BaseServiceTest {
 	private static String BASE_URL;
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
+	public static final String FAILURE = Messages.FAILURE.value();
 
 	@Before
 	public void initialSetUp() throws FileNotFoundException, IOException {

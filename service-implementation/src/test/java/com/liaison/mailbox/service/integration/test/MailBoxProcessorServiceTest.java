@@ -127,8 +127,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 	@Test
 	public void testReadProcessor() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-			JAXBException,
-			IOException {
+			JAXBException, IOException {
 
 		AddMailBoxResponseDTO responseDTO = createMailBox();
 
@@ -165,8 +164,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -235,8 +233,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(reviseProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -282,8 +279,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				+ processorResponseDTO.getProcessor().getGuId();
 		request = constructHTTPRequest(getBASE_URL() + deActProcessor, HTTP_METHOD.DELETE, null, logger);
 		request.execute();
-		Assert.assertEquals(true,
-				getResponseStatus(getOutput().toString(), "deActivateProcessorResponse").equals(SUCCESS));
+		Assert.assertEquals(true, getResponseStatus(getOutput().toString(), "deActivateProcessorResponse").equals(SUCCESS));
 
 		// Get Processor
 		String getProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
@@ -292,8 +288,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
@@ -358,8 +353,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(reviseProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());

@@ -13,6 +13,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -25,7 +26,9 @@ import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
@@ -38,6 +41,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.util.ProcessorExecutionOrderComparator;
+import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * @author sivakumarg
@@ -50,6 +54,8 @@ public class ProcessorConfigurationService {
 	private static String MAILBOX = "MailBox";
 	private static final String PROCESSOR_STATUS = "Processor Status";
 
+	private static final GenericValidator validator = new GenericValidator();
+
 	/**
 	 * Creates processor for the mailbox.
 	 * 
@@ -60,9 +66,10 @@ public class ProcessorConfigurationService {
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
+	 * @throws SymmetricAlgorithmException
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
 		LOGGER.info("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
@@ -71,6 +78,23 @@ public class ProcessorConfigurationService {
 
 			if (!mailBoxGuid.equals(serviceRequest.getProcessor().getLinkedMailboxId())) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
+			}
+
+			ProcessorDTO processorDTO = serviceRequest.getProcessor();
+			if (processorDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			validator.validate(processorDTO);
+			if (null != processorDTO.getFolders()) {
+				for (FolderDTO folderDTO : processorDTO.getFolders()) {
+					validator.validate(folderDTO);
+				}
+			}
+			if (null != processorDTO.getCredentials()) {
+				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
+					validator.validate(credentialDTO);
+				}
 			}
 
 			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
@@ -139,10 +163,10 @@ public class ProcessorConfigurationService {
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
 	 */
 	public GetProcessorResponseDTO getProcessor(String mailBoxGuid, String processorGuid) throws JsonParseException,
-			JsonMappingException,
-			JAXBException, IOException {
+			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
@@ -229,7 +253,8 @@ public class ProcessorConfigurationService {
 	 * @param request
 	 *            The Revise Processor Request DTO
 	 * @param mailBoxId
-	 *            The guid of the mailbox.The given processor should belongs to the given mailbox.
+	 *            The guid of the mailbox.The given processor should belongs to
+	 *            the given mailbox.
 	 * @param processorId
 	 *            The processor guid which is to be revised.
 	 * @return The Revise Processor ResponseDTO
@@ -237,9 +262,10 @@ public class ProcessorConfigurationService {
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
+	 * @throws SymmetricAlgorithmException
 	 */
 	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
 		LOGGER.info("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
@@ -258,6 +284,18 @@ public class ProcessorConfigurationService {
 			ProcessorDTO processorDTO = request.getProcessor();
 			if (processorDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			validator.validate(processorDTO);
+			if (null != processorDTO.getFolders()) {
+				for (FolderDTO folderDTO : processorDTO.getFolders()) {
+					validator.validate(folderDTO);
+				}
+			}
+			if (null != processorDTO.getCredentials()) {
+				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
+					validator.validate(credentialDTO);
+				}
 			}
 
 			// validates the processor type
@@ -315,8 +353,9 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Changing the execution order using duplicate Processor entity.The change will occur when the
-	 * incoming execution order does not match with the existing one.
+	 * Changing the execution order using duplicate Processor entity.The change
+	 * will occur when the incoming execution order does not match with the
+	 * existing one.
 	 * 
 	 * @param request
 	 *            The revise processor request DTO.
@@ -364,7 +403,8 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Method for add and update the dynamic processorProperty to Processor entity
+	 * Method for add and update the dynamic processorProperty to Processor
+	 * entity
 	 * 
 	 * @param processor
 	 *            The processor guid

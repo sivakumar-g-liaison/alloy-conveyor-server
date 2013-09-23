@@ -35,4 +35,8 @@ public interface MailBoxConstants {
 
 	public final static String MBX_STATUS = "MailBoxStatus";
 
+	public final static String PROCESSOR_TYPE = "ProcessorType";
+
+	public final static String FOLDER_TYPE = "FolderType";
+
 }

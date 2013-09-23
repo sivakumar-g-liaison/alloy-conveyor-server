@@ -20,6 +20,8 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
@@ -29,6 +31,8 @@ import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.dto.configuration.request.HttpRemoteDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.validation.DataValidation;
+import com.liaison.mailbox.service.validation.Mandatory;
 
 /**
  * 
@@ -71,6 +75,8 @@ public class ProcessorDTO {
 		this.name = name;
 	}
 
+	@Mandatory(errorMessage = "Processor type is mandatory.")
+	@DataValidation(errorMessage = "Processor type set to a value that is not supported.", type = MailBoxConstants.PROCESSOR_TYPE)
 	public String getType() {
 		return type;
 	}
@@ -103,6 +109,8 @@ public class ProcessorDTO {
 		this.description = description;
 	}
 
+	@Mandatory(errorMessage = "Processor status is mandatory.")
+	@DataValidation(errorMessage = "Processor status set to a value that is not supported.", type = MailBoxConstants.MBX_STATUS)
 	public String getStatus() {
 		return status;
 	}
@@ -170,21 +178,24 @@ public class ProcessorDTO {
 	}
 
 	/**
-	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
-	 * MailBoxSchedProfile and Processor. That step will be done in the service.
+	 * Method is used to copy the values from DTO to Entity. It does not create
+	 * relationship between MailBoxSchedProfile and Processor. That step will be
+	 * done in the service.
 	 * 
 	 * @param processor
 	 *            The processor entity
 	 * @param isCreate
-	 *            The boolean value use to differentiate create and revise processor operation.
+	 *            The boolean value use to differentiate create and revise
+	 *            processor operation.
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
+	 * @throws SymmetricAlgorithmException
 	 */
 	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException,
-			JsonGenerationException, JsonMappingException, JAXBException, IOException {
+			JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
 		if (isCreate) {
 			processor.setPguid(MailBoxUtility.getGUID());
@@ -255,9 +266,10 @@ public class ProcessorDTO {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 * @throws MailBoxConfigurationServicesException
+	 * @throws SymmetricAlgorithmException
 	 */
 	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException,
-			MailBoxConfigurationServicesException {
+			MailBoxConfigurationServicesException, SymmetricAlgorithmException {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());

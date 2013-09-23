@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.framework.fs2.api.FS2Exception;
 import com.liaison.framework.fs2.api.FS2Factory;
@@ -47,6 +48,7 @@ import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHea
 import com.liaison.mailbox.service.dto.configuration.request.HttpRemoteDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -85,7 +87,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor type.
+	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor
+	 * type.
 	 * 
 	 * @return
 	 */
@@ -144,8 +147,9 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the URI to which the response should be written, this can be used if the JS decides to
-	 * write the response straight to the file system or database
+	 * Get the URI to which the response should be written, this can be used if
+	 * the JS decides to write the response straight to the file system or
+	 * database
 	 * 
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
@@ -189,7 +193,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the list of dynamic properties of the MailBox known only to java script
+	 * Get the list of dynamic properties of the MailBox known only to java
+	 * script
 	 * 
 	 * @return MailBox dynamic properties
 	 */
@@ -228,6 +233,17 @@ public abstract class AbstractRemoteProcessor {
 	public Object getCertificate() {
 		// TODO
 		return null;
+	}
+
+	/**
+	 * Get the decrypted value of a String, known only to java script
+	 * 
+	 * @param encryptedValue
+	 *            The text to be decrypted
+	 * @return decrypted data as String
+	 */
+	public String getDecryptedString(String encryptedValue) throws SymmetricAlgorithmException {
+		return MailBoxCryptoUtil.doPasswordEncryption(encryptedValue, 2);
 	}
 
 	/**
@@ -308,7 +324,8 @@ public abstract class AbstractRemoteProcessor {
 	 * Sent notifications for trigger system failure.
 	 * 
 	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in the mailbox.
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
 	 * @param subject
 	 *            The notification subject
 	 * @param emailBody

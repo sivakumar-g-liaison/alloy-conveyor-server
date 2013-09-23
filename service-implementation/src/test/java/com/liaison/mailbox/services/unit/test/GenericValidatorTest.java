@@ -15,8 +15,10 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -95,6 +97,65 @@ public class GenericValidatorTest {
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testProfile_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
 		validator.validate(null);
+	}
+
+	@Test
+	public void testValidateProcessor() throws MailBoxConfigurationServicesException {
+
+		ProcessorDTO dto = new ProcessorDTO();
+		dto.setType("SWEEPER");
+		dto.setStatus("ACTIVE");
+		validator.validate(dto);
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testValidateProcessor_WithEmptySpace_ShouldThrowException() throws MailBoxConfigurationServicesException {
+
+		ProcessorDTO dto = new ProcessorDTO();
+		dto.setType(" ");
+		dto.setStatus(" ");
+		validator.validate(dto);
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testValidateProcessor_WithInvalidValue_ShouldThrowException() throws MailBoxConfigurationServicesException {
+
+		ProcessorDTO dto = new ProcessorDTO();
+		dto.setType("sdsd");
+		dto.setStatus("dsddd");
+		validator.validate(dto);
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testValidateProcessor_WithoutStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
+
+		ProcessorDTO dto = new ProcessorDTO();
+		dto.setType("SWEEPER");
+		validator.validate(dto);
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testValidateProcessor_WithoutType_ShouldThrowException() throws MailBoxConfigurationServicesException {
+
+		ProcessorDTO dto = new ProcessorDTO();
+		dto.setStatus("ACTIVE");
+		validator.validate(dto);
+	}
+
+	@Test
+	public void testValidateFolder() throws MailBoxConfigurationServicesException {
+
+		FolderDTO dto = new FolderDTO();
+		dto.setFolderType("PAYLOAD_LOCATION");
+		validator.validate(dto);
+	}
+
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testValidateFolder_WithInvalidValue_ShouldThrowException() throws MailBoxConfigurationServicesException {
+
+		FolderDTO dto = new FolderDTO();
+		dto.setFolderType("payload_location");
+		validator.validate(dto);
 	}
 
 }
