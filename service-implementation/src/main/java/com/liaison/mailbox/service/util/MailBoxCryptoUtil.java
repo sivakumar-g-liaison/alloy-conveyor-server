@@ -9,6 +9,8 @@
  */
 package com.liaison.mailbox.service.util;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.liaison.commons.security.pkcs7.CryptoUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 
@@ -33,8 +35,13 @@ public class MailBoxCryptoUtil {
 	 */
 	public static String doPasswordEncryption(String data, int mode) throws SymmetricAlgorithmException {
 
-		byte[] bytes = CryptoUtil.doPasswordBasedEncryption(data.getBytes(), PASSWORD_ENCRYPT_KEY, mode);
-		return new String(bytes);
+		if (1 == mode) {
+			byte[] bytes = CryptoUtil.doPasswordBasedEncryption(data.getBytes(), PASSWORD_ENCRYPT_KEY, 1);
+			return Base64.encodeBase64String(bytes);
+		} else {
+			byte[] bytes = CryptoUtil.doPasswordBasedEncryption(Base64.decodeBase64(data), PASSWORD_ENCRYPT_KEY, 2);
+			return new String(bytes);
+		}
 
 	}
 
