@@ -17,7 +17,7 @@ public class RemoteProcessorFS2Configuration extends FS2DefaultConfiguration imp
 	public RemoteProcessorFS2Configuration() throws IOException {
 
 		props = new Properties();
-		String properties = ServiceUtils.readFileFromClassPath("g2mailboxservice-dev.properties");
+		String properties = ServiceUtils.readFileFromClassPath("g2mailboxservice-atlqa.properties");
 		InputStream is = new ByteArrayInputStream(properties.getBytes("UTF-8"));
 		props.load(is);
 
