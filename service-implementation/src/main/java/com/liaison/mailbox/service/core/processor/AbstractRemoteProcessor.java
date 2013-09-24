@@ -87,8 +87,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor
-	 * type.
+	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor type.
 	 * 
 	 * @return
 	 */
@@ -147,9 +146,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the URI to which the response should be written, this can be used if
-	 * the JS decides to write the response straight to the file system or
-	 * database
+	 * Get the URI to which the response should be written, this can be used if the JS decides to
+	 * write the response straight to the file system or database
 	 * 
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
@@ -193,8 +191,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the list of dynamic properties of the MailBox known only to java
-	 * script
+	 * Get the list of dynamic properties of the MailBox known only to java script
 	 * 
 	 * @return MailBox dynamic properties
 	 */
@@ -257,7 +254,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonParseException
 	 * @throws LiaisonException
 	 */
-	protected HTTPRequest getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
+	public HTTPRequest getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, LiaisonException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
@@ -324,8 +321,7 @@ public abstract class AbstractRemoteProcessor {
 	 * Sent notifications for trigger system failure.
 	 * 
 	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
+	 *            The extra receivers. The default receiver will be available in the mailbox.
 	 * @param subject
 	 *            The notification subject
 	 * @param emailBody
