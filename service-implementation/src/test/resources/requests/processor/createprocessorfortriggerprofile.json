@@ -27,21 +27,21 @@
             "javaScriptURI": null,
             "folders": [
                 {
-                    "folderURI": "//trigger",
+                    "folderURI": "/trigger",
                     "folderType": "RESPONSE_LOCATION",
                     "folderDesc": "test"
                 }
             ],
             "credentials": [
-                {
-                    "credentialType": "db",
-                    "credentialURI": "http: //path",
-                    "userId": "karthi",
-                    "password": "krishh",
-                    "idpType": "ffdf",
-                    "idpURI": "fdfd"
-                }
-            ],
+			    {
+			        "credentialType": "db",
+			        "credentialURI": "http: //path",
+			        "userId": "test",
+			        "password": "test",
+			        "idpType": "test",
+			        "idpURI": "test"
+			    }
+			],
             "dynamicProperties": [
                 {
                     "name": "filename",

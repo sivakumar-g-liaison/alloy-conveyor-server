@@ -17,8 +17,8 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
  * @author praveenu
  * 
  */
-@JsonRootName("remoteDownloaderProperties")
-public class HttpRemoteDownloaderPropertiesDTO {
+@JsonRootName("remoteProcessorProperties")
+public class RemoteProcessorPropertiesDTO {
 
 	private String httpVersion;
 	private String httpVerb;

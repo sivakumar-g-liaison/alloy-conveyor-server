@@ -28,7 +28,7 @@ import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
-import com.liaison.mailbox.service.dto.configuration.request.HttpRemoteDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.DataValidation;
@@ -44,7 +44,7 @@ public class ProcessorDTO {
 	private String guid;
 	private String name;
 	private String type;
-	private HttpRemoteDownloaderPropertiesDTO remoteDownloaderProperties;
+	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private String javaScriptURI;
 	private String description;
 	private String status;
@@ -85,12 +85,12 @@ public class ProcessorDTO {
 		this.type = type;
 	}
 
-	public HttpRemoteDownloaderPropertiesDTO getRemoteDownloaderProperties() {
-		return remoteDownloaderProperties;
+	public RemoteProcessorPropertiesDTO getRemoteDownloaderProperties() {
+		return remoteProcessorProperties;
 	}
 
-	public void setRemoteDownloaderProperties(HttpRemoteDownloaderPropertiesDTO remoteDownloaderProperties) {
-		this.remoteDownloaderProperties = remoteDownloaderProperties;
+	public void setRemoteDownloaderProperties(RemoteProcessorPropertiesDTO remoteDownloaderProperties) {
+		this.remoteProcessorProperties = remoteDownloaderProperties;
 	}
 
 	public String getJavaScriptURI() {
@@ -201,7 +201,7 @@ public class ProcessorDTO {
 			processor.setPguid(MailBoxUtility.getGUID());
 		}
 
-		HttpRemoteDownloaderPropertiesDTO propertiesDTO = this.getRemoteDownloaderProperties();
+		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteDownloaderProperties();
 		if (null != propertiesDTO) {
 			String propertiesJSON = MailBoxUtility.marshalToJSON(this.getRemoteDownloaderProperties());
 			processor.setProcsrProperties(propertiesJSON);
@@ -277,8 +277,8 @@ public class ProcessorDTO {
 		String propertyJSON = processor.getProcsrProperties();
 		if (!MailBoxUtility.isEmpty(propertyJSON)) {
 
-			HttpRemoteDownloaderPropertiesDTO propertiesDTO = MailBoxUtility.unmarshalFromJSON(propertyJSON,
-					HttpRemoteDownloaderPropertiesDTO.class);
+			RemoteProcessorPropertiesDTO propertiesDTO = MailBoxUtility.unmarshalFromJSON(propertyJSON,
+					RemoteProcessorPropertiesDTO.class);
 			this.setRemoteDownloaderProperties(propertiesDTO);
 		}
 

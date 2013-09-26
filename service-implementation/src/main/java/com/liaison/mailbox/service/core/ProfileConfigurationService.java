@@ -104,8 +104,10 @@ public class ProfileConfigurationService {
 	/**
 	 * Add Profile to MailBox.
 	 * 
-	 * @param request
-	 *            The request DTO & guid.
+	 * @param mailBoxGuid
+	 *            The id of the mailbox.
+	 * @param profileGuid
+	 *            The id of the scheduler profile.
 	 * @return The responseDTO.
 	 */
 	public AddProfileToMailBoxResponseDTO addProfileToMailBox(String mailBoxGuid, String profileGuid) {
@@ -159,8 +161,10 @@ public class ProfileConfigurationService {
 	/**
 	 * Deactivate Profile from MailBox.
 	 * 
-	 * @param request
-	 *            The request MailboxGuid & MailboxLinkGuid
+	 * @param mailboxGuid
+	 *            The mailbox id
+	 * @param linkGuid
+	 *            The mailbox profile link id
 	 * @return The responseDTO.
 	 */
 	public DeactivateMailboxProfileLinkResponseDTO deactivateMailboxProfileLink(String mailboxGuid, String linkGuid) {

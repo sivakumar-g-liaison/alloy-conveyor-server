@@ -253,8 +253,7 @@ public class ProcessorConfigurationService {
 	 * @param request
 	 *            The Revise Processor Request DTO
 	 * @param mailBoxId
-	 *            The guid of the mailbox.The given processor should belongs to
-	 *            the given mailbox.
+	 *            The guid of the mailbox.The given processor should belongs to the given mailbox.
 	 * @param processorId
 	 *            The processor guid which is to be revised.
 	 * @return The Revise Processor ResponseDTO
@@ -353,9 +352,8 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Changing the execution order using duplicate Processor entity.The change
-	 * will occur when the incoming execution order does not match with the
-	 * existing one.
+	 * Changing the execution order using duplicate Processor entity.The change will occur when the
+	 * incoming execution order does not match with the existing one.
 	 * 
 	 * @param request
 	 *            The revise processor request DTO.
@@ -403,15 +401,12 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Method for add and update the dynamic processorProperty to Processor
-	 * entity
+	 * Method for add and update the dynamic processorProperty to Processor entity
 	 * 
-	 * @param processor
+	 * @param guid
 	 *            The processor guid
-	 * @param name
-	 *            The property name
-	 * @param value
-	 *            The property value
+	 * @param propertyDTO
+	 *            The dynamic properties
 	 */
 	public void addOrUpdateProcessorProperties(String guid, DynamicPropertiesDTO propertyDTO) {
 

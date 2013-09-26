@@ -45,7 +45,7 @@ import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
-import com.liaison.mailbox.service.dto.configuration.request.HttpRemoteDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
@@ -89,7 +89,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * This will return a HTTP ,FTP,HTTPS or FTPS client based on the processor type.
 	 * 
-	 * @return
+	 * @return The Object based on processor type.
 	 */
 	public Object getClient() {
 
@@ -262,8 +262,8 @@ public abstract class AbstractRemoteProcessor {
 		HTTPRequest request = new HTTPRequest(null, LOGGER);
 
 		// Convert the json string to DTO
-		HttpRemoteDownloaderPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
-				configurationInstance.getProcsrProperties(), HttpRemoteDownloaderPropertiesDTO.class);
+		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
+				configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
 
 		// Set url to HTTPRequest
 		URL url = new URL(properties.getUrl());

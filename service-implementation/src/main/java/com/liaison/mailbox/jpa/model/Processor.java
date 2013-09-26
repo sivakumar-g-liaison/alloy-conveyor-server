@@ -253,8 +253,6 @@ public class Processor implements Identifiable {
 	/**
 	 * Gets the configured email receivers from the mailbox for the processor.
 	 * 
-	 * @param processor
-	 *            The processor instance
 	 * @return List of receivers
 	 */
 	@Transient

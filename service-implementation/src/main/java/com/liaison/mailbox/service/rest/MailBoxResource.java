@@ -48,8 +48,11 @@ public class MailBoxResource {
 	/**
 	 * REST method to trigger a profile and run the processors in that profile.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param profileName
+	 *            The profile name to be trigger
+	 * @param mailboxNamePattern
+	 *            The mailbox name pattern. The given pattern mailbox do not include in the trigger
+	 *            profile process.
 	 * @return Response Object
 	 */
 	@POST

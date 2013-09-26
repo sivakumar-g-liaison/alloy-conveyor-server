@@ -175,8 +175,9 @@ public class MailBoxConfigurationResource {
 	/**
 	 * REST method to delete a mailbox.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param guid
+	 *            The id of the mailbox
+	 * 
 	 * @return Response Object
 	 */
 	@DELETE
@@ -217,8 +218,8 @@ public class MailBoxConfigurationResource {
 	/**
 	 * REST method to retrieve a mailbox details.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param guid
+	 *            The id of the mailbox
 	 * @return Response Object
 	 */
 	@GET
@@ -304,64 +305,14 @@ public class MailBoxConfigurationResource {
 	}
 
 	/**
-	 * REST method to update a existing profile.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@PUT
-	@Path("/profile")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response updateProfile(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Update profile not yet implemented.")
-				.build();
-
-	}
-
-	/**
-	 * REST method to delete a profile.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@DELETE
-	@Path("/profile")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteProfile(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Delete Profile not yet implemented.")
-				.build();
-
-	}
-
-	/**
-	 * REST method to retrieve a profile details.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@GET
-	@Path("/profile")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response readProfile(@Context HttpServletRequest request) {
-
-		return Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Read Profile not yet implemented.")
-				.build();
-
-	}
-
-	/**
 	 * REST method to associate existing profiles to mailbox.
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
+	 * @param mailBoxGuid
+	 *            The id of the mailbox
+	 * @param profileGuid
+	 *            The id of the scheduler profile
 	 * @return Response Object
 	 */
 	@POST
@@ -403,8 +354,10 @@ public class MailBoxConfigurationResource {
 	/**
 	 * REST method to deactivate a profile - mailbox link.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param mailGuid
+	 *            The id of the mailbox
+	 * @param linkGuid
+	 *            The id of the mailbox scheduler profile link
 	 * @return Response Object
 	 */
 	@DELETE
@@ -448,6 +401,9 @@ public class MailBoxConfigurationResource {
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
+	 * @param guid
+	 *            The id of the mailbox
+	 * 
 	 * @return Response Object
 	 */
 	@POST
@@ -495,20 +451,12 @@ public class MailBoxConfigurationResource {
 	/**
 	 * REST method to remove a processor details.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object ======= REST method to delete a processor.
+	 * @param mailboxguid
+	 *            The id of the mailbox
+	 * @param guid
+	 *            The id of the processor
+	 * @return Response Object
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object ======= }
-	 * 
-	 *         /** REST method to remove a processor details.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object >>>>>>> e66c1ef52674a4cb8f26697537b99380173e2ae8 >>>>>>>
-	 *         origin/for-review
 	 */
 	@DELETE
 	@Path("/{mailboxid}/processor/{processorid}")
@@ -549,8 +497,10 @@ public class MailBoxConfigurationResource {
 	/**
 	 * REST method to retrieve a mailbox details.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param mailboxguid
+	 *            The id of the mailbox
+	 * @param guid
+	 *            The id of the processor
 	 * @return Response Object
 	 */
 	@GET
@@ -593,6 +543,10 @@ public class MailBoxConfigurationResource {
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
+	 * @param mailboxguid
+	 *            The id of the mailbox
+	 * @param guid
+	 *            The id of the processor
 	 * @return Response Object
 	 */
 	@PUT

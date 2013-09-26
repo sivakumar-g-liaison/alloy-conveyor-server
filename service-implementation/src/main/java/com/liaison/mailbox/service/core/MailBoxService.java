@@ -19,8 +19,8 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -43,7 +43,7 @@ public class MailBoxService {
 	 *            The name of the profile to trigger
 	 * @param mailboxNamePattern
 	 *            The mailbox name pattern to exclude
-	 * @return
+	 * @return The trigger profile response DTO
 	 */
 	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern) {
 
