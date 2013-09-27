@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
@@ -59,6 +58,47 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	}
 
 	@Test
+	public void testCreateProfile() throws JsonGenerationException, JsonMappingException, JsonParseException,
+			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testCreateProfile_WithNullasProfileName() throws JsonGenerationException, JsonMappingException,
+			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		AddProfileResponseDTO profileResponseDTO = addProfile(null);
+		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testCreateProfile_WithDuplicates() throws JsonGenerationException, JsonMappingException, JsonParseException,
+			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		addProfile("OnceIn15Mins");
+		AddProfileResponseDTO dupProfileResponseDTO = addProfile("OnceIn15Mins");
+		Assert.assertEquals(FAILURE, dupProfileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testCreateProfile_WithProfileNameEmpty() throws JsonGenerationException, JsonMappingException,
+			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		AddProfileResponseDTO profileResponseDTO = addProfile("");
+		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testCreateProfile_WithProfileNameAsSpecialCharacter() throws JsonGenerationException, JsonMappingException,
+			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		AddProfileResponseDTO profileResponseDTO = addProfile("@#$%$!@");
+		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
 	public void testAddProfileToMailBox() throws LiaisonException, JSONException, IOException, JAXBException {
 
 		// Add the Mailbox
@@ -66,7 +106,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Add the Profile
-		AddProfileResponseDTO profileResponseDTO = addProfile();
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
 		// Create Link
@@ -85,6 +125,175 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	}
 
 	@Test
+	public void testAddProfileToMailBox_InvalidMailBoxId() throws LiaisonException, JSONException, IOException, JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + "142DERFDFSWWEE6" + "/profile/" + profileResponseDTO.getProfile().getGuId();
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+
+		Assert.assertEquals(FAILURE, mbProfileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testAddProfileToMailBox_InvalidProfileId() throws LiaisonException, JSONException, IOException, JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + "DWDDFEEFF1542";
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+
+		Assert.assertEquals(FAILURE, mbProfileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testAddProfileToMailBox_InvalidCharacters() throws LiaisonException, JSONException, IOException, JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + "!452$SDF" + "/profile/" + "!@#1425";
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+
+		Assert.assertEquals(FAILURE, mbProfileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testAddProfileToMailBox_NullValues() throws LiaisonException, JSONException, IOException, JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + null + "/profile/" + null;
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+
+		Assert.assertEquals(FAILURE, mbProfileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test(expected = JsonParseException.class)
+	public void testAddProfileToMailBox_EmptyValues_ShouldThrowException() throws LiaisonException, JSONException, IOException,
+			JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + "" + "/profile/" + "";
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+	}
+
+	@Test
+	public void testAddProfileToMailBox_DuplicateLinks() throws LiaisonException, JSONException, IOException, JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+
+		Assert.assertEquals(SUCCESS, mbProfileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addDupProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
+		HTTPRequest dupProfileRequest = constructHTTPRequest(getBASE_URL() + addDupProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		dupProfileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbDubProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+
+		Assert.assertEquals(SUCCESS, mbDubProfileResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
 	public void testDeactivateProfileFromMailBox() throws LiaisonException, JSONException, IOException, JAXBException {
 
 		// Add the Mailbox
@@ -92,7 +301,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Add the Profile
-		AddProfileResponseDTO profileResponseDTO = addProfile();
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
 		// Create Link
@@ -132,7 +341,46 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Add the Profile
-		AddProfileResponseDTO profileResponseDTO = addProfile();
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
+		// Create Link
+		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
+		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		profileRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProfileToMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, mbProfileResponseDTO.getResponse().getStatus());
+
+		// Deactivate Link
+		String deactivateProfile = "/" + "1425633662225144" + "/profile/" + mbProfileResponseDTO.getMailboxProfileLinkGuid();
+		HTTPRequest deactivateRequest = constructHTTPRequest(getBASE_URL() + deactivateProfile, HTTP_METHOD.DELETE, null,
+				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
+		deactivateRequest.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		DeactivateMailboxProfileLinkResponseDTO deactivateResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				DeactivateMailboxProfileLinkResponseDTO.class);
+		Assert.assertEquals(FAILURE, deactivateResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testDeactivateProfileFromMailBox_ShouldThrowException() throws LiaisonException, JSONException, IOException,
+			JAXBException {
+
+		// Add the Mailbox
+		AddMailBoxResponseDTO responseDTO = createMailBox();
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Add the Profile
+		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
 		// Create Link
@@ -165,9 +413,7 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	private AddMailBoxResponseDTO createMailBox() throws JAXBException, JsonParseException, JsonMappingException, IOException,
 			JsonGenerationException, MalformedURLException, FileNotFoundException, LiaisonException {
 
-		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
-		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
-
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 
@@ -182,10 +428,9 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		return responseDTO;
 	}
 
-	private AddProfileResponseDTO addProfile() throws JAXBException, JsonGenerationException, JsonMappingException, IOException,
-			MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
+	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
+			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
-		String profileName = "once" + System.currentTimeMillis();
 		ProfileDTO profile = new ProfileDTO();
 		profile.setName(profileName);
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
@@ -198,7 +443,8 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 
 		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
-		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+
 		return profileResponseDTO;
 	}
+
 }
