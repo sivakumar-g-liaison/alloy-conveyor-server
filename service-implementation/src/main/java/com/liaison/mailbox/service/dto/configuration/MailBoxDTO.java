@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -158,10 +158,8 @@ public class MailBoxDTO {
 		this.setName(mailBox.getMbxName());
 		this.setDescription(mailBox.getMbxDesc());
 
-		if (null != mailBox.getMbxStatus()) {
-			MailBoxStatus status = MailBoxStatus.findByCode(mailBox.getMbxStatus());
-			this.setStatus(status.name());
-		}
+		MailBoxStatus status = MailBoxStatus.findByCode(mailBox.getMbxStatus());
+		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
 
