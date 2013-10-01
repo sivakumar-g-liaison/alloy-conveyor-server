@@ -17,8 +17,8 @@ import org.junit.Test;
 
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
-import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -105,6 +105,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("SWEEPER");
 		dto.setStatus("ACTIVE");
+		dto.setLinkedProfileId("ASDERER1425SDSD");
 		validator.validate(dto);
 	}
 
@@ -114,6 +115,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType(" ");
 		dto.setStatus(" ");
+		dto.setLinkedProfileId(" ");
 		validator.validate(dto);
 	}
 
@@ -123,6 +125,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("sdsd");
 		dto.setStatus("dsddd");
+		dto.setLinkedProfileId("ASDERER1425SDSD");
 		validator.validate(dto);
 	}
 
@@ -147,6 +150,7 @@ public class GenericValidatorTest {
 
 		FolderDTO dto = new FolderDTO();
 		dto.setFolderType("PAYLOAD_LOCATION");
+		dto.setFolderURI("/SAMPLE");
 		validator.validate(dto);
 	}
 
@@ -155,6 +159,7 @@ public class GenericValidatorTest {
 
 		FolderDTO dto = new FolderDTO();
 		dto.setFolderType("payload_location");
+		dto.setFolderURI(null);
 		validator.validate(dto);
 	}
 
