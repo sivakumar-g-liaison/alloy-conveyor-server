@@ -52,7 +52,7 @@ public class ProcessorDTO {
 	private String linkedProfileId;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
-	private List<ProcessorPropertyDTO> dynamicProperties;
+	private List<PropertyDTO> dynamicProperties;
 	private int executionOrder;
 
 	public ProcessorDTO() {
@@ -127,6 +127,7 @@ public class ProcessorDTO {
 		this.linkedMailboxId = linkedMailboxId;
 	}
 
+	@Mandatory(errorMessage = "Linked ProfileId is mandatory.")
 	public String getLinkedProfileId() {
 		return linkedProfileId;
 	}
@@ -157,15 +158,15 @@ public class ProcessorDTO {
 		this.credentials = credentials;
 	}
 
-	public List<ProcessorPropertyDTO> getDynamicProperties() {
+	public List<PropertyDTO> getDynamicProperties() {
 
 		if (dynamicProperties == null) {
-			dynamicProperties = new ArrayList<ProcessorPropertyDTO>();
+			dynamicProperties = new ArrayList<PropertyDTO>();
 		}
 		return dynamicProperties;
 	}
 
-	public void setDynamicProperties(List<ProcessorPropertyDTO> dynamicProperties) {
+	public void setDynamicProperties(List<PropertyDTO> dynamicProperties) {
 		this.dynamicProperties = dynamicProperties;
 	}
 
@@ -246,10 +247,10 @@ public class ProcessorDTO {
 		// Setting the property
 		ProcessorProperty property = null;
 		List<ProcessorProperty> properties = new ArrayList<>();
-		for (ProcessorPropertyDTO propertyDTO : this.getDynamicProperties()) {
+		for (PropertyDTO propertyDTO : this.getDynamicProperties()) {
 
 			property = new ProcessorProperty();
-			propertyDTO.copyToEntity(property);
+			propertyDTO.copyToEntity(property, false);
 			properties.add(property);
 		}
 		if (!properties.isEmpty()) {
@@ -325,10 +326,10 @@ public class ProcessorDTO {
 		// Set properties
 		if (null != processor.getDynamicProperties()) {
 
-			ProcessorPropertyDTO propertyDTO = null;
+			PropertyDTO propertyDTO = null;
 			for (ProcessorProperty property : processor.getDynamicProperties()) {
-				propertyDTO = new ProcessorPropertyDTO();
-				propertyDTO.copyFromEntity(property);
+				propertyDTO = new PropertyDTO();
+				propertyDTO.copyFromEntity(property, false);
 				this.getDynamicProperties().add(propertyDTO);
 			}
 		}

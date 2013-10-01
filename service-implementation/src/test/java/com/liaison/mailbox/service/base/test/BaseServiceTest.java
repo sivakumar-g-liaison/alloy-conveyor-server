@@ -31,7 +31,7 @@ import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.util.HTTPStringOutputStream;
 
 /**
@@ -159,7 +159,7 @@ public abstract class BaseServiceTest {
 	public MailBoxDTO constructDummyMailBoxDTO(Long uniqueValue, boolean isCreate) {
 
 		MailBoxDTO mailBoxDTO = new MailBoxDTO();
-		MailBoxPropertyDTO property = new MailBoxPropertyDTO();
+		PropertyDTO property = new PropertyDTO();
 
 		if (isCreate) {
 

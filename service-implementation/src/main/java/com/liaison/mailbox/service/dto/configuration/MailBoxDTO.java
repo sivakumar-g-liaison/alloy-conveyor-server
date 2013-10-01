@@ -36,7 +36,7 @@ public class MailBoxDTO {
 	private String status;
 	private Integer serviceInstId;
 	private String shardKey;
-	private List<MailBoxPropertyDTO> properties;
+	private List<PropertyDTO> properties;
 	private List<ProfileDTO> profiles;
 
 	public String getGuid() {
@@ -90,7 +90,7 @@ public class MailBoxDTO {
 		this.shardKey = shardKey;
 	}
 
-	public List<MailBoxPropertyDTO> getProperties() {
+	public List<PropertyDTO> getProperties() {
 
 		if (null == properties) {
 			properties = new ArrayList<>();
@@ -98,7 +98,7 @@ public class MailBoxDTO {
 		return properties;
 	}
 
-	public void setProperties(List<MailBoxPropertyDTO> properties) {
+	public void setProperties(List<PropertyDTO> properties) {
 		this.properties = properties;
 	}
 
@@ -132,11 +132,12 @@ public class MailBoxDTO {
 
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
-		for (MailBoxPropertyDTO propertyDTO : this.getProperties()) {
+		for (PropertyDTO propertyDTO : this.getProperties()) {
 			property = new MailBoxProperty();
-			// property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO REMOVE OWNER
+			// property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO
+			// REMOVE OWNER
 			// INCONSISTENT ERROR.STRANGE THOUGH.
-			propertyDTO.copyToEntity(property);
+			propertyDTO.copyToEntity(property, true);
 			properties.add(property);
 
 		}
@@ -167,11 +168,11 @@ public class MailBoxDTO {
 			this.setServiceInstId(mailBox.getServiceInstId().intValue());
 		}
 
-		MailBoxPropertyDTO propertyDTO = null;
+		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {
 
-			propertyDTO = new MailBoxPropertyDTO();
-			propertyDTO.copyFromEntity(property);
+			propertyDTO = new PropertyDTO();
+			propertyDTO.copyFromEntity(property, true);
 			this.getProperties().add(propertyDTO);
 		}
 

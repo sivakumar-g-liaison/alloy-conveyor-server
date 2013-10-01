@@ -38,6 +38,7 @@ public class FolderDTO {
 		this.guId = guId;
 	}
 
+	@Mandatory(errorMessage = "Folder URI is mandatory.")
 	public String getFolderURI() {
 		return folderURI;
 	}

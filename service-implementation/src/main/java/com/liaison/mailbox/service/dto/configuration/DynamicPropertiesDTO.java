@@ -21,17 +21,17 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 @JsonRootName("dynamicProperties")
 public class DynamicPropertiesDTO {
 
-	List<ProcessorPropertyDTO> dynamicProperties;
+	private List<PropertyDTO> dynamicProperties;
 
-	public List<ProcessorPropertyDTO> getDynamicProperties() {
+	public List<PropertyDTO> getDynamicProperties() {
 
 		if (dynamicProperties == null) {
-			dynamicProperties = new ArrayList<ProcessorPropertyDTO>();
+			dynamicProperties = new ArrayList<PropertyDTO>();
 		}
 		return dynamicProperties;
 	}
 
-	public void setDynamicProperties(List<ProcessorPropertyDTO> dynamicProperties) {
+	public void setDynamicProperties(List<PropertyDTO> dynamicProperties) {
 		this.dynamicProperties = dynamicProperties;
 	}
 }

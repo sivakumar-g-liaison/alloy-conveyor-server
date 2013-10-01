@@ -30,7 +30,7 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
-import com.liaison.mailbox.service.dto.configuration.ProcessorPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -253,7 +253,8 @@ public class ProcessorConfigurationService {
 	 * @param request
 	 *            The Revise Processor Request DTO
 	 * @param mailBoxId
-	 *            The guid of the mailbox.The given processor should belongs to the given mailbox.
+	 *            The guid of the mailbox.The given processor should belongs to
+	 *            the given mailbox.
 	 * @param processorId
 	 *            The processor guid which is to be revised.
 	 * @return The Revise Processor ResponseDTO
@@ -352,8 +353,9 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Changing the execution order using duplicate Processor entity.The change will occur when the
-	 * incoming execution order does not match with the existing one.
+	 * Changing the execution order using duplicate Processor entity.The change
+	 * will occur when the incoming execution order does not match with the
+	 * existing one.
 	 * 
 	 * @param request
 	 *            The revise processor request DTO.
@@ -401,7 +403,8 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Method for add and update the dynamic processorProperty to Processor entity
+	 * Method for add and update the dynamic processorProperty to Processor
+	 * entity
 	 * 
 	 * @param guid
 	 *            The processor guid
@@ -417,11 +420,11 @@ public class ProcessorConfigurationService {
 		// update the property
 		List<ProcessorProperty> existingProperties = processor.getDynamicProperties();
 		// new property from DTO
-		List<ProcessorPropertyDTO> newProperties = propertyDTO.getDynamicProperties();
+		List<PropertyDTO> newProperties = propertyDTO.getDynamicProperties();
 		// new property to add entity
 		List<ProcessorProperty> processorPropertyList = new ArrayList<ProcessorProperty>();
 
-		for (ProcessorPropertyDTO properties : newProperties) {
+		for (PropertyDTO properties : newProperties) {
 
 			// Add the property if empty
 			if (existingProperties == null || existingProperties.isEmpty()) {
