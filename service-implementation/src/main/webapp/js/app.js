@@ -12,6 +12,9 @@ var myApp = angular.module('myApp',
         '$strap.directives' // angular strap
     ]);
 
+myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/mailbox');
+
+
 // bootstrap angular
 myApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
 
@@ -21,7 +24,16 @@ myApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, $
     $routeProvider.when('/', {
         templateUrl:'partials/home.html'
     });
-    $routeProvider.when('/contact', {
+    $routeProvider.when('/mailbox/addMailBox', {
+        templateUrl:'partials/mailbox/addmailbox.html',
+        controller:'AddMailBoxCntrlr'
+    });
+    $routeProvider.when('/mailbox/getMailBox', {
+        templateUrl:'partials/mailbox/getmailbox.html',
+        controller:'GetMailBoxCntrlr'
+    });
+
+    /*$routeProvider.when('/contact', {
         templateUrl:'partials/contact.html'
     });
     $routeProvider.when('/about', {
@@ -29,15 +41,15 @@ myApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, $
     });
     $routeProvider.when('/faq', {
         templateUrl:'partials/faq.html'
-    });
+    });*/
 
     // note that to minimize playground impact on app.js, we
     // are including just this simple route with a parameterized 
     // partial value (see playground.js and playground.html)
-    $routeProvider.when('/playground/:widgetName', {
+    /*$routeProvider.when('/playground/:widgetName', {
         templateUrl:'playground/playground.html',
         controller:'PlaygroundCtrl'
-    });
+    });*/
 
     // by default, redirect to site root
     $routeProvider.otherwise({

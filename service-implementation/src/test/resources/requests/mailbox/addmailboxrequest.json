@@ -4,6 +4,8 @@
             "name": "TestData",
             "description": "This is to collect access metrics ",
             "status": "ACTIVE",
+			"serviceInstId":"1234567",
+			"shardKey":"key_12345",
             "properties": [
                 {
                     "name": "filerenameformat",

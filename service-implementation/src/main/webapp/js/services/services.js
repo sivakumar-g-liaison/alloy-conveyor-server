@@ -13,7 +13,27 @@ myApp.factory('RESTService',
                     error(function (data, status, headers, config) {
                         console.log("failed to retrieve data");
                     });
-            }
+            }, post:function (url, body, callback) {
+                
+            	alert(body);
+                return $http({method:'POST', url:url, data:body}).
+                success(function (data, status, headers, config) {
+                    callback(data, status);
+                }).
+                error(function (data, status, headers, config) {
+                    callback(data, status);
+                });
+           }, delete:function (url, callback) {
+               
+               return $http({method:'DELETE', url:url}).
+                success(function (data, status, headers, config) {
+                    callback(data, status);
+                }).
+                error(function (data, status, headers, config) {
+                    callback(data, status);
+                });
+           }
+        
         };
     }
 );

@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +24,7 @@ import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.ProfileOperationDelegate;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
@@ -31,6 +35,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponse
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -94,6 +99,50 @@ public class ProfileConfigurationService {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
+					.getMessage()));
+
+			return serviceResponse;
+		}
+
+	}
+
+	/**
+	 * Retrieves all profiles.
+	 * 
+	 * @return The GetProfileResponseDTO.
+	 */
+	public GetProfileResponseDTO getProfiles() {
+
+		LOG.info("Entering into get profiles.");
+		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
+
+		try {
+
+			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+			List<ScheduleProfilesRef> profiles = configDao.fetch(new ProfileOperationDelegate());
+			if (profiles == null || profiles.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, PROFILE);
+			}
+
+			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
+			ProfileDTO profile = null;
+			for (ScheduleProfilesRef prof : profiles) {
+				profile = new ProfileDTO();
+				profile.copyFromEntity(prof);
+				profilesDTO.add(profile);
+			}
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
+			serviceResponse.setProfiles(profilesDTO);
+
+			LOG.info("Exiting from get profiles operation.");
+
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
 					.getMessage()));
 
 			return serviceResponse;

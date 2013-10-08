@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -233,5 +236,57 @@ public class MailBoxConfigurationService {
 			return serviceResponse;
 
 		}
+	}
+
+	/**
+	 * Searchs the mailbox using mailbox name and profile name.
+	 * 
+	 * @param mbxName
+	 *            The name of the mailbox
+	 * 
+	 * @param profName
+	 *            The name of the profile
+	 * 
+	 * @return The SearchMailBoxResponseDTO
+	 */
+	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String profName) {
+
+		LOG.info("Entering into search mailbox.");
+
+		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
+
+		try {
+
+			// Getting mailbox
+			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			List<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
+			if (null == retrievedMailBoxes || retrievedMailBoxes.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, MAILBOX);
+			}
+
+			// Constructing the SearchMailBoxDTO from retrieved mailboxes
+			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
+			SearchMailBoxDTO serachMailBoxDTO = null;
+			for (MailBox mbx : retrievedMailBoxes) {
+
+				serachMailBoxDTO = new SearchMailBoxDTO();
+				serachMailBoxDTO.copyFromEntity(mbx);
+				searchMailBoxDTOList.add(serachMailBoxDTO);
+			}
+
+			// Constructing the responses.
+			serviceResponse.setMailBox(searchMailBoxDTOList);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
+			LOG.info("Exit from search mailbox.");
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+		}
+
 	}
 }

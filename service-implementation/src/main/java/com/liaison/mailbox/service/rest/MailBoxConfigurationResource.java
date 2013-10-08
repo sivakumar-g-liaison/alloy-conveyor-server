@@ -22,6 +22,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -49,6 +50,8 @@ import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -133,7 +136,7 @@ public class MailBoxConfigurationResource {
 	 */
 	@PUT
 	@Path("/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response reviseMailBox(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
 
@@ -182,7 +185,6 @@ public class MailBoxConfigurationResource {
 	 */
 	@DELETE
 	@Path("/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deactivateMailBox(@PathParam(value = "id") String guid) {
 
@@ -256,6 +258,49 @@ public class MailBoxConfigurationResource {
 	}
 
 	/**
+	 * Rest method to search the mailbox based on the given query parameters. If both are empty it
+	 * returns all mailboxes.
+	 * 
+	 * @param mbxName
+	 *            The mailbox name should be searched
+	 * @param profileName
+	 *            The profile name should be searched
+	 * @return The Response
+	 */
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response searchMailBox(@QueryParam(value = "name") String mbxName,
+			@QueryParam(value = "profile") String profileName) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			// search the mailbox from the given details
+			SearchMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+			serviceResponse = mailbox.searchMailBox(mbxName, profileName);
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
+
+	/**
 	 * REST method to initiate profile creation.
 	 * 
 	 * @param request
@@ -293,6 +338,43 @@ public class MailBoxConfigurationResource {
 
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
+
+	/**
+	 * REST method to retrieve all profiles.
+	 * 
+	 * @return Response Object
+	 */
+	@GET
+	@Path("/profile")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response readProfiles() {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		try {
+
+			// add the new profile details
+			GetProfileResponseDTO serviceResponse = null;
+			ProfileConfigurationService mailbox = new ProfileConfigurationService();
+			serviceResponse = mailbox.getProfiles();
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
 			// should be throwing out of domain scope and into framework using

@@ -40,6 +40,7 @@ public enum Messages {
 	REVISED_SUCCESSFULLY("%s revised successfully."),
 	READ_SUCCESSFUL("%s read successfully."),
 	DEACTIVATION_SUCCESSFUL("%s deactivated successfully."),
+	NO_COMPONENT_EXISTS("No %s available in the system."),
 	SUCCESS("success"),
 	FAILURE("failure"),
 	MANDATORY_FIELD_MISSING("%s is mandatory"),
