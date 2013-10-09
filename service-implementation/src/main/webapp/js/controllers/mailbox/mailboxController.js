@@ -132,48 +132,6 @@ myApp.controller('GetMailBoxCntrlr', ['$scope', '$http', 'rootUrl',
 	// Customized column in the grid.
     $scope.editableInPopup = '<button class="btn" ng-click="edit(key)"><i class="icon-pencil"></i></button>' 
 		+'      <button class="btn" ng-click="openDelete()"><i class="icon-trash"></i></button>';
-
-    // Setting the grid details
-    $scope.gridOptions = {
-		 columnDefs: [
-                {
-                    field: 'name',
-                    displayName: 'Name'
-                },
-                {
-                    field: 'description',
-                    displayName: 'Desc'
-                },
-                {
-                    field: 'status',
-                    displayName: 'Status'
-                },
-				{
-					field:'profiles',
-					displayName:'LinkedProfiles'
-				},
-				{// Customized column
-					displayName:'Action',
-					cellTemplate:$scope.editableInPopup
-				}
-				
-            ],
-        data: 'mailboxes',
-        enablePaging: true,
-		showFooter: true,
-		canSelectRows: true,
-        multiSelect: false,
-        jqueryUITheme: false,
-        displaySelectionCheckbox: false,
-        pagingOptions: $scope.pagingOptions,
-        filterOptions: $scope.filterOptions,
-		afterSelectionChange: function (rowItem, event) {
-                if (rowItem.selected == true) {
-                    // clone key object
-                    $scope.key = JSON.parse(JSON.stringify(rowItem.entity));
-                }
-        } 
-    };
     
 	// Enable the delete modal dialog
     $scope.openDelete = function () {
@@ -198,6 +156,7 @@ myApp.controller('GetMailBoxCntrlr', ['$scope', '$http', 'rootUrl',
 	    $scope.deleteKey = false;
 	};
 	
+	// Dummy Impl
 	$scope.edit = function edit(row){
         alert("Here I need to know which button was selected " + $scope.key.name)
     }
@@ -250,7 +209,9 @@ myApp.controller('GetMailBoxCntrlr', ['$scope', '$http', 'rootUrl',
 	
 	// Whenever changes occur in the mbx Name it calls search method
 	$scope.$watch('mailBoxName', function () {
-        $scope.search();
+		if ($scope.mailBoxName != null && $scope.mailBoxName.length > 3) {
+		        $scope.search();
+		}
     });
 	
 	// Util function
@@ -264,5 +225,50 @@ myApp.controller('GetMailBoxCntrlr', ['$scope', '$http', 'rootUrl',
 	$scope.clear = function() {
 		$scope.profileName = null;
 	}
+	
+    // Setting the grid details
+    $scope.gridOptions = {
 		
+		 columnDefs: [
+                {
+                    field: 'name',
+                    displayName: 'Name',
+					//cellTemplate: '<div ng-if="row.getProperty(\'status\') == \'INCOMPLETE\'"><i class="icon-pencil"></i><span ng-cell-text>{{row.getProperty(col.field)}}</span></div><div ng-if="row.getProperty(\'status\') != \'INCOMPLETE\'"><i class="icon-pencil"></i>  <span ng-cell-text>{{row.getProperty(col.field)}}</span></div>'
+                },
+                {
+                    field: 'description',
+                    displayName: 'Desc'
+                },
+                {
+                    field: 'status',
+                    displayName: 'Status'					
+                },
+				{
+					field:'profiles',
+					displayName:'LinkedProfiles'
+				},
+				{// Customized column
+					displayName:'Action',
+					cellTemplate:$scope.editableInPopup
+				}
+				
+            ],
+        data: 'mailboxes',
+		//rowTemplate: customRowTemplate,
+        enablePaging: true,
+		showFooter: true,
+		canSelectRows: true,
+        multiSelect: false,
+        jqueryUITheme: false,
+        displaySelectionCheckbox: false,
+        pagingOptions: $scope.pagingOptions,
+        filterOptions: $scope.filterOptions,
+		afterSelectionChange: function (rowItem, event) {
+                if (rowItem.selected == true) {
+                    // clone key object
+                    $scope.key = JSON.parse(JSON.stringify(rowItem.entity));
+                }
+        }
+    };
+	
 }]);

@@ -11,8 +11,11 @@
 package com.liaison.mailbox.service.dto.ui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
@@ -34,6 +37,7 @@ public class SearchMailBoxDTO {
 	private String shardKey;
 	private List<PropertyDTO> properties;
 	private String profiles;
+	private boolean incomplete;
 
 	public String getGuid() {
 		return guid;
@@ -75,8 +79,9 @@ public class SearchMailBoxDTO {
 
 		if (null == this.getProfiles()) {
 			this.profiles = profiles;
+		} else {
+			this.profiles += " " + profiles;
 		}
-		this.profiles += " " + profiles;
 	}
 
 	public Integer getServiceInstId() {
@@ -105,6 +110,14 @@ public class SearchMailBoxDTO {
 
 	public void setProperties(List<PropertyDTO> properties) {
 		this.properties = properties;
+	}
+
+	public boolean isIncomplete() {
+		return incomplete;
+	}
+
+	public void setIncomplete(boolean incomplete) {
+		this.incomplete = incomplete;
 	}
 
 	/**
@@ -136,8 +149,24 @@ public class SearchMailBoxDTO {
 			this.getProperties().add(propertyDTO);
 		}
 
+		// Set is used to avoid duplicates
+		Set<String> profileNames = new HashSet<String>();
+		// Boolean to denote the mailbox has processor or not
+		boolean isMbxHasProcessors = false;
 		for (MailBoxSchedProfile schedProfile : mailBox.getMailboxSchedProfiles()) {
-			this.setProfiles(schedProfile.getScheduleProfilesRef().getSchProfName());
+
+			if (schedProfile.getProcessors() != null && !schedProfile.getProcessors().isEmpty()) {
+				isMbxHasProcessors = true;
+			}
+			profileNames.add(schedProfile.getScheduleProfilesRef().getSchProfName().trim());
+		}
+
+		for (String profileName : profileNames) {
+			this.setProfiles(profileName);
+		}
+
+		if (!isMbxHasProcessors) {
+			this.setStatus(MailBoxConstants.INCOMPLETE_STATUS);
 		}
 
 	}

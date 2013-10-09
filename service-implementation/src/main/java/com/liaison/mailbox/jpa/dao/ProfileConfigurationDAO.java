@@ -9,7 +9,7 @@ import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 @NamedQueries({
 		@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"
 				+ ProfileConfigurationDAO.PROF_NAME),
-		@NamedQuery(name = ProfileConfigurationDAO.GET_ALL, query = "select schdprof from ScheduleProfilesRef schdprof") })
+		@NamedQuery(name = ProfileConfigurationDAO.GET_ALL, query = "select schdprof from ScheduleProfilesRef schdprof order by schdprof.schProfName") })
 public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef> {
 
 	public static final String PGUID = "pguid";

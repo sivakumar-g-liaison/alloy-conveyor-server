@@ -39,4 +39,6 @@ public interface MailBoxConstants {
 
 	public final static String FOLDER_TYPE = "FolderType";
 
+	public final static String INCOMPLETE_STATUS = "INCOMPLETE";
+
 }

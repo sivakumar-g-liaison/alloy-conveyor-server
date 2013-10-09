@@ -21,7 +21,8 @@ import com.liaison.mailbox.jpa.model.MailBox;
 						+ " inner join mbx.mailboxSchedProfiles mbxSchProf"
 						+ " inner join mbxSchProf.scheduleProfilesRef prof"
 						+ " where mbx.mbxName like :" + MailBoxConfigurationDAO.MBX_NAME
-						+ " and prof.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME)
+						+ " and prof.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
+						+ " order by mbx.mbxName prof.schProfName")
 })
 public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 
