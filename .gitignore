@@ -66,6 +66,9 @@ atlassian-ide-plugin.xml
 .project
 .settings
 .metadata
+.nb-gradle/
+service-framework/.nb-gradle/
+service-implementation/.nb-gradle/
 
 # NetBeans specific files/directories
 .nbattrs
