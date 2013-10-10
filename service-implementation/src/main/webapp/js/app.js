@@ -3,7 +3,9 @@
 // declare top-level module which depends on filters,and services
 var myApp = angular.module('myApp',
     [   'myApp.filters',
-        'myApp.directives',
+        'myApp.directiveSwapPropInput', 
+		'myApp.directiveSwapPropButton',
+		'myApp.directiveSwapPropCombo',// custom directives
         'ngGrid', // angular grid
         'ui', // angular ui
         'ngSanitize', // for html-bind in ckeditor
@@ -31,10 +33,13 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider', function (
     $routeProvider.when('/', {
         templateUrl:'partials/home.html'
     });
+    
+    // Add Mailbox
     $routeProvider.when('/mailbox/addMailBox', {
         templateUrl:'partials/mailbox/addmailbox.html',
         controller:'AddMailBoxCntrlr'
     });
+    
     $routeProvider.when('/mailbox/getMailBox', {
         templateUrl:'partials/mailbox/searchmailbox.html',
         controller:'SearchMailBoxCntrlr'
@@ -72,6 +77,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Eager load some data using simple REST client
     // *****
 
+	$rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/';
     $rootScope.restService = RESTService;
 
     // async load constants

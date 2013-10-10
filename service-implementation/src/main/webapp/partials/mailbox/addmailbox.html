@@ -1,87 +1,61 @@
+<style>
+.form-row {
+	padding-bottom: .5em;
+}
 
+.css-form input.ng-invalid.ng-dirty {
+	background-color: #FA787E;
+}
 
-<!DOCTYPE html>
+.css-form input.ng-valid.ng-dirty {
+	background-color: #78FA89;
+}
+</style>
 
-<html>
+<div fade-in>
 
-<head>
-
-<meta charset="ISO-8859-1">
-
-<title>Add MailBox</title>
-
-</head>
-
-<body>
-
-	<form novalidate class="form-horizontal">
-		<div>
-			<legend>MailBox Details</legend>
-			<div class="control-group">
-				<label for="name" class="control-label">Name</label>
-				<input type="text" id="name" ng-model="mailBoxName" required ng-trim="false">
-			</div>
-			<div class="control-group">
-				<label for="desc" class="control-label">Description</label>
-				<input type="text" id="desc" ng-model="mailBoxDesc">
-			</div>
-			<div class="control-group">
-				<label for="stat" class="control-label">Status</label>
-				<select id="stat" ng-model="status" ng-options="s.name for s in statusenum"></select>
-			</div>
-			<div class="control-group">
-				<label for="instId" class="control-label">ServiceInstId</label> <input type="number" id="instId"
-					ng-model="mailBoxInstId">
-			</div>
-			<div class="control-group">
-				<label for="shardKey" class="control-label">SharedKey</label> <input type="text" id="shardKey"
-					ng-model="mailBoxShardKey">
-			</div>
-
-			<div class="control-group">
-				<label for="check" class="control-label">Do you want to add properties for mailbox?</label> <input id="check"
-					class="checkbox" type="checkbox" ng-model="hideBasicInfo">
-			</div>
-
-			<div ng-hide="!hideBasicInfo">
-				<div class="control-group">
-					<legend>MailBox Properties</legend>
-					<label for="key" class="control-label">Key</label> <input type="text" id="key" ng-model="data.name" required
-						ng-trim="false"><br /> <label for="value" class="control-label">Value</label> <input type="text"
-						id="value" ng-model="data.value" required ng-trim="false"><br />
-					<button class="btn btn-primary" ng-click='addProperty()'>AddProperty</button>
-					<br />
-				</div>
-
-				<br />
-				<table class="table table-bordered">
-					<thead>
-						<tr>
-							<th>Key</th>
-							<th>Value</th>
-							<th>Action</th>
-						</tr>
-					</thead>
-
-					<tbody>
-						<tr ng-repeat="d in datas">
-							<td>{{d.name}}</td>
-							<td>{{d.value}}</td>
-							<td><a href=""><i class="icon-trash" ng-click="removeProperty(d, $event)"></i></a></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<button class="btn btn-primary" ng-click='insert()'>Add Mailbox</button>
-			<button class="btn btn-primary" ng-click='show()'>Show Json</button>
-			<textarea ng-hide="!showjson" rows="5" ng-model="requestjson">
-	
-	</textarea>
+	<div class="container">
+		<div class="form-row">
+			<h3>MailBox Creation</h3>
+			<hr>
 		</div>
 
+		<form name="formAddMbx" novalidate class="container css-form">
+
+			<div class="container form-row">
+				Name:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.name" required />
+			</div>
+
+			<div class="container form-row">
+				Status:&nbsp;&nbsp;&nbsp; <select ng-model="request.addMailBoxRequest.mailBox.status"
+					ng-options="e for e in enumstats"></select> <br>
+			</div>
+
+			<div class="container form-row">
+				Description:&nbsp;&nbsp;&nbsp;
+				<textarea ng-model="request.addMailBoxRequest.mailBox.description"></textarea>
+			</div>
+
+			<div class="container form-row">
+				Service Ins ID:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.serviceInstId" />
+			</div>
+
+			<div class="container form-row">
+				Shared key:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.shardKey" />
+			</div>
+
+
+
+			<div class="gridStyle height" ng-grid="gridOptions"></div>
+
+			<button class="btn btn-primary" ng-click="saveForm(request)" ng-disabled="formAddMbx.$invalid">SAVE</button>
+	</div>
+
+	<div class="container form-row">&nbsp;&nbsp;&nbsp; Respons Status:&nbsp;&nbsp;&nbsp;{{stats}}</div>
+
 	</form>
-</body>
 
-</html>
+	<pre>form = {{request | json}}</pre>
+</div>
 
-
+</div>
