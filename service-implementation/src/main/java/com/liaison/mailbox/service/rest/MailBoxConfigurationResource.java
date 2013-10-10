@@ -185,6 +185,7 @@ public class MailBoxConfigurationResource {
 	 */
 	@DELETE
 	@Path("/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deactivateMailBox(@PathParam(value = "id") String guid) {
 

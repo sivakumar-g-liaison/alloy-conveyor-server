@@ -8,10 +8,10 @@ myApp.factory('RESTService',
                 return $http({method:'GET', url:url}).
                     success(function (data, status, headers, config) {
                         callback(data);
-                        //console.log(data.json);
                     }).
                     error(function (data, status, headers, config) {
-                        console.log("failed to retrieve data");
+                        alert("failed to retrieve data");
+                        callback(data);
                     });
             }, post:function (url, body, callback) {
                 
@@ -24,8 +24,8 @@ myApp.factory('RESTService',
                     callback(data, status);
                 });
            }, delete:function (url, callback) {
-               
-               return $http({method:'DELETE', url:url}).
+               var body = "[{}]";//Dummy body
+               return $http({method:'DELETE', url:url, data:body}).
                 success(function (data, status, headers, config) {
                     callback(data, status);
                 }).

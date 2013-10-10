@@ -3,7 +3,7 @@
 // declare top-level module which depends on filters,and services
 var myApp = angular.module('myApp',
     [   'myApp.filters',
-        'myApp.directives', // custom directives
+        'myApp.directives',
         'ngGrid', // angular grid
         'ui', // angular ui
         'ngSanitize', // for html-bind in ckeditor
@@ -16,7 +16,14 @@ myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/mailbox')
 
 
 // bootstrap angular
-myApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
+myApp.config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {
+	
+	  /**
+	   * make delete type json
+	   */
+	  $httpProvider.defaults.headers["delete"] = {
+	    'Content-Type': 'application/json;charset=utf-8'
+	  };
 
     // TODO use html5 *no hash) where possible
     // $locationProvider.html5Mode(true);
@@ -29,8 +36,8 @@ myApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, $
         controller:'AddMailBoxCntrlr'
     });
     $routeProvider.when('/mailbox/getMailBox', {
-        templateUrl:'partials/mailbox/getmailbox.html',
-        controller:'GetMailBoxCntrlr'
+        templateUrl:'partials/mailbox/searchmailbox.html',
+        controller:'SearchMailBoxCntrlr'
     });
 
     /*$routeProvider.when('/contact', {
