@@ -165,7 +165,7 @@ public class SearchMailBoxDTO {
 			this.setProfiles(profileName);
 		}
 
-		if (!isMbxHasProcessors) {
+		if (MailBoxStatus.ACTIVE.value().equals(mailBox.getMbxStatus()) && !isMbxHasProcessors) {
 			this.setStatus(MailBoxConstants.INCOMPLETE_STATUS);
 		}
 

@@ -18,6 +18,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
         ];
 
         req.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
+        
+        // Loads the details initially if edit
+        $scope.load = function() {
+        	if ('test' !== $scope.sharedService.getProperty()) {
+			
+				 $injector.get('RESTService').get($scope.base_url + 'mailbox/' + $scope.sharedService.getProperty(),
+					function (data) {
+						alert(data.getMailBoxResponse.response.message);
+				}
+            );
+			
+			}
+        };
+		$scope.load();
 
 
         $scope.saveForm = function (request) {
