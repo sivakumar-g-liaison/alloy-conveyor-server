@@ -6,7 +6,8 @@ var myApp = angular.module('myApp',
     [   'myApp.filters',
         'myApp.directiveSwapPropInput', 
 		'myApp.directiveSwapPropButton',
-		'myApp.directiveSwapPropCombo',// custom directives
+		'myApp.directiveSwapPropCombo',
+		'myApp.directiveCustomCell',// custom directives
         'ngGrid', // angular grid
         'ui', // angular ui
         'ngSanitize', // for html-bind in ckeditor
@@ -72,7 +73,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider', function (
 }]);
 
 // this is run after angular is instantiated and bootstrapped
-myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService) {
+myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, SharedService) {
 
     // *****
     // Eager load some data using simple REST client
@@ -80,6 +81,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 
 	$rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/';
     $rootScope.restService = RESTService;
+    
+    $rootScope.sharedService = SharedService;
 
     // async load constants
     $rootScope.constants = [];

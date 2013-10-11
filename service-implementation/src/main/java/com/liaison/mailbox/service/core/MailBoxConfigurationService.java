@@ -276,7 +276,7 @@ public class MailBoxConfigurationService {
 
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			LOG.info("Exit from search mailbox.");
 			return serviceResponse;
 
@@ -284,7 +284,7 @@ public class MailBoxConfigurationService {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse
-					.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
+					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
 

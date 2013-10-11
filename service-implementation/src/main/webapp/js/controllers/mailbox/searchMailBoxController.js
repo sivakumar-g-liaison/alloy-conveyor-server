@@ -3,17 +3,35 @@
 /**
  * Controller for Configure mailbox setup search screen.
  */
-myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
-    function ($scope, $rootUrl) {
+myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
+    function ($scope, $rootUrl, $location) {
 
         $scope.title = "MailBox Profiles"; //title
 
         //Search Details
         $scope.mailBoxName = null;
-        $scope.profileName = null;
+        $scope.profile = null;
 
         // Profiles loads initially
         $scope.profiles = [];
+
+        // Loading the profile details
+        $scope.loadProfiles = function () {
+
+            $scope.restService.get($rootUrl + '/profile').success(function (data) {
+                $scope.profiles = data.getProfileResponse.profiles;
+            }).error(function (data) {
+                alert("Failed to load profiles.");
+            });
+        };
+        $scope.loadProfiles(); //loads the profile
+
+        // Whenever changes occur in the mbx Name it calls search method
+        $scope.$watch('mailBoxName', function () {
+            if ($scope.mailBoxName !== null && $scope.mailBoxName.length > 3) {
+                $scope.search($scope.filterOptions.filterText);
+            }
+        });
 
         // Grid Setups
         $scope.filterOptions = {
@@ -32,6 +50,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
 
         // Set the paging data to grid from server object
         $scope.setPagingData = function (data, page, pageSize) {
+		
+			if (data === null || data.length <= 0) {
+				alert('No data matches the given conditions.');
+			}
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
             $scope.mailboxes = pagedData;
@@ -41,9 +63,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
             }
         };
 
-        // Customized column in the grid.
-        $scope.editableInPopup = '<i class="icon-pencil" ng-click="edit(key)"></i>  <i class="icon-trash" ng-click="openDelete()"> </i>';
-
         // Enable the delete modal dialog
         $scope.openDelete = function () {
             $scope.deleteKey = true;
@@ -52,8 +71,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
         // calls the rest deactivate service
         $scope.deactivateMailBox = function (key) {
 
-			alert($rootUrl + '/' + $scope.key.guid);
-            $scope.restService.delete($rootUrl + '/' +  $scope.key.guid)
+            alert($rootUrl + '/' + $scope.key.guid);
+            $scope.restService.delete($rootUrl + '/' + $scope.key.guid)
                 .success(function (data, status) {
                     alert(data.deactivateMailBoxResponse.response.message);
                     $scope.search();
@@ -71,26 +90,24 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
 
         // Dummy Impl for edit
         $scope.edit = function () {
+
+        	$scope.sharedService.setProperty($scope.key.guid);
             alert("Here I need to know which button was selected " + $scope.key.name);
+			$location.path('/mailbox/addMailBox');
         };
 
-        // Loading the profile details
-        $scope.loadProfiles = function () {
-
-            $scope.restService.get($rootUrl + '/profile').success(function (data) {
-                $scope.profiles = data.getProfileResponse.profiles;
-            }).error(function (data) {
-                    alert(data);
-            });
+        $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
+            setTimeout(function () {
+                $scope.setPagingData(largeLoad.searchMailBoxResponse.mailBox, page, pageSize);
+            }, 100);
         };
-        $scope.loadProfiles();//loads the profile
 
-        // Search logic
+        // Search logic for mailbox
         $scope.search = function () {
 
             var profName = "";
-            if (null !== $scope.profileName) {
-                profName = $scope.profileName.name;
+            if (null !== $scope.profile) {
+                profName = $scope.profile.name;
             }
 
             var mbxName = "";
@@ -100,30 +117,24 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
 
             $scope.restService.get($rootUrl + '?name=' + mbxName + '&profile=' + profName)
                 .success(function (data) {
-                    $scope.setPagingData(data.searchMailBoxResponse.mailBox,
-                        $scope.pagingOptions.currentPage,
-                        $scope.pagingOptions.pageSize);
+                    $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
                 });
         };
 
-        // Whenever changes occur in the mbx Name it calls search method
-        $scope.$watch('mailBoxName', function () {
-           if ($scope.mailBoxName !== null && $scope.mailBoxName.length > 3) {
+        $scope.$watch('pagingOptions', function (newVal, oldVal) {
+            if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
                 $scope.search();
             }
-        });
+        }, true);
 
-        // Util function
-        function checkEmpty(str) {
-            if (null === str || str.length === 0) {
-                return true;
+        $scope.$watch('filterOptions', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+                $scope.search();
             }
-        }
+        }, true);
 
-        // Clearing the text boxes and grid
-        $scope.clear = function () {
-            $scope.profileName = null;
-        };
+        // Customized column in the grid.
+        $scope.editableInPopup = '<i class="icon-pencil" ng-click="edit(key)"></i>  <i class="icon-trash" ng-click="openDelete()"> </i>';
 
         // Setting the grid details
         $scope.gridOptions = {
@@ -169,22 +180,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl',
             }
         };
 
+        // used to move add screen
+		$scope.goto = function (hash) { 
+			$scope.testService.setProperty('test');
+			$location.path(hash);
+		}
+
 }]);
-
-//TODO move to individual file
-myApp.directive('customCell', function () {
-
-    return {
-        restrict: 'C',
-        replace: true,
-        transclude: true,
-        scope: {
-            status: '@status',
-            name: '@name'
-        },
-
-        /*loading the required template based upon the model value*/
-        template: '<div ng-switch on="status"><div ng-switch-when="INCOMPLETE"><i class="icon-warning-sign"></i> {{name}}</div><div ng-switch-default>{{name}}</div></div>'
-    }
-
-});

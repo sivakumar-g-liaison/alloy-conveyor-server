@@ -113,7 +113,7 @@ public class ProfileConfigurationService {
 	 */
 	public GetProfileResponseDTO getProfiles() {
 
-		LOG.info("Entering into get profiles.");
+		LOG.info("Entering into get all profiles.");
 		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
 
 		try {
@@ -133,10 +133,10 @@ public class ProfileConfigurationService {
 			}
 
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfiles(profilesDTO);
 
-			LOG.info("Exiting from get profiles operation.");
+			LOG.info("Exiting from get all profiles operation.");
 
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {

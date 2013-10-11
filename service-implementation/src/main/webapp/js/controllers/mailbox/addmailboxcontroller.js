@@ -18,6 +18,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
         ];
 
         req.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
+        
+        // Loads the details initially if edit
+        $scope.load = function() {
+        	if ('test' !== $scope.sharedService.getProperty()) {
+			
+				 $injector.get('RESTService').get($scope.base_url + 'mailbox/' + $scope.sharedService.getProperty(),
+					function (data) {
+						alert(data.getMailBoxResponse.response.message);
+				}
+            );
+			
+			}
+        };
+		$scope.load();
 
 
         $scope.saveForm = function (request) {
@@ -34,7 +48,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
 
         $scope.val = [{
             name: "-1",
-            value: "5",
+            value: "-1",
             isPlus: true
         }, {
             name: "2",
@@ -60,26 +74,18 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
             shade: 'light'
         }];
 
-        /*$scope.dynamicProps = [
-			'PROP1','PROP2','PROP3','PROP4'
-		];*/
-
         $scope.dynamicProp = $scope.dynamicProps[0];
 
-        /*$scope.countries = [
-        algeria={name:'ALGERIA', phoneCode:'213'},
-        andorra={name:'ANDORRA', phoneCode:'376'},
-        angola={name:'ANGOLA', phoneCode:'244'}
-    ];*/
-
         $scope.tpl = '<button ng-click="addRow()">Add Row</button>';
+		
+		$scope.isOpen = false;
 
         $scope.gridOptions = {
             data: 'val',
             columnDefs: [{
                     field: "name",
                     displayName: "Name",
-                    cellTemplate: '<div class="swapComboOrText" my-data="{{row.getProperty(col.field)}}" prop-data="{{dynamicProps}}" prop-model="{{dynamicProp}}"></div>'
+                    cellTemplate: '<div class="swapComboOrText" my-data="{{row.getProperty(col.field)}}" prop-data="{{dynamicProps}}" prop-model="{{dynamicProp}}" is-open="isOpen"></div>'
                 },
 
                 {
@@ -93,29 +99,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
                     displayName: "Action",
                     cellTemplate: '<div class="swapButton" get-Btn="{{row.getProperty(col.field)}}" add-row="addRow()" delete-row="deleteRow(row)"></div>'
                 }
-
-                //This won't trigger addRow() because the template is present in the chooseButton Directive.
-                //{field: "isPlus", displayName: "Action", cellTemplate: '<div class="swapButton" //get-Btn="{{row.getProperty(col.field)}}" add-row="addRow()" delete-row="deleteRow(row)"></div>'}
-
-                //,
-                /*
-						  Ganesh this will trigger addRow(); because the template is within the scope.
-						  ,{field: "isPlus", displayName: "Action", cellTemplate: $scope.tpl}
-						  */
             ]
         };
 
         // Dummy needs to be implemented.
         $scope.deleteRow = function (row) {
 
-            alert(row.rowIndex);
+			alert(row.rowIndex);
             //$scope.val.splice(row.rowIndex, 1);
         };
 
         // Dummy needs to be implemented.
         $scope.addRow = function () {
 
-            alert("Succs");
+			alert($scope.isOpen);
             //$scope.val.splice(row.rowIndex, 1);
         };
 
