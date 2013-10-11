@@ -1,5 +1,6 @@
 'use strict';
 
+
 // declare top-level module which depends on filters,and services
 var myApp = angular.module('myApp',
     [   'myApp.filters',
@@ -14,7 +15,7 @@ var myApp = angular.module('myApp',
         '$strap.directives' // angular strap
     ]);
 
-myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/mailbox');
+myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/v1/mailbox');
 
 
 // bootstrap angular

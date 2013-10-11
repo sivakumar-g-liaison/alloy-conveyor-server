@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.ws.rs.Consumes;
@@ -25,12 +26,14 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import javax.ws.rs.GET;
 
-@Path("/mailbox/triggerProfile")
+@Path("v1/mailbox/triggerProfile")
 public class MailBoxResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
@@ -55,7 +58,7 @@ public class MailBoxResource {
 	 *            profile process.
 	 * @return Response Object
 	 */
-	@POST
+	@POST    
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response triggerProfile(@QueryParam(value = "name") String profileName,
@@ -85,4 +88,5 @@ public class MailBoxResource {
 		return returnResponse;
 
 	}
+       
 }

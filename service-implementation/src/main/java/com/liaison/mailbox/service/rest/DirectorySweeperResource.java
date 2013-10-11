@@ -41,8 +41,8 @@ import com.netflix.servo.monitor.Monitors;
  * @author veerasamyn
  * @version 1.0
  */
-
-@Path("v1/sweepdirectories")
+//
+//@Path("v1/sweepdirectories")
 public class DirectorySweeperResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeperResource.class);
@@ -66,8 +66,8 @@ public class DirectorySweeperResource {
      *
      * @return JSON meta data of file groups
      */
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
+//    @GET
+//    @Produces({ MediaType.APPLICATION_JSON })
     public Response sweepDirectory() {
 
         SERVICE_CALL_COUNTER.addAndGet(1);
@@ -106,9 +106,9 @@ public class DirectorySweeperResource {
      *
      * @return JSON meta data of file groups
      */
-    @Path("/dynamic")
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
+//    @Path("/dynamic")
+//    @GET
+//    @Produces({ MediaType.APPLICATION_JSON })
     public Response sweepDirectory(@QueryParam("path") String path) {
 
         SERVICE_CALL_COUNTER.addAndGet(1);
