@@ -15,7 +15,7 @@ myApp.factory('RESTService',
                     });
             }, post:function (url, body, callback) {
                 
-            	alert(body);
+            	//alert(body);
                 return $http({method:'POST', url:url, data:body}).
                 success(function (data, status, headers, config) {
                     callback(data, status);

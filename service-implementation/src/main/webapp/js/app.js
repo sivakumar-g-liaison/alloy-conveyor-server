@@ -79,7 +79,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Eager load some data using simple REST client
     // *****
 
-	$rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/';
+	$rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/v1/';
     $rootScope.restService = RESTService;
     
     $rootScope.sharedService = SharedService;

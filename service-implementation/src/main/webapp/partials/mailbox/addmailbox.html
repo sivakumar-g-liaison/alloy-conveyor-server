@@ -10,11 +10,16 @@
 .css-form input.ng-valid.ng-dirty {
 	background-color: #78FA89;
 }
+
+.gridStyle {
+    border: 1px solid rgb(212,212,212); 
+    height: 300px
+}
+
 </style>
 
-<div fade-in>
-
-	<div class="container">
+	<div class="container fade-in">
+	
 		<div class="form-row">
 			<h3>MailBox Creation</h3>
 			<hr>
@@ -22,40 +27,44 @@
 
 		<form name="formAddMbx" novalidate class="container css-form">
 
-			<div class="container form-row">
-				Name:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.name" required />
+			<div class="span5">
+			
+				<div class="container form-row">
+					Name:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.name" required />
+				</div>
+
+				<div class="container form-row">
+					Status:&nbsp;&nbsp;&nbsp; <select ng-model="request.addMailBoxRequest.mailBox.status"
+						ng-options="e for e in enumstats"></select> <br>
+				</div>
+			
 			</div>
-
-			<div class="container form-row">
-				Status:&nbsp;&nbsp;&nbsp; <select ng-model="request.addMailBoxRequest.mailBox.status"
-					ng-options="e for e in enumstats"></select> <br>
+			
+			<div class="span5">
+			
+				<div class="container form-row">
+					Shared key:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.shardKey" />
+				</div>
+				
+				<div class="container form-row">
+					Description:&nbsp;&nbsp;&nbsp;
+					<textarea ng-model="request.addMailBoxRequest.mailBox.description"></textarea>
+				</div>
 			</div>
-
-			<div class="container form-row">
-				Description:&nbsp;&nbsp;&nbsp;
-				<textarea ng-model="request.addMailBoxRequest.mailBox.description"></textarea>
-			</div>
-
-			<div class="container form-row">
-				Service Ins ID:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.serviceInstId" />
-			</div>
-
-			<div class="container form-row">
-				Shared key:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.shardKey" />
-			</div>
-
-
-
-			<div class="gridStyle height" ng-grid="gridOptions"></div>
-
-			<button class="btn btn-primary" ng-click="saveForm(request)" ng-disabled="formAddMbx.$invalid">SAVE</button>
-	</div>
-
-	<div class="container form-row">&nbsp;&nbsp;&nbsp; Respons Status:&nbsp;&nbsp;&nbsp;{{stats}}</div>
 
 	</form>
+	
+	<div>
+		<div class="gridStyle" ng-grid="gridOptionsForMailbox"></div>
+		<br>
+	</div>
 
-	<pre>form = {{request | json}}</pre>
-</div>
+	<div class="container">
+		<button class="btn btn-primary" ng-click="doCancel()">Cancel</button>
+		<button class="btn btn-primary" ng-click="saveForm(request)" ng-disabled="formAddMbx.$invalid">Save</button>
+		<button class="btn btn-primary" >Add Processors</button>
+	</div>
 
+	<!--<div class="container form-row">&nbsp;&nbsp;&nbsp; Respons Status:&nbsp;&nbsp;&nbsp;{{stats}}</div>-->
+	<!--<pre>form = {{request | json}}</pre>-->
 </div>
