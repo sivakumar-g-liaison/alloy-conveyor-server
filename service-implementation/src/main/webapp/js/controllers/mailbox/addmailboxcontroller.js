@@ -1,16 +1,39 @@
 var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$http', '$filter', '$injector',
     function ($scope, $routeParams, $http, $filter, $injector) {
 
+        //Remove if not needed
+        $scope.isMailBoxEdit = false;
+
+        //Needed only for Edir
+        $scope.mailBoxId;
+
+        //Model for Add MB
         req = $scope.request = {
             addMailBoxRequest: {
                 mailBox: {
                     name: "",
                     description: "",
                     status: "",
+                    shardKey: "",
                     properties: []
                 }
             }
         };
+
+        //Model For Revise MB
+        editReq = $scope.editReq = {
+            reviseMailBoxRequest: {
+                mailBox: {
+                    guid: "",
+                    name: "",
+                    description: "",
+                    status: "",
+                    shardKey: "",
+                    properties: []
+                }
+            }
+        };
+
 
         $scope.enumstats = [
             'ACTIVE',
@@ -23,9 +46,68 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
         $scope.load = function () {
             if ('test' !== $scope.sharedService.getProperty()) {
 
-                $injector.get('RESTService').get($scope.base_url + 'mailbox/' + $scope.sharedService.getProperty(),
+                // Mailbox Edit Related Stuff
+
+                $scope.isMailBoxEdit = true;
+                $scope.mailBoxId = $scope.sharedService.getProperty();
+                $scope.sharedService.setProperty('test');
+
+                $injector.get('RESTService').get($scope.base_url + 'mailbox/' + $scope.mailBoxId,
                     function (data) {
-                        //alert(data.getMailBoxResponse.response.message);
+
+                        req.addMailBoxRequest.mailBox.name = data.getMailBoxResponse.mailBox.name;
+                        req.addMailBoxRequest.mailBox.description = data.getMailBoxResponse.mailBox.description;
+
+                        (data.getMailBoxResponse.mailBox.status === 'ACTIVE' || data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? req.addMailBoxRequest.mailBox.status = $scope.enumstats[0] : req.addMailBoxRequest.mailBox.status = $scope.enumstats[1];
+
+                        req.addMailBoxRequest.mailBox.properties = data.getMailBoxResponse.mailBox.properties;
+                        req.addMailBoxRequest.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
+
+                        var len = req.addMailBoxRequest.mailBox.properties.length;
+
+                        var propNameArray = [];
+
+                        // Logic for determining Add and Delete Btn population 
+                        for (var i = 0; i < len; i++) {
+
+                            var index = $scope.allStaicProperties.indexOf(req.addMailBoxRequest.mailBox.properties[i].name);
+
+                            if (index != -1) {
+                                propNameArray.push(req.addMailBoxRequest.mailBox.properties[i].name);
+                            }
+
+                            req.addMailBoxRequest.mailBox.properties[i].allowAdd = false;
+                        }
+
+                        req.addMailBoxRequest.mailBox.properties.push({
+                            name: '',
+                            value: '',
+                            allowAdd: true
+                        });
+
+                        //console.log(req.addMailBoxRequest.mailBox.properties);
+
+                        //Logic For determining combo values during load
+                        var staticPropsLen = $scope.allStaicProperties.length;
+
+                        for (var i = 0; i < staticPropsLen; i++) {
+
+                            if (propNameArray.length > 0) {
+
+                                for (var j = 0; j < propNameArray.length; j++) {
+
+                                    if ($scope.allStaicProperties[i] === propNameArray[j]) {
+
+                                        var index = $scope.allStaicPropertiesThatAreNotAssignedValuesYet.indexOf($scope.allStaicProperties[i]);
+
+                                        $scope.allStaicPropertiesThatAreNotAssignedValuesYet.splice(index, 1);
+                                        propNameArray.splice(j, 1);
+                                    }
+
+                                }
+                            } else break;
+
+                        }
                     }
                 );
 
@@ -44,19 +126,37 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$routeParams', '$htt
             for (var i = 0; i < len; i++) {
 
                 delete request.addMailBoxRequest.mailBox.properties[i][removeProp];
-                console.log(request.addMailBoxRequest.mailBox.properties[i]);
+                //console.log(request.addMailBoxRequest.mailBox.properties[i]);
             }
 
             // For removing the final element which has addRow specific data
 
             request.addMailBoxRequest.mailBox.properties.splice(len - 1, 1);
 
-            $injector.get('RESTService').post($scope.base_url + 'mailbox', $filter('json')(request),
-                function (data, status) {
-                    $(".alert").alert(data.addMailBoxResponse.response.message);
-                    //alert(data.addMailBoxResponse.response.message);
-                }
-            );
+            if ($scope.isMailBoxEdit) {
+
+                editReq.reviseMailBoxRequest.mailBox.guid = $scope.mailBoxId;
+                editReq.reviseMailBoxRequest.mailBox.name = req.addMailBoxRequest.mailBox.name;
+                editReq.reviseMailBoxRequest.mailBox.description = req.addMailBoxRequest.mailBox.description;
+                editReq.reviseMailBoxRequest.mailBox.status = req.addMailBoxRequest.mailBox.status;
+                editReq.reviseMailBoxRequest.mailBox.properties = req.addMailBoxRequest.mailBox.properties;
+                editReq.reviseMailBoxRequest.mailBox.shardKey = req.addMailBoxRequest.mailBox.shardKey;
+
+                $injector.get('RESTService').put($scope.base_url + 'mailbox/' + $scope.mailBoxId, $filter('json')(editReq),
+                    function (data, status) {
+                        //$(".alert").alert(data.addMailBoxResponse.response.message);
+                        alert(data.reviseMailBoxResponse.response.message);
+                    }
+                );
+            } else {
+
+                $injector.get('RESTService').post($scope.base_url + 'mailbox', $filter('json')(request),
+                    function (data, status) {
+                        //$(".alert").alert(data.addMailBoxResponse.response.message);
+                        alert(data.addMailBoxResponse.response.message);
+                    }
+                );
+            }
         }
 
         $scope.doCancel = function () {

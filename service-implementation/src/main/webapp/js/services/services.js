@@ -4,36 +4,64 @@
 myApp.factory('RESTService',
     function ($http) {
         return {
-            get:function (url, callback) {
-                return $http({method:'GET', url:url}).
-                    success(function (data, status, headers, config) {
-                        callback(data);
-                    }).
-                    error(function (data, status, headers, config) {
-                        alert("failed to retrieve data");
-                        callback(data);
-                    });
-            }, post:function (url, body, callback) {
-                
-            	//alert(body);
-                return $http({method:'POST', url:url, data:body}).
+            get: function (url, callback) {
+                return $http({
+                    method: 'GET',
+                    url: url
+                }).
+                success(function (data, status, headers, config) {
+                    callback(data);
+                }).
+                error(function (data, status, headers, config) {
+                    alert("failed to retrieve data");
+                    callback(data);
+                });
+            },
+            post: function (url, body, callback) {
+
+                //alert(body);
+                return $http({
+                    method: 'POST',
+                    url: url,
+                    data: body
+                }).
                 success(function (data, status, headers, config) {
                     callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
                     callback(data, status);
                 });
-           }, delete:function (url, callback) {
-               var body = "[{}]";//Dummy body
-               return $http({method:'DELETE', url:url, data:body}).
+            },
+            put: function (url, body, callback) {
+
+                //alert(body);
+                return $http({
+                    method: 'PUT',
+                    url: url,
+                    data: body
+                }).
                 success(function (data, status, headers, config) {
                     callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
                     callback(data, status);
                 });
-           }
-        
+            },
+            delete: function (url, callback) {
+                var body = "[{}]"; //Dummy body
+                return $http({
+                    method: 'DELETE',
+                    url: url,
+                    data: body
+                }).
+                success(function (data, status, headers, config) {
+                    callback(data, status);
+                }).
+                error(function (data, status, headers, config) {
+                    callback(data, status);
+                });
+            }
+
         };
     }
 );
@@ -50,29 +78,28 @@ myApp.factory('AuthService',
         var initialState = true;
 
         return {
-            initialState:function () {
+            initialState: function () {
                 return initialState;
             },
-            login:function (name, password) {
+            login: function (name, password) {
                 currentUser = name;
                 authorized = true;
                 //console.log("Logged in as " + name);
                 initialState = false;
             },
-            logout:function () {
+            logout: function () {
                 currentUser = null;
                 authorized = false;
             },
-            isLoggedIn:function () {
+            isLoggedIn: function () {
                 return authorized;
             },
-            currentUser:function () {
+            currentUser: function () {
                 return currentUser;
             },
-            authorized:function () {
+            authorized: function () {
                 return authorized;
             }
         };
     }
 );
-
