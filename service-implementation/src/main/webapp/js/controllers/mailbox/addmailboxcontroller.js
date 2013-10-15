@@ -6,7 +6,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope','$filter','$location',
         //Needed only for Edir
         $scope.mailBoxId;
         //Model for Add MB
-        addRequest = $scope.request = {
+        addRequest = $scope.addRequest = {
             addMailBoxRequest: {
                 mailBox: {}
             }
@@ -106,12 +106,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope','$filter','$location',
                 $scope.restService.put($scope.base_url + 'mailbox/' + $scope.mailBoxId, $filter('json')(editReq),
                                              function (data, status) { 
                                                      alert(data.reviseMailBoxResponse.response.message);
+                                                     
                                                   }
                                        );
             } else {
-                $scope.request.addMailBoxRequest.mailBox = $scope.mailBox;
-                 $log.info($filter('json')(request));
-                $scope.restService.post($scope.base_url + 'mailbox', $filter('json')(request),
+                $scope.addRequest.addMailBoxRequest.mailBox = $scope.mailBox;
+                 $log.info($filter('json')(addRequest));
+                $scope.restService.post($scope.base_url + 'mailbox', $filter('json')(addRequest),
                                             function (data, status) {                                                
                                                 alert(data.addMailBoxResponse.response.message);
                                             }
