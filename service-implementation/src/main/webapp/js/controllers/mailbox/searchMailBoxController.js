@@ -91,9 +91,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
         // Dummy Impl for edit
         $scope.edit = function () {
 
-        	$scope.sharedService.setProperty($scope.key.guid);
-            alert("Here I need to know which button was selected " + $scope.key.name);
-			$location.path('/mailbox/addMailBox');
+        	//$scope.sharedService.setProperty($scope.key.guid);
+                //alert("Here I need to know which button was selected " + $scope.key.name);
+                        $location.path('/mailbox/addMailBox').search('mailBoxId',$scope.key.guid);
+                       
+			
         };
 
         $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
@@ -182,7 +184,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // used to move add screen
 		$scope.goto = function (hash) { 
-			$scope.testService.setProperty('test');
 			$location.path(hash);
 		}
 

@@ -1,70 +1,84 @@
 <style>
-.form-row {
+  .form-row {
 	padding-bottom: .5em;
-}
-
-.css-form input.ng-invalid.ng-dirty {
+  }
+  
+  .css-form input.ng-invalid.ng-dirty {
 	background-color: #FA787E;
-}
-
-.css-form input.ng-valid.ng-dirty {
+  }
+  
+  .css-form input.ng-valid.ng-dirty {
 	background-color: #78FA89;
-}
-
-.gridStyle {
-    border: 1px solid rgb(212,212,212); 
+  }
+  
+  .gridStyle {
+    border: 1px solid rgb(212,212,212);
+    
     height: 300px
-}
-
+  }
+  
 </style>
 
-	<div class="container fade-in">
-	
-		<div class="form-row">
-			<h3>MailBox Definition</h3>
-			<hr>
-		</div>
+<div class="container fade-in">
+  
+  <div class="form-row">
+    <h3>
+      MailBox Definition
+    </h3>
+    <hr>
+  </div>
+  
+  <form name="formAddMbx" novalidate class="container css-form">
+    
+    <div class="span5">
+      
+      <div class="container form-row">
+        Name:&nbsp;&nbsp;&nbsp; 
+        <input type="text" ng-model="mailBox.name" required />
+      </div>
+      
+      <div class="container form-row">
+        Status:&nbsp;&nbsp;&nbsp; 
+        <select ng-model="mailBox.status" ng-options="e for e in enumstats">
+        </select>
+        
+        <br>
+      </div>
+      
+    </div>
+    
+    <div class="span5">
+      
+      <div class="container form-row">
+        Shared key:&nbsp;&nbsp;&nbsp; 
+        <input type="text" ng-model="mailBox.shardKey" />
+      </div>
+      
+      <div class="container form-row">
+        Description:&nbsp;&nbsp;&nbsp;
+        <textarea ng-model="mailBox.description">
+        </textarea>
+      </div>
+    </div>
+    
+  </form>
+  
+  <div>
+    <div class="gridStyle" ng-grid="gridOptionsForMailbox">
+    </div>
+    <br>
+  </div>
+  
+  <div class="container">
+    <button class="btn btn-primary" ng-click="doCancel()">
+      Cancel
+    </button>
+    <button class="btn btn-primary" ng-click="saveForm(request)" ng-disabled="formAddMbx.$invalid">
+      Save
+    </button>
+    <button class="btn btn-primary" >
+      Add Processors
+    </button>
+  </div>
 
-		<form name="formAddMbx" novalidate class="container css-form">
-
-			<div class="span5">
-			
-				<div class="container form-row">
-					Name:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.name" required />
-				</div>
-
-				<div class="container form-row">
-					Status:&nbsp;&nbsp;&nbsp; <select ng-model="request.addMailBoxRequest.mailBox.status"
-						ng-options="e for e in enumstats"></select> <br>
-				</div>
-			
-			</div>
-			
-			<div class="span5">
-			
-				<div class="container form-row">
-					Shared key:&nbsp;&nbsp;&nbsp; <input type="text" ng-model="request.addMailBoxRequest.mailBox.shardKey" />
-				</div>
-				
-				<div class="container form-row">
-					Description:&nbsp;&nbsp;&nbsp;
-					<textarea ng-model="request.addMailBoxRequest.mailBox.description"></textarea>
-				</div>
-			</div>
-
-	</form>
-	
-	<div>
-		<div class="gridStyle" ng-grid="gridOptionsForMailbox"></div>
-		<br>
-	</div>
-
-	<div class="container">
-		<button class="btn btn-primary" ng-click="doCancel()">Cancel</button>
-		<button class="btn btn-primary" ng-click="saveForm(request)" ng-disabled="formAddMbx.$invalid">Save</button>
-		<button class="btn btn-primary" >Add Processors</button>
-	</div>
-
-	<!--<div class="container form-row">&nbsp;&nbsp;&nbsp; Respons Status:&nbsp;&nbsp;&nbsp;{{stats}}</div>-->
-	<!--<pre>form = {{request | json}}</pre>-->
 </div>
