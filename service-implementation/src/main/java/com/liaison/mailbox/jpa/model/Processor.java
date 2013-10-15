@@ -10,8 +10,10 @@
 
 package com.liaison.mailbox.jpa.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,8 +23,6 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -31,6 +31,7 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * The persistent class for the PROCESSORS database table.
@@ -54,11 +55,14 @@ public class Processor implements Identifiable {
 	private String procsrProperties;
 	private String procsrStatus;
 	private String procsrName;
+	private String procsrProtocol;
 	private int executionOrder;
 	private List<Credential> credentials;
 	private List<Folder> folders;
-	private MailBoxSchedProfile mailboxSchedProfile;
 	private List<ProcessorProperty> dynamicProperties;
+
+	private List<MailBoxProcessorLink> mailboxProcessors;
+	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
 
 	public Processor() {
 	}
@@ -129,6 +133,15 @@ public class Processor implements Identifiable {
 		this.procsrName = procsrName;
 	}
 
+	@Column(name = "PROCSR_PROTOCOL", length = 128)
+	public String getProcsrProtocol() {
+		return procsrProtocol;
+	}
+
+	public void setProcsrProtocol(String procsrProtocol) {
+		this.procsrProtocol = procsrProtocol;
+	}
+
 	// bi-directional many-to-one association to Credential
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
@@ -181,15 +194,40 @@ public class Processor implements Identifiable {
 		return folder;
 	}
 
-	// bi-directional many-to-one association to MailBoxSchedProfile
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@JoinColumn(name = "MAILBOX_SCHED_PROFILES_GUID", nullable = false)
-	public MailBoxSchedProfile getMailboxSchedProfile() {
-		return this.mailboxSchedProfile;
+	// bi-directional many-to-one association to MailBoxProcessor
+	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	public List<MailBoxProcessorLink> getMailboxProcessors() {
+		return this.mailboxProcessors;
 	}
 
-	public void setMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		this.mailboxSchedProfile = mailboxSchedProfile;
+	public void setMailboxProcessors(List<MailBoxProcessorLink> mailboxProcessors) {
+		this.mailboxProcessors = mailboxProcessors;
+	}
+
+	// bi-directional many-to-one association to ScheduleProfileProcessor
+	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
+		return this.scheduleProfileProcessors;
+	}
+
+	public void setScheduleProfileProcessors(List<ScheduleProfileProcessor> scheduleProfileProcessors) {
+		this.scheduleProfileProcessors = scheduleProfileProcessors;
+	}
+
+	public ScheduleProfileProcessor addScheduleProfileProcessor(ScheduleProfileProcessor scheduleProfileProcessor) {
+		getScheduleProfileProcessors().add(scheduleProfileProcessor);
+		scheduleProfileProcessor.setProcessor(this);
+
+		return scheduleProfileProcessor;
+	}
+
+	public ScheduleProfileProcessor removeScheduleProfileProcessor(ScheduleProfileProcessor scheduleProfileProcessor) {
+		getScheduleProfileProcessors().remove(scheduleProfileProcessor);
+		scheduleProfileProcessor.setProcessor(null);
+
+		return scheduleProfileProcessor;
 	}
 
 	@Column(name = "PROCSR_EXECUTION_ORDER")
@@ -258,7 +296,7 @@ public class Processor implements Identifiable {
 	@Transient
 	public List<String> getEmailAddress() {
 
-		MailBox mailBox = getMailboxSchedProfile().getMailbox();
+		MailBox mailBox = getMailboxProcessors().get(0).getMailbox();
 		List<MailBoxProperty> properties = mailBox.getMailboxProperties();
 
 		if (null != properties) {
@@ -274,6 +312,38 @@ public class Processor implements Identifiable {
 
 		return null;
 
+	}
+
+	@Transient
+	public void addProfilesToProcessor(Set<ScheduleProfilesRef> scheduleProfilesRef) {
+
+		List<ScheduleProfileProcessor> scheduleProfileProcessors = new ArrayList<>();
+		ScheduleProfileProcessor profileProcessor = null;
+		for (ScheduleProfilesRef profiles : scheduleProfilesRef) {
+
+			profileProcessor = new ScheduleProfileProcessor();
+			profileProcessor.setPguid(MailBoxUtility.getGUID());
+			profileProcessor.setScheduleProfilesRef(profiles);
+			scheduleProfileProcessors.add(profileProcessor);
+		}
+
+		if (!scheduleProfileProcessors.isEmpty()) {
+			this.setScheduleProfileProcessors(scheduleProfileProcessors);
+		}
+
+	}
+
+	@Transient
+	public void addMailBoxToProcessor(MailBox mailBox) {
+
+		MailBoxProcessorLink mailBoxProcessor = new MailBoxProcessorLink();
+		mailBoxProcessor.setPguid(MailBoxUtility.getGUID());
+		mailBoxProcessor.setMailbox(mailBox);
+
+		List<MailBoxProcessorLink> processors = new ArrayList<>();
+		processors.add(mailBoxProcessor);
+
+		this.setMailboxProcessors(processors);
 	}
 
 }

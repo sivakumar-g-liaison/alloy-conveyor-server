@@ -19,7 +19,6 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 
 /**
@@ -153,17 +152,13 @@ public class SearchMailBoxDTO {
 		Set<String> profileNames = new HashSet<String>();
 		// Boolean to denote the mailbox has processor or not
 		boolean isMbxHasProcessors = false;
-		for (MailBoxSchedProfile schedProfile : mailBox.getMailboxSchedProfiles()) {
-
-			if (schedProfile.getProcessors() != null && !schedProfile.getProcessors().isEmpty()) {
-				isMbxHasProcessors = true;
-			}
-			profileNames.add(schedProfile.getScheduleProfilesRef().getSchProfName().trim());
-		}
-
-		for (String profileName : profileNames) {
-			this.setProfiles(profileName);
-		}
+		/*
+		 * for (MailBoxSchedProfile schedProfile : mailBox.getMailboxSchedProfiles()) { if
+		 * (schedProfile.getProcessors() != null && !schedProfile.getProcessors().isEmpty()) {
+		 * isMbxHasProcessors = true; }
+		 * profileNames.add(schedProfile.getScheduleProfilesRef().getSchProfName().trim()); } for
+		 * (String profileName : profileNames) { this.setProfiles(profileName); }
+		 */
 
 		if (MailBoxStatus.ACTIVE.value().equals(mailBox.getMbxStatus()) && !isMbxHasProcessors) {
 			this.setStatus(MailBoxConstants.INCOMPLETE_STATUS);

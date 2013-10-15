@@ -18,8 +18,6 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
-import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 
@@ -177,20 +175,14 @@ public class MailBoxDTO {
 		}
 
 		ProfileDTO profile = null;
-		MailBoxProcessorResponseDTO processorDTO = null;
-		for (MailBoxSchedProfile schedProfile : mailBox.getMailboxSchedProfiles()) {
-
-			profile = new ProfileDTO();
-			profile.copyFromEntity(schedProfile.getScheduleProfilesRef());
-
-			for (Processor processor : schedProfile.getProcessors()) {
-
-				processorDTO = new MailBoxProcessorResponseDTO();
-				processorDTO.copyFromEntity(processor);
-				profile.getProcessors().add(processorDTO);
-			}
-			this.getProfiles().add(profile);
-		}
+		/*
+		 * MailBoxProcessorResponseDTO processorDTO = null; for (MailBoxSchedProfile schedProfile :
+		 * mailBox.getMailboxSchedProfiles()) { profile = new ProfileDTO();
+		 * profile.copyFromEntity(schedProfile.getScheduleProfilesRef()); for (Processor processor :
+		 * schedProfile.getProcessors()) { processorDTO = new MailBoxProcessorResponseDTO();
+		 * processorDTO.copyFromEntity(processor); profile.getProcessors().add(processorDTO); }
+		 * this.getProfiles().add(profile); }
+		 */
 
 	}
 }

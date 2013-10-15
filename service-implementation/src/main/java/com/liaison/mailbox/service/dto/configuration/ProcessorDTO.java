@@ -23,9 +23,9 @@ import org.codehaus.jackson.map.JsonMappingException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
-import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
@@ -48,8 +48,9 @@ public class ProcessorDTO {
 	private String javaScriptURI;
 	private String description;
 	private String status;
+	private String protocol;
 	private String linkedMailboxId;
-	private String linkedProfileId;
+	private List<String> linkedProfilesId;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
 	private List<PropertyDTO> dynamicProperties;
@@ -119,21 +120,22 @@ public class ProcessorDTO {
 		this.status = status;
 	}
 
+	@Mandatory(errorMessage = "Processor protocol is mandatory.")
+	@DataValidation(errorMessage = "Processor protocol set to a value that is not supported.", type = MailBoxConstants.PROCESSOR_PROTOCOL)
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
 	public String getLinkedMailboxId() {
 		return linkedMailboxId;
 	}
 
 	public void setLinkedMailboxId(String linkedMailboxId) {
 		this.linkedMailboxId = linkedMailboxId;
-	}
-
-	@Mandatory(errorMessage = "Linked ProfileId is mandatory.")
-	public String getLinkedProfileId() {
-		return linkedProfileId;
-	}
-
-	public void setLinkedProfileId(String linkedProfileId) {
-		this.linkedProfileId = linkedProfileId;
 	}
 
 	public List<FolderDTO> getFolders() {
@@ -178,16 +180,22 @@ public class ProcessorDTO {
 		this.executionOrder = executionOrder;
 	}
 
+	public List<String> getLinkedProfilesId() {
+		return linkedProfilesId;
+	}
+
+	public void setLinkedProfilesId(List<String> linkedProfilesId) {
+		this.linkedProfilesId = linkedProfilesId;
+	}
+
 	/**
-	 * Method is used to copy the values from DTO to Entity. It does not create
-	 * relationship between MailBoxSchedProfile and Processor. That step will be
-	 * done in the service.
+	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
+	 * MailBoxSchedProfile and Processor. That step will be done in the service.
 	 * 
 	 * @param processor
 	 *            The processor entity
 	 * @param isCreate
-	 *            The boolean value use to differentiate create and revise
-	 *            processor operation.
+	 *            The boolean value use to differentiate create and revise processor operation.
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws IOException
 	 * @throws JAXBException
@@ -256,6 +264,15 @@ public class ProcessorDTO {
 		if (!properties.isEmpty()) {
 			processor.setDynamicProperties(properties);
 		}
+
+		// Set the protocol
+		Protocol protocol = Protocol.findByName(this.getProtocol());
+		processor.setProcsrProtocol(protocol.getCode());
+
+		// Set the status
+		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());
+		processor.setProcsrStatus(foundStatusType.value());
+
 	}
 
 	/**
@@ -294,13 +311,6 @@ public class ProcessorDTO {
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 		this.setName(processor.getProcsrName());
 
-		if (processor.getMailboxSchedProfile() != null) {
-
-			MailBoxSchedProfile mbxProfile = processor.getMailboxSchedProfile();
-			this.setLinkedMailboxId(mbxProfile.getMailbox().getPguid());
-			this.setLinkedProfileId(mbxProfile.getPguid());
-		}
-
 		// Set folders
 		if (null != processor.getFolders()) {
 
@@ -333,5 +343,8 @@ public class ProcessorDTO {
 				this.getDynamicProperties().add(propertyDTO);
 			}
 		}
+
+		// Set protocol
+		this.setProtocol(Protocol.findByCode(processor.getProcsrProtocol()).name());
 	}
 }

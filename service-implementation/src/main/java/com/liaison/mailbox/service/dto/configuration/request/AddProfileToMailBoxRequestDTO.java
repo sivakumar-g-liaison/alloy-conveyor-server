@@ -11,9 +11,6 @@ package com.liaison.mailbox.service.dto.configuration.request;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
-import com.liaison.mailbox.service.util.MailBoxUtility;
-
 /**
  * 
  * 
@@ -45,20 +42,9 @@ public class AddProfileToMailBoxRequestDTO {
 	public String getProfileGuid() {
 		return profileGuid;
 	}
-	
+
 	public void setProfileGuid(String profileGuid) {
 		this.profileGuid = profileGuid;
 	}
 
-	public void copyToEntity(MailBoxSchedProfile mailboxProfile) {
-
-		mailboxProfile.setPguid(MailBoxUtility.getGUID());
-		mailboxProfile.setMbxProfileStatus(this.getStatus());
-	}
-
-	public void copyFromEntity(MailBoxSchedProfile mailboxProfile) {
-
-		this.setMailBoxGuid(mailboxProfile.getPguid());
-		this.setStatus(mailboxProfile.getMbxProfileStatus());
-	}
 }

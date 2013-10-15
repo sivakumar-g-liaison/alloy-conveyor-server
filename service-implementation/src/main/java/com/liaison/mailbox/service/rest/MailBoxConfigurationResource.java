@@ -42,7 +42,6 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequ
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
@@ -258,8 +257,6 @@ public class MailBoxConfigurationResource {
 
 	}
 
-	
-
 	/**
 	 * REST method to initiate profile creation.
 	 * 
@@ -331,53 +328,6 @@ public class MailBoxConfigurationResource {
 			serviceResponse = mailbox.getProfiles();
 
 			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
-	}
-
-	/**
-	 * REST method to associate existing profiles to mailbox.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @param mailBoxGuid
-	 *            The id of the mailbox
-	 * @param profileGuid
-	 *            The id of the scheduler profile
-	 * @return Response Object
-	 */
-	@POST
-	@Path("/{mailboxid}/profile/{profileid}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response addProfileToMailBox(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailBoxGuid,
-			@PathParam(value = "profileid") String profileGuid) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-
-		try {
-
-			// add the new profile details
-			AddProfileToMailBoxResponseDTO serviceResponse = null;
-			ProfileConfigurationService profile = new ProfileConfigurationService();
-			serviceResponse = profile.addProfileToMailBox(mailBoxGuid, profileGuid);
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
@@ -631,51 +581,48 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
-	
-	
-	 
-    /**
- * Rest method to search the mailbox based on the given query parameters. If both are empty it
- * returns all mailboxes.
- * 
- * @param mbxName
- *            The mailbox name should be searched
- * @param profileName
- *            The profile name should be searched
- * @return The Response
- */
-@GET
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public Response searchMailBox(@QueryParam(value = "name") String mbxName,
-		@QueryParam(value = "profile") String profileName) {
 
-	serviceCallCounter.addAndGet(1);
+	/**
+	 * Rest method to search the mailbox based on the given query parameters. If both are empty it
+	 * returns all mailboxes.
+	 * 
+	 * @param mbxName
+	 *            The mailbox name should be searched
+	 * @param profileName
+	 *            The profile name should be searched
+	 * @return The Response
+	 */
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response searchMailBox(@QueryParam(value = "name") String mbxName,
+			@QueryParam(value = "profile") String profileName) {
 
-	Response returnResponse;
+		serviceCallCounter.addAndGet(1);
 
-	try {
+		Response returnResponse;
 
-		// search the mailbox from the given details
-		SearchMailBoxResponseDTO serviceResponse = null;
-		MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-		serviceResponse = mailbox.searchMailBox(mbxName, profileName);
+		try {
 
-		returnResponse = serviceResponse.constructResponse();
-	} catch (Exception e) {
+			// search the mailbox from the given details
+			SearchMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+			serviceResponse = mailbox.searchMailBox(mbxName, profileName);
 
-		int f = failureCounter.addAndGet(1);
-		String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-		LOG.error(errMsg, e);
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
 
-		// should be throwing out of domain scope and into framework using
-		// above code
-		returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
 	}
-
-	return returnResponse;
-
-}
-	
 
 }
