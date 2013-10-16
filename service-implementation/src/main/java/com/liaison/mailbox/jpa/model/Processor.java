@@ -10,10 +10,8 @@
 
 package com.liaison.mailbox.jpa.model;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -33,7 +31,6 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * The persistent class for the PROCESSORS database table.
@@ -313,25 +310,6 @@ public class Processor implements Identifiable {
 		}
 
 		return null;
-
-	}
-
-	@Transient
-	public void addProfilesToProcessor(Set<ScheduleProfilesRef> scheduleProfilesRef) {
-
-		List<ScheduleProfileProcessor> scheduleProfileProcessors = new ArrayList<>();
-		ScheduleProfileProcessor profileProcessor = null;
-		for (ScheduleProfilesRef profiles : scheduleProfilesRef) {
-
-			profileProcessor = new ScheduleProfileProcessor();
-			profileProcessor.setPguid(MailBoxUtility.getGUID());
-			profileProcessor.setScheduleProfilesRef(profiles);
-			scheduleProfileProcessors.add(profileProcessor);
-		}
-
-		if (!scheduleProfileProcessors.isEmpty()) {
-			this.setScheduleProfileProcessors(scheduleProfileProcessors);
-		}
 
 	}
 

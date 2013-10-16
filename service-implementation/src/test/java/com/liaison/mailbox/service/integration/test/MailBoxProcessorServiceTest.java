@@ -51,7 +51,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * @author karthikeyanm
+ * @author
  * 
  */
 public class MailBoxProcessorServiceTest extends BaseServiceTest {
@@ -62,8 +62,6 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 	private Logger logger = null;
 	private AddMailBoxResponseDTO responseDTO;
-	private AddProfileResponseDTO profileResponseDTO;
-	private AddProfileToMailBoxResponseDTO mbProfileResponseDTO;
 
 	/**
 	 * @throws java.lang.Exception
@@ -73,8 +71,6 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		logger = LoggerFactory.getLogger(MailBoxProcessorServiceTest.class);
 		// Adding the mailbox
 		responseDTO = createMailBox();
-		profileResponseDTO = addProfile();
-		mbProfileResponseDTO = createProfileLink(responseDTO, profileResponseDTO);
 	}
 
 	@Test
@@ -530,7 +526,14 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		processorDTO.setType(processorType);
 		processorDTO.setProtocol(protocolType);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		// processorDTO.setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
+
+		String profileName = "TestProfile" + System.nanoTime();
+		AddProfileResponseDTO response = addProfile(profileName);
+		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+		List<String> profiles = new ArrayList<>();
+		profiles.add(profileName);
+		processorDTO.setLinkedProfiles(profiles);
 
 		if (isRevise) {
 			ReviseProcessorRequestDTO reviseDTO = new ReviseProcessorRequestDTO();
@@ -541,5 +544,24 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			addProcessorDTO.setProcessor(processorDTO);
 			return addProcessorDTO;
 		}
+	}
+
+	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
+			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
+
+		ProfileDTO profile = new ProfileDTO();
+		profile.setName(profileName);
+		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
+		profileRequstDTO.setProfile(profile);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
+		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+
+		return profileResponseDTO;
 	}
 }

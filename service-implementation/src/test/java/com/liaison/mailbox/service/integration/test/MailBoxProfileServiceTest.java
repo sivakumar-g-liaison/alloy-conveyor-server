@@ -94,8 +94,8 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	public void testCreateProfile_WithProfileNameAsSpecialCharacter() throws JsonGenerationException, JsonMappingException,
 			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
 
-		AddProfileResponseDTO profileResponseDTO = addProfile("@#$%$!@");
-		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
+		AddProfileResponseDTO profileResponseDTO = addProfile(System.nanoTime() + "#$%^%&@");
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 	}
 
 	@Test

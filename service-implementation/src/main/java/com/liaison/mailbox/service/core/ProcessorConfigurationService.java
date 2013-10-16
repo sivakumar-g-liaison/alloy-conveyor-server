@@ -131,9 +131,14 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
+	 * Creates link between scheduleProfileref and processor.
+	 * 
 	 * @param addRequest
+	 *            The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest
+	 *            The ReviseProcessorRequest DTO
 	 * @param processor
+	 *            The processor Entity
 	 * @throws MailBoxConfigurationServicesException
 	 */
 	private void createScheduleProfileAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
@@ -186,9 +191,14 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
+	 * Creates link between mailbox and processor.
+	 * 
 	 * @param addRequest
+	 *            The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest
+	 *            The ReviseProcessorRequest DTO
 	 * @param processor
+	 *            The processor Entity
 	 * @throws MailBoxConfigurationServicesException
 	 */
 	private void createMailBoxAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
