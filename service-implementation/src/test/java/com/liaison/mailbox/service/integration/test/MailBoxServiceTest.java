@@ -106,7 +106,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 				AddProcessorToMailboxRequestDTO.class);
 
 		addProcessorDTO.getProcessor().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		addProcessorDTO.getProcessor().setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
+		// addProcessorDTO.getProcessor().setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
 
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 

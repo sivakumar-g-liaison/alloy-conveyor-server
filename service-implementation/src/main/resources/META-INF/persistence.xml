@@ -12,11 +12,10 @@
 		<class>com.liaison.mailbox.jpa.model.Folder</class>
 		<class>com.liaison.mailbox.jpa.model.MailBox</class>
 		<class>com.liaison.mailbox.jpa.model.MailBoxProperty</class>
-		<class>com.liaison.mailbox.jpa.model.MailBoxSchedProfile</class>
 		<class>com.liaison.mailbox.jpa.model.Processor</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
-		<class>com.liaison.mailbox.jpa.model.ProcessorForMerge</class>
+		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
 		
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />

@@ -22,6 +22,7 @@ import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
@@ -199,6 +200,11 @@ public class GenericValidator {
 			}
 		} else if (MailBoxConstants.FOLDER_TYPE.equals(annotationDetails.type())) {
 			if (FolderType.findByName(String.valueOf(value)) == null) {
+				errorMessage.append(annotationDetails.errorMessage());
+				return false;
+			}
+		} else if (MailBoxConstants.PROCESSOR_PROTOCOL.equals(annotationDetails.type())) {
+			if (Protocol.findByName(String.valueOf(value)) == null) {
 				errorMessage.append(annotationDetails.errorMessage());
 				return false;
 			}

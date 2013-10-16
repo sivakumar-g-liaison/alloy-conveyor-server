@@ -105,7 +105,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("SWEEPER");
 		dto.setStatus("ACTIVE");
-		dto.setLinkedProfileId("ASDERER1425SDSD");
+		// dto.setLinkedProfileId("ASDERER1425SDSD");
 		validator.validate(dto);
 	}
 
@@ -115,7 +115,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType(" ");
 		dto.setStatus(" ");
-		dto.setLinkedProfileId(" ");
+		// dto.setLinkedProfileId(" ");
 		validator.validate(dto);
 	}
 
@@ -125,7 +125,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("sdsd");
 		dto.setStatus("dsddd");
-		dto.setLinkedProfileId("ASDERER1425SDSD");
+		// dto.setLinkedProfileId("ASDERER1425SDSD");
 		validator.validate(dto);
 	}
 

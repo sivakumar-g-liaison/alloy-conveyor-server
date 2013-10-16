@@ -36,7 +36,7 @@ public class ScheduleProfilesRef implements Identifiable {
 
 	private String pguid;
 	private String schProfName;
-	private List<MailBoxSchedProfile> mailboxSchedProfiles;
+	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
 
 	public ScheduleProfilesRef() {
 	}
@@ -60,29 +60,29 @@ public class ScheduleProfilesRef implements Identifiable {
 		this.schProfName = schProfName;
 	}
 
-	// bi-directional many-to-one association to MailBoxSchedProfile
+	// bi-directional many-to-one association to ScheduleProfileProcessor
 	@OneToMany(mappedBy = "scheduleProfilesRef", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
-	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
-		return this.mailboxSchedProfiles;
+	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
+		return this.scheduleProfileProcessors;
 	}
 
-	public void setMailboxSchedProfiles(List<MailBoxSchedProfile> mailboxSchedProfiles) {
-		this.mailboxSchedProfiles = mailboxSchedProfiles;
+	public void setScheduleProfileProcessors(List<ScheduleProfileProcessor> scheduleProfileProcessors) {
+		this.scheduleProfileProcessors = scheduleProfileProcessors;
 	}
 
-	public MailBoxSchedProfile addMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		getMailboxSchedProfiles().add(mailboxSchedProfile);
-		mailboxSchedProfile.setScheduleProfilesRef(this);
+	public ScheduleProfileProcessor addScheduleProfileProcessor(ScheduleProfileProcessor scheduleProfileProcessor) {
+		getScheduleProfileProcessors().add(scheduleProfileProcessor);
+		scheduleProfileProcessor.setScheduleProfilesRef(this);
 
-		return mailboxSchedProfile;
+		return scheduleProfileProcessor;
 	}
 
-	public MailBoxSchedProfile removeMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		getMailboxSchedProfiles().remove(mailboxSchedProfile);
-		mailboxSchedProfile.setScheduleProfilesRef(null);
+	public ScheduleProfileProcessor removeScheduleProfileProcessor(ScheduleProfileProcessor scheduleProfileProcessor) {
+		getScheduleProfileProcessors().remove(scheduleProfileProcessor);
+		scheduleProfileProcessor.setScheduleProfilesRef(null);
 
-		return mailboxSchedProfile;
+		return scheduleProfileProcessor;
 	}
 
 	@Override

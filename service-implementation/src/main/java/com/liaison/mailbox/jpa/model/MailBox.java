@@ -43,7 +43,7 @@ public class MailBox implements Identifiable {
 	private BigDecimal serviceInstId;
 	private String shardKey;
 	private List<MailBoxProperty> mailboxProperties;
-	private List<MailBoxSchedProfile> mailboxSchedProfiles;
+	private List<Processor> mailboxProcessors;
 
 	public MailBox() {
 	}
@@ -128,29 +128,16 @@ public class MailBox implements Identifiable {
 		return mailboxProperty;
 	}
 
-	// bi-directional many-to-one association to MailBoxSchedProfile
-	@OneToMany(mappedBy = "mailbox", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH },
+	// bi-directional many-to-one association to MailBoxProcessor
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+			CascadeType.REMOVE, CascadeType.REFRESH },
 			fetch = FetchType.EAGER)
-	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
-		return this.mailboxSchedProfiles;
+	public List<Processor> getMailboxProcessors() {
+		return this.mailboxProcessors;
 	}
 
-	public void setMailboxSchedProfiles(List<MailBoxSchedProfile> mailboxSchedProfiles) {
-		this.mailboxSchedProfiles = mailboxSchedProfiles;
-	}
-
-	public MailBoxSchedProfile addMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		getMailboxSchedProfiles().add(mailboxSchedProfile);
-		mailboxSchedProfile.setMailbox(this);
-
-		return mailboxSchedProfile;
-	}
-
-	public MailBoxSchedProfile removeMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		getMailboxSchedProfiles().remove(mailboxSchedProfile);
-		mailboxSchedProfile.setMailbox(null);
-
-		return mailboxSchedProfile;
+	public void setMailboxProcessors(List<Processor> mailboxProcessors) {
+		this.mailboxProcessors = mailboxProcessors;
 	}
 
 	@Override

@@ -142,7 +142,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processorDTO.setType(processorType);
 		processorDTO.setJavaScriptURI(javaScriptURI);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		processorDTO.setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
+		// processorDTO.setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = new AddProcessorToMailboxRequestDTO();
 		addProcessorDTO.setProcessor(processorDTO);
