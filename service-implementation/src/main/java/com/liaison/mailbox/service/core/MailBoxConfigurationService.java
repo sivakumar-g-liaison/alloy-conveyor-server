@@ -305,32 +305,19 @@ public class MailBoxConfigurationService {
 	
 	public FileInfo getFileDetail(File file) {
 
-		 
-
         FileInfo info = new FileInfo();
-
         info.setRoleName(file.getName());
-
         info.setRoleId(file.getName());
-
         info.setChildren(new ArrayList<FileInfo>());
-
-
 
         if (file.isDirectory() && file.list().length > 0) {
 
-
-
               for (File f : file.listFiles()) {
-
                     info.getChildren().add(getFileDetail(f));
-
               }
-
         }
 
         return info;
-
   }
 
 
