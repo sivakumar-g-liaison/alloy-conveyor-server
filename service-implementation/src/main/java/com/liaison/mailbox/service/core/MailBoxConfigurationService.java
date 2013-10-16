@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.FileInfo;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
@@ -298,6 +300,39 @@ public class MailBoxConfigurationService {
 					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
-
+		
 	}
+	
+	public FileInfo getFileDetail(File file) {
+
+		 
+
+        FileInfo info = new FileInfo();
+
+        info.setRoleName(file.getName());
+
+        info.setRoleId(file.getName());
+
+        info.setChildren(new ArrayList<FileInfo>());
+
+
+
+        if (file.isDirectory() && file.list().length > 0) {
+
+
+
+              for (File f : file.listFiles()) {
+
+                    info.getChildren().add(getFileDetail(f));
+
+              }
+
+        }
+
+        return info;
+
+  }
+
+
+
 }

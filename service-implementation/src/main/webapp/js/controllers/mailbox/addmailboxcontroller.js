@@ -1,5 +1,5 @@
-var rest = myApp.controller('AddMailBoxCntrlr', ['$scope','$filter','$location','$log',
-    function ($scope,$filter,$location,$log) {
+var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location', '$log',
+    function ($scope, $filter, $location, $log) {
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
@@ -17,8 +17,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope','$filter','$location',
                 mailBox: {}
             }
         };
-        
-           $scope.mailBox = {
+
+        $scope.mailBox = {
             guid: "",
             name: "",
             description: "",
@@ -29,106 +29,117 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope','$filter','$location',
 
         $scope.enumstats = [
             'ACTIVE',
-            'INACTIVE'            
+            'INACTIVE'
         ];
 
         addRequest.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
-        
+
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'assignuser', 'inputfolder', 'globalstatus', 'filerenameformat', 'retrycountglobal'];
         //Data from server
         $scope.allStaticProperties = ['assignuser', 'inputfolder', 'globalstatus', 'filerenameformat', 'retrycountglobal'];
-        
+
         //Data from server
         $scope.mailBoxProperties = [{
-                name: '',
-                value: '',
-                 allowAdd:true
-             }];
+            name: '',
+            value: '',
+            allowAdd: true
+        }];
 
         // Loads the details initially if edit
         $scope.load = function () {
-            
+
             if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On               
-               
+
                 $scope.isMailBoxEdit = true;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 //$scope.sharedService.setProperty('test');
                 $scope.restService.get($scope.base_url + 'mailbox/' + $scope.mailBoxId, //Get mail box Data
-                                          function (data) {
-                                                $scope.mailBox.guid = $scope.mailBoxId;
-                                                $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
-                                                $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-                                                (data.getMailBoxResponse.mailBox.status === 'ACTIVE' || 
-                                                                      data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') 
-                                                             ? $scope.mailBox.status = $scope.enumstats[0] 
-                                                             : $scope.mailBox.status = $scope.enumstats[1];                                                
-                                                $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
-                                                $scope.mailBoxProperties.splice(0,1); //Removing now so that the add new option always shows below the available properties
-                                                for(var i =0;i<data.getMailBoxResponse.mailBox.properties.length;i++){
-                                                  $scope.mailBoxProperties.push ({
-                                                    name:data.getMailBoxResponse.mailBox.properties[i].name,
-                                                    value:data.getMailBoxResponse.mailBox.properties[i].value,
-                                                    allowAdd: false
-                                                  }); 
-                                                  
-                                                  var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(data.getMailBoxResponse.mailBox.properties[i].name);
-                                                  $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-                                                };
-                                                $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
-                                                                                name: '',
-                                                                                value: '',
-                                                                                allowAdd: true
-                                                                                 });
-                                      }
-                               );
-                       }
-             };
-             
+                    function (data) {
+                        $scope.mailBox.guid = $scope.mailBoxId;
+                        $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
+                        $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
+                        (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
+                            data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.mailBox.status = $scope.enumstats[0] : $scope.mailBox.status = $scope.enumstats[1];
+                        $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
+                        $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
+                        for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
+                            $scope.mailBoxProperties.push({
+                                name: data.getMailBoxResponse.mailBox.properties[i].name,
+                                value: data.getMailBoxResponse.mailBox.properties[i].value,
+                                allowAdd: false
+                            });
+
+                            var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(data.getMailBoxResponse.mailBox.properties[i].name);
+                            $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                        };
+                        $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
+                            name: '',
+                            value: '',
+                            allowAdd: true
+                        });
+                    }
+                );
+            }
+        };
+
         $scope.load();
 
 
         $scope.saveForm = function () {
-    
+
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
-             var len = $scope.mailBoxProperties.length;
-            for (var i = 0; i < len-1; i++) { 
-                $scope.mailBox.properties.push ({
-                                                    name:$scope.mailBoxProperties[i].name,
-                                                    value:$scope.mailBoxProperties[i].value,
-                                                   
-                                                  });                               
-                            }
-            
+            var len = $scope.mailBoxProperties.length;
+            for (var i = 0; i < len - 1; i++) {
+                $scope.mailBox.properties.push({
+                    name: $scope.mailBoxProperties[i].name,
+                    value: $scope.mailBoxProperties[i].value,
+
+                });
+            }
+
             if ($scope.isMailBoxEdit) {
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;
                 $log.info($filter('json')(editReq));
                 $scope.restService.put($scope.base_url + 'mailbox/' + $scope.mailBoxId, $filter('json')(editReq),
-                                             function (data, status) { 
-                                                     alert(data.reviseMailBoxResponse.response.message);
-                                                     
-                                                  }
-                                       );
+                    function (data, status) {
+
+                        if (status === 200) {
+                            alert(data.reviseMailBoxResponse.response.message);
+                        }
+                        $scope.mailBox.properties = [];
+                    }
+                );
             } else {
                 $scope.addRequest.addMailBoxRequest.mailBox = $scope.mailBox;
-                 $log.info($filter('json')(addRequest));
+                $log.info($filter('json')(addRequest));
                 $scope.restService.post($scope.base_url + 'mailbox', $filter('json')(addRequest),
-                                            function (data, status) {                                                
-                                                alert(data.addMailBoxResponse.response.message);
-                                            }
-                                        );
-             }
+                    function (data, status) {
+
+                        if (status === 200) {
+                            alert(data.addMailBoxResponse.response.message);
+                        }
+                        $scope.mailBox.properties = [];
+
+                    }
+                );
+            }
         };
 
         $scope.doCancel = function () {
-               var response = confirm("Are you  sure you want to cancel the Operation?");
-               if (response === true) {               
+            var response = confirm("Are you  sure you want to cancel the Operation?");
+            if (response === true) {
                 $location.path('/mailbox/getMailBox');
-                }
-            };
+            }
+        };
+
+        $scope.addProcessor = function () {
+
+            $location.path('/processor/Processor').search('mailBoxId', $scope.mailBoxId);
+        };
 
         // Property grid
-        
+
         $scope.addedProperty = 'add new';
         $scope.disableAddNewTextBox = 'true';
         $scope.valueSelectedinSelectionBox;
