@@ -2,6 +2,7 @@ package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseD
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.ProcessorExecutionOrderComparator;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -424,6 +426,55 @@ public class ProcessorConfigurationService {
 		LOGGER.info("Exit from revise processor.");
 
 		return serviceResponse;
+	}
+
+	/**
+	 * Changing the execution order using duplicate Processor entity.The change will occur when the
+	 * incoming execution order does not match with the existing one.
+	 * 
+	 * @param request
+	 *            The revise processor request DTO.
+	 * @param config
+	 *            The Processor Configuration DAO instance
+	 * @param processor
+	 *            The Current processor Entity
+	 */
+	private void changeExecutionOrder(ReviseProcessorRequestDTO request, ProcessorConfigurationDAO config, Processor processor) {
+
+		int currentExecutionOrder = processor.getExecutionOrder();
+		int inputExecution = request.getProcessor().getExecutionOrder();
+
+		if (inputExecution != 0 && currentExecutionOrder != inputExecution) {
+
+			// Logic for updating execution order using original Processor
+			// entity
+			// List<Processor> processorList = processor.getMailboxSchedProfile().getProcessors();
+
+			// Need to add entity objects in another list because calling
+			// remove() on original
+			// list causes entity object removal
+			List<Processor> procs = new ArrayList<Processor>();
+			// procs.addAll(processorList);
+
+			// TODO When we use order by, we are facing NPE in JPA level. Need
+			// to look into
+			// that.
+			Collections.sort(procs, new ProcessorExecutionOrderComparator());
+
+			// Changing the processor entity as per given one. This
+			// rearrangement taken care by
+			// arraylist.
+			Processor procsrToSwap = procs.get(currentExecutionOrder - 1);
+			procs.remove(currentExecutionOrder - 1);
+			procs.add(inputExecution - 1, procsrToSwap);
+
+			// Changing the execution order
+			int index = 0;
+			for (Processor procsr : procs) {
+				procsr.setExecutionOrder(++index);
+				config.merge(procsr);
+			}
+		}
 	}
 
 	/**

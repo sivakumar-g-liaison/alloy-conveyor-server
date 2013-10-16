@@ -18,14 +18,14 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class MailBoxResponseDTO {
 
+	private String guid;
+
 	public MailBoxResponseDTO() { // Added for Deserialization
 	}
 
 	public MailBoxResponseDTO(String guid) {
 		this.guid = guid;
 	}
-
-	private String guid;
 
 	public String getGuid() {
 		return guid;
