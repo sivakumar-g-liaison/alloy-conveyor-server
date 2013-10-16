@@ -10,14 +10,23 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
+import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 
@@ -35,7 +44,7 @@ public class MailBoxDTO {
 	private Integer serviceInstId;
 	private String shardKey;
 	private List<PropertyDTO> properties;
-	private List<ProfileDTO> profiles;
+	private List<MailBoxProcessorResponseDTO> processors;
 
 	public String getGuid() {
 		return guid;
@@ -100,17 +109,17 @@ public class MailBoxDTO {
 		this.properties = properties;
 	}
 
-	public List<ProfileDTO> getProfiles() {
+	public List<MailBoxProcessorResponseDTO> getProcessors() {
 
-		if (null == profiles) {
-			profiles = new ArrayList<>();
+		if (null == processors) {
+			processors = new ArrayList<>();
 		}
 
-		return profiles;
+		return processors;
 	}
 
-	public void setProfiles(List<ProfileDTO> profiles) {
-		this.profiles = profiles;
+	public void setProcessors(List<MailBoxProcessorResponseDTO> processors) {
+		this.processors = processors;
 	}
 
 	/**
@@ -150,8 +159,15 @@ public class MailBoxDTO {
 	 * 
 	 * @param mailBox
 	 *            The MailBox Entity
+	 * @throws SymmetricAlgorithmException
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
-	public void copyFromEntity(MailBox mailBox) {
+	public void copyFromEntity(MailBox mailBox) throws JsonParseException, JsonMappingException, JAXBException, IOException,
+			MailBoxConfigurationServicesException, SymmetricAlgorithmException {
 
 		this.setGuid(mailBox.getPguid());
 		this.setName(mailBox.getMbxName());
@@ -174,15 +190,13 @@ public class MailBoxDTO {
 			this.getProperties().add(propertyDTO);
 		}
 
-		ProfileDTO profile = null;
-		/*
-		 * MailBoxProcessorResponseDTO processorDTO = null; for (MailBoxSchedProfile schedProfile :
-		 * mailBox.getMailboxSchedProfiles()) { profile = new ProfileDTO();
-		 * profile.copyFromEntity(schedProfile.getScheduleProfilesRef()); for (Processor processor :
-		 * schedProfile.getProcessors()) { processorDTO = new MailBoxProcessorResponseDTO();
-		 * processorDTO.copyFromEntity(processor); profile.getProcessors().add(processorDTO); }
-		 * this.getProfiles().add(profile); }
-		 */
+		MailBoxProcessorResponseDTO prcsrDTO = null;
+		for (Processor prcsr : mailBox.getMailboxProcessors()) {
+
+			prcsrDTO = new MailBoxProcessorResponseDTO();
+			prcsrDTO.copyFromEntity(prcsr);
+			this.getProcessors().add(prcsrDTO);
+		}
 
 	}
 }

@@ -28,6 +28,7 @@ import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
+import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -50,10 +51,11 @@ public class ProcessorDTO {
 	private String status;
 	private String protocol;
 	private String linkedMailboxId;
-	private List<String> linkedProfilesId;
+	private List<String> linkedProfiles;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
 	private List<PropertyDTO> dynamicProperties;
+	private List<ProfileDTO> profiles;
 	private int executionOrder;
 
 	public ProcessorDTO() {
@@ -180,12 +182,24 @@ public class ProcessorDTO {
 		this.executionOrder = executionOrder;
 	}
 
-	public List<String> getLinkedProfilesId() {
-		return linkedProfilesId;
+	public List<String> getLinkedProfiles() {
+		return linkedProfiles;
 	}
 
-	public void setLinkedProfilesId(List<String> linkedProfilesId) {
-		this.linkedProfilesId = linkedProfilesId;
+	public void setLinkedProfiles(List<String> linkedProfiles) {
+		this.linkedProfiles = linkedProfiles;
+	}
+
+	public List<ProfileDTO> getProfiles() {
+
+		if (null == profiles) {
+			profiles = new ArrayList<>();
+		}
+		return profiles;
+	}
+
+	public void setProfiles(List<ProfileDTO> profiles) {
+		this.profiles = profiles;
 	}
 
 	/**
@@ -346,5 +360,17 @@ public class ProcessorDTO {
 
 		// Set protocol
 		this.setProtocol(Protocol.findByCode(processor.getProcsrProtocol()).name());
+
+		if (null != processor.getScheduleProfileProcessors()) {
+
+			ProfileDTO profile = null;
+			for (ScheduleProfileProcessor scheduleProfileProcessor : processor.getScheduleProfileProcessors()) {
+
+				profile = new ProfileDTO();
+				profile.copyFromEntity(scheduleProfileProcessor.getScheduleProfilesRef());
+				this.getProfiles().add(profile);
+			}
+
+		}
 	}
 }

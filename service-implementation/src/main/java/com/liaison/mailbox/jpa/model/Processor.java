@@ -23,6 +23,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -61,7 +63,7 @@ public class Processor implements Identifiable {
 	private List<Folder> folders;
 	private List<ProcessorProperty> dynamicProperties;
 
-	private List<MailBoxProcessorLink> mailboxProcessors;
+	private MailBox mailbox;
 	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
 
 	public Processor() {
@@ -194,15 +196,15 @@ public class Processor implements Identifiable {
 		return folder;
 	}
 
-	// bi-directional many-to-one association to MailBoxProcessor
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<MailBoxProcessorLink> getMailboxProcessors() {
-		return this.mailboxProcessors;
+	// bi-directional many-to-one association to MailBox
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
+	public MailBox getMailbox() {
+		return this.mailbox;
 	}
 
-	public void setMailboxProcessors(List<MailBoxProcessorLink> mailboxProcessors) {
-		this.mailboxProcessors = mailboxProcessors;
+	public void setMailbox(MailBox mailbox) {
+		this.mailbox = mailbox;
 	}
 
 	// bi-directional many-to-one association to ScheduleProfileProcessor
@@ -296,7 +298,7 @@ public class Processor implements Identifiable {
 	@Transient
 	public List<String> getEmailAddress() {
 
-		MailBox mailBox = getMailboxProcessors().get(0).getMailbox();
+		MailBox mailBox = getMailbox();
 		List<MailBoxProperty> properties = mailBox.getMailboxProperties();
 
 		if (null != properties) {
@@ -331,19 +333,6 @@ public class Processor implements Identifiable {
 			this.setScheduleProfileProcessors(scheduleProfileProcessors);
 		}
 
-	}
-
-	@Transient
-	public void addMailBoxToProcessor(MailBox mailBox) {
-
-		MailBoxProcessorLink mailBoxProcessor = new MailBoxProcessorLink();
-		mailBoxProcessor.setPguid(MailBoxUtility.getGUID());
-		mailBoxProcessor.setMailbox(mailBox);
-
-		List<MailBoxProcessorLink> processors = new ArrayList<>();
-		processors.add(mailBoxProcessor);
-
-		this.setMailboxProcessors(processors);
 	}
 
 }

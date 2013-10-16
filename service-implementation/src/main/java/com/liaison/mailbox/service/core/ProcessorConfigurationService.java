@@ -27,6 +27,7 @@ import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
+import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
@@ -140,33 +141,47 @@ public class ProcessorConfigurationService {
 			Processor processor)
 			throws MailBoxConfigurationServicesException {
 
-		List<String> linkedProfilesId = null;
+		List<String> linkedProfiles = null;
 		if (null == reviseRequest) {
-			linkedProfilesId = addRequest.getProcessor().getLinkedProfilesId();
+			linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
 		} else {
-			linkedProfilesId = reviseRequest.getProcessor().getLinkedProfilesId();
+			linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
 		}
 
-		Set<ScheduleProfilesRef> profiles = new HashSet<>();
-		if (null != linkedProfilesId && !linkedProfilesId.isEmpty()) {
+		Set<ScheduleProfilesRef> scheduleProfilesRef = new HashSet<>();
+		if (null != linkedProfiles && !linkedProfiles.isEmpty()) {
 
 			ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
 			ScheduleProfilesRef scheduleProfile = null;
-			for (String id : linkedProfilesId) {
+			for (String profileName : linkedProfiles) {
 
-				scheduleProfile = scheduleProfileDAO.find(ScheduleProfilesRef.class, id);
+				scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
 				if (scheduleProfile == null) {
-					throw new MailBoxConfigurationServicesException(Messages.PROFILE_DOES_NOT_EXIST, id);
+					throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName);
 				}
 
-				profiles.add(scheduleProfile);
+				scheduleProfilesRef.add(scheduleProfile);
 			}
 
 		}
 
 		// Creates relationship processor and schedprofile.
-		if (!profiles.isEmpty()) {
-			processor.addProfilesToProcessor(profiles);
+		if (!scheduleProfilesRef.isEmpty()) {
+
+			List<ScheduleProfileProcessor> scheduleProfileProcessors = new ArrayList<>();
+			ScheduleProfileProcessor profileProcessor = null;
+			for (ScheduleProfilesRef profile : scheduleProfilesRef) {
+
+				profileProcessor = new ScheduleProfileProcessor();
+				profileProcessor.setPguid(MailBoxUtility.getGUID());
+				profileProcessor.setScheduleProfilesRef(profile);
+				scheduleProfileProcessors.add(profileProcessor);
+			}
+
+			if (!scheduleProfileProcessors.isEmpty()) {
+				processor.setScheduleProfileProcessors(scheduleProfileProcessors);
+			}
+
 		}
 	}
 
@@ -193,7 +208,8 @@ public class ProcessorConfigurationService {
 		if (null == mailBox) {
 			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxId);
 		}
-		processor.addMailBoxToProcessor(mailBox);
+		processor.setMailbox(mailBox);
+
 	}
 
 	/**
@@ -359,7 +375,7 @@ public class ProcessorConfigurationService {
 			}
 
 			// validates the given processor is belongs to given mailbox
-			validateProcessorBelongToMbx(mailBoxId, processor);
+			// validateProcessorBelongToMbx(mailBoxId, processor);
 
 			if (processor.getFolders() != null) {
 				processor.getFolders().clear();
@@ -473,7 +489,7 @@ public class ProcessorConfigurationService {
 	private void validateProcessorBelongToMbx(String mailBoxGuid, Processor processor)
 			throws MailBoxConfigurationServicesException {
 
-		MailBox mbx = processor.getMailboxProcessors().get(0).getMailbox();
+		MailBox mbx = processor.getMailbox();
 		if (!mailBoxGuid.equals(mbx.getPrimaryKey())) {
 			throw new MailBoxConfigurationServicesException(Messages.PROC_DOES_NOT_BELONG_TO_MBX);
 		}

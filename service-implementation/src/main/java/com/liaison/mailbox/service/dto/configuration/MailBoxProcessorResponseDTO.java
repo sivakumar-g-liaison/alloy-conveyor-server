@@ -10,7 +10,11 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 
 /**
  * Data Transfer Object for processor details in MailBox.
@@ -22,6 +26,8 @@ public class MailBoxProcessorResponseDTO {
 	private String guid;
 	private String name;
 	private String type;
+	private String protocol;
+	private List<ProfileDTO> profiles;
 
 	public String getGuid() {
 		return guid;
@@ -47,10 +53,44 @@ public class MailBoxProcessorResponseDTO {
 		this.type = type;
 	}
 
+	public List<ProfileDTO> getProfiles() {
+
+		if (null == profiles) {
+			profiles = new ArrayList<>();
+		}
+
+		return profiles;
+	}
+
+	public void setProfiles(List<ProfileDTO> profiles) {
+		this.profiles = profiles;
+	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
 	public void copyFromEntity(Processor processor) {
 
 		this.setGuid(processor.getPguid());
 		this.setType(processor.getProcessorType().name());
 		this.setName(processor.getProcsrName());
+		this.setProtocol(processor.getProcsrProtocol());
+
+		if (null != processor.getScheduleProfileProcessors()) {
+
+			ProfileDTO profile = null;
+			for (ScheduleProfileProcessor scheduleProfileProcessor : processor.getScheduleProfileProcessors()) {
+
+				profile = new ProfileDTO();
+				profile.copyFromEntity(scheduleProfileProcessor.getScheduleProfilesRef());
+				this.getProfiles().add(profile);
+			}
+
+		}
 	}
 }

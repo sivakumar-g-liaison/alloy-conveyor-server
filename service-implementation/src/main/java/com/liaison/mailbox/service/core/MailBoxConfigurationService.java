@@ -10,12 +10,18 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
@@ -100,8 +106,14 @@ public class MailBoxConfigurationService {
 	 * @param guid
 	 *            The guid of the mailbox.
 	 * @return The responseDTO.
+	 * @throws SymmetricAlgorithmException
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
-	public GetMailBoxResponseDTO getMailBox(String guid) {
+	public GetMailBoxResponseDTO getMailBox(String guid) throws JsonParseException, JsonMappingException, JAXBException,
+			IOException, SymmetricAlgorithmException {
 
 		LOG.info("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);

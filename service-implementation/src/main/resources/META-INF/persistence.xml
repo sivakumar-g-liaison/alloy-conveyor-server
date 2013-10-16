@@ -15,7 +15,6 @@
 		<class>com.liaison.mailbox.jpa.model.Processor</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
-		<class>com.liaison.mailbox.jpa.model.MailBoxProcessorLink</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
 		
 		<properties>

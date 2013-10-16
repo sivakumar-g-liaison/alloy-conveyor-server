@@ -43,7 +43,7 @@ public class MailBox implements Identifiable {
 	private BigDecimal serviceInstId;
 	private String shardKey;
 	private List<MailBoxProperty> mailboxProperties;
-	private List<MailBoxProcessorLink> mailboxProcessors;
+	private List<Processor> mailboxProcessors;
 
 	public MailBox() {
 	}
@@ -132,11 +132,11 @@ public class MailBox implements Identifiable {
 	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.REMOVE, CascadeType.REFRESH },
 			fetch = FetchType.EAGER)
-	public List<MailBoxProcessorLink> getMailboxProcessors() {
+	public List<Processor> getMailboxProcessors() {
 		return this.mailboxProcessors;
 	}
 
-	public void setMailboxProcessors(List<MailBoxProcessorLink> mailboxProcessors) {
+	public void setMailboxProcessors(List<Processor> mailboxProcessors) {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 
