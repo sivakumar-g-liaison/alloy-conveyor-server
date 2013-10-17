@@ -138,7 +138,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processorDTO.setCredentials(credetnialList);
 		processorDTO.setFolders(folderList);
 		processorDTO.setStatus(processorStatus);
-		processorDTO.setRemoteDownloaderProperties(getRemoteProcessorPropertiesString());
+		processorDTO.setRemoteProcessorProperties(getRemoteProcessorPropertiesString());
 		processorDTO.setType(processorType);
 		processorDTO.setJavaScriptURI(javaScriptURI);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());

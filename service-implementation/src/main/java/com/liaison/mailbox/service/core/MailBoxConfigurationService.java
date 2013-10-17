@@ -307,7 +307,7 @@ public class MailBoxConfigurationService {
 
         FileInfoDTO info = new FileInfoDTO();
         info.setRoleName(file.getName());
-        info.setRoleId(file.getName());
+        info.setRoleId(file.getAbsolutePath());
         info.setChildren(new ArrayList<FileInfoDTO>());
 
         if (file.isDirectory() && file.list().length > 0) {
