@@ -142,7 +142,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.addedProperty = 'add new';
         $scope.disableAddNewTextBox = 'true';
-        $scope.valueSelectedinSelectionBox={name:''};
+        $scope.valueSelectedinSelectionBox = {
+            name: ''
+        };
         $scope.tableValues = 'Not showing anything yet';
 
         $scope.gridOptionsForMailbox = {
@@ -174,20 +176,23 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             }]
         };
 
-       
+
         // adds a resource to the 'data' object
-        $scope.addRow = function (row,valueSelectedinSelectionBox,allPropsWithNovalue,gridData) {
-            
-            var index = gridData.indexOf(row.entity);            
+        $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
+
+            var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
             gridData.push({
-                    name: valueSelectedinSelectionBox.name,
-                    value: row.getProperty('value'),
-                    allowAdd: false
-                });
-                var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
+                name: valueSelectedinSelectionBox.name,
+                value: row.getProperty('value'),
+                allowAdd: false
+            });
+            var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
+
+            if (indexOfSelectedElement != -1) {
                 allPropsWithNovalue.splice(indexOfSelectedElement, 1);
-               
+            }
+
             //}
             gridData.push({
                 name: '',
@@ -197,17 +202,17 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         };
 
-        $scope.removeRow = function (row,allProps,allPropsWithNovalue,gridData) {
+        $scope.removeRow = function (row, allProps, allPropsWithNovalue, gridData) {
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
             var removedProperty = row.getProperty('name');
             var indexOfSelectedElement = allProps.indexOf(removedProperty);
             if (indexOfSelectedElement > -1) {
-               allPropsWithNovalue.push(removedProperty);
+                allPropsWithNovalue.push(removedProperty);
             }
         };
 
-        
+
 
         /*$scope.displayAllTableValues = function(){               
                 $scope.tableValues=$scope.mailBoxProperties;

@@ -1,24 +1,130 @@
-<div style="margin:10px 0 30px 0; padding:10px; background-color:#EEEEEE; border-radius:5px; font:12px Tahoma;">
-      <span><b>Selected Node</b> : {{currentNode.roleName}}</span>
-    </div>
+<style>
+  .form-row {
+	padding-bottom: .5em;
+  }
+  
+  .css-form input.ng-invalid.ng-dirty {
+	background-color: #FA787E;
+  }
+  
+  .css-form input.ng-valid.ng-dirty {
+	background-color: #78FA89;
+  }
+  
+  .gridStyle {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 903px;
+  }
+  
+  .gridStyleFolder {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 1203px;
+  }
+  
+  .gridStyleCredentials {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 1903px;
+  }
+  
+</style>
 
-    <button class="btn btn-primary" ng-click="getData()">
-      Get Tree
+<div class="container fade-in">
+  
+  <div class="form-row">
+    <h3>
+      Processors of Mailbox - MCCW
+    </h3>
+    <hr>
+  </div>
+  
+  <form name="formAddPrcsr" novalidate class="container css-form">
+    
+    <div class="span5">
+      
+      <div class="container form-row">
+        Name:&nbsp;&nbsp;&nbsp; 
+        <input type="text" ng-model="processor.name" required />
+      </div>
+      
+	  <div class="container form-row">
+        Type:&nbsp;&nbsp;&nbsp; 
+        <select ng-model="processor.type" ng-options="type for type in enumprocsrtype">
+        </select>
+      </div>
+      
+	  <div class="container form-row">
+        Status:&nbsp;&nbsp;&nbsp; 
+        <select ng-model="processor.status" ng-options="e for e in enumstats">
+        </select>
+      </div>
+	  
+	  <div class="container form-row">
+        Protocol:&nbsp;&nbsp;&nbsp; 
+        <select ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype">
+        </select>
+      </div>
+      
+    </div>
+    
+    <div class="span5">
+      
+      <div class="container form-row">
+        Description:&nbsp;&nbsp;&nbsp;
+        <textarea width="40px" height="20px" ng-model="processor.description">
+        </textarea>
+      </div>
+	  
+	  <div class="container form-row">
+        Profiles:&nbsp;&nbsp;&nbsp;
+        <select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles"></select>
+
+		<button class="btn btn-primary" ng-click="chooseProfile()"> Add >> </button>
+
+		<button class="btn btn-primary" ng-click="removeProfile()"> << Remove </button>
+		<select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles"></select>
+      </div>
+	  
+    </div>
+    
+  </form>
+  
+  <div>
+	<div>
+		Properties
+		<div class="gridStyle" ng-grid="gridOptionsForProcessor">
+		</div>
+	</div>
+    <br>
+  </div>
+  
+  <div>
+	<div>
+		Folders
+		<div class="gridStyleFolder" ng-grid="gridOptionsForProcessorFolder">
+		</div>
+	</div>
+    <br>
+  </div>
+  
+  <div>
+	<div>
+		Credentials
+		<div class="gridStyleCredentials" ng-grid="gridOptionsForProcessorCredential">
+		</div>
+	</div>
+    <br>
+  </div>
+  
+  <div class="container">
+    <button class="btn btn-primary" ng-click="doCancel()">
+      Cancel
     </button>
-	
-    <div
-      data-angular-treeview="true"
-      data-tree-model="roleList"
-      data-node-id="roleId"
-      data-node-label="roleName"
-      data-node-children="children" >
-    </div>
-</br>
-<div>
-<select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile for profile in allProfiles"></select>
-
-<button class="btn btn-primary" ng-click="chooseProfile()"> Add >> </button>
-
-<button class="btn btn-primary" ng-click="removeProfile()"> << Remove </button>
-<select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected for selected in selectedProfiles"></select>
+    <button class="btn btn-primary" ng-click="saveProcessor()" ng-disabled="formAddPrcsr.$invalid">
+      Save
+    </button>
+  </div>
+ 
 </div>
