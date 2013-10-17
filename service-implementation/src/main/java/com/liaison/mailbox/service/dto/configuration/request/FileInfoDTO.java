@@ -15,11 +15,11 @@ import java.util.List;
  * @author praveenu
  * 
  */
-public class FileInfo {
+public class FileInfoDTO {
 
 	private String roleName;
 	private String roleId;
-	private List<FileInfo> children;
+	private List<FileInfoDTO> children;
 
 	/**
 	 * @return the roleName
@@ -54,7 +54,7 @@ public class FileInfo {
 	/**
 	 * @return the children
 	 */
-	public List<FileInfo> getChildren() {
+	public List<FileInfoDTO> getChildren() {
 		return children;
 	}
 
@@ -62,7 +62,7 @@ public class FileInfo {
 	 * @param children
 	 *            the children to set
 	 */
-	public void setChildren(List<FileInfo> children) {
+	public void setChildren(List<FileInfoDTO> children) {
 		this.children = children;
 	}
 }
