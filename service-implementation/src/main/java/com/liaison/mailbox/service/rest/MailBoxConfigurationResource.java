@@ -44,7 +44,7 @@ import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.FileInfo;
+import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
@@ -649,9 +649,9 @@ public class MailBoxConfigurationResource {
             File f = new File(System.getenv().get("USERPROFILE") + File.separator + "net");
             MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
-            FileInfo info = mailbox.getFileDetail(f);
+            FileInfoDTO info = mailbox.getFileDetail(f);
 
-            List<FileInfo> infos = new ArrayList<FileInfo>();
+            List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
             infos.add(info);
             String onfo = MailBoxUtility.marshalToJSON(infos);	 
 

@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.FileInfo;
+import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
@@ -226,13 +226,11 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
 
-			/*
-			 * // Changing the status in MailBoxSchedProfile if it is avail
+			/* // Changing the status in MailBoxSchedProfile if it is avail
 			 * List<MailBoxSchedProfile> retrievedSchedProfiles =
 			 * retrievedMailBox.getMailboxSchedProfiles(); if (null != retrievedSchedProfiles) { for
 			 * (MailBoxSchedProfile schedProfile : retrievedSchedProfiles) {
-			 * schedProfile.setMbxProfileStatus(MailBoxStatus.INACTIVE.value()); } }
-			 */
+			 * schedProfile.setMbxProfileStatus(MailBoxStatus.INACTIVE.value()); } } */
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(MailBoxStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
@@ -315,12 +313,12 @@ public class MailBoxConfigurationService {
 
 	}
 
-	public FileInfo getFileDetail(File file) {
+	public FileInfoDTO getFileDetail(File file) {
 
-		FileInfo info = new FileInfo();
+		FileInfoDTO info = new FileInfoDTO();
 		info.setRoleName(file.getName());
 		info.setRoleId(file.getName());
-		info.setChildren(new ArrayList<FileInfo>());
+		info.setChildren(new ArrayList<FileInfoDTO>());
 
 		if (file.isDirectory() && file.list().length > 0) {
 
