@@ -28,9 +28,14 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
+		
             if ($scope.mailBoxName !== null && $scope.mailBoxName.length > 3) {
-                $scope.search($scope.filterOptions.filterText);
-            }
+                $scope.search();
+            } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
+                $scope.search();
+            } else {
+				$scope.mailboxes = [];
+			}
         });
 
         // Grid Setups
@@ -64,12 +69,13 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
         };
 
         // Enable the delete modal dialog
-        $scope.openDelete = function () {
+        $scope.openDelete = function (row) {
+			$scope.key = row.entity;
             $scope.deleteKey = true;
         };
 
         // calls the rest deactivate service
-        $scope.deactivateMailBox = function (key) {
+        $scope.deactivateMailBox = function () {
 
             alert($rootUrl + '/' + $scope.key.guid);
             $scope.restService.delete($rootUrl + '/' + $scope.key.guid)
@@ -89,13 +95,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
         };
 
         // Dummy Impl for edit
-        $scope.edit = function () {
-
-        	//$scope.sharedService.setProperty($scope.key.guid);
-                //alert("Here I need to know which button was selected " + $scope.key.name);
-                        $location.path('/mailbox/addMailBox').search('mailBoxId',$scope.key.guid);
-                       
-			
+        $scope.edit = function (row) {
+            $location.path('/mailbox/addMailBox').search('mailBoxId',row.entity.guid);
         };
 
         $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
@@ -136,7 +137,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
         }, true);
 
         // Customized column in the grid.
-        $scope.editableInPopup = '<i class="icon-pencil" ng-click="edit(key)"></i>  <i class="icon-trash" ng-click="openDelete()"> </i>';
+        $scope.editableInPopup = '<button class="btn" ng-click="edit(row)"><i class="icon-pencil"></i></button><button class="btn" ng-click="openDelete(row)"><i class="icon-trash"></i></button>';
 
         // Setting the grid details
         $scope.gridOptions = {
@@ -173,13 +174,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
             jqueryUITheme: false,
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
-            filterOptions: $scope.filterOptions,
-            afterSelectionChange: function (rowItem, event) {
-                if (rowItem.selected === true) {
-                    // clone key object
-                    $scope.key = JSON.parse(JSON.stringify(rowItem.entity));
-                }
-            }
+            filterOptions: $scope.filterOptions
         };
 
         // used to move add screen

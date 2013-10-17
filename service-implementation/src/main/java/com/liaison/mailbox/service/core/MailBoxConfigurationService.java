@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -272,7 +273,18 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			List<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
+			Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
+
+			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
+
+				Set<MailBox> retrievedMailBoxesUsingName = configDao.findByName(mbxName);
+				if (retrievedMailBoxes.isEmpty() && !retrievedMailBoxesUsingName.isEmpty()) {
+					retrievedMailBoxes = retrievedMailBoxesUsingName;
+				} else {
+					retrievedMailBoxes.addAll(retrievedMailBoxesUsingName);
+				}
+			}
+
 			if (null == retrievedMailBoxes || retrievedMailBoxes.isEmpty()) {
 				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, MAILBOX);
 			}
@@ -300,26 +312,24 @@ public class MailBoxConfigurationService {
 					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
-		
+
 	}
-	
+
 	public FileInfo getFileDetail(File file) {
 
-        FileInfo info = new FileInfo();
-        info.setRoleName(file.getName());
-        info.setRoleId(file.getName());
-        info.setChildren(new ArrayList<FileInfo>());
+		FileInfo info = new FileInfo();
+		info.setRoleName(file.getName());
+		info.setRoleId(file.getName());
+		info.setChildren(new ArrayList<FileInfo>());
 
-        if (file.isDirectory() && file.list().length > 0) {
+		if (file.isDirectory() && file.list().length > 0) {
 
-              for (File f : file.listFiles()) {
-                    info.getChildren().add(getFileDetail(f));
-              }
-        }
+			for (File f : file.listFiles()) {
+				info.getChildren().add(getFileDetail(f));
+			}
+		}
 
-        return info;
-  }
-
-
+		return info;
+	}
 
 }

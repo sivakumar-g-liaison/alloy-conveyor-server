@@ -152,4 +152,37 @@ public class MailBox implements Identifiable {
 	public Class getEntityClass() {
 		return this.getClass();
 	}
+
+	@Override
+	public int hashCode() {
+
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((pguid == null) ? 0 : pguid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof MailBox)) {
+			return false;
+		}
+		MailBox other = (MailBox) obj;
+		if (pguid == null) {
+			if (other.pguid != null) {
+				return false;
+			}
+		} else if (!pguid.equals(other.pguid)) {
+			return false;
+		}
+		return true;
+	}
+
 }

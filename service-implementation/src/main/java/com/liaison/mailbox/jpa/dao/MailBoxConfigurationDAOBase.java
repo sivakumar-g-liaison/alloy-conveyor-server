@@ -1,8 +1,9 @@
 package com.liaison.mailbox.jpa.dao;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -46,9 +47,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	}
 
 	@Override
-	public List<MailBox> find(String mbxName, String profName) {
+	public Set<MailBox> find(String mbxName, String profName) {
 
-		List<MailBox> mailBoxSchedProfiles = new ArrayList<MailBox>();
+		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
@@ -60,7 +61,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			Iterator<?> iter = object.iterator();
 
 			while (iter.hasNext()) {
-				mailBoxSchedProfiles.add((MailBox) iter.next());
+				mailBoxes.add((MailBox) iter.next());
 			}
 
 		} finally {
@@ -68,6 +69,32 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				em.clear();
 			}
 		}
-		return mailBoxSchedProfiles;
+		return mailBoxes;
 	}
+
+	@Override
+	public Set<MailBox> findByName(String mbxName) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		Set<MailBox> mailBoxes = new HashSet<MailBox>();
+
+		try {
+
+			List<?> object = entityManager.createNamedQuery(FIND_BY_NAME)
+					.setParameter(MBX_NAME, "%" + mbxName + "%")
+					.getResultList();
+			Iterator<?> iter = object.iterator();
+
+			while (iter.hasNext()) {
+				mailBoxes.add((MailBox) iter.next());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.clear();
+			}
+		}
+		return mailBoxes;
+	}
+
 }

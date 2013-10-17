@@ -88,14 +88,6 @@ public class ProcessorDTO {
 		this.type = type;
 	}
 
-	public RemoteProcessorPropertiesDTO getRemoteDownloaderProperties() {
-		return remoteProcessorProperties;
-	}
-
-	public void setRemoteDownloaderProperties(RemoteProcessorPropertiesDTO remoteDownloaderProperties) {
-		this.remoteProcessorProperties = remoteDownloaderProperties;
-	}
-
 	public String getJavaScriptURI() {
 		return javaScriptURI;
 	}
@@ -132,6 +124,7 @@ public class ProcessorDTO {
 		this.protocol = protocol;
 	}
 
+	@Mandatory(errorMessage = "Mailbox Id is mandatory.")
 	public String getLinkedMailboxId() {
 		return linkedMailboxId;
 	}
@@ -202,6 +195,14 @@ public class ProcessorDTO {
 		this.profiles = profiles;
 	}
 
+	public RemoteProcessorPropertiesDTO getRemoteProcessorProperties() {
+		return remoteProcessorProperties;
+	}
+
+	public void setRemoteProcessorProperties(RemoteProcessorPropertiesDTO remoteProcessorProperties) {
+		this.remoteProcessorProperties = remoteProcessorProperties;
+	}
+
 	/**
 	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
 	 * MailBoxSchedProfile and Processor. That step will be done in the service.
@@ -224,9 +225,9 @@ public class ProcessorDTO {
 			processor.setPguid(MailBoxUtility.getGUID());
 		}
 
-		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteDownloaderProperties();
+		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
 		if (null != propertiesDTO) {
-			String propertiesJSON = MailBoxUtility.marshalToJSON(this.getRemoteDownloaderProperties());
+			String propertiesJSON = MailBoxUtility.marshalToJSON(this.getRemoteProcessorProperties());
 			processor.setProcsrProperties(propertiesJSON);
 		}
 
@@ -311,7 +312,7 @@ public class ProcessorDTO {
 
 			RemoteProcessorPropertiesDTO propertiesDTO = MailBoxUtility.unmarshalFromJSON(propertyJSON,
 					RemoteProcessorPropertiesDTO.class);
-			this.setRemoteDownloaderProperties(propertiesDTO);
+			this.setRemoteProcessorProperties(propertiesDTO);
 		}
 
 		String status = processor.getProcsrStatus();
