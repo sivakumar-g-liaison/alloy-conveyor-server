@@ -8,6 +8,7 @@ var myApp = angular.module('myApp',
 		'myApp.directiveSwapPropButton',
 		'myApp.directiveSwapPropCombo',
 		'myApp.directiveCustomCell',// custom directives
+                'myApp.dynamicComponentDirectiveForName',
         'ngGrid', // angular grid
         'ui', // angular ui
         'ngSanitize', // for html-bind in ckeditor
@@ -45,6 +46,11 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider', function (
     $routeProvider.when('/mailbox/getMailBox', {
         templateUrl:'partials/mailbox/searchmailbox.html',
         controller:'SearchMailBoxCntrlr'
+    });
+    
+    $routeProvider.when('/mailbox/processor', {
+        templateUrl:'partials/processor/processor.html',
+        controller:'ProcessorCntrlr'
     });
 
     /*$routeProvider.when('/contact', {

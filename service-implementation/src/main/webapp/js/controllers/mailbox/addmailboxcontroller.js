@@ -135,14 +135,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.addProcessor = function () {
 
-            $location.path('/processor/Processor').search('mailBoxId', $scope.mailBoxId);
+            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId);
         };
 
         // Property grid
 
         $scope.addedProperty = 'add new';
         $scope.disableAddNewTextBox = 'true';
-        $scope.valueSelectedinSelectionBox;
+        $scope.valueSelectedinSelectionBox={name:''};
         $scope.tableValues = 'Not showing anything yet';
 
         $scope.gridOptionsForMailbox = {
@@ -156,14 +156,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 field: "name",
                 width: 500,
                 displayName: "Property Name",
-                cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
-                    '<div ng-switch-when="false">{{row.getProperty(col.field)}}</div>' +
-                    '<div ng-switch-when="true">\n\
-                                                                 <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticPropertiesThatAreNotAssignedValuesYet">\n\
-                                                                 <option value="">-- select--</option>\n\
-                                                                 </select> <i>or</i>\n\
-                                                                 <input type="text" ng-disabled=disableAddNewTextBox  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)" required></input>\n\
-                                                                 </div>'
+                cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} />'
             }, {
                 field: "value",
                 displayName: "Property Value",
@@ -174,50 +167,29 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 field: "allowAdd",
                 displayName: "Action",
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                    '<div ng-switch-when="true"><button ng-click="addRow(row,selectedproperty)">add</button></div>' +
-                    '<div ng-switch-when="false"><button ng-click="removeRow(row)">remove</button></div>' +
+                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)">add</button></div>' +
+                    '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)">remove</button></div>' +
                     '</div>'
 
             }]
         };
 
-        //GRID related functaions
-        $scope.shouldIShowAddTextBox = function (selectedproperty) {
-            $scope.valueSelectedinSelectionBox = selectedproperty;
-            if (selectedproperty === "add new -->") {
-                $scope.disableAddNewTextBox = false;
-                $scope.addedProperty = '';
-            } else {
-                $scope.addedProperty = 'add new';
-                $scope.disableAddNewTextBox = true;
-
-            }
-        };
-
+       
         // adds a resource to the 'data' object
-        $scope.addRow = function (row) {
-            var index = $scope.mailBoxProperties.indexOf(row.entity);
-            $scope.mailBoxProperties.splice(index, 1);
-            if ($scope.addedProperty !== 'add new') {
-
-                $scope.mailBoxProperties.push({
-                    name: $scope.addedProperty,
+        $scope.addRow = function (row,valueSelectedinSelectionBox,allPropsWithNovalue,gridData) {
+            
+            var index = gridData.indexOf(row.entity);            
+            gridData.splice(index, 1);
+            gridData.push({
+                    name: valueSelectedinSelectionBox.name,
                     value: row.getProperty('value'),
                     allowAdd: false
                 });
-                $scope.addedProperty = 'add new';
-                $scope.disableAddNewTextBox = true;
-            } else {
-
-                $scope.mailBoxProperties.push({
-                    name: $scope.valueSelectedinSelectionBox,
-                    value: row.getProperty('value'),
-                    allowAdd: false
-                });
-                var indexOfSelectedElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf($scope.valueSelectedinSelectionBox);
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfSelectedElement, 1);
-            }
-            $scope.mailBoxProperties.push({
+                var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
+                allPropsWithNovalue.splice(indexOfSelectedElement, 1);
+               
+            //}
+            gridData.push({
                 name: '',
                 value: '',
                 allowAdd: true
@@ -225,19 +197,17 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         };
 
-        $scope.removeRow = function (row) {
-            var index = $scope.mailBoxProperties.indexOf(row.entity);
-            $scope.mailBoxProperties.splice(index, 1);
+        $scope.removeRow = function (row,allProps,allPropsWithNovalue,gridData) {
+            var index = gridData.indexOf(row.entity);
+            gridData.splice(index, 1);
             var removedProperty = row.getProperty('name');
-            var indexOfSelectedElement = $scope.allStaticProperties.indexOf(removedProperty);
+            var indexOfSelectedElement = allProps.indexOf(removedProperty);
             if (indexOfSelectedElement > -1) {
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push(removedProperty);
+               allPropsWithNovalue.push(removedProperty);
             }
         };
 
-        $scope.setScopeValue = function (value) {
-            $scope.addedProperty = value;
-        };
+        
 
         /*$scope.displayAllTableValues = function(){               
                 $scope.tableValues=$scope.mailBoxProperties;

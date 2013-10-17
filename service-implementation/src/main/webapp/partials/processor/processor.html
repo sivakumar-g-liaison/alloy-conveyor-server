@@ -13,3 +13,12 @@
       data-node-label="roleName"
       data-node-children="children" >
     </div>
+</br>
+<div>
+<select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile for profile in allProfiles"></select>
+
+<button class="btn btn-primary" ng-click="chooseProfile()"> Add >> </button>
+
+<button class="btn btn-primary" ng-click="removeProfile()"> << Remove </button>
+<select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected for selected in selectedProfiles"></select>
+</div>
