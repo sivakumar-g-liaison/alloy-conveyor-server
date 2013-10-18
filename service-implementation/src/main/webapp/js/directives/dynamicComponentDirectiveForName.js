@@ -26,7 +26,11 @@ angular.module(
                                         <option value="">-- select--</option>\n\
                                         </select> <i>or</i>\n\
                                         <input type="text" ng-disabled=disableAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)" required></input>\n\
-                                        </div>',
+                                        </div>\n\
+                                        <div ng-switch-default>\n\
+                                        <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
+                                        <option value="">-- select--</option>\n\
+                                        </select></div>',
 				link: function (scope, elem, attrs) {
                                     
 					scope.$watch("allProps", function (

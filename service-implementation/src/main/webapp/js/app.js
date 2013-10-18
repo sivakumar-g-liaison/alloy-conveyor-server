@@ -9,6 +9,7 @@ var myApp = angular.module('myApp',
 		'myApp.directiveSwapPropCombo',
 		'myApp.directiveCustomCell',// custom directives
                 'myApp.dynamicComponentDirectiveForName',
+                'myApp.passwordDirective',
         'ngGrid', // angular grid
         'ui', // angular ui
         'ngSanitize', // for html-bind in ckeditor
@@ -17,7 +18,7 @@ var myApp = angular.module('myApp',
         '$strap.directives' // angular strap
     ]);
 
-myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/v1/mailbox');
+myApp.constant('rootUrl', 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox');
 
 
 // bootstrap angular
@@ -85,7 +86,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Eager load some data using simple REST client
     // *****
 
-	$rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/v1/';
+	$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/';
     $rootScope.restService = RESTService;
     
     $rootScope.sharedService = SharedService;
