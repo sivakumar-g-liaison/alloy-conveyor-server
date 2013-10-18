@@ -34,6 +34,9 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
+ * 
+ ** FTPS remote uploader to perform pull operation, also it has support methods
+ * for JavaScript.
  * @author praveenu
  * 
  */
