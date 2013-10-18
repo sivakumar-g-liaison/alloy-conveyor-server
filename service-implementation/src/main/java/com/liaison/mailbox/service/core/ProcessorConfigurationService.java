@@ -387,7 +387,7 @@ public class ProcessorConfigurationService {
 			}
 
 			// validates the given processor is belongs to given mailbox
-			// validateProcessorBelongToMbx(mailBoxId, processor);
+			validateProcessorBelongToMbx(mailBoxId, processor);
 
 			if (processor.getFolders() != null) {
 				processor.getFolders().clear();

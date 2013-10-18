@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,14 +29,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.StreamUtil;
+import com.liaison.framework.fs2.api.FS2DefaultConfiguration;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
@@ -632,37 +629,34 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
+
 	@GET
-
 	@Path("/listFile")
-
 	@Produces(MediaType.APPLICATION_JSON)
-
 	public Response getFileList() {
 
-      serviceCallCounter.addAndGet(1);
-      Response returnResponse;
-      
-      try {
+		serviceCallCounter.addAndGet(1);
+		Response returnResponse;
 
-            File f = new File(System.getenv().get("USERPROFILE") + File.separator + "net");
-            MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+		try {
 
-            FileInfoDTO info = mailbox.getFileDetail(f);
+			File file = new File(FS2DefaultConfiguration.properties.getProperty("rootDirectory"));
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
-            List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
-            infos.add(info);
-            String onfo = MailBoxUtility.marshalToJSON(infos);	 
+			FileInfoDTO info = mailbox.getFileDetail(file);
 
-            return Response.ok(onfo).header("Content-Type", MediaType.APPLICATION_JSON).build();
-      } catch (Exception e) {
-    	  
-            int f = failureCounter.addAndGet(1);
-            String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
-            LOG.error(errMsg, e);
-            returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-      }
-      return returnResponse;
+			List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
+			infos.add(info);
+			String response = MailBoxUtility.marshalToJSON(infos);
+
+			return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+		return returnResponse;
 	}
 }

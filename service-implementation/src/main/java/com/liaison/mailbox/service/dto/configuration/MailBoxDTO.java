@@ -135,6 +135,8 @@ public class MailBoxDTO {
 		mailBox.setShardKey(this.getShardKey());
 		if (null != this.getServiceInstId()) {
 			mailBox.setServiceInstId(new BigDecimal(this.getServiceInstId()));
+		} else {
+			mailBox.setServiceInstId(null);
 		}
 
 		MailBoxProperty property = null;

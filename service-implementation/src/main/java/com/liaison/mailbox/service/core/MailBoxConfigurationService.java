@@ -226,11 +226,6 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
 
-			/* // Changing the status in MailBoxSchedProfile if it is avail
-			 * List<MailBoxSchedProfile> retrievedSchedProfiles =
-			 * retrievedMailBox.getMailboxSchedProfiles(); if (null != retrievedSchedProfiles) { for
-			 * (MailBoxSchedProfile schedProfile : retrievedSchedProfiles) {
-			 * schedProfile.setMbxProfileStatus(MailBoxStatus.INACTIVE.value()); } } */
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(MailBoxStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
@@ -251,7 +246,7 @@ public class MailBoxConfigurationService {
 	}
 
 	/**
-	 * Searchs the mailbox using mailbox name and profile name.
+	 * Searches the mailbox using mailbox name and profile name.
 	 * 
 	 * @param mbxName
 	 *            The name of the mailbox
@@ -313,10 +308,17 @@ public class MailBoxConfigurationService {
 
 	}
 
+	/**
+	 * Service to list the directory structure for browse component.
+	 * 
+	 * @param file
+	 *            The root directory location
+	 * @return The FileInfoDTO
+	 */
 	public FileInfoDTO getFileDetail(File file) {
 
 		FileInfoDTO info = new FileInfoDTO();
-		info.setRoleName(file.getName());
+		info.setRoleName(file.getAbsolutePath());
 		info.setRoleId(file.getName());
 		info.setChildren(new ArrayList<FileInfoDTO>());
 

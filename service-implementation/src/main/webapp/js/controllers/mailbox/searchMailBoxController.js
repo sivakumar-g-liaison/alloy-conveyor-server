@@ -3,8 +3,8 @@
 /**
  * Controller for Configure mailbox setup search screen.
  */
-myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
-    function ($scope, $rootUrl, $location) {
+myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
+    function ($scope, $location) {
 
         $scope.title = "MailBox Profiles"; //title
 
@@ -17,8 +17,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // Loading the profile details
         $scope.loadProfiles = function () {
-
-            $scope.restService.get($rootUrl + '/profile').success(function (data) {
+            $scope.restService.get($scope.base_url + "/profile").success(function (data) {
                 $scope.profiles = data.getProfileResponse.profiles;
             }).error(function (data) {
                 alert("Failed to load profiles.");
@@ -28,14 +27,14 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
-		
+
             if ($scope.mailBoxName !== null && $scope.mailBoxName.length > 3) {
                 $scope.search();
             } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
                 $scope.search();
             } else {
-				$scope.mailboxes = [];
-			}
+                $scope.mailboxes = [];
+            }
         });
 
         // Grid Setups
@@ -55,10 +54,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // Set the paging data to grid from server object
         $scope.setPagingData = function (data, page, pageSize) {
-		
-			if (data === null || data.length <= 0) {
-				alert('No data matches the given conditions.');
-			}
+
+            if (data === null || data.length <= 0) {
+                alert('No data matches the given conditions.');
+            }
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
             $scope.mailboxes = pagedData;
@@ -70,15 +69,14 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // Enable the delete modal dialog
         $scope.openDelete = function (row) {
-			$scope.key = row.entity;
+            $scope.key = row.entity;
             $scope.deleteKey = true;
         };
 
         // calls the rest deactivate service
         $scope.deactivateMailBox = function () {
 
-            alert($rootUrl + '/' + $scope.key.guid);
-            $scope.restService.delete($rootUrl + '/' + $scope.key.guid)
+            $scope.restService.delete($scope.base_url + "/" +  $scope.key.guid)
                 .success(function (data, status) {
                     alert(data.deactivateMailBoxResponse.response.message);
                     $scope.search();
@@ -96,7 +94,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         // Dummy Impl for edit
         $scope.edit = function (row) {
-            $location.path('/mailbox/addMailBox').search('mailBoxId',row.entity.guid);
+            $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid);
         };
 
         $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
@@ -118,7 +116,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
                 mbxName = $scope.mailBoxName;
             }
 
-            $scope.restService.get($rootUrl + '?name=' + mbxName + '&profile=' + profName)
+            $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName)
                 .success(function (data) {
                     $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
                 });
@@ -126,6 +124,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
 
         $scope.$watch('pagingOptions', function (newVal, oldVal) {
             if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+                $scope.search();
+            }
+            if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
                 $scope.search();
             }
         }, true);
@@ -178,8 +179,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', 'rootUrl', '$location',
         };
 
         // used to move add screen
-		$scope.goto = function (hash) { 
-			$location.path(hash);
-		}
+        $scope.goto = function (hash) {
+            $location.path(hash);
+        };
 
 }]);

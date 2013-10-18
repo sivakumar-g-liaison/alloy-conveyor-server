@@ -55,7 +55,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 $scope.procsBtnStatus = false;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 //$scope.sharedService.setProperty('test');
-                $scope.restService.get($scope.base_url + 'mailbox/' + $scope.mailBoxId, //Get mail box Data
+                $scope.restService.get($scope.base_url + "/"+ $scope.mailBoxId, //Get mail box Data
                     function (data) {
                         $scope.mailBox.guid = $scope.mailBoxId;
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
@@ -102,7 +102,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             if ($scope.isMailBoxEdit) {
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;
                 $log.info($filter('json')(editReq));
-                $scope.restService.put($scope.base_url + 'mailbox/' + $scope.mailBoxId, $filter('json')(editReq),
+                
+                $scope.restService.put($scope.base_url + "/"+ $scope.mailBoxId, $filter('json')(editReq),
                     function (data, status) {
 
                         if (status === 200) {
@@ -114,7 +115,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             } else {
                 $scope.addRequest.addMailBoxRequest.mailBox = $scope.mailBox;
                 $log.info($filter('json')(addRequest));
-                $scope.restService.post($scope.base_url + 'mailbox', $filter('json')(addRequest),
+                $scope.restService.post($scope.base_url, $filter('json')(addRequest),
                     function (data, status) {
 
                         if (status === 200) {

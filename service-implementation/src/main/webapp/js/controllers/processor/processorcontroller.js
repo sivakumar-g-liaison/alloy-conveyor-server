@@ -3,7 +3,7 @@ var rest = myApp.controller(
         '$filter', '$location', '$log',
         function ($scope, $filter,
             $location, $log) {
-
+    	
             // To be Populated
             $scope.mailBoxId;
 
@@ -266,7 +266,7 @@ var rest = myApp.controller(
 
             $scope.readAllProcessors = function () {
 
-                $scope.restService.get($scope.base_url + 'mailbox/' + $location.search().mailBoxId, //Get mail box Data
+                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId, //Get mail box Data
                     function (data) {
 
                         $scope.processorList = data.getMailBoxResponse.mailBox.processors;
@@ -316,8 +316,7 @@ var rest = myApp.controller(
                 $scope.isEdit = true;
                 var procsrId = row.getProperty('guid');
 
-                $scope.restService.get($scope.base_url +
-                    'mailbox/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
+                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
 
                         $log.info($filter('json')(data));
@@ -411,8 +410,7 @@ var rest = myApp.controller(
 
             $scope.readAllProfiles = function () {
 
-                $scope.restService.get($scope.base_url +
-                    'mailbox/profile', //Get mail box Data
+                $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                     function (data) {
 
                         $scope.allProfiles = data.getProfileResponse.profiles;
@@ -423,8 +421,7 @@ var rest = myApp.controller(
 
             $scope.loadBrowseData = function () {
 
-                $scope.restService.get($scope.base_url +
-                    'mailbox/listFile', //Get mail box Data
+                $scope.restService.get($scope.base_url + '/listFile', //Get mail box Data
                     function (data) {
 
                         $scope.roleList = data.ArrayList;
@@ -681,7 +678,7 @@ var rest = myApp.controller(
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
 
                     $log.info($filter('json')(editRequest));
-                    $scope.restService.put($scope.base_url + 'mailbox/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
+                    $scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
                         function (data, status) {
 
                             if (status === 200) {
@@ -698,7 +695,7 @@ var rest = myApp.controller(
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
 
                     $log.info($filter('json')(addRequest));
-                    $scope.restService.post($scope.base_url + 'mailbox/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
+                    $scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
                         function (data, status) {
 
                             if (status === 200) {

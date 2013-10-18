@@ -18,9 +18,6 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'angularTreeview' // for tree view
 ]);
 
-myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/v1/mailbox');
-
-
 // bootstrap angular
 myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     function ($routeProvider, $locationProvider, $httpProvider) {
@@ -55,23 +52,28 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             controller: 'ProcessorCntrlr'
         });
 
-        /*$routeProvider.when('/contact', {
-        templateUrl:'partials/contact.html'
-    });
-    $routeProvider.when('/about', {
-        templateUrl:'partials/about.html'
-    });
-    $routeProvider.when('/faq', {
-        templateUrl:'partials/faq.html'
-    });*/
+		$routeProvider.when('/profiles/addProfiles', {
+	        templateUrl:'partials/profile/addprofile.html',
+	        controller:'ProfileCntrlr'
+	    });
 
-        // note that to minimize playground impact on app.js, we
-        // are including just this simple route with a parameterized 
-        // partial value (see playground.js and playground.html)
-        /*$routeProvider.when('/playground/:widgetName', {
-        templateUrl:'playground/playground.html',
-        controller:'PlaygroundCtrl'
-    });*/
+	    /*$routeProvider.when('/contact', {
+	        templateUrl:'partials/contact.html'
+	    });
+	    $routeProvider.when('/about', {
+	        templateUrl:'partials/about.html'
+	    });
+	    $routeProvider.when('/faq', {
+	        templateUrl:'partials/faq.html'
+	    });*/
+	
+	        // note that to minimize playground impact on app.js, we
+	        // are including just this simple route with a parameterized 
+	        // partial value (see playground.js and playground.html)
+	        /*$routeProvider.when('/playground/:widgetName', {
+	        templateUrl:'playground/playground.html',
+	        controller:'PlaygroundCtrl'
+	    });*/
 
         // by default, redirect to site root
         $routeProvider.otherwise({
@@ -88,7 +90,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Eager load some data using simple REST client
     // *****
 
-    $rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/v1/';
+    $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
     $rootScope.restService = RESTService;
 
     $rootScope.sharedService = SharedService;
