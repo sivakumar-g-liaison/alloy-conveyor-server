@@ -94,7 +94,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 		HttpRemoteDownloader downloader = new HttpRemoteDownloader(processor);
-		HTTPRequest request = downloader.getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest)downloader.getClientWithInjectedConfiguration();
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
 	}

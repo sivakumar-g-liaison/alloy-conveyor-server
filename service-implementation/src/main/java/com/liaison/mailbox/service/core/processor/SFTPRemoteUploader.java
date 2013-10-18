@@ -9,9 +9,11 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -21,10 +23,13 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.framework.fs2.api.FS2Exception;
+import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -45,6 +50,117 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	public SFTPRemoteUploader(Processor processor) {
 		super(processor);
 	}
+	
+	/**
+	 * Java method to inject the G2SFTP configurations
+	 * 
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws JAXBException
+	 * @throws MailBoxConfigurationServicesException
+	 * 
+	 */
+	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException {
+
+		String json = ServiceUtils.readFileFromClassPath("requests/processor/sftp.json");
+		// Convert the json string to DTO
+		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
+				json, RemoteProcessorPropertiesDTO.class);
+
+		G2SFTPClient sftpRequest = new G2SFTPClient();
+		sftpRequest.setURI(properties.getUrl());
+		sftpRequest.setDiagnosticLogger(LOGGER);
+		sftpRequest.setCommandLogger(LOGGER);
+		sftpRequest.setTimeout(properties.getConnectionTimeout());
+		sftpRequest.setRetryInterval(properties.getRetryInterval());
+		sftpRequest.setRetryCount(properties.getRetryAttempts());
+		sftpRequest.setUser("g2testusr");
+		sftpRequest.setPassword("mpxEukvePd4V");
+		sftpRequest.setStrictHostChecking(false);
+		//sftpRequest.setKnownHosts("C:/Documents and Settings/praveenu/.ssh/known_hosts");
+		
+		return sftpRequest;
+		
+	}
+	
+	/**
+	 * Java method to execute the SFTPrequest to upload the file or folder
+	 * 
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws JAXBException
+	 * @throws SftpException 
+	 * @throws URISyntaxException 
+	 * @throws FS2Exception 
+	 * @throws MailBoxServicesException
+	 * 
+	 */
+	private void executeRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException, 
+									FS2Exception, MailBoxServicesException, SftpException{
+		
+		G2SFTPClient sftpRequest =getClientWithInjectedConfiguration();
+		sftpRequest.connect();
+		
+		if (sftpRequest.openChannel()) {
+		
+			sftpRequest.changeDirectory(getWriteResponseURI());
+			String path = getPayloadURI();
+			File root = new File(path);
+			
+			if(root.isDirectory()){
+				uploadDirectory(sftpRequest,path,"");
+			}else{
+				InputStream inputStream = new FileInputStream(root);
+				sftpRequest.putFile(root.getPath(), inputStream);
+			}
+		}
+		sftpRequest.disconnect();
+	}
+	
+	/**
+	 * Java method to upload the file or folder
+	 * 
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws SftpException 
+	 * 
+	 */
+	public static void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir)
+			throws IOException, LiaisonException, SftpException {
+
+		File localDir = new File(localParentDir);
+		File[] subFiles = localDir.listFiles();
+		if (subFiles != null && subFiles.length > 0) {
+			for (File item : subFiles) {
+				String remoteFilePath = remoteParentDir
+						+ "/" + item.getName();
+				if (remoteParentDir.equals("")) {
+					remoteFilePath = item.getName();
+				}
+
+				if (item.isFile()) {
+					// upload the file
+					String localFilePath = item.getAbsolutePath();
+					File localFile = new File(localFilePath);
+					InputStream inputStream = new FileInputStream(localFile);
+					sftpRequest.putFile(new File(remoteFilePath).getPath(), inputStream);
+					
+				} else {
+					// create directory on the server
+					sftpRequest.getNative().mkdir(new File(remoteFilePath).getPath());
+					// upload the sub directory
+					String parent = remoteParentDir + "/" + item.getName();
+					if (remoteParentDir.equals("")) {
+						parent = item.getName();
+					}
+
+					localParentDir = item.getAbsolutePath();
+					uploadDirectory(sftpRequest, localParentDir,
+							parent);
+				}
+			}
+		}
+	}
 
 	@Override
 	public void invoke() {
@@ -52,7 +168,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		try {
 
 			LOGGER.info("Entering in invoke.");
-			// HTTPRequest executed through JavaScript
+			// SFTPRequest executed through JavaScript
 			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
@@ -65,7 +181,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				inv.invokeFunction("init", this);
 
 			} else {
-				// HTTPRequest executed through Java
+				// SFTPRequest executed through Java
 				executeRequest();
 			}
 
@@ -73,40 +189,5 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
-	}
-
-	/**
-	 * Java method to execute the G2SFTP and write in FS location
-	 * 
-	 * @throws MailBoxServicesException
-	 * @throws FS2Exception
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws URISyntaxException
-	 * @throws JAXBException
-	 * 
-	 * @throws MailBoxConfigurationServicesException
-	 * 
-	 */
-	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException {
-
-		G2SFTPClient sftp = new G2SFTPClient();
-		sftp.setURI("sftp://10.0.24.40:22/");
-		sftp.setDiagnosticLogger(LOGGER);
-		sftp.setCommandLogger(LOGGER);
-		sftp.setTimeout(59999);
-		sftp.setUser("g2testusr");
-		sftp.setPassword("mpxEukvePd4V");
-		sftp.setKnownHosts("C:/Documents and Settings/praveenu/.ssh/known_hosts");
-		sftp.connect();
-		if (sftp.openChannel()) {
-			List<String> files = sftp.listFiles();
-			for (String filename : files) {
-
-				System.out.println(filename);
-			}
-		}
-		sftp.disconnect();
 	}
 }

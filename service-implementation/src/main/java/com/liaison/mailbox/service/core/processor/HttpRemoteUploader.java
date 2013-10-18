@@ -58,7 +58,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException {
 
-		HTTPRequest request = getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest)getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
 
