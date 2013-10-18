@@ -73,33 +73,34 @@ var rest = myApp.controller(
                 folderURI: '',
                 folderType: '',
                 folderDesc: '',
-                allowAdd: true
+                allowAdd: 'showNoAddBox'
             }];
 
             // Procsr Credential Props
-            $scope.processorCredProperties = [{
+            $scope.processorCredProperties = [{              
+             
                 credentialURI: '',
                 credentialType: '',
                 userId: '',
                 password: '',
                 idpType: '',
-                idpURI: '',
-                allowAdd: true
+                idpURI: '',    
+                allowAdd: 'showNoAddBox'
             }];
 
             $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'httpVersion', 'httpVerb', 'socketTimeout', 'connectionTimeout', 'url', 'port', 'retryAttempts', 'chunkedEncoding', 'contentType', 'encodingFormat', 'otherRequestHeader'];
 
             $scope.allStaticProperties = ['httpVersion', 'httpVerb', 'socketTimeout', 'connectionTimeout', 'url', 'port', 'retryAttempts', 'chunkedEncoding', 'contentType', 'encodingFormat', 'otherRequestHeader'];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['add new -->', 'PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
+            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
 
             $scope.allStaticPropertiesForProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['add new -->', 'cred1', 'cred2', 'cred3', 'cred4', 'cred5'];
+            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['cred1', 'cred2', 'cred3', 'cred4', 'cred5'];
 
             $scope.allStaticPropertiesForProcessorCredential = ['cred1', 'cred2', 'cred3', 'cred4', 'cred5'];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['add new -->', 'idp1', 'idp2', 'idp3', 'idp4', 'idp5'];
+            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['idp1', 'idp2', 'idp3', 'idp4', 'idp5'];
 
             $scope.allStaticPropertiesForProcessorCredentialIdp = ['idp1', 'idp2', 'idp3', 'idp4', 'idp5'];
 
@@ -132,19 +133,19 @@ var rest = myApp.controller(
                 rowHeight: 40,
                 columnDefs: [{
                     field: "name",
-                    width: 500,
+                    width: "45%",
                     displayName: "Name",
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "value",
-                    width: 300,
+                    width: "45%",
                     displayName: "Value",
                     enableCellEdit: true,
                     enableCellSelection: true,
                     enableFocusedCellEdit: true
                 }, {
                     field: "allowAdd",
-                    width: 100,
+                    width: "10%",
                     displayName: "Action",
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">add</button></div>' +
@@ -163,29 +164,30 @@ var rest = myApp.controller(
                 rowHeight: 40,
                 columnDefs: [{
                     field: "folderURI",
-                    width: 300,
+                    width: "30%",
                     displayName: "Uri",
                     enableCellEdit: true,
                     enableCellSelection: true,
                     enableFocusedCellEdit: true
                 }, {
                     field: "folderType",
-                    width: 500,
+                    width: "30%",
                     displayName: "Type",
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder" selected-value="valueSelectedinSelectionBoxForProcessorFolder" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "folderDesc",
-                    width: 300,
+                    width: "30%",
                     displayName: "Description",
                     enableCellEdit: true,
                     enableCellSelection: true,
                     enableFocusedCellEdit: true
                 }, {
                     field: "allowAdd",
-                    width: 100,
+                    width: "10%",
                     displayName: "Action",
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">add</button></div>' +
+                        '<div ng-switch-when="showNoAddBox"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">add</button></div>' +
                         '<div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">remove</button></div>' +
                         '</div>'
 
@@ -199,51 +201,50 @@ var rest = myApp.controller(
                 canSelectRows: false,
                 enablePaging: false,
                 showFooter: false,
-                rowHeight: 40,
+                rowHeight: 100,
                 columnDefs: [{
                     field: "credentialURI",
-                    width: 150,
+                    width: "15%",
                     displayName: "URI",
                     enableCellEdit: true,
                     enableCellSelection: true,
                     enableFocusedCellEdit: true
                 }, {
                     field: "credentialType",
-                    width: 500,
+                    width: "12%",
                     displayName: "Type",
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "userId",
-                    width: 200,
+                    width: "15%",
                     displayName: "UserId",
-                    enableCellEdit: true,
+                   enableCellEdit: true,
                     enableCellSelection: true,
                     enableFocusedCellEdit: true
                 }, {
                     field: "password",
-                    width: 200,
-                    displayName: "Password",
-                    enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                    width: "20%",
+                    displayName: "Password",                    
+                    cellTemplate:'<div class="passwordDirective" row-entity="row.entity" col-filed="col.field" />'
                 }, {
                     field: "idpType",
-                    width: 500,
+                    width: "12%",
                     displayName: "IdpType",
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp" selected-value="valueSelectedinSelectionBoxForProcessorCredentialIdp" prop-name={{row.getProperty(col.field)}} />'
-                }, {
+                    }, {
                     field: "idpURI",
-                    width: 200,
+                    width: "15%",
                     displayName: "IdpURI",
                     enableCellEdit: true,
                     enableCellSelection: true,
                     enableFocusedCellEdit: true
                 }, {
                     field: "allowAdd",
-                    width: 100,
+                    width: "10%",
                     displayName: "Action",
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">add</button></div>' +
+                        '<div ng-switch-when="showNoAddBox"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">add</button></div>'+
                         '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">remove</button></div>' +
                         '</div>'
 
@@ -362,7 +363,7 @@ var rest = myApp.controller(
                     folderURI: '',
                     folderType: '',
                     folderDesc: '',
-                    allowAdd: true
+                    allowAdd: 'showNoAddBox'
                 });
 
             };
@@ -408,7 +409,7 @@ var rest = myApp.controller(
                     userId: '',
                     password: '',
                     idpType: '',
-                    allowAdd: true
+                    allowAdd: 'showNoAddBox'
                 });
 
             };
@@ -478,7 +479,7 @@ var rest = myApp.controller(
 
                 var lenCredentialProps = $scope.processorCredProperties.length;
                 for (var i = 0; i < lenCredentialProps - 1; i++) {
-                    $scope.processor.credentials.push({
+                    $scope.processor.credentials.push( {
                         credentialURI: $scope.processorCredProperties[i].credentialURI,
                         credentialType: $scope.processorCredProperties[i].credentialType,
                         userId: $scope.processorCredProperties[i].userId,
@@ -486,7 +487,8 @@ var rest = myApp.controller(
                         idpType: $scope.processorCredProperties[i].idpType,
                         idpURI: $scope.processorCredProperties[i].idpURI
 
-                    });
+                    }
+                            );
                 }
 
                 $scope.processor.linkedMailboxId = 'C6A30A26C0A800FE0B62C7C85060484E';

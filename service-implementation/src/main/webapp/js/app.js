@@ -9,6 +9,7 @@ var myApp = angular.module('myApp',
 		'myApp.directiveSwapPropCombo',
 		'myApp.directiveCustomCell',// custom directives
                 'myApp.dynamicComponentDirectiveForName',
+                'myApp.passwordDirective',
         'ngGrid', // angular grid
         'ui', // angular ui
         'ngSanitize', // for html-bind in ckeditor
