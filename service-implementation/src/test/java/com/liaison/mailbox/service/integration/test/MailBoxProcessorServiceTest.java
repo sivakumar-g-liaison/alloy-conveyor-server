@@ -550,7 +550,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
 		ProfileDTO profile = new ProfileDTO();
-		profile.setName(profileName);
+		profile.setName("onceIn57mins");
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
 		profileRequstDTO.setProfile(profile);
 

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -225,13 +226,11 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
 
-			/*
-			 * // Changing the status in MailBoxSchedProfile if it is avail
+			/* // Changing the status in MailBoxSchedProfile if it is avail
 			 * List<MailBoxSchedProfile> retrievedSchedProfiles =
 			 * retrievedMailBox.getMailboxSchedProfiles(); if (null != retrievedSchedProfiles) { for
 			 * (MailBoxSchedProfile schedProfile : retrievedSchedProfiles) {
-			 * schedProfile.setMbxProfileStatus(MailBoxStatus.INACTIVE.value()); } }
-			 */
+			 * schedProfile.setMbxProfileStatus(MailBoxStatus.INACTIVE.value()); } } */
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(MailBoxStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
@@ -272,7 +271,18 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			List<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
+			Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
+
+			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
+
+				Set<MailBox> retrievedMailBoxesUsingName = configDao.findByName(mbxName);
+				if (retrievedMailBoxes.isEmpty() && !retrievedMailBoxesUsingName.isEmpty()) {
+					retrievedMailBoxes = retrievedMailBoxesUsingName;
+				} else {
+					retrievedMailBoxes.addAll(retrievedMailBoxesUsingName);
+				}
+			}
+
 			if (null == retrievedMailBoxes || retrievedMailBoxes.isEmpty()) {
 				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, MAILBOX);
 			}
@@ -300,26 +310,24 @@ public class MailBoxConfigurationService {
 					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
-		
+
 	}
-	
+
 	public FileInfoDTO getFileDetail(File file) {
 
-        FileInfoDTO info = new FileInfoDTO();
-        info.setRoleName(file.getName());
-        info.setRoleId(file.getAbsolutePath());
-        info.setChildren(new ArrayList<FileInfoDTO>());
+		FileInfoDTO info = new FileInfoDTO();
+		info.setRoleName(file.getName());
+		info.setRoleId(file.getName());
+		info.setChildren(new ArrayList<FileInfoDTO>());
 
-        if (file.isDirectory() && file.list().length > 0) {
+		if (file.isDirectory() && file.list().length > 0) {
 
-              for (File f : file.listFiles()) {
-                    info.getChildren().add(getFileDetail(f));
-              }
-        }
+			for (File f : file.listFiles()) {
+				info.getChildren().add(getFileDetail(f));
+			}
+		}
 
-        return info;
-  }
-
-
+		return info;
+	}
 
 }

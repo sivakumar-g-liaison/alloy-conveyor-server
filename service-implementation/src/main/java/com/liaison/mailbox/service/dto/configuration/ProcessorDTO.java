@@ -124,6 +124,7 @@ public class ProcessorDTO {
 		this.protocol = protocol;
 	}
 
+	@Mandatory(errorMessage = "Mailbox Id is mandatory.")
 	public String getLinkedMailboxId() {
 		return linkedMailboxId;
 	}

@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public class MailBoxService {
 	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern) {
 
 		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
-		List<Processor> processorMatchingProfile;
+		List<Processor> processorMatchingProfile = new ArrayList<>();
 
 		try {
 
@@ -61,6 +62,13 @@ public class MailBoxService {
 			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern);
+
+			/* MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase(); Set<MailBox>
+			 * retrievedMailBoxes =
+			 * configDao.findByProfileNameWithExcludePattern(mailboxNamePattern, profileName); for
+			 * (MailBox mailBox : retrievedMailBoxes) {
+			 * processorMatchingProfile.addAll(mailBox.getMailboxProcessors()); } */
+
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}

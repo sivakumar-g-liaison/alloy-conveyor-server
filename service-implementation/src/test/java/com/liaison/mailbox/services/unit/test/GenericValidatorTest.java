@@ -105,7 +105,7 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("SWEEPER");
 		dto.setStatus("ACTIVE");
-		// dto.setLinkedProfileId("ASDERER1425SDSD");
+		dto.setProtocol("HTTP");
 		validator.validate(dto);
 	}
 

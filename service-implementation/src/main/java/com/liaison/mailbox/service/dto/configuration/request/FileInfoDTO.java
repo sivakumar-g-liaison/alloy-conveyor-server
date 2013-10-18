@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import java.util.List;
 
 /**
+ * Folder tree model
  * @author praveenu
  * 
  */
