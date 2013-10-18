@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.dto.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 
@@ -27,6 +28,7 @@ public class MailBoxProcessorResponseDTO {
 	private String name;
 	private String type;
 	private String protocol;
+	private String status;
 	private List<ProfileDTO> profiles;
 
 	public String getGuid() {
@@ -74,12 +76,23 @@ public class MailBoxProcessorResponseDTO {
 		this.protocol = protocol;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	public void copyFromEntity(Processor processor) {
 
 		this.setGuid(processor.getPguid());
 		this.setType(processor.getProcessorType().name());
 		this.setName(processor.getProcsrName());
 		this.setProtocol(processor.getProcsrProtocol());
+
+		MailBoxStatus status = MailBoxStatus.findByCode(processor.getProcsrStatus());
+		this.setStatus(status.name());
 
 		if (null != processor.getScheduleProfileProcessors()) {
 
