@@ -99,7 +99,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException {
 
-		HTTPRequest request = getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest)getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
 

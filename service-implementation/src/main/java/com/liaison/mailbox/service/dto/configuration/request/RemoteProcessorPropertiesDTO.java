@@ -30,6 +30,9 @@ public class RemoteProcessorPropertiesDTO {
 	private boolean chunkedEncoding;
 	private String contentType;
 	private String encodingFormat;
+	private boolean passive;
+	private boolean binary;
+	private int retryInterval;
 	private List<HttpOtherRequestHeaderDTO> otherRequestHeader;
 
 	public String getHttpVersion() {
@@ -118,6 +121,30 @@ public class RemoteProcessorPropertiesDTO {
 
 	public void setOtherRequestHeader(List<HttpOtherRequestHeaderDTO> otherRequestHeader) {
 		this.otherRequestHeader = otherRequestHeader;
+	}
+
+	public boolean isPassive() {
+		return passive;
+	}
+
+	public void setPassive(boolean passive) {
+		this.passive = passive;
+	}
+
+	public boolean isBinary() {
+		return binary;
+	}
+
+	public void setBinary(boolean binary) {
+		this.binary = binary;
+	}
+
+	public int getRetryInterval() {
+		return retryInterval;
+	}
+
+	public void setRetryInterval(int retryInterval) {
+		this.retryInterval = retryInterval;
 	}
 
 }

@@ -63,12 +63,6 @@ public class MailBoxService {
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern);
 
-			/* MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase(); Set<MailBox>
-			 * retrievedMailBoxes =
-			 * configDao.findByProfileNameWithExcludePattern(mailboxNamePattern, profileName); for
-			 * (MailBox mailBox : retrievedMailBoxes) {
-			 * processorMatchingProfile.addAll(mailBox.getMailboxProcessors()); } */
-
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}

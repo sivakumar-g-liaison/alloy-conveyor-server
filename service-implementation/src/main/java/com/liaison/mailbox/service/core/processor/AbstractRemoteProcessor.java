@@ -133,6 +133,31 @@ public abstract class AbstractRemoteProcessor {
 		}
 		return files;
 	}
+	
+	/**
+	 * To Retrive the Payload URI
+	 * 
+	 * @return List of files
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws MailBoxServicesException
+	 */
+	public String getPayloadURI() throws MailBoxServicesException {
+
+		if (configurationInstance.getFolders() != null) {
+
+			for (Folder folder : configurationInstance.getFolders()) {
+
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
+				if (null == foundFolderType) {
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+				} else if (FolderType.INPUT_FOLDER.equals(foundFolderType)) {
+
+					return folder.getFldrUri();
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Get HTTPRequest configurations from mailbox processor.
@@ -152,7 +177,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public String getWriteResponseURI() throws MailBoxServicesException {
+	protected String getWriteResponseURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -163,7 +188,9 @@ public abstract class AbstractRemoteProcessor {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return folder.getFldrUri();
-				}
+				} else if (FolderType.OUTPUT_FOLDER.equals(foundFolderType)) {
+					return folder.getFldrUri();
+				} 
 			}
 		}
 		return null;
@@ -187,7 +214,28 @@ public abstract class AbstractRemoteProcessor {
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
 		LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
+		
+	}
+	
+	/**
+	 * call back method to write the file response back to MailBox from JS
+	 * 
+	 * @throws MailBoxServicesException
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws FS2Exception
+	 * 
+	 */
+	public void writeFileResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception,
+			MailBoxServicesException {
 
+		LOGGER.info("Started writing response");
+		FlexibleStorageSystem FS2 = getFS2Instance();
+		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + filename);
+		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
+		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
+		LOGGER.info("Reponse is succefully written" + getWriteResponseURI()+"/"+metaSnapShot.getURI());
+		
 	}
 
 	/**
@@ -254,7 +302,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonParseException
 	 * @throws LiaisonException
 	 */
-	public HTTPRequest getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
+	public Object getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, LiaisonException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
