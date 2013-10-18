@@ -4,7 +4,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         //Remove if not needed
         $scope.isMailBoxEdit = false;
         //Needed only for Edir
-        $scope.mailBoxId;
+        $scope.procsBtnStatus = true;
         //Model for Add MB
         addRequest = $scope.addRequest = {
             addMailBoxRequest: {
@@ -52,6 +52,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On               
 
                 $scope.isMailBoxEdit = true;
+                $scope.procsBtnStatus = false;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 //$scope.sharedService.setProperty('test');
                 $scope.restService.get($scope.base_url + 'mailbox/' + $scope.mailBoxId, //Get mail box Data
@@ -118,6 +119,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
                         if (status === 200) {
                             alert(data.addMailBoxResponse.response.message);
+                            $scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
+                            $scope.procsBtnStatus = false;
                         }
                         $scope.mailBox.properties = [];
 

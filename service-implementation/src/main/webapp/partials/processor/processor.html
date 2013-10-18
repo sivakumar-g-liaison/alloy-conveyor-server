@@ -14,31 +14,25 @@
   .gridStyle {
     border: 1px solid rgb(212,212,212);
     height: 300px;
-<<<<<<< HEAD
-	width: 903px;
-=======
 	width: 1200px;
->>>>>>> origin/for-review
   }
   
   .gridStyleFolder {
     border: 1px solid rgb(212,212,212);
     height: 300px;
-<<<<<<< HEAD
-	width: 1203px;
-=======
 	width: 1200px;
->>>>>>> origin/for-review
   }
   
   .gridStyleCredentials {
     border: 1px solid rgb(212,212,212);
     height: 300px;
-<<<<<<< HEAD
-	width: 1903px;
-=======
 	width: 1200px;
->>>>>>> origin/for-review
+  }
+  
+  .gridStyleProcessors {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 800px;
   }
   
 </style>
@@ -49,11 +43,14 @@
     <h3>
       Processors of Mailbox - MCCW
     </h3>
-    <hr>
+	
+    <div class="gridStyleProcessors" ng-grid="gridOptionsForProcessorList">
   </div>
+  
   
   <form name="formAddPrcsr" novalidate class="container css-form">
     
+	<br><br><br>
     <div class="span5">
       
       <div class="container form-row">
@@ -99,6 +96,12 @@
 		<select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles"></select>
       </div>
 	  
+	  <div class="container form-row">
+        URL:&nbsp;&nbsp;&nbsp;
+		<input type="text" ng-model="modal.url"/>
+		<button type="button" class="btn" bs-modal="'partials/processor/treemodal.html'">Browse</button>
+		</div>
+	  </div>
     </div>
     
   </form>

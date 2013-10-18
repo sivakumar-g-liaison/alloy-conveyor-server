@@ -2,59 +2,60 @@
 
 
 // declare top-level module which depends on filters,and services
-var myApp = angular.module('myApp',
-    [   'myApp.filters',
-        'myApp.directiveSwapPropInput', 
-		'myApp.directiveSwapPropButton',
-		'myApp.directiveSwapPropCombo',
-		'myApp.directiveCustomCell',// custom directives
-                'myApp.dynamicComponentDirectiveForName',
-                'myApp.passwordDirective',
-        'ngGrid', // angular grid
-        'ui', // angular ui
-        'ngSanitize', // for html-bind in ckeditor
-        'ui.ace', // ace code editor
-        'ui.bootstrap', // jquery ui bootstrap
-        '$strap.directives' // angular strap
-    ]);
+var myApp = angular.module('myApp', ['myApp.filters',
+    'myApp.directiveSwapPropInput',
+    'myApp.directiveSwapPropButton',
+    'myApp.directiveSwapPropCombo',
+    'myApp.directiveCustomCell', // custom directives
+    'myApp.dynamicComponentDirectiveForName',
+    'myApp.passwordDirective',
+    'ngGrid', // angular grid
+    'ui', // angular ui
+    'ngSanitize', // for html-bind in ckeditor
+    'ui.ace', // ace code editor
+    'ui.bootstrap', // jquery ui bootstrap
+    '$strap.directives', // angular strap
+    'angularTreeview' // for tree view
+]);
 
-myApp.constant('rootUrl', 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox');
+myApp.constant('rootUrl', 'http://localhost:9090/g2mailboxservice/rest/v1/mailbox');
 
 
 // bootstrap angular
-myApp.config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {
-	
-	  /**
-	   * make delete type json
-	   */
-	  $httpProvider.defaults.headers["delete"] = {
-	    'Content-Type': 'application/json;charset=utf-8'
-	  };
+myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
+    function ($routeProvider, $locationProvider, $httpProvider) {
 
-    // TODO use html5 *no hash) where possible
-    // $locationProvider.html5Mode(true);
+        /**
+         * make delete type json
+         */
+        $httpProvider.defaults.headers["delete"] = {
+            'Content-Type': 'application/json;charset=utf-8'
+        };
 
-    $routeProvider.when('/', {
-        templateUrl:'partials/home.html'
-    });
-    
-    // Add Mailbox
-    $routeProvider.when('/mailbox/addMailBox', {
-        templateUrl:'partials/mailbox/addmailbox.html',
-        controller:'AddMailBoxCntrlr'
-    });
-    
-    $routeProvider.when('/mailbox/getMailBox', {
-        templateUrl:'partials/mailbox/searchmailbox.html',
-        controller:'SearchMailBoxCntrlr'
-    });
-    
-    $routeProvider.when('/mailbox/processor', {
-        templateUrl:'partials/processor/processor.html',
-        controller:'ProcessorCntrlr'
-    });
+        // TODO use html5 *no hash) where possible
+        // $locationProvider.html5Mode(true);
 
-    /*$routeProvider.when('/contact', {
+        $routeProvider.when('/', {
+            templateUrl: 'partials/home.html'
+        });
+
+        // Add Mailbox
+        $routeProvider.when('/mailbox/addMailBox', {
+            templateUrl: 'partials/mailbox/addmailbox.html',
+            controller: 'AddMailBoxCntrlr'
+        });
+
+        $routeProvider.when('/mailbox/getMailBox', {
+            templateUrl: 'partials/mailbox/searchmailbox.html',
+            controller: 'SearchMailBoxCntrlr'
+        });
+
+        $routeProvider.when('/mailbox/processor', {
+            templateUrl: 'partials/processor/processor.html',
+            controller: 'ProcessorCntrlr'
+        });
+
+        /*$routeProvider.when('/contact', {
         templateUrl:'partials/contact.html'
     });
     $routeProvider.when('/about', {
@@ -64,20 +65,21 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider', function (
         templateUrl:'partials/faq.html'
     });*/
 
-    // note that to minimize playground impact on app.js, we
-    // are including just this simple route with a parameterized 
-    // partial value (see playground.js and playground.html)
-    /*$routeProvider.when('/playground/:widgetName', {
+        // note that to minimize playground impact on app.js, we
+        // are including just this simple route with a parameterized 
+        // partial value (see playground.js and playground.html)
+        /*$routeProvider.when('/playground/:widgetName', {
         templateUrl:'playground/playground.html',
         controller:'PlaygroundCtrl'
     });*/
 
-    // by default, redirect to site root
-    $routeProvider.otherwise({
-        redirectTo:'/'
-    });
+        // by default, redirect to site root
+        $routeProvider.otherwise({
+            redirectTo: '/'
+        });
 
-}]);
+    }
+]);
 
 // this is run after angular is instantiated and bootstrapped
 myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, SharedService) {
@@ -86,24 +88,22 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Eager load some data using simple REST client
     // *****
 
-	$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/';
+    $rootScope.base_url = 'http://localhost:9090/g2mailboxservice/rest/v1/';
     $rootScope.restService = RESTService;
-    
+
     $rootScope.sharedService = SharedService;
 
     // async load constants
     $rootScope.constants = [];
     $rootScope.restService.get('data/constants.json', function (data) {
-            $rootScope.constants = data[0];
-        }
-    );
+        $rootScope.constants = data[0];
+    });
 
     // async load data do be used in table (playgound grid widget)
     $rootScope.listData = [];
     $rootScope.restService.get('data/generic-list.json', function (data) {
-            $rootScope.listData = data;
-        }
-    );
+        $rootScope.listData = data;
+    });
 
 
     // *****
@@ -136,13 +136,24 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     }, true);
 
     // TODO move this out to a more appropriate place
-    $rootScope.faq = [
-        {key: "What is the service-nucleus?", value: "The service nucleus is a starting point for a full-blown Java webservice and accompanying UI."},
-        {key: "What are the pre-requisites for running the service nucleus?", value: "You need JDK 7 and Gradle>=1.6."},
-        {key: "How do I change styling (css)?", value:  "See service-implementation/bootstrap.  First change the less modules, then compile using build.sh.  The resulting artifacts will be copied to the appropriate location."},
-        {key: "How do I implement a REST service?", value:  "Simply add a new Jersey Resource.  See service-implementation/src/main/java/com/liaison/service/resources/examples for examples."},
-        {key: "How do I brand my project (rename from Hello-World)?", value: "This is currently a manual process with about a half-dozen steps.  See README.md for details."},
-        {key: "How do I expose JMX metrics?", value: "Checkout the MetricsResource example."}
-    ];
+    $rootScope.faq = [{
+        key: "What is the service-nucleus?",
+        value: "The service nucleus is a starting point for a full-blown Java webservice and accompanying UI."
+    }, {
+        key: "What are the pre-requisites for running the service nucleus?",
+        value: "You need JDK 7 and Gradle>=1.6."
+    }, {
+        key: "How do I change styling (css)?",
+        value: "See service-implementation/bootstrap.  First change the less modules, then compile using build.sh.  The resulting artifacts will be copied to the appropriate location."
+    }, {
+        key: "How do I implement a REST service?",
+        value: "Simply add a new Jersey Resource.  See service-implementation/src/main/java/com/liaison/service/resources/examples for examples."
+    }, {
+        key: "How do I brand my project (rename from Hello-World)?",
+        value: "This is currently a manual process with about a half-dozen steps.  See README.md for details."
+    }, {
+        key: "How do I expose JMX metrics?",
+        value: "Checkout the MetricsResource example."
+    }];
 
 });
