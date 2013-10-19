@@ -12,14 +12,18 @@
 
 		<div class="form-row">
             <h4>Search Mailbox</h4>
+           
         </div>
-
+        
         <div class="form-row">
             <div class="group">
                 <label for="name" class="control-label">Name</label>
                 <input type="text" id="name" ng-model="mailBoxName" ng-trim="false">
                 <label for="prof" class="control-label">Profiles</label>
-                <select id="prof" ng-model="profile" ng-options="prof.name for prof in profiles" ng-change="search()"></select>
+                <select id="prof" ng-model="profile" ng-options="prof.name for prof in profiles" ng-change="search()">
+                    <option value="">-- select--</option>
+                </select>
+                <progress ng-show=showprogressbar></progress>
             </div>
         </div>
         <br />

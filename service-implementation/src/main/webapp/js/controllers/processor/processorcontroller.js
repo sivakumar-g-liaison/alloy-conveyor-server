@@ -7,10 +7,12 @@ var rest = myApp.controller(
             // To be Populated
             $scope.mailBoxId;
 
-            //
+          $scope.loadOrigin = function () {
+                 
+ //          
             $scope.isEdit = false;
-
-            //Model for Add MB
+            $scope.mailboxName=$location.search().mbxname;
+ //Model for Add MB
             addRequest = $scope.addRequest = {
                 addProcessorToMailBoxRequest: {
                     processor: {}
@@ -62,7 +64,10 @@ var rest = myApp.controller(
             $scope.enumprotocoltype = [
                 'FTP',
                 'HTTP',
-                'HTTPS'
+                'HTTPS',
+                'FTP',
+                'FTPS',
+                'SFTP'
             ];
 
             addRequest.addProcessorToMailBoxRequest.processor.protocol = $scope.enumprotocoltype[0];
@@ -102,13 +107,13 @@ var rest = myApp.controller(
 
             $scope.allStaticPropertiesForProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['cred1', 'cred2', 'cred3', 'cred4', 'cred5'];
+            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['REMOTE_SERVER_CRED'];
 
-            $scope.allStaticPropertiesForProcessorCredential = ['cred1', 'cred2', 'cred3', 'cred4', 'cred5'];
+            $scope.allStaticPropertiesForProcessorCredential = ['REMOTE_SERVER_CRED'];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['idp1', 'idp2', 'idp3', 'idp4', 'idp5'];
+            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['FTP', 'FTPS', 'SFTP'];
 
-            $scope.allStaticPropertiesForProcessorCredentialIdp = ['idp1', 'idp2', 'idp3', 'idp4', 'idp5'];
+            $scope.allStaticPropertiesForProcessorCredentialIdp = ['FTP', 'FTPS', 'SFTP'];
 
             $scope.addedProperty = 'add new';
             $scope.disableAddNewTextBox = 'true';
@@ -128,7 +133,15 @@ var rest = myApp.controller(
             $scope.valueSelectedinSelectionBoxForProcessorCredentialIdp = {
                 name: ''
             };
+            
+            // Profile Related Stuff.
+            $scope.allProfiles = [];
 
+            $scope.selectedProfiles = [];
+
+            };  
+
+            $scope.loadOrigin();
 
             $scope.gridOptionsForProcessor = {
                 data: 'processorProperties',
@@ -293,9 +306,6 @@ var rest = myApp.controller(
                     }, {
                         displayName: 'Action',
                         cellTemplate: $scope.editableInPopup
-                    }, {
-                        field: 'guid',
-                        visible: false
                     }
 
                 ],
@@ -312,7 +322,8 @@ var rest = myApp.controller(
             };
 
             $scope.editProcessor = function (row) {
-
+                 $scope.loadOrigin();
+                 $scope.readAllProfiles();
                 $scope.isEdit = true;
                 var procsrId = row.getProperty('guid');
 
@@ -330,21 +341,39 @@ var rest = myApp.controller(
                         $scope.processor.description = data.getProcessorResponse.processor.description;
                         $scope.processor.status = data.getProcessorResponse.processor.status;
                         $scope.processor.protocol = data.getProcessorResponse.processor.protocol;
-
+                        $scope.processor.protocol = data.getProcessorResponse.processor.protocol;
+                        $scope.selectedProfiles=data.getProcessorResponse.processor.profiles;
+                        //Schedules
+                        
+                        for(var i =0 ;i <data.getProcessorResponse.processor.profiles.length;i++){
+                           
+                           var index = $scope.allProfiles.indexOf(data.getProcessorResponse.processor.profiles[i].name);
+                           $scope.allProfiles.splice(index, 1);
+                           
+                        }
 
                         // Pushing out dynamis props
 
-                        /*$scope.processorProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
-                        for (var i = 0; i < data.getProcessorResponse.mailBox.properties.length; i++) {
+                        $scope.processorProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
+                        var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
+                       
+                       
+                         for(var prop in json_data){                  
+                           if(json_data[prop]!==0 && json_data[prop]!==null && json_data[prop]!==''){
                             $scope.processorProperties.push({
-                                name: data.getMailBoxResponse.mailBox.properties[i].name,
-                                value: data.getMailBoxResponse.mailBox.properties[i].value,
+                                name: prop,
+                                value: json_data[prop],
                                 allowAdd: false
                             });
-
-                            var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(data.getMailBoxResponse.mailBox.properties[i].name);
+                            var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(prop);
                             $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-                        };*/
+                        }
+                       
+                        } 
+                            
+
+                            
+                       
 
                         $scope.processorProperties.splice(0, 1);
 
@@ -450,10 +479,7 @@ var rest = myApp.controller(
 			};*/
 
 
-            // Profile Related Stuff.
-            $scope.allProfiles = [];
-
-            $scope.selectedProfiles = [];
+            
 
             $scope.chooseProfile = function () {
 
@@ -601,7 +627,18 @@ var rest = myApp.controller(
             };
 
             $scope.doCancel = function () {
-
+            var response = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost");
+            if (response === true) {
+                $location.path('/mailbox/getMailBox');
+            }
+            };
+            
+            $scope.backToMailbox = function () {
+                var response = confirm("Are you  sure you want to leave this page? All unsaved changes will be lost");
+            if (response === true) {
+                $location.path('/mailbox/addMailBox').search('mailBoxId',$location.search().mailBoxId);
+            }
+                
             };
 
             $scope.saveProcessor = function () {
@@ -717,8 +754,15 @@ var rest = myApp.controller(
                 $scope.processor.credentials = [];
                 $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
+            
+             $scope.addNew = function () {
+                   
+                    $scope.loadOrigin();
+                    $scope.readAllProfiles();
+             };
 
         }
-
+        
+        
 
     ]);

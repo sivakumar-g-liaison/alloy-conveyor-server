@@ -35,9 +35,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         addRequest.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
-        $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'assignuser', 'inputfolder', 'globalstatus', 'filerenameformat', 'retrycountglobal'];
+        $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'filerenameformat'];
         //Data from server
-        $scope.allStaticProperties = ['assignuser', 'inputfolder', 'globalstatus', 'filerenameformat', 'retrycountglobal'];
+        $scope.allStaticProperties = ['filerenameformat'];
 
         //Data from server
         $scope.mailBoxProperties = [{
@@ -72,7 +72,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             });
 
                             var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(data.getMailBoxResponse.mailBox.properties[i].name);
+                           if(indexOfElement >0){
                             $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                          }
                         };
                         $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
                             name: '',
@@ -131,7 +133,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         };
 
         $scope.doCancel = function () {
-            var response = confirm("Are you  sure you want to cancel the Operation?");
+            var response = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
             if (response === true) {
                 $location.path('/mailbox/getMailBox');
             }
@@ -139,7 +141,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.addProcessor = function () {
 
-            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId);
+            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname',$scope.mailBox.name);
         };
 
         // Property grid

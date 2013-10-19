@@ -30,32 +30,33 @@
   
   <form name="formAddMbx" novalidate class="container css-form">
     
-    <div class="span5">
+    <div class="row">
+        <div class="span6">
       
-      <div class="container form-row">
-        Name:&nbsp;&nbsp;&nbsp; 
+          <label>
+            Name
+          </label>
         <input type="text" ng-model="mailBox.name" required />
-      </div>
-      
-      <div class="container form-row">
-        Status:&nbsp;&nbsp;&nbsp; 
+     
+           <label>
+            Status
+          </label> 
         <select ng-model="mailBox.status" ng-options="e for e in enumstats">
+            <option value="">-- select--</option>
         </select>
-        
-        <br>
       </div>
-      
-    </div>
     
-    <div class="span5">
+    <div class="span6">
       
-      <div class="container form-row">
-        Shared key:&nbsp;&nbsp;&nbsp; 
+           <label>
+            Shard
+          </label> 
         <input type="text" ng-model="mailBox.shardKey" />
-      </div>
       
-      <div class="container form-row">
-        Description:&nbsp;&nbsp;&nbsp;
+      
+         <label>
+            Description
+          </label> 
         <textarea ng-model="mailBox.description">
         </textarea>
       </div>

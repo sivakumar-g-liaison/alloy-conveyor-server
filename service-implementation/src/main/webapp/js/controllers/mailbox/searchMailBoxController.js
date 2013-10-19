@@ -105,7 +105,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
         // Search logic for mailbox
         $scope.search = function () {
-
+            $scope.showprogressbar=true;
             var profName = "";
             if (null !== $scope.profile) {
                 profName = $scope.profile.name;
@@ -119,6 +119,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName)
                 .success(function (data) {
                     $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+                    $scope.showprogressbar=false;
                 });
         };
 
@@ -145,23 +146,27 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             columnDefs: [
                 {
                     field: 'name',
+                     width:'30%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 },
                 {
                     field: 'description',
+                    width:'50%',
                     displayName: 'Desc'
                 },
                 {
                     field: 'status',
+                    width:'10%',
                     displayName: 'Status'
                 },
-                {
+                /*{
                     field: 'profiles',
                     displayName: 'LinkedProfiles'
-                },
+                },*/
                 { // Customized column
                     displayName: 'Action',
+                     width:'10%',
                     cellTemplate: $scope.editableInPopup
                 }
 
