@@ -1,0 +1,203 @@
+<style>
+  .form-row {
+	padding-bottom: .5em;
+  }
+  
+  .css-form input.ng-invalid.ng-dirty {
+	background-color: #FA787E;
+  }
+  
+  .css-form input.ng-valid.ng-dirty {
+	background-color: #78FA89;
+  }
+  
+  .gridStyle {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 1200px;
+  }
+  
+  .gridStyleFolder {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 1200px;
+  }
+  
+  .gridStyleCredentials {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 1200px;
+  }
+  
+  .gridStyleProcessors {
+    border: 1px solid rgb(212,212,212);
+    height: 300px;
+	width: 1200px;
+  }
+  
+</style>
+
+<div class="container fade-in">
+  
+  <div class="form-row">
+    <h2>
+      Processors of Mailbox {{mailboxName}}
+    </h2>
+	
+    <div class="gridStyleProcessors" ng-grid="gridOptionsForProcessorList">
+        
+    </div>
+    
+    <button class="btn btn-primary" ng-click="addNew()" >
+          Add new
+        </button>
+      
+    <form name="formAddPrcsr" novalidate class="form-horizontal">
+      
+      <br>
+      <br>
+      <br>
+      <h3>
+        Processors Details
+      </h3>
+      <div class="row">
+        <div class="col-md-6">
+           <div class="row">
+          <label>
+            Name
+          </label>
+           </div> 
+            <div class="row">
+          <input type="text" ng-model="processor.name" required />
+           </div>
+           <div class="row">
+          <label>
+            Type
+          </label>
+           </div> 
+            <div class="row">
+          <select ng-model="processor.type" ng-options="type for type in enumprocsrtype">
+          </select>
+          </div>
+           <div class="row">
+          <label>
+            Status
+          </label>
+                </div> 
+            <div class="row">
+          <select ng-model="processor.status" ng-options="e for e in enumstats">
+          </select>
+          </div>
+           <div class="row">
+          
+          <label>
+            Protocol
+          </label>
+                </div> 
+            <div class="row">
+          <select ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype">
+          </select>
+        </div>
+       </div> 
+        <div class="col-md-6">
+          
+          <label>
+            Description
+          </label>
+          <textarea width="40px" height="20px" ng-model="processor.description">
+          </textarea>
+          
+          <label>
+            Script File Path
+          </label>
+          <input type="text" ng-model="modal.url"/>
+          <button type="button" class="btn" bs-modal="'partials/processor/treemodal.html'">
+            Browse
+          </button>
+          <label>
+            Scheduling
+          </label>
+          
+          <div class="row">
+            <div class="col-md-3">
+           <label>
+            <i>
+              all available schedules
+            </i>
+          </label>
+              <select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles">
+              </select>
+            </div>
+            <div class="col-md-1">
+              <div class="row">
+                  </br>
+                <button class="btn btn-primary" ng-click="chooseProfile()">
+                  >> 
+                </button>
+              </div>
+              <div class="row">
+              </br>              
+              <button class="btn btn-primary" ng-click="removeProfile()">
+                <<
+              </button>
+                </div>
+             </div>
+              <div class="col-md-3">
+          <label>
+            <i>
+              linked schedules
+            </i>
+          </label>
+                <select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles">
+               </select>
+               </div>
+             
+            </div>
+          </div>
+          
+          
+        </div>
+        
+      </form>
+      
+      
+      
+      <div>
+        <div>
+            <h4>Properties</h4>
+          <div class="gridStyle" ng-grid="gridOptionsForProcessor">
+          </div>
+        </div>
+        <br>
+      </div>
+      
+      <div>
+        <div>
+            <h4>Folders</h4>
+          <div class="gridStyleFolder" ng-grid="gridOptionsForProcessorFolder">
+          </div>
+        </div>
+        <br>
+      </div>
+      
+      <div>
+        <div>
+            <h4>Credentials</h4>
+          <div class="gridStyleCredentials" ng-grid="gridOptionsForProcessorCredential">
+          </div>
+        </div>
+        <br>
+      </div>
+      
+      <div class="container">
+         <button class="btn btn-primary" ng-click="backToMailbox()" >
+          Back to Mailbox
+        </button>         
+        <button class="btn btn-primary" ng-click="saveProcessor()" ng-disabled="formAddPrcsr.$invalid">
+          Save
+        </button>
+         <button class="btn btn-primary" ng-click="doCancel()">
+          Cancel
+        </button>
+      </div>      
+    </div>

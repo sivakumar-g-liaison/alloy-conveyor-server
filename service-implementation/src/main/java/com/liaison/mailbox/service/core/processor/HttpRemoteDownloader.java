@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import com.liaison.framework.fs2.api.FS2Exception;
+import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;

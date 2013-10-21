@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.framework.fs2.api.FS2Exception;
+import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;

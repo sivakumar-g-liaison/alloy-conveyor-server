@@ -1,0 +1,85 @@
+<style>
+  .form-row {
+	padding-bottom: .5em;
+  }
+  
+  .css-form input.ng-invalid.ng-dirty {
+	background-color: #FA787E;
+  }
+  
+  .css-form input.ng-valid.ng-dirty {
+	background-color: #78FA89;
+  }
+  
+  .gridStyle {
+    border: 1px solid rgb(212,212,212);
+    
+    height: 300px
+  }
+  
+</style>
+
+<div class="container fade-in">
+  
+  <div class="form-row">
+    <h3>
+      MailBox Definition
+    </h3>
+    <hr>
+  </div>
+  
+  <form name="formAddMbx" novalidate class="container css-form">
+    
+    <div class="row">
+        <div class="col-md-6">
+      
+          <label>
+            Name
+          </label>
+        <input type="text" ng-model="mailBox.name" required />
+     
+           <label>
+            Status
+          </label> 
+        <select ng-model="mailBox.status" ng-options="e for e in enumstats">
+            <option value="">-- select--</option>
+        </select>
+      </div>
+    
+    <div class="col-md-6">
+      
+           <label>
+            Shard
+          </label> 
+        <input type="text" ng-model="mailBox.shardKey" />
+      
+      
+         <label>
+            Description
+          </label> 
+        <textarea ng-model="mailBox.description">
+        </textarea>
+      </div>
+    </div>
+    
+  </form>
+  
+  <div>
+    <div class="gridStyle" ng-grid="gridOptionsForMailbox">
+    </div>
+    <br>
+  </div>
+  
+  <div class="container">
+    <button class="btn btn-primary" ng-click="doCancel()">
+      Cancel
+    </button>
+    <button class="btn btn-primary" ng-click="saveForm(request)" ng-disabled="formAddMbx.$invalid">
+      Save
+    </button>
+    <button class="btn btn-primary" ng-click="addProcessor()" ng-disabled="procsBtnStatus">
+      Add Processors
+    </button>
+  </div>
+ 
+</div>

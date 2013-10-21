@@ -71,6 +71,7 @@ war {
 
 	archiveName="g2mailboxservice.war"
 
+
 	// TODO
 	// Resources used for the Dynamic Services landing page are intentionally kept in the
 	// service-framework module (where dynamic services framework is also defined), and
@@ -81,21 +82,28 @@ war {
 		into 'WEB-INF/classes/'
 	}
 
-	// TODO Needed?  I believe is is, since this is not
-	// the conventional location for webapp root
-	from('src/main/webapp/') {
-		include '**/**';
-		into '/'
-	}
+	
+    // copy webapp
+    from('src/main/webapp/ui') {
+        include '**/**';
+        into '/'
+    }
 
-	//webXml = file('src/main/webapp/WEB-INF/web.xml')
-
+    //webXml = file('src/main/webapp/ui/WEB-INF/web.xml')
 }
+
+
 
 dependencies {
 
-	// inherited from NetFlix Karyon
-	compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
+
+    // fs2
+    compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
+    
+    
+    // inherited from NetFlix Karyon
+    compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
+
 
 	// for commons-codec (used in example encoding service)
 	compile 'commons-configuration:commons-configuration:1.8'
@@ -279,6 +287,7 @@ classes.dependsOn('enhance')
 
 // jettyRun configuration properties
 jettyRun {
+
 	dependsOn 'jettyRunSetProperties'
 	logger.info "Running jetty"
 	httpPort = new Integer(jettyHttpPort)
@@ -334,5 +343,14 @@ jacocoTestReport {
         xml.enabled true
     }
 	
+
+    dependsOn 'jettyRunSetProperties'
+    logger.info "Running jetty"
+    httpPort = new Integer(jettyHttpPort)
+    reload = 'automatic'
+    scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
+    daemon = false
+    webAppSourceDirectory = file('src/main/webapp/ui')
+
 }
 

@@ -76,6 +76,8 @@ service-framework/.nb-gradle/
 service-implementation/.nb-gradle/
 service-implementation/src/main/webapp/build.xml
 service-implementation/src/main/webapp/nbproject/
+service-implementation/src/main/webapp/ui/nbproject/
 
 /bin
 /service-implementation/src/main/webapp/nbproject/private/
+/service-implementation/src/main/webapp/ui/nbproject/private/

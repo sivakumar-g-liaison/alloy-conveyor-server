@@ -31,7 +31,6 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.audit.AuditStatement;
 import com.liaison.framework.audit.DefaultAuditStatement;
 import com.liaison.framework.audit.pci.PCIV20Requirement;
-import com.liaison.framework.fs2.api.FS2DefaultConfiguration;
 import com.netflix.config.ConfigurationManager;
 
 /**
@@ -63,12 +62,12 @@ public class InitializationServlet extends HttpServlet {
 				UUIDGen.init();
 
 				// To initialize the properties for FS2
-				FS2DefaultConfiguration.init(ConfigurationManager.getDeploymentContext().getDeploymentEnvironment());
+				//FS2DefaultConfiguration.init(ConfigurationManager.getDeploymentContext().getDeploymentEnvironment());
 				isInitialized = true;
 				DefaultAuditStatement audit = new DefaultAuditStatement(PCIV20Requirement.PCI10_2_6,
 						AuditStatement.Status.SUCCEED, "Initialization via servlet");
 				logger.info("Servlet Init", audit);
-			} catch (SQLException | NamingException | UniversalConnectionPoolException | IOException e) {
+			} catch (SQLException | NamingException | UniversalConnectionPoolException  e) {
 				logger.error(e.getMessage(), e);
 				throw new ServletException("JPA Persistence initialialization failed! See log for details.");
 			}

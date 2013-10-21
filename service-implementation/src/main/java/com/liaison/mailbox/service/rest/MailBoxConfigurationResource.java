@@ -10,10 +10,14 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.StreamUtil;
-import com.liaison.framework.fs2.api.FS2DefaultConfiguration;
+import com.liaison.framework.util.ServiceUtils;
+import com.liaison.fs2.api.FS2DefaultConfiguration;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
@@ -56,6 +61,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -70,6 +76,7 @@ import com.netflix.servo.monitor.Monitors;
 public class MailBoxConfigurationResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
+	private final static Properties properties = new Properties();
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -77,8 +84,13 @@ public class MailBoxConfigurationResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public MailBoxConfigurationResource() {
+	public MailBoxConfigurationResource() throws IOException {
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
+		Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
+		String propertyFileName = "g2mailboxservice-" + env + ".properties";
+		String props = ServiceUtils.readFileFromClassPath(propertyFileName);
+		InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
+		properties.load(is);
 	}
 
 	/**
@@ -593,8 +605,8 @@ public class MailBoxConfigurationResource {
 		Response returnResponse;
 
 		try {
-
-			File file = new File(FS2DefaultConfiguration.properties.getProperty("rootDirectory"));
+            String jsFileLocation = String.valueOf(properties.get("rootDirectory"));
+			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			FileInfoDTO info = mailbox.getFileDetail(file);

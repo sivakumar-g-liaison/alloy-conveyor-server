@@ -129,15 +129,11 @@ project(':service-framework') {
     dependencies {
 
         testCompile 'org.testng:testng:6.8'
-        testCompile 'junit:junit:4.10'
-
-        // commons-io and jackson-core support fs2
-        compile 'commons-io:commons-io:2.4'
-        compile 'com.fasterxml.jackson.core:jackson-core:2.2.2'
-
+        testCompile 'junit:junit:4.11'
     }
 }
 
+// fs2
 allprojects {
     //repositories { mavenCentral() }
     configurations.all {
