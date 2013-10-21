@@ -33,7 +33,6 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailb
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -86,27 +85,13 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
-		// Add MailBoxSched Profile
-		String addProfile = "/" + responseDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
-		HTTPRequest profileRequest = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
-				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
-		profileRequest.execute();
-
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				AddProfileToMailBoxResponseDTO.class);
-
-		Assert.assertEquals(SUCCESS, mbProfileResponseDTO.getResponse().getStatus());
-
 		// Add the Processor
 		String jsonRequest = ServiceUtils.readFileFromClassPath("requests/processor/createprocessorfortriggerprofile.json");
 		AddProcessorToMailboxRequestDTO addProcessorDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest,
 				AddProcessorToMailboxRequestDTO.class);
 
 		addProcessorDTO.getProcessor().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		// addProcessorDTO.getProcessor().setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
+		addProcessorDTO.getProcessor().getLinkedProfiles().add(profileName);
 
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 

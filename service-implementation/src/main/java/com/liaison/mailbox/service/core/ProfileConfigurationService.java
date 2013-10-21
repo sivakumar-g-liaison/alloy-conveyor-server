@@ -25,7 +25,6 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -41,8 +40,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 public class ProfileConfigurationService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
-	private static String PROFILE = "Profile";
-	private static String MAILBOX_PROFILE = "Mailbox-Profile Link";
+	private static final String PROFILE = "Profile";
 
 	private final GenericValidator validator = new GenericValidator();
 
@@ -142,26 +140,4 @@ public class ProfileConfigurationService {
 
 	}
 
-	/**
-	 * Deactivate Profile from MailBox.
-	 * 
-	 * @param mailboxGuid
-	 *            The mailbox id
-	 * @param linkGuid
-	 *            The mailbox profile link id
-	 * @return The responseDTO.
-	 */
-	public DeactivateMailboxProfileLinkResponseDTO deactivateMailboxProfileLink(String mailboxGuid, String linkGuid) {
-
-		LOG.info("Deactivate Profile from mailbox");
-		LOG.info("input mailbox id {}", mailboxGuid);
-		LOG.info("input linker id {}", linkGuid);
-		DeactivateMailboxProfileLinkResponseDTO serviceResponse = new DeactivateMailboxProfileLinkResponseDTO();
-		// response message construction
-		serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, PROFILE, Messages.SUCCESS));
-		serviceResponse.setMailboxProfileLinkGuid(String.valueOf(linkGuid));
-		LOG.info("Exit from deactivate profile.");
-		return serviceResponse;
-
-	}
 }

@@ -45,9 +45,9 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequ
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -74,11 +74,50 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testAddProcessorToMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+	public void testCreateProcessorToMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+
+		// Get Processor
+		String getProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
+				+ processorResponseDTO.getProcessor().getGuId();
+		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+		Assert.assertEquals(false, getResponseDTO.getProcessor().getProfiles().isEmpty());
+
+	}
+
+	@Test
+	public void testCreateProcessorToMailBox_WithoutProfile_ShouldPass() throws LiaisonException, JSONException,
+			JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -110,12 +149,14 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testAddProcessorToMailBoxWithoutProtocol() throws LiaisonException, JSONException, JsonParseException,
+	public void testCreateProcessorToMailBox_WithoutMailBoxId_ShouldFail() throws LiaisonException, JSONException,
+			JsonParseException,
 			JsonMappingException,
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, null);
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
+		addProcessorDTO.getProcessor().setLinkedMailboxId(null);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -132,12 +173,37 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testAddProcessorToMailBoxWithWrongProtocol() throws LiaisonException, JSONException, JsonParseException,
+	public void testCreateProcessorToMailBox_WithWorngMailBoxId_ShouldFail() throws LiaisonException, JSONException,
+			JsonParseException,
 			JsonMappingException,
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "TEST");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
+		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + "1241234123" + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testCreateProcessorToMailBox_WithWrongProfile_ShouldFail() throws LiaisonException, JSONException,
+			JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		addProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -154,11 +220,13 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testAddProcessorToMailBox_InvalidId() throws LiaisonException, JSONException, JsonParseException,
-			JsonMappingException, JAXBException, IOException {
+	public void testCreateProcessorToMailBox_WithoutProtocol_ShouldFail() throws LiaisonException, JSONException,
+			JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, null, true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -170,26 +238,18 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
-
-		// Get Processor
-		String getProcessor = "/" + "1452585w1" + "/processor" + "/" + "SSDDCSDSDSD";
-		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
-		request.execute();
-
-		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
-
-		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
 
 	@Test
-	public void testAddProcessorToMailBox_NullValue() throws LiaisonException, JSONException, JsonParseException,
-			JsonMappingException, JAXBException, IOException {
+	public void testCreateProcessorToMailBox_WithWrongProtocol_ShouldFail() throws LiaisonException, JSONException,
+			JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "TEST", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -201,7 +261,14 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testReadProcessor_NullValueInURI_ShouldFail() throws LiaisonException, JSONException,
+			JsonParseException,
+			JsonMappingException, JAXBException, IOException {
 
 		// Get Processor
 		String getProcessor = "/" + null + "/processor" + "/" + null;
@@ -216,11 +283,12 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testCreateProcessor_MandotoryValuesOnly() throws LiaisonException, JSONException, JsonParseException,
+	public void testCreateProcessorToMailBox_MandotoryValuesOnly_ShouldPass() throws LiaisonException, JSONException,
+			JsonParseException,
 			JsonMappingException, JAXBException, IOException {
 
 		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest("RESPONSE_LOCATION", "/Sample", "db", "ACTIVE",
-				"REMOTEDOWNLOADER", false, "HTTP"));
+				"REMOTEDOWNLOADER", false, "HTTP", true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -236,11 +304,12 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testCreateProcessor_WithInvalidMandatoryValues() throws JAXBException, JsonGenerationException,
+	public void testCreateProcessorToMailBox_WithInvalidMandatoryValues_ShouldFail() throws JAXBException,
+			JsonGenerationException,
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
 		jsonRequest = MailBoxUtility
-				.marshalToJSON(getProcessorRequest("ddd755", "/Sample", "db", "fdfd", "85964", false, "HTTP"));
+				.marshalToJSON(getProcessorRequest("ddd755", "/Sample", "db", "fdfd", "85964", false, "HTTP", true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -255,10 +324,11 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testCreateProcessor_WithInvalidMandatoryValuesAsNull() throws JAXBException, JsonGenerationException,
+	public void testCreateProcessorToMailBox_WithMandatoryValuesAsNull__ShouldFail() throws JAXBException,
+			JsonGenerationException,
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
-		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest(null, null, null, null, null, false, null));
+		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest(null, null, null, null, null, false, null, true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -277,7 +347,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -309,11 +379,79 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testReviseProcessorUsingLiaisonHttpClient() throws LiaisonException, JSONException, JsonParseException,
+	public void testReadProcessor_WithInvalidProcessorId_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		String getProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/" + "DummyId";
+		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+
+		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+	}
+
+	@Test
+	public void testReadProcessor_WithInvalidMailBox_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+
+		AddProcessorToMailboxRequestDTO addSecProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		jsonRequest = MailBoxUtility.marshalToJSON(addSecProcessorDTO);
+
+		String addProcessorReq = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessorReq, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorSecResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorSecResponseDTO.getResponse().getStatus());
+
+		// Get Processor
+		String getProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
+				+ processorResponseDTO.getProcessor().getGuId();
+		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getType(), getResponseDTO.getProcessor().getType());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
+		Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
+	}
+
+	@Test
+	public void testReviseProcessor() throws LiaisonException, JSONException, JsonParseException,
 			JsonMappingException, JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -328,7 +466,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
-				"/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP");
+				"/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", true);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
@@ -360,11 +498,11 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testReviseProcessorUsingWithoutProtocol() throws LiaisonException, JSONException, JsonParseException,
+	public void testReviseProcessor_WithoutProtocol_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
 			JsonMappingException, JAXBException, IOException {
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
-				"/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, null);
+				"/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, null, true);
 		reviseProcessorDTO.getProcessor().setGuid("123456");
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
@@ -381,11 +519,11 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testReviseProcessorUsingWithInvalidProtocol() throws LiaisonException, JSONException, JsonParseException,
+	public void testReviseProcessor_WithInvalidProtocol_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
 			JsonMappingException, JAXBException, IOException {
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
-				"/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "Test");
+				"/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "Test", true);
 		reviseProcessorDTO.getProcessor().setGuid("123456");
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
@@ -402,11 +540,207 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testDeActivateProcessor() throws LiaisonException, JSONException, JsonGenerationException, JsonMappingException,
+	public void testReviseProcessor_WithoutMailBoxId_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+		reviseProcessorDTO.getProcessor().setLinkedMailboxId(null);
+		reviseProcessorDTO.getProcessor().setGuid("21412341234");
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+
+		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor/"
+				+ "123456";
+		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		ReviseProcessorResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				ReviseProcessorResponseDTO.class);
+		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testReviseProcessor_WithNullValueInURI_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+		reviseProcessorDTO.getProcessor().setLinkedMailboxId("null");
+		reviseProcessorDTO.getProcessor().setGuid("dfasfasfdafd");
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+
+		String reviseProcessor = "/" + null + "/processor/" + null;
+		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		ReviseProcessorResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				ReviseProcessorResponseDTO.class);
+		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testReviseProcessor_WithWorngMailBoxId_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		// Add
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+
+		// Revise
+		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
+
+		String reviseProcessor = "/" + addProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
+				+ "123456";
+		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				ReviseProcessorResponseDTO.class);
+		Assert.assertEquals(FAILURE, revProcessorResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testReviseProcessor_WithoutProfile_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		// AddProcessor
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+
+		// Get Processor
+		String getProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
+				+ processorResponseDTO.getProcessor().getGuId();
+		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(false, getResponseDTO.getProcessor().getProfiles().isEmpty());
+
+		// Revise
+		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
+
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		String reviseProcessor = "/" + reviseProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
+				+ processorResponseDTO.getProcessor().getGuId();
+		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				ReviseProcessorResponseDTO.class);
+		Assert.assertEquals(SUCCESS, revProcessorResponseDTO.getResponse().getStatus());
+
+		// Get Processor
+		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(true, getResponseDTO.getProcessor().getProfiles().isEmpty());
+	}
+
+	@Test
+	public void testReviseProcessor_WithInvaidProfile_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		// AddProcessor
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+
+		// Revise
+		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", true);
+		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
+		reviseProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
+
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		String reviseProcessor = "/" + reviseProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
+				+ processorResponseDTO.getProcessor().getGuId();
+		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				ReviseProcessorResponseDTO.class);
+		Assert.assertEquals(FAILURE, revProcessorResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testDeactivateProcessor() throws LiaisonException, JSONException, JsonGenerationException, JsonMappingException,
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP");
+				"RESPONSE_LOCATION", "/Sample", "db", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -421,9 +755,9 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		// Deactivate the processor
-		String deActProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
+		String deactProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
 				+ processorResponseDTO.getProcessor().getGuId();
-		request = constructHTTPRequest(getBASE_URL() + deActProcessor, HTTP_METHOD.DELETE, null, logger);
+		request = constructHTTPRequest(getBASE_URL() + deactProcessor, HTTP_METHOD.DELETE, null, logger);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -446,6 +780,47 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
 	}
 
+	@Test
+	public void testDeactivateProcessor_WithWrongProcessorId__ShouldFail() throws LiaisonException, JSONException,
+			JsonGenerationException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		// Deactivate the processor
+		String deactProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
+				+ "DummyId";
+		request = constructHTTPRequest(getBASE_URL() + deactProcessor, HTTP_METHOD.DELETE, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				DeActivateProcessorResponseDTO.class);
+		Assert.assertEquals(FAILURE, responseDeactivateDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testDeactivateProcessor_WithNullValueInURI__ShouldFail() throws LiaisonException, JSONException,
+			JsonGenerationException,
+			JsonMappingException,
+			JAXBException, IOException {
+
+		// Deactivate the processor
+		String deactProcessor = "/" + null + "/processor" + "/" + null;
+		request = constructHTTPRequest(getBASE_URL() + deactProcessor, HTTP_METHOD.DELETE, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+				DeActivateProcessorResponseDTO.class);
+		Assert.assertEquals(FAILURE, responseDeactivateDTO.getResponse().getStatus());
+
+	}
+
 	private AddMailBoxResponseDTO createMailBox() throws JAXBException, JsonParseException, JsonMappingException, IOException,
 			JsonGenerationException, MalformedURLException, FileNotFoundException, LiaisonException {
 
@@ -464,46 +839,9 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		return responseDTO;
 	}
 
-	private AddProfileToMailBoxResponseDTO createProfileLink(AddMailBoxResponseDTO requestDTO,
-			AddProfileResponseDTO profileResponseDTO) throws MalformedURLException, FileNotFoundException, LiaisonException,
-			JAXBException, JsonParseException, JsonMappingException, IOException {
-
-		String addProfile = "/" + requestDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
-		request = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
-				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
-		request.execute();
-
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				AddProfileToMailBoxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, mbProfileResponseDTO.getResponse().getStatus());
-		return mbProfileResponseDTO;
-	}
-
-	private AddProfileResponseDTO addProfile() throws JAXBException, JsonGenerationException, JsonMappingException, IOException,
-			MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
-
-		String profileName = "once" + System.currentTimeMillis();
-		ProfileDTO profile = new ProfileDTO();
-		profile.setName(profileName);
-		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
-		profileRequstDTO.setProfile(profile);
-
-		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
-		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
-		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
-		return profileResponseDTO;
-	}
-
 	private Object getProcessorRequest(String folderTye, String folderURI, String credentialType, String processorStatus,
-			String processorType, boolean isRevise, String protocolType) throws JsonParseException, JsonMappingException,
+			String processorType, boolean isRevise, String protocolType, boolean setProfile) throws JsonParseException,
+			JsonMappingException,
 			JsonGenerationException,
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
 
@@ -527,13 +865,16 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		processorDTO.setProtocol(protocolType);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
 
-		String profileName = "TestProfile" + System.nanoTime();
-		AddProfileResponseDTO response = addProfile(profileName);
-		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+		if (setProfile) {
 
-		List<String> profiles = new ArrayList<>();
-		profiles.add(profileName);
-		processorDTO.setLinkedProfiles(profiles);
+			String profileName = "TestProfile" + System.nanoTime();
+			AddProfileResponseDTO response = addProfile(profileName);
+			Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+			List<String> profiles = new ArrayList<>();
+			profiles.add(profileName);
+			processorDTO.setLinkedProfiles(profiles);
+		}
 
 		if (isRevise) {
 			ReviseProcessorRequestDTO reviseDTO = new ReviseProcessorRequestDTO();
@@ -550,7 +891,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
 		ProfileDTO profile = new ProfileDTO();
-		profile.setName("onceIn57mins");
+		profile.setName(profileName);
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
 		profileRequstDTO.setProfile(profile);
 

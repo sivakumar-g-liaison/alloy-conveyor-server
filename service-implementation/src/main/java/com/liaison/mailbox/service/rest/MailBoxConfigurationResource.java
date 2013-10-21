@@ -49,7 +49,6 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMail
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DeactivateMailboxProfileLinkResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
@@ -337,51 +336,6 @@ public class MailBoxConfigurationResource {
 
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
-	}
-
-	/**
-	 * REST method to deactivate a profile - mailbox link.
-	 * 
-	 * @param mailGuid
-	 *            The id of the mailbox
-	 * @param linkGuid
-	 *            The id of the mailbox scheduler profile link
-	 * @return Response Object
-	 */
-	@DELETE
-	@Path("/{mailboxguid}/profile/{mailboxprofilelinkguid}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response deactivateMailboxProfileLink(@PathParam(value = "mailboxguid") String mailGuid,
-			@PathParam(value = "mailboxprofilelinkguid") String linkGuid) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-
-		try {
-
-			// deactivate the profile details
-			DeactivateMailboxProfileLinkResponseDTO serviceResponse = null;
-			ProfileConfigurationService profile = new ProfileConfigurationService();
-			serviceResponse = profile.deactivateMailboxProfileLink(mailGuid, linkGuid);
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
 			// should be throwing out of domain scope and into framework using

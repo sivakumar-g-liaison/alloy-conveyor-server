@@ -106,6 +106,7 @@ public class GenericValidatorTest {
 		dto.setType("SWEEPER");
 		dto.setStatus("ACTIVE");
 		dto.setProtocol("HTTP");
+		dto.setLinkedMailboxId("DUMMYID");
 		validator.validate(dto);
 	}
 

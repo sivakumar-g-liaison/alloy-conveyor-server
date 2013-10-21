@@ -48,7 +48,6 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProfileToMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -62,8 +61,6 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	private HTTPRequest request;
 	private Logger logger = null;
 	private AddMailBoxResponseDTO responseDTO;
-	private AddProfileResponseDTO profileResponseDTO;
-	private AddProfileToMailBoxResponseDTO mbProfileResponseDTO;
 
 	/**
 	 * @throws java.lang.Exception
@@ -73,8 +70,6 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		logger = LoggerFactory.getLogger(MailBoxProcessorServiceTest.class);
 		// Adding the mailbox
 		responseDTO = createMailBox();
-		profileResponseDTO = addProfile();
-		mbProfileResponseDTO = createProfileLink(responseDTO, profileResponseDTO);
 	}
 
 	@Test
@@ -94,7 +89,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 		HttpRemoteDownloader downloader = new HttpRemoteDownloader(processor);
-		HTTPRequest request = (HTTPRequest)downloader.getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest) downloader.getClientWithInjectedConfiguration();
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
 	}
@@ -120,7 +115,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 	private AddProcessorToMailboxRequestDTO getProcessorRequest(String folderTye, String credentialType, String folderURI,
 			String processorStatus, String processorType, String javaScriptURI) throws JsonParseException, JsonMappingException,
-			JAXBException, IOException {
+			JAXBException, IOException, LiaisonException {
 
 		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
 		List<FolderDTO> folderList = new ArrayList<FolderDTO>();
@@ -142,7 +137,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processorDTO.setType(processorType);
 		processorDTO.setJavaScriptURI(javaScriptURI);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
-		// processorDTO.setLinkedProfileId(mbProfileResponseDTO.getMailboxProfileLinkGuid());
+
+		String profileName = "Test" + System.nanoTime();
+		addProfile(profileName);
+		processorDTO.getLinkedProfiles().add(profileName);
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = new AddProcessorToMailboxRequestDTO();
 		addProcessorDTO.setProcessor(processorDTO);
@@ -177,28 +175,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		return responseDTO;
 	}
 
-	private AddProfileToMailBoxResponseDTO createProfileLink(AddMailBoxResponseDTO requestDTO,
-			AddProfileResponseDTO profileResponseDTO) throws MalformedURLException, FileNotFoundException, LiaisonException,
-			JAXBException, JsonParseException, JsonMappingException, IOException {
-
-		String addProfile = "/" + requestDTO.getMailBox().getGuid() + "/profile/" + profileResponseDTO.getProfile().getGuId();
-		request = constructHTTPRequest(getBASE_URL() + addProfile, HTTP_METHOD.POST, jsonRequest,
-				LoggerFactory.getLogger(MailBoxProfileServiceTest.class));
-		request.execute();
-
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddProfileToMailBoxResponseDTO mbProfileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				AddProfileToMailBoxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, mbProfileResponseDTO.getResponse().getStatus());
-		return mbProfileResponseDTO;
-	}
-
-	private AddProfileResponseDTO addProfile() throws JAXBException, JsonGenerationException, JsonMappingException, IOException,
+	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
+			JsonMappingException, IOException,
 			MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
-		String profileName = "once" + System.currentTimeMillis();
 		ProfileDTO profile = new ProfileDTO();
 		profile.setName(profileName);
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();

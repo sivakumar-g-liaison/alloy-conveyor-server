@@ -6,7 +6,8 @@
             "type": "REMOTEDOWNLOADER",
             "status": "ACTIVE",
             "description": "",
-            "remoteDownloaderProperties": {
+            "protocol": "HTTP",
+            "remoteProcessorProperties": {
                 "httpVersion": "1.1",
                 "httpVerb": "GET",
                 "retryAttempts": "1",
@@ -49,7 +50,7 @@
                 }
             ],
             "linkedMailboxId": "2CA5B1B6C0A801AD0B4385E4060808F5",
-            "linkedProfileId": "2CB89C44C0A801AD0B4385E41F305C5E"
+            "linkedProfiles": []
         }
     }
 }
