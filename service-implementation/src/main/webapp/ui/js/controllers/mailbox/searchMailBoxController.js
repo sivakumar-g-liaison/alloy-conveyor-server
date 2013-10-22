@@ -139,7 +139,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         }, true);
 
         // Customized column in the grid.
-        $scope.editableInPopup = '<button class="btn" ng-click="edit(row)"><i class="icon-pencil"></i></button><button class="btn" ng-click="openDelete(row)"><i class="icon-trash"></i></button>';
+        $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-click="openDelete(row)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button>';
 
         // Setting the grid details
         $scope.gridOptions = {
