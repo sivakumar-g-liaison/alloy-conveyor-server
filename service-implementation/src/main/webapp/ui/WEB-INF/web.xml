@@ -101,7 +101,7 @@
        Enable only for development when using python to make calls to tomcat  and 
        make sure containes (tomcat) provides the jar required for this
     ==============================================================================
-     -->
+     
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -110,7 +110,7 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-  
+  -->
 
 
 </web-app>
