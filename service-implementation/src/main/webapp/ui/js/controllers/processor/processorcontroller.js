@@ -103,6 +103,23 @@ var rest = myApp.controller(
 				allowAdd: true,
 				isMandatory: false
 			}];
+                    
+                    $scope.ftpMandatoryProperties = [{
+				name: 'url',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: 'port',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: '',
+				value: '',
+				allowAdd: true,
+				isMandatory: false
+			}];
 
             // Procsr Folder Props
             $scope.processorFolderProperties = [{
@@ -188,24 +205,20 @@ var rest = myApp.controller(
                     field: "value",
                     width: "45%",
                     displayName: "Value",
-                    enableCellEdit: true,
-                                     
+                    enableCellEdit: false,
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required">'                 
                 }, {
                 field: "allowAdd",
 		width: "10%",
                 enableCellEdit: false,
                 displayName: "Action",
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">add</button></div>' +
+                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                     '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')">'+
-					'<div ng-switch-when="true"><button ng-disabled=true>remove</button></div>'+
-					'<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">remove</button></div>'+
+					'<div ng-switch-when="true">-NA-</div>'+
+					'<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>'+
 					'</div></div></div>'
 
-				}, {
-					field: "isMandatory",
-					width: "1%",
-					visible: false
 				}]
             };
 
@@ -241,9 +254,9 @@ var rest = myApp.controller(
                     displayName: "Action",
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">add</button></div>' +
-                        '<div ng-switch-when="showNoAddBox"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">add</button></div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">remove</button></div>' +
+                        '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="showNoAddBox"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                         '</div>'
 
                 }]
@@ -279,6 +292,7 @@ var rest = myApp.controller(
                     field: "password",
                     width: "20%",
                     displayName: "Password",
+                     enableCellEdit: false,
                     cellTemplate: '<div class="passwordDirective" row-entity="row.entity" col-filed="col.field" />'
                 }, {
                     field: "idpType",
@@ -297,9 +311,9 @@ var rest = myApp.controller(
                     displayName: "Action",
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">add</button></div>' +
-                        '<div ng-switch-when="showNoAddBox"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">add</button></div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">remove</button></div>' +
+                        '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="showNoAddBox"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                         '</div>'
 
                 }]
@@ -547,7 +561,11 @@ var rest = myApp.controller(
 
             // For Procsr Dynamic Props
             $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
+              $scope.informer.inform("error message", "error");
+               $scope.informer.inform("info message", "info");
 
+               $scope.allInfos = $scope.informer.allInfos;  
+               $scope.remove = $scope.informer.remove;
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
                 gridData.push({
@@ -566,7 +584,7 @@ var rest = myApp.controller(
                     name: '',
                     value: '',
                     allowAdd: true,
-					isMandatory: false
+		    isMandatory: false
 					
                 });
 
@@ -823,6 +841,18 @@ var rest = myApp.controller(
                    
                     $scope.loadOrigin();
                     $scope.readAllProfiles();
+             };
+             
+             $scope.resetProps = function () {
+                 alert("iam called");
+                     if($scope.isEdit){
+                         return;
+                     }
+                    if($scope.processor.protocol === "FTP"){
+                         alert($scope.processor.type);
+                       $scope.processorProperties = $scope.ftpMandatoryProperties; 
+                    }
+                    
              };
 
         }

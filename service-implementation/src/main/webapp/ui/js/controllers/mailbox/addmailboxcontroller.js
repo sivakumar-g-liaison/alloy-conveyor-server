@@ -32,7 +32,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             'INACTIVE'
         ];
 
-        addRequest.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
+        //addRequest.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'filerenameformat'];
@@ -175,8 +175,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 field: "allowAdd",
                 displayName: "Action",
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)">add</button></div>' +
-                    '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)">remove</button></div>' +
+                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                    '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                     '</div>'
 
             }]
