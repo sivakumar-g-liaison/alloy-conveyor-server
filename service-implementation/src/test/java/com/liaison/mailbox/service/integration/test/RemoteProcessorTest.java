@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.integration.test;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -74,7 +76,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 	@Test
 	public void testRemoteDownloader() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
-			JAXBException, IOException {
+			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("Processor");

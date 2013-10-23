@@ -37,8 +37,10 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2Factory;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FlexibleStorageSystem;
+import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.EmailNotifier;
@@ -62,6 +64,8 @@ public abstract class AbstractRemoteProcessor {
 	private static final EmailNotifier NOTIFIER = new EmailNotifier();
 
 	private static FlexibleStorageSystem FS2 = null;
+	
+	public static boolean isTrustStore = false;
 
 	protected Processor configurationInstance;
 
@@ -151,7 +155,6 @@ public abstract class AbstractRemoteProcessor {
 				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.INPUT_FOLDER.equals(foundFolderType)) {
-
 					return folder.getFldrUri();
 				}
 			}
@@ -194,6 +197,67 @@ public abstract class AbstractRemoteProcessor {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Get the URI to which the response should be written, this can be used if the JS decides to
+	 * write the response straight to the file system or database
+	 * 
+	 * @return URI
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	protected String getCredentialURI() throws MailBoxServicesException {
+
+		if (configurationInstance.getCredentials() != null) {
+
+			for (Credential credential : configurationInstance.getCredentials()) {
+
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
+				if (null == foundCredentailType) {
+					
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+				} else if (CredentialType.TRUST_STORE.equals(foundCredentailType)) {
+					
+					isTrustStore = true;
+					return credential.getCredsIdpUri();
+				} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
+					
+					isTrustStore = false;
+					return credential.getCredsIdpUri();
+				} else {
+					return credential.getCredsIdpUri();
+				}
+			}
+		}
+		return null;
+	}
+	
+	protected String getUserCredentialURI() throws MailBoxServicesException {
+
+		if (configurationInstance.getCredentials() != null) {
+
+			for (Credential credential : configurationInstance.getCredentials()) {
+
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
+				
+				if (null == foundCredentailType) {
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+				} else if(CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)){
+					return credential.getCredsIdpUri();
+				}
+			}
+		}
+		return null;
+	}
+	
+	public String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException{
+		
+		if(MailBoxUtility.isEmpty(credentialURI)){
+			throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+		}
+		URI uri = new URI(credentialURI);
+		String [] userData = uri.getRawAuthority().split("@")[0].split(":");
+		return userData;
 	}
 
 	/**
@@ -301,9 +365,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 * @throws LiaisonException
+	 * @throws URISyntaxException 
 	 */
 	public Object getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
-			IOException, LiaisonException {
+			IOException, LiaisonException, URISyntaxException, MailBoxServicesException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
 		// Create HTTPRequest and set the properties

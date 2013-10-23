@@ -7,33 +7,39 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-
 package com.liaison.mailbox.enums;
 
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
-public enum Protocol {
+/**
+ * @author praveenu
+ * 
+ */
+public enum CredentialType {
 
-	FTP("ftp"),
-	FTPS("ftps"),
-	SFTP("sftp"),
-	HTTP("http"),
-	HTTPS("https");
+	TRUST_STORE("trust_store"),
+	KEY_STORE("key_store"),
+	LOGIN_CREDENTIAL("login_credential");
 
 	private final String code;
 
-	private Protocol(String code) {
+	private CredentialType(String code) {
 		this.code = code;
+	}
+
+	@Override
+	public String toString() {
+		return code;
 	}
 
 	public String getCode() {
 		return code;
 	}
 
-	public static Protocol findByCode(String code) {
+	public static CredentialType findByCode(String code) {
 
-		Protocol found = null;
-		for (Protocol value : Protocol.values()) {
+		CredentialType found = null;
+		for (CredentialType value : CredentialType.values()) {
 
 			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
 				found = value;
@@ -44,10 +50,10 @@ public enum Protocol {
 		return found;
 	}
 
-	public static Protocol findByName(String name) {
+	public static CredentialType findByName(String name) {
 
-		Protocol found = null;
-		for (Protocol value : Protocol.values()) {
+		CredentialType found = null;
+		for (CredentialType value : CredentialType.values()) {
 
 			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
 				found = value;

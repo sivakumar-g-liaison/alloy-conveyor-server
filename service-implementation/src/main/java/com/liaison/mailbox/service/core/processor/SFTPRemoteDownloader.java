@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -56,11 +57,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
+	 * @throws MailBoxServicesException 
+	 * @throws URISyntaxException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException {
+	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
@@ -71,11 +74,11 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		sftpRequest.setDiagnosticLogger(LOGGER);
 		sftpRequest.setCommandLogger(LOGGER);
 		sftpRequest.setTimeout(properties.getConnectionTimeout());
+		sftpRequest.setStrictHostChecking(false);
 		sftpRequest.setRetryInterval(properties.getRetryInterval());
 		sftpRequest.setRetryCount(properties.getRetryAttempts());
-		sftpRequest.setUser("g2testusr");
-		sftpRequest.setPassword("mpxEukvePd4V");
-		sftpRequest.setStrictHostChecking(false);
+		sftpRequest.setUser(getUserCredetial(getUserCredentialURI())[0]);
+		sftpRequest.setPassword(getUserCredetial(getUserCredentialURI())[1]);
 		
 		return sftpRequest;
 		
@@ -189,5 +192,4 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			// TODO Re stage and update status in FSM
 		}
 	}
-
 }

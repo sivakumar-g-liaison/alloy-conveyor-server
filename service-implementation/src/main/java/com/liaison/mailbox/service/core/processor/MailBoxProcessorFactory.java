@@ -10,7 +10,10 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.model.Processor;
 
 /**
@@ -38,12 +41,53 @@ public class MailBoxProcessorFactory {
 
 		MailBoxProcessor mailBoxProcessor = null;
 
+		Protocol foundProtocolType = Protocol.findByCode(processor.getProcsrProtocol());
+		
 		if (ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-			mailBoxProcessor = new HttpRemoteDownloader(processor);
-		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
-			mailBoxProcessor = new HttpRemoteUploader(processor);
-		}
+						
+			switch (foundProtocolType) {
 
+				case FTPS:
+					mailBoxProcessor = new FTPSRemoteDownloader(processor);
+					break;
+
+				case SFTP:
+					mailBoxProcessor = new SFTPRemoteDownloader(processor);
+					break;
+				
+				case HTTP:
+					mailBoxProcessor = new HttpRemoteDownloader(processor);
+					break;
+				case HTTPS:
+					mailBoxProcessor = new HttpRemoteDownloader(processor);
+					break;
+				default:
+					break;
+				
+			}
+		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
+			
+			switch (foundProtocolType) {
+
+				case FTPS:
+					mailBoxProcessor = new FTPSRemoteUploader(processor);
+					break;
+
+				case SFTP:
+					mailBoxProcessor = new SFTPRemoteUploader(processor);
+					break;
+			
+				case HTTP:
+					mailBoxProcessor = new HttpRemoteUploader(processor);
+					break;
+				case HTTPS:
+					mailBoxProcessor = new HttpRemoteUploader(processor);
+					break;
+				default:
+					break;
+			
+			}
+		}
 		return mailBoxProcessor;
 	}
 
