@@ -41,7 +41,7 @@ var rest = myApp.controller(
                 remoteProcessorProperties: {}
             };
 
-            $scope.remoteProcessorProperties = {
+            $scope.processor.remoteProcessorProperties = {
                 otherRequestHeader: []
             };
 
@@ -65,7 +65,6 @@ var rest = myApp.controller(
                 'FTP',
                 'HTTP',
                 'HTTPS',
-                'FTP',
                 'FTPS',
                 'SFTP'
             ];
@@ -74,10 +73,36 @@ var rest = myApp.controller(
 
             // Procsr Dynamic Props
             $scope.processorProperties = [{
-                name: '',
-                value: '',
-                allowAdd: true
-            }];
+				name: 'httpVersion',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: 'httpVerb',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: 'url',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: 'port',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: 'contentType',
+				value: '',
+				allowAdd: false,
+				isMandatory: true
+			},{
+				name: '',
+				value: '',
+				allowAdd: true,
+				isMandatory: false
+			}];
 
             // Procsr Folder Props
             $scope.processorFolderProperties = [{
@@ -99,9 +124,11 @@ var rest = myApp.controller(
                 allowAdd: 'showNoAddBox'
             }];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'httpVersion', 'httpVerb', 'socketTimeout', 'connectionTimeout', 'url', 'port', 'retryAttempts', 'chunkedEncoding', 'contentType', 'encodingFormat', 'otherRequestHeader'];
+            $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'otherRequestHeader'];
 
-            $scope.allStaticProperties = ['httpVersion', 'httpVerb', 'socketTimeout', 'connectionTimeout', 'url', 'port', 'retryAttempts', 'chunkedEncoding', 'contentType', 'encodingFormat', 'otherRequestHeader'];
+            $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding','encodingFormat', 'otherRequestHeader'];
+			
+			$scope.allMandatoryProperties = ['httpVersion', 'httpVerb', 'url', 'port', 'contentType'];
 
             $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
 
@@ -146,7 +173,8 @@ var rest = myApp.controller(
             $scope.gridOptionsForProcessor = {
                 data: 'processorProperties',
                 displaySelectionCheckbox: false,
-                canSelectRows: false,
+                enableRowSelection: false,
+                enableCellEditOnFocus: true ,
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 40,
@@ -154,30 +182,38 @@ var rest = myApp.controller(
                     field: "name",
                     width: "45%",
                     displayName: "Name",
+                    enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "value",
                     width: "45%",
                     displayName: "Value",
                     enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                                     
                 }, {
-                    field: "allowAdd",
-                    width: "10%",
-                    displayName: "Action",
-                    cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">add</button></div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">remove</button></div>' +
-                        '</div>'
+                field: "allowAdd",
+		width: "10%",
+                enableCellEdit: false,
+                displayName: "Action",
+                cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
+                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">add</button></div>' +
+                    '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')">'+
+					'<div ng-switch-when="true"><button ng-disabled=true>remove</button></div>'+
+					'<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)">remove</button></div>'+
+					'</div></div></div>'
 
-                }]
+				}, {
+					field: "isMandatory",
+					width: "1%",
+					visible: false
+				}]
             };
 
             $scope.gridOptionsForProcessorFolder = {
                 data: 'processorFolderProperties',
                 displaySelectionCheckbox: false,
-                canSelectRows: false,
+                enableRowSelection: false,
+                enableCellEditOnFocus: true ,
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 40,
@@ -185,25 +221,25 @@ var rest = myApp.controller(
                     field: "folderURI",
                     width: "30%",
                     displayName: "Uri",
-                    enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                    enableCellEdit: true
+                   
                 }, {
                     field: "folderType",
                     width: "30%",
                     displayName: "Type",
+                     enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder" selected-value="valueSelectedinSelectionBoxForProcessorFolder" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "folderDesc",
                     width: "30%",
                     displayName: "Description",
-                    enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                    enableCellEdit: true
+                    
                 }, {
                     field: "allowAdd",
                     width: "10%",
                     displayName: "Action",
+                    enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">add</button></div>' +
                         '<div ng-switch-when="showNoAddBox"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)">add</button></div>' +
@@ -217,7 +253,8 @@ var rest = myApp.controller(
             $scope.gridOptionsForProcessorCredential = {
                 data: 'processorCredProperties',
                 displaySelectionCheckbox: false,
-                canSelectRows: false,
+                enableRowSelection: false,
+                enableCellEditOnFocus: true ,
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 100,
@@ -225,21 +262,19 @@ var rest = myApp.controller(
                     field: "credentialURI",
                     width: "15%",
                     displayName: "URI",
-                    enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                    enableCellEdit: true
+                   
                 }, {
                     field: "credentialType",
                     width: "12%",
                     displayName: "Type",
+                    enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "userId",
                     width: "15%",
                     displayName: "UserId",
-                    enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                    enableCellEdit: true
                 }, {
                     field: "password",
                     width: "20%",
@@ -249,18 +284,18 @@ var rest = myApp.controller(
                     field: "idpType",
                     width: "12%",
                     displayName: "IdpType",
+                    enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp" selected-value="valueSelectedinSelectionBoxForProcessorCredentialIdp" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "idpURI",
                     width: "15%",
                     displayName: "IdpURI",
-                    enableCellEdit: true,
-                    enableCellSelection: true,
-                    enableFocusedCellEdit: true
+                    enableCellEdit: true
                 }, {
                     field: "allowAdd",
                     width: "10%",
                     displayName: "Action",
+                    enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">add</button></div>' +
                         '<div ng-switch-when="showNoAddBox"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)">add</button></div>' +
@@ -354,33 +389,42 @@ var rest = myApp.controller(
 
                         // Pushing out dynamis props
 
-                        $scope.processorProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
+                        $scope.processorProperties = []; //Removing now so that the add new option always shows below the available properties
                         var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
                        
                        
                          for(var prop in json_data){                  
-                           if(json_data[prop]!==0 && json_data[prop]!==null && json_data[prop]!==''){
+                           if(json_data[prop]!==0 && json_data[prop]!==false && json_data[prop]!==null && json_data[prop]!==''){
                             $scope.processorProperties.push({
                                 name: prop,
                                 value: json_data[prop],
-                                allowAdd: false
+                                allowAdd: false,
+								isMandatory: ($scope.allMandatoryProperties.indexOf(prop) == -1)?false:true
                             });
                             var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(prop);
-                            $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+							if (indexOfElement != -1) {
+								$scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+							}
+                            
                         }
                        
                         } 
-                            
-
-                            
-                       
-
-                        $scope.processorProperties.splice(0, 1);
+						
+						for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
+							
+							$scope.processorProperties.push({
+                                name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                                allowAdd: false,
+								isMandatory: false
+                            });
+						}
 
                         $scope.processorProperties.push({ //Adding now so that the add new option always shows below the available properties
                             name: '',
                             value: '',
-                            allowAdd: true
+                            allowAdd: true,
+							isMandatory: false
                         });
 
                         $scope.processorFolderProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
@@ -457,7 +501,7 @@ var rest = myApp.controller(
                         $log.info($scope.roleList);
                         $scope.modal = {
                             "roleList": $scope.roleList,
-                            "url": ''
+                            "uri": ''
                         }
                     }
                 );
@@ -509,7 +553,8 @@ var rest = myApp.controller(
                 gridData.push({
                     name: valueSelectedinSelectionBox.name,
                     value: row.getProperty('value'),
-                    allowAdd: false
+                    allowAdd: false,
+					isMandatory: false
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
                 if (indexOfSelectedElement != -1) {
@@ -520,7 +565,9 @@ var rest = myApp.controller(
                 gridData.push({
                     name: '',
                     value: '',
-                    allowAdd: true
+                    allowAdd: true,
+					isMandatory: false
+					
                 });
 
             };
@@ -640,16 +687,25 @@ var rest = myApp.controller(
             }
                 
             };
+			
+			$scope.processOtherHeaderValue =  function(value) {
+				
+				var commaSplit = val.split(",");
+				var colonSplit
+			}
 
             $scope.saveProcessor = function () {
 
                 var lenDynamicProps = $scope.processorProperties.length;
+				var commaSplit;
+				
                 for (var i = 0; i < lenDynamicProps - 1; i++) {
 
                     var index = $scope.allStaticProperties.indexOf($scope.processorProperties[i].name);
+					var indexMandatory = $scope.allMandatoryProperties.indexOf($scope.processorProperties[i].name);
 
 
-                    if (index == -1) {
+                    if (index == -1 && indexMandatory == -1) {
                         $scope.processor.dynamicProperties.push({
                             name: $scope.processorProperties[i].name,
                             value: $scope.processorProperties[i].value
@@ -659,11 +715,7 @@ var rest = myApp.controller(
                         var name = $scope.processorProperties[i].name;
                         if (name === 'otherRequestHeader') {
 
-                            $scope.processor.remoteProcessorProperties.otherRequestHeader.push({
-                                name: 'otherRequestHeader',
-                                value: $scope.processorProperties[i].value
-
-                            });
+                            commaSplit = $scope.processorProperties[i].value.split(",");
                         } else {
                             $scope.processor.remoteProcessorProperties[name] = $scope.processorProperties[i].value;
                         }
@@ -671,6 +723,18 @@ var rest = myApp.controller(
                     }
 
                 }
+				
+				for (var i=0; i<commaSplit.length; i++) {
+								
+					var colonSplit = commaSplit[i].split(":");
+					$scope.processor.remoteProcessorProperties.otherRequestHeader.push({
+						name: colonSplit[0],
+						value: colonSplit[1]
+
+					});
+				}
+				
+				console.log(commaSplit)
 
                 var lenFolderProps = $scope.processorFolderProperties.length;
                 for (var i = 0; i < lenFolderProps - 1; i++) {

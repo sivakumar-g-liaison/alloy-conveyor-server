@@ -48,107 +48,104 @@
         
     </div>
     
-    <button class="btn btn-primary" ng-click="addNew()" >
+    <button class="btn btn-primary" ng-click="addNew()">
           Add new
         </button>
       
-    <form name="formAddPrcsr" novalidate class="form-horizontal">
+    <form name="formAddPrcsr" novalidate="">
       
       <br>
-      <br>
-      <br>
+      
       <h3>
         Processors Details
       </h3>
       <div class="row">
-        <div class="col-md-6">
-           <div class="row">
+        <div class="col-sm-6 col-md-6">
+          <div class="form-group">
           <label>
             Name
           </label>
-           </div> 
-            <div class="row">
-          <input type="text" ng-model="processor.name" required />
-           </div>
-           <div class="row">
+          <input type="text" ng-model="processor.name" required="" class="form-control">
+          </div>
+             <div class="form-group">
           <label>
             Type
           </label>
-           </div> 
-            <div class="row">
-          <select ng-model="processor.type" ng-options="type for type in enumprocsrtype">
+          
+          <select ng-model="processor.type" ng-options="type for type in enumprocsrtype" class="form-control">
+			<option value="">-- select--</option>
           </select>
-          </div>
-           <div class="row">
+             </div>
+           <div class="form-group">
           <label>
             Status
           </label>
-                </div> 
-            <div class="row">
-          <select ng-model="processor.status" ng-options="e for e in enumstats">
+          <select ng-model="processor.status" ng-options="e for e in enumstats" class="form-control">
+			<option value="">-- select--</option>
           </select>
-          </div>
-           <div class="row">
           
+           </div>
+           <div class="form-group">
           <label>
             Protocol
           </label>
-                </div> 
-            <div class="row">
-          <select ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype">
+          <select ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+			<option value="">-- select--</option>
           </select>
+           </div>
         </div>
-       </div> 
-        <div class="col-md-6">
+        
+        <div class="col-sm-6 col-md-6">
           
           <label>
             Description
           </label>
-          <textarea width="40px" height="20px" ng-model="processor.description">
-          </textarea>
+          <textarea width="40px" height="20px" ng-model="processor.description" class="form-control"></textarea>
           
           <label>
             Script File Path
           </label>
-          <input type="text" ng-model="modal.url"/>
-          <button type="button" class="btn" bs-modal="'partials/processor/treemodal.html'">
+		
+          <input type="text" ng-model="modal.uri" class="form-control" >
+          <button type="button" class="btn btn-default" bs-modal="'partials/processor/treemodal.html'">
             Browse
           </button>
+          <br/><br/>
           <label>
             Scheduling
           </label>
           
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-sm-4 col-md-4">
            <label>
             <i>
               all available schedules
             </i>
           </label>
-              <select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles">
+              <select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
               </select>
             </div>
-            <div class="col-md-1">
+            <div class="col-sm-2 col-md-2">
               <div class="row">
-                  </br>
+                  <br>
                 <button class="btn btn-primary" ng-click="chooseProfile()">
-                  >> 
+                  &gt;&gt; 
                 </button>
               </div>
               <div class="row">
-              </br>              
+              <br>              
               <button class="btn btn-primary" ng-click="removeProfile()">
-                <<
+                &lt;&lt;
               </button>
                 </div>
              </div>
-              <div class="col-md-3">
+              <div class="col-sm-4 col-md-4">
           <label>
             <i>
               linked schedules
             </i>
           </label>
-                <select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles">
+                <select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles" class="form-control">
                </select>
                </div>
              
@@ -190,7 +187,7 @@
       </div>
       
       <div class="container">
-         <button class="btn btn-primary" ng-click="backToMailbox()" >
+         <button class="btn btn-primary" ng-click="backToMailbox()">
           Back to Mailbox
         </button>         
         <button class="btn btn-primary" ng-click="saveProcessor()" ng-disabled="formAddPrcsr.$invalid">
@@ -200,4 +197,4 @@
           Cancel
         </button>
       </div>      
-    </div>
+    </div></div>
