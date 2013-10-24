@@ -57,15 +57,16 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
+	 * @throws MailBoxServicesException 
+	 * @throws URISyntaxException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException {
+	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
 
-		String json = ServiceUtils.readFileFromClassPath("requests/processor/sftp.json");
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
-				json, RemoteProcessorPropertiesDTO.class);
+				configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
 
 		G2SFTPClient sftpRequest = new G2SFTPClient();
 		sftpRequest.setURI(properties.getUrl());
@@ -74,10 +75,9 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		sftpRequest.setTimeout(properties.getConnectionTimeout());
 		sftpRequest.setRetryInterval(properties.getRetryInterval());
 		sftpRequest.setRetryCount(properties.getRetryAttempts());
-		sftpRequest.setUser("g2testusr");
-		sftpRequest.setPassword("mpxEukvePd4V");
 		sftpRequest.setStrictHostChecking(false);
-		//sftpRequest.setKnownHosts("C:/Documents and Settings/praveenu/.ssh/known_hosts");
+		sftpRequest.setUser(getUserCredetial(getUserCredentialURI())[0]);
+		sftpRequest.setPassword(getUserCredetial(getUserCredentialURI())[1]);
 		
 		return sftpRequest;
 		
