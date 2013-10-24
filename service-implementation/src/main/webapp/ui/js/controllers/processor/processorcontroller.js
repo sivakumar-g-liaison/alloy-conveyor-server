@@ -3,195 +3,191 @@ var rest = myApp.controller(
         '$filter', '$location', '$log',
         function ($scope, $filter,
             $location, $log) {
-    	
+
             // To be Populated
             $scope.mailBoxId;
 
-          $scope.loadOrigin = function () {
-                 
- //          
-            $scope.isEdit = false;
-            $scope.mailboxName=$location.search().mbxname;
- //Model for Add MB
-            addRequest = $scope.addRequest = {
-                addProcessorToMailBoxRequest: {
-                    processor: {}
-                }
+            $scope.loadOrigin = function () {
+
+                //          
+                $scope.isEdit = false;
+                $scope.mailboxName = $location.search().mbxname;
+                //Model for Add MB
+                addRequest = $scope.addRequest = {
+                    addProcessorToMailBoxRequest: {
+                        processor: {}
+                    }
+                };
+
+                editRequest = $scope.editRequest = {
+                    reviseProcessorRequest: {
+                        processor: {}
+                    }
+                };
+
+                $scope.processor = {
+                    guid: "",
+                    name: "",
+                    type: "",
+                    javaScriptURI: "",
+                    description: "",
+                    status: "",
+                    protocol: "",
+                    linkedMailboxId: "",
+                    linkedProfiles: [],
+                    folders: [],
+                    credentials: [],
+                    dynamicProperties: [],
+                    remoteProcessorProperties: {}
+                };
+
+                $scope.processor.remoteProcessorProperties = {
+                    otherRequestHeader: []
+                };
+
+                $scope.enumstats = [
+                    'ACTIVE',
+                    'INACTIVE'
+                ];
+
+                $scope.processor.status = $scope.enumstats[0];
+
+                // Enum for procsr type
+                $scope.enumprocsrtype = [
+                    'REMOTEDOWNLOADER',
+                    'REMOTEUPLOADER'
+                ];
+
+                $scope.processor.type = $scope.enumprocsrtype[0];
+
+                // Enum for protocol type
+                $scope.enumprotocoltype = [
+                    'FTP',
+                    'HTTP',
+                    'HTTPS',
+                    'FTPS',
+                    'SFTP'
+                ];
+
+                $scope.processor.protocol = $scope.enumprotocoltype[0];
+
+                // Procsr Dynamic Props
+
+                $scope.ftpMandatoryProperties = [{
+                    name: 'url',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: '',
+                    value: '',
+                    allowAdd: true,
+                    isMandatory: false
+                }];
+
+                $scope.httpMandatoryProperties = [{
+                    name: 'url',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'httpVersion',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'httpVerb',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'contentType',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: '',
+                    value: '',
+                    allowAdd: true,
+                    isMandatory: false
+                }];
+
+                $scope.processorProperties = $scope.ftpMandatoryProperties;
+
+                // Procsr Folder Props
+                $scope.processorFolderProperties = [{
+                    folderURI: '',
+                    folderType: '',
+                    folderDesc: '',
+                    allowAdd: 'showNoAddBox'
+                }];
+
+                // Procsr Credential Props
+                $scope.processorCredProperties = [{
+
+                    credentialURI: '',
+                    credentialType: '',
+                    userId: '',
+                    password: '',
+                    idpType: '',
+                    idpURI: '',
+                    allowAdd: 'showNoAddBox'
+                }];
+
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'otherRequestHeader'];
+
+                $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'otherRequestHeader'];
+
+                $scope.allMandatoryFtpProperties = ['url'];
+
+                $scope.allMandatoryHttpProperties = ['httpVersion', 'httpVerb', 'url', 'contentType'];
+
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
+
+                $scope.allStaticPropertiesForProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
+
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['REMOTE_SERVER_CRED'];
+
+                $scope.allStaticPropertiesForProcessorCredential = ['REMOTE_SERVER_CRED'];
+
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['FTP', 'FTPS', 'SFTP'];
+
+                $scope.allStaticPropertiesForProcessorCredentialIdp = ['FTP', 'FTPS', 'SFTP'];
+
+                $scope.addedProperty = 'add new';
+                $scope.disableAddNewTextBox = 'true';
+
+                $scope.valueSelectedinSelectionBox = {
+                    name: ''
+                };
+                /*Folder*/
+                $scope.valueSelectedinSelectionBoxForProcessorFolder = {
+                    name: ''
+                };
+                /*Credential*/
+                $scope.valueSelectedinSelectionBoxForProcessorCredential = {
+                    name: ''
+                };
+                /*Credential Idp*/
+                $scope.valueSelectedinSelectionBoxForProcessorCredentialIdp = {
+                    name: ''
+                };
+
+                // Profile Related Stuff.
+                $scope.allProfiles = [];
+
+                $scope.selectedProfiles = [];
+
             };
-
-            editRequest = $scope.editRequest = {
-                reviseProcessorRequest: {
-                    processor: {}
-                }
-            };
-
-            $scope.processor = {
-                guid: "",
-                name: "",
-                type: "",
-                javaScriptURI: "",
-                description: "",
-                status: "",
-                protocol: "",
-                linkedMailboxId: "",
-                linkedProfiles: [],
-                folders: [],
-                credentials: [],
-                dynamicProperties: [],
-                remoteProcessorProperties: {}
-            };
-
-            $scope.processor.remoteProcessorProperties = {
-                otherRequestHeader: []
-            };
-
-            $scope.enumstats = [
-                'ACTIVE',
-                'INACTIVE'
-            ];
-
-            addRequest.addProcessorToMailBoxRequest.processor.status = $scope.enumstats[0];
-
-            // Enum for procsr type
-            $scope.enumprocsrtype = [
-                'REMOTEDOWNLOADER',
-                'REMOTEUPLOADER'
-            ];
-
-            addRequest.addProcessorToMailBoxRequest.processor.type = $scope.enumprocsrtype[0];
-
-            // Enum for protocol type
-            $scope.enumprotocoltype = [
-                'FTP',
-                'HTTP',
-                'HTTPS',
-                'FTPS',
-                'SFTP'
-            ];
-
-            addRequest.addProcessorToMailBoxRequest.processor.protocol = $scope.enumprotocoltype[0];
-
-            // Procsr Dynamic Props
-            $scope.processorProperties = [{
-				name: 'httpVersion',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: 'httpVerb',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: 'url',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: 'port',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: 'contentType',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: '',
-				value: '',
-				allowAdd: true,
-				isMandatory: false
-			}];
-                    
-                    $scope.ftpMandatoryProperties = [{
-				name: 'url',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: 'port',
-				value: '',
-				allowAdd: false,
-				isMandatory: true
-			},{
-				name: '',
-				value: '',
-				allowAdd: true,
-				isMandatory: false
-			}];
-
-            // Procsr Folder Props
-            $scope.processorFolderProperties = [{
-                folderURI: '',
-                folderType: '',
-                folderDesc: '',
-                allowAdd: 'showNoAddBox'
-            }];
-
-            // Procsr Credential Props
-            $scope.processorCredProperties = [{
-
-                credentialURI: '',
-                credentialType: '',
-                userId: '',
-                password: '',
-                idpType: '',
-                idpURI: '',
-                allowAdd: 'showNoAddBox'
-            }];
-
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'otherRequestHeader'];
-
-            $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding','encodingFormat', 'otherRequestHeader'];
-			
-			$scope.allMandatoryProperties = ['httpVersion', 'httpVerb', 'url', 'port', 'contentType'];
-
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
-
-            $scope.allStaticPropertiesForProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
-
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['REMOTE_SERVER_CRED'];
-
-            $scope.allStaticPropertiesForProcessorCredential = ['REMOTE_SERVER_CRED'];
-
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['FTP', 'FTPS', 'SFTP'];
-
-            $scope.allStaticPropertiesForProcessorCredentialIdp = ['FTP', 'FTPS', 'SFTP'];
-
-            $scope.addedProperty = 'add new';
-            $scope.disableAddNewTextBox = 'true';
-
-            $scope.valueSelectedinSelectionBox = {
-                name: ''
-            };
-            /*Folder*/
-            $scope.valueSelectedinSelectionBoxForProcessorFolder = {
-                name: ''
-            };
-            /*Credential*/
-            $scope.valueSelectedinSelectionBoxForProcessorCredential = {
-                name: ''
-            };
-            /*Credential Idp*/
-            $scope.valueSelectedinSelectionBoxForProcessorCredentialIdp = {
-                name: ''
-            };
-            
-            // Profile Related Stuff.
-            $scope.allProfiles = [];
-
-            $scope.selectedProfiles = [];
-
-            };  
 
             $scope.loadOrigin();
+
 
             $scope.gridOptionsForProcessor = {
                 data: 'processorProperties',
                 displaySelectionCheckbox: false,
                 enableRowSelection: false,
-                enableCellEditOnFocus: true ,
+                enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 40,
@@ -206,27 +202,27 @@ var rest = myApp.controller(
                     width: "45%",
                     displayName: "Value",
                     enableCellEdit: false,
-                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required">'                 
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required">'
                 }, {
-                field: "allowAdd",
-		width: "10%",
-                enableCellEdit: false,
-                displayName: "Action",
-                cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                    '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')">'+
-					'<div ng-switch-when="true">-NA-</div>'+
-					'<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>'+
-					'</div></div></div>'
+                    field: "allowAdd",
+                    width: "10%",
+                    enableCellEdit: false,
+                    displayName: "Action",
+                    cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
+                        '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')">' +
+                        '<div ng-switch-when="true">-NA-</div>' +
+                        '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
+                        '</div></div></div>'
 
-				}]
+                }]
             };
 
             $scope.gridOptionsForProcessorFolder = {
                 data: 'processorFolderProperties',
                 displaySelectionCheckbox: false,
                 enableRowSelection: false,
-                enableCellEditOnFocus: true ,
+                enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 40,
@@ -234,20 +230,21 @@ var rest = myApp.controller(
                     field: "folderURI",
                     width: "30%",
                     displayName: "Uri",
-                    enableCellEdit: true
-                   
+                    enableCellEdit: false,
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required">'
+
                 }, {
                     field: "folderType",
                     width: "30%",
                     displayName: "Type",
-                     enableCellEdit: false,
+                    enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder" selected-value="valueSelectedinSelectionBoxForProcessorFolder" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "folderDesc",
                     width: "30%",
                     displayName: "Description",
                     enableCellEdit: true
-                    
+
                 }, {
                     field: "allowAdd",
                     width: "10%",
@@ -267,7 +264,7 @@ var rest = myApp.controller(
                 data: 'processorCredProperties',
                 displaySelectionCheckbox: false,
                 enableRowSelection: false,
-                enableCellEditOnFocus: true ,
+                enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 100,
@@ -276,7 +273,7 @@ var rest = myApp.controller(
                     width: "15%",
                     displayName: "URI",
                     enableCellEdit: true
-                   
+
                 }, {
                     field: "credentialType",
                     width: "12%",
@@ -292,7 +289,7 @@ var rest = myApp.controller(
                     field: "password",
                     width: "20%",
                     displayName: "Password",
-                     enableCellEdit: false,
+                    enableCellEdit: false,
                     cellTemplate: '<div class="passwordDirective" row-entity="row.entity" col-filed="col.field" />'
                 }, {
                     field: "idpType",
@@ -340,7 +337,7 @@ var rest = myApp.controller(
                 );
             }
 
-            $scope.editableInPopup = '<button class="btn" ng-click="editProcessor(row)"><i class="icon-pencil"></i></button>';
+            $scope.editableInPopup = '<button class="btn" ng-click="editProcessor(row)"><i class="glyphicon glyphicon-pencil"></i></button>';
 
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
@@ -371,8 +368,8 @@ var rest = myApp.controller(
             };
 
             $scope.editProcessor = function (row) {
-                 $scope.loadOrigin();
-                 $scope.readAllProfiles();
+                $scope.loadOrigin();
+                $scope.readAllProfiles();
                 $scope.isEdit = true;
                 var procsrId = row.getProperty('guid');
 
@@ -391,55 +388,99 @@ var rest = myApp.controller(
                         $scope.processor.status = data.getProcessorResponse.processor.status;
                         $scope.processor.protocol = data.getProcessorResponse.processor.protocol;
                         $scope.processor.protocol = data.getProcessorResponse.processor.protocol;
-                        $scope.selectedProfiles=data.getProcessorResponse.processor.profiles;
+                        $scope.selectedProfiles = data.getProcessorResponse.processor.profiles;
                         //Schedules
-                        
-                        for(var i =0 ;i <data.getProcessorResponse.processor.profiles.length;i++){
-                           
-                           var index = $scope.allProfiles.indexOf(data.getProcessorResponse.processor.profiles[i].name);
-                           $scope.allProfiles.splice(index, 1);
-                           
+
+                        for (var i = 0; i < data.getProcessorResponse.processor.profiles.length; i++) {
+
+                            var index = $scope.allProfiles.indexOf(data.getProcessorResponse.processor.profiles[i].name);
+                            $scope.allProfiles.splice(index, 1);
+
                         }
 
                         // Pushing out dynamis props
 
                         $scope.processorProperties = []; //Removing now so that the add new option always shows below the available properties
-                        var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
-                       
-                       
-                         for(var prop in json_data){                  
-                           if(json_data[prop]!==0 && json_data[prop]!==false && json_data[prop]!==null && json_data[prop]!==''){
-                            $scope.processorProperties.push({
-                                name: prop,
-                                value: json_data[prop],
-                                allowAdd: false,
-								isMandatory: ($scope.allMandatoryProperties.indexOf(prop) == -1)?false:true
-                            });
-                            var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(prop);
-							if (indexOfElement != -1) {
-								$scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-							}
-                            
-                        }
-                       
-                        } 
-						
-						for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
-							
-							$scope.processorProperties.push({
-                                name: data.getProcessorResponse.processor.dynamicProperties[i].name,
-                                value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-                                allowAdd: false,
-								isMandatory: false
-                            });
-						}
 
-                        $scope.processorProperties.push({ //Adding now so that the add new option always shows below the available properties
-                            name: '',
-                            value: '',
-                            allowAdd: true,
-							isMandatory: false
-                        });
+                        $scope.httpMandatoryProperties = [];
+                        $scope.ftpMandatoryProperties = [];
+
+                        var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
+
+
+                        for (var prop in json_data) {
+                            if (json_data[prop] !== 0 && json_data[prop] !== false && json_data[prop] !== null && json_data[prop] !== '') {
+
+                                if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
+
+                                    $scope.httpMandatoryProperties.push({
+                                        name: prop,
+                                        value: json_data[prop],
+                                        allowAdd: false,
+                                        isMandatory: ($scope.allMandatoryHttpProperties.indexOf(prop) == -1) ? false : true
+                                    });
+                                } else {
+
+                                    $scope.ftpMandatoryProperties.push({
+                                        name: prop,
+                                        value: json_data[prop],
+                                        allowAdd: false,
+                                        isMandatory: ($scope.allMandatoryFtpProperties.indexOf(prop) == -1) ? false : true
+                                    });
+                                }
+
+
+                                var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(prop);
+                                if (indexOfElement != -1) {
+                                    $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                                }
+
+                            }
+
+                        }
+
+                        for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
+
+                            if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
+
+                                $scope.httpMandatoryProperties.push({
+                                    name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                    value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                                    allowAdd: false,
+                                    isMandatory: false
+                                });
+                            } else {
+                                $scope.ftpMandatoryProperties.push({
+                                    name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                    value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                                    allowAdd: false,
+                                    isMandatory: false
+                                });
+                            }
+
+                        }
+
+                        if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
+
+                            $scope.httpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
+                                name: '',
+                                value: '',
+                                allowAdd: true,
+                                isMandatory: false
+                            });
+
+                            $scope.processorProperties = $scope.httpMandatoryProperties;
+                        } else {
+
+                            $scope.ftpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
+                                name: '',
+                                value: '',
+                                allowAdd: true,
+                                isMandatory: false
+                            });
+                            $scope.processorProperties = $scope.ftpMandatoryProperties;
+                        }
+
 
                         $scope.processorFolderProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                         for (var i = 0; i < data.getProcessorResponse.processor.folders.length; i++) {
@@ -537,7 +578,7 @@ var rest = myApp.controller(
 			};*/
 
 
-            
+
 
             $scope.chooseProfile = function () {
 
@@ -561,18 +602,26 @@ var rest = myApp.controller(
 
             // For Procsr Dynamic Props
             $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
-              $scope.informer.inform("error message", "error");
-               $scope.informer.inform("info message", "info");
 
-               $scope.allInfos = $scope.informer.allInfos;  
-               $scope.remove = $scope.informer.remove;
+                // validation
+
+                console.log('val is ' + row.getProperty('value'));
+                if (valueSelectedinSelectionBox.name === '' || valueSelectedinSelectionBox.name === 'add new -->' || row.getProperty('value') === '' || typeof row.getProperty('value') === 'undefined') {
+                    showAlert('Enter Values');
+                    return;
+                }
+                $scope.informer.inform("error message", "error");
+                $scope.informer.inform("info message", "info");
+
+                $scope.allInfos = $scope.informer.allInfos;
+                $scope.remove = $scope.informer.remove;
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
                 gridData.push({
                     name: valueSelectedinSelectionBox.name,
                     value: row.getProperty('value'),
                     allowAdd: false,
-					isMandatory: false
+                    isMandatory: false
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
                 if (indexOfSelectedElement != -1) {
@@ -584,8 +633,8 @@ var rest = myApp.controller(
                     name: '',
                     value: '',
                     allowAdd: true,
-		    isMandatory: false
-					
+                    isMandatory: false
+
                 });
 
             };
@@ -603,6 +652,11 @@ var rest = myApp.controller(
 
             // For Procsr Folder Props
             $scope.addFolderRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
+
+                if (valueSelectedinSelectionBox.name === '' || row.getProperty('folderURI') === '' || typeof row.getProperty('folderURI') === 'undefined') {
+                    showAlert('Enter Values');
+                    return;
+                }
 
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
@@ -640,6 +694,11 @@ var rest = myApp.controller(
 
             // For Procsr Credentials Props
             $scope.addCredentialRow = function (row, valueSelectedinSelectionBox, valueSelectedinSelectionBoxIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
+
+                if (valueSelectedinSelectionBox.name === '') {
+                    showAlert('Enter Values');
+                    return;
+                }
 
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
@@ -692,36 +751,55 @@ var rest = myApp.controller(
             };
 
             $scope.doCancel = function () {
-            var response = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost");
-            if (response === true) {
-                $location.path('/mailbox/getMailBox');
-            }
+                var response = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost");
+                if (response === true) {
+                    $location.path('/mailbox/getMailBox');
+                }
             };
-            
+
             $scope.backToMailbox = function () {
                 var response = confirm("Are you  sure you want to leave this page? All unsaved changes will be lost");
-            if (response === true) {
-                $location.path('/mailbox/addMailBox').search('mailBoxId',$location.search().mailBoxId);
-            }
-                
+                if (response === true) {
+                    $location.path('/mailbox/addMailBox').search('mailBoxId', $location.search().mailBoxId);
+                }
+
             };
-			
-			$scope.processOtherHeaderValue =  function(value) {
-				
-				var commaSplit = val.split(",");
-				var colonSplit
-			}
+
+            $scope.processOtherHeaderValue = function (value) {
+
+                var commaSplit = val.split(",");
+                var colonSplit
+            }
 
             $scope.saveProcessor = function () {
 
                 var lenDynamicProps = $scope.processorProperties.length;
-				var commaSplit;
-				
+                var commaSplit = [];
+
+
+                var mandatoryArray = [];
+
                 for (var i = 0; i < lenDynamicProps - 1; i++) {
 
-                    var index = $scope.allStaticProperties.indexOf($scope.processorProperties[i].name);
-					var indexMandatory = $scope.allMandatoryProperties.indexOf($scope.processorProperties[i].name);
+                    var name = $scope.processorProperties[i].name;
+                    var value = $scope.processorProperties[i].value;
 
+
+                    if (name === 'url' || name === 'httpVersion' || name === 'httpVerb' || name === 'contentType') {
+
+                        mandatoryArray.push({
+                            name: name,
+                            value: value
+                        });
+                    }
+
+                    var index = $scope.allStaticProperties.indexOf($scope.processorProperties[i].name);
+
+                    var indexMandatory;
+
+                    if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
+                        indexMandatory = $scope.allMandatoryHttpProperties.indexOf($scope.processorProperties[i].name);
+                    } else indexMandatory = $scope.allMandatoryFtpProperties.indexOf($scope.processorProperties[i].name);
 
                     if (index == -1 && indexMandatory == -1) {
                         $scope.processor.dynamicProperties.push({
@@ -730,7 +808,7 @@ var rest = myApp.controller(
 
                         });
                     } else {
-                        var name = $scope.processorProperties[i].name;
+
                         if (name === 'otherRequestHeader') {
 
                             commaSplit = $scope.processorProperties[i].value.split(",");
@@ -741,18 +819,27 @@ var rest = myApp.controller(
                     }
 
                 }
-				
-				for (var i=0; i<commaSplit.length; i++) {
-								
-					var colonSplit = commaSplit[i].split(":");
-					$scope.processor.remoteProcessorProperties.otherRequestHeader.push({
-						name: colonSplit[0],
-						value: colonSplit[1]
 
-					});
-				}
-				
-				console.log(commaSplit)
+                for (var i = 0; i < mandatoryArray.length; i++) {
+
+                    if (mandatoryArray[i].value === '' || typeof mandatoryArray[i].value === 'undefined') {
+
+                        showAlert('Enter MandatoryProperties');
+                        return;
+                    } else $scope.processor.remoteProcessorProperties[mandatoryArray[i].name] = mandatoryArray[i].value;
+                }
+
+                for (var i = 0; i < commaSplit.length; i++) {
+
+                    var colonSplit = commaSplit[i].split(":");
+                    $scope.processor.remoteProcessorProperties.otherRequestHeader.push({
+                        name: colonSplit[0],
+                        value: colonSplit[1]
+
+                    });
+                }
+
+                console.log(commaSplit)
 
                 var lenFolderProps = $scope.processorFolderProperties.length;
                 for (var i = 0; i < lenFolderProps - 1; i++) {
@@ -836,27 +923,27 @@ var rest = myApp.controller(
                 $scope.processor.credentials = [];
                 $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
-            
-             $scope.addNew = function () {
-                   
-                    $scope.loadOrigin();
-                    $scope.readAllProfiles();
-             };
-             
-             $scope.resetProps = function () {
-                 alert("iam called");
-                     if($scope.isEdit){
-                         return;
-                     }
-                    if($scope.processor.protocol === "FTP"){
-                         alert($scope.processor.type);
-                       $scope.processorProperties = $scope.ftpMandatoryProperties; 
-                    }
-                    
-             };
+
+            $scope.addNew = function () {
+
+                $scope.loadOrigin();
+                $scope.readAllProfiles();
+            };
+
+            $scope.resetProps = function () {
+                //alert("iam called");
+                if ($scope.isEdit) {
+                    return;
+                }
+                if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
+                    //alert($scope.processor.type);
+                    $scope.processorProperties = $scope.ftpMandatoryProperties;
+                } else $scope.processorProperties = $scope.httpMandatoryProperties;
+
+            };
 
         }
-        
-        
+
+
 
     ]);

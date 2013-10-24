@@ -32,7 +32,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             'INACTIVE'
         ];
 
-        //addRequest.addMailBoxRequest.mailBox.status = $scope.enumstats[0];
+        $scope.mailBox.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'filerenameformat'];
@@ -55,7 +55,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 $scope.procsBtnStatus = false;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 //$scope.sharedService.setProperty('test');
-                $scope.restService.get($scope.base_url + "/"+ $scope.mailBoxId, //Get mail box Data
+                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId, //Get mail box Data
                     function (data) {
                         $scope.mailBox.guid = $scope.mailBoxId;
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
@@ -72,9 +72,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             });
 
                             var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(data.getMailBoxResponse.mailBox.properties[i].name);
-                           if(indexOfElement >0){
-                            $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-                          }
+                            if (indexOfElement > 0) {
+                                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                            }
                         };
                         $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
                             name: '',
@@ -104,8 +104,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             if ($scope.isMailBoxEdit) {
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;
                 $log.info($filter('json')(editReq));
-                
-                $scope.restService.put($scope.base_url + "/"+ $scope.mailBoxId, $filter('json')(editReq),
+
+                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId, $filter('json')(editReq),
                     function (data, status) {
 
                         if (status === 200) {
@@ -141,7 +141,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.addProcessor = function () {
 
-            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname',$scope.mailBox.name);
+            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
         };
 
         // Property grid
@@ -168,9 +168,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             }, {
                 field: "value",
                 displayName: "Property Value",
-                enableCellEdit: true,
+                enableCellEdit: false,
                 enableCellSelection: true,
-                enableFocusedCellEdit: true
+                enableFocusedCellEdit: true,
+                cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="true"><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required"></div><div ng-switch-when="false"><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required" readonly></div></div>'
+
             }, {
                 field: "allowAdd",
                 displayName: "Action",
@@ -185,6 +187,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         // adds a resource to the 'data' object
         $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
+
+            // validation
+
+            if (valueSelectedinSelectionBox.name === '' || valueSelectedinSelectionBox.name === 'add new -->' || row.getProperty('value') === '' || typeof row.getProperty('value') === 'undefined') {
+                showAlert('Enter Values');
+                return;
+            }
 
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);

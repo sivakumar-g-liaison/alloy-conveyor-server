@@ -13,11 +13,11 @@
                         k =
                             '<ul><li data-ng-repeat="node in ' +
                             e +
-                            '"><i class="collapsed" data-ng-show="node.' +
+                            '"><i class="collapsed glyphicon glyphicon-folder-close" data-ng-show="node.' +
                             d +
-                            '.length && node.collapsed" data-ng-click="selectNodeHead(node, $event)"></i><i class="expanded" data-ng-show="node.' +
+                            '.length && node.collapsed" data-ng-click="selectNodeHead(node, $event)"></i><i class="expanded glyphicon glyphicon-folder-open" data-ng-show="node.' +
                             d +
-                            '.length && !node.collapsed" data-ng-click="selectNodeHead(node, $event)"></i><i class="normal" data-ng-hide="node.' +
+                            '.length && !node.collapsed" data-ng-click="selectNodeHead(node, $event)"></i><i class="normal glyphicon glyphicon-file" data-ng-hide="node.' +
                             d +
                             '.length"></i> <span data-ng-class="node.selected" data-ng-click="selectNodeLabel(node, $event)">{{node.' +
                             h +
