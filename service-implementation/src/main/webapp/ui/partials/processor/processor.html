@@ -72,7 +72,7 @@
             Type
           </label>
           
-          <select ng-model="processor.type" ng-options="type for type in enumprocsrtype" class="form-control">
+          <select ng-model="processor.type" ng-options="type for type in enumprocsrtype"  class="form-control">
 			<option value="">-- select--</option>
           </select>
              </div>
@@ -89,7 +89,7 @@
           <label>
             Protocol
           </label>
-          <select ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+          <select ng-change="resetProps()" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
 			<option value="">-- select--</option>
           </select>
            </div>
@@ -115,7 +115,7 @@
             Scheduling
           </label>
           
-          <div class="row">
+          <div class="row well">
             <div class="col-sm-4 col-md-4">
            <label>
             <i>
@@ -154,20 +154,16 @@
           
           
         </div>
-        
-      </form>
-      
-      
-      
       <div>
         <div>
             <h4>Properties</h4>
+            
           <div class="gridStyle" ng-grid="gridOptionsForProcessor">
           </div>
         </div>
         <br>
       </div>
-      
+     
       <div>
         <div>
             <h4>Folders</h4>
@@ -185,7 +181,7 @@
         </div>
         <br>
       </div>
-      
+    </form>  
       <div class="container">
          <button class="btn btn-primary" ng-click="backToMailbox()">
           Back to Mailbox

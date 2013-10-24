@@ -9,6 +9,7 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.directiveCustomCell', // custom directives
     'myApp.dynamicComponentDirectiveForName',
     'myApp.passwordDirective',
+    'myApp.cellWithTextBox',
     'ngGrid', // angular grid
     'ui', // angular ui
     'ngSanitize', // for html-bind in ckeditor
@@ -90,7 +91,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
 
 
 // this is run after angular is instantiated and bootstrapped
-myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, SharedService) {
+myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, SharedService,Informer) {
 
     // *****
     // Eager load some data using simple REST client
@@ -100,6 +101,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     //FOR USE WITH PYTHON
     $rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.restService = RESTService;
+    $rootScope.informer = Informer;
 
     $rootScope.sharedService = SharedService;
 
