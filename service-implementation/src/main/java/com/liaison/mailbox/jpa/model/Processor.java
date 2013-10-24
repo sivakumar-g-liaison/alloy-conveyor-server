@@ -53,9 +53,9 @@ public class Processor implements Identifiable {
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
+	private String procsrExecutionStatus;
 	private String procsrName;
 	private String procsrProtocol;
-	private int executionOrder;
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private List<ProcessorProperty> dynamicProperties;
@@ -121,6 +121,15 @@ public class Processor implements Identifiable {
 
 	public void setProcsrStatus(String procsrStatus) {
 		this.procsrStatus = procsrStatus;
+	}
+
+	@Column(name = "PROCSR_EXEC_STATUS", nullable = false, length = 128)
+	public String getProcsrExecutionStatus() {
+		return procsrExecutionStatus;
+	}
+
+	public void setProcsrExecutionStatus(String procsrExecutionStatus) {
+		this.procsrExecutionStatus = procsrExecutionStatus;
 	}
 
 	@Column(name = "PROCSR_NAME", length = 512)
@@ -229,15 +238,6 @@ public class Processor implements Identifiable {
 		return scheduleProfileProcessor;
 	}
 
-	@Column(name = "PROCSR_EXECUTION_ORDER")
-	public int getExecutionOrder() {
-		return executionOrder;
-	}
-
-	public void setExecutionOrder(int executionOrder) {
-		this.executionOrder = executionOrder;
-	}
-
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
@@ -311,6 +311,36 @@ public class Processor implements Identifiable {
 
 		return null;
 
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((pguid == null) ? 0 : pguid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Processor)) {
+			return false;
+		}
+		Processor other = (Processor) obj;
+		if (pguid == null) {
+			if (other.pguid != null) {
+				return false;
+			}
+		} else if (!pguid.equals(other.pguid)) {
+			return false;
+		}
+		return true;
 	}
 
 }

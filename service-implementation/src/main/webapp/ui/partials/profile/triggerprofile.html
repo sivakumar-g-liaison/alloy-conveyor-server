@@ -1,0 +1,54 @@
+<div class="container fade-in">
+
+	<div class="form-row">
+		<h3 id="title" class="ng-binding">Trigger Profile</h3>
+		<hr />
+		<br />
+	</div>
+
+	<div class="form-inline">
+
+		<form name="triggerForm">
+			<div class="row">
+				<div class="col-md-3">
+					<label for="name"> Mailbox Name </label> <input type="text" ng-maxlength=128 name="name" ng-model="mailBoxName"
+						ng-trim="false" class="form-control" />
+				</div>
+				<div class="col-md-5">
+					<br />
+					<div class="alert alert-danger" ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
+						<strong>Mailbox name cannot be longer than 128 characters</strong>
+					</div>
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="col-md-3">
+					<label for="name"> Shard Key </label> <input type="text" ng-maxlength=512 name="sharedKey"
+						ng-model="mailBoxSharedKey" ng-trim="false" class="form-control" />
+				</div>
+				<div class="col-md-5">
+					<div class="alert alert-danger" ng-show="triggerForm.sharedKey.$dirty && triggerForm.sharedKey.$invalid">
+						<strong>ShardKey cannot be longer than 512 characters</strong>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-5">
+					<label for="prof"> Profiles </label> <select name="prof" ng-model="profile"
+						ng-options="prof.name for prof in profiles" class="form-control" required>
+					</select>
+				</div>
+			</div>
+			<div class="row">
+				<br />
+				<div class="col-md-1">
+					<button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click="trigger()">
+						trigger profile</button>
+				</div>
+			</div>
+		</form>
+		<br />
+	</div>
+
+</div>

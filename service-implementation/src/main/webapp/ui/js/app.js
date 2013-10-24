@@ -62,6 +62,11 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
 	        templateUrl:'partials/profile/addprofile.html',
 	        controller:'ProfileCntrlr'
 	    });
+		
+		$routeProvider.when('/profiles/trigger', {
+	        templateUrl:'partials/profile/triggerprofile.html',
+	        controller:'TriggerProfileCntrlr'
+	    });
 
 	    /*$routeProvider.when('/contact', {
 	        templateUrl:'partials/contact.html'

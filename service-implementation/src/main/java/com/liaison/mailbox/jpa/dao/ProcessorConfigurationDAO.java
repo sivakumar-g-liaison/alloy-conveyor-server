@@ -16,7 +16,9 @@ import com.liaison.mailbox.jpa.model.Processor;
 						+ " where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME
 						+ " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
 						+ " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
-						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS)
+						+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
+						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
+						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS)
 
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
@@ -26,6 +28,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
 	public static final String STATUS = "status";
+	public static final String EXEC_STATUS = "exec_status";
+	public static final String SHARD_KEY = "shard_key";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -36,6 +40,6 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 *            The MailBox name pattern to exclude
 	 * @return The list of processors.
 	 */
-	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern);
+	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
 
 }

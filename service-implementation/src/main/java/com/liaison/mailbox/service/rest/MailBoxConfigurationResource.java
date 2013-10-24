@@ -14,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -39,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.fs2.api.FS2DefaultConfiguration;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
@@ -85,6 +83,7 @@ public class MailBoxConfigurationResource {
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
 	public MailBoxConfigurationResource() throws IOException {
+
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 		Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
 		String propertyFileName = "g2mailboxservice-" + env + ".properties";
@@ -605,7 +604,7 @@ public class MailBoxConfigurationResource {
 		Response returnResponse;
 
 		try {
-            String jsFileLocation = String.valueOf(properties.get("rootDirectory"));
+			String jsFileLocation = String.valueOf(properties.get("rootDirectory"));
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 

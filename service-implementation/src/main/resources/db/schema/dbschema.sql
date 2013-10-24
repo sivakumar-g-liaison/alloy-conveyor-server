@@ -68,7 +68,6 @@
   ALTER TABLE "MAILBOX_PROPERTIES" ADD CONSTRAINT "MAILBOX_PROPERTIES_FK1" FOREIGN KEY ("MAILBOX_GUID")
 	  REFERENCES "MAILBOXES" ("PGUID") ON DELETE CASCADE ENABLE;
 
-	  
 --------------------------------------------------------
 --  DDL for Table PROCESSORS
 --------------------------------------------------------
@@ -80,11 +79,11 @@
 	"PROCSR_PROPERTIES" VARCHAR2(2048 BYTE), 
 	"PROCSR_STATUS" VARCHAR2(128 BYTE), 
 	"JAVA_SCRIPT_URI" VARCHAR2(512 BYTE), 
-	"PROCSR_EXECUTION_ORDER" NUMBER(*,0), 
 	"PROCSR_NAME" VARCHAR2(512 BYTE), 
 	"PROCSR_PROTOCOL" VARCHAR2(128 BYTE), 
-	"MAILBOX_GUID" CHAR(32 BYTE)
-   ) ;
+	"MAILBOX_GUID" CHAR(32 BYTE), 
+	"PROCSR_EXEC_STATUS" VARCHAR2(128 BYTE)
+   );
  
 
    COMMENT ON COLUMN "PROCESSORS"."PROCSR_DESC" IS 'processor description';
@@ -95,9 +94,9 @@
  
    COMMENT ON COLUMN "PROCESSORS"."JAVA_SCRIPT_URI" IS 'refrence to filesystem, js pulled from git.';
  
-   COMMENT ON COLUMN "PROCESSORS"."PROCSR_EXECUTION_ORDER" IS 'determines procsr execution order';
- 
    COMMENT ON COLUMN "PROCESSORS"."PROCSR_PROTOCOL" IS 'processor protocol';
+ 
+   COMMENT ON COLUMN "PROCESSORS"."PROCSR_EXEC_STATUS" IS 'processor execution status';
 --------------------------------------------------------
 --  DDL for Index PROCESSORS_PK
 --------------------------------------------------------
@@ -124,6 +123,7 @@
 
   ALTER TABLE "PROCESSORS" ADD CONSTRAINT "PROCESSORS_FK1" FOREIGN KEY ("MAILBOX_GUID")
 	  REFERENCES "MAILBOXES" ("PGUID") ON DELETE CASCADE ENABLE;
+
 
 
 --------------------------------------------------------

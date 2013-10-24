@@ -22,6 +22,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.model.Credential;
@@ -56,7 +57,6 @@ public class ProcessorDTO {
 	private List<CredentialDTO> credentials;
 	private List<PropertyDTO> dynamicProperties;
 	private List<ProfileDTO> profiles;
-	private int executionOrder;
 
 	public ProcessorDTO() {
 		super();
@@ -167,14 +167,6 @@ public class ProcessorDTO {
 		this.dynamicProperties = dynamicProperties;
 	}
 
-	public int getExecutionOrder() {
-		return executionOrder;
-	}
-
-	public void setExecutionOrder(int executionOrder) {
-		this.executionOrder = executionOrder;
-	}
-
 	public List<String> getLinkedProfiles() {
 		return linkedProfiles;
 	}
@@ -194,7 +186,7 @@ public class ProcessorDTO {
 	public void setProfiles(List<ProfileDTO> profiles) {
 		this.profiles = profiles;
 	}
-	
+
 	public RemoteProcessorPropertiesDTO getRemoteProcessorProperties() {
 		return remoteProcessorProperties;
 	}
@@ -223,6 +215,7 @@ public class ProcessorDTO {
 
 		if (isCreate) {
 			processor.setPguid(MailBoxUtility.getGUID());
+			processor.setProcsrExecutionStatus(ExecutionStatus.READY.value());
 		}
 
 		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
@@ -321,7 +314,6 @@ public class ProcessorDTO {
 			this.setStatus(foundStatus.name());
 		}
 
-		this.setExecutionOrder(processor.getExecutionOrder());
 		this.setType(processor.getProcessorType().name());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 		this.setName(processor.getProcsrName());

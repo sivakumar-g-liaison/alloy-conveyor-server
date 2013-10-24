@@ -16,6 +16,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
@@ -36,6 +37,8 @@ public class MailBoxService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxService.class);
 
+	private static List<Processor> synchronizedProcessors = new ArrayList<>();
+
 	/**
 	 * The method gets the list of processors from the given profile, mailboxNamePattern and invokes
 	 * the processor.
@@ -46,7 +49,7 @@ public class MailBoxService {
 	 *            The mailbox name pattern to exclude
 	 * @return The trigger profile response DTO
 	 */
-	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern) {
+	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern, String shardKey) {
 
 		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
 		List<Processor> processorMatchingProfile = new ArrayList<>();
@@ -61,9 +64,13 @@ public class MailBoxService {
 
 			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern);
+			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern, shardKey);
 
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
+				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
+			}
+			validateProcessorExecution(processorMatchingProfile);
+			if (processorMatchingProfile.isEmpty()) {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
 
@@ -73,12 +80,22 @@ public class MailBoxService {
 
 				processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
+
 					LOG.info("The Processer id is {}", processor.getPguid());
 					LOG.info("The Processer type is {}", processor.getProcessorType());
+					processor.setProcsrExecutionStatus(ExecutionStatus.RUNNING.value());
+					processorDAO.merge(processor);
 					processorService.invoke();
+					processor.setProcsrExecutionStatus(ExecutionStatus.COMPLETED.value());
+					processorDAO.merge(processor);
+
 				} else {
 					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
 				}
+			}
+
+			if (processorMatchingProfile != null) {
+				removeExecutedProcessor(processorMatchingProfile);
 			}
 
 			// response message construction
@@ -93,5 +110,31 @@ public class MailBoxService {
 			return serviceResponse;
 
 		}
+	}
+
+	private synchronized void validateProcessorExecution(List<Processor> processors) {
+
+		List<Processor> existingProcessors = new ArrayList<>();
+
+		for (Processor prcsr : synchronizedProcessors) {
+			for (Processor inputPrcsr : processors) {
+				if (prcsr.equals(inputPrcsr)) {
+					existingProcessors.add(inputPrcsr);
+				}
+			}
+		}
+
+		if (!existingProcessors.isEmpty()) {
+			processors.removeAll(existingProcessors);
+		}
+
+		if (!processors.isEmpty()) {
+			synchronizedProcessors.addAll(processors);
+		}
+
+	}
+
+	private synchronized void removeExecutedProcessor(List<Processor> processors) {
+		synchronizedProcessors.removeAll(processors);
 	}
 }
