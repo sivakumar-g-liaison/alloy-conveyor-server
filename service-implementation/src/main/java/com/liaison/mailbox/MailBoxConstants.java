@@ -40,6 +40,8 @@ public interface MailBoxConstants {
 	public final static String PROCESSOR_PROTOCOL = "Protocol";
 
 	public final static String FOLDER_TYPE = "FolderType";
+	
+	public final static String CREDENTIAL_TYPE = "CredentialType";
 
 	public final static String INCOMPLETE_STATUS = "INCOMPLETE";
 

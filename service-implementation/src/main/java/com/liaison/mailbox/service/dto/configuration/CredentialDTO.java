@@ -11,9 +11,11 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 
 /**
@@ -40,6 +42,7 @@ public class CredentialDTO {
 	}
 
 	@Mandatory(errorMessage = "Credential Type is mandatory.")
+	@DataValidation(errorMessage = "Credential type set to a value that is not supported.", type = MailBoxConstants.CREDENTIAL_TYPE)
 	public String getCredentialType() {
 		return credentialType;
 	}

@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.script.Invocable;
@@ -84,11 +85,13 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
+	 * @throws MailBoxServicesException 
+	 * @throws URISyntaxException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException {
+	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
@@ -102,11 +105,32 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		
 		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
 		ftpsRequest.setRetryCount(properties.getRetryAttempts());
-		ftpsRequest.setUser("username");
-		ftpsRequest.setPassword("xxxxxx");
-		ftpsRequest.setTrustManagerKeyStore("E:/keystore.jks");
-		ftpsRequest.setTrustManagerKeyStoreType("jks");
-		ftpsRequest.setTrustManagerKeyStorePassword("xxxxxx");
+		
+		String [] serverCredentials = getUserCredetial(getUserCredentialURI());
+		ftpsRequest.setUser(serverCredentials[0]);
+		ftpsRequest.setPassword(serverCredentials[1]);
+		
+		String credentialURI = getCredentialURI();
+		
+		if(!MailBoxUtility.isEmpty(credentialURI)){
+
+			URI uri = new URI(credentialURI);
+			
+			if(isTrustStore){
+				
+				ftpsRequest.setTrustManagerKeyStore(uri.getPath());
+				ftpsRequest.setTrustManagerKeyStoreType("jks");
+				ftpsRequest.setTrustManagerKeyStorePassword(getUserCredetial(credentialURI)[1]);
+			
+			}else{
+				ftpsRequest.setKeyManagerKeyStore(uri.getPath());
+				ftpsRequest.setKeyManagerKeyStoreType("jks");
+				ftpsRequest.setKeyManagerKeyStorePassword(getUserCredetial(credentialURI)[1]);
+				//ftpsRequest.setKeyManagerKeyAlias(keyManagerKeyAlias);
+				//ftpsRequest.setKeyManagerKeyPassword(keyManagerKeyPassword);
+				
+			}
+		}
 		
 		return ftpsRequest;
 		

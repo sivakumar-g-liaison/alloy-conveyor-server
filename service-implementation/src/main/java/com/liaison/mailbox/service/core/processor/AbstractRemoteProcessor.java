@@ -224,8 +224,6 @@ public abstract class AbstractRemoteProcessor {
 					
 					isTrustStore = false;
 					return credential.getCredsIdpUri();
-				} else {
-					return credential.getCredsIdpUri();
 				}
 			}
 		}
