@@ -1,10 +1,11 @@
-var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location', '$log',
-    function ($scope, $filter, $location, $log) {
+var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location', '$log', '$blockUI',
+    function ($scope, $filter, $location, $log, $blockUI) {
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
         //Needed only for Edir
         $scope.procsBtnStatus = true;
+
         //Model for Add MB
         addRequest = $scope.addRequest = {
             addMailBoxRequest: {
@@ -32,6 +33,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             'INACTIVE'
         ];
 
+        var block = $blockUI.createBlockUI();
+
         $scope.mailBox.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
@@ -55,8 +58,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 $scope.procsBtnStatus = false;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 //$scope.sharedService.setProperty('test');
+
+                block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId, //Get mail box Data
                     function (data) {
+
+                        block.unblockUI();
                         $scope.mailBox.guid = $scope.mailBoxId;
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                         $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
@@ -117,10 +124,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             } else {
                 $scope.addRequest.addMailBoxRequest.mailBox = $scope.mailBox;
                 $log.info($filter('json')(addRequest));
+
+                block.blockUI();
                 $scope.restService.post($scope.base_url, $filter('json')(addRequest),
                     function (data, status) {
 
+                        block.unblockUI();
                         if (status === 200) {
+
                             alert(data.addMailBoxResponse.response.message);
                             $scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
                             $scope.procsBtnStatus = false;
@@ -133,8 +144,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         };
 
         $scope.doCancel = function () {
-            var response = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
-            if (response === true) {
+            var resp = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
+            if (resp === true) {
                 $location.path('/mailbox/getMailBox');
             }
         };

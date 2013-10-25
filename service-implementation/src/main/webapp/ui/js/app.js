@@ -16,7 +16,8 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'ui.ace', // ace code editor
     'ui.bootstrap', // jquery ui bootstrap
     '$strap.directives', // angular strap
-    'angularTreeview' // for tree view
+    'angularTreeview', // for tree view
+    'BlockUI'
 ]);
 
 
@@ -58,17 +59,17 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             controller: 'ProcessorCntrlr'
         });
 
-		$routeProvider.when('/profiles/addProfiles', {
-	        templateUrl:'partials/profile/addprofile.html',
-	        controller:'ProfileCntrlr'
-	    });
-		
-		$routeProvider.when('/profiles/trigger', {
-	        templateUrl:'partials/profile/triggerprofile.html',
-	        controller:'TriggerProfileCntrlr'
-	    });
+        $routeProvider.when('/profiles/addProfiles', {
+            templateUrl: 'partials/profile/addprofile.html',
+            controller: 'ProfileCntrlr'
+        });
 
-	    /*$routeProvider.when('/contact', {
+        $routeProvider.when('/profiles/trigger', {
+            templateUrl: 'partials/profile/triggerprofile.html',
+            controller: 'TriggerProfileCntrlr'
+        });
+
+        /*$routeProvider.when('/contact', {
 	        templateUrl:'partials/contact.html'
 	    });
 	    $routeProvider.when('/about', {
@@ -77,11 +78,11 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
 	    $routeProvider.when('/faq', {
 	        templateUrl:'partials/faq.html'
 	    });*/
-	
-	        // note that to minimize playground impact on app.js, we
-	        // are including just this simple route with a parameterized 
-	        // partial value (see playground.js and playground.html)
-	        /*$routeProvider.when('/playground/:widgetName', {
+
+        // note that to minimize playground impact on app.js, we
+        // are including just this simple route with a parameterized 
+        // partial value (see playground.js and playground.html)
+        /*$routeProvider.when('/playground/:widgetName', {
 	        templateUrl:'playground/playground.html',
 	        controller:'PlaygroundCtrl'
 	    });*/
@@ -96,13 +97,13 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
 
 
 // this is run after angular is instantiated and bootstrapped
-myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, SharedService,Informer) {
+myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, SharedService, Informer) {
 
     // *****
     // Eager load some data using simple REST client
     // *****
 
-   // $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
+    // $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
     //FOR USE WITH PYTHON
     $rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.restService = RESTService;

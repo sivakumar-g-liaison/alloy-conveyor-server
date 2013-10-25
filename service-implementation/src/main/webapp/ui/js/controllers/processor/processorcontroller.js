@@ -1,11 +1,12 @@
 var rest = myApp.controller(
     'ProcessorCntrlr', ['$scope',
-        '$filter', '$location', '$log',
+        '$filter', '$location', '$log', '$blockUI',
         function ($scope, $filter,
-            $location, $log) {
+            $location, $log, $blockUI) {
 
             // To be Populated
             $scope.mailBoxId;
+            var block = $blockUI.createBlockUI();
 
             $scope.loadOrigin = function () {
 
@@ -231,7 +232,7 @@ var rest = myApp.controller(
                     width: "30%",
                     displayName: "Uri",
                     enableCellEdit: false,
-                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required">'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="false"><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required" readonly></div><div ng-switch-default><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required"></div></div>'
 
                 }, {
                     field: "folderType",
@@ -367,7 +368,30 @@ var rest = myApp.controller(
                 filterOptions: $scope.filterOptions
             };
 
+            $scope.setOtherRequestHeader = function (reqHeaderArray) {
+
+                var colonArray = [];
+                for (var i = 0; i < reqHeaderArray.length; i++) {
+                    colonArray.push(reqHeaderArray[i].name + ':' + reqHeaderArray[i].value)
+                }
+
+                /*var otherRequestHeaderVal = '';
+				var len = colonArray.length;
+				for (var i=0; i<len - 1; i++) {
+					otherRequestHeaderVal = otherRequestHeaderVal + colonArray[i] + ","
+				}
+				
+				if (len > 0)
+				otherRequestHeaderVal = otherRequestHeaderVal + colonArray[len -1];
+				
+				console.log(otherRequestHeaderVal);*/
+
+                return colonArray.toString();
+            }
+
             $scope.editProcessor = function (row) {
+
+                block.blockUI();
                 $scope.loadOrigin();
                 $scope.readAllProfiles();
                 $scope.isEdit = true;
@@ -376,6 +400,7 @@ var rest = myApp.controller(
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
 
+                        block.unblockUI();
                         $log.info($filter('json')(data));
 
                         $scope.clearProps();
@@ -415,7 +440,7 @@ var rest = myApp.controller(
 
                                     $scope.httpMandatoryProperties.push({
                                         name: prop,
-                                        value: json_data[prop],
+                                        value: (prop === 'otherRequestHeader') ? $scope.setOtherRequestHeader(json_data[prop]) : json_data[prop],
                                         allowAdd: false,
                                         isMandatory: ($scope.allMandatoryHttpProperties.indexOf(prop) == -1) ? false : true
                                     });
@@ -423,7 +448,7 @@ var rest = myApp.controller(
 
                                     $scope.ftpMandatoryProperties.push({
                                         name: prop,
-                                        value: json_data[prop],
+                                        value: (prop === 'otherRequestHeader') ? $scope.setOtherRequestHeader(json_data[prop]) : json_data[prop],
                                         allowAdd: false,
                                         isMandatory: ($scope.allMandatoryFtpProperties.indexOf(prop) == -1) ? false : true
                                     });
@@ -879,6 +904,7 @@ var rest = myApp.controller(
 
                 $scope.processor.javaScriptURI = $scope.modal.uri;
 
+                block.blockUI();
                 if ($scope.isEdit) {
 
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
@@ -887,6 +913,7 @@ var rest = myApp.controller(
                     $scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
                         function (data, status) {
 
+                            block.unblockUI();
                             if (status === 200) {
                                 alert(data.reviseProcessorResponse.response.message);
                                 $scope.readOnlyProcessors = true;
@@ -904,6 +931,7 @@ var rest = myApp.controller(
                     $scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
                         function (data, status) {
 
+                            block.unblockUI();
                             if (status === 200) {
                                 alert(data.addProcessorToMailBoxResponse.response.message);
                                 $scope.readOnlyProcessors = true;
