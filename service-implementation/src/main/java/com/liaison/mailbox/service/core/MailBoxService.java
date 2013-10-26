@@ -20,7 +20,10 @@ import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.dto.ResponseDTO;
@@ -62,6 +65,13 @@ public class MailBoxService {
 			}
 			LOG.info("The given profile name is {}", profileName);
 
+			// Profile validation
+			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
+			ScheduleProfilesRef profile = profileDAO.findProfileByName(profileName);
+			if (null == profile) {
+				throw new MailBoxServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName);
+			}
+
 			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern, shardKey);
@@ -71,7 +81,7 @@ public class MailBoxService {
 			}
 			validateProcessorExecution(processorMatchingProfile);
 			if (processorMatchingProfile.isEmpty()) {
-				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
+				LOG.info("The processor is already in progress.");
 			}
 
 			// invoking the Processors

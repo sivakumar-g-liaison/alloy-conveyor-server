@@ -18,7 +18,8 @@ public enum Protocol {
 	FTPS("ftps"),
 	SFTP("sftp"),
 	HTTP("http"),
-	HTTPS("https");
+	HTTPS("https"),
+	SWEEPER("sweeper");
 
 	private final String code;
 

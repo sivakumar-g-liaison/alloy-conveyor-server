@@ -32,6 +32,7 @@ import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
@@ -77,6 +78,9 @@ public class MailBoxConfigurationService {
 
 			// validation
 			validator.validate(mailboxDTO);
+			for (PropertyDTO property : mailboxDTO.getProperties()) {
+				validator.validate(property);
+			}
 
 			MailBox mailBox = new MailBox();
 			mailboxDTO.copyToEntity(mailBox);
@@ -171,6 +175,9 @@ public class MailBoxConfigurationService {
 
 			// Validation
 			validator.validate(mailboxDTO);
+			for (PropertyDTO property : mailboxDTO.getProperties()) {
+				validator.validate(property);
+			}
 
 			if (!guid.equals(mailboxDTO.getGuid())) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);

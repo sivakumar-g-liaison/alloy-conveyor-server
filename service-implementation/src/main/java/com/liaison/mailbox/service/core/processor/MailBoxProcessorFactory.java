@@ -10,8 +10,6 @@
 
 package com.liaison.mailbox.service.core.processor;
 
-import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -42,9 +40,9 @@ public class MailBoxProcessorFactory {
 		MailBoxProcessor mailBoxProcessor = null;
 
 		Protocol foundProtocolType = Protocol.findByCode(processor.getProcsrProtocol());
-		
+
 		if (ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
-						
+
 			switch (foundProtocolType) {
 
 				case FTPS:
@@ -54,7 +52,7 @@ public class MailBoxProcessorFactory {
 				case SFTP:
 					mailBoxProcessor = new SFTPRemoteDownloader(processor);
 					break;
-				
+
 				case HTTP:
 					mailBoxProcessor = new HttpRemoteDownloader(processor);
 					break;
@@ -63,10 +61,10 @@ public class MailBoxProcessorFactory {
 					break;
 				default:
 					break;
-				
+
 			}
 		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
-			
+
 			switch (foundProtocolType) {
 
 				case FTPS:
@@ -76,7 +74,7 @@ public class MailBoxProcessorFactory {
 				case SFTP:
 					mailBoxProcessor = new SFTPRemoteUploader(processor);
 					break;
-			
+
 				case HTTP:
 					mailBoxProcessor = new HttpRemoteUploader(processor);
 					break;
@@ -85,8 +83,10 @@ public class MailBoxProcessorFactory {
 					break;
 				default:
 					break;
-			
+
 			}
+		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
+			mailBoxProcessor = new DirectorySweeperProcessor(processor);
 		}
 		return mailBoxProcessor;
 	}

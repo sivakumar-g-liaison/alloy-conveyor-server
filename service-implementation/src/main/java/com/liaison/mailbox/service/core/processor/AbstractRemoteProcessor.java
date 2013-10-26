@@ -19,7 +19,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -42,12 +45,16 @@ import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
+import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
+import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
@@ -64,7 +71,7 @@ public abstract class AbstractRemoteProcessor {
 	private static final EmailNotifier NOTIFIER = new EmailNotifier();
 
 	private static FlexibleStorageSystem FS2 = null;
-	
+
 	public static boolean isTrustStore = false;
 
 	protected Processor configurationInstance;
@@ -137,7 +144,7 @@ public abstract class AbstractRemoteProcessor {
 		}
 		return files;
 	}
-	
+
 	/**
 	 * To Retrive the Payload URI
 	 * 
@@ -193,12 +200,56 @@ public abstract class AbstractRemoteProcessor {
 					return folder.getFldrUri();
 				} else if (FolderType.OUTPUT_FOLDER.equals(foundFolderType)) {
 					return folder.getFldrUri();
-				} 
+				}
 			}
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Get the URI to which the mailbox sweeper should be happen
+	 * 
+	 * @return URI
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	protected String getInputLocationURI() throws MailBoxServicesException {
+
+		if (configurationInstance.getFolders() != null) {
+
+			for (Folder folder : configurationInstance.getFolders()) {
+
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
+				if (null == foundFolderType) {
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+				} else if (FolderType.INPUT_FOLDER.equals(foundFolderType)) {
+					return folder.getFldrUri();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get the URI to which the mailbox sweeper should be happen
+	 * 
+	 * @return URI
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	protected List<PropertyDTO> getMailBoxProperties() throws MailBoxServicesException {
+
+		List<PropertyDTO> mailBoxProperties = new ArrayList<>();
+
+		PropertyDTO prop = null;
+		for (MailBoxProperty property : configurationInstance.getMailbox().getMailboxProperties()) {
+
+			prop = new PropertyDTO();
+			prop.copyFromEntity(property, true);
+			mailBoxProperties.add(prop);
+		}
+
+		return mailBoxProperties;
+	}
+
 	/**
 	 * Get the URI to which the response should be written, this can be used if the JS decides to
 	 * write the response straight to the file system or database
@@ -214,14 +265,14 @@ public abstract class AbstractRemoteProcessor {
 
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (null == foundCredentailType) {
-					
+
 					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
 				} else if (CredentialType.TRUST_STORE.equals(foundCredentailType)) {
-					
+
 					isTrustStore = true;
 					return credential.getCredsIdpUri();
 				} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
-					
+
 					isTrustStore = false;
 					return credential.getCredsIdpUri();
 				}
@@ -229,7 +280,7 @@ public abstract class AbstractRemoteProcessor {
 		}
 		return null;
 	}
-	
+
 	protected String getUserCredentialURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getCredentials() != null) {
@@ -237,24 +288,24 @@ public abstract class AbstractRemoteProcessor {
 			for (Credential credential : configurationInstance.getCredentials()) {
 
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
-				
+
 				if (null == foundCredentailType) {
 					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
-				} else if(CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)){
+				} else if (CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)) {
 					return credential.getCredsIdpUri();
 				}
 			}
 		}
 		return null;
 	}
-	
-	public String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException{
-		
-		if(MailBoxUtility.isEmpty(credentialURI)){
+
+	public String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException {
+
+		if (MailBoxUtility.isEmpty(credentialURI)) {
 			throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
 		}
 		URI uri = new URI(credentialURI);
-		String [] userData = uri.getRawAuthority().split("@")[0].split(":");
+		String[] userData = uri.getRawAuthority().split("@")[0].split(":");
 		return userData;
 	}
 
@@ -276,9 +327,9 @@ public abstract class AbstractRemoteProcessor {
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
 		LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
-		
+
 	}
-	
+
 	/**
 	 * call back method to write the file response back to MailBox from JS
 	 * 
@@ -288,7 +339,8 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws FS2Exception
 	 * 
 	 */
-	public void writeFileResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception,
+	public void writeFileResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException,
+			IOException, FS2Exception,
 			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
@@ -296,8 +348,8 @@ public abstract class AbstractRemoteProcessor {
 		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + filename);
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
-		LOGGER.info("Reponse is succefully written" + getWriteResponseURI()+"/"+metaSnapShot.getURI());
-		
+		LOGGER.info("Reponse is succefully written" + getWriteResponseURI() + "/" + metaSnapShot.getURI());
+
 	}
 
 	/**
@@ -363,7 +415,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 * @throws LiaisonException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 */
 	public Object getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, LiaisonException, URISyntaxException, MailBoxServicesException {
@@ -448,6 +500,93 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		NOTIFIER.sendEmail(toEmailAddrList, subject, emailBody, type);
+	}
+
+	/**
+	 * Method is used to retrieve all the files attributes from the given mailbox. This method
+	 * supports both FS2 and Java File API
+	 * 
+	 * @param root
+	 *            The mailbox root directory
+	 * @param includeSubDir
+	 * @param listDirectoryOnly
+	 * @param sweepConditions
+	 * @return
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 */
+	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
+			SweepConditions sweepConditions) throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception {
+
+		List<FileAttributesDTO> fileAttributes = new ArrayList<>();
+
+		if (root.startsWith("fs2:")) {
+
+			FlexibleStorageSystem FS2 = getFS2Instance();
+			URI fileLoc = new URI(root);
+
+			Set<FS2MetaSnapshot> childrens = FS2.listChildren(fileLoc);
+
+			FileAttributesDTO attribute = null;
+			for (FS2MetaSnapshot file : childrens) {
+
+				attribute = new FileAttributesDTO();
+				attribute.setFilePath((file.getURI() == null ? "" : file.getURI().toString()));
+				attribute.setTimestamp((file.createdOn() == null ? "" : file.createdOn().toString()));
+				fileAttributes.add(attribute);
+			}
+
+		} else {
+
+			List<Path> result = new ArrayList<>();
+
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(root), defineFilter(listDirectoryOnly))) {
+				for (Path entry : stream) {
+					result.add(entry);
+				}
+			} catch (IOException e) {
+				throw e;
+			}
+
+			FileAttributesDTO attribute = null;
+			for (Path path : result) {
+
+				attribute = new FileAttributesDTO();
+				attribute.setFilePath(path.toAbsolutePath().toString());
+				BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+				attribute.setTimestamp(attr.creationTime().toString());
+				attribute.setSize(attr.size());
+				attribute.setFilename(path.toFile().getName());
+				fileAttributes.add(attribute);
+			}
+		}
+
+		return fileAttributes;
+	}
+
+	/**
+	 * Creates a filter for directories only.
+	 * 
+	 * @return Object which implements DirectoryStream.Filter interface and that accepts directories
+	 *         only.
+	 */
+	public DirectoryStream.Filter<Path> defineFilter(
+			final boolean listDirectoryOnly) {
+
+		DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
+
+			@Override
+			public boolean accept(Path entry) throws IOException {
+
+				return listDirectoryOnly
+						? Files.isDirectory(entry)
+						: Files.isRegularFile(entry);
+			}
+		};
+
+		return filter;
 	}
 
 }

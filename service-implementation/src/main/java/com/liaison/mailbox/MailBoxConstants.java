@@ -40,9 +40,13 @@ public interface MailBoxConstants {
 	public final static String PROCESSOR_PROTOCOL = "Protocol";
 
 	public final static String FOLDER_TYPE = "FolderType";
-	
+
 	public final static String CREDENTIAL_TYPE = "CredentialType";
 
 	public final static String INCOMPLETE_STATUS = "INCOMPLETE";
+
+	public final static String GROUPING_JS_PROP_NAME = "filegroupingjspath";
+
+	public final static String FILE_RENAME_FORMAT_PROP_NAME = "filerenameformat";
 
 }
