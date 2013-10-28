@@ -19,9 +19,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         $scope.loadProfiles = function () {
             $scope.restService.get($scope.base_url + "/profile").success(function (data) {
                 $scope.profiles = data.getProfileResponse.profiles;
-            }).error(function (data) {
-                alert("Failed to load profiles.");
-            });
+            })
         };
         $scope.loadProfiles(); //loads the profile
 
@@ -56,7 +54,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         $scope.setPagingData = function (data, page, pageSize) {
 
             if (data === null || data.length <= 0) {
-                alert('No data matches the given conditions.');
+				$scope.message = 'No results found.';
+				$scope.openMessage();
             }
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
@@ -71,6 +70,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         $scope.openDelete = function (row) {
             $scope.key = row.entity;
             $scope.deleteKey = true;
+        };
+		
+		// Enable the delete modal dialog
+        $scope.openMessage = function () {
+            $scope.customKey = true;
+        };
+		
+		// Close the modal
+        $scope.closeMessage = function () {
+            $scope.customKey = false;
         };
 
         // calls the rest deactivate service
