@@ -103,9 +103,9 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Eager load some data using simple REST client
     // *****
 
-    // $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
+    $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
     //FOR USE WITH PYTHON
-    $rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
+    //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.restService = RESTService;
     $rootScope.informer = Informer;
 
