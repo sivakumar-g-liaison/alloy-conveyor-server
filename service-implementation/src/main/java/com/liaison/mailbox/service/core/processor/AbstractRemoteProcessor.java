@@ -37,7 +37,6 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.fs2.api.FS2Exception;
-import com.liaison.fs2.api.FS2Factory;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.enums.CredentialType;
@@ -57,6 +56,7 @@ import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -70,8 +70,6 @@ public abstract class AbstractRemoteProcessor {
 
 	private static final EmailNotifier NOTIFIER = new EmailNotifier();
 
-	private static FlexibleStorageSystem FS2 = null;
-
 	public static boolean isTrustStore = false;
 
 	protected Processor configurationInstance;
@@ -81,20 +79,6 @@ public abstract class AbstractRemoteProcessor {
 
 	public AbstractRemoteProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
-	}
-
-	/**
-	 * Instantiate the FS2. It gets the mount location from properties.
-	 * 
-	 * @return The FlexibleStorageSystem instance
-	 * @throws IOException
-	 */
-	public static FlexibleStorageSystem getFS2Instance() throws IOException {
-
-		if (null == FS2) {
-			FS2 = FS2Factory.newInstance(new RemoteProcessorFS2Configuration());
-		}
-		return FS2;
 	}
 
 	/**
@@ -322,7 +306,7 @@ public abstract class AbstractRemoteProcessor {
 			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
-		FlexibleStorageSystem FS2 = getFS2Instance();
+		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
 		URI fileLoc = new URI("fs2:" + getWriteResponseURI());
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
@@ -344,7 +328,7 @@ public abstract class AbstractRemoteProcessor {
 			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
-		FlexibleStorageSystem FS2 = getFS2Instance();
+		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
 		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + filename);
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
@@ -524,7 +508,7 @@ public abstract class AbstractRemoteProcessor {
 
 		if (root.startsWith("fs2:")) {
 
-			FlexibleStorageSystem FS2 = getFS2Instance();
+			FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
 			URI fileLoc = new URI(root);
 
 			Set<FS2MetaSnapshot> childrens = FS2.listChildren(fileLoc);

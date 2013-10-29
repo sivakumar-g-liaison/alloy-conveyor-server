@@ -56,7 +56,8 @@ public enum Messages {
 	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile."),
 	TRG_PROF_FAILURE("Error triggering the profile %s ."),
 	FOLDERS_CONFIGURATION_INVALID("Folders configured for processors, but they are missing folder type and folder uri."),
-	CREDENTIAL_CONFIGURATION_INVALID("Credential configured for processors, but they are missing Credetial type and Credetial uri."),
+	CREDENTIAL_CONFIGURATION_INVALID(
+			"Credential configured for processors, but they are missing Credetial type and Credetial uri."),
 	INJECTION_OF_PROPERTIES_FAILED("Injection of properties while building http client from processor configuration failed."),
 	HTTP_REQUEST_FAILED("HTTP request failed."),
 
@@ -67,7 +68,12 @@ public enum Messages {
 	PROC_DOES_NOT_BELONG_TO_MBX("The given processor is not belongs to given mailbox."),
 
 	ERROR_MSG("Validation failed with the following error(s):"),
-	VALIDATOR_ERROR_MSG("Error in validator, object cannot be null.");
+	VALIDATOR_ERROR_MSG("Error in validator, object cannot be null."),
+
+	// HTTP SERVER LISTENER
+	EMPTY_VALUE("The given %s is empty."),
+	PERSIST_SUCCESS("%s persisted successfully."),
+	PERSIST_FAILURE("Failed to persist the %s.");
 
 	private String value;
 
