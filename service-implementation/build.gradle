@@ -248,8 +248,8 @@ task configureTomcat(dependsOn: ['stageTomcat']) << {
 	}
 }
 project.afterEvaluate {
-	cargoRunLocal.dependsOn('configureTomcat')
-	cargoStartLocal.dependsOn('configureTomcat')
+/*	cargoRunLocal.dependsOn('configureTomcat')
+	cargoStartLocal.dependsOn('configureTomcat')*/
 }
 
 
@@ -332,7 +332,7 @@ import org.gradle.api.plugins.jetty.internal.Monitor
    }
 }
 
-apply plugin: 'jacoco'
+/*apply plugin: 'jacoco'
 
 jacocoTestReport {
 	
@@ -352,5 +352,5 @@ jacocoTestReport {
     daemon = false
     webAppSourceDirectory = file('src/main/webapp/ui')
 
-}
+}*/
 
