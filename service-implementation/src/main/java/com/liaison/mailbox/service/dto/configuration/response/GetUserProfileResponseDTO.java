@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+import java.util.List;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -18,7 +20,7 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.AccountDTO;
-import com.liaison.mailbox.service.dto.configuration.IdpProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.IdpUserProfileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -31,7 +33,7 @@ public class GetUserProfileResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private AccountDTO account;
-	private IdpProfileDTO ipdProfile;
+	private List<IdpUserProfileDTO> idpProfiles;
 
 	public ResponseDTO getResponse() {
 		return response;
@@ -49,18 +51,18 @@ public class GetUserProfileResponseDTO implements ResponseBuilder {
 		this.account = account;
 	}
 
-	public IdpProfileDTO getIpdProfile() {
-		return ipdProfile;
-	}
-
-	public void setIpdProfile(IdpProfileDTO ipdProfile) {
-		this.ipdProfile = ipdProfile;
-	}
-
 	@Override
 	public Response constructResponse() throws Exception {
 		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
+	}
+
+	public List<IdpUserProfileDTO> getIdpProfiles() {
+		return idpProfiles;
+	}
+
+	public void setIdpProfiles(List<IdpUserProfileDTO> idpProfiles) {
+		this.idpProfiles = idpProfiles;
 	}
 
 	
