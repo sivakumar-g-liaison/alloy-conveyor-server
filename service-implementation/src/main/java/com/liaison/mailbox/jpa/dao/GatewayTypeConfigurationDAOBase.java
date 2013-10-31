@@ -23,7 +23,7 @@ public class GatewayTypeConfigurationDAOBase extends GenericDAOBase<GatewayType>
 		try {
 
 			@SuppressWarnings("unchecked")
-			List<GatewayType> profiles = entityManager.createNamedQuery(GET_BY_NAME)
+			List<GatewayType> profiles = entityManager.createNamedQuery(GET_BY_GATE_NAME)
 					.setParameter(NAME, name).getResultList();
 			Iterator<GatewayType> iter = profiles.iterator();
 

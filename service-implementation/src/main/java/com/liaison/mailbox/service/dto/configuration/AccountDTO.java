@@ -24,7 +24,6 @@ public class AccountDTO {
 	private String crmURI;
 	private AccountTypeDTO accountType;
 	private LanguageDTO language;
-	private LocaleDTO locale;
 	private String currencyFormat;
 	private String numberFormat;
 	private String dateFormat;
@@ -78,12 +77,6 @@ public class AccountDTO {
 	}
 	public void setCrmURI(String crmURI) {
 		this.crmURI = crmURI;
-	}
-	public LocaleDTO getLocale() {
-		return locale;
-	}
-	public void setLocale(LocaleDTO locale) {
-		this.locale = locale;
 	}
 	public AccountTypeDTO getAccountType() {
 		return accountType;
@@ -158,10 +151,12 @@ public class AccountDTO {
 		if (null != account.getAccountType()) {
 			AccountTypeDTO accountTypeDTO = new AccountTypeDTO();
 			accountTypeDTO.copyFromEntity(account.getAccountType());
+			this.setAccountType(accountTypeDTO);
 		}
 		if (null != account.getLanguage()) {
 			LanguageDTO languageDTO = new LanguageDTO();
 			languageDTO.copyFromEntity(account.getLanguage());
+			this.setLanguage(languageDTO);
 		}
 		
 		this.setCurrencyFormat(account.getCurrencyFormat());

@@ -1,5 +1,7 @@
 package com.liaison.mailbox.jpa.model;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.SecondaryTable;
 import javax.persistence.Table;
@@ -39,7 +40,7 @@ public class Account implements Identifiable {
 	private String tmpPswdHash;
 	private AccountType accountType;
 	private Language language;
-	private IdpProfile idpProfile;
+	private List<IdpProfile> idpProfiles;
 	private String currencyFormat;
 	private String dateFormat;
 	private String numberFormat;
@@ -178,16 +179,15 @@ public class Account implements Identifiable {
 	}
 
 
-	//bi-directional one-to-one association to IdpProfile
-	@OneToOne(mappedBy = "account", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@Column(name="ACCOUNT_GUID")
-	public IdpProfile getIdpProfile() {
-		return this.idpProfile;
+	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE,CascadeType.DETACH, CascadeType.REMOVE, CascadeType.REFRESH })
+    @JoinColumn(name="ACCOUNT_GUID")
+	public List<IdpProfile> getIdpProfiles() {
+		return this.idpProfiles;
 	}
 
-	public void setIdpProfile(IdpProfile idpProfile) {
-		this.idpProfile = idpProfile;
+	public void setIdpProfiles(List<IdpProfile> idpProfiles) {
+		this.idpProfiles = idpProfiles;
 	}
 
 

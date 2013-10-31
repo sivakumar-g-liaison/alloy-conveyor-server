@@ -20,17 +20,15 @@ import com.liaison.mailbox.jpa.dao.GatewayTypeConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.IdpProviderConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.LanguageConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.UserAccountConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.UserProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Account;
 import com.liaison.mailbox.jpa.model.AccountType;
 import com.liaison.mailbox.jpa.model.GatewayType;
 import com.liaison.mailbox.jpa.model.IdpProfile;
-import com.liaison.mailbox.jpa.model.IdpProfileProvider;
 import com.liaison.mailbox.jpa.model.IdpProvider;
 import com.liaison.mailbox.jpa.model.Language;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.AccountDTO;
-import com.liaison.mailbox.service.dto.configuration.IdpProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.IdpUserProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddUserProfileAccountRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseUserProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddUserProfileAccountResponseDTO;
@@ -39,6 +37,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetUserProfileResp
 import com.liaison.mailbox.service.dto.configuration.response.ReviseUserProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.UserProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 public class UserProfileConfigurationService {
 
@@ -46,11 +45,11 @@ public class UserProfileConfigurationService {
 	
 	
 	/**
-	 * Creates processor for the mailbox.
+	 * Creates User Profile Account.
 	 * 
 	 * @param serviceRequest
-	 *            The AddProcessorToMailboxRequestDTO
-	 * @return The AddProcessorToMailboxResponseDTO
+	 *            The AddUserProfileAccountRequestDTO
+	 * @return The AddUserProfileAccountResponseDTO
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
@@ -60,7 +59,7 @@ public class UserProfileConfigurationService {
 	public AddUserProfileAccountResponseDTO createUserProfileAccount(AddUserProfileAccountRequestDTO serviceRequest)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
-		LOGGER.info("call receive to insert the user account ::{}", serviceRequest.getIdpProfile());
+		LOGGER.info("call receive to insert the user account ::{}", serviceRequest.getIdpProfiles());
 		AddUserProfileAccountResponseDTO serviceResponse = new AddUserProfileAccountResponseDTO();
 
 		try {
@@ -70,8 +69,8 @@ public class UserProfileConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 			
-			IdpProfileDTO ipdProfileDTO = serviceRequest.getIdpProfile();
-			if(ipdProfileDTO == null){
+			List<IdpUserProfileDTO> ipdProfileDTOs = serviceRequest.getIdpProfiles();
+			if(ipdProfileDTOs == null || ipdProfileDTOs.isEmpty()){
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
 			
@@ -86,44 +85,38 @@ public class UserProfileConfigurationService {
 			account.setAccountType(accountType);
 			serviceRequest.getAccount().copyToEntity(account, true);
 			
-			IdpProfile profile = new IdpProfile();
+			IdpProfile profile = null;
+			List<IdpProfile> profiles = null;
 			
-			IdpProfileProvider pros = null;
-			List<IdpProfileProvider> providerDetails = null;
-			if (null != ipdProfileDTO.getIdpProvider()) {
-
-				IdpProviderConfigurationDAOBase idpProviderDAOBase = new IdpProviderConfigurationDAOBase();
-				IdpProvider idpProvider = null;
-				providerDetails = new ArrayList<>();
-				for (String name : ipdProfileDTO.getIdpProvider()) {
+			IdpProviderConfigurationDAOBase idpProviderDAOBase = new IdpProviderConfigurationDAOBase();
+			GatewayTypeConfigurationDAOBase gatewayDAOBase = new GatewayTypeConfigurationDAOBase();
+				
+			IdpProvider idpProvider = null;
+			GatewayType gatewayTpe = null;
+			profiles = new ArrayList<>();
+				
+			for (IdpUserProfileDTO dto : ipdProfileDTOs) {
 					
-					idpProvider = idpProviderDAOBase.findByName(name);
-					if (null != idpProvider) {
-						pros = new IdpProfileProvider();
-						pros.setIdpProfile(profile);
-						pros.setIdpProvider(idpProvider);
-						providerDetails.add(pros);
-					}
+				idpProvider = idpProviderDAOBase.findByName(dto.getIdpProvider());
+				if (null != idpProvider) {
+					profile = new IdpProfile();
+					profile.setPguid(MailBoxUtility.getGUID());
+					profile.setIdpProvider(idpProvider);
+					profile.setLoginDomain(dto.getLoginDomain());
+						
+					gatewayTpe = gatewayDAOBase.findByName(dto.getGatewayType());
+					profile.setGatewayType(gatewayTpe);
+					profiles.add(profile);
 				}
 			}
 			
-			if (null != providerDetails) {
-				profile.setIdpProfileProvider(providerDetails);
+			if (null != profiles) {
+				account.setIdpProfiles(profiles);
 			}
 			
-			GatewayTypeConfigurationDAOBase gatewayDAOBase = new GatewayTypeConfigurationDAOBase();
-			GatewayType gatewayTpe = gatewayDAOBase.findByName(ipdProfileDTO.getGatewayType().getName());
-			profile.setGatewayType(gatewayTpe);
-
-			profile.setAccount(account);
-			serviceRequest.getIdpProfile().copyToEntity(profile, true);
-
-			// persist the account.
-			//UserAccountConfigurationDAOBase configAccountDAO = new UserAccountConfigurationDAOBase();
-			//configAccountDAO.persist(account);
-			
-			UserProfileConfigurationDAOBase configAccountDAO = new UserProfileConfigurationDAOBase();
-			configAccountDAO.persist(profile);
+			//persist the account.
+			UserAccountConfigurationDAOBase configAccountDAO = new UserAccountConfigurationDAOBase();
+			configAccountDAO.persist(account);
 			
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, "PROCESSOR", Messages.SUCCESS));
 			serviceResponse.setUserResponse(new UserProfileResponseDTO(String.valueOf(account.getPrimaryKey())));
@@ -173,11 +166,20 @@ public class UserProfileConfigurationService {
 			AccountDTO dto = new AccountDTO();
 			dto.copyFromEntity(account);
 			
-			IdpProfileDTO profileDto = new IdpProfileDTO();
-			profileDto.copyFromEntity(account.getIdpProfile());
-
+			List <IdpProfile> profiles = account.getIdpProfiles();
+			List<IdpUserProfileDTO> userProfileDto =new ArrayList<>();
+			for (IdpProfile profile : profiles){
+				
+				IdpUserProfileDTO profileDTO = new IdpUserProfileDTO();
+				profileDTO.setGuid(profile.getPguid());
+				profileDTO.setGatewayType(profile.getGatewayType().getName());
+				profileDTO.setLoginDomain(profile.getLoginDomain());
+				profileDTO.setIdpProvider(profile.getIdpProvider().getName());
+				userProfileDto.add(profileDTO);
+			}
+			
 			serviceResponse.setAccount(dto);
-			serviceResponse.setIpdProfile(profileDto);
+			serviceResponse.setIdpProfiles(userProfileDto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, "PROFILE", Messages.SUCCESS));
 			LOGGER.info("Exit from get mailbox.");
 			return serviceResponse;
@@ -220,7 +222,8 @@ public class UserProfileConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, "Profile");
 			}
 			
-			IdpProfileDTO profileDTO = request.getProfile();
+			List<IdpUserProfileDTO> profileDTO = request.getIdpProfiles();
+			
 			if (profileDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
@@ -233,7 +236,38 @@ public class UserProfileConfigurationService {
 			}
 
 			accountDTO.copyToEntity(retrievedAccount, false);
-			profileDTO.copyToEntity(retrievedAccount.getIdpProfile(), false);
+			
+			retrievedAccount.getIdpProfiles().clear();
+			
+			IdpProfile profile = null;
+			List<IdpProfile> profiles = null;
+			
+			IdpProviderConfigurationDAOBase idpProviderDAOBase = new IdpProviderConfigurationDAOBase();
+			GatewayTypeConfigurationDAOBase gatewayDAOBase = new GatewayTypeConfigurationDAOBase();
+				
+			IdpProvider idpProvider = null;
+			GatewayType gatewayTpe = null;
+			profiles = new ArrayList<>();
+				
+			for (IdpUserProfileDTO dto : profileDTO) {
+					
+				idpProvider = idpProviderDAOBase.findByName(dto.getIdpProvider());
+				if (null != idpProvider) {
+					profile = new IdpProfile();
+					profile.setPguid(dto.getGuid());
+					profile.setIdpProvider(idpProvider);
+					profile.setLoginDomain(dto.getLoginDomain());
+						
+					gatewayTpe = gatewayDAOBase.findByName(dto.getGatewayType());
+					profile.setGatewayType(gatewayTpe);
+					profiles.add(profile);
+				}
+			}
+			
+			if (null != profiles) {
+				retrievedAccount.setIdpProfiles(profiles);
+			}
+			
 			configDao.merge(retrievedAccount);
 
 			// response message construction
@@ -266,19 +300,19 @@ public class UserProfileConfigurationService {
 
 			LOGGER.info("The deactivate request is for {} ", guid);
 
-			UserProfileConfigurationDAOBase configDao = new UserProfileConfigurationDAOBase();
-			IdpProfile retrievedAccount = configDao.find(IdpProfile.class, guid);
-			if (retrievedAccount == null) {
+			UserAccountConfigurationDAOBase configDao = new UserAccountConfigurationDAOBase();
+			Account account = configDao.find(Account.class, guid);
+			if (account == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
 
 			// Changing the mailbox status
-			retrievedAccount.getAccount().setActiveState(MailBoxStatus.INACTIVE.value());
-			configDao.merge(retrievedAccount);
+			account.setActiveState(MailBoxStatus.INACTIVE.value().toUpperCase());
+			configDao.merge(account);
 
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, "Profile", Messages.SUCCESS));
-			serviceResponse.setProfile(new UserProfileResponseDTO(String.valueOf(retrievedAccount.getPrimaryKey())));;
+			serviceResponse.setProfile(new UserProfileResponseDTO(String.valueOf(account.getPrimaryKey())));;
 			LOGGER.info("Exit from deactivate mailbox.");
 			return serviceResponse;
 

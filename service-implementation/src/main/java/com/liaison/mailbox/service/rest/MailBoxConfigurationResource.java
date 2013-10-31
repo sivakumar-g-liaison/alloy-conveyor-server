@@ -847,6 +847,47 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
+	
+	/**
+	 * Rest method to search the mailbox based on the given query parameters. If both are empty it
+	 * returns all mailboxes.
+	 * 
+	 * @param mbxName
+	 *            The mailbox name should be searched
+	 * @param profileName
+	 *            The profile name should be searched
+	 * @return The Response
+	 */
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response searchUserProfile(@QueryParam(value = "name") String accountType,
+			@QueryParam(value = "provider") String providerName, @QueryParam(value = "domain") String loginDomain) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse = null;
+
+		try {
+
+			// search the mailbox from the given details
+			UserProfileConfigurationService mailbox = new UserProfileConfigurationService();
+
+			//returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
 
 	@POST
 	@Path("/sweeper")

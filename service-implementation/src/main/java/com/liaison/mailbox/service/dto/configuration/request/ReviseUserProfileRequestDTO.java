@@ -10,6 +10,7 @@
 package com.liaison.mailbox.service.dto.configuration.request;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -23,6 +24,7 @@ import com.liaison.mailbox.jpa.model.IdpProfile;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.AccountDTO;
 import com.liaison.mailbox.service.dto.configuration.IdpProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.IdpUserProfileDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
@@ -34,7 +36,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 public class ReviseUserProfileRequestDTO {
 
 	private AccountDTO account;
-	private IdpProfileDTO profile;
+	private List<IdpUserProfileDTO> idpProfiles;
 
 	public AccountDTO getAccount() {
 		return account;
@@ -42,17 +44,18 @@ public class ReviseUserProfileRequestDTO {
 	public void setAccount(AccountDTO account) {
 		this.account = account;
 	}
-	public IdpProfileDTO getProfile() {
-		return profile;
+	public List<IdpUserProfileDTO> getIdpProfiles() {
+		return idpProfiles;
 	}
-	public void setProfile(IdpProfileDTO profile) {
-		this.profile = profile;
+	public void setIdpProfiles(List<IdpUserProfileDTO> idpProfiles) {
+		this.idpProfiles = idpProfiles;
 	}
+	
 
-	public void copyToEntity(Account entity, IdpProfile profile) throws MailBoxConfigurationServicesException, JsonGenerationException,
+	/*public void copyToEntity(Account entity, IdpProfile profile) throws MailBoxConfigurationServicesException, JsonGenerationException,
 			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 		this.getAccount().copyToEntity(entity, false);
 		this.getProfile().copyToEntity(profile, false);
-	}
+	}*/
 	
 }

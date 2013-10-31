@@ -23,7 +23,7 @@ public class LanguageConfigurationDAOBase extends GenericDAOBase<Language> imple
 		try {
 
 			@SuppressWarnings("unchecked")
-			List<Language> profiles = entityManager.createNamedQuery(GET_BY_NAME)
+			List<Language> profiles = entityManager.createNamedQuery(GET_BY_LANG_NAME)
 					.setParameter(NAME, name).getResultList();
 			Iterator<Language> iter = profiles.iterator();
 

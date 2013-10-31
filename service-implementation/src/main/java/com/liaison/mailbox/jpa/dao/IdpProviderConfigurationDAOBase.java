@@ -23,7 +23,7 @@ public class IdpProviderConfigurationDAOBase extends GenericDAOBase<IdpProvider>
 		try {
 
 			@SuppressWarnings("unchecked")
-			List<IdpProvider> profiles = entityManager.createNamedQuery(GET_BY_NAME)
+			List<IdpProvider> profiles = entityManager.createNamedQuery(GET_BY_PROVIDER_NAME)
 					.setParameter(NAME, name).getResultList();
 			Iterator<IdpProvider> iter = profiles.iterator();
 

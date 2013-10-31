@@ -31,8 +31,6 @@ public class IdpProvider implements Identifiable {
 	private String providerDefStorage;
 	private String pswdResetPolicyUri;
 	
-	private List<IdpProfileProvider> idpProfileProvider;
-	
 	public IdpProvider() {
 	}
 
@@ -83,17 +81,6 @@ public class IdpProvider implements Identifiable {
 
 	public void setPswdResetPolicyUri(String pswdResetPolicyUri) {
 		this.pswdResetPolicyUri = pswdResetPolicyUri;
-	}
-	
-	// bi-directional many-to-one association to ScheduleProfileProcessor
-	@OneToMany(mappedBy = "idpProvider", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<IdpProfileProvider> getIdpProfileProvider() {
-		return this.idpProfileProvider;
-	}
-
-	public void setIdpProfileProvider(List<IdpProfileProvider> IdpProfileProvider) {
-		this.idpProfileProvider = IdpProfileProvider;
 	}
 
 	@Override

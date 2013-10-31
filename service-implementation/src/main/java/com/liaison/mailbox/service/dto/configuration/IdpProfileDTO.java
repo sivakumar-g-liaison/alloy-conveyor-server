@@ -11,7 +11,7 @@ public class IdpProfileDTO {
 	private String guid;
 	private String loginDomain;
 	private GatewayTypeDTO gatewayType;
-	private List<String> idpProvider;
+	private List<IdpUserProfileDTO> idpProvider;
 	
 	public String getGuid() {
 		return guid;
@@ -26,10 +26,10 @@ public class IdpProfileDTO {
 	public void setLoginDomain(String loginDomain) {
 		this.loginDomain = loginDomain;
 	}
-	public List<String> getIdpProvider() {
+	public List<IdpUserProfileDTO> getIdpProvider() {
 		return idpProvider;
 	}
-	public void setIdpProvider(List<String> ipdProvider) {
+	public void setIdpProvider(List<IdpUserProfileDTO> ipdProvider) {
 		this.idpProvider = ipdProvider;
 	}
 	public GatewayTypeDTO getGatewayType() {
@@ -69,16 +69,6 @@ public class IdpProfileDTO {
 			GatewayTypeDTO gatewayTypeDTO = new GatewayTypeDTO();
 			gatewayTypeDTO.copyFromEntity(idpProfile.getGatewayType());
 		}
-		// Set properties
-		/*if (null != idpProfile.getIdpProvider()) {
-
-			IdpProviderDTO idpProviderDTO = null;
-			for (IdpProvider property : idpProfile.getIdpProvider()) {
-				idpProviderDTO = new IdpProviderDTO();
-				idpProviderDTO.copyFromEntity(property);
-				//this.getIdpProvider().add(idpProviderDTO);
-			}
-		}*/
 		
 		
 	}
