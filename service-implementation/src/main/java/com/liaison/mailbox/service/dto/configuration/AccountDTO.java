@@ -142,9 +142,6 @@ public class AccountDTO {
 		account.setNumberFormat(this.getNumberFormat());
 		account.setTimeZone(this.getTimeZone());
 		
-		this.getLanguage().copyToEntity(account.getLanguage());
-		this.getAccountType().copyToEntity(account.getAccountType());
-
 	}
 	
 	public void copyFromEntity(Account account) throws MailBoxConfigurationServicesException{

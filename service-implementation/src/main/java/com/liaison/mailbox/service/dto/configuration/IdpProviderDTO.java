@@ -46,7 +46,6 @@ public class IdpProviderDTO {
 	
 	public void copyToEntity(IdpProvider idpProvider) throws MailBoxConfigurationServicesException {
 		
-		idpProvider.setPguid(MailBoxUtility.getGUID());
 		idpProvider.setIdpProviderUri(this.getIdpProviderURI());
 		idpProvider.setProviderDefStorage(this.getProviderDefStorage());
 		idpProvider.setName(this.getName());

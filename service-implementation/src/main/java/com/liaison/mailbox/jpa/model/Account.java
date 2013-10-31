@@ -7,6 +7,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.SecondaryTable;
@@ -32,12 +33,10 @@ public class Account implements Identifiable {
 	private String activeState;
 	private String crmUri;
 	private String description;
-	private String languageGuid;
 	private String loginId;
 	private String smsNumber;
 	private String tmpPswdExp;
 	private String tmpPswdHash;
-	private String userTypeGuid;
 	private AccountType accountType;
 	private Language language;
 	private IdpProfile idpProfile;
@@ -84,15 +83,6 @@ public class Account implements Identifiable {
 		this.description = description;
 	}
 
-	@Column(name="LANGUAGE_GUID")
-	public String getLanguageGuid() {
-		return this.languageGuid;
-	}
-
-	public void setLanguageGuid(String languageGuid) {
-		this.languageGuid = languageGuid;
-	}
-
 	@Column(name="LOGIN_ID")
 	public String getLoginId() {
 		return this.loginId;
@@ -127,53 +117,6 @@ public class Account implements Identifiable {
 
 	public void setTmpPswdHash(String tmpPswdHash) {
 		this.tmpPswdHash = tmpPswdHash;
-	}
-
-	@Column(name="USER_TYPE_GUID")
-	public String getUserTypeGuid() {
-		return this.userTypeGuid;
-	}
-
-	public void setUserTypeGuid(String userTypeGuid) {
-		this.userTypeGuid = userTypeGuid;
-	}
-
-
-	//bi-directional one-to-one association to AccountType
-	@OneToOne(mappedBy = "account", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@JoinColumn(name="PGUID")
-	public AccountType getAccountType() {
-		return this.accountType;
-	}
-
-	public void setAccountType(AccountType accountType) {
-		this.accountType = accountType;
-	}
-
-
-	//bi-directional one-to-one association to Language
-	@OneToOne(mappedBy = "account", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@JoinColumn(name="PGUID")
-	public Language getLanguage() {
-		return this.language;
-	}
-
-	public void setLanguage(Language language) {
-		this.language = language;
-	}
-
-
-	//bi-directional one-to-one association to IdpProfile
-	@OneToOne(mappedBy = "account", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public IdpProfile getIdpProfile() {
-		return this.idpProfile;
-	}
-
-	public void setIdpProfile(IdpProfile idpProfile) {
-		this.idpProfile = idpProfile;
 	}
 
 	@Column(name="CURRENCY_FORMAT", table = "LOCALE")
@@ -213,6 +156,38 @@ public class Account implements Identifiable {
 
 	public void setTimeZone(String timeZone) {
 		this.timeZone = timeZone;
+	}
+	
+	//bi-directional one-to-one association to AccountType
+	@Column(name="USER_TYPE_GUID")
+	public AccountType getAccountType() {
+		return this.accountType;
+	}
+
+	public void setAccountType(AccountType accountType) {
+		this.accountType = accountType;
+	}
+
+	@Column(name="LANGUAGE_GUID")
+	public Language getLanguage() {
+		return this.language;
+	}
+
+	public void setLanguage(Language language) {
+		this.language = language;
+	}
+
+
+	//bi-directional one-to-one association to IdpProfile
+	@OneToOne(mappedBy = "account", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	@Column(name="ACCOUNT_GUID")
+	public IdpProfile getIdpProfile() {
+		return this.idpProfile;
+	}
+
+	public void setIdpProfile(IdpProfile idpProfile) {
+		this.idpProfile = idpProfile;
 	}
 
 

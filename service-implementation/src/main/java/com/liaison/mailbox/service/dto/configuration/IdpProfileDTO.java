@@ -1,10 +1,8 @@
 package com.liaison.mailbox.service.dto.configuration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.liaison.mailbox.jpa.model.IdpProfile;
-import com.liaison.mailbox.jpa.model.IdpProvider;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -13,7 +11,7 @@ public class IdpProfileDTO {
 	private String guid;
 	private String loginDomain;
 	private GatewayTypeDTO gatewayType;
-	private List<IdpProviderDTO> idpProvider;
+	private List<String> idpProvider;
 	
 	public String getGuid() {
 		return guid;
@@ -28,10 +26,10 @@ public class IdpProfileDTO {
 	public void setLoginDomain(String loginDomain) {
 		this.loginDomain = loginDomain;
 	}
-	public List<IdpProviderDTO> getIdpProvider() {
+	public List<String> getIdpProvider() {
 		return idpProvider;
 	}
-	public void setIdpProvider(List<IdpProviderDTO> ipdProvider) {
+	public void setIdpProvider(List<String> ipdProvider) {
 		this.idpProvider = ipdProvider;
 	}
 	public GatewayTypeDTO getGatewayType() {
@@ -41,24 +39,25 @@ public class IdpProfileDTO {
 		this.gatewayType = gatewayType;
 	}
 	
-	public void copyToEntity(IdpProfile idpProfile) throws MailBoxConfigurationServicesException {
+	public void copyToEntity(IdpProfile idpProfile, boolean iscreate) throws MailBoxConfigurationServicesException {
 		
-		idpProfile.setPguid(MailBoxUtility.getGUID());
+		if(iscreate){
+			idpProfile.setPguid(MailBoxUtility.getGUID());
+		}
 		idpProfile.setLoginDomain(this.getLoginDomain());
-		this.getGatewayType().copyToEntity(idpProfile.getGatewayType());
 		
-		// Setting the ipdProvider
-		IdpProvider idpProvider = null;
-		List<IdpProvider> idpProviderList = new ArrayList<>();
-		for (IdpProviderDTO idpProviderDTO : this.getIdpProvider()) {
+		// Setting the property
+		//IdpProvider idpProvider = null;
+		//List<IdpProvider> idpProviderList = new ArrayList<>();
+		/*for (IdpProviderDTO idpProviderDTO : this.getIdpProvider()) {
 
 			idpProvider = new IdpProvider();
 			idpProviderDTO.copyToEntity(idpProvider);
 			idpProviderList.add(idpProvider);
-		}
-		if (!idpProviderList.isEmpty()) {
+		}*/
+		/*if (!idpProviderList.isEmpty()) {
 			idpProfile.setIdpProvider(idpProviderList);
-		}
+		}*/
 	}
 	public void copyFromEntity(IdpProfile idpProfile) throws MailBoxConfigurationServicesException {
 		
@@ -71,14 +70,16 @@ public class IdpProfileDTO {
 			gatewayTypeDTO.copyFromEntity(idpProfile.getGatewayType());
 		}
 		// Set properties
-		if (null != idpProfile.getIdpProvider()) {
+		/*if (null != idpProfile.getIdpProvider()) {
 
 			IdpProviderDTO idpProviderDTO = null;
-			for (IdpProvider idpProvider : idpProfile.getIdpProvider()) {
+			for (IdpProvider property : idpProfile.getIdpProvider()) {
 				idpProviderDTO = new IdpProviderDTO();
-				idpProviderDTO.copyFromEntity(idpProvider);
-				this.getIdpProvider().add(idpProviderDTO);
+				idpProviderDTO.copyFromEntity(property);
+				//this.getIdpProvider().add(idpProviderDTO);
 			}
-		}
+		}*/
+		
+		
 	}
 }

@@ -13,6 +13,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public class AddUserProfileAccountResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
+	private UserProfileResponseDTO userResponse;
 
 	public ResponseDTO getResponse() {
 		return response;
@@ -22,10 +23,19 @@ public class AddUserProfileAccountResponseDTO implements ResponseBuilder {
 		this.response = response;
 	}
 	
+	public UserProfileResponseDTO getUserResponse() {
+		return userResponse;
+	}
+	
+	public void setUserResponse(UserProfileResponseDTO userResponse) {
+		this.userResponse = userResponse;
+	}
+	
 	@Override
 	public Response constructResponse() throws Exception {
 
 		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
+
 }

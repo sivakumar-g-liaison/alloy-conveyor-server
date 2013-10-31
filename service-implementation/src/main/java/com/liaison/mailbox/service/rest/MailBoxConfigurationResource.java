@@ -54,16 +54,20 @@ import com.liaison.mailbox.service.dto.configuration.request.AddUserProfileAccou
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseUserProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddUserProfileAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DeactivateUserProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetUserProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseUserProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
@@ -674,6 +678,46 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
+	
+	/**
+	 * REST method to retrieve a mailbox details.
+	 * 
+	 * @param guid
+	 *            The id of the mailbox
+	 * @return Response Object
+	 */
+	@GET
+	@Path("/account/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response readUserAccount(@PathParam(value = "id") String guid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			// add the new profile details
+			GetUserProfileResponseDTO serviceResponse = null;
+			UserProfileConfigurationService userProfile = new UserProfileConfigurationService();
+			serviceResponse = userProfile.getUserProfile(guid);
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
 
 	@POST
 	@Path("/serverlistener")
@@ -709,6 +753,100 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
+	
+	/**
+	 * REST method to update existing processor.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @param mailboxguid
+	 *            The id of the mailbox
+	 * @param guid
+	 *            The id of the processor
+	 * @return Response Object
+	 */
+	@PUT
+	@Path("/account/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response reviseUserProfile(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		InputStream requestStream;
+		ReviseUserProfileRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseUserProfileRequestDTO.class);
+
+			ReviseUserProfileResponseDTO serviceResponse = null;
+			UserProfileConfigurationService mailbox = new UserProfileConfigurationService();
+			// updates existing processor
+			serviceResponse = mailbox.reviseUserProfile(serviceRequest,guid);
+			// constructs response
+			returnResponse = serviceResponse.constructResponse();
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+	}
+	
+	/**
+	 * REST method to delete a mailbox.
+	 * 
+	 * @param guid
+	 *            The id of the mailbox
+	 * 
+	 * @return Response Object
+	 */
+	@DELETE
+	@Path("/account/{id}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deactivateUserProfile(@PathParam(value = "id") String guid) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			DeactivateUserProfileResponseDTO serviceResponse = null;
+			UserProfileConfigurationService profile = new UserProfileConfigurationService();
+
+			// deactivates existing mailbox
+			serviceResponse = profile.deactivateProfile(guid);
+
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
 
 	@POST
 	@Path("/sweeper")
@@ -743,4 +881,6 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
+	
+	
 }

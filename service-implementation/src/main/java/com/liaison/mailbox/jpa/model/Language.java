@@ -1,8 +1,12 @@
 package com.liaison.mailbox.jpa.model;
 
-import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import javax.persistence.*;
+import com.liaison.commons.jpa.Identifiable;
 
 
 /**
@@ -12,11 +16,11 @@ import javax.persistence.*;
 @Entity
 @Table(name="LANGUAGE")
 @NamedQuery(name="Language.findAll", query="SELECT l FROM Language l")
-public class Language implements com.liaison.commons.jpa.Identifiable {
+public class Language implements Identifiable {
+
 	private static final long serialVersionUID = 1L;
 	private String pguid;
 	private String name;
-	private Account account;
 
 	public Language() {
 	}
@@ -38,19 +42,6 @@ public class Language implements com.liaison.commons.jpa.Identifiable {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
-	//bi-directional one-to-one association to Account
-	@OneToOne(mappedBy = "language", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public Account getAccount() {
-		return this.account;
-	}
-
-	public void setAccount(Account account) {
-		this.account = account;
-	}
-	
 
 	@Override
 	@Transient

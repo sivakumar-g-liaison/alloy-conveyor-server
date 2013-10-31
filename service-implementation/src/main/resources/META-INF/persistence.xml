@@ -22,6 +22,7 @@
 		<class>com.liaison.mailbox.jpa.model.IdpProfile</class>
 		<class>com.liaison.mailbox.jpa.model.IdpProvider</class>
 		<class>com.liaison.mailbox.jpa.model.Language</class>
+		<class>com.liaison.mailbox.jpa.model.IdpProfileProvider</class>
 		
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
