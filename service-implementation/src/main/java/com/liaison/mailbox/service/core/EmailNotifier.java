@@ -15,6 +15,8 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.netflix.config.ConfigurationManager;
+
 public class EmailNotifier {
 
 	protected static final Logger LOGGER = Logger.getLogger(EmailNotifier.class);
@@ -37,9 +39,10 @@ public class EmailNotifier {
 
 		InputStream input = null;
 		try {
-
+			Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
+			String propertyFileName = "g2mailboxservice-" + env + ".properties";
 			MAILSERVER_CONFIG.load(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("g2mailboxservice-dev.properties"));
+					.getResourceAsStream(propertyFileName));
 			// RECEIVERS = new
 			// ArrayList<String>(Arrays.asList(StringUtils.split(MAILSERVER_CONFIG.getProperty("recievers"),
 			// ",")));
