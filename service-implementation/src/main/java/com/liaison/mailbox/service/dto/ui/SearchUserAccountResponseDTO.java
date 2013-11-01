@@ -8,41 +8,41 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.dto.configuration.response;
+package com.liaison.mailbox.service.dto.ui;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
  * 
- * @author veerasamyn
+ * @author praveenu
  */
-@JsonRootName("reviseUserProfileResponse")
-public class DeactivateUserProfileResponseDTO implements ResponseBuilder {
+@JsonRootName("searchUserAccountResponse")
+public class SearchUserAccountResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private UserProfileResponseDTO idpProfile;
+	private List<SearchUserAccountDTO> userAccount;
 
-	
-	public UserProfileResponseDTO getProfile() {
-		return idpProfile;
+	public List<SearchUserAccountDTO> getUserAccount() {
+
+		if (null == userAccount) {
+			userAccount = new ArrayList<SearchUserAccountDTO>();
+		}
+		return userAccount;
 	}
-	
-	public void setProfile(UserProfileResponseDTO profile) {
-		this.idpProfile = profile;
+
+	public void setUserAccount(List<SearchUserAccountDTO> userAccount) {
+		this.userAccount = userAccount;
 	}
 
 	public ResponseDTO getResponse() {
@@ -54,10 +54,8 @@ public class DeactivateUserProfileResponseDTO implements ResponseBuilder {
 	}
 
 	@Override
-	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+	public Response constructResponse() throws Exception {
 		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
-
-
 }

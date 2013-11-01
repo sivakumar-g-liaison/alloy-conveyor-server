@@ -73,7 +73,12 @@ public enum Messages {
 	// HTTP SERVER LISTENER
 	EMPTY_VALUE("The given %s is empty."),
 	PERSIST_SUCCESS("%s persisted successfully."),
-	PERSIST_FAILURE("Failed to persist the %s.");
+	PERSIST_FAILURE("Failed to persist the %s."),
+	
+	//User Account Messages
+	INVALID_ACC_REQUEST("The input request is invalid."),
+	ACC_DOES_NOT_EXIST("User Account with the given id %s does not exist."),
+	DATA_PREPOPULATE("Data populated successfully");
 
 	private String value;
 

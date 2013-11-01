@@ -68,6 +68,16 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/profile/triggerprofile.html',
             controller: 'TriggerProfileCntrlr'
         });
+        
+        $routeProvider.when('/account/addAccount', {
+            templateUrl: 'partials/account/account.html',
+            controller: 'AccountCntrlr'
+        });
+        
+        $routeProvider.when('/account/getAccount', {
+            templateUrl: 'partials/account/searchaccount.html',
+            controller: 'SearchAccountCntrlr'
+        });
 
         /*$routeProvider.when('/contact', {
 	        templateUrl:'partials/contact.html'

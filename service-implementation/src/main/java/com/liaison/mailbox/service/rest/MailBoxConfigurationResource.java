@@ -46,31 +46,33 @@ import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
-import com.liaison.mailbox.service.core.UserProfileConfigurationService;
+import com.liaison.mailbox.service.core.UserAccountConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddUserProfileAccountRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddUserAccountRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.ReviseUserProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseUserAccountRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddUserProfileAccountResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DeactivateUserProfileResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DeactivateUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetUserProfileResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.ReviseUserProfileResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
+import com.liaison.mailbox.service.dto.ui.PrepopulateUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchUserAccountResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.config.ConfigurationManager;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -648,19 +650,19 @@ public class MailBoxConfigurationResource {
 
 		Response returnResponse;
 		InputStream requestStream;
-		AddUserProfileAccountRequestDTO serviceRequest;
+		AddUserAccountRequestDTO serviceRequest;
 
 		try {
 
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddUserProfileAccountRequestDTO.class);
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddUserAccountRequestDTO.class);
 
 			// add the new profile details
-			AddUserProfileAccountResponseDTO serviceResponse = null;
-			UserProfileConfigurationService userProfile = new UserProfileConfigurationService();
-			serviceResponse = userProfile.createUserProfileAccount(serviceRequest);
+			AddUserAccountResponseDTO serviceResponse = null;
+			UserAccountConfigurationService userProfile = new UserAccountConfigurationService();
+			serviceResponse = userProfile.createUserAccount(serviceRequest);
 
 			// populate the response body
 			returnResponse = serviceResponse.constructResponse();
@@ -699,9 +701,9 @@ public class MailBoxConfigurationResource {
 		try {
 
 			// add the new profile details
-			GetUserProfileResponseDTO serviceResponse = null;
-			UserProfileConfigurationService userProfile = new UserProfileConfigurationService();
-			serviceResponse = userProfile.getUserProfile(guid);
+			GetUserAccountResponseDTO serviceResponse = null;
+			UserAccountConfigurationService userProfile = new UserAccountConfigurationService();
+			serviceResponse = userProfile.getUserAccount(guid);
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -775,19 +777,19 @@ public class MailBoxConfigurationResource {
 
 		Response returnResponse;
 		InputStream requestStream;
-		ReviseUserProfileRequestDTO serviceRequest;
+		ReviseUserAccountRequestDTO serviceRequest;
 
 		try {
 
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseUserProfileRequestDTO.class);
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseUserAccountRequestDTO.class);
 
-			ReviseUserProfileResponseDTO serviceResponse = null;
-			UserProfileConfigurationService mailbox = new UserProfileConfigurationService();
+			ReviseUserAccountResponseDTO serviceResponse = null;
+			UserAccountConfigurationService mailbox = new UserAccountConfigurationService();
 			// updates existing processor
-			serviceResponse = mailbox.reviseUserProfile(serviceRequest,guid);
+			serviceResponse = mailbox.reviseUserAccount(serviceRequest,guid);
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -825,11 +827,11 @@ public class MailBoxConfigurationResource {
 
 		try {
 
-			DeactivateUserProfileResponseDTO serviceResponse = null;
-			UserProfileConfigurationService profile = new UserProfileConfigurationService();
+			DeactivateUserAccountResponseDTO serviceResponse = null;
+			UserAccountConfigurationService profile = new UserAccountConfigurationService();
 
 			// deactivates existing mailbox
-			serviceResponse = profile.deactivateProfile(guid);
+			serviceResponse = profile.deactivateUserAccount(guid);
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -859,6 +861,7 @@ public class MailBoxConfigurationResource {
 	 * @return The Response
 	 */
 	@GET
+	@Path("/account")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchUserProfile(@QueryParam(value = "name") String accountType,
@@ -866,14 +869,49 @@ public class MailBoxConfigurationResource {
 
 		serviceCallCounter.addAndGet(1);
 
-		Response returnResponse = null;
+		Response returnResponse;
 
 		try {
 
 			// search the mailbox from the given details
-			UserProfileConfigurationService mailbox = new UserProfileConfigurationService();
+			SearchUserAccountResponseDTO serviceResponse = null;
+			UserAccountConfigurationService userAccount = new UserAccountConfigurationService();
+			serviceResponse = userAccount.searchUserAccount(accountType, providerName, loginDomain);
 
-			//returnResponse = serviceResponse.constructResponse();
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
+	
+	@GET
+	@Path("/account/prepopulate")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response preloadData() {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			// search the mailbox from the given details
+			PrepopulateUserAccountResponseDTO serviceResponse = null;
+			UserAccountConfigurationService userAccount = new UserAccountConfigurationService();
+			serviceResponse = userAccount.prePopulate();
+
+			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);

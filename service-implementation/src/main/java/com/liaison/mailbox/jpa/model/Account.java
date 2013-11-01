@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.model;
 
 import java.util.List;
@@ -129,7 +139,6 @@ public class Account implements Identifiable {
 		this.currencyFormat = currencyFormat;
 	}
 
-
 	@Column(name="DATE_FORMAT", table = "LOCALE")
 	public String getDateFormat() {
 		return this.dateFormat;
@@ -139,7 +148,6 @@ public class Account implements Identifiable {
 		this.dateFormat = dateFormat;
 	}
 
-
 	@Column(name="NUMBER_FORMAT", table = "LOCALE")
 	public String getNumberFormat() {
 		return this.numberFormat;
@@ -148,7 +156,6 @@ public class Account implements Identifiable {
 	public void setNumberFormat(String numberFormat) {
 		this.numberFormat = numberFormat;
 	}
-
 
 	@Column(name="TIME_ZONE", table = "LOCALE")
 	public String getTimeZone() {
@@ -178,7 +185,6 @@ public class Account implements Identifiable {
 		this.language = language;
 	}
 
-
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE,CascadeType.DETACH, CascadeType.REMOVE, CascadeType.REFRESH })
     @JoinColumn(name="ACCOUNT_GUID")
@@ -189,7 +195,6 @@ public class Account implements Identifiable {
 	public void setIdpProfiles(List<IdpProfile> idpProfiles) {
 		this.idpProfiles = idpProfiles;
 	}
-
 
 	@Override
 	@Transient
@@ -203,5 +208,4 @@ public class Account implements Identifiable {
 	public Class getEntityClass() {
 		return this.getClass();
 	}
-
 }

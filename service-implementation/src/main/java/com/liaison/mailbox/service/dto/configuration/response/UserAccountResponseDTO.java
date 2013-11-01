@@ -12,16 +12,16 @@ package com.liaison.mailbox.service.dto.configuration.response;
 
 /**
  * 
- * @author karthikeyanm
+ * @author praveenu
  */
-public class UserProfileResponseDTO {
+public class UserAccountResponseDTO {
 
 	private String guId;
 
-	public UserProfileResponseDTO() {
+	public UserAccountResponseDTO() {
 	}
 
-	public UserProfileResponseDTO(String guid) {
+	public UserAccountResponseDTO(String guid) {
 		this.guId = guid;
 	}
 

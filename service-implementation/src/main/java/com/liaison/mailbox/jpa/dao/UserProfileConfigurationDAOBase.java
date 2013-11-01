@@ -1,14 +1,24 @@
-package com.liaison.mailbox.jpa.dao;
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.liaison.mailbox.jpa.dao;
 
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.jpa.model.IdpProfile;
 
+/**
+ * 
+ * 
+ * @author praveenu
+ */
 public class UserProfileConfigurationDAOBase extends GenericDAOBase<IdpProfile> implements MailBoxDAO{
-
-	private static final Logger LOG = LoggerFactory.getLogger(UserProfileConfigurationDAOBase.class);
 
 	public UserProfileConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);

@@ -10,40 +10,30 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
-import java.io.IOException;
+import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.AccountDTO;
+import com.liaison.mailbox.service.dto.configuration.IdpUserProfileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
  * 
- * @author veerasamyn
+ * @author praveenu
  */
-@JsonRootName("reviseUserProfileResponse")
-public class ReviseUserProfileResponseDTO implements ResponseBuilder {
+@JsonRootName("getUserAccountResponse")
+public class GetUserAccountResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private UserProfileResponseDTO profile;
-
-	
-	public UserProfileResponseDTO getProfile() {
-		return profile;
-	}
-	
-	public void setProfile(UserProfileResponseDTO profile) {
-		this.profile = profile;
-	}
+	private AccountDTO account;
+	private List<IdpUserProfileDTO> idpProfiles;
 
 	public ResponseDTO getResponse() {
 		return response;
@@ -52,12 +42,28 @@ public class ReviseUserProfileResponseDTO implements ResponseBuilder {
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
+	
+	public AccountDTO getAccount() {
+		return account;
+	}
+
+	public void setAccount(AccountDTO account) {
+		this.account = account;
+	}
 
 	@Override
-	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
+	public Response constructResponse() throws Exception {
 		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 
+	public List<IdpUserProfileDTO> getIdpProfiles() {
+		return idpProfiles;
+	}
 
+	public void setIdpProfiles(List<IdpUserProfileDTO> idpProfiles) {
+		this.idpProfiles = idpProfiles;
+	}
+
+	
 }
