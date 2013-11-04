@@ -19,7 +19,7 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.Language;
 
 @NamedQueries({
-		@NamedQuery(name = LanguageConfigurationDAO.GET_BY_LANG_NAME, query = "SELECT l FROM Language l where l.name = :"
+		@NamedQuery(name = LanguageConfigurationDAO.GET_BY_LANG_NAME, query = "SELECT l FROM Language l where l.pguid = :"
 				+ LanguageConfigurationDAO.NAME),
 		@NamedQuery(name = LanguageConfigurationDAO.GET_ALL_LANG, query = "select l from Language l") })
 

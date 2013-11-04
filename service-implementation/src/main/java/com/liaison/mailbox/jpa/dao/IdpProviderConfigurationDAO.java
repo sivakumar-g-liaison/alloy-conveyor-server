@@ -19,7 +19,7 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.IdpProvider;
 
 @NamedQueries({
-		@NamedQuery(name = IdpProviderConfigurationDAO.GET_BY_PROVIDER_NAME, query = "select idpType from IdpProvider idpType where idpType.name = :"
+		@NamedQuery(name = IdpProviderConfigurationDAO.GET_BY_PROVIDER_NAME, query = "select idpType from IdpProvider idpType where idpType.pguid = :"
 				+ IdpProviderConfigurationDAO.NAME),
 		@NamedQuery(name = IdpProviderConfigurationDAO.GET_ALL_PROV, query = "select idpType from IdpProvider idpType") })
 

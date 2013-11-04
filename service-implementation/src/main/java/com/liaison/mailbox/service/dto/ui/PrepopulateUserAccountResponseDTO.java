@@ -31,54 +31,54 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public class PrepopulateUserAccountResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private List<String> accountType;
-	private List<String> gatewayType;
-	private List<String> language;
-	private List<String> idpProvider;
+	private List<UserAccountDTO> accountType;
+	private List<UserAccountDTO> gatewayType;
+	private List<UserAccountDTO> language;
+	private List<UserAccountDTO> idpProvider;
 
-	public List<String> getAccountType() {
+	public List<UserAccountDTO> getAccountType() {
 
 		if (null == accountType) {
-			accountType = new ArrayList<String>();
+			accountType = new ArrayList<UserAccountDTO>();
 		}
 		return accountType;
 	}
 
-	public void setAccountType(List<String> accountType) {
+	public void setAccountType(List<UserAccountDTO> accountType) {
 		this.accountType = accountType;
 	}
 	
-	public List<String> getGatewayType() {
+	public List<UserAccountDTO> getGatewayType() {
 		if (null == gatewayType) {
-			gatewayType = new ArrayList<String>();
+			gatewayType = new ArrayList<UserAccountDTO>();
 		}
 		return gatewayType;
 	}
 
-	public void setGatewayType(List<String> gatewayType) {
+	public void setGatewayType(List<UserAccountDTO> gatewayType) {
 		this.gatewayType = gatewayType;
 	}
 
-	public List<String> getLanguage() {
+	public List<UserAccountDTO> getLanguage() {
 		if (null == language) {
-			language = new ArrayList<String>();
+			language = new ArrayList<UserAccountDTO>();
 		}
 		return language;
 	}
 
-	public void setLanguage(List<String> language) {
+	public void setLanguage(List<UserAccountDTO> language) {
 		this.language = language;
 	}
 	
-	public List<String> getIdpProvider() {
+	public List<UserAccountDTO> getIdpProvider() {
 		
 		if (null == idpProvider) {
-			idpProvider = new ArrayList<String>();
+			idpProvider = new ArrayList<UserAccountDTO>();
 		}
 		return idpProvider;
 	}
 
-	public void setIdpProvider(List<String> idpProvider) {
+	public void setIdpProvider(List<UserAccountDTO> idpProvider) {
 		this.idpProvider = idpProvider;
 	}
 

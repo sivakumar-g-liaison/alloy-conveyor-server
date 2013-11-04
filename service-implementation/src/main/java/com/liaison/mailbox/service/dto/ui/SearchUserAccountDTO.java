@@ -22,7 +22,7 @@ public class SearchUserAccountDTO {
 	private String guid;
 	private String status;
 	private String loginId;
-	private List<String> providerName;
+	private List<UserAccountDTO> idpProvider;
 	
 	private boolean incomplete;
 	private String accountType;
@@ -32,11 +32,11 @@ public class SearchUserAccountDTO {
 	public void setAccountType(String accountType) {
 		this.accountType = accountType;
 	}
-	public List<String> getProviderName() {
-		return providerName;
+	public List<UserAccountDTO> getIdpProvider() {
+		return idpProvider;
 	}
-	public void setProviderName(List<String> providerName) {
-		this.providerName = providerName;
+	public void setIdpProvider(List<UserAccountDTO> idpProvider) {
+		this.idpProvider = idpProvider;
 	}
 	public String getStatus() {
 		return status;

@@ -20,7 +20,7 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.GatewayType;
 
 @NamedQueries({
-	@NamedQuery(name = GatewayTypeConfigurationDAO.GET_BY_GATE_NAME, query = "select gateType from GatewayType gateType where gateType.name = :"
+	@NamedQuery(name = GatewayTypeConfigurationDAO.GET_BY_GATE_NAME, query = "select gateType from GatewayType gateType where gateType.pguid = :"
 			+ GatewayTypeConfigurationDAO.NAME),
 		@NamedQuery(name = GatewayTypeConfigurationDAO.GET_ALL_GATE, query = "select gateType from GatewayType gateType") })
 

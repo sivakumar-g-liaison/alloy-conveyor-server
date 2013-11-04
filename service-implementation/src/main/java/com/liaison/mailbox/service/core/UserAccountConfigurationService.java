@@ -51,6 +51,7 @@ import com.liaison.mailbox.service.dto.configuration.response.UserAccountRespons
 import com.liaison.mailbox.service.dto.ui.PrepopulateUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchUserAccountDTO;
 import com.liaison.mailbox.service.dto.ui.SearchUserAccountResponseDTO;
+import com.liaison.mailbox.service.dto.ui.UserAccountDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -96,10 +97,10 @@ public class UserAccountConfigurationService {
 			}
 			
 			AccountTypeConfigurationDAOBase accountDAOBase = new AccountTypeConfigurationDAOBase();
-			AccountType accountType = accountDAOBase.findByName(accountDTO.getAccountType().getName());			
+			AccountType accountType = accountDAOBase.findByName(accountDTO.getAccountType().getGuid());			
 			
 			LanguageConfigurationDAOBase languageDAOBase = new LanguageConfigurationDAOBase();
-			Language language = languageDAOBase.findByName(accountDTO.getLanguage().getName());
+			Language language = languageDAOBase.findByName(accountDTO.getLanguage().getGuid());
 			
 			Account account = new Account();
 			account.setLanguage(language);
@@ -118,14 +119,14 @@ public class UserAccountConfigurationService {
 				
 			for (IdpUserProfileDTO dto : ipdProfileDTOs) {
 					
-				idpProvider = idpProviderDAOBase.findByName(dto.getIdpProvider());
+				idpProvider = idpProviderDAOBase.findByName(dto.getIdpProviderGuid());
 				if (null != idpProvider) {
 					profile = new IdpProfile();
 					profile.setPguid(MailBoxUtility.getGUID());
 					profile.setIdpProvider(idpProvider);
 					profile.setLoginDomain(dto.getLoginDomain());
 						
-					gatewayTpe = gatewayDAOBase.findByName(dto.getGatewayType());
+					gatewayTpe = gatewayDAOBase.findByName(dto.getGatewayTypeGuid());
 					profile.setGatewayType(gatewayTpe);
 					profiles.add(profile);
 				}
@@ -193,9 +194,9 @@ public class UserAccountConfigurationService {
 				
 				IdpUserProfileDTO profileDTO = new IdpUserProfileDTO();
 				profileDTO.setGuid(profile.getPguid());
-				profileDTO.setGatewayType(profile.getGatewayType().getName());
+				profileDTO.setGatewayTypeGuid(profile.getGatewayType().getPguid());
 				profileDTO.setLoginDomain(profile.getLoginDomain());
-				profileDTO.setIdpProvider(profile.getIdpProvider().getName());
+				profileDTO.setIdpProviderGuid(profile.getIdpProvider().getPguid());
 				userProfileDto.add(profileDTO);
 			}
 			
@@ -258,6 +259,15 @@ public class UserAccountConfigurationService {
 
 			accountDTO.copyToEntity(retrievedAccount, false);
 			
+			AccountTypeConfigurationDAOBase accountDAOBase = new AccountTypeConfigurationDAOBase();
+			AccountType accountType = accountDAOBase.findByName(accountDTO.getAccountType().getGuid());			
+			
+			LanguageConfigurationDAOBase languageDAOBase = new LanguageConfigurationDAOBase();
+			Language language = languageDAOBase.findByName(accountDTO.getLanguage().getGuid());
+			
+			retrievedAccount.setAccountType(accountType);
+			retrievedAccount.setLanguage(language);
+			
 			IdpProfile profile = null;
 			List<IdpProfile> profiles = null;
 			
@@ -274,16 +284,14 @@ public class UserAccountConfigurationService {
 				
 			for (IdpUserProfileDTO dto : profileDTO) {
 					
-				idpProvider = idpProviderDAOBase.findByName(dto.getIdpProvider());
+				idpProvider = idpProviderDAOBase.findByName(dto.getIdpProviderGuid());
 				if (null != idpProvider) {
 					UserProfileConfigurationDAOBase configProfileDao = new UserProfileConfigurationDAOBase();
 					profile = configProfileDao.find(IdpProfile.class, dto.getGuid());
-					//profile = new IdpProfile();
-					//profile.setPguid(dto.getGuid());
 					profile.setIdpProvider(idpProvider);
 					profile.setLoginDomain(dto.getLoginDomain());
 						
-					gatewayTpe = gatewayDAOBase.findByName(dto.getGatewayType());
+					gatewayTpe = gatewayDAOBase.findByName(dto.getGatewayTypeGuid());
 					profile.setGatewayType(gatewayTpe);
 					profiles.add(profile);
 				}
@@ -377,12 +385,16 @@ public class UserAccountConfigurationService {
 				serachMailBoxDTO.setLoginId(acc.getLoginId());
 				serachMailBoxDTO.setAccountType(acc.getAccountType().getName());
 				
-				List<String> providerName = new ArrayList<>();
+				List<UserAccountDTO> idpProvider = new ArrayList<>();
+				UserAccountDTO userAccount = null;
 				for(IdpProfile profile : acc.getIdpProfiles()){
 					
-					providerName.add(profile.getIdpProvider().getName());
+					userAccount = new UserAccountDTO();
+					userAccount.setId(profile.getIdpProvider().getPguid());
+					userAccount.setName(profile.getIdpProvider().getName());
+					idpProvider.add(userAccount);
 				}
-				serachMailBoxDTO.setProviderName(providerName);
+				serachMailBoxDTO.setIdpProvider(idpProvider);
 				serachMailBoxDTO.setStatus(acc.getActiveState());
 				searchMailBoxDTOList.add(serachMailBoxDTO);
 			}
@@ -422,26 +434,39 @@ public class UserAccountConfigurationService {
 			Set<IdpProvider> retrievedProvider = configProviderDAO.findAllProviders();
 
 			// Constructing the DTO from retrieved fields
-			List<String> accTypeDTO = new ArrayList<String>();
-			List<String> gateTypeDTO = new ArrayList<String>();
-			List<String> langDTO = new ArrayList<String>();
-			List<String> providerDTO = new ArrayList<String>();
+			List<UserAccountDTO> accTypeDTO = new ArrayList<UserAccountDTO>();
+			List<UserAccountDTO> gateTypeDTO = new ArrayList<UserAccountDTO>();
+			List<UserAccountDTO> langDTO = new ArrayList<UserAccountDTO>();
+			List<UserAccountDTO> providerDTO = new ArrayList<UserAccountDTO>();
 			
+			UserAccountDTO userAccountDTO = null;
 			for (AccountType acc : retrievedAccoutType) {
 
-				accTypeDTO.add(acc.getName());
+				userAccountDTO = new UserAccountDTO();
+				userAccountDTO.setId(acc.getPguid());
+				userAccountDTO.setName(acc.getName());
+				accTypeDTO.add(userAccountDTO);
 			}
 			for (GatewayType gate : retrievedGateway) {
 
-				gateTypeDTO.add(gate.getName());
+				userAccountDTO = new UserAccountDTO();
+				userAccountDTO.setId(gate.getPguid());
+				userAccountDTO.setName(gate.getName());
+				gateTypeDTO.add(userAccountDTO);
 			}
 			for (Language lang : retrievedLanguage) {
 
-				langDTO.add(lang.getName());
+				userAccountDTO = new UserAccountDTO();
+				userAccountDTO.setId(lang.getPguid());
+				userAccountDTO.setName(lang.getName());
+				langDTO.add(userAccountDTO);
 			}
 			for (IdpProvider prov : retrievedProvider) {
 
-				providerDTO.add(prov.getName());
+				userAccountDTO = new UserAccountDTO();
+				userAccountDTO.setId(prov.getPguid());
+				userAccountDTO.setName(prov.getName());
+				providerDTO.add(userAccountDTO);
 			}
 
 			// Constructing the responses.

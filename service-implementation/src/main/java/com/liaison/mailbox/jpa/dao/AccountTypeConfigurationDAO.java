@@ -19,7 +19,7 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.AccountType;
 
 @NamedQueries({
-		@NamedQuery(name = AccountTypeConfigurationDAO.GET_BY_NAME, query = "select accType from AccountType accType where accType.name = :"
+		@NamedQuery(name = AccountTypeConfigurationDAO.GET_BY_NAME, query = "select accType from AccountType accType where accType.pguid = :"
 				+ AccountTypeConfigurationDAO.NAME),
 		@NamedQuery(name = AccountTypeConfigurationDAO.GET_ALL_ACC_TYP, query = "select accType from AccountType accType") })
 

@@ -10,9 +10,6 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import java.util.List;
-
-import com.liaison.mailbox.jpa.model.IdpProfile;
 
 /**
  * 
@@ -21,16 +18,16 @@ import com.liaison.mailbox.jpa.model.IdpProfile;
  */
 public class IdpUserProfileDTO {
 
-	private String idpProvider;
-	private String gatewayType;
+	private String idpProviderGuid;
+	private String gatewayTypeGuid;
 	private String loginDomain;
 	private String guid;
 	
-	public String getIdpProvider() {
-		return idpProvider;
+	public String getIdpProviderGuid() {
+		return idpProviderGuid;
 	}
-	public void setIdpProvider(String idpProvider) {
-		this.idpProvider = idpProvider;
+	public void setIdpProviderGuid(String idpProviderGuid) {
+		this.idpProviderGuid = idpProviderGuid;
 	}
 	public String getLoginDomain() {
 		return loginDomain;
@@ -38,17 +35,13 @@ public class IdpUserProfileDTO {
 	public void setLoginDomain(String loginDomain) {
 		this.loginDomain = loginDomain;
 	}
-	public String getGatewayType() {
-		return gatewayType;
+	public String getGatewayTypeGuid() {
+		return gatewayTypeGuid;
 	}
-	public void setGatewayType(String gatewayType) {
-		this.gatewayType = gatewayType;
+	public void setGatewayTypeGuid(String gatewayTypeGuid) {
+		this.gatewayTypeGuid = gatewayTypeGuid;
 	}
 	
-	public void copyFromEntity(List<IdpProfile> idpProfiles){
-		
-		
-	}
 	public String getGuid() {
 		return guid;
 	}
