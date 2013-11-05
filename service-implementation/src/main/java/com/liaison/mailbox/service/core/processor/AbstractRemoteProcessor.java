@@ -452,16 +452,24 @@ public abstract class AbstractRemoteProcessor {
 	 */
 	protected String getJavaScriptString(String URI) throws IOException, URISyntaxException {
 
-		StringBuffer buffer = new StringBuffer();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(URI))) {
-			for (Path entry : stream) {
-				String content = FileUtils.readFileToString(entry.toFile(), "UTF-8");
-				buffer.append(content);
+		File file = new File(URI);
+		if (file.isFile()) { // Added because of this java.nio.file.NotDirectoryException
+
+			String content = FileUtils.readFileToString(file, "UTF-8");
+			return content;
+		} else {
+
+			StringBuffer buffer = new StringBuffer();
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(URI))) {
+				for (Path entry : stream) {
+					String content = FileUtils.readFileToString(entry.toFile(), "UTF-8");
+					buffer.append(content);
+				}
+			} catch (IOException e) {
+				throw e;
 			}
-		} catch (IOException e) {
-			throw e;
+			return buffer.toString();
 		}
-		return buffer.toString();
 	}
 
 	/**
