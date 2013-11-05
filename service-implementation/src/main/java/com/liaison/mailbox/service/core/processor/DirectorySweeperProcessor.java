@@ -108,7 +108,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		// Get root from folders input_folder
 		String inputLocation = getInputLocationURI();
-		String fileRenameFormat = getPropertyValue(MailBoxConstants.FOLDER_HEADER);
+		String fileRenameFormat = getPropertyValue(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		String url = getPropertyValue(MailBoxConstants.URL);
 		if (MailBoxUtility.isEmpty(inputLocation)) {
 			throw new MailBoxServicesException("The given input location is not available in the system.");
