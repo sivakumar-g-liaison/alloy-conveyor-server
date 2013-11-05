@@ -64,7 +64,7 @@ public class ProcessorProperty implements Identifiable {
 		this.procsrPropName = procsrPropName;
 	}
 
-	@Column(name="PROCSR_PROP_VALUE", length=512)
+	@Column(name="PROCSR_PROP_VALUE", length=4000)
 	public String getProcsrPropValue() {
 		return this.procsrPropValue;
 	}

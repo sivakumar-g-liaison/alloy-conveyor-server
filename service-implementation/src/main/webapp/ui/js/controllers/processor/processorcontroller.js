@@ -93,12 +93,12 @@ var rest = myApp.controller(
                     isMandatory: true
                 }, {
                     name: 'httpVersion',
-                    value: '',
+                    value: '1.1',
                     allowAdd: false,
                     isMandatory: true
                 }, {
                     name: 'httpVerb',
-                    value: '',
+                    value: 'verb',
                     allowAdd: false,
                     isMandatory: true
                 }, {
@@ -135,9 +135,9 @@ var rest = myApp.controller(
                     allowAdd: 'showNoAddBox'
                 }];
 
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'otherRequestHeader'];
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
 
-                $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'otherRequestHeader'];
+                $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
 
                 $scope.allMandatoryFtpProperties = ['url'];
 
@@ -203,7 +203,7 @@ var rest = myApp.controller(
                     width: "45%",
                     displayName: "Value",
                     enableCellEdit: false,
-                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required">'
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required"><a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></a>'
                 }, {
                     field: "allowAdd",
                     width: "10%",
@@ -244,7 +244,8 @@ var rest = myApp.controller(
                     field: "folderDesc",
                     width: "30%",
                     displayName: "Description",
-                    enableCellEdit: true
+                    enableCellEdit: false,
+                    cellTemplate: '<textarea ng-model="COL_FIELD"></textarea>'
 
                 }, {
                     field: "allowAdd",
@@ -273,7 +274,8 @@ var rest = myApp.controller(
                     field: "credentialURI",
                     width: "15%",
                     displayName: "URI",
-                    enableCellEdit: true
+                    enableCellEdit: false,
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
 
                 }, {
                     field: "credentialType",
@@ -285,7 +287,8 @@ var rest = myApp.controller(
                     field: "userId",
                     width: "15%",
                     displayName: "UserId",
-                    enableCellEdit: true
+                    enableCellEdit: false,
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
                 }, {
                     field: "password",
                     width: "20%",
@@ -302,7 +305,8 @@ var rest = myApp.controller(
                     field: "idpURI",
                     width: "15%",
                     displayName: "IdpURI",
-                    enableCellEdit: true
+                    enableCellEdit: false,
+                    cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
                 }, {
                     field: "allowAdd",
                     width: "10%",
@@ -392,8 +396,7 @@ var rest = myApp.controller(
             $scope.editProcessor = function (row) {
 
                 block.blockUI();
-                $scope.loadOrigin();
-                $scope.readAllProfiles();
+                $scope.addNew();
                 $scope.isEdit = true;
                 var procsrId = row.getProperty('guid');
 
@@ -418,9 +421,17 @@ var rest = myApp.controller(
 
                         for (var i = 0; i < data.getProcessorResponse.processor.profiles.length; i++) {
 
-                            var index = $scope.allProfiles.indexOf(data.getProcessorResponse.processor.profiles[i].name);
-                            $scope.allProfiles.splice(index, 1);
+                            // To remove $$hashKey
+                            var profs = angular.fromJson(angular.toJson($scope.allProfiles));
 
+                            console.log('Profs ' + profs[0].name);
+                            console.log('Profs ' + data.getProcessorResponse.processor.profiles[i].name);
+
+                            console.log('Profs ' + profs[0].id);
+                            console.log('Profs ' + data.getProcessorResponse.processor.profiles[i].id);
+
+                            var index = profs.indexOf(data.getProcessorResponse.processor.profiles[i]);
+                            $scope.allProfiles.splice(index, 1);
                         }
 
                         // Pushing out dynamis props
@@ -431,10 +442,16 @@ var rest = myApp.controller(
                         $scope.ftpMandatoryProperties = [];
 
                         var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
-
+                        var otherReqIndex = -1;
+                        var i = 0;
 
                         for (var prop in json_data) {
                             if (json_data[prop] !== 0 && json_data[prop] !== false && json_data[prop] !== null && json_data[prop] !== '') {
+
+                                i++;
+                                if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
+                                    otherReqIndex = i;
+                                }
 
                                 if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
 
@@ -462,6 +479,17 @@ var rest = myApp.controller(
 
                             }
 
+                        }
+
+                        if (otherReqIndex !== -1) {
+
+                            if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
+                                $scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
+                            } else {
+                                $scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
+                            }
+
+                            $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push('otherRequestHeader');
                         }
 
                         for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
@@ -969,6 +997,30 @@ var rest = myApp.controller(
                 } else $scope.processorProperties = $scope.httpMandatoryProperties;
 
             };
+
+            // Editor Section Begins
+
+            var editor;
+            var rowObj;
+
+            $scope.loadValueData = function (_editor) {
+
+                editor = _editor;
+                _editor.getSession().setUseWorker(false);
+            };
+
+            $scope.isModal = function (row) {
+
+                rowObj = row;
+                editor.setValue(row.getProperty('value'));
+            }
+
+            $scope.close = function () {
+
+                rowObj.entity.value = editor.getValue();
+            }
+
+            // Editor Section Ends
 
         }
 

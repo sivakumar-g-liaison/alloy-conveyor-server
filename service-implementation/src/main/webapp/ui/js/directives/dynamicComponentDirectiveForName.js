@@ -39,7 +39,7 @@ angular.module(
 								angular.fromJson(newValue);
 							scope.disableAddnew = true;
 							scope.addedProperty = 'add new';
-						},
+						});
                                                 
 						scope.shouldIShowAddTextBox =
 						function (selectedproperty) {
@@ -55,10 +55,10 @@ angular.module(
 							}
 						},
                                               
-                                              scope.setScopeValue = function (value) {
-                                                    scope.selectedValue.name = value;
-                                                              }
-					);
+					  scope.setScopeValue = function (value) {
+							scope.selectedValue.name = value;
+									  }
+					
 				}
 			};
 		});
