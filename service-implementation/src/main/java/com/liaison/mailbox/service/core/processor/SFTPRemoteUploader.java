@@ -111,7 +111,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				uploadDirectory(sftpRequest,path,"");
 			}else{
 				InputStream inputStream = new FileInputStream(root);
-				sftpRequest.putFile(root.getPath(), inputStream);
+				sftpRequest.putFile(root.getName(), inputStream);
 			}
 		}
 		sftpRequest.disconnect();
@@ -143,7 +143,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					String localFilePath = item.getAbsolutePath();
 					File localFile = new File(localFilePath);
 					InputStream inputStream = new FileInputStream(localFile);
-					sftpRequest.putFile(new File(remoteFilePath).getPath(), inputStream);
+					sftpRequest.putFile(new File(remoteFilePath).getName(), inputStream);
 					
 				} else {
 					// create directory on the server
