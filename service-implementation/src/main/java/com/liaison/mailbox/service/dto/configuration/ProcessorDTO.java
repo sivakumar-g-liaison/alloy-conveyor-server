@@ -261,6 +261,9 @@ public class ProcessorDTO {
 		}
 
 		// Setting the property
+		if (null != processor.getDynamicProperties()) {
+			processor.getDynamicProperties().clear();
+		}
 		ProcessorProperty property = null;
 		List<ProcessorProperty> properties = new ArrayList<>();
 		for (PropertyDTO propertyDTO : this.getDynamicProperties()) {
