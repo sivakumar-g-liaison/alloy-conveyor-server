@@ -152,7 +152,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.addProcessor = function () {
 
-            $scope.saveForm();
+            //$scope.saveForm();
             $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
         };
 
