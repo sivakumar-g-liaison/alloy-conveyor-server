@@ -41,6 +41,11 @@ var rest = myApp.controller(
                     dynamicProperties: [],
                     remoteProcessorProperties: {}
                 };
+                
+                $scope.modal = {
+                        "roleList":'',
+                        "uri": ''
+                    }
 
                 $scope.processor.remoteProcessorProperties = {
                     otherRequestHeader: []
