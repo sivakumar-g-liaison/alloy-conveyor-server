@@ -58,7 +58,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException {
 
-		HTTPRequest request = (HTTPRequest)getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
 
@@ -70,6 +70,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				String content = FileUtils.readFileToString(entry, "UTF-8");
 				buffer.append(content);
 			}
+			if (buffer.length() > 0) {
+				request.inputData(buffer.toString());
+			}
 		}
 
 		HTTPResponse response = request.execute();
@@ -77,8 +80,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		}
-
-		writeResponseToMailBox(responseStream);
+		
 	}
 
 	@Override

@@ -35,8 +35,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote downloader to perform pull operation, also it has support methods
- * for JavaScript.
+ * Http remote downloader to perform pull operation, also it has support methods for JavaScript.
  * 
  * @author praveenu
  */
@@ -99,7 +98,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException {
 
-		HTTPRequest request = (HTTPRequest)getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
 
@@ -110,6 +109,9 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			for (File entry : getPayload()) {
 				String content = FileUtils.readFileToString(entry, "UTF-8");
 				buffer.append(content);
+			}
+			if (buffer.length() > 0) {
+				request.inputData(buffer.toString());
 			}
 		}
 
