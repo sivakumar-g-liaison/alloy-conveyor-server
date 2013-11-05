@@ -181,6 +181,7 @@ dependencies {
 	
 	//Dependencies for MCC
 	compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
+	compile group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
