@@ -124,8 +124,17 @@ public abstract class AbstractRemoteProcessor {
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 
 					LOGGER.debug("Started reading the payload files");
-					files = new File(folder.getFldrUri()).listFiles();
-					LOGGER.debug("Payload files received successfully");
+					File file = new File(folder.getFldrUri());
+					
+					if(file.isFile()){
+						LOGGER.debug("Payload files received successfully");
+						files = new File[1];
+						files[0] = file;
+						return files;
+					}else{
+						LOGGER.debug("Payload files received successfully");
+						return file.listFiles();
+					}
 				}
 			}
 		}
@@ -221,7 +230,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public String getCredentialURI() throws MailBoxServicesException {
+	protected String getCredentialURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getCredentials() != null) {
 
@@ -245,7 +254,7 @@ public abstract class AbstractRemoteProcessor {
 		return null;
 	}
 
-	public String getUserCredentialURI() throws MailBoxServicesException {
+	protected String getUserCredentialURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getCredentials() != null) {
 
@@ -263,7 +272,7 @@ public abstract class AbstractRemoteProcessor {
 		return null;
 	}
 
-	public String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException {
+	protected String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException {
 
 		if (MailBoxUtility.isEmpty(credentialURI)) {
 			throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
@@ -321,20 +330,18 @@ public abstract class AbstractRemoteProcessor {
 	 * 
 	 * @return MailBox dynamic properties
 	 */
-	public List<Properties> getDynamicProperties() {
+	public Properties getDynamicProperties() {
 
-		List<Properties> dynamicProperties = new ArrayList<>();
-
-		Properties pro = null;
-		for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
-
-			pro = new Properties();
-			pro.setProperty("name", property.getProcsrPropName());
-			pro.setProperty("value", property.getProcsrPropValue());
-			dynamicProperties.add(pro);
-		}
+		Properties properties = new Properties();
 		
-		return dynamicProperties;
+		if(null != configurationInstance.getDynamicProperties()){
+			
+			for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
+
+				properties.setProperty(property.getProcsrPropName(),property.getProcsrPropValue());
+			}
+		}
+		return properties;
 	}
 
 	/**
