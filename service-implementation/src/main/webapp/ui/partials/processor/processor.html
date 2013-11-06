@@ -83,7 +83,7 @@
             Type
           </label>
           
-          <select ng-model="processor.type" ng-options="type for type in enumprocsrtype"  class="form-control">
+          <select ng-disabled="isEdit" ng-model="processor.type" ng-options="type for type in enumprocsrtype"  class="form-control">
           </select>
              </div>
            <div class="form-group">

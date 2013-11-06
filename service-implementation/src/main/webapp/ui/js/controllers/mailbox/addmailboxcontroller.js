@@ -3,8 +3,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
-        //Needed only for Edir
-        //$scope.procsBtnStatus = true;
 
         //Model for Add MB
         addRequest = $scope.addRequest = {
@@ -34,6 +32,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         ];
 
         var block = $blockUI.createBlockUI();
+        var fromAddProcsr = false;
 
         $scope.mailBox.status = $scope.enumstats[0];
 
@@ -55,7 +54,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On               
 
                 $scope.isMailBoxEdit = true;
-                //$scope.procsBtnStatus = false;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 //$scope.sharedService.setProperty('test');
 
@@ -116,7 +114,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                     function (data, status) {
 
                         if (status === 200) {
-                            alert(data.reviseMailBoxResponse.response.message);
+
+                            if (fromAddProcsr) {
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+                            } else alert(data.reviseMailBoxResponse.response.message);
                         }
                         $scope.mailBox.properties = [];
                     }
@@ -132,9 +133,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                         block.unblockUI();
                         if (status === 200) {
 
-                            alert(data.addMailBoxResponse.response.message);
                             $scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
-                            //$scope.procsBtnStatus = false;
+
+                            if (fromAddProcsr) {
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+                            } else alert(data.addMailBoxResponse.response.message);
                         }
                         $scope.mailBox.properties = [];
 
@@ -152,8 +155,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.addProcessor = function () {
 
-            //$scope.saveForm();
-            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+            fromAddProcsr = true;
+            $scope.saveForm();
+        };
+
+        $scope.saveMailbox = function () {
+
+            fromAddProcsr = false;
+            $scope.saveForm();
         };
 
         // Property grid
