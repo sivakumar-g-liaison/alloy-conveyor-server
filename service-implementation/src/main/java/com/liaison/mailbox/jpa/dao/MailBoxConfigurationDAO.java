@@ -10,7 +10,7 @@ import com.liaison.mailbox.jpa.model.MailBox;
 
 @NamedQueries({
 		@NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_NAME,
-				query = "SELECT mbc FROM MailBox mbc where mbc.mbxName like :" + MailBoxConfigurationDAO.MBX_NAME),
+				query = "SELECT mbc FROM MailBox mbc where LOWER(mbc.mbxName) like :" + MailBoxConfigurationDAO.MBX_NAME),
 		@NamedQuery(name = MailBoxConfigurationDAO.FIND_ACTIVE_MAILBOX_BY_PGUID,
 				query = "SELECT mbc FROM MailBox mbc WHERE mbc.mbxStatus = 'active' and mbc.pguid = :"
 						+ MailBoxConfigurationDAO.PGUID),
@@ -21,7 +21,7 @@ import com.liaison.mailbox.jpa.model.MailBox;
 						+ " inner join mbx.mailboxProcessors prcsr"
 						+ " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
 						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
-						+ " where mbx.mbxName like :" + MailBoxConfigurationDAO.MBX_NAME
+						+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBX_NAME
 						+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
 						+ " order by mbx.mbxName")
 })

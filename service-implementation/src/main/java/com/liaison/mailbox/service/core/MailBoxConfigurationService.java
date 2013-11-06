@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -273,8 +274,13 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
 
+			Set<MailBox> retrievedMailBoxes = new HashSet<>();
+			if (!MailBoxUtility.isEmpty(profName)) {
+				retrievedMailBoxes = configDao.find(mbxName, profName);
+			}
+
+			// If the profile name is empty it will use findByName
 			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
 
 				Set<MailBox> retrievedMailBoxesUsingName = configDao.findByName(mbxName);

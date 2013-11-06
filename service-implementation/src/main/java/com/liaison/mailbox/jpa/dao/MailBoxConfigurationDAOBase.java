@@ -54,8 +54,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
-			List<?> object = em.createNamedQuery(GET_MBX)
-					.setParameter(MailBoxConfigurationDAO.MBX_NAME, "%" + (mbxName == null ? "" : mbxName) + "%")
+			List<?> object = em
+					.createNamedQuery(GET_MBX)
+					.setParameter(MailBoxConfigurationDAO.MBX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(MailBoxConfigurationDAO.SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.getResultList();
 			Iterator<?> iter = object.iterator();
@@ -81,7 +82,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 
 			List<?> object = entityManager.createNamedQuery(FIND_BY_NAME)
-					.setParameter(MBX_NAME, "%" + mbxName + "%")
+					.setParameter(MBX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.getResultList();
 			Iterator<?> iter = object.iterator();
 
