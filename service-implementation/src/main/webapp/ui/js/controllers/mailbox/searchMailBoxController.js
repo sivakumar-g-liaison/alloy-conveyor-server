@@ -54,8 +54,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         $scope.setPagingData = function (data, page, pageSize) {
 
             if (data === null || data.length <= 0) {
-				$scope.message = 'No results found.';
-				$scope.openMessage();
+                $scope.message = 'No results found.';
+                $scope.openMessage();
             }
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
@@ -71,13 +71,13 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             $scope.key = row.entity;
             $scope.deleteKey = true;
         };
-		
-		// Enable the delete modal dialog
+
+        // Enable the delete modal dialog
         $scope.openMessage = function () {
             $scope.customKey = true;
         };
-		
-		// Close the modal
+
+        // Close the modal
         $scope.closeMessage = function () {
             $scope.customKey = false;
         };
@@ -85,7 +85,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         // calls the rest deactivate service
         $scope.deactivateMailBox = function () {
 
-            $scope.restService.delete($scope.base_url + "/" +  $scope.key.guid)
+            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid)
                 .success(function (data, status) {
                     alert(data.deactivateMailBoxResponse.response.message);
                     $scope.search();
@@ -114,7 +114,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
         // Search logic for mailbox
         $scope.search = function () {
-            $scope.showprogressbar=true;
+            $scope.showprogressbar = true;
             var profName = "";
             if (null !== $scope.profile) {
                 profName = $scope.profile.name;
@@ -128,7 +128,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName)
                 .success(function (data) {
                     $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
-                    $scope.showprogressbar=false;
+                    $scope.showprogressbar = false;
                 });
         };
 
@@ -148,25 +148,22 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         }, true);
 
         // Customized column in the grid.
-        $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-click="openDelete(row)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button>';
+        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE"><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-click="openDelete(row)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-disabled="true"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
 
         // Setting the grid details
         $scope.gridOptions = {
-            columnDefs: [
-                {
+            columnDefs: [{
                     field: 'name',
-                     width:'30%',
+                    width: '30%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
-                },
-                {
+                }, {
                     field: 'description',
-                    width:'50%',
+                    width: '50%',
                     displayName: 'Desc'
-                },
-                {
+                }, {
                     field: 'status',
-                    width:'10%',
+                    width: '10%',
                     displayName: 'Status'
                 },
                 /*{
@@ -175,7 +172,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                 },*/
                 { // Customized column
                     displayName: 'Action',
-                     width:'10%',
+                    width: '10%',
                     cellTemplate: $scope.editableInPopup
                 }
 
@@ -197,4 +194,5 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             $location.path(hash);
         };
 
-}]);
+    }
+]);
