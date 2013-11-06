@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -49,6 +50,7 @@ import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
@@ -319,19 +321,19 @@ public abstract class AbstractRemoteProcessor {
 	 * 
 	 * @return MailBox dynamic properties
 	 */
-	public List<PropertyDTO> getDynamicProperties() {
+	public List<Properties> getDynamicProperties() {
 
-		List<PropertyDTO> dynamicProperties = new ArrayList<>();
+		List<Properties> dynamicProperties = new ArrayList<>();
 
-		PropertyDTO prop = null;
+		Properties pro = null;
 		for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
 
-			prop = new PropertyDTO();
-			prop.copyFromEntity(property, true);
-			dynamicProperties.add(prop);
+			pro = new Properties();
+			pro.setProperty("name", property.getProcsrPropName());
+			pro.setProperty("value", property.getProcsrPropValue());
+			dynamicProperties.add(pro);
 		}
-
-		//return configurationInstance.getDynamicProperties();
+		
 		return dynamicProperties;
 	}
 
@@ -357,8 +359,10 @@ public abstract class AbstractRemoteProcessor {
 	 * Get the credentials of the MailBox known only to java script
 	 * 
 	 * @return MailBox dynamic properties
+	 * @throws SymmetricAlgorithmException 
 	 */
-	public Object getPassword() {
+	public Object getPassword() throws SymmetricAlgorithmException {
+		
 		return configurationInstance.getCredentials();
 	}
 
