@@ -19,7 +19,7 @@ function showAlert(msg) {
 			afterClose: function() {}
 		},
       buttons: [
-        {addClass: 'btn btn-primary', text: 'Ok', onClick: function($noty) {
+        {addClass: 'btn btn-primary', text: 'close', onClick: function($noty) {
             $noty.close();
           }
         }

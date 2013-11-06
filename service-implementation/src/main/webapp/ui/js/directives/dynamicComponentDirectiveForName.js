@@ -24,21 +24,22 @@ angular.module(
 					'<div ng-switch-when="true">\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
                                         <option value="">-- select--</option>\n\
-                                        </select> <i>or</i>\n\
-                                        <input type="text" ng-disabled=disableAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)" required></input>\n\
+                                        </select> <i><br/></i>\n\
+                                        <input type="text" ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)" required class="textboxingrid"></input>\n\
                                         </div>\n\
                                         <div ng-switch-default>\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
                                         <option value="">-- select--</option>\n\
                                         </select></div>',
 				link: function (scope, elem, attrs) {
-                                    
+                                        scope.showAddnew=false;
 					scope.$watch("allProps", function (
 							newValue) {
+                                                   
 							scope.allStaticProperties =
 								angular.fromJson(newValue);
-							scope.disableAddnew = true;
-							scope.addedProperty = 'add new';
+							scope.showAddnew = false;
+							scope.addedProperty = '';
 						});
                                                 
 						scope.shouldIShowAddTextBox =
@@ -46,18 +47,19 @@ angular.module(
                                                     
 							scope.selectedValue.name = selectedproperty;
 							if (selectedproperty ==="add new -->") {                                                            
-								scope.disableAddnew = false;
-								scope.addedProperty = '';
+							scope.addedProperty = '';	
+                                                        scope.showAddnew = true;
+								
                                                                 
 							} else {
 								scope.addedProperty = 'add new';
-								scope.disableAddnew = true;
+								scope.showAddnew = false;
 							}
 						},
                                               
 					  scope.setScopeValue = function (value) {
 							scope.selectedValue.name = value;
-									  }
+									  };
 					
 				}
 			};

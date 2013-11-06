@@ -41,11 +41,11 @@ var rest = myApp.controller(
                     dynamicProperties: [],
                     remoteProcessorProperties: {}
                 };
-
+                
                 $scope.modal = {
                     "roleList": '',
                     "uri": ''
-                }
+                };
 
                 $scope.processor.remoteProcessorProperties = {
                     otherRequestHeader: []
@@ -204,22 +204,36 @@ var rest = myApp.controller(
                 enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
-                rowHeight: 40,
+                rowHeight: 60,
                 columnDefs: [{
                     field: "name",
-                    width: "45%",
-                    displayName: "Name",
+                    width: "40%",
+                    displayName: "Name*",
                     enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "value",
-                    width: "45%",
-                    displayName: "Value",
+                    width: "53%",
+                    displayName: "Value*",
                     enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'name\')"><div ng-switch-default><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required"><a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right"><i class="glyphicon glyphicon-new-window"></i></a></div><div ng-switch-when="httpVerb"><select ng-model="verb" ng-change="onVerbChange(verb)"  ng-options="property for property in enumHttpVerb"></select></div></div>'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
+                                    <div ng-switch-when="">\n\
+                                         <textarea ng-model="COL_FIELD"  style="width:94%" row="4" placeholder="required" />\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                    </div>\n\
+                                    <div ng-switch-default>\n\
+                                         <textarea ng-model="COL_FIELD"  required style="width:94%" row="4" placeholder="required"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                    </div>\n\
+                                    <div ng-switch-when="httpVerb">\n\
+                                         <select ng-model="verb" ng-change="onVerbChange(verb)"  ng-options="property for property in enumHttpVerb"></select>\n\
+                                     </div>\n\
+                                  </div>'
                 }, {
                     field: "allowAdd",
-                    width: "10%",
+                    width: "7%",
                     enableCellEdit: false,
                     displayName: "Action",
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
@@ -239,30 +253,30 @@ var rest = myApp.controller(
                 enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
-                rowHeight: 40,
+                rowHeight: 60,
                 columnDefs: [{
                     field: "folderURI",
-                    width: "30%",
-                    displayName: "Uri",
+                    width: "33%",
+                    displayName: "URI*",
                     enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="false"><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required" readonly></div><div ng-switch-default><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required"></div></div>'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="false"><input type="text" ng-model="COL_FIELD"  required class="textboxingrid" placeholder="required" ></div><div ng-switch-default><input type="text" ng-model="COL_FIELD"   class="textboxingrid" placeholder="required"></div></div>'
 
                 }, {
                     field: "folderType",
-                    width: "30%",
-                    displayName: "Type",
+                    width: "20%",
+                    displayName: "Type*",
                     enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder" selected-value="valueSelectedinSelectionBoxForProcessorFolder" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "folderDesc",
-                    width: "30%",
+                    width: "40%",
                     displayName: "Description",
                     enableCellEdit: false,
-                    cellTemplate: '<textarea style="width:100%" ng-model="COL_FIELD"></textarea>'
+                    cellTemplate: '<textarea style="width:95%" ng-model="COL_FIELD" ></textarea>'
 
                 }, {
                     field: "allowAdd",
-                    width: "10%",
+                    width: "7%",
                     displayName: "Action",
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
@@ -285,15 +299,15 @@ var rest = myApp.controller(
                 rowHeight: 100,
                 columnDefs: [{
                     field: "credentialURI",
-                    width: "15%",
+                    width: "20%",
                     displayName: "URI",
                     enableCellEdit: false,
-                    cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
+                    cellTemplate: '<textarea style="width:98%" rows="4" ng-model="COL_FIELD" />'
 
                 }, {
                     field: "credentialType",
-                    width: "12%",
-                    displayName: "Type",
+                    width: "17%",
+                    displayName: "Type*",
                     enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}} />'
                 }, {
@@ -304,7 +318,7 @@ var rest = myApp.controller(
                     cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
                 }, {
                     field: "password",
-                    width: "20%",
+                    width: "15%",
                     displayName: "Password",
                     enableCellEdit: false,
                     cellTemplate: '<div class="passwordDirective" row-entity="row.entity" col-filed="col.field" />'
@@ -319,10 +333,10 @@ var rest = myApp.controller(
                     width: "15%",
                     displayName: "IdpURI",
                     enableCellEdit: false,
-                    cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
+                    cellTemplate: '<textarea style="width:98%" rows="4" ng-model="COL_FIELD" />'
                 }, {
                     field: "allowAdd",
-                    width: "10%",
+                    width: "7%",
                     displayName: "Action",
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
@@ -337,12 +351,12 @@ var rest = myApp.controller(
             $scope.onVerbChange = function (httpVerb) {
 
                 $scope.verb = httpVerb;
-            }
+            };
 
             $scope.initialLoad = function () {
                 $scope.readAllProcessors();
                 $scope.readAllProfiles();
-            }
+            };
 
 
             //$scope.readOnlyProcessors = false;
@@ -375,7 +389,7 @@ var rest = myApp.controller(
 
                     }
                 );
-            }
+            };
 
             $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
                 setTimeout(function () {
@@ -450,14 +464,14 @@ var rest = myApp.controller(
 
                     var colonArray = [];
                     for (var i = 0; i < reqHeaderArray.length; i++) {
-                        colonArray.push(reqHeaderArray[i].name + ':' + reqHeaderArray[i].value)
+                        colonArray.push(reqHeaderArray[i].name + ':' + reqHeaderArray[i].value);
                     }
 
                     return colonArray.toString();
                 } else {
                     $scope.verb = reqHeaderArray;
                 }
-            }
+            };
 
             $scope.editProcessor = function (row) {
 
@@ -477,7 +491,7 @@ var rest = myApp.controller(
                         $scope.processor.guid = data.getProcessorResponse.processor.guid;
                         $scope.processor.name = data.getProcessorResponse.processor.name;
                         $scope.processor.type = data.getProcessorResponse.processor.type;
-                        $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+                        $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;                        
                         $scope.processor.description = data.getProcessorResponse.processor.description;
                         $scope.processor.status = data.getProcessorResponse.processor.status;
                         $scope.processor.protocol = data.getProcessorResponse.processor.protocol;
@@ -525,7 +539,7 @@ var rest = myApp.controller(
                                         name: prop,
                                         value: (prop === 'otherRequestHeader' || prop === 'httpVerb') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
                                         allowAdd: false,
-                                        isMandatory: ($scope.allMandatoryHttpProperties.indexOf(prop) == -1) ? false : true
+                                        isMandatory: ($scope.allMandatoryHttpProperties.indexOf(prop) === -1) ? false : true
                                     });
                                 } else {
 
@@ -533,13 +547,13 @@ var rest = myApp.controller(
                                         name: prop,
                                         value: (prop === 'otherRequestHeader') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
                                         allowAdd: false,
-                                        isMandatory: ($scope.allMandatoryFtpProperties.indexOf(prop) == -1) ? false : true
+                                        isMandatory: ($scope.allMandatoryFtpProperties.indexOf(prop) === -1) ? false : true
                                     });
                                 }
 
 
                                 var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(prop);
-                                if (indexOfElement != -1) {
+                                if (indexOfElement !== -1) {
                                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
                                 }
 
@@ -652,11 +666,11 @@ var rest = myApp.controller(
                         });
                     }
                 );
-            }
+            };
 
 
             $scope.readAllProfiles = function () {
-
+                
                 $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                     function (data) {
 
@@ -664,22 +678,20 @@ var rest = myApp.controller(
                         $scope.loadBrowseData();
                     }
                 );
-            }
+            };
 
             $scope.loadBrowseData = function () {
-
+               
                 $scope.restService.get($scope.base_url + '/listFile', //Get mail box Data
                     function (data) {
 
                         $scope.roleList = data.ArrayList;
                         $log.info($scope.roleList);
-                        $scope.modal = {
-                            "roleList": $scope.roleList,
-                            "uri": ''
-                        }
+                       $scope.modal.roleList= $scope.roleList;
+                       
                     }
                 );
-            }
+            };
 
             $scope.initialLoad();
 
@@ -726,7 +738,7 @@ var rest = myApp.controller(
 
                 console.log('val is ' + row.getProperty('value'));
                 if (valueSelectedinSelectionBox.name === '' || valueSelectedinSelectionBox.name === 'add new -->' || row.getProperty('value') === '' || typeof row.getProperty('value') === 'undefined') {
-                    showAlert('Enter Values');
+                    showAlert('It is mandatory to set the name and value of the property being added.');
                     return;
                 }
                 $scope.informer.inform("error message", "error");
@@ -743,7 +755,7 @@ var rest = myApp.controller(
                     isMandatory: false
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
-                if (indexOfSelectedElement != -1) {
+                if (indexOfSelectedElement !== -1) {
                     allPropsWithNovalue.splice(indexOfSelectedElement, 1);
                 }
 
@@ -773,7 +785,7 @@ var rest = myApp.controller(
             $scope.addFolderRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
 
                 if (valueSelectedinSelectionBox.name === '' || row.getProperty('folderURI') === '' || typeof row.getProperty('folderURI') === 'undefined') {
-                    showAlert('Enter Values');
+                    showAlert('It is mandatory to set the folder URI and Type.');
                     return;
                 }
 
@@ -786,7 +798,7 @@ var rest = myApp.controller(
                     allowAdd: false
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
-                if (indexOfSelectedElement != -1) {
+                if (indexOfSelectedElement !== -1) {
                     allPropsWithNovalue.splice(indexOfSelectedElement, 1);
                 }
 
@@ -815,7 +827,7 @@ var rest = myApp.controller(
             $scope.addCredentialRow = function (row, valueSelectedinSelectionBox, valueSelectedinSelectionBoxIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
 
                 if (valueSelectedinSelectionBox.name === '') {
-                    showAlert('Enter Values');
+                    showAlert('It is mandatory to set credential type');
                     return;
                 }
 
@@ -830,12 +842,12 @@ var rest = myApp.controller(
                     allowAdd: false
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
-                if (indexOfSelectedElement != -1) {
+                if (indexOfSelectedElement !== -1) {
                     allPropsWithNovalue.splice(indexOfSelectedElement, 1);
                 }
 
                 var indexOfSelectedElementIdp = allPropsWithNovalueIdp.indexOf(valueSelectedinSelectionBoxIdp.name);
-                if (indexOfSelectedElementIdp != -1) {
+                if (indexOfSelectedElementIdp !== -1) {
                     allPropsWithNovalueIdp.splice(indexOfSelectedElementIdp, 1);
                 }
 
@@ -887,8 +899,8 @@ var rest = myApp.controller(
             $scope.processOtherHeaderValue = function (value) {
 
                 var commaSplit = val.split(",");
-                var colonSplit
-            }
+                var colonSplit;
+            };
 
             $scope.saveProcessor = function () {
 
@@ -928,7 +940,7 @@ var rest = myApp.controller(
                         indexMandatory = $scope.allMandatoryHttpProperties.indexOf($scope.processorProperties[i].name);
                     } else indexMandatory = $scope.allMandatoryFtpProperties.indexOf($scope.processorProperties[i].name);
 
-                    if (index == -1 && indexMandatory == -1) {
+                    if (index === -1 && indexMandatory === -1) {
                         $scope.processor.dynamicProperties.push({
                             name: $scope.processorProperties[i].name,
                             value: $scope.processorProperties[i].value
@@ -966,7 +978,7 @@ var rest = myApp.controller(
                     });
                 }
 
-                console.log(commaSplit)
+                console.log(commaSplit);
 
                 var lenFolderProps = $scope.processorFolderProperties.length;
                 for (var i = 0; i < lenFolderProps - 1; i++) {
@@ -1001,9 +1013,9 @@ var rest = myApp.controller(
 
                 var profileLen = $scope.selectedProfiles.length;
                 for (var i = 0; i < profileLen; i++) {
-                    $scope.processor.linkedProfiles[i] = $scope.selectedProfiles[i].name
+                    $scope.processor.linkedProfiles[i] = $scope.selectedProfiles[i].name;
                 }
-
+                
                 $scope.processor.javaScriptURI = $scope.modal.uri;
 
                 block.blockUI();
@@ -1017,7 +1029,7 @@ var rest = myApp.controller(
 
                             block.unblockUI();
                             if (status === 200) {
-                                alert(data.reviseProcessorResponse.response.message);
+                               
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
@@ -1036,7 +1048,7 @@ var rest = myApp.controller(
 
                             block.unblockUI();
                             if (status === 200) {
-                                alert(data.addProcessorToMailBoxResponse.response.message);
+                               
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
@@ -1089,12 +1101,12 @@ var rest = myApp.controller(
 
                 rowObj = row;
                 editor.setValue(row.getProperty('value'));
-            }
+            };
 
             $scope.close = function () {
 
                 rowObj.entity.value = editor.getValue();
-            }
+            };
 
             // Editor Section Ends
 
