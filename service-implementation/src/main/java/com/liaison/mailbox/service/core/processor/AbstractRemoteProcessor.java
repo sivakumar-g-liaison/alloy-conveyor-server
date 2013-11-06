@@ -368,7 +368,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return MailBox dynamic properties
 	 * @throws SymmetricAlgorithmException 
 	 */
-	public Object getPassword() throws SymmetricAlgorithmException {
+	public Object getProcessorCredentials() throws SymmetricAlgorithmException {
 		
 		return configurationInstance.getCredentials();
 	}
