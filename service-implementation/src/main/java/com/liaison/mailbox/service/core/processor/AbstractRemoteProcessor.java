@@ -46,6 +46,7 @@ import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
@@ -318,9 +319,20 @@ public abstract class AbstractRemoteProcessor {
 	 * 
 	 * @return MailBox dynamic properties
 	 */
-	public Object getDynamicProperties() {
+	public List<PropertyDTO> getDynamicProperties() {
 
-		return configurationInstance.getDynamicProperties();
+		List<PropertyDTO> dynamicProperties = new ArrayList<>();
+
+		PropertyDTO prop = null;
+		for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
+
+			prop = new PropertyDTO();
+			prop.copyFromEntity(property, true);
+			dynamicProperties.add(prop);
+		}
+
+		//return configurationInstance.getDynamicProperties();
+		return dynamicProperties;
 	}
 
 	/**
