@@ -107,7 +107,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			MailBoxServicesException, FS2Exception, LiaisonException {
 
 		// Get root from folders input_folder
-		String inputLocation = getInputLocationURI();
+		String inputLocation = getPayloadURI();
 		String fileRenameFormat = getPropertyValue(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		String url = getPropertyValue(MailBoxConstants.URL);
 		if (MailBoxUtility.isEmpty(inputLocation)) {

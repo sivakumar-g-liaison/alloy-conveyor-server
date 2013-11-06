@@ -171,7 +171,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	protected String getWriteResponseURI() throws MailBoxServicesException {
+	public String getWriteResponseURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -183,29 +183,6 @@ public abstract class AbstractRemoteProcessor {
 				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return folder.getFldrUri();
 				} else if (FolderType.OUTPUT_FOLDER.equals(foundFolderType)) {
-					return folder.getFldrUri();
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Get the URI to which the mailbox sweeper should be happen
-	 * 
-	 * @return URI
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	protected String getInputLocationURI() throws MailBoxServicesException {
-
-		if (configurationInstance.getFolders() != null) {
-
-			for (Folder folder : configurationInstance.getFolders()) {
-
-				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
-				if (null == foundFolderType) {
-					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
-				} else if (FolderType.INPUT_FOLDER.equals(foundFolderType)) {
 					return folder.getFldrUri();
 				}
 			}
@@ -241,7 +218,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	protected String getCredentialURI() throws MailBoxServicesException {
+	public String getCredentialURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getCredentials() != null) {
 
@@ -265,7 +242,7 @@ public abstract class AbstractRemoteProcessor {
 		return null;
 	}
 
-	protected String getUserCredentialURI() throws MailBoxServicesException {
+	public String getUserCredentialURI() throws MailBoxServicesException {
 
 		if (configurationInstance.getCredentials() != null) {
 
