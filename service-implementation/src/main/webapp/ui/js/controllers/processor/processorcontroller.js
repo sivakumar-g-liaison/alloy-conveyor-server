@@ -779,6 +779,8 @@ var rest = myApp.controller(
                 if (indexOfSelectedElement > -1) {
                     allPropsWithNovalue.push(removedProperty);
                 }
+               
+                
             };
 
             // For Procsr Folder Props

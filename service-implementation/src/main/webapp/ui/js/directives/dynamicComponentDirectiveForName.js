@@ -25,7 +25,7 @@ angular.module(
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
                                         <option value="">-- select--</option>\n\
                                         </select> <i><br/></i>\n\
-                                        <input type="text" ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)" required class="textboxingrid"></input>\n\
+                                        <input type="text" ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)"  placeholder="required" class="textboxingrid"></input>\n\
                                         </div>\n\
                                         <div ng-switch-default>\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
