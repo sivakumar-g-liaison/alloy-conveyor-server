@@ -1031,7 +1031,7 @@ var rest = myApp.controller(
 
                             block.unblockUI();
                             if (status === 200) {
-                               
+                               alert(data.reviseProcessorResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
@@ -1050,7 +1050,7 @@ var rest = myApp.controller(
 
                             block.unblockUI();
                             if (status === 200) {
-                               
+                               alert(data.reviseProcessorResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
