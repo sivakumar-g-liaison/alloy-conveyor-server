@@ -98,8 +98,8 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
-				Object obj = inv.invokeFunction("init", this);
-				System.out.println(obj.toString());
+				inv.invokeFunction("init", this);
+				//System.out.println(obj.toString());
 
 			} else {
 				// HTTPRequest executed through Java

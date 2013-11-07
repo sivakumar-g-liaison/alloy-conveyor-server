@@ -71,7 +71,7 @@ public class Folder implements Identifiable {
 		this.fldrType = fldrType;
 	}
 
-	@Column(name = "FLDR_URI", length = 50)
+	@Column(name = "FLDR_URI", length = 250)
 	public String getFldrUri() {
 		return this.fldrUri;
 	}

@@ -9,7 +9,7 @@ var rest = myApp.controller(
             var block = $blockUI.createBlockUI();
 
             $scope.loadOrigin = function () {
-
+               
                 //          
                 $scope.isEdit = false;
                 $scope.mailboxName = $location.search().mbxname;
@@ -68,6 +68,7 @@ var rest = myApp.controller(
 
                 // Enum for protocol type
                 $scope.enumprotocoltype = [
+                    'FTP',
                     'FTPS',
                     'HTTP',
                     'HTTPS',
@@ -145,7 +146,8 @@ var rest = myApp.controller(
                     password: '',
                     idpType: '',
                     idpURI: '',
-                    allowAdd: 'showNoAddBox'
+                    allowAdd: 'showNoAddBox',
+                    passwordDirtyState:''
                 }];
 
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
@@ -259,7 +261,7 @@ var rest = myApp.controller(
                     width: "33%",
                     displayName: "URI*",
                     enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="false"><input type="text" ng-model="COL_FIELD"  required class="textboxingrid" placeholder="required" ></div><div ng-switch-default><input type="text" ng-model="COL_FIELD"   class="textboxingrid" placeholder="required"></div></div>'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="false"><textarea ng-model="COL_FIELD"  style="width:95%" required  placeholder="required" /></div><div ng-switch-default><textarea ng-model="COL_FIELD" style="width:95%"   placeholder="required"/></div></div>'
 
                 }, {
                     field: "folderType",
@@ -289,6 +291,7 @@ var rest = myApp.controller(
             };
 
             // Credentials for Grid Options 
+           
             $scope.gridOptionsForProcessorCredential = {
                 data: 'processorCredProperties',
                 displaySelectionCheckbox: false,
@@ -312,25 +315,25 @@ var rest = myApp.controller(
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "userId",
-                    width: "15%",
+                    width: "14%",
                     displayName: "UserId",
                     enableCellEdit: false,
                     cellTemplate: '<input type="text" ng-model="COL_FIELD" class="textboxingrid">'
                 }, {
                     field: "password",
-                    width: "15%",
+                    width: "14%",
                     displayName: "Password",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="passwordDirective" row-entity="row.entity" col-filed="col.field" />'
+                    cellTemplate: '<div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field"  />'
                 }, {
                     field: "idpType",
-                    width: "12%",
+                    width: "10%",
                     displayName: "IdpType",
                     enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp" selected-value="valueSelectedinSelectionBoxForProcessorCredentialIdp" prop-name={{row.getProperty(col.field)}} />'
                 }, {
                     field: "idpURI",
-                    width: "15%",
+                    width: "20%",
                     displayName: "IdpURI",
                     enableCellEdit: false,
                     cellTemplate: '<textarea style="width:98%" rows="4" ng-model="COL_FIELD" />'
@@ -832,6 +835,11 @@ var rest = myApp.controller(
                     showAlert('It is mandatory to set credential type');
                     return;
                 }
+               
+                if(row.getProperty('passwordDirtyState') === "nomatch"){
+                    showAlert('The password and confirm password do not match');
+                    return;
+                }
 
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
@@ -1043,14 +1051,16 @@ var rest = myApp.controller(
 
                 } else {
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
-
+                   
                     $log.info($filter('json')(addRequest));
                     $scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
                         function (data, status) {
-
+                            
                             block.unblockUI();
+                            
                             if (status === 200) {
-                               alert(data.reviseProcessorResponse.response.message);
+                               
+                               alert(data.addProcessorToMailBoxResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
@@ -1081,7 +1091,7 @@ var rest = myApp.controller(
                 if ($scope.isEdit) {
                     return;
                 }
-                if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
+                if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTP") {
                     //alert($scope.processor.type);
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                 } else $scope.processorProperties = $scope.httpMandatoryProperties;

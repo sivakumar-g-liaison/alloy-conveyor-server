@@ -24,8 +24,8 @@ angular.module(
 					'<div ng-switch-when="true">\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
                                         <option value="">-- select--</option>\n\
-                                        </select> <i><br/></i>\n\
-                                        <input type="text" ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)"  placeholder="required" class="textboxingrid"></input>\n\
+                                        </select> <i>&nbsp</i>\n\
+                                        <textarea ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)"  placeholder="required" style="width:60%"></textarea>\n\
                                         </div>\n\
                                         <div ng-switch-default>\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
@@ -35,7 +35,7 @@ angular.module(
                                         scope.showAddnew=false;
 					scope.$watch("allProps", function (
 							newValue) {
-                                                   
+                                                        
 							scope.allStaticProperties =
 								angular.fromJson(newValue);
 							scope.showAddnew = false;
