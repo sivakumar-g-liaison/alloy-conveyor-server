@@ -37,9 +37,9 @@ import com.liaison.mailbox.enums.ProcessorType;
  * 
  */
 @Entity
-@Table(name = "PROCESSORS")
+@Table(name = "PROCESSOR")
 @NamedQuery(name = "Processor.findAll", query = "SELECT p FROM Processor p")
-@DiscriminatorColumn(name = "PROCSR_TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
+@DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
@@ -87,7 +87,7 @@ public class Processor implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "JAVA_SCRIPT_URI", length = 512)
+	@Column(name = "JAVASCRIPT_URI", length = 512)
 	public String getJavaScriptUri() {
 		return this.javaScriptUri;
 	}
@@ -96,7 +96,7 @@ public class Processor implements Identifiable {
 		this.javaScriptUri = javaScriptUri;
 	}
 
-	@Column(name = "PROCSR_DESC", length = 512)
+	@Column(name = "DESCRIPTION", length = 512)
 	public String getProcsrDesc() {
 		return this.procsrDesc;
 	}
@@ -105,7 +105,7 @@ public class Processor implements Identifiable {
 		this.procsrDesc = procsrDesc;
 	}
 
-	@Column(name = "PROCSR_PROPERTIES", length = 2048)
+	@Column(name = "PROPERTIES", length = 2048)
 	public String getProcsrProperties() {
 		return this.procsrProperties;
 	}
@@ -114,7 +114,7 @@ public class Processor implements Identifiable {
 		this.procsrProperties = procsrProperties;
 	}
 
-	@Column(name = "PROCSR_STATUS", nullable = false, length = 128)
+	@Column(name = "STATUS", nullable = false, length = 128)
 	public String getProcsrStatus() {
 		return this.procsrStatus;
 	}
@@ -123,7 +123,7 @@ public class Processor implements Identifiable {
 		this.procsrStatus = procsrStatus;
 	}
 
-	@Column(name = "PROCSR_EXEC_STATUS", nullable = false, length = 128)
+	@Column(name = "EXEC_STATUS", length = 128)
 	public String getProcsrExecutionStatus() {
 		return procsrExecutionStatus;
 	}
@@ -132,7 +132,7 @@ public class Processor implements Identifiable {
 		this.procsrExecutionStatus = procsrExecutionStatus;
 	}
 
-	@Column(name = "PROCSR_NAME", length = 512)
+	@Column(name = "NAME", length = 512)
 	public String getProcsrName() {
 		return procsrName;
 	}
@@ -141,7 +141,7 @@ public class Processor implements Identifiable {
 		this.procsrName = procsrName;
 	}
 
-	@Column(name = "PROCSR_PROTOCOL", length = 128)
+	@Column(name = "PROTOCOL", nullable = false, length = 128)
 	public String getProcsrProtocol() {
 		return procsrProtocol;
 	}

@@ -13,30 +13,29 @@ import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
 
-
 /**
  * The persistent class for the PROCESSOR_PROPERTIES database table.
  * 
  */
 @Entity
-@Table(name="PROCESSOR_PROPERTIES")
-@NamedQuery(name="ProcessorProperty.findAll", query="SELECT p FROM ProcessorProperty p")
+@Table(name = "PROCESSOR_PROPERTY")
+@NamedQuery(name = "ProcessorProperty.findAll", query = "SELECT p FROM ProcessorProperty p")
 public class ProcessorProperty implements Identifiable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private String pguid;
 	private String procsrPropName;
 	private String procsrPropValue;
-	
+
 	private Processor processor;
 
 	public ProcessorProperty() {
 	}
-	
+
 	// bi-directional many-to-one association to Processor
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
-	@JoinColumn(name = "PROCESSORS_GUID", nullable = false)
+	@JoinColumn(name = "PROCESSOR_GUID", nullable = false)
 	public Processor getProcessor() {
 		return processor;
 	}
@@ -46,7 +45,7 @@ public class ProcessorProperty implements Identifiable {
 	}
 
 	@Id
-	@Column(unique=true, nullable=false, length=32)
+	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {
 		return this.pguid;
 	}
@@ -55,7 +54,7 @@ public class ProcessorProperty implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name="PROCSR_PROP_NAME", length=128)
+	@Column(name = "NAME", nullable = false, length = 128)
 	public String getProcsrPropName() {
 		return this.procsrPropName;
 	}
@@ -64,7 +63,7 @@ public class ProcessorProperty implements Identifiable {
 		this.procsrPropName = procsrPropName;
 	}
 
-	@Column(name="PROCSR_PROP_VALUE", length=4000)
+	@Column(name = "VALUE", length = 4000)
 	public String getProcsrPropValue() {
 		return this.procsrPropValue;
 	}

@@ -28,7 +28,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "CREDENTIALS")
+@Table(name = "CREDENTIAL")
 @NamedQuery(name = "Credential.findAll", query = "SELECT c FROM Credential c")
 public class Credential implements Identifiable {
 
@@ -56,7 +56,7 @@ public class Credential implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "CREDS_IDP_TYPE", length = 128)
+	@Column(name = "IDP_TYPE", length = 128)
 	public String getCredsIdpType() {
 		return this.credsIdpType;
 	}
@@ -65,7 +65,7 @@ public class Credential implements Identifiable {
 		this.credsIdpType = credsIdpType;
 	}
 
-	@Column(name = "CREDS_IDP_URI", length = 128)
+	@Column(name = "IDP_URI", length = 128)
 	public String getCredsIdpUri() {
 		return this.credsIdpUri;
 	}
@@ -74,7 +74,7 @@ public class Credential implements Identifiable {
 		this.credsIdpUri = credsIdpUri;
 	}
 
-	@Column(name = "CREDS_PASSWORD", length = 128)
+	@Column(name = "PASSWORD", length = 128)
 	public String getCredsPassword() {
 		return this.credsPassword;
 	}
@@ -83,7 +83,7 @@ public class Credential implements Identifiable {
 		this.credsPassword = credsPassword;
 	}
 
-	@Column(name = "CREDS_TYPE", nullable = false, length = 128)
+	@Column(name = "TYPE", nullable = false, length = 128)
 	public String getCredsType() {
 		return this.credsType;
 	}
@@ -92,7 +92,7 @@ public class Credential implements Identifiable {
 		this.credsType = credsType;
 	}
 
-	@Column(name = "CREDS_URI", length = 128)
+	@Column(name = "URI", length = 128)
 	public String getCredsUri() {
 		return this.credsUri;
 	}
@@ -101,7 +101,7 @@ public class Credential implements Identifiable {
 		this.credsUri = credsUri;
 	}
 
-	@Column(name = "CREDS_USERNAME", length = 128)
+	@Column(name = "USERNAME", length = 128)
 	public String getCredsUsername() {
 		return this.credsUsername;
 	}
@@ -112,7 +112,7 @@ public class Credential implements Identifiable {
 
 	// bi-directional many-to-one association to Processor
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
-	@JoinColumn(name = "PROCESSORS_GUID", nullable = false)
+	@JoinColumn(name = "PROCESSOR_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;
 	}

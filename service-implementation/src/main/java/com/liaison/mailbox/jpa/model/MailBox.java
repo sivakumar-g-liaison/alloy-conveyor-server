@@ -30,7 +30,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "MAILBOXES")
+@Table(name = "MAILBOX")
 @NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m")
 public class MailBox implements Identifiable {
 
@@ -58,7 +58,7 @@ public class MailBox implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "MBX_DESC", length = 1024)
+	@Column(name = "DESCRIPTION", length = 1024)
 	public String getMbxDesc() {
 		return this.mbxDesc;
 	}
@@ -67,7 +67,7 @@ public class MailBox implements Identifiable {
 		this.mbxDesc = mbxDesc;
 	}
 
-	@Column(name = "MBX_NAME", nullable = false, length = 128)
+	@Column(name = "NAME", nullable = false, length = 128)
 	public String getMbxName() {
 		return this.mbxName;
 	}
@@ -76,7 +76,7 @@ public class MailBox implements Identifiable {
 		this.mbxName = mbxName;
 	}
 
-	@Column(name = "MBX_STATUS", nullable = false, length = 128)
+	@Column(name = "STATUS", nullable = false, length = 128)
 	public String getMbxStatus() {
 		return this.mbxStatus;
 	}

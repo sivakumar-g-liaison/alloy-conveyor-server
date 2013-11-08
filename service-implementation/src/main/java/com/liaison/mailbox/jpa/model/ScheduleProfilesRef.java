@@ -28,7 +28,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "SCHEDULE_PROFILES_REF")
+@Table(name = "SCHED_PROFILE")
 @NamedQuery(name = "ScheduleProfilesRef.findAll", query = "SELECT s FROM ScheduleProfilesRef s")
 public class ScheduleProfilesRef implements Identifiable {
 
@@ -51,7 +51,7 @@ public class ScheduleProfilesRef implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "SCH_PROF_NAME", nullable = false, length = 128)
+	@Column(name = "NAME", nullable = false, length = 128)
 	public String getSchProfName() {
 		return this.schProfName;
 	}

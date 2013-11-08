@@ -18,7 +18,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "SCHEDULE_PROFILE_PROCESSORS")
+@Table(name = "SCHED_PROCESSOR")
 @NamedQuery(name = "ScheduleProfileProcessor.findAll", query = "SELECT s FROM ScheduleProfileProcessor s")
 public class ScheduleProfileProcessor implements Identifiable {
 
@@ -53,7 +53,7 @@ public class ScheduleProfileProcessor implements Identifiable {
 
 	// bi-directional many-to-one association to ScheduleProfilesRef
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@JoinColumn(name = "SCHEDULE_PROFILE_REF_GUID", nullable = false)
+	@JoinColumn(name = "SCHED_PROFILE_GUID", nullable = false)
 	public ScheduleProfilesRef getScheduleProfilesRef() {
 		return this.scheduleProfilesRef;
 	}
