@@ -9,7 +9,7 @@ var rest = myApp.controller(
             var block = $blockUI.createBlockUI();
 
             $scope.loadOrigin = function () {
-               
+
                 //          
                 $scope.isEdit = false;
                 $scope.mailboxName = $location.search().mbxname;
@@ -41,7 +41,7 @@ var rest = myApp.controller(
                     dynamicProperties: [],
                     remoteProcessorProperties: {}
                 };
-                
+
                 $scope.modal = {
                     "roleList": '',
                     "uri": ''
@@ -147,7 +147,7 @@ var rest = myApp.controller(
                     idpType: '',
                     idpURI: '',
                     allowAdd: 'showNoAddBox',
-                    passwordDirtyState:''
+                    passwordDirtyState: ''
                 }];
 
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
@@ -291,7 +291,7 @@ var rest = myApp.controller(
             };
 
             // Credentials for Grid Options 
-           
+
             $scope.gridOptionsForProcessorCredential = {
                 data: 'processorCredProperties',
                 displaySelectionCheckbox: false,
@@ -494,7 +494,7 @@ var rest = myApp.controller(
                         $scope.processor.guid = data.getProcessorResponse.processor.guid;
                         $scope.processor.name = data.getProcessorResponse.processor.name;
                         $scope.processor.type = data.getProcessorResponse.processor.type;
-                        $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;                        
+                        $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
                         $scope.processor.description = data.getProcessorResponse.processor.description;
                         $scope.processor.status = data.getProcessorResponse.processor.status;
                         $scope.processor.protocol = data.getProcessorResponse.processor.protocol;
@@ -673,7 +673,7 @@ var rest = myApp.controller(
 
 
             $scope.readAllProfiles = function () {
-                
+
                 $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                     function (data) {
 
@@ -684,14 +684,14 @@ var rest = myApp.controller(
             };
 
             $scope.loadBrowseData = function () {
-               
+
                 $scope.restService.get($scope.base_url + '/listFile', //Get mail box Data
                     function (data) {
 
                         $scope.roleList = data.ArrayList;
                         $log.info($scope.roleList);
-                       $scope.modal.roleList= $scope.roleList;
-                       
+                        $scope.modal.roleList = $scope.roleList;
+
                     }
                 );
             };
@@ -782,8 +782,8 @@ var rest = myApp.controller(
                 if (indexOfSelectedElement > -1) {
                     allPropsWithNovalue.push(removedProperty);
                 }
-               
-                
+
+
             };
 
             // For Procsr Folder Props
@@ -835,8 +835,8 @@ var rest = myApp.controller(
                     showAlert('It is mandatory to set credential type');
                     return;
                 }
-               
-                if(row.getProperty('passwordDirtyState') === "nomatch"){
+
+                if (row.getProperty('passwordDirtyState') === "nomatch") {
                     showAlert('The password and confirm password do not match');
                     return;
                 }
@@ -892,16 +892,19 @@ var rest = myApp.controller(
             };
 
             $scope.doCancel = function () {
-                var response = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost");
+                var response = confirm("Are you  sure you want to cancel the Operation? Any unsaved changes will be lost");
                 if (response === true) {
+                    $location.$$search = {};
                     $location.path('/mailbox/getMailBox');
                 }
             };
 
             $scope.backToMailbox = function () {
-                var response = confirm("Are you  sure you want to leave this page? All unsaved changes will be lost");
+                var response = confirm("Are you  sure you want to leave this page? Any unsaved changes will be lost");
                 if (response === true) {
-                    $location.path('/mailbox/addMailBox').search('mailBoxId', $location.search().mailBoxId);
+                    var redirectToId = $location.search().mailBoxId;
+                    $location.$$search = {};
+                    $location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId);
                 }
 
             };
@@ -1025,12 +1028,12 @@ var rest = myApp.controller(
                 for (var i = 0; i < profileLen; i++) {
                     $scope.processor.linkedProfiles[i] = $scope.selectedProfiles[i].name;
                 }
-                
+
                 $scope.processor.javaScriptURI = $scope.modal.uri;
 
                 block.blockUI();
                 if ($scope.isEdit) {
-
+                   
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
 
                     $log.info($filter('json')(editRequest));
@@ -1039,7 +1042,7 @@ var rest = myApp.controller(
 
                             block.unblockUI();
                             if (status === 200) {
-                               alert(data.reviseProcessorResponse.response.message);
+                                alert(data.reviseProcessorResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
@@ -1051,19 +1054,21 @@ var rest = myApp.controller(
 
                 } else {
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
-                   
+
                     $log.info($filter('json')(addRequest));
                     $scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
                         function (data, status) {
-                            
+
                             block.unblockUI();
-                            
+
                             if (status === 200) {
-                               
-                               alert(data.addProcessorToMailBoxResponse.response.message);
+
+                                alert(data.addProcessorToMailBoxResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
+                                $scope.isEdit=true;
+                                $scope.processor.guid=data.addProcessorToMailBoxResponse.processor.guId;
                             }
 
                             $scope.clearProps();

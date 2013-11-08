@@ -116,6 +116,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                         if (status === 200) {
 
                             if (fromAddProcsr) {
+                                $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
                             } else alert(data.reviseMailBoxResponse.response.message);
                         }
@@ -136,8 +137,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             $scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
 
                             if (fromAddProcsr) {
+                                $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
                             } else alert(data.addMailBoxResponse.response.message);
+                            
+                            $scope.isMailBoxEdit=true;
                         }
                         $scope.mailBox.properties = [];
 
@@ -149,6 +153,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         $scope.doCancel = function () {
             var resp = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
             if (resp === true) {
+                $location.$$search = {};
                 $location.path('/mailbox/getMailBox');
             }
         };
