@@ -140,8 +140,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
                             } else alert(data.addMailBoxResponse.response.message);
-                            
-                            $scope.isMailBoxEdit=true;
+
+                            $scope.isMailBoxEdit = true;
                         }
                         $scope.mailBox.properties = [];
 
@@ -185,6 +185,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             canSelectRows: false,
             enablePaging: false,
             showFooter: false,
+            useExternalSorting: true,
             rowHeight: 40,
             columnDefs: [{
                 field: "name",
@@ -216,8 +217,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
             // validation
 
-            if (valueSelectedinSelectionBox.name === '' || valueSelectedinSelectionBox.name === 'add new -->' || row.getProperty('value') === '' || typeof row.getProperty('value') === 'undefined') {
-                showAlert('Enter Values');
+            $log.info(valueSelectedinSelectionBox.name);
+            $log.info(row.getProperty('value'));
+
+            if (!valueSelectedinSelectionBox.name || valueSelectedinSelectionBox.name === 'add new -->' || !row.getProperty('value')) {
+                showAlert('It is mandatory to set the name and value of the property being added.');
                 return;
             }
 
@@ -240,6 +244,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 value: '',
                 allowAdd: true
             });
+
+            valueSelectedinSelectionBox.name = '';
 
         };
 

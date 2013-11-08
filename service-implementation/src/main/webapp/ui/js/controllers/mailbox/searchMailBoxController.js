@@ -60,7 +60,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
             $scope.mailboxes = pagedData;
-            $scope.pagingOptions.totalServerItems = data.length;
+            $scope.totalServerItems = data.length;
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
@@ -148,7 +148,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         }, true);
 
         // Customized column in the grid.
-        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE"><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-click="openDelete(row)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-disabled="true"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="INACTIVE"><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-disabled="true"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-click="openDelete(row)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
 
         // Setting the grid details
         $scope.gridOptions = {
@@ -186,7 +186,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             jqueryUITheme: false,
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
-            filterOptions: $scope.filterOptions
+            filterOptions: $scope.filterOptions,
+            useExternalSorting: true,
+            totalServerItems: 'totalServerItems',
         };
 
         // used to move add screen

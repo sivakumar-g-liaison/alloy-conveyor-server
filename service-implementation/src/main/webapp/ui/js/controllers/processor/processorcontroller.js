@@ -221,7 +221,7 @@ var rest = myApp.controller(
                     cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
                                     <div ng-switch-when="">\n\
                                          <textarea ng-model="COL_FIELD"  style="width:94%" row="4" placeholder="required" />\n\
-                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" data-backdrop="static" data-keyboard="false" href="#valueModal" class = "right">\n\
                                              <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                     </div>\n\
                                     <div ng-switch-default>\n\
@@ -739,11 +739,14 @@ var rest = myApp.controller(
 
                 // validation
 
-                console.log('val is ' + row.getProperty('value'));
-                if (valueSelectedinSelectionBox.name === '' || valueSelectedinSelectionBox.name === 'add new -->' || row.getProperty('value') === '' || typeof row.getProperty('value') === 'undefined') {
+                $log.info(valueSelectedinSelectionBox.name);
+                $log.info(row.getProperty('value'));
+
+                if (!valueSelectedinSelectionBox.name || valueSelectedinSelectionBox.name === 'add new -->' || !row.getProperty('value')) {
                     showAlert('It is mandatory to set the name and value of the property being added.');
                     return;
                 }
+
                 $scope.informer.inform("error message", "error");
                 $scope.informer.inform("info message", "info");
 
@@ -771,6 +774,8 @@ var rest = myApp.controller(
 
                 });
 
+                valueSelectedinSelectionBox.name = '';
+
             };
 
             // For Procsr Dynamic Props
@@ -789,10 +794,18 @@ var rest = myApp.controller(
             // For Procsr Folder Props
             $scope.addFolderRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
 
-                if (valueSelectedinSelectionBox.name === '' || row.getProperty('folderURI') === '' || typeof row.getProperty('folderURI') === 'undefined') {
+                $log.info(valueSelectedinSelectionBox.name);
+                $log.info(row.getProperty('folderURI'));
+
+                if (!valueSelectedinSelectionBox.name || !row.getProperty('folderURI')) {
                     showAlert('It is mandatory to set the folder URI and Type.');
                     return;
                 }
+
+                /*if (valueSelectedinSelectionBox.name === '' || row.getProperty('folderURI') === '' || typeof row.getProperty('folderURI') === 'undefined') {
+                    showAlert('It is mandatory to set the folder URI and Type.');
+                    return;
+                }*/
 
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
@@ -814,6 +827,8 @@ var rest = myApp.controller(
                     folderDesc: '',
                     allowAdd: 'showNoAddBox'
                 });
+
+                valueSelectedinSelectionBox.name = '';
 
             };
 
@@ -870,6 +885,9 @@ var rest = myApp.controller(
                     idpType: '',
                     allowAdd: 'showNoAddBox'
                 });
+
+                valueSelectedinSelectionBox.name = '';
+                valueSelectedinSelectionBoxIdp.name = '';
 
             };
 
@@ -1033,7 +1051,7 @@ var rest = myApp.controller(
 
                 block.blockUI();
                 if ($scope.isEdit) {
-                   
+
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
 
                     $log.info($filter('json')(editRequest));
@@ -1067,8 +1085,8 @@ var rest = myApp.controller(
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 $scope.readAllProfiles();
-                                $scope.isEdit=true;
-                                $scope.processor.guid=data.addProcessorToMailBoxResponse.processor.guId;
+                                $scope.isEdit = true;
+                                $scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
                             }
 
                             $scope.clearProps();

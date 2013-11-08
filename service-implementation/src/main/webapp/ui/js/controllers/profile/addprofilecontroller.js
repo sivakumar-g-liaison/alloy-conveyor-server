@@ -1,8 +1,8 @@
 var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', '$log',
     function ($scope, $filter, $location, $log) {
 
-	 	var url = $scope.base_url + "/profile";
-	
+        var url = $scope.base_url + "/profile";
+
         addRequest = $scope.addRequest = {
             addProfileRequest: {
                 profile: {}
@@ -18,12 +18,13 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
         $scope.insert = function () {
 
             $scope.addRequest.addProfileRequest.profile = $scope.profile;
-           
+
             $scope.restService.post(url, $filter('json')(addRequest),
                 function (data, status) {
 
                     if (status === 200) {
                         alert(data.addProfileResponse.response.message);
+                        $scope.profile.name = "";
                         $scope.loadProfiles();
                     }
 
@@ -95,13 +96,11 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 
         // Setting the grid details
         $scope.gridOptions = {
-            columnDefs: [
-                {
-                    field: 'name',
-                    displayName: 'ProfileName',
+            columnDefs: [{
+                field: 'name',
+                displayName: 'ProfileName',
 
-                }
-            ],
+            }],
             data: 'profiles',
             //rowTemplate: customRowTemplate,
             enablePaging: true,
