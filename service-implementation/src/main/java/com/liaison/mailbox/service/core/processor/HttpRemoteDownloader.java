@@ -25,14 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exceptions.LiaisonException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
+import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
+
 
 /**
  * Http remote downloader to perform pull operation, also it has support methods for JavaScript.
@@ -93,20 +97,21 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws JAXBException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
+	 * @throws SymmetricAlgorithmException 
 	 * 
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException {
+			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
-
+		
 		// Set the pay load value to http client input data for POST & PUT
 		// request
 		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 			StringBuffer buffer = new StringBuffer();
-			for (File entry : getPayload()) {
+			for (File entry : getProcessorPayload()) {
 				String content = FileUtils.readFileToString(entry, "UTF-8");
 				buffer.append(content);
 			}

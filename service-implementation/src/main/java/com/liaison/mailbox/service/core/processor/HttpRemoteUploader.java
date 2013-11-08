@@ -66,9 +66,10 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		// request
 		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 			StringBuffer buffer = new StringBuffer();
-			for (File entry : getPayload()) {
+			for (File entry : getProcessorPayload()) {
 				String content = FileUtils.readFileToString(entry, "UTF-8");
 				buffer.append(content);
+				archiveFile(entry.getAbsolutePath());
 			}
 			if (buffer.length() > 0) {
 				request.inputData(buffer.toString());
@@ -80,7 +81,6 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		}
-		
 	}
 
 	@Override
@@ -111,5 +111,4 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			// TODO Re stage and update status in FSM
 		}
 	}
-
 }

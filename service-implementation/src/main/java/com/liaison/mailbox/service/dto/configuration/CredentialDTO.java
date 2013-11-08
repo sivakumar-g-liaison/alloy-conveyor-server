@@ -124,4 +124,8 @@ public class CredentialDTO {
 		this.setUserId(credential.getCredsUsername());
 		this.setGuId(credential.getPguid());
 	}
+	
+	public String getDecryptedString(String encryptedValue) throws SymmetricAlgorithmException {
+		return MailBoxCryptoUtil.doPasswordEncryption(encryptedValue, 2);
+	}
 }
