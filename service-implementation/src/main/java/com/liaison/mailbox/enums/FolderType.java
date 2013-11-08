@@ -18,9 +18,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public enum FolderType {
 
 	PAYLOAD_LOCATION("payload_location"),
-	RESPONSE_LOCATION("response_location"),
-	INPUT_FOLDER("input_folder"),
-	OUTPUT_FOLDER("output_folder");
+	RESPONSE_LOCATION("response_location");
 
 	private final String code;
 

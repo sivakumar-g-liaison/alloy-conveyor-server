@@ -43,8 +43,11 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.enums.CredentialType;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
@@ -75,6 +78,7 @@ public abstract class AbstractRemoteProcessor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteProcessor.class);
 
 	private static final EmailNotifier NOTIFIER = new EmailNotifier();
+	private static final ProcessorConfigurationDAO PROCESSOR_DAO = new ProcessorConfigurationDAOBase();
 
 	public static boolean isTrustStore = false;
 
@@ -105,18 +109,18 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 	}
-	
+
 	/**
-	 * To Retrive the credential info from the processor
+	 * To Retrieve the credential info from the processor
 	 * 
 	 * @return array of CredentialDTO
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
 	 */
-	public CredentialDTO[] getProcessorCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException{
-		
+	public CredentialDTO[] getProcessorCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException {
+
 		CredentialDTO[] credentialArray = null;
-		
+
 		List<CredentialDTO> credentialsDTO = new ArrayList<>();
 
 		CredentialDTO credentialDTO = null;
@@ -126,27 +130,28 @@ public abstract class AbstractRemoteProcessor {
 			credentialDTO.copyFromEntity(credential);
 			credentialsDTO.add(credentialDTO);
 		}
-		
-		if(credentialsDTO.size()>0)
-			credentialArray = Arrays.copyOf(credentialsDTO.toArray(), credentialsDTO.toArray().length, 
+
+		if (credentialsDTO.size() > 0) {
+			credentialArray = Arrays.copyOf(credentialsDTO.toArray(), credentialsDTO.toArray().length,
 					CredentialDTO[].class);
-		
+		}
+
 		return credentialArray;
 	}
-	
+
 	/**
-	 * To Retrive the folder info from the processor
+	 * To Retrieve the folder info from the processor
 	 * 
 	 * @return array of FolderDTO
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
 	 */
-	public FolderDTO[] getProcessorFolders() throws MailBoxConfigurationServicesException{
-		
+	public FolderDTO[] getProcessorFolders() throws MailBoxConfigurationServicesException {
+
 		FolderDTO[] folderArray = null;
-		
+
 		if (configurationInstance.getFolders() != null) {
-			
+
 			List<FolderDTO> foldersDTO = new ArrayList<>();
 
 			FolderDTO folderDTO = null;
@@ -156,22 +161,23 @@ public abstract class AbstractRemoteProcessor {
 				folderDTO.copyFromEntity(folder);
 				foldersDTO.add(folderDTO);
 			}
-		
-			if(foldersDTO.size()>0)
-				folderArray = Arrays.copyOf(foldersDTO.toArray(), foldersDTO.toArray().length, 
-											FolderDTO[].class);
+
+			if (foldersDTO.size() > 0) {
+				folderArray = Arrays.copyOf(foldersDTO.toArray(), foldersDTO.toArray().length,
+						FolderDTO[].class);
+			}
 		}
-		
+
 		return folderArray;
 	}
-	
+
 	/**
-	 * To Retrive the Payload file from the URI
+	 * To Retrieve the Payload file from the URI
 	 * 
 	 * @return array of files
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public File[] getProcessorPayload() throws MailBoxServicesException, IOException {
 
@@ -182,7 +188,7 @@ public abstract class AbstractRemoteProcessor {
 			for (Folder folder : configurationInstance.getFolders()) {
 
 				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
-				
+
 				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
@@ -190,9 +196,9 @@ public abstract class AbstractRemoteProcessor {
 					LOGGER.debug("Started reading the payload files");
 					ArrayList<File> result = new ArrayList<>();
 					result = listFiles(folder.getFldrUri(), result);
-					
-					if(result.size()>0){
-						files = Arrays.copyOf(result.toArray(), result.toArray().length, 
+
+					if (result.size() > 0) {
+						files = Arrays.copyOf(result.toArray(), result.toArray().length,
 								File[].class);
 						LOGGER.debug("Completed reading the payload files");
 					}
@@ -255,7 +261,7 @@ public abstract class AbstractRemoteProcessor {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return folder.getFldrUri();
-				} 
+				}
 			}
 		}
 		return null;
@@ -283,8 +289,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the credential URI of TrustStore & Keystore
-	 * to execute the FTPS uploader/downloader 
+	 * Get the credential URI of TrustStore & Keystore to execute the FTPS uploader/downloader
 	 * 
 	 * @return String URI
 	 * @throws MailBoxServicesException
@@ -314,8 +319,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the credential URI for login details
-	 * to execute the FTPS & SFTP uploader/downloader 
+	 * Get the credential URI for login details to execute the FTPS & SFTP uploader/downloader
 	 * 
 	 * @return String URI
 	 * @throws MailBoxServicesException
@@ -339,8 +343,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the login details from credentialURI
-	 * to execute the FTPS & SFTP uploader/downloader 
+	 * Get the login details from credentialURI to execute the FTPS & SFTP uploader/downloader
 	 * 
 	 * @return String[]
 	 * @throws MailBoxServicesException
@@ -370,7 +373,7 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Started writing response");
 		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-		URI fileLoc = new URI("fs2:" + getWriteResponseURI()+configurationInstance.getProcsrName()+System.nanoTime());
+		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + configurationInstance.getProcsrName() + System.nanoTime());
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
 		LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
@@ -407,12 +410,12 @@ public abstract class AbstractRemoteProcessor {
 	public Properties getDynamicProperties() {
 
 		Properties properties = new Properties();
-		
-		if(null != configurationInstance.getDynamicProperties()){
-			
+
+		if (null != configurationInstance.getDynamicProperties()) {
+
 			for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
 
-				properties.setProperty(property.getProcsrPropName(),property.getProcsrPropValue());
+				properties.setProperty(property.getProcsrPropName(), property.getProcsrPropValue());
 			}
 		}
 		return properties;
@@ -496,7 +499,7 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		// Set the content type header to HttpRequest
-		if (MailBoxUtility.isEmpty(properties.getContentType())) {
+		if (!MailBoxUtility.isEmpty(properties.getContentType())) {
 			request.addHeader("Content-Type", properties.getContentType());
 		}
 
@@ -620,30 +623,34 @@ public abstract class AbstractRemoteProcessor {
 
 		return fileAttributes;
 	}
-	
+
 	/**
 	 * Method to list file from folder
-	 *  
+	 * 
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * 
 	 */
 	private ArrayList<File> listFiles(String directoryName, ArrayList<File> files) {
-	    
+
 		File directory = new File(directoryName);
 
-	    // get all the files from a directory
-	    File[] fList = directory.listFiles();
-	    for (File file : fList) {
-	        if (file.isFile()) {
-	        	if(file.getName().equals(".meta")) continue;
-	            files.add(file);
-	        } else if (file.isDirectory()) {
-	        	if(file.getName().toUpperCase().equals("PROCESSED")) continue;
-	        	listFiles(file.getAbsolutePath(), files);
-	        }
-	    }
-	    return files;
+		// get all the files from a directory
+		File[] fList = directory.listFiles();
+		for (File file : fList) {
+			if (file.isFile()) {
+				if (file.getName().equals(".meta")) {
+					continue;
+				}
+				files.add(file);
+			} else if (file.isDirectory()) {
+				if (file.getName().toUpperCase().equals("PROCESSED")) {
+					continue;
+				}
+				listFiles(file.getAbsolutePath(), files);
+			}
+		}
+		return files;
 	}
 
 	/**
@@ -659,7 +666,7 @@ public abstract class AbstractRemoteProcessor {
 
 			@Override
 			public boolean accept(Path entry) throws IOException {
-				
+
 				return listDirectoryOnly
 						? Files.isDirectory(entry)
 						: Files.isRegularFile(entry);
@@ -668,7 +675,7 @@ public abstract class AbstractRemoteProcessor {
 
 		return filter;
 	}
-	
+
 	/**
 	 * Method is used to move the file to the processed folder.
 	 * 
@@ -678,18 +685,27 @@ public abstract class AbstractRemoteProcessor {
 	 *            The target location
 	 * @throws IOException
 	 */
-	public void archiveFile(String filePath) throws IOException{
-		
+	public void archiveFile(String filePath) throws IOException {
+
 		File file = new File(filePath);
 
-        Path targetDirectory =  file.toPath().getParent().resolve("processed");
-        if(!Files.exists(targetDirectory)){
-            LOGGER.info("Creating 'processed' folder");
-            Files.createDirectories(targetDirectory);
-        }
-        Path target = targetDirectory.resolve(file.getName());
-        //moving to processed folder
-        Files.move(file.toPath(), target, StandardCopyOption.ATOMIC_MOVE);
+		Path targetDirectory = file.toPath().getParent().resolve("processed");
+		if (!Files.exists(targetDirectory)) {
+			LOGGER.info("Creating 'processed' folder");
+			Files.createDirectories(targetDirectory);
+		}
+		Path target = targetDirectory.resolve(file.getName());
+		// moving to processed folder
+		Files.move(file.toPath(), target, StandardCopyOption.ATOMIC_MOVE);
 	}
-	
+
+	/**
+	 * Method is used to modify the status during failure.
+	 */
+	protected void modifyProcessorExecutionStatus() {
+
+		configurationInstance.setProcsrExecutionStatus(ExecutionStatus.FAILED.value());
+		PROCESSOR_DAO.merge(configurationInstance);
+
+	}
 }

@@ -72,7 +72,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
             $scope.profiles = pagedData;
-            $scope.pagingOptions.totalServerItems = data.length;
+            $scope.totalServerItems = data.length;
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
@@ -110,7 +110,8 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
             jqueryUITheme: false,
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
-            filterOptions: $scope.filterOptions
+            filterOptions: $scope.filterOptions,
+			totalServerItems:'totalServerItems'
         };
     }
 ]);

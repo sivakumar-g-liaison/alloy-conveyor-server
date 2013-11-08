@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -34,8 +33,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * SFTP remote downloader to perform pull operation, also it has support methods
- * for JavaScript.
+ * SFTP remote downloader to perform pull operation, also it has support methods for JavaScript.
  * 
  * @author praveenu
  */
@@ -50,20 +48,22 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	public SFTPRemoteDownloader(Processor processor) {
 		super(processor);
 	}
-	
+
 	/**
 	 * Java method to inject the G2SFTP configurations
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws MailBoxServicesException 
-	 * @throws URISyntaxException 
+	 * @throws MailBoxServicesException
+	 * @throws URISyntaxException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
+	@Override
+	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException {
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
@@ -79,11 +79,11 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		sftpRequest.setRetryCount(properties.getRetryAttempts());
 		sftpRequest.setUser(getUserCredetial(getUserCredentialURI())[0]);
 		sftpRequest.setPassword(getUserCredetial(getUserCredentialURI())[1]);
-		
+
 		return sftpRequest;
-		
+
 	}
-	
+
 	/**
 	 * Java method to execute the SFTPrequest
 	 * 
@@ -94,42 +94,43 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	private void executeSFTPRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException, FS2Exception, MailBoxServicesException{
-		
-		G2SFTPClient sftpRequest =getClientWithInjectedConfiguration();
+	private void executeSFTPRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException, FS2Exception,
+			MailBoxServicesException {
+
+		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();
-		
+
 		if (sftpRequest.openChannel()) {
-			
-			//String path = "/home/g2testusr/Directory S/Zippy/Demo.js";
+
+			// String path = "/home/g2testusr/Directory S/Zippy/Demo.js";
 			String path = getPayloadURI();
 			File root = new File(path);
-			
-			if(root.isDirectory()){
+
+			if (root.isDirectory()) {
 				downloadDirectory(sftpRequest, path);
-			}else{
-				
+			} else {
+
 				ByteArrayOutputStream response = new ByteArrayOutputStream();
 				sftpRequest.getFile(path, response);
-				writeFileResponseToMailBox(response,"/"+root.getName());
+				writeFileResponseToMailBox(response, "/" + root.getName());
 			}
 		}
 		sftpRequest.disconnect();
 	}
-	
+
 	/**
 	 * Java method to download the folder and its files
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
-	 *  @throws FS2Exception
+	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * 
 	 */
-	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir) 
+	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir)
 			throws IOException, LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException {
-		
+
 		String dirToList = "";
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
@@ -138,7 +139,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		List<String> files = sftpRequest.listFiles(dirToList);
 
 		if (files != null && files.size() > 0) {
-			
+
 			for (String aFile : files) {
 				File root = new File(aFile);
 				String currentFileName = root.getName();
@@ -148,7 +149,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				}
 				String filePath = currentDir + "/" + currentFileName;
 				if (currentDir.equals("")) {
-					filePath =  currentFileName;
+					filePath = currentFileName;
 				}
 
 				if (root.isDirectory()) {
@@ -157,13 +158,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					// download the file
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					sftpRequest.getFile(filePath, stream);
-					
-					writeFileResponseToMailBox(stream, "/"+root.getName());
+
+					writeFileResponseToMailBox(stream, "/" + root.getName());
 				}
 			}
 		}
 	}
-	
+
 	@Override
 	public void invoke() {
 
@@ -188,6 +189,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			}
 
 		} catch (Exception e) {
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

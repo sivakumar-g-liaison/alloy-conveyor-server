@@ -74,24 +74,27 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			}
 
 		} catch (Exception e) {
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
 	}
-	
+
 	/**
 	 * Java method to inject the G2SFTP configurations
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws MailBoxServicesException 
-	 * @throws URISyntaxException 
+	 * @throws MailBoxServicesException
+	 * @throws URISyntaxException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
+	@Override
+	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException {
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
@@ -102,53 +105,53 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		ftpsRequest.setDiagnosticLogger(LOGGER);
 		ftpsRequest.setCommandLogger(LOGGER);
 		ftpsRequest.setConnectionTimeout(properties.getConnectionTimeout());
-		
+
 		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
 		ftpsRequest.setRetryCount(properties.getRetryAttempts());
-		
-		String [] serverCredentials = getUserCredetial(getUserCredentialURI());
+
+		String[] serverCredentials = getUserCredetial(getUserCredentialURI());
 		ftpsRequest.setUser(serverCredentials[0]);
 		ftpsRequest.setPassword(serverCredentials[1]);
-		
+
 		String credentialURI = getCredentialURI();
-		
-		if(!MailBoxUtility.isEmpty(credentialURI)){
+
+		if (!MailBoxUtility.isEmpty(credentialURI)) {
 
 			URI uri = new URI(credentialURI);
-			
-			if(isTrustStore){
-				
+
+			if (isTrustStore) {
+
 				ftpsRequest.setTrustManagerKeyStore(uri.getPath());
 				ftpsRequest.setTrustManagerKeyStoreType("jks");
 				ftpsRequest.setTrustManagerKeyStorePassword(getUserCredetial(credentialURI)[1]);
-			
-			}else{
+
+			} else {
 				ftpsRequest.setKeyManagerKeyStore(uri.getPath());
 				ftpsRequest.setKeyManagerKeyStoreType("jks");
 				ftpsRequest.setKeyManagerKeyStorePassword(getUserCredetial(credentialURI)[1]);
-				//ftpsRequest.setKeyManagerKeyAlias(keyManagerKeyAlias);
-				//ftpsRequest.setKeyManagerKeyPassword(keyManagerKeyPassword);
-				
+				// ftpsRequest.setKeyManagerKeyAlias(keyManagerKeyAlias);
+				// ftpsRequest.setKeyManagerKeyPassword(keyManagerKeyPassword);
+
 			}
 		}
-		
+
 		return ftpsRequest;
-		
+
 	}
-	
+
 	/**
 	 * Java method to execute the SFTPrequest to download the file or folder
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws SftpException 
-	 * @throws URISyntaxException 
-	 * @throws FS2Exception 
+	 * @throws SftpException
+	 * @throws URISyntaxException
+	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * 
 	 */
-	
+
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException {
 
@@ -157,33 +160,33 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		ftpsRequest.login();
 		ftpsRequest.setBinary(false);
 		ftpsRequest.setPassive(true);
-		
+
 		String path = getPayloadURI();
 		File root = new File(path);
-		
-		if(root.isDirectory()){
+
+		if (root.isDirectory()) {
 			downloadDirectory(ftpsRequest, path);
-		}else{
-			
+		} else {
+
 			ByteArrayOutputStream response = new ByteArrayOutputStream();
 			ftpsRequest.getFile(root.getName(), response);
-			writeFileResponseToMailBox(response,"/"+root.getName());
+			writeFileResponseToMailBox(response, "/" + root.getName());
 		}
 		ftpsRequest.disconnect();
 	}
-	
+
 	/**
 	 * Java method to download the file or folder
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
-	 * @throws SftpException 
+	 * @throws SftpException
 	 * 
 	 */
-	
-	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir) 
+
+	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir)
 			throws IOException, LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException {
-		
+
 		String dirToList = "";
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
@@ -192,7 +195,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		FTPFile[] subFiles = ftpClient.getNative().listFiles(dirToList);
 
 		if (subFiles != null && subFiles.length > 0) {
-			
+
 			for (FTPFile aFile : subFiles) {
 				String currentFileName = aFile.getName();
 				if (currentFileName.equals(".") || currentFileName.equals("..")) {
@@ -201,22 +204,21 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				}
 				String filePath = currentDir + "/" + currentFileName;
 				if (currentDir.equals("")) {
-					filePath =  currentFileName;
+					filePath = currentFileName;
 				}
 
 				if (aFile.isDirectory()) {
 					downloadDirectory(ftpClient, currentFileName);
 				} else {
 					// download the file
-					LOGGER.info(aFile.getName()+" File started downloading.");
+					LOGGER.info(aFile.getName() + " File started downloading.");
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					ftpClient.getFile(filePath, stream);
-					writeFileResponseToMailBox(stream, "/"+aFile.getName());
-					LOGGER.info(aFile.getName()+" File completed downloading.");
+					writeFileResponseToMailBox(stream, "/" + aFile.getName());
+					LOGGER.info(aFile.getName() + " File completed downloading.");
 				}
 			}
 		}
 	}
-	
-	
+
 }

@@ -11,6 +11,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         //Search Details
         $scope.mailBoxName = null;
         $scope.profile = null;
+        $scope.info = false;
 
         // Profiles loads initially
         $scope.profiles = [];
@@ -26,12 +27,17 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
 
-            if ($scope.mailBoxName !== null && $scope.mailBoxName.length > 3) {
+            if ($scope.mailBoxName !== null && $scope.mailBoxName.length >= 3) {
                 $scope.search();
             } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
                 $scope.search();
             } else {
                 $scope.mailboxes = [];
+                $scope.info = false;
+				$scope.totalServerItems = 0;
+				if (!$scope.$$phase) {
+					$scope.$apply();
+				}
             }
         });
 
@@ -55,7 +61,12 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
             if (data === null || data.length <= 0) {
                 $scope.message = 'No results found.';
-                $scope.openMessage();
+                $scope.info = true;
+            } else if ($scope.profile === null && ($scope.mailBoxName === null || $scope.mailBoxName.length === 0)) {
+                data = [];
+                $scope.info = true;
+            } else {
+                $scope.info = false;
             }
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
@@ -64,6 +75,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
+
         };
 
         // Enable the delete modal dialog
@@ -114,6 +126,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
         // Search logic for mailbox
         $scope.search = function () {
+
             $scope.showprogressbar = true;
             var profName = "";
             if (null !== $scope.profile) {

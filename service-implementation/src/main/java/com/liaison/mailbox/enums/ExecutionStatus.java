@@ -21,6 +21,7 @@ public enum ExecutionStatus {
 
 	READY("ready"),
 	RUNNING("running"),
+	FAILED("failed"),
 	COMPLETED("completed");
 
 	private String value;

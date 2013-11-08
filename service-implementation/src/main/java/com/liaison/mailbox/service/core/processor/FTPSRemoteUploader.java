@@ -36,8 +36,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- ** FTPS remote uploader to perform pull operation, also it has support methods
- * for JavaScript.
+ ** FTPS remote uploader to perform pull operation, also it has support methods for JavaScript.
+ * 
  * @author praveenu
  * 
  */
@@ -77,24 +77,27 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 			}
 
 		} catch (Exception e) {
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
 	}
-	
+
 	/**
 	 * Java method to inject the G2FTPS configurations
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws MailBoxServicesException 
-	 * @throws URISyntaxException 
+	 * @throws MailBoxServicesException
+	 * @throws URISyntaxException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
+	@Override
+	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException {
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
@@ -105,38 +108,38 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		ftpsRequest.setDiagnosticLogger(LOGGER);
 		ftpsRequest.setCommandLogger(LOGGER);
 		ftpsRequest.setConnectionTimeout(properties.getConnectionTimeout());
-		
+
 		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
 		ftpsRequest.setRetryCount(properties.getRetryAttempts());
-		
-		String [] serverCredentials = getUserCredetial(getUserCredentialURI());
+
+		String[] serverCredentials = getUserCredetial(getUserCredentialURI());
 		ftpsRequest.setUser(serverCredentials[0]);
 		ftpsRequest.setPassword(serverCredentials[1]);
-		
+
 		String credentialURI = getCredentialURI();
-		
-		if(!MailBoxUtility.isEmpty(credentialURI)){
+
+		if (!MailBoxUtility.isEmpty(credentialURI)) {
 
 			URI uri = new URI(credentialURI);
-			
-			if(isTrustStore){
-				
+
+			if (isTrustStore) {
+
 				ftpsRequest.setTrustManagerKeyStore(uri.getPath());
 				ftpsRequest.setTrustManagerKeyStoreType("jks");
 				ftpsRequest.setTrustManagerKeyStorePassword(getUserCredetial(credentialURI)[1]);
-			
-			}else{
+
+			} else {
 				ftpsRequest.setKeyManagerKeyStore(uri.getPath());
 				ftpsRequest.setKeyManagerKeyStoreType("jks");
 				ftpsRequest.setKeyManagerKeyStorePassword(getUserCredetial(credentialURI)[1]);
-				//ftpsRequest.setKeyManagerKeyAlias(keyManagerKeyAlias);
-				//ftpsRequest.setKeyManagerKeyPassword(keyManagerKeyPassword);
-				
+				// ftpsRequest.setKeyManagerKeyAlias(keyManagerKeyAlias);
+				// ftpsRequest.setKeyManagerKeyPassword(keyManagerKeyPassword);
+
 			}
 		}
-		
+
 		return ftpsRequest;
-		
+
 	}
 
 	/**
@@ -145,9 +148,9 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws SftpException 
-	 * @throws URISyntaxException 
-	 * @throws FS2Exception 
+	 * @throws SftpException
+	 * @throws URISyntaxException
+	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * 
 	 */
@@ -159,28 +162,28 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		ftpsRequest.login();
 		ftpsRequest.setBinary(false);
 		ftpsRequest.setPassive(true);
-		
+
 		String path = getPayloadURI();
 		File root = new File(path);
-		
-		if(root.isDirectory()){
-			
-			uploadDirectory(ftpsRequest,path,getWriteResponseURI());
-		}else{
-			
+
+		if (root.isDirectory()) {
+
+			uploadDirectory(ftpsRequest, path, getWriteResponseURI());
+		} else {
+
 			InputStream inputStream = new FileInputStream(root);
 			ftpsRequest.putFile(root.getName(), inputStream);
 		}
-		
+
 		ftpsRequest.disconnect();
 	}
-	
+
 	/**
 	 * Java method to upload the file or folder
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
-	 * @throws SftpException 
+	 * @throws SftpException
 	 * 
 	 */
 	public static void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
@@ -202,7 +205,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					File localFile = new File(localFilePath);
 					InputStream inputStream = new FileInputStream(localFile);
 					ftpsRequest.putFile(new File(remoteFilePath).getName(), inputStream);
-					
+
 				} else {
 					// create directory on the server
 					ftpsRequest.getNative().makeDirectory(remoteFilePath);

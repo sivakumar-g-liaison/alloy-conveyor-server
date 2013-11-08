@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
@@ -50,19 +49,21 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	public SFTPRemoteUploader(Processor processor) {
 		super(processor);
 	}
-	
+
 	/**
 	 * Java method to inject the G2SFTP configurations
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws MailBoxServicesException 
-	 * @throws URISyntaxException 
+	 * @throws MailBoxServicesException
+	 * @throws URISyntaxException
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException, URISyntaxException, MailBoxServicesException {
+	@Override
+	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException {
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
@@ -78,51 +79,51 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		sftpRequest.setStrictHostChecking(false);
 		sftpRequest.setUser(getUserCredetial(getUserCredentialURI())[0]);
 		sftpRequest.setPassword(getUserCredetial(getUserCredentialURI())[1]);
-		
+
 		return sftpRequest;
-		
+
 	}
-	
+
 	/**
 	 * Java method to execute the SFTPrequest to upload the file or folder
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
-	 * @throws SftpException 
-	 * @throws URISyntaxException 
-	 * @throws FS2Exception 
+	 * @throws SftpException
+	 * @throws URISyntaxException
+	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * 
 	 */
-	private void executeRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException, 
-									FS2Exception, MailBoxServicesException, SftpException{
-		
-		G2SFTPClient sftpRequest =getClientWithInjectedConfiguration();
+	private void executeRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
+			FS2Exception, MailBoxServicesException, SftpException {
+
+		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();
-		
+
 		if (sftpRequest.openChannel()) {
-		
+
 			sftpRequest.changeDirectory(getWriteResponseURI());
 			String path = getPayloadURI();
 			File root = new File(path);
-			
-			if(root.isDirectory()){
-				uploadDirectory(sftpRequest,path,"");
-			}else{
+
+			if (root.isDirectory()) {
+				uploadDirectory(sftpRequest, path, "");
+			} else {
 				InputStream inputStream = new FileInputStream(root);
 				sftpRequest.putFile(root.getName(), inputStream);
 			}
 		}
 		sftpRequest.disconnect();
 	}
-	
+
 	/**
 	 * Java method to upload the file or folder
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
-	 * @throws SftpException 
+	 * @throws SftpException
 	 * 
 	 */
 	public static void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir)
@@ -144,7 +145,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					File localFile = new File(localFilePath);
 					InputStream inputStream = new FileInputStream(localFile);
 					sftpRequest.putFile(new File(remoteFilePath).getName(), inputStream);
-					
+
 				} else {
 					// create directory on the server
 					sftpRequest.getNative().mkdir(new File(remoteFilePath).getPath());
@@ -186,6 +187,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			}
 
 		} catch (Exception e) {
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

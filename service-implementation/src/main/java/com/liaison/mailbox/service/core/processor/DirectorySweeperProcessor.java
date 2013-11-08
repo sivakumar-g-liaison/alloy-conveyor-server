@@ -97,6 +97,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			}
 
 		} catch (Exception e) {
+
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

@@ -81,6 +81,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			}
 
 		} catch (Exception e) {
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

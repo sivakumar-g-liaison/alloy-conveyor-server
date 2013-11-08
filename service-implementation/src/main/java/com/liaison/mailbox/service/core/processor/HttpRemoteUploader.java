@@ -99,7 +99,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 				// invoke the method in javascript
 				inv.invokeFunction("init", this);
-				//System.out.println(obj.toString());
+				// System.out.println(obj.toString());
 
 			} else {
 				// HTTPRequest executed through Java
@@ -107,6 +107,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			}
 
 		} catch (Exception e) {
+			modifyProcessorExecutionStatus();
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
