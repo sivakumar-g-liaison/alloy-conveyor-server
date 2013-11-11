@@ -373,7 +373,11 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Started writing response");
 		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + configurationInstance.getProcsrName() + System.nanoTime());
+		String processorName = "PROCESSOR";
+		if(configurationInstance.getProcsrName() != null){
+			processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
+		}
+		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + processorName + System.nanoTime());
 		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
 		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
 		LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());

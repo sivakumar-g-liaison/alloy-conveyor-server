@@ -12,7 +12,11 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.CredentialType;
+import com.liaison.mailbox.enums.FolderType;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Credential;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.DataValidation;
@@ -91,7 +95,7 @@ public class CredentialDTO {
 		this.idpURI = idpURI;
 	}
 
-	public void copyToEntity(Object entity) throws SymmetricAlgorithmException {
+	public void copyToEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;
 		credential.setCredsIdpType(this.getIdpType());
@@ -101,14 +105,18 @@ public class CredentialDTO {
 
 			credential.setCredsPassword(MailBoxCryptoUtil.doPasswordEncryption(this.getPassword(), 1));
 		}
-		credential.setCredsType(this.getCredentialType());
+		CredentialType foundCredentialType = CredentialType.findByName(this.getCredentialType());
+		if (foundCredentialType == null) {
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Credential");
+		}
+		credential.setCredsType(foundCredentialType.getCode());
 		credential.setCredsUri(this.getCredentialURI());
 		credential.setCredsUsername(this.getUserId());
 		credential.setPguid(this.getGuId());
 
 	}
 
-	public void copyFromEntity(Object entity) throws SymmetricAlgorithmException {
+	public void copyFromEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;
 
@@ -119,7 +127,11 @@ public class CredentialDTO {
 
 			this.setPassword(MailBoxCryptoUtil.doPasswordEncryption(credential.getCredsPassword(), 2));
 		}
-		this.setCredentialType(credential.getCredsType());
+		CredentialType foundCredentialType = CredentialType.findByCode(credential.getCredsType());
+		if (foundCredentialType == null) {
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Credential");
+		}
+		this.setCredentialType(foundCredentialType.name());
 		this.setCredentialURI(credential.getCredsUri());
 		this.setUserId(credential.getCredsUsername());
 		this.setGuId(credential.getPguid());
