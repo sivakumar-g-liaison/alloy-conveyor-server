@@ -864,6 +864,7 @@ var rest = myApp.controller(
                     userId: row.getProperty('userId'),
                     password: row.getProperty('password'),
                     idpType: valueSelectedinSelectionBoxIdp.name,
+                    idpURI: row.getProperty('idpURI'),
                     allowAdd: false
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
@@ -883,6 +884,7 @@ var rest = myApp.controller(
                     userId: '',
                     password: '',
                     idpType: '',
+                    idpURI: '',
                     allowAdd: 'showNoAddBox'
                 });
 
