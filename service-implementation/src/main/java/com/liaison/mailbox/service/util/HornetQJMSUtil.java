@@ -23,7 +23,7 @@ public class HornetQJMSUtil {
 
 	 private static Context jndiContext = null;
 	 
-	 private static String g2QueueName = "/queue/testWSN";
+	 private static String g2QueueName = "/queue/G2Queue";
 	 
 	 private static Hashtable<String, String> jndiProperties = new Hashtable<String,String>();
 	 
@@ -208,7 +208,7 @@ public class HornetQJMSUtil {
 		
 		ConfigureJNDIDTO  jndidto = new ConfigureJNDIDTO();
 		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-		jndidto.setProviderURL("jnp://10.0.26.56:1095");
+		jndidto.setProviderURL("jnp://10.0.24.76:1099");
 		jndidto.setUrlPackagePrefixes("org.jboss.naming");
 		
 		initializeConext(jndidto);
