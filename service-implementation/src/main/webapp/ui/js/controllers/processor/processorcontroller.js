@@ -1065,7 +1065,7 @@ var rest = myApp.controller(
                                 alert(data.reviseProcessorResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
-                                $scope.readAllProfiles();
+                                //$scope.readAllProfiles();
                             }
 
                             $scope.clearProps();
@@ -1086,7 +1086,7 @@ var rest = myApp.controller(
                                 alert(data.addProcessorToMailBoxResponse.response.message);
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
-                                $scope.readAllProfiles();
+                                //$scope.readAllProfiles();
                                 $scope.isEdit = true;
                                 $scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
                             }
@@ -1108,6 +1108,7 @@ var rest = myApp.controller(
             $scope.addNew = function () {
 
                 $scope.loadOrigin();
+                $scope.selectedProfiles = [];
                 $scope.readAllProfiles();
             };
 

@@ -249,13 +249,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         };
 
-        $scope.removeRow = function (row, allProps, allPropsWithNovalue, gridData) {
+        $scope.removeRow = function (row, allProps, allStaticPropertiesThatAreNotAssignedValuesYet, gridData) {
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
             var removedProperty = row.getProperty('name');
             var indexOfSelectedElement = allProps.indexOf(removedProperty);
             if (indexOfSelectedElement > -1) {
-                allPropsWithNovalue.push(removedProperty);
+                allStaticPropertiesThatAreNotAssignedValuesYet.push(removedProperty);
+            } else {
+                allStaticPropertiesThatAreNotAssignedValuesYet.push('');
             }
         };
 
