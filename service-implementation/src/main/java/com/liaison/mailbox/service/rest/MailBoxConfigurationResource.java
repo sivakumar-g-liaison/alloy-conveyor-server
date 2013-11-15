@@ -10,13 +10,11 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.StreamUtil;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.HTTPServerListenerService;
@@ -74,7 +71,6 @@ import com.liaison.mailbox.service.dto.ui.PrepopulateUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchUserAccountResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
-import com.netflix.config.ConfigurationManager;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -89,7 +85,6 @@ import com.netflix.servo.monitor.Monitors;
 public class MailBoxConfigurationResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
-	private final static Properties properties = new Properties();
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -100,11 +95,6 @@ public class MailBoxConfigurationResource {
 	public MailBoxConfigurationResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
-		Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
-		String propertyFileName = "g2mailboxservice-" + env + ".properties";
-		String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-		InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-		properties.load(is);
 	}
 
 	/**
@@ -619,7 +609,7 @@ public class MailBoxConfigurationResource {
 		Response returnResponse;
 
 		try {
-			String jsFileLocation = String.valueOf(properties.get("rootDirectory"));
+			String jsFileLocation = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("rootDirectory"));
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
@@ -680,7 +670,7 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
-	
+
 	/**
 	 * REST method to retrieve a mailbox details.
 	 * 
@@ -755,7 +745,7 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
-	
+
 	/**
 	 * REST method to update existing processor.
 	 * 
@@ -789,7 +779,7 @@ public class MailBoxConfigurationResource {
 			ReviseUserAccountResponseDTO serviceResponse = null;
 			UserAccountConfigurationService mailbox = new UserAccountConfigurationService();
 			// updates existing processor
-			serviceResponse = mailbox.reviseUserAccount(serviceRequest,guid);
+			serviceResponse = mailbox.reviseUserAccount(serviceRequest, guid);
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -806,7 +796,7 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
-	
+
 	/**
 	 * REST method to delete a mailbox.
 	 * 
@@ -849,7 +839,7 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
+
 	/**
 	 * Rest method to search the mailbox based on the given query parameters. If both are empty it
 	 * returns all mailboxes.
@@ -893,7 +883,7 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
+
 	@GET
 	@Path("/account/prepopulate")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -960,6 +950,5 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
-	
-	
+
 }

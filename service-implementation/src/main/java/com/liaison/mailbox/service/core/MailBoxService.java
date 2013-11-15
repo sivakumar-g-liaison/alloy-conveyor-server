@@ -96,8 +96,6 @@ public class MailBoxService {
 					processor.setProcsrExecutionStatus(ExecutionStatus.RUNNING.value());
 					processorDAO.merge(processor);
 					processorService.invoke();
-					processor.setProcsrExecutionStatus(ExecutionStatus.COMPLETED.value());
-					processorDAO.merge(processor);
 
 				} else {
 					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());

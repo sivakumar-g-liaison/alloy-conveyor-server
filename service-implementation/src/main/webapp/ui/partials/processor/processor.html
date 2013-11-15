@@ -31,7 +31,7 @@
   
   .gridStyleProcessors {
     border: 1px solid rgb(212,212,212);
-    height: 300px;
+    height: 250px;
 	width: 1200px;
   }
   
@@ -57,7 +57,7 @@
 	
     <div class="gridStyleProcessors" ng-grid="gridOptionsForProcessorList">
         
-    </div>
+    </div><br/>
     
     <button class="btn btn-primary" ng-click="addNew()">
           Add new
@@ -98,7 +98,7 @@
           <label>
             Protocol
           </label>
-          <select ng-change="resetProps()" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+          <select ng-change="resetProps(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
           </select>
            </div>
         </div>

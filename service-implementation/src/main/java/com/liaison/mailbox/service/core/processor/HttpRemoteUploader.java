@@ -18,6 +18,7 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -105,9 +106,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				// HTTPRequest executed through Java
 				executeRequest();
 			}
-
+			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
-			modifyProcessorExecutionStatus();
+			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

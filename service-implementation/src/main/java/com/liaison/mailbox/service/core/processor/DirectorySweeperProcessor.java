@@ -9,10 +9,8 @@ package com.liaison.mailbox.service.core.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -31,22 +29,18 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.commons.exceptions.LiaisonException;
-import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
-import com.liaison.commons.util.client.http.HTTPStringData;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
+import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.MetaDataDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
-import com.liaison.mailbox.service.util.HTTPStringOutputStream;
+import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.MailBoxServiceUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -55,7 +49,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * <P>
  * DirectorySweeper sweeps the files from mail box and creates meta data about file and post it to
- * the rest service.
+ * the queue.
  * 
  * @author veerasamyn
  */
@@ -88,42 +82,80 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
-				Object obj = inv.invokeFunction("init", this);
-				System.out.println(obj.toString());
+				inv.invokeFunction("init", this);
 
 			} else {
 				// Directory Sweeper executed through Java
 				executeRequest();
 			}
 
+			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
 
-			modifyProcessorExecutionStatus();
-			e.printStackTrace();
 			// TODO Re stage and update status in FSM
+			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
+			e.printStackTrace();
 		}
 
 	}
 
-	private void executeRequest() throws IOException, JSONException, NoSuchMethodException, ScriptException, URISyntaxException,
-			MailBoxServicesException, FS2Exception, LiaisonException {
+	private void executeRequest() throws Exception {
 
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
-		String fileRenameFormat = getPropertyValue(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
-		String url = getPropertyValue(MailBoxConstants.URL);
+		String fileRenameFormat = getMailBoxProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
+
+		// Validation of the necessary properties
 		if (MailBoxUtility.isEmpty(inputLocation)) {
-			throw new MailBoxServicesException("The given input location is not available in the system.");
+			throw new MailBoxServicesException("The given input directroy location is empty.");
 		}
 		if (null == fileRenameFormat) {
 			fileRenameFormat = MailBoxConstants.SWEEPED_FILE_EXTN;
 		}
 
 		// Sweeps the directory and constructs the list of file attributes dto.
-		List<FileAttributesDTO> files = sweepDirectory(inputLocation, false, false, null);
+		List<FileAttributesDTO> files = sweepDirectory(inputLocation, false, false, null, fileRenameFormat);
 
 		// Read from mailbox property - grouping js location
-		String groupingJsPath = getPropertyValue(MailBoxConstants.GROUPING_JS_PROP_NAME);
+		List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
+
+		// Renaming the file
+		markAsSweeped(files, fileRenameFormat);
+
+		if (fileGroups.isEmpty()) {
+			LOGGER.info("The file group is empty.");
+		} else {
+
+			for (List<FileAttributesDTO> fileGroup : fileGroups) {
+
+				String jsonResponse = constructMetaDataJson(fileGroup);
+
+				LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
+				postToQueue(jsonResponse);
+			}
+
+		}
+
+	}
+
+	/**
+	 * Grouping the files based on the payload threshold and no of files threshold.
+	 * 
+	 * @param files
+	 *            Group of all files in a given directory.
+	 * @return List of group of files
+	 * @throws ScriptException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws NoSuchMethodException
+	 * @throws MailBoxServicesException
+	 */
+	private List<List<FileAttributesDTO>> groupingFiles(List<FileAttributesDTO> files)
+			throws ScriptException, IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
+
+		String groupingJsPath = getMailBoxProperties().getProperty(MailBoxConstants.GROUPING_JS_PROP_NAME);
+		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
+
 		if (!MailBoxUtility.isEmpty(groupingJsPath)) {
 
 			ScriptEngineManager manager = new ScriptEngineManager();
@@ -139,45 +171,59 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			// TODO The input of the js should be List<FileAttributesDTO>
 			// TODO The output from the js should be List<List<FileAttributesDTO>
 
+		} else {
+
+			if (files.isEmpty()) {
+				LOGGER.info("There are no files available in the directory.");
+			}
+
+			List<FileAttributesDTO> fileGroup = new ArrayList<>();
+			for (FileAttributesDTO file : files) {
+
+				if (validateAdditionalGroupFile(fileGroup, file)) {
+					fileGroup.add(file);
+				} else {
+					fileGroups.add(fileGroup);
+					fileGroup = new ArrayList<>();
+					fileGroup.add(file);
+
+				}
+			}
+
+			if (!fileGroup.isEmpty()) {
+				fileGroups.add(fileGroup);
+			}
+
 		}
-
-		markAsSweeped(files, fileRenameFormat);
-
-		String jsonResponse = constructMetaDataJson(files);
-
-		// TODO Need to send the constructed json to rest service
-		LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
-
-		postToRestService(jsonResponse, url);
+		return fileGroups;
 	}
 
 	/**
-	 * Dummy method to post meta json to rest service.
+	 * Method to post meta data to rest service/ queue.
 	 * 
 	 * @param input
+	 *            The input message to queue.
 	 * @param restUrl
-	 * @throws LiaisonException
-	 * @throws MalformedURLException
+	 *            The url of the rest service if it is rest.
+	 * @param isRest
+	 *            true if it is to post rest service
+	 * @throws Exception
 	 */
-	private void postToRestService(String input, String restUrl) throws LiaisonException, MalformedURLException {
+	private void postToQueue(String input) throws Exception {
 
-		URL url = new URL(restUrl);
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.POST, url, LOGGER);
-		request.setSocketTimeout(60000);
-		request.addHeader("Content-Type", "application/json");
-		HTTPStringOutputStream output = new HTTPStringOutputStream();
-		request.setOutputStream(output);
-		if (input != null) {
-			request.inputData(new HTTPStringData(input));
-		}
-		request.execute();
+		HornetQJMSUtil util = new HornetQJMSUtil();
 
-		String response = output.toString();
-		if (Messages.SUCCESS.value().equals(response)) {
-			LOGGER.info("Successfully posted to the rest listener.");
-		} else {
-			LOGGER.info("Failed to post to the rest listener.");
-		}
+		String providerURL = MailBoxUtility.getEnvironmentProperties().getProperty("providerurl");
+		String queueName = MailBoxUtility.getEnvironmentProperties().getProperty("queuename");
+
+		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
+		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
+		jndidto.setProviderURL(providerURL);
+		jndidto.setQueueName(queueName);
+		jndidto.setUrlPackagePrefixes("org.jboss.naming");
+		jndidto.setMessage(input);
+
+		util.postMessage(jndidto);
 
 	}
 
@@ -197,25 +243,21 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	public void markAsSweeped(List<FileAttributesDTO> fileList, String fileRenameFormat) throws IOException,
 			JSONException, FS2Exception, URISyntaxException {
 
-		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-		URI uri = null;
-		Path newPath = null;
-		Path oldPath = null;
-
 		for (FileAttributesDTO file : fileList) {
 
 			if (file.getFilePath().startsWith("fs2:")) {
 
+				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
 				FS2MetaSnapshot old = FS2.fetchObject(new URI(file.getFilePath()));
-				uri = new URI(old + fileRenameFormat);
+				URI uri = new URI(old + fileRenameFormat);
 				FS2.move(old.getURI(), uri);
 				LOGGER.info("Renaming the processed files");
 				file.setFilePath(uri.toString());
 
 			} else {
 
-				oldPath = new File(file.getFilePath()).toPath();
-				newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
+				Path oldPath = new File(file.getFilePath()).toPath();
+				Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
 				move(oldPath, newPath);
 				LOGGER.info("Renaming the processed files");
 				file.setFilePath(newPath.toFile().getAbsolutePath());
@@ -259,25 +301,6 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		String jsonResponse = MailBoxServiceUtil.convertObjectToJson(meta);
 		return jsonResponse;
-	}
-
-	/**
-	 * Method is used to get the property value by give name for mailbox.
-	 * 
-	 * @param propName
-	 *            The property name
-	 * @return propertyValue The property value
-	 * @throws MailBoxServicesException
-	 */
-	private String getPropertyValue(String propName) throws MailBoxServicesException {
-
-		for (PropertyDTO prop : getMailBoxProperties()) {
-			if (propName.equals(prop.getName())) {
-				return prop.getValue();
-			}
-		}
-
-		return null;
 	}
 
 }

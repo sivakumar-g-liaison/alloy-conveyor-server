@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -187,9 +188,9 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				// G2SFTP executed through Java
 				executeSFTPRequest();
 			}
-
+			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
-			modifyProcessorExecutionStatus();
+			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

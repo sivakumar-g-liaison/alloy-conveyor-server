@@ -29,14 +29,12 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
-import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
-
 
 /**
  * Http remote downloader to perform pull operation, also it has support methods for JavaScript.
@@ -79,9 +77,9 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				// HTTPRequest executed through Java
 				executeRequest();
 			}
-
+			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
-			modifyProcessorExecutionStatus();
+			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
@@ -98,7 +96,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws JAXBException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
-	 * @throws SymmetricAlgorithmException 
+	 * @throws SymmetricAlgorithmException
 	 * 
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
@@ -107,7 +105,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
-		
+
 		// Set the pay load value to http client input data for POST & PUT
 		// request
 		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {

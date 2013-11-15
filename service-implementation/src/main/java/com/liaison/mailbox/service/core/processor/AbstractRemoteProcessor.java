@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -42,6 +41,7 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FlexibleStorageSystem;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.FolderType;
@@ -58,7 +58,6 @@ import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
-import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
@@ -83,6 +82,7 @@ public abstract class AbstractRemoteProcessor {
 	public static boolean isTrustStore = false;
 
 	protected Processor configurationInstance;
+	protected Properties mailBoxProperties;
 
 	public AbstractRemoteProcessor() {
 	}
@@ -121,19 +121,21 @@ public abstract class AbstractRemoteProcessor {
 
 		CredentialDTO[] credentialArray = null;
 
-		List<CredentialDTO> credentialsDTO = new ArrayList<>();
+		if (configurationInstance.getCredentials() != null
+				&& !configurationInstance.getCredentials().isEmpty()) {
 
-		CredentialDTO credentialDTO = null;
-		for (Credential credential : configurationInstance.getCredentials()) {
+			List<CredentialDTO> credentialsList = new ArrayList<>();
+			CredentialDTO credentialDTO = null;
+			for (Credential credential : configurationInstance.getCredentials()) {
 
-			credentialDTO = new CredentialDTO();
-			credentialDTO.copyFromEntity(credential);
-			credentialsDTO.add(credentialDTO);
-		}
+				credentialDTO = new CredentialDTO();
+				credentialDTO.copyFromEntity(credential);
+				credentialsList.add(credentialDTO);
+			}
 
-		if (credentialsDTO.size() > 0) {
-			credentialArray = Arrays.copyOf(credentialsDTO.toArray(), credentialsDTO.toArray().length,
-					CredentialDTO[].class);
+			if (credentialsList.size() > 0) {
+				credentialArray = (CredentialDTO[]) credentialsList.toArray();
+			}
 		}
 
 		return credentialArray;
@@ -150,10 +152,10 @@ public abstract class AbstractRemoteProcessor {
 
 		FolderDTO[] folderArray = null;
 
-		if (configurationInstance.getFolders() != null) {
+		if (configurationInstance.getFolders() != null
+				&& !configurationInstance.getFolders().isEmpty()) {
 
 			List<FolderDTO> foldersDTO = new ArrayList<>();
-
 			FolderDTO folderDTO = null;
 			for (Folder folder : configurationInstance.getFolders()) {
 
@@ -162,9 +164,8 @@ public abstract class AbstractRemoteProcessor {
 				foldersDTO.add(folderDTO);
 			}
 
-			if (foldersDTO.size() > 0) {
-				folderArray = Arrays.copyOf(foldersDTO.toArray(), foldersDTO.toArray().length,
-						FolderDTO[].class);
+			if (!foldersDTO.isEmpty()) {
+				folderArray = (FolderDTO[]) foldersDTO.toArray();
 			}
 		}
 
@@ -194,12 +195,11 @@ public abstract class AbstractRemoteProcessor {
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 
 					LOGGER.debug("Started reading the payload files");
-					ArrayList<File> result = new ArrayList<>();
-					result = listFiles(folder.getFldrUri(), result);
+					List<File> result = new ArrayList<>();
+					listFiles(folder.getFldrUri(), result);
 
-					if (result.size() > 0) {
-						files = Arrays.copyOf(result.toArray(), result.toArray().length,
-								File[].class);
+					if (!result.isEmpty()) {
+						files = (File[]) result.toArray();
 						LOGGER.debug("Completed reading the payload files");
 					}
 				}
@@ -273,19 +273,20 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	protected List<PropertyDTO> getMailBoxProperties() throws MailBoxServicesException {
+	protected Properties getMailBoxProperties() throws MailBoxServicesException {
 
-		List<PropertyDTO> mailBoxProperties = new ArrayList<>();
+		if (mailBoxProperties != null) {
+			return mailBoxProperties;
+		} else {
 
-		PropertyDTO prop = null;
-		for (MailBoxProperty property : configurationInstance.getMailbox().getMailboxProperties()) {
-
-			prop = new PropertyDTO();
-			prop.copyFromEntity(property, true);
-			mailBoxProperties.add(prop);
+			mailBoxProperties = new Properties();
+			if (null != configurationInstance.getDynamicProperties()) {
+				for (MailBoxProperty property : configurationInstance.getMailbox().getMailboxProperties()) {
+					mailBoxProperties.setProperty(property.getMbxPropName(), property.getMbxPropValue());
+				}
+			}
+			return mailBoxProperties;
 		}
-
-		return mailBoxProperties;
 	}
 
 	/**
@@ -373,8 +374,8 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Started writing response");
 		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-		String processorName = "PROCESSOR";
-		if(configurationInstance.getProcsrName() != null){
+		String processorName = MailBoxConstants.PROCESSOR;
+		if (configurationInstance.getProcsrName() != null) {
 			processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
 		}
 		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + processorName + System.nanoTime());
@@ -418,7 +419,6 @@ public abstract class AbstractRemoteProcessor {
 		if (null != configurationInstance.getDynamicProperties()) {
 
 			for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
-
 				properties.setProperty(property.getProcsrPropName(), property.getProcsrPropValue());
 			}
 		}
@@ -524,7 +524,6 @@ public abstract class AbstractRemoteProcessor {
 
 		File file = new File(URI);
 		if (file.isFile()) { // Added because of this java.nio.file.NotDirectoryException
-
 			String content = FileUtils.readFileToString(file, "UTF-8");
 			return content;
 		} else {
@@ -580,7 +579,8 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws FS2Exception
 	 */
 	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
-			SweepConditions sweepConditions) throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception {
+			SweepConditions sweepConditions, String fileRenameFormat) throws IOException, URISyntaxException,
+			MailBoxServicesException, FS2Exception {
 
 		List<FileAttributesDTO> fileAttributes = new ArrayList<>();
 
@@ -605,8 +605,11 @@ public abstract class AbstractRemoteProcessor {
 			List<Path> result = new ArrayList<>();
 
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(root), defineFilter(listDirectoryOnly))) {
-				for (Path entry : stream) {
-					result.add(entry);
+				for (Path file : stream) {
+
+					if (!file.getFileName().toString().contains(fileRenameFormat)) {
+						result.add(file);
+					}
 				}
 			} catch (IOException e) {
 				throw e;
@@ -631,30 +634,40 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method to list file from folder
 	 * 
+	 * @throws MailBoxServicesException
+	 * 
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * 
 	 */
-	private ArrayList<File> listFiles(String directoryName, ArrayList<File> files) {
+	private void listFiles(String directoryName, List<File> files) throws MailBoxServicesException {
 
 		File directory = new File(directoryName);
 
-		// get all the files from a directory
-		File[] fList = directory.listFiles();
-		for (File file : fList) {
-			if (file.isFile()) {
-				if (file.getName().equals(".meta")) {
-					continue;
+		if (!directory.isDirectory()) {
+			LOGGER.info("The given URI {} is not a directory.", directoryName);
+			throw new MailBoxServicesException("The given URI '" + directoryName + "' is not a directory.");
+		}
+
+		if (!directory.exists()) {
+			LOGGER.info("The given directory {} does not exist.", directoryName);
+			throw new MailBoxServicesException("The given directory '" + directoryName + "' does not exist.");
+		} else {
+
+			// get all the files from a directory
+			for (File file : directory.listFiles()) {
+
+				if (file.isFile()) {
+					if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
+						files.add(file);
+					}
+				} else if (file.isDirectory()) { // get all files from inner directory.
+					if (!MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
+						listFiles(file.getAbsolutePath(), files);
+					}
 				}
-				files.add(file);
-			} else if (file.isDirectory()) {
-				if (file.getName().toUpperCase().equals("PROCESSED")) {
-					continue;
-				}
-				listFiles(file.getAbsolutePath(), files);
 			}
 		}
-		return files;
 	}
 
 	/**
@@ -693,7 +706,7 @@ public abstract class AbstractRemoteProcessor {
 
 		File file = new File(filePath);
 
-		Path targetDirectory = file.toPath().getParent().resolve("processed");
+		Path targetDirectory = file.toPath().getParent().resolve(MailBoxConstants.PROCESSED_FOLDER.toLowerCase());
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating 'processed' folder");
 			Files.createDirectories(targetDirectory);
@@ -706,10 +719,62 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method is used to modify the status during failure.
 	 */
-	protected void modifyProcessorExecutionStatus() {
+	protected void modifyProcessorExecutionStatus(ExecutionStatus status) {
 
-		configurationInstance.setProcsrExecutionStatus(ExecutionStatus.FAILED.value());
+		configurationInstance.setProcsrExecutionStatus(status.value());
 		PROCESSOR_DAO.merge(configurationInstance);
 
 	}
+
+	/**
+	 * Use to validate the given file can be added in the given group.
+	 * 
+	 * @param fileGroup
+	 *            The file attributes group
+	 * @param fileAttribute
+	 *            The file attribute to be added in the group
+	 * @return true if it can be added false otherwise
+	 * @throws MailBoxServicesException
+	 */
+	protected Boolean validateAdditionalGroupFile(List<FileAttributesDTO> fileGroup, FileAttributesDTO fileAttribute)
+			throws MailBoxServicesException {
+
+		long maxPayloadSize = Long.parseLong(getMailBoxProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD));
+		long maxNoOfFiles = Long.parseLong(getMailBoxProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD));
+
+		if (maxPayloadSize == 0L) {
+			maxPayloadSize = 131072L;
+		}
+
+		if (maxNoOfFiles == 0L) {
+			maxNoOfFiles = 10;
+		}
+
+		if (maxNoOfFiles < fileGroup.size()) {
+			return false;
+		}
+
+		if (maxPayloadSize < (getGroupFileSize(fileGroup) + fileAttribute.getSize())) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Get the total file size of the group.
+	 * 
+	 * @param fileGroup
+	 * @return
+	 */
+	private long getGroupFileSize(List<FileAttributesDTO> fileGroup) {
+
+		long size = 0;
+
+		for (FileAttributesDTO attribute : fileGroup) {
+			size += attribute.getSize();
+		}
+
+		return size;
+	}
+
 }
