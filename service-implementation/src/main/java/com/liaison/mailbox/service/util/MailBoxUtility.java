@@ -10,7 +10,10 @@
 
 package com.liaison.mailbox.service.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
@@ -27,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.framework.util.ServiceUtils;
+import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.
@@ -37,6 +42,7 @@ public class MailBoxUtility {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxUtility.class);
+	private static final Properties properties = new Properties();
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -119,9 +125,21 @@ public class MailBoxUtility {
 	 * @return boolean
 	 */
 	public static boolean isEmpty(String str) {
-
 		return str == null || str.isEmpty();
+	}
 
+	public static Properties getEnvironmentProperties() throws IOException {
+
+		if (properties.isEmpty()) {
+
+			Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
+			String propertyFileName = "g2mailboxservice-" + env + ".properties";
+			String props = ServiceUtils.readFileFromClassPath(propertyFileName);
+			InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
+			properties.load(is);
+		}
+
+		return properties;
 	}
 
 }

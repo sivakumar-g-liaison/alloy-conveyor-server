@@ -1,26 +1,31 @@
 <div class="container fade-in">
-
-		<div class="form-inline">
-			<legend>Profile Details</legend>
-			<div class="form-row">
-				<div class="group">
-					<label for="name" class="control-label">Name</label>
-					<input type="text" id="name" ng-model="profile.name" required ng-trim="false"/>
-				</div>
-			</div>
-			
-			<br/>
-			<button class="btn btn-primary" ng-click='insert()'>Add Profile</button>
-		
-		
-			<div>
-				<br>
-				<legend>List of Profiles</legend>
-				<div class="gridStyle" ng-grid="gridOptions"></div>
-				<br>
-			</div>
-		
-		</div>
-
+   <div class="form-inline">
+      <form name="triggerForm">
+         <legend>Profile Details</legend>
+         <div class="row">
+            <div class="col-md-3">
+               <label for="name" class="control-label">Name</label>
+               <input type="text" name="name" ng-model="profile.name" required ng-trim="true" ng-pattern="/^[a-zA-Z0-9 ]+$/" ng-maxlength=128/>
+            </div>
+            <div class="col-md-3">
+               <div class="alert alert-danger" ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
+                  <span ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
+                  <span ng-show="triggerForm.name.$error.maxlength"><strong>Profile name cannot be longer than 128 characters.</strong></span>
+                  <span ng-show="triggerForm.name.$error.required"><strong>Profile Name is mandatory.</strong></span>
+               </div>
+            </div>
+         </div>
+		 <br/>
+         <div class="row">
+            <div class="col-md-1">
+               <button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click='insert()'>
+               Add Profile</button>
+            </div>
+         </div>
+      </form>
+      <br/>
+      <legend>List of Profiles</legend>
+      <div class="gridStyle" ng-grid="gridOptions"></div>
+      <br>
+   </div>
 </div>
-

@@ -4,63 +4,68 @@
  * and open the template in the editor.
  */
 angular.module(
-	'myApp.dynamicComponentDirectiveForName', []
+    'myApp.dynamicComponentDirectiveForName', []
 )
-	.directive(
-		'dynamicComponentDirectiveForName',
-		function () {
-			return {
-				restrict: 'C',
-				replace: true,
-				scope: {
-					allowAdd: '@',
-					allProps: '=',
-					enableTextbox: '&',
-                                        selectedValue: '=',
-                                        propName:'@'
-				},
-				template: '<div ng-switch on="allowAdd">' +
-					'<div ng-switch-when="false">{{propName}}</div>' +
-					'<div ng-switch-when="true">\n\
+    .directive(
+        'dynamicComponentDirectiveForName',
+        function () {
+            return {
+                restrict: 'C',
+                replace: true,
+                scope: {
+                    allowAdd: '@',
+                    allProps: '=',
+                    enableTextbox: '&',
+                    selectedValue: '=',
+                    propName: '@'
+                },
+                template: '<div ng-switch on="allowAdd">' +
+                    '<div ng-switch-when="false">{{propName}}</div>' +
+                    '<div ng-switch-when="true">\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
                                         <option value="">-- select--</option>\n\
                                         </select> <i>&nbsp</i>\n\
-                                        <textarea ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)"  placeholder="required" style="width:60%"></textarea>\n\
+                                        <textarea class="tarea" ng-show=showAddnew  ng-model="addedProperty" ng-change="setScopeValue(addedProperty)"  placeholder="required" style="width:60%"></textarea>\n\
                                         </div>\n\
                                         <div ng-switch-default>\n\
                                         <select ng-change="shouldIShowAddTextBox(selectedproperty)" ng-model="selectedproperty" ng-options="property for property in allStaticProperties">\n\
                                         <option value="">-- select--</option>\n\
                                         </select></div>',
-				link: function (scope, elem, attrs) {
-                                        scope.showAddnew=false;
-					scope.$watch("allProps", function (
-							newValue) {
-                                                        
-							scope.allStaticProperties =
-								angular.fromJson(newValue);
-							scope.showAddnew = false;
-							scope.addedProperty = '';
-						});
-                                                
-						scope.shouldIShowAddTextBox =
-						function (selectedproperty) {
-                                                    
-							scope.selectedValue.name = selectedproperty;
-							if (selectedproperty ==="add new -->") {                                                            
-							scope.addedProperty = '';	
-                                                        scope.showAddnew = true;
-								
-                                                                
-							} else {
-								scope.addedProperty = 'add new';
-								scope.showAddnew = false;
-							}
-						},
-                                              
-					  scope.setScopeValue = function (value) {
-							scope.selectedValue.name = value;
-									  };
-					
-				}
-			};
-		});
+                link: function (scope, elem, attrs) {
+
+                    scope.showAddnew = false;
+                    scope.$watch("allProps", function (
+                        newValue) {
+
+                        if (newValue[newValue.length - 1] === "") {
+                            newValue.splice(newValue.length - 1, 1);
+                        }
+                        scope.allStaticProperties =
+                            angular.fromJson(newValue);
+                        scope.showAddnew = false;
+                        scope.addedProperty = '';
+                    }, true);
+
+                    scope.shouldIShowAddTextBox =
+                        function (selectedproperty) {
+
+                            scope.selectedValue.name = selectedproperty;
+                            if (selectedproperty === "add new -->") {
+                                elem.find(".tarea").val('');
+                                scope.addedProperty = '';
+                                scope.showAddnew = true;
+
+
+                            } else {
+                                scope.addedProperty = 'add new';
+                                scope.showAddnew = false;
+                            }
+                    },
+
+                    scope.setScopeValue = function (value) {
+                        scope.selectedValue.name = value;
+                    };
+
+                }
+            };
+        });

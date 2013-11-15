@@ -54,4 +54,15 @@ public interface MailBoxConstants {
 
 	public final static String URL = "resturl";
 
+	// Added for list files in get payload
+	public final static String META_FILE_NAME = ".meta";
+	public final static String PROCESSED_FOLDER = "PROCESSED";
+
+	// used for write response for http remote downloader. This is the default processor name.
+	public final static String PROCESSOR = "PROCESSOR";
+
+	// Properties for sweeper grouping boundary condition
+	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
+	public final static String NUMER_OF_FILES_THRESHOLD = "numoffilesthreshold";
+
 }

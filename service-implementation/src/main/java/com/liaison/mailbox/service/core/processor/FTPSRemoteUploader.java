@@ -28,6 +28,7 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -75,9 +76,9 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 				// HTTPRequest executed through Java
 				executeRequest();
 			}
-
+			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
-			modifyProcessorExecutionStatus();
+			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
