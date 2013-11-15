@@ -10,17 +10,16 @@
 
 		<form name="triggerForm">
 			<div class="row">
-				<div class="col-md-3">
-					<label for="name">Exclude Mailbox Name </label> <input type="text" ng-maxlength=128 name="name" ng-model="mailBoxName"
-						ng-trim="false" class="form-control" />
+				<div class="col-md-4">
+					<label for="name">Exclude Mailbox Name </label>
+					<input type="text" ng-maxlength=128 name="name" ng-model="mailBoxName" ng-trim="true" ng-pattern="/^[a-zA-Z0-9 ]+$/" class="form-control" />
 				</div>
 				<div class="col-md-5">
-					<br />
 					<div class="alert alert-danger" ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-						<strong>Mailbox name cannot be longer than 128 characters</strong>
+						<span ng-show="triggerForm.name.$error.pattern"><strong>Invalid Mailbox name.</strong></span>
+						<span ng-show="triggerForm.name.$error.maxlength"><strong>Mailbox name cannot be longer than 128 characters.</strong></span>
 					</div>
 				</div>
-
 			</div>
 			<div class="row">
 				<div class="col-md-3">

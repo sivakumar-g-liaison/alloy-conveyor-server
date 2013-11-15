@@ -203,6 +203,7 @@ var rest = myApp.controller(
 
 
             $scope.gridOptionsForProcessor = {
+
                 data: 'processorProperties',
                 displaySelectionCheckbox: false,
                 enableRowSelection: false,
@@ -377,8 +378,8 @@ var rest = myApp.controller(
             $scope.totalServerItems = 0;
 
             $scope.pagingOptions = {
-                pageSizes: [25, 100, 1000],
-                pageSize: 25,
+                pageSizes: [5, 10, 50],
+                pageSize: 5,
                 currentPage: 1
             };
 
@@ -387,11 +388,9 @@ var rest = myApp.controller(
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId, //Get mail box Data
                     function (data) {
 
-                        //$scope.processorList = data.getMailBoxResponse.mailBox.processors;
-                        $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
-                        /*if (!$scope.readOnlyProcessors) {
-                            $scope.readAllProfiles();
-                        }*/
+                        $scope.getPagedDataAsync(data,
+									$scope.pagingOptions.pageSize, 
+									$scope.pagingOptions.currentPage);
 
                     }
                 );
@@ -413,7 +412,7 @@ var rest = myApp.controller(
 
                 var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
                 $scope.processorList = pagedData;
-                $scope.pagingOptions.totalServerItems = data.length;
+                $scope.totalServerItems = data.length;
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
@@ -434,7 +433,7 @@ var rest = myApp.controller(
                 }
             }, true);
 
-            $scope.editableInPopup = '<button class="btn" ng-click="editProcessor(row)"><i class="glyphicon glyphicon-pencil"></i></button>';
+            $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row)"><i class="glyphicon glyphicon-pencil"></i></button>';
 
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
@@ -461,7 +460,8 @@ var rest = myApp.controller(
                 jqueryUITheme: false,
                 displaySelectionCheckbox: false,
                 pagingOptions: $scope.pagingOptions,
-                filterOptions: $scope.filterOptions
+                filterOptions: $scope.filterOptions,
+				totalServerItems : 'totalServerItems'
             };
 
             $scope.setRemotePropData = function (reqHeaderArray, value) {
