@@ -61,18 +61,19 @@ var rest = myApp.controller(
                 // Enum for procsr type
                 $scope.enumprocsrtype = [
                     'REMOTEDOWNLOADER',
-                    'REMOTEUPLOADER'
+                    'REMOTEUPLOADER',
+					'SWEEPER'
                 ];
 
                 $scope.processor.type = $scope.enumprocsrtype[0];
 
                 // Enum for protocol type
                 $scope.enumprotocoltype = [
-                    'FTP',
                     'FTPS',
                     'HTTP',
                     'HTTPS',
-                    'SFTP'
+                    'SFTP',
+					'SWEEPER'
                 ];
 
                 $scope.enumHttpVerb = [
@@ -134,8 +135,10 @@ var rest = myApp.controller(
                     folderURI: '',
                     folderType: '',
                     folderDesc: '',
+					isMandatory: false,
                     allowAdd: 'showNoAddBox'
                 }];
+				
 
                 // Procsr Credential Props
                 $scope.processorCredProperties = [{
@@ -284,7 +287,7 @@ var rest = myApp.controller(
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                         '<div ng-switch-when="showNoAddBox"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')"><div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-when="true">-NA-</div></div></div>' +
                         '</div>'
 
                 }]
@@ -552,9 +555,8 @@ var rest = myApp.controller(
                                         allowAdd: false,
                                         isMandatory: ($scope.allMandatoryFtpProperties.indexOf(prop) === -1) ? false : true
                                     });
-                                }
-
-
+                                } 
+								
                                 var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(prop);
                                 if (indexOfElement !== -1) {
                                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
@@ -624,6 +626,7 @@ var rest = myApp.controller(
                                 folderURI: data.getProcessorResponse.processor.folders[i].folderURI,
                                 folderType: data.getProcessorResponse.processor.folders[i].folderType,
                                 folderDesc: data.getProcessorResponse.processor.folders[i].folderDesc,
+								isMandatory: ($scope.processor.protocol === 'SWEEPER' && data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION')?true:false,
                                 allowAdd: false
                             });
 
@@ -813,7 +816,8 @@ var rest = myApp.controller(
                     folderURI: row.getProperty('folderURI'),
                     folderType: valueSelectedinSelectionBox.name,
                     folderDesc: row.getProperty('folderDesc'),
-                    allowAdd: false
+					isMandatory: false,
+                    allowAdd: false,
                 });
                 var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
                 if (indexOfSelectedElement !== -1) {
@@ -1112,17 +1116,62 @@ var rest = myApp.controller(
                 $scope.readAllProfiles();
             };
 
-            $scope.resetProps = function () {
-                //alert("iam called");
+            $scope.resetProps = function (model) {
+                
+				console.log(model);
+				//alert("iam called");
                 if ($scope.isEdit) {
                     return;
                 }
-                if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTP") {
+				
+                if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
                     //alert($scope.processor.type);
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
-                } else $scope.processorProperties = $scope.httpMandatoryProperties;
-
+					$scope.setFolderData(false);
+                } else if ($scope.processor.protocol === "HTTP" || $scope.processor.protocol === "HTTPS") {
+					$scope.processorProperties = $scope.httpMandatoryProperties;
+					$scope.setFolderData(false);
+				} else {
+					$scope.setFolderData(true);
+				}
+				
             };
+			
+			$scope.setFolderData = function(mandatory) {
+				
+				if (mandatory) {
+				
+					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['RESPONSE_LOCATION'];
+					
+					$scope.processorFolderProperties = [{
+						folderURI: '',
+						folderType: 'PAYLOAD_LOCATION',
+						folderDesc: '',
+						isMandatory: true,
+						allowAdd: false
+					},{
+						folderURI: '',
+						folderType: '',
+						folderDesc: '',
+						isMandatory: false,
+						allowAdd: 'showNoAddBox'
+					}];
+					
+				} else {
+					
+					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
+					
+					$scope.processorFolderProperties = [{
+						folderURI: '',
+						folderType: '',
+						folderDesc: '',
+						isMandatory: false,
+						allowAdd: 'showNoAddBox'
+					}];
+					
+					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
+				}
+			}
 
             // Editor Section Begins
 
