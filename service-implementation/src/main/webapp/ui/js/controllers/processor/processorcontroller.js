@@ -12,6 +12,8 @@ var rest = myApp.controller(
 
                 //          
                 $scope.isEdit = false;
+				$scope.isSweeper = false;
+				
                 $scope.mailboxName = $location.search().mbxname;
                 //Model for Add MB
                 addRequest = $scope.addRequest = {
@@ -1115,8 +1117,22 @@ var rest = myApp.controller(
                 $scope.selectedProfiles = [];
                 $scope.readAllProfiles();
             };
+			
+			$scope.resetProcessorType = function (model) {
+				
+				if (model.type === 'SWEEPER') {
+					
+					$scope.processor.protocol = $scope.enumprotocoltype[4];
+					$scope.isSweeper = true;
+					$scope.setFolderData(true);
+				} else {
+					$scope.isSweeper = false;
+					$scope.processor.protocol = $scope.enumprotocoltype[0];
+					$scope.setFolderData(false);
+				}
+			}
 
-            $scope.resetProps = function (model) {
+            $scope.resetProtocol = function (model) {
                 
 				console.log(model);
 				//alert("iam called");
@@ -1133,6 +1149,9 @@ var rest = myApp.controller(
 					$scope.setFolderData(false);
 				} else {
 					$scope.setFolderData(true);
+					$scope.processor.type = $scope.enumprocsrtype[2];
+					$scope.isSweeper = true;
+					
 				}
 				
             };
