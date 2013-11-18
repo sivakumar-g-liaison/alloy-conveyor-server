@@ -43,33 +43,24 @@ import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
-import com.liaison.mailbox.service.core.UserAccountConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddUserAccountRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.ReviseUserAccountRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DeactivateUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.ReviseUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
-import com.liaison.mailbox.service.dto.ui.PrepopulateUserAccountResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
-import com.liaison.mailbox.service.dto.ui.SearchUserAccountResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -631,87 +622,6 @@ public class MailBoxConfigurationResource {
 	}
 
 	@POST
-	@Path("/account")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response createUserProfile(@Context HttpServletRequest request) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-		InputStream requestStream;
-		AddUserAccountRequestDTO serviceRequest;
-
-		try {
-
-			requestStream = request.getInputStream();
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddUserAccountRequestDTO.class);
-
-			// add the new profile details
-			AddUserAccountResponseDTO serviceResponse = null;
-			UserAccountConfigurationService userProfile = new UserAccountConfigurationService();
-			serviceResponse = userProfile.createUserAccount(serviceRequest);
-
-			// populate the response body
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "processorConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-	}
-
-	/**
-	 * REST method to retrieve a mailbox details.
-	 * 
-	 * @param guid
-	 *            The id of the mailbox
-	 * @return Response Object
-	 */
-	@GET
-	@Path("/account/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response readUserAccount(@PathParam(value = "id") String guid) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-
-		try {
-
-			// add the new profile details
-			GetUserAccountResponseDTO serviceResponse = null;
-			UserAccountConfigurationService userProfile = new UserAccountConfigurationService();
-			serviceResponse = userProfile.getUserAccount(guid);
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
-	}
-
-	@POST
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response httpServerListener(@Context HttpServletRequest request,
@@ -744,177 +654,6 @@ public class MailBoxConfigurationResource {
 		}
 
 		return returnResponse;
-	}
-
-	/**
-	 * REST method to update existing processor.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @param mailboxguid
-	 *            The id of the mailbox
-	 * @param guid
-	 *            The id of the processor
-	 * @return Response Object
-	 */
-	@PUT
-	@Path("/account/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response reviseUserProfile(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-		InputStream requestStream;
-		ReviseUserAccountRequestDTO serviceRequest;
-
-		try {
-
-			requestStream = request.getInputStream();
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseUserAccountRequestDTO.class);
-
-			ReviseUserAccountResponseDTO serviceResponse = null;
-			UserAccountConfigurationService mailbox = new UserAccountConfigurationService();
-			// updates existing processor
-			serviceResponse = mailbox.reviseUserAccount(serviceRequest, guid);
-			// constructs response
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-	}
-
-	/**
-	 * REST method to delete a mailbox.
-	 * 
-	 * @param guid
-	 *            The id of the mailbox
-	 * 
-	 * @return Response Object
-	 */
-	@DELETE
-	@Path("/account/{id}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response deactivateUserProfile(@PathParam(value = "id") String guid) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-
-		try {
-
-			DeactivateUserAccountResponseDTO serviceResponse = null;
-			UserAccountConfigurationService profile = new UserAccountConfigurationService();
-
-			// deactivates existing mailbox
-			serviceResponse = profile.deactivateUserAccount(guid);
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
-	}
-
-	/**
-	 * Rest method to search the mailbox based on the given query parameters. If both are empty it
-	 * returns all mailboxes.
-	 * 
-	 * @param mbxName
-	 *            The mailbox name should be searched
-	 * @param profileName
-	 *            The profile name should be searched
-	 * @return The Response
-	 */
-	@GET
-	@Path("/account")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response searchUserProfile(@QueryParam(value = "name") String accountType,
-			@QueryParam(value = "provider") String providerName, @QueryParam(value = "domain") String loginDomain) {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-
-		try {
-
-			// search the mailbox from the given details
-			SearchUserAccountResponseDTO serviceResponse = null;
-			UserAccountConfigurationService userAccount = new UserAccountConfigurationService();
-			serviceResponse = userAccount.searchUserAccount(accountType, providerName, loginDomain);
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
-	}
-
-	@GET
-	@Path("/account/prepopulate")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response preloadData() {
-
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-
-		try {
-
-			// search the mailbox from the given details
-			PrepopulateUserAccountResponseDTO serviceResponse = null;
-			UserAccountConfigurationService userAccount = new UserAccountConfigurationService();
-			serviceResponse = userAccount.prePopulate();
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
 	}
 
 	@POST
