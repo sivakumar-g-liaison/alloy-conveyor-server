@@ -46,6 +46,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 	private HTTPRequest request;
 	private String jsonRequest;
+	
 	private String jsonResponse;
 
 	@Before
