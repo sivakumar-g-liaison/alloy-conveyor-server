@@ -1,109 +1,130 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.core.processor;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URI;
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.xml.bind.JAXBException;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exceptions.LiaisonException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import com.liaison.framework.fs2.api.FS2Exception;
-import com.liaison.framework.fs2.api.FS2Factory;
-import com.liaison.framework.fs2.api.FS2MetaSnapshot;
-import com.liaison.framework.fs2.api.FlexibleStorageSystem;
+import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
-public class HttpRemoteDownloader implements MailBoxProcessor {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeper.class);
-	private Processor configurationInstance ;
-	
+/**
+ * Http remote downloader to perform pull operation, also it has support methods for JavaScript.
+ * 
+ * @author praveenu
+ */
+public class HttpRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpRemoteDownloader.class);
+
 	@SuppressWarnings("unused")
 	private HttpRemoteDownloader() {
-		//to force creation of instance only by passing the processor entity
-	}
-	
-	public HttpRemoteDownloader(Processor processor){
-		this.configurationInstance = processor;
+		// to force creation of instance only by passing the processor entity
 	}
 
-	
-	
+	public HttpRemoteDownloader(Processor processor) {
+		super(processor);
+		// this.configurationInstance = processor;
+	}
+
 	@Override
-	public  void invoke() {
-		
+	public void invoke() {
 
-		// initiator
 		try {
-			HTTPRequest.get("https://www.googleapis.com/analytics/v3/management/accounts", null).addHeader("Authorization", "");
-		} catch (LiaisonException e) {
-			// TODO Auto-generated catch block
+
+			LOGGER.info("Entering in invoke.");
+			// HTTPRequest executed through JavaScript
+			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+
+				ScriptEngineManager manager = new ScriptEngineManager();
+				ScriptEngine engine = manager.getEngineByName("JavaScript");
+
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
+				Invocable inv = (Invocable) engine;
+
+				// invoke the method in javascript
+				inv.invokeFunction("init", this);
+
+			} else {
+				// HTTPRequest executed through Java
+				executeRequest();
+			}
+			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
+		} catch (Exception e) {
+			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
 			e.printStackTrace();
+			// TODO Re stage and update status in FSM
 		}
-
 	}
-	
-public  static void invokeTest() throws MalformedURLException, LiaisonException, FileNotFoundException, FS2Exception, URISyntaxException {
-		
 
-		URL url = new URL("http://in.rediff.com/");		
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,LOGGER);
-		//request.setOutputStream(new FileOutputStream(new File("output.txt")));
+	/**
+	 * Java method to execute the HTTPRequest and write in FS location
+	 * 
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws URISyntaxException
+	 * @throws JAXBException
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws SymmetricAlgorithmException
+	 * 
+	 */
+	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException {
+
+		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
-		request.execute();
-		
-		//WRITE RESPOSNSE TO A FILE
-		FlexibleStorageSystem FS2 = FS2Factory.newInstance(new RemoteProcessorFS2Configuration());
-		 URI fileLoc = new URI("fs2:"+"/response2.txt");
-		FS2MetaSnapshot metaSnapShot =  FS2.createObjectEntry(fileLoc);
-		FS2.writePayloadFromBytes(metaSnapShot.getURI(),responseStream.toByteArray());
-		System.out.println("Wrote to "+metaSnapShot.getURI());
-		
-		//COPY A FILE
-		
-		URI copyFileLoc = new URI("fs2:"+"/responseCopy.txt");
-		FS2.copy(fileLoc, copyFileLoc);	
-		
-		//RENAME A FILE
-		  //sample data preparation
-		URI originalFileTobeRenamed = new URI("fs2:"+"/filetoBeRenamed.txt");
-		FS2.copy(fileLoc, originalFileTobeRenamed);	
-		  //Begins
-		URI renamedFileLoc = new URI("fs2:"+"/fileRenamed.txt");
-		FS2.move(originalFileTobeRenamed, renamedFileLoc); 
-		
-		//READ A FILE
-		String opt  = new String(FS2.readPayloadToBytes(renamedFileLoc));
-		System.out.println(opt);
-		
-		//DELETE A FILE
-		  //FS2.delete(renamedFileLoc);
-				
-		
-		
-	}
-	
-	public static void main (String argsv[]){
-		try {
-			try {
-				invokeTest();
-			} catch (FS2Exception | URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+		// Set the pay load value to http client input data for POST & PUT
+		// request
+		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+			StringBuffer buffer = new StringBuffer();
+			for (File entry : getProcessorPayload()) {
+				String content = FileUtils.readFileToString(entry, "UTF-8");
+				buffer.append(content);
 			}
-		} catch (MalformedURLException | LiaisonException | FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (buffer.length() > 0) {
+				request.inputData(buffer.toString());
+			}
 		}
+
+		HTTPResponse response = request.execute();
+		if (response.getStatusCode() != 200) {
+			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
+		}
+		writeResponseToMailBox(responseStream);
 	}
 
 }
-

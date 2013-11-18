@@ -30,7 +30,7 @@ import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 
-@Path("/mailbox/triggerProfile")
+@Path("v1/mailbox/triggerProfile")
 public class MailBoxResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
@@ -48,15 +48,19 @@ public class MailBoxResource {
 	/**
 	 * REST method to trigger a profile and run the processors in that profile.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param profileName
+	 *            The profile name to be trigger
+	 * @param mailboxNamePattern
+	 *            The mailbox name pattern. The given pattern mailbox do not include in the trigger
+	 *            profile process.
 	 * @return Response Object
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response triggerProfile(@QueryParam(value = "name") String profileName,
-			@QueryParam(value = "excludeMailbox") String mailboxNamePattern) {
+			@QueryParam(value = "excludeMailbox") String mailboxNamePattern,
+			@QueryParam(value = "shardKey") String shardKey) {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
@@ -65,7 +69,7 @@ public class MailBoxResource {
 
 			LOG.info("Entering into trigger profile resource.");
 			MailBoxService service = new MailBoxService();
-			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern);
+			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern, shardKey);
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -82,4 +86,5 @@ public class MailBoxResource {
 		return returnResponse;
 
 	}
+
 }

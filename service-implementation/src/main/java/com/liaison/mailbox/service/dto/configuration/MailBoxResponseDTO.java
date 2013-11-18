@@ -20,6 +20,13 @@ public class MailBoxResponseDTO {
 
 	private String guid;
 
+	public MailBoxResponseDTO() { // Added for Deserialization
+	}
+
+	public MailBoxResponseDTO(String guid) {
+		this.guid = guid;
+	}
+
 	public String getGuid() {
 		return guid;
 	}

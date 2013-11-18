@@ -1,20 +1,40 @@
 package com.liaison.mailbox.service.core;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.bind.JAXBException;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.MailBoxScheduleProfileConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.jpa.model.MailBoxSchedProfile;
+import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.RemoteDownloader;
-import com.liaison.mailbox.jpa.model.RemoteUploader;
+import com.liaison.mailbox.jpa.model.ProcessorProperty;
+import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
+import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
+import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -23,201 +43,465 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorRespon
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * @author sivakumarg
- *
+ * 
  */
 public class ProcessorConfigurationService {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorConfigurationService.class);
+	private static String PROCESSOR = "Processor";
+	private static String MAILBOX = "MailBox";
+	private static final String PROCESSOR_STATUS = "Processor Status";
+
+	private static final GenericValidator validator = new GenericValidator();
 
 	/**
-	 * Method inserts the analytic config details into the mail box processor.
+	 * Creates processor for the mailbox.
 	 * 
 	 * @param serviceRequest
-	 * @return
+	 *            The AddProcessorToMailboxRequestDTO
+	 * @return The AddProcessorToMailboxResponseDTO
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonGenerationException
+	 * @throws SymmetricAlgorithmException
 	 */
-	public AddProcessorToMailboxResponseDTO createProcessor(AddProcessorToMailboxRequestDTO serviceRequest) {
+	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest)
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
-		LOGGER.info("call receive to insert the profile ::{}", serviceRequest.getProcessor());
-		Processor processor = null;
-		
-		if (ProcessorType.REMOTEDOWNLOADER.toString()
-				.equalsIgnoreCase(serviceRequest.getProcessor().getType())) {
-			processor = new RemoteDownloader();
-		} else if (ProcessorType.REMOTEUPLOADER.toString()
-				.equalsIgnoreCase(serviceRequest.getProcessor().getType())) {
-			processor = new RemoteUploader();
-		} else {
-			processor = null;
-		}
-
-		if (processor != null) {
-
-			serviceRequest.getProcessor().copyToEntity(processor, true);
-			String mailboxId = serviceRequest.getProcessor().getLinkedMailboxId();
-			String profileId = serviceRequest.getProcessor().getLinkedProfileId();
-			MailBoxScheduleProfileConfigurationDAO scheduleProfileDAO = new MailBoxScheduleProfileConfigurationDAOBase();
-			MailBoxSchedProfile scheduleProfile = scheduleProfileDAO.find(mailboxId, profileId);
-			processor.setMailboxSchedProfile(scheduleProfile);
-			ProcessorConfigurationDAO componenDao = new ProcessorConfigurationDAOBase();
-			componenDao.persist(processor);
-		}
+		LOGGER.info("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
-		serviceResponse.setResponse(new ResponseDTO());
-		serviceResponse.getResponse().setStatus(MailBoxConstants.SUCCESS);
-		serviceResponse.getResponse().setMessage(MailBoxConstants.CREATE_PROCESSOR_SUCCESS);
-		serviceResponse.setProcessor(new ProcessorResponseDTO());
-		serviceResponse.getProcessor().setGuId(processor.getPguid());
-		
-		return serviceResponse;
-	}
-	
-	/**
-	 * Get the Processor using guid.
-	 * 
-	 * @param processorGuid The guid of the Processor.
-	 * @return The responseDTO.
-	 */
-	public GetProcessorResponseDTO getProcessor(String processorGuid) {
 
-		GetProcessorResponseDTO serviceResponse = null;
-		ResponseDTO response = null;
 		try {
-			
-			if (processorGuid == null || processorGuid.equals("")) {
-				throw new MailBoxConfigurationServicesException("Processor cannot be found");
+
+			if (!mailBoxGuid.equals(serviceRequest.getProcessor().getLinkedMailboxId())) {
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
 			}
-			
+
+			ProcessorDTO processorDTO = serviceRequest.getProcessor();
+			if (processorDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			validator.validate(processorDTO);
+			if (null != processorDTO.getFolders()) {
+				for (FolderDTO folderDTO : processorDTO.getFolders()) {
+					validator.validate(folderDTO);
+				}
+			}
+			if (null != processorDTO.getCredentials()) {
+				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
+					validator.validate(credentialDTO);
+				}
+			}
+
+			// Instantiate the processor and copying the values from DTO to
+			// entity.
+			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
+			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
+			serviceRequest.getProcessor().copyToEntity(processor, true);
+
+			createMailBoxAndProcessorLink(serviceRequest, null, processor);
+
+			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
+
+			// persist the processor.
+			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
+			configDAO.persist(processor);
+
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setProcessor(new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey())));
+			LOGGER.info("Exit from create processor.");
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROCESSOR, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+
+		}
+
+	}
+
+	/**
+	 * Creates link between scheduleProfileref and processor.
+	 * 
+	 * @param addRequest
+	 *            The AddProcessorToMailboxRequest DTO
+	 * @param reviseRequest
+	 *            The ReviseProcessorRequest DTO
+	 * @param processor
+	 *            The processor Entity
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	private void createScheduleProfileAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
+			ReviseProcessorRequestDTO reviseRequest,
+			Processor processor)
+			throws MailBoxConfigurationServicesException {
+
+		List<String> linkedProfiles = null;
+		if (null == reviseRequest) {
+			linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
+		} else {
+			linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
+		}
+
+		Set<ScheduleProfilesRef> scheduleProfilesRef = new HashSet<>();
+		if (null != linkedProfiles && !linkedProfiles.isEmpty()) {
+
+			ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
+			ScheduleProfilesRef scheduleProfile = null;
+			for (String profileName : linkedProfiles) {
+
+				scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
+				if (scheduleProfile == null) {
+					throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName);
+				}
+
+				scheduleProfilesRef.add(scheduleProfile);
+			}
+
+		}
+
+		// Creates relationship processor and schedprofile.
+		if (!scheduleProfilesRef.isEmpty()) {
+
+			List<ScheduleProfileProcessor> scheduleProfileProcessors = new ArrayList<>();
+			ScheduleProfileProcessor profileProcessor = null;
+			for (ScheduleProfilesRef profile : scheduleProfilesRef) {
+
+				profileProcessor = new ScheduleProfileProcessor();
+				profileProcessor.setPguid(MailBoxUtility.getGUID());
+				profileProcessor.setScheduleProfilesRef(profile);
+				scheduleProfileProcessors.add(profileProcessor);
+			}
+
+			if (!scheduleProfileProcessors.isEmpty()) {
+				processor.setScheduleProfileProcessors(scheduleProfileProcessors);
+			}
+
+		}
+	}
+
+	/**
+	 * Creates link between mailbox and processor.
+	 * 
+	 * @param addRequest
+	 *            The AddProcessorToMailboxRequest DTO
+	 * @param reviseRequest
+	 *            The ReviseProcessorRequest DTO
+	 * @param processor
+	 *            The processor Entity
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	private void createMailBoxAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
+			ReviseProcessorRequestDTO reviseRequest,
+			Processor processor)
+			throws MailBoxConfigurationServicesException {
+
+		String mailBoxId = null;
+		if (null == reviseRequest) {
+			mailBoxId = addRequest.getProcessor().getLinkedMailboxId();
+		} else {
+			mailBoxId = reviseRequest.getProcessor().getLinkedMailboxId();
+		}
+
+		MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
+		MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, mailBoxId);
+		if (null == mailBox) {
+			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxId);
+		}
+		processor.setMailbox(mailBox);
+
+	}
+
+	/**
+	 * Get the Processor details of the mailbox using guid.
+	 * 
+	 * @param processorGuid
+	 *            The guid of the Processor.
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 */
+	public GetProcessorResponseDTO getProcessor(String mailBoxGuid, String processorGuid) throws JsonParseException,
+			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+
+		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
+
+		try {
+
 			LOGGER.info("Entering into get processor.");
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
-				
+
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor processor = config.find(Processor.class, processorGuid);
-			
-			response = new ResponseDTO();
-			serviceResponse = new GetProcessorResponseDTO();
-					
-			if (null != processor) {
-				
-				response.setMessage(MailBoxConstants.GET_PROCESSOR_SUCCESS);
-				response.setStatus(MailBoxConstants.SUCCESS);
-				
-				ProcessorDTO dto = new ProcessorDTO();
-				dto.copyFromEntity(processor);
-				
-				serviceResponse.setProcessor(dto);
-				serviceResponse.setResponse(response);
-				
-				LOGGER.info("Exit from get processor.");
-				
-			} else {
-				
-				response.setMessage(MailBoxConstants.GET_PROCESSOR_SUCCESS);
-				response.setStatus(MailBoxConstants.SUCCESS);
-				
-				serviceResponse.setResponse(response);
-				
-				LOGGER.info("Exit from get processor.");
+
+			if (processor == null) {
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid);
 			}
-		} catch (Exception e) {
 
-			response = new ResponseDTO();
-			serviceResponse = new GetProcessorResponseDTO();
-			response.setMessage(MailBoxConstants.GET_PROCESSOR_FAILURE + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
+			// validates the given processor is belongs to given mailbox
+			validateProcessorBelongToMbx(mailBoxGuid, processor);
 
-			serviceResponse.setResponse(response);
+			ProcessorDTO dto = new ProcessorDTO();
+			dto.copyFromEntity(processor);
+
+			serviceResponse.setProcessor(dto);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
+			LOGGER.info("Exit from get mailbox.");
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROCESSOR, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
 		}
-		
-		return serviceResponse;
 	}
-	
+
 	/**
-	 * Get the Processor using guid.
+	 * Deactivate the processor using guid.
 	 * 
-	 * @param processorGuid The guid of the Processor.
+	 * @param processorGuid
+	 *            The guid of the Processor.
 	 * @return The responseDTO.
 	 */
-	public DeActivateProcessorResponseDTO deactivateProcessor(String processorGuid) {
-		
-		DeActivateProcessorResponseDTO serviceResponse = null;
-		ResponseDTO response = null;
+	public DeActivateProcessorResponseDTO deactivateProcessor(String mailBoxGuid, String processorGuid) {
+
+		DeActivateProcessorResponseDTO serviceResponse = new DeActivateProcessorResponseDTO();
 
 		try {
-			
-			if (processorGuid == null || processorGuid.equals("")) {
-				throw new MailBoxConfigurationServicesException("Processor cannot be found");
-			}
-			
+
 			LOGGER.info("Entering into get processor.");
 			LOGGER.info("Deactivate guid is {} ", processorGuid);
-			
+
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-			config.deactivate(processorGuid);
-			
-			response = new ResponseDTO();
-			serviceResponse = new DeActivateProcessorResponseDTO();
-			
-			response.setMessage(MailBoxConstants.DELETE_PROCESSOR_SUCCESS);
-			response.setStatus(MailBoxConstants.SUCCESS);
-			
-			ProcessorResponseDTO dto = new ProcessorResponseDTO();
-			dto.setGuId(processorGuid);
-			serviceResponse.setProcessor(dto);
-			serviceResponse.setResponse(response);
-			
-			LOGGER.info("Exit from deactivate processor.");
-		} catch (Exception e) {
-			
-			response = new ResponseDTO();
-			serviceResponse = new DeActivateProcessorResponseDTO();
-			response.setMessage(MailBoxConstants.DELETE_PROCESSOR_FAILURE + e.getMessage());
-			response.setStatus(MailBoxConstants.FAILURE);
+			Processor retrievedProcessor = config.find(Processor.class, processorGuid);
+			if (null == retrievedProcessor) {
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid);
+			}
+
+			// validates the given processor is belongs to given mailbox
+			validateProcessorBelongToMbx(mailBoxGuid, retrievedProcessor);
+
+			// Changing the processor status
+			retrievedProcessor.setProcsrStatus(MailBoxStatus.INACTIVE.value());
+			config.merge(retrievedProcessor);
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setProcessor(new ProcessorResponseDTO(processorGuid));
+			LOGGER.info("Exit from deactivate mailbox.");
+			return serviceResponse;
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.DEACTIVATION_FAILED.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, PROCESSOR, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
 		}
-		
-		return serviceResponse;
+
 	}
-	
+
 	/**
-	 * Method revise the mailbox configurations.
+	 * Method revise the processor configuration
 	 * 
 	 * @param request
+	 *            The Revise Processor Request DTO
+	 * @param mailBoxId
+	 *            The guid of the mailbox.The given processor should belongs to the given mailbox.
+	 * @param processorId
+	 *            The processor guid which is to be revised.
+	 * @return The Revise Processor ResponseDTO
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonGenerationException
+	 * @throws SymmetricAlgorithmException
 	 */
-	
-	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request) {
-		
+	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId)
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+
 		LOGGER.info("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
-		
-		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		Processor processor = config.find(Processor.class, request.getProcessor().getGuid());
-		
-		processor.getFolders().clear();
-		processor.getCredentials().clear();
-		
-		request.copyToEntity(processor);
-		
-		config.merge(processor);
-		
-		//Response Construction
 		ReviseProcessorResponseDTO serviceResponse = new ReviseProcessorResponseDTO();
 
-		ResponseDTO response = new ResponseDTO();
-		response.setMessage(MailBoxConstants.REVISE_PROCESSOR_SUCCESS);
-		response.setStatus(MailBoxConstants.SUCCESS);
+		try {
 
-		ProcessorDTO dto = new ProcessorDTO();
-		dto.setGuid(String.valueOf(processor.getPrimaryKey()));
-		
-		serviceResponse.setProcessor(dto);
-		serviceResponse.setResponse(response);
+			if (!mailBoxId.equals(request.getProcessor().getLinkedMailboxId())) {
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
+			}
 
-		LOGGER.info("Exit from revising processor.");
-		
+			if (!processorId.equals(request.getProcessor().getGuid())) {
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, PROCESSOR);
+			}
+
+			ProcessorDTO processorDTO = request.getProcessor();
+			if (processorDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			validator.validate(processorDTO);
+			if (null != processorDTO.getFolders()) {
+				for (FolderDTO folderDTO : processorDTO.getFolders()) {
+					validator.validate(folderDTO);
+				}
+			}
+			if (null != processorDTO.getCredentials()) {
+				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
+					validator.validate(credentialDTO);
+				}
+			}
+
+			// validates the processor type
+			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
+			if (foundProcessorType == null) {
+				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Processor");
+			}
+
+			// validates the processor status
+			MailBoxStatus foundStatusType = MailBoxStatus.findByName(processorDTO.getStatus());
+			if (foundStatusType == null) {
+				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, PROCESSOR_STATUS);
+			}
+
+			ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
+			Processor processor = configDao.find(Processor.class, processorDTO.getGuid());
+			if (processor == null) {
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorDTO.getGuid());
+			}
+
+			// validates the given processor is belongs to given mailbox
+			validateProcessorBelongToMbx(mailBoxId, processor);
+
+			if (processor.getFolders() != null) {
+				processor.getFolders().clear();
+			}
+			if (processor.getCredentials() != null) {
+				processor.getCredentials().clear();
+			}
+			if (processor.getScheduleProfileProcessors() != null) {
+				processor.getScheduleProfileProcessors().clear();
+			}
+
+			createMailBoxAndProcessorLink(null, request, processor);
+			createScheduleProfileAndProcessorLink(null, request, processor);
+
+			// Copying the new details of the processor and merging.
+			processorDTO.copyToEntity(processor, false);
+
+			configDao.merge(processor);
+			// Change the execution order if existing and incoming does not
+			// matche
+			// changeExecutionOrder(request, configDao, processor);
+
+			// response message construction
+			ProcessorResponseDTO dto = new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setProcessor(dto);
+
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROCESSOR, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+		}
+
+		LOGGER.info("Exit from revise processor.");
+
 		return serviceResponse;
-		
 	}
 
+	/**
+	 * Method for add and update the dynamic processorProperty to Processor entity
+	 * 
+	 * @param guid
+	 *            The processor guid
+	 * @param propertyDTO
+	 *            The dynamic properties
+	 */
+	public void addOrUpdateProcessorProperties(String guid, DynamicPropertiesDTO propertyDTO) {
+
+		ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
+		Processor processor = configDao.find(Processor.class, guid);
+		ProcessorProperty processorProperty = null;
+
+		// update the property
+		List<ProcessorProperty> existingProperties = processor.getDynamicProperties();
+		// new property from DTO
+		List<PropertyDTO> newProperties = propertyDTO.getDynamicProperties();
+		// new property to add entity
+		List<ProcessorProperty> processorPropertyList = new ArrayList<ProcessorProperty>();
+
+		for (PropertyDTO properties : newProperties) {
+
+			// Add the property if empty
+			if (existingProperties == null || existingProperties.isEmpty()) {
+
+				processorProperty = new ProcessorProperty();
+				processorProperty.setPguid(MailBoxUtility.getGUID());
+				processorProperty.setProcsrPropName(properties.getName());
+				processorProperty.setProcsrPropValue(properties.getValue());
+
+				processorPropertyList.add(processorProperty);
+				processor.setDynamicProperties(processorPropertyList);
+
+			} else {
+
+				for (ProcessorProperty property : existingProperties) {
+
+					String existingName = property.getProcsrPropName();
+
+					// Update the property value if property name already exist
+					if (existingName != null && existingName.equals(properties.getName())) {
+						property.setProcsrPropValue(properties.getValue());
+					} else {
+						// add new property name and value
+						processorProperty = new ProcessorProperty();
+						processorProperty.setPguid(MailBoxUtility.getGUID());
+						processorProperty.setProcsrPropName(properties.getName());
+						processorProperty.setProcsrPropValue(properties.getValue());
+
+					}
+				}
+				if (null != processorProperty) {
+					existingProperties.add(processorProperty);
+				}
+			}
+		}
+
+		configDao.merge(processor);
+	}
+
+	/**
+	 * Validates the given processor is belongs to the given mailbox.
+	 * 
+	 * @param mailBoxGuid
+	 *            The guid of the mailbox
+	 * @param processor
+	 *            The processor of the mailbox
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	private void validateProcessorBelongToMbx(String mailBoxGuid, Processor processor)
+			throws MailBoxConfigurationServicesException {
+
+		MailBox mbx = processor.getMailbox();
+		if (!mailBoxGuid.equals(mbx.getPrimaryKey())) {
+			throw new MailBoxConfigurationServicesException(Messages.PROC_DOES_NOT_BELONG_TO_MBX);
+		}
+	}
 }

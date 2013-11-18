@@ -18,32 +18,6 @@ package com.liaison.mailbox;
 public interface MailBoxConstants {
 
 	// Key descriminator values
-	public static final String REMOTE_UPLOADER = "REMOTE_UPLOADER";
-	public static final String REMOTE_DOWNLOADER = "REMOTE_DOWNLOADER";
-	public static final String SWEEPER = "SWEEPER";
-
-	// Response Messages
-	public static final String SUCCESS = "Success";
-	public static final String FAILURE = "Failure";
-
-	public static final String CREATE_MAILBOX_SUCCESS = "Mailbox created successfully.";
-	public static final String CREATE_MAILBOX_FAILURE = "Error occured during mailbox creation.";
-
-	public static final String ADD_PROFILE_SUCCESS = "Profile added to mailbox Successfully.";
-	public static final String ADD_PROFILE_FAILURE = "Error occured while adding Profile to Mailbox.";
-
-	public static final String DEACTIVATE_MAIBOX_PROFILE_SUCCESS = "Mailbox Profile deactivated successfully.";
-	public static final String DEACTIVATE_MAIBOX_PROFILE_FAILURE = "Error occured while deactivating Mailbox Profile.";
-
-	public static final String REVISE_MAILBOX_SUCCESS = "Mailbox revised successfully.";
-	public static final String REVISE_MAILBOX_FAILURE = "Error occured during mailbox updation.";
-
-	public static final String GET_MAILBOX_SUCCESS = "Mailbox retrieved successfully.";
-	public static final String GET_MAILBOX_FAILURE = "Error occured during get mailbox operation.";
-
-	public static final String INACTIVE_MAILBOX_SUCCESS = "Mailbox deactivated successfully.";
-	public static final String INACTIVE_MAILBOX_FAILURE = "Error occured during mailbox deactivation.";
-
 	/** File datetime format. */
 	public final static String FILETIME_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
@@ -56,15 +30,39 @@ public interface MailBoxConstants {
 	/** The processed file extension */
 	public final static String SWEEPED_FILE_EXTN = ".queued";
 
-	public static final String CREATE_PROCESSOR_SUCCESS = "Processor created successfully.";
-	public static final String CREATE_PROCESSOR_FAILURE = "Error occured during processor creation.";
+	/** Property which is used to get the configured receivers from mailbox. */
+	public final static String MBX_RCVR_PROPERTY = "receivers";
 
-	public static final String DELETE_PROCESSOR_SUCCESS = "Processor deactivated successfully.";
-	public static final String DELETE_PROCESSOR_FAILURE = "Processor deactivation failed.";
+	public final static String MBX_STATUS = "MailBoxStatus";
 
-	public static final String GET_PROCESSOR_SUCCESS = "Processor retrieved successfully.";
-	public static final String GET_PROCESSOR_FAILURE = "Error occured during get processor operation.";
-	
-	public static final String REVISE_PROCESSOR_SUCCESS = "Processor revised successfully.";
-	public static final String REVISE_PROCESSOR_FAILURE = "Error occured during processor updation.";
+	public final static String PROCESSOR_TYPE = "ProcessorType";
+
+	public final static String PROCESSOR_PROTOCOL = "Protocol";
+
+	public final static String FOLDER_TYPE = "FolderType";
+
+	public final static String CREDENTIAL_TYPE = "CredentialType";
+
+	public final static String INCOMPLETE_STATUS = "INCOMPLETE";
+
+	public final static String GROUPING_JS_PROP_NAME = "filegroupingjspath";
+
+	public final static String FILE_RENAME_FORMAT_PROP_NAME = "filerenameformat";
+
+	public final static String FOLDER_HEADER = "folderlocation";
+	public final static String FILE_NAME_HEADER = "filename";
+
+	public final static String URL = "resturl";
+
+	// Added for list files in get payload
+	public final static String META_FILE_NAME = ".meta";
+	public final static String PROCESSED_FOLDER = "PROCESSED";
+
+	// used for write response for http remote downloader. This is the default processor name.
+	public final static String PROCESSOR = "PROCESSOR";
+
+	// Properties for sweeper grouping boundary condition
+	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
+	public final static String NUMER_OF_FILES_THRESHOLD = "numoffilesthreshold";
+
 }

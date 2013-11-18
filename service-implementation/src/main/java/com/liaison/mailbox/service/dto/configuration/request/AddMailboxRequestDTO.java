@@ -14,10 +14,10 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
- * Data Transfer Object that implements fields required for mailbox
- * configuration request.
+ * Data Transfer Object that implements fields required for mailbox configuration request.
  * 
  * @author veerasamyn
  */
@@ -34,7 +34,7 @@ public class AddMailboxRequestDTO {
 		this.mailBox = mailBox;
 	}
 
-	public void copyToEntity(MailBox entity) {
+	public void copyToEntity(MailBox entity) throws MailBoxConfigurationServicesException {
 		this.getMailBox().copyToEntity(entity);
 	}
 

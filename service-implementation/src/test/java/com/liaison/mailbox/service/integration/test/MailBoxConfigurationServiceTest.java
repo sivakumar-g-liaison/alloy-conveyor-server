@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -10,20 +10,16 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
+
+import javax.xml.bind.JAXBException;
 
 import junit.framework.Assert;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +30,15 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Test class to test mailbox configuration service.
@@ -43,7 +47,10 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
  */
 public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
-	private Logger logger = null;
+	private Logger logger;
+	private String jsonResponse;
+	private String jsonRequest;
+	private HTTPRequest request;
 
 	/**
 	 * @throws java.lang.Exception
@@ -54,74 +61,443 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testCreateMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
+	public void testCreateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+			JAXBException, IOException {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		// Adding the mailbox
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
-		HTTPRequest request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonString, logger);
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Get the mailbox
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+		Assert.assertEquals(requestDTO.getMailBox().getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
+		Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+		Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
+				getResponseDTO.getMailBox().getProperties().get(0).getName());
+		Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getValue(),
+				getResponseDTO.getMailBox().getProperties().get(0).getValue());
 
 	}
 
 	@Test
-	public void testGetMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
+	public void testGetMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
+			IOException {
 
-		String url = getBASE_URL() + "/" + "40288bc340cffc570140cffc57a10000";
-		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		// Adding the mailbox
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Get the mailbox
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "getMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+		Assert.assertEquals(requestDTO.getMailBox().getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
+		Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+		Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
+				getResponseDTO.getMailBox().getProperties().get(0).getName());
+		Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getValue(),
+				getResponseDTO.getMailBox().getProperties().get(0).getValue());
 
 	}
 
 	@Test
-	public void testDeactivateMailBox() throws MalformedURLException, FileNotFoundException, LiaisonException, JSONException {
+	public void testDeactivateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+			JAXBException, IOException {
 
-		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf2bb8480007";
-		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
+		// Adding the mailbox
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Deactivate the mailbox
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "deactivateMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "deactivateMailBoxResponse"));
+
+		// Get the mailbox
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 	}
 
 	@Test
 	public void testReviseMailBoxWithLiaisonHTTPClient() throws ClientProtocolException, IOException, Exception {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+		// Adding the mailbox
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 
-		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf1947e00003";
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
 
-		HTTPRequest request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonString, logger);
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Constructing the revise
+		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+		mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), false);
+		mbxDTO.setGuid(responseDTO.getMailBox().getGuid());
+		reviseRequestDTO.setMailBox(mbxDTO);
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
 
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "reviseMailBoxResponse"));
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
+
+		// Get the mailbox
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(mbxDTO.getName(), getResponseDTO.getMailBox().getName());
+		Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
+		Assert.assertEquals(mbxDTO.getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
+		Assert.assertEquals(mbxDTO.getShardKey(), getResponseDTO.getMailBox().getShardKey());
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+		Assert.assertEquals(mbxDTO.getProperties().get(0).getName(),
+				getResponseDTO.getMailBox().getProperties().get(0).getName());
+		Assert.assertEquals(mbxDTO.getProperties().get(0).getValue(),
+				getResponseDTO.getMailBox().getProperties().get(0).getValue());
 
 	}
 
 	@Test
-	public void testReviseMailBoxWithApacheHTTPClient() throws ClientProtocolException, IOException, Exception {
+	public void testCreateMailBox_MandatoryFields_ShouldPass() throws JsonGenerationException, JsonMappingException,
+			JAXBException, IOException, LiaisonException {
 
-		String jsonString = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+		MailBoxDTO mailBox = new MailBoxDTO();
+		mailBox.setName("TestMailBox");
+		mailBox.setStatus("ACTIVE");
 
-		String url = getBASE_URL() + "/" + "40288bc340cf19460140cf1947e00003";
+		// Adding the mailbox
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+		requestDTO.setMailBox(mailBox);
 
-		HttpParams params = new BasicHttpParams();
-		HttpClient httpClient = new DefaultHttpClient(params);
-		HttpResponse response = httpClient.execute(getHttpPut(url, jsonString));
-		Assert.assertEquals(true, response.getStatusLine().getStatusCode() == 200);
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Get the mailbox
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(mailBox.getName(), getResponseDTO.getMailBox().getName());
+	}
+
+	@Test
+	public void testCreateMailBox_WithoutMandatoryFields_ShouldFail() throws JsonGenerationException, JsonMappingException,
+			JAXBException, IOException, LiaisonException {
+
+		MailBoxDTO mailBox = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+
+		// Adding the mailbox
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+		requestDTO.setMailBox(mailBox);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+
+		// Get the mailbox
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(mailBox.getName(), getResponseDTO.getMailBox().getName());
 
 	}
 
-	private HttpPut getHttpPut(String url, String jsonString) throws Exception {
+	@Test
+	public void testCreateMailBox_MailBoxisNull_ShouldFail() throws JsonGenerationException, JsonMappingException,
+			JAXBException, IOException, LiaisonException {
 
-		HttpPut httpPut = new HttpPut(url);
+		// Adding the mailbox
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+		requestDTO.setMailBox(null);
 
-		httpPut.setHeader("Content-Type", "application/json");
-		StringEntity entity = new StringEntity(jsonString);
-		httpPut.setEntity(entity);
-		return httpPut;
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
+		Assert.assertEquals(true,
+				responseDTO.getResponse().getMessage().contains(Messages.INVALID_REQUEST.value()));
+
+	}
+
+	@Test
+	public void testGetMailBox_WrongId_ShouldFail() throws JsonGenerationException, JsonMappingException,
+			JAXBException, IOException, LiaisonException {
+
+		// Get the mailbox
+		String url = getBASE_URL() + "/" + "3434";
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testReviseMailBox_Null_ShouldFail() throws JsonGenerationException, JsonMappingException, JAXBException,
+			IOException, LiaisonException, JSONException {
+
+		// Constructing the revise
+		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+		reviseRequestDTO.setMailBox(null);
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+
+		String url = getBASE_URL() + "/" + "fasdfasdfdas";
+		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
+
+	}
+
+	@Test
+	public void testReviseMailBox_WrongGuids_ShouldFail() throws JsonGenerationException, JsonMappingException, JAXBException,
+			IOException, LiaisonException, JSONException {
+
+		// Constructing the revise
+		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+		reviseRequestDTO.setMailBox(constructDummyMailBoxDTO(System.currentTimeMillis(), true));
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+
+		String url = getBASE_URL() + "/" + "3432432";
+		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
+
+	}
+
+	@Test
+	public void testReviseMailBox_InvalidGuids_ShouldFail() throws JsonGenerationException, JsonMappingException, JAXBException,
+			IOException, LiaisonException, JSONException {
+
+		// Constructing the revise
+		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+
+		MailBoxDTO mailBox = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		mailBox.setGuid("123456");
+		reviseRequestDTO.setMailBox(mailBox);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+
+		String url = getBASE_URL() + "/" + "123456";
+		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
+
+	}
+
+	@Test
+	public void testDeactivateMailBox_WrongId_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
+			JsonMappingException, JAXBException, IOException {
+
+		// Deactivate the mailbox
+		String url = getBASE_URL() + "/" + "123456";
+		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "deactivateMailBoxResponse"));
+
+	}
+
+	@Test
+	public void testReviseMailBox_WithoutMandatory_ShouldFail() throws JsonGenerationException, JsonMappingException,
+			JAXBException,
+			IOException, LiaisonException, JSONException {
+
+		// Constructing the revise
+		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+		reviseRequestDTO.setMailBox(null);
+		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+
+		String url = getBASE_URL() + "/" + "3432432";
+		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
+
+	}
+
+	@Test
+	public void testCreateMailBox_EmptyString_ShouldFail() throws JsonGenerationException, JsonMappingException,
+			JAXBException, IOException, LiaisonException {
+
+		// Adding the mailbox
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+
+		MailBoxDTO dto = new MailBoxDTO();
+		dto.setName("");
+		requestDTO.setMailBox(dto);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testCreateMailBox_InValidStatus_ShouldFail() throws JsonGenerationException, JsonMappingException,
+			JAXBException, IOException, LiaisonException {
+
+		// Adding the mailbox
+		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+
+		MailBoxDTO dto = new MailBoxDTO();
+		dto.setName("afdaf");
+		dto.setStatus("sfrafda");
+		requestDTO.setMailBox(dto);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
 	}
 }

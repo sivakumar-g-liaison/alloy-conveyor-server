@@ -12,34 +12,32 @@ package com.liaison.mailbox.grammer;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 
-import com.liaison.mailbox.enums.ErrorMessages;
+import com.liaison.mailbox.enums.Messages;
 
 /**
- * A Data Transfer Object that implements the fields required for
- * error message.
+ * A Data Transfer Object that implements the fields required for error message.
  * 
  * @author veerasamyn
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(namespace = "http://key.management.liaison.com/error")
 public class MailboxServiceError extends DataTransferObject {
 
-	private ErrorMessages errorCode;
-    private String errorMessage;
+	private Messages errorCode;
+	private String errorMessage;
 
-    /**
+	/**
 	 * @return the errorCode
 	 */
-	public ErrorMessages getErrorCode() {
+	public Messages getErrorCode() {
 		return errorCode;
 	}
 
 	/**
-	 * @param errorCode the errorCode to set
+	 * @param errorCode
+	 *            the errorCode to set
 	 */
-	public void setErrorCode(ErrorMessages errorCode) {
+	public void setErrorCode(Messages errorCode) {
 		this.errorCode = errorCode;
 	}
 
@@ -51,7 +49,8 @@ public class MailboxServiceError extends DataTransferObject {
 	}
 
 	/**
-	 * @param errorMessage the errorMessage to set
+	 * @param errorMessage
+	 *            the errorMessage to set
 	 */
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;

@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.enums;
 
+import com.liaison.mailbox.service.util.MailBoxUtility;
+
 public enum ProcessorType {
 
 	REMOTEDOWNLOADER("remotedownloader"),
@@ -22,9 +24,37 @@ public enum ProcessorType {
 		this.code = code;
 	}
 
-	@Override
-	public String toString() {
+	public String getCode() {
 		return code;
+	}
+
+	public static ProcessorType findByCode(String code) {
+
+		ProcessorType found = null;
+		for (ProcessorType value : ProcessorType.values()) {
+
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+	}
+
+	public static ProcessorType findByName(String name) {
+
+		ProcessorType found = null;
+		for (ProcessorType value : ProcessorType.values()) {
+
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+
 	}
 
 }

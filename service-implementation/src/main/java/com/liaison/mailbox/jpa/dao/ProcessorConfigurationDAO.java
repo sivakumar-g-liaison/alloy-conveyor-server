@@ -9,40 +9,37 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.Processor;
 
 @NamedQueries({
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PGUID,
-				query = "SELECT processor FROM Processor processor WHERE processor.pguid = :" + ProcessorConfigurationDAO.PGUID),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE,
-				query = "select processor from Processor processor "
-						+ "inner join processor.mailboxSchedProfile profile "
-						+ "inner join profile.scheduleProfilesRef schdprof "
-						+ "inner join profile.mailbox mbx "
-						+ "where schdprof.schProfName =:"
-						+ ProcessorConfigurationDAO.PROF_NAME
-		),
 		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,
-				query = "select processor from Processor processor "
-						+ "inner join processor.mailboxSchedProfile profile "
-						+ "inner join profile.scheduleProfilesRef schdprof "
-						+ "inner join profile.mailbox mbx "
-						+ "where schdprof.schProfName = :"
-						+ ProcessorConfigurationDAO.PROF_NAME
-						+ " and mbx.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME + "")
+				query = "select processor from Processor processor"
+						+ " inner join processor.scheduleProfileProcessors schd_prof_processor"
+						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
+						+ " where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME
+						+ " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
+						+ " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
+						+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
+						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
+						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS)
+
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
-	public static final String FIND_PROCESSOR_BY_PGUID = "findProcessorByPguid";
-	public static final String FIND_PROCESSOR_BY_PROFILE = "findProcessorByProfile";
 	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
 
-	public static final String PGUID = "pguid";
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
+	public static final String STATUS = "status";
+	public static final String EXEC_STATUS = "exec_status";
+	public static final String SHARD_KEY = "shard_key";
 
-	public Processor find(String guid);
+	/**
+	 * Find by profileName and mailbox name pattern.
+	 * 
+	 * @param profileName
+	 *            The profile name.
+	 * @param mbxNamePattern
+	 *            The MailBox name pattern to exclude
+	 * @return The list of processors.
+	 */
+	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
 
-	public List<Processor> findByProfile(String profileName);
-
-	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern);
-
-	public void deactivate(String guId);
 }

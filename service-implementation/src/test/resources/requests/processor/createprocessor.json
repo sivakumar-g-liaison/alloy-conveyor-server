@@ -1,41 +1,55 @@
-{ 
-	"addProcessorToMailBoxRequest":{
-		"processor":{ 
-			"guid":"", 
-			"name":"google remote downloader tess", 
-			"type":"remotedownloader", 
-			"status":"active", 
-			"description":"", 
-			"properties":"JSON String", 
-			"javaScriptURI":"file sytem path", 
-			"folders":[ 
-				{ 
-				"folderURI":"http://path", 
-				"folderType":"folder", 
-				"folderDesc":"test" 
-				} 
-			], 
-
-			 "credentials":[ 
-				{ 
-				"credentialType":"db", 
-				"credentialURI":"http://path", 
-				"userId":"karthi", 
-				"password":"krishh", 
-				"idpType":"ffdf", 
-				"idpURI":"fdfd"
-				} 
-			],
-			
-			"procsrProperties":[ 
-				{
-                    "name": "filerenameformat",
-                    "value": "*.processed"
+{
+    "addProcessorToMailBoxRequest": {
+        "processor": {
+            "guid": "",
+            "name": "google testremote downloader",
+            "type": "REMOTEDOWNLOADER",
+            "status": "ACTIVE",
+            "description": "",
+            "remoteDownloaderProperties": {
+                "httpVersion": "1.1",
+                "httpVerb": "GET",
+                "retryAttempts": "1",
+                "socketTimeout": "60000",
+                "connectionTimeout": "60000",
+                "url": "http://soi.uat.liaison.com/soi/rest/s/r/javascript-invoker/soi-test-response",
+                "port": "",
+                "chunkedEncoding": "true",
+                "otherRequestHeader": [
+                    {
+                        "name": "",
+                        "value": ""
+                    }
+                ],
+                "contentType": "",
+                "encodingFormat": ""
+            },
+            "javaScriptURI": null,
+            "folders": [
+                {
+                    "folderURI": "//temp",
+                    "folderType": "RESPONSE_LOCATION",
+                    "folderDesc": "test"
                 }
-			],
-			 
-			"linkedMailboxId":"E8E82C26NULL00B9NULL7523FA8F6F99", 
-			"linkedProfileId":"E914BCE0NULL00C0NULLED5A47F0379E" 
-		} 
-	}
-} 
+            ],
+            "credentials": [
+                {
+                    "credentialType": "db",
+                    "credentialURI": "http: //path",
+                    "userId": "karthi",
+                    "password": "krishh",
+                    "idpType": "ffdf",
+                    "idpURI": "fdfd"
+                }
+            ],
+            "dynamicProperties": [
+                {
+                    "name": "filename",
+                    "value": "test"
+                }
+            ],
+            "linkedMailboxId": "2CA5B1B6C0A801AD0B4385E4060808F5",
+            "linkedProfileId": "2CB89C44C0A801AD0B4385E41F305C5E"
+        }
+    }
+}

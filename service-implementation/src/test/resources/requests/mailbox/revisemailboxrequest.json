@@ -4,7 +4,9 @@
             "guid": "40288bc340cf19460140cf1947e00003",
             "name": "MCCWebAnalytics",
             "description": "Updatedmydescription",
-            "status": "active",
+            "serviceInstId":"1234567",
+			"shardKey":"key_12345",
+            "status": "ACTIVE",
             "properties": [
                 {
                     "name": "filerenameformat",

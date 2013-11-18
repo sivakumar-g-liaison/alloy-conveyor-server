@@ -16,42 +16,39 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * @author karthikeyanm
- *
+ * 
  */
 
 @JsonRootName("reviseProcessorResponse")
 public class ReviseProcessorResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private ProcessorDTO processor;
-	
+	private ProcessorResponseDTO processor;
+
 	/**
 	 * @return the response
 	 */
 	public ResponseDTO getResponse() {
 		return response;
 	}
+
 	/**
-	 * @param response the response to set
+	 * @param response
+	 *            the response to set
 	 */
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
-	/**
-	 * @return the processor
-	 */
-	public ProcessorDTO getProcessor() {
+
+	public ProcessorResponseDTO getProcessor() {
 		return processor;
 	}
-	/**
-	 * @param processor the processor to set
-	 */
-	public void setProcessor(ProcessorDTO processor) {
+
+	public void setProcessor(ProcessorResponseDTO processor) {
 		this.processor = processor;
 	}
 
@@ -61,6 +58,5 @@ public class ReviseProcessorResponseDTO implements ResponseBuilder {
 		String responseBody = MailBoxUtility.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
-	
-	
+
 }

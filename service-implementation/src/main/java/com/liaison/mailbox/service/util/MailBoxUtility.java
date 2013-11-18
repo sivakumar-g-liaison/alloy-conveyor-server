@@ -10,7 +10,10 @@
 
 package com.liaison.mailbox.service.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
@@ -23,12 +26,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.service.core.processor.HttpRemoteDownloader;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
+import com.liaison.framework.util.ServiceUtils;
+import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.
@@ -38,6 +41,8 @@ import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 public class MailBoxUtility {
 
 	private static final UUIDGen UUID = new UUIDGen();
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxUtility.class);
+	private static final Properties properties = new Properties();
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -54,7 +59,7 @@ public class MailBoxUtility {
 	 */
 	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
 			JsonMappingException, IOException {
-
+		LOGGER.debug("Input JSON is {}", serializedJson);
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
 		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
@@ -98,8 +103,9 @@ public class MailBoxUtility {
 
 		// added to support root level element.
 		mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, true);
-
-		return mapper.writeValueAsString(object);
+		String jsonBuilt = mapper.writeValueAsString(object);
+		LOGGER.debug("JSON Built is {}", jsonBuilt);
+		return jsonBuilt;
 	}
 
 	/**
@@ -119,26 +125,21 @@ public class MailBoxUtility {
 	 * @return boolean
 	 */
 	public static boolean isEmpty(String str) {
-
 		return str == null || str.isEmpty();
-
 	}
 
-	/**
-	 * Factory to method to create instances for mailbox processor.
-	 * 
-	 * @param processor
-	 *            The Processor Entity
-	 * @return The MailBox Processor instance.
-	 */
-	public static MailBoxProcessor getInstance(Processor processor) {
+	public static Properties getEnvironmentProperties() throws IOException {
 
-		MailBoxProcessor mailBoxProcessor = null;
+		if (properties.isEmpty()) {
 
-		if (MailBoxConstants.REMOTE_DOWNLOADER.equals(processor.getDiscriminatorValue())) {
-			mailBoxProcessor = new HttpRemoteDownloader(processor);
+			Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
+			String propertyFileName = "g2mailboxservice-" + env + ".properties";
+			String props = ServiceUtils.readFileFromClassPath(propertyFileName);
+			InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
+			properties.load(is);
 		}
 
-		return mailBoxProcessor;
+		return properties;
 	}
+
 }

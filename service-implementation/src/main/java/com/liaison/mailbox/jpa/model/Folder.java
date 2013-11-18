@@ -28,7 +28,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "FOLDERS")
+@Table(name = "FOLDER")
 @NamedQuery(name = "Folder.findAll", query = "SELECT f FROM Folder f")
 public class Folder implements Identifiable {
 
@@ -53,7 +53,7 @@ public class Folder implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "FLDR_DESC", length = 250)
+	@Column(name = "DESCRIPTION", length = 250)
 	public String getFldrDesc() {
 		return this.fldrDesc;
 	}
@@ -62,7 +62,7 @@ public class Folder implements Identifiable {
 		this.fldrDesc = fldrDesc;
 	}
 
-	@Column(name = "FLDR_TYPE", nullable = false, length = 50)
+	@Column(name = "TYPE", nullable = false, length = 50)
 	public String getFldrType() {
 		return this.fldrType;
 	}
@@ -71,7 +71,7 @@ public class Folder implements Identifiable {
 		this.fldrType = fldrType;
 	}
 
-	@Column(name = "FLDR_URI", length = 50)
+	@Column(name = "URI", length = 250)
 	public String getFldrUri() {
 		return this.fldrUri;
 	}
@@ -82,7 +82,7 @@ public class Folder implements Identifiable {
 
 	// bi-directional many-to-one association to Processor
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
-	@JoinColumn(name = "PROCESSORS_GUID", nullable = false)
+	@JoinColumn(name = "PROCESSOR_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;
 	}

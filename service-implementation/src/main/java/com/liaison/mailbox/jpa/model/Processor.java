@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.jpa.model;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -28,30 +29,39 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ProcessorType;
 
 /**
  * The persistent class for the PROCESSORS database table.
  * 
  */
 @Entity
-@Table(name = "PROCESSORS")
+@Table(name = "PROCESSOR")
 @NamedQuery(name = "Processor.findAll", query = "SELECT p FROM Processor p")
-@DiscriminatorColumn(name = "PROCSR_TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
+@DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String TYPE_REMOTEDOWNLOADER = "remotedownloader";
+	public static final String TYPE_REMOTEUPLOADER = "remoteuploader";
+	public static final String TYPE_SWEEPER = "sweeper";
 
 	private String pguid;
 	private String javaScriptUri;
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
-	// private String procsrType;
+	private String procsrExecutionStatus;
+	private String procsrName;
+	private String procsrProtocol;
 	private List<Credential> credentials;
 	private List<Folder> folders;
-	private MailBoxSchedProfile mailboxSchedProfile;
+	private List<ProcessorProperty> dynamicProperties;
 
-	private List<ProcessorProperty> processorProperties;
+	private MailBox mailbox;
+	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
 
 	public Processor() {
 	}
@@ -59,12 +69,12 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ProcessorProperty
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<ProcessorProperty> getProcessorProperties() {
-		return processorProperties;
+	public List<ProcessorProperty> getDynamicProperties() {
+		return dynamicProperties;
 	}
 
-	public void setProcessorProperties(List<ProcessorProperty> processorProperties) {
-		this.processorProperties = processorProperties;
+	public void setDynamicProperties(List<ProcessorProperty> processorProperties) {
+		this.dynamicProperties = processorProperties;
 	}
 
 	@Id
@@ -77,7 +87,7 @@ public class Processor implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "JAVA_SCRIPT_URI", length = 512)
+	@Column(name = "JAVASCRIPT_URI", length = 512)
 	public String getJavaScriptUri() {
 		return this.javaScriptUri;
 	}
@@ -86,7 +96,7 @@ public class Processor implements Identifiable {
 		this.javaScriptUri = javaScriptUri;
 	}
 
-	@Column(name = "PROCSR_DESC", length = 512)
+	@Column(name = "DESCRIPTION", length = 512)
 	public String getProcsrDesc() {
 		return this.procsrDesc;
 	}
@@ -95,7 +105,7 @@ public class Processor implements Identifiable {
 		this.procsrDesc = procsrDesc;
 	}
 
-	@Column(name = "PROCSR_PROPERTIES", length = 2048)
+	@Column(name = "PROPERTIES", length = 2048)
 	public String getProcsrProperties() {
 		return this.procsrProperties;
 	}
@@ -104,7 +114,7 @@ public class Processor implements Identifiable {
 		this.procsrProperties = procsrProperties;
 	}
 
-	@Column(name = "PROCSR_STATUS", nullable = false, length = 128)
+	@Column(name = "STATUS", nullable = false, length = 128)
 	public String getProcsrStatus() {
 		return this.procsrStatus;
 	}
@@ -113,11 +123,32 @@ public class Processor implements Identifiable {
 		this.procsrStatus = procsrStatus;
 	}
 
-	/*
-	 * @Column(name="PROCSR_TYPE", nullable=false, length=128) public String getProcsrType() {
-	 * return this.procsrType; } public void setProcsrType(String procsrType) { this.procsrType =
-	 * procsrType; }
-	 */
+	@Column(name = "EXEC_STATUS", length = 128)
+	public String getProcsrExecutionStatus() {
+		return procsrExecutionStatus;
+	}
+
+	public void setProcsrExecutionStatus(String procsrExecutionStatus) {
+		this.procsrExecutionStatus = procsrExecutionStatus;
+	}
+
+	@Column(name = "NAME", length = 512)
+	public String getProcsrName() {
+		return procsrName;
+	}
+
+	public void setProcsrName(String procsrName) {
+		this.procsrName = procsrName;
+	}
+
+	@Column(name = "PROTOCOL", nullable = false, length = 128)
+	public String getProcsrProtocol() {
+		return procsrProtocol;
+	}
+
+	public void setProcsrProtocol(String procsrProtocol) {
+		this.procsrProtocol = procsrProtocol;
+	}
 
 	// bi-directional many-to-one association to Credential
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
@@ -171,15 +202,40 @@ public class Processor implements Identifiable {
 		return folder;
 	}
 
-	// bi-directional many-to-one association to MailBoxSchedProfile
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
-	@JoinColumn(name = "MAILBOX_SCHED_PROFILES_GUID", nullable = false)
-	public MailBoxSchedProfile getMailboxSchedProfile() {
-		return this.mailboxSchedProfile;
+	// bi-directional many-to-one association to MailBox
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
+	public MailBox getMailbox() {
+		return this.mailbox;
 	}
 
-	public void setMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		this.mailboxSchedProfile = mailboxSchedProfile;
+	public void setMailbox(MailBox mailbox) {
+		this.mailbox = mailbox;
+	}
+
+	// bi-directional many-to-one association to ScheduleProfileProcessor
+	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
+		return this.scheduleProfileProcessors;
+	}
+
+	public void setScheduleProfileProcessors(List<ScheduleProfileProcessor> scheduleProfileProcessors) {
+		this.scheduleProfileProcessors = scheduleProfileProcessors;
+	}
+
+	public ScheduleProfileProcessor addScheduleProfileProcessor(ScheduleProfileProcessor scheduleProfileProcessor) {
+		getScheduleProfileProcessors().add(scheduleProfileProcessor);
+		scheduleProfileProcessor.setProcessor(this);
+
+		return scheduleProfileProcessor;
+	}
+
+	public ScheduleProfileProcessor removeScheduleProfileProcessor(ScheduleProfileProcessor scheduleProfileProcessor) {
+		getScheduleProfileProcessors().remove(scheduleProfileProcessor);
+		scheduleProfileProcessor.setProcessor(null);
+
+		return scheduleProfileProcessor;
 	}
 
 	@Override
@@ -195,9 +251,96 @@ public class Processor implements Identifiable {
 		return this.getClass();
 	}
 
+	/**
+	 * Method returns the processor type from the discriminator value.
+	 * 
+	 * @return The Processor type
+	 */
 	@Transient
-	public String getDiscriminatorValue() {
+	public ProcessorType getProcessorType() {
+
 		DiscriminatorValue val = this.getClass().getAnnotation(DiscriminatorValue.class);
-		return val == null ? null : val.value();
+		String code = val.value();
+		return ProcessorType.findByCode(code);
 	}
+
+	/**
+	 * Factory method returns Processor instance corresponding to the input value.
+	 * 
+	 * @param processorType
+	 *            enumeration indicating the type of processor type.
+	 * @return a new instance of Processor of the give type.
+	 */
+	@Transient
+	public static Processor processorInstanceFactory(ProcessorType processorType) {
+
+		Processor processor = null;
+
+		if (ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
+			processor = new RemoteDownloader();
+		} else if (ProcessorType.REMOTEUPLOADER.equals(processorType)) {
+			processor = new RemoteUploader();
+		} else {
+			processor = new Sweeper();
+		}
+
+		return processor;
+	}
+
+	/**
+	 * Gets the configured email receivers from the mailbox for the processor.
+	 * 
+	 * @return List of receivers
+	 */
+	@Transient
+	public List<String> getEmailAddress() {
+
+		MailBox mailBox = getMailbox();
+		List<MailBoxProperty> properties = mailBox.getMailboxProperties();
+
+		if (null != properties) {
+
+			for (MailBoxProperty property : properties) {
+
+				if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
+					String address = property.getMbxPropValue();
+					return Arrays.asList(address.split(","));
+				}
+			}
+		}
+
+		return null;
+
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((pguid == null) ? 0 : pguid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Processor)) {
+			return false;
+		}
+		Processor other = (Processor) obj;
+		if (pguid == null) {
+			if (other.pguid != null) {
+				return false;
+			}
+		} else if (!pguid.equals(other.pguid)) {
+			return false;
+		}
+		return true;
+	}
+
 }

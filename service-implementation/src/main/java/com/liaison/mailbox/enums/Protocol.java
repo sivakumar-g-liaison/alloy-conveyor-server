@@ -10,11 +10,16 @@
 
 package com.liaison.mailbox.enums;
 
+import com.liaison.mailbox.service.util.MailBoxUtility;
+
 public enum Protocol {
 
 	FTP("ftp"),
+	FTPS("ftps"),
+	SFTP("sftp"),
 	HTTP("http"),
-	HTTPS("https");
+	HTTPS("https"),
+	SWEEPER("sweeper");
 
 	private final String code;
 
@@ -22,9 +27,37 @@ public enum Protocol {
 		this.code = code;
 	}
 
-	@Override
-	public String toString() {
+	public String getCode() {
 		return code;
+	}
+
+	public static Protocol findByCode(String code) {
+
+		Protocol found = null;
+		for (Protocol value : Protocol.values()) {
+
+			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+	}
+
+	public static Protocol findByName(String name) {
+
+		Protocol found = null;
+		for (Protocol value : Protocol.values()) {
+
+			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+				found = value;
+				break;
+			}
+		}
+
+		return found;
+
 	}
 
 }

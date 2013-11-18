@@ -28,7 +28,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "MAILBOX_PROPERTIES")
+@Table(name = "MAILBOX_PROPERTY")
 @NamedQuery(name = "MailBoxProperty.findAll", query = "SELECT m FROM MailBoxProperty m")
 public class MailBoxProperty implements Identifiable {
 
@@ -52,7 +52,7 @@ public class MailBoxProperty implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "MBX_PROP_NAME", length = 128)
+	@Column(name = "NAME", length = 128)
 	public String getMbxPropName() {
 		return this.mbxPropName;
 	}
@@ -61,7 +61,7 @@ public class MailBoxProperty implements Identifiable {
 		this.mbxPropName = mbxPropName;
 	}
 
-	@Column(name = "MBX_PROP_VALUE", length = 512)
+	@Column(name = "VALUE", length = 512)
 	public String getMbxPropValue() {
 		return this.mbxPropValue;
 	}

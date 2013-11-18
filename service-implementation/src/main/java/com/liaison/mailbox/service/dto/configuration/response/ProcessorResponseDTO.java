@@ -11,11 +11,21 @@
 package com.liaison.mailbox.service.dto.configuration.response;
 
 /**
- *
+ * Customized DTO for responses.
+ * 
  * @author sivakumarg
  */
 public class ProcessorResponseDTO {
+
 	private String guId;
+
+	public ProcessorResponseDTO() {
+		super();
+	}
+
+	public ProcessorResponseDTO(String guid) {
+		this.guId = guid;
+	}
 
 	public String getGuId() {
 		return guId;

@@ -1,5 +1,5 @@
 /**
- * Copyright Liaison Technologies, Inc. All rights reserved.
+\ * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall 
@@ -30,7 +30,7 @@ import com.liaison.commons.jpa.Identifiable;
  * 
  */
 @Entity
-@Table(name = "MAILBOXES")
+@Table(name = "MAILBOX")
 @NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m")
 public class MailBox implements Identifiable {
 
@@ -43,7 +43,7 @@ public class MailBox implements Identifiable {
 	private BigDecimal serviceInstId;
 	private String shardKey;
 	private List<MailBoxProperty> mailboxProperties;
-	private List<MailBoxSchedProfile> mailboxSchedProfiles;
+	private List<Processor> mailboxProcessors;
 
 	public MailBox() {
 	}
@@ -58,7 +58,7 @@ public class MailBox implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "MBX_DESC", length = 1024)
+	@Column(name = "DESCRIPTION", length = 1024)
 	public String getMbxDesc() {
 		return this.mbxDesc;
 	}
@@ -67,7 +67,7 @@ public class MailBox implements Identifiable {
 		this.mbxDesc = mbxDesc;
 	}
 
-	@Column(name = "MBX_NAME", nullable = false, length = 128)
+	@Column(name = "NAME", nullable = false, length = 128)
 	public String getMbxName() {
 		return this.mbxName;
 	}
@@ -76,7 +76,7 @@ public class MailBox implements Identifiable {
 		this.mbxName = mbxName;
 	}
 
-	@Column(name = "MBX_STATUS", nullable = false, length = 128)
+	@Column(name = "STATUS", nullable = false, length = 128)
 	public String getMbxStatus() {
 		return this.mbxStatus;
 	}
@@ -128,28 +128,16 @@ public class MailBox implements Identifiable {
 		return mailboxProperty;
 	}
 
-	// bi-directional many-to-one association to MailBoxSchedProfile
-	@OneToMany(mappedBy = "mailbox", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<MailBoxSchedProfile> getMailboxSchedProfiles() {
-		return this.mailboxSchedProfiles;
+	// bi-directional many-to-one association to MailBoxProcessor
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+			CascadeType.REMOVE, CascadeType.REFRESH },
+			fetch = FetchType.EAGER)
+	public List<Processor> getMailboxProcessors() {
+		return this.mailboxProcessors;
 	}
 
-	public void setMailboxSchedProfiles(List<MailBoxSchedProfile> mailboxSchedProfiles) {
-		this.mailboxSchedProfiles = mailboxSchedProfiles;
-	}
-
-	public MailBoxSchedProfile addMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		getMailboxSchedProfiles().add(mailboxSchedProfile);
-		mailboxSchedProfile.setMailbox(this);
-
-		return mailboxSchedProfile;
-	}
-
-	public MailBoxSchedProfile removeMailboxSchedProfile(MailBoxSchedProfile mailboxSchedProfile) {
-		getMailboxSchedProfiles().remove(mailboxSchedProfile);
-		mailboxSchedProfile.setMailbox(null);
-
-		return mailboxSchedProfile;
+	public void setMailboxProcessors(List<Processor> mailboxProcessors) {
+		this.mailboxProcessors = mailboxProcessors;
 	}
 
 	@Override
@@ -164,4 +152,37 @@ public class MailBox implements Identifiable {
 	public Class getEntityClass() {
 		return this.getClass();
 	}
+
+	@Override
+	public int hashCode() {
+
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((pguid == null) ? 0 : pguid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof MailBox)) {
+			return false;
+		}
+		MailBox other = (MailBox) obj;
+		if (pguid == null) {
+			if (other.pguid != null) {
+				return false;
+			}
+		} else if (!pguid.equals(other.pguid)) {
+			return false;
+		}
+		return true;
+	}
+
 }
