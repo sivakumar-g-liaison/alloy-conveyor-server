@@ -33,7 +33,6 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.util.HTTPStringOutputStream;
-import com.netflix.config.ConfigurationManager;
 
 /**
  * Base Test class for initial setup and cleanup.
@@ -60,8 +59,6 @@ public abstract class BaseServiceTest {
 			prop.load(is);
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
-			
-			ConfigurationManager.getConfigInstance().setProperty("archaius.deployment.environment", "dev");
 		}
 
 	}
