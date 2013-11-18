@@ -28,12 +28,17 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.util.HTTPStringOutputStream;
+import com.netflix.config.ConfigurationManager;
 
 /**
  * Base Test class for initial setup and cleanup.
  * 
- * @author karthikeyanm
+ * @author easwaripriyak
  * 
  */
 public abstract class BaseServiceTest {
@@ -41,7 +46,8 @@ public abstract class BaseServiceTest {
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
 
-	public static final String SUCCESS = "Success";
+	public static final String SUCCESS = Messages.SUCCESS.value();
+	public static final String FAILURE = Messages.FAILURE.value();
 
 	@Before
 	public void initialSetUp() throws FileNotFoundException, IOException {
@@ -54,6 +60,7 @@ public abstract class BaseServiceTest {
 			prop.load(is);
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
+			ConfigurationManager.getConfigInstance().setProperty("archaius.deployment.environment", "dev");
 		}
 
 	}
@@ -93,14 +100,14 @@ public abstract class BaseServiceTest {
 	 * @return HTTPRequest The HTTPRequest instance for the given URL and method
 	 * @throws MalformedURLException
 	 * @throws FileNotFoundException
-	 * @throws LiaisonException 
+	 * @throws LiaisonException
 	 */
 	public HTTPRequest constructHTTPRequest(String URL, HTTP_METHOD method, String input, Logger logger)
 			throws MalformedURLException, FileNotFoundException, LiaisonException {
 
 		URL url = new URL(URL);
 		HTTPRequest request = new HTTPRequest(method, url, logger);
-		request.setSocketTimeout(300000);
+		request.setSocketTimeout(60000);
 		request.addHeader("Content-Type", "application/json");
 		output = new HTTPStringOutputStream();
 		request.setOutputStream(output);
@@ -143,6 +150,45 @@ public abstract class BaseServiceTest {
 		JSONObject rootJson = new JSONObject(requestString);
 		JSONObject serviceJson = rootJson.getJSONObject(serivceName);
 		return serviceJson;
+	}
+
+	/**
+	 * Construct dummy mailbox DTO for testing.
+	 * 
+	 * @param uniqueValue
+	 * @return
+	 */
+	public MailBoxDTO constructDummyMailBoxDTO(Long uniqueValue, boolean isCreate) {
+
+		MailBoxDTO mailBoxDTO = new MailBoxDTO();
+		PropertyDTO property = new PropertyDTO();
+
+		if (isCreate) {
+
+			mailBoxDTO.setName("MBX_TEST" + uniqueValue);
+			mailBoxDTO.setDescription("MBX_TEST_DESCRIPTION" + uniqueValue);
+			mailBoxDTO.setServiceInstId(uniqueValue.intValue());
+			mailBoxDTO.setShardKey("MBX_SHARD_KEY" + uniqueValue);
+			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+
+			property.setName("MBX_SIZE");
+			property.setValue("1024");
+
+		} else {
+
+			mailBoxDTO.setName("MBX_REV_TEST" + uniqueValue);
+			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
+			mailBoxDTO.setServiceInstId(uniqueValue.intValue());
+			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
+			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+
+			property.setName("MBX_REV_SIZE");
+			property.setValue("1024");
+
+		}
+
+		mailBoxDTO.getProperties().add(property);
+		return mailBoxDTO;
 	}
 
 }
