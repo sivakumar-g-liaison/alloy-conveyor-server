@@ -60,6 +60,7 @@ public abstract class BaseServiceTest {
 			prop.load(is);
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
+			
 			ConfigurationManager.getConfigInstance().setProperty("archaius.deployment.environment", "dev");
 		}
 
