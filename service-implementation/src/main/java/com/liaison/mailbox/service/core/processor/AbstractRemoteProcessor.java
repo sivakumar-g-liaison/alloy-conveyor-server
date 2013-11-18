@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -134,7 +135,8 @@ public abstract class AbstractRemoteProcessor {
 			}
 
 			if (credentialsList.size() > 0) {
-				credentialArray = (CredentialDTO[]) credentialsList.toArray();
+				credentialArray = Arrays.copyOf(credentialsList.toArray(), credentialsList.toArray().length,
+						CredentialDTO[].class);
 			}
 		}
 
@@ -165,7 +167,7 @@ public abstract class AbstractRemoteProcessor {
 			}
 
 			if (!foldersDTO.isEmpty()) {
-				folderArray = (FolderDTO[]) foldersDTO.toArray();
+				folderArray = Arrays.copyOf(foldersDTO.toArray(), foldersDTO.toArray().length, FolderDTO[].class);
 			}
 		}
 
@@ -199,7 +201,7 @@ public abstract class AbstractRemoteProcessor {
 					listFiles(folder.getFldrUri(), result);
 
 					if (!result.isEmpty()) {
-						files = (File[]) result.toArray();
+						files = Arrays.copyOf(result.toArray(), result.toArray().length, File[].class);
 						LOGGER.debug("Completed reading the payload files");
 					}
 				}
@@ -742,19 +744,19 @@ public abstract class AbstractRemoteProcessor {
 		long maxPayloadSize = Long.parseLong(getMailBoxProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD));
 		long maxNoOfFiles = Long.parseLong(getMailBoxProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD));
 
-		if (maxPayloadSize == 0L) {
-			maxPayloadSize = 131072L;
+		if (maxPayloadSize == 0) {
+			maxPayloadSize = 131072;
 		}
 
-		if (maxNoOfFiles == 0L) {
+		if (maxNoOfFiles == 0) {
 			maxNoOfFiles = 10;
 		}
 
-		if (maxNoOfFiles < fileGroup.size()) {
+		if (maxNoOfFiles <= fileGroup.size()) {
 			return false;
 		}
 
-		if (maxPayloadSize < (getGroupFileSize(fileGroup) + fileAttribute.getSize())) {
+		if (maxPayloadSize <= (getGroupFileSize(fileGroup) + fileAttribute.getSize())) {
 			return false;
 		}
 		return true;
