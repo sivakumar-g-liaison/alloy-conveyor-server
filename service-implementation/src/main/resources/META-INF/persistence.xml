@@ -16,12 +16,6 @@
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
-		<class>com.liaison.mailbox.jpa.model.Account</class>
-		<class>com.liaison.mailbox.jpa.model.AccountType</class>
-		<class>com.liaison.mailbox.jpa.model.GatewayType</class>
-		<class>com.liaison.mailbox.jpa.model.IdpProfile</class>
-		<class>com.liaison.mailbox.jpa.model.IdpProvider</class>
-		<class>com.liaison.mailbox.jpa.model.Language</class>
 		
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
