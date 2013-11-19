@@ -49,7 +49,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
  */
 public class RemoteProcessorTest extends BaseServiceTest {
 
-	private static final String responseLocation = "/sample";
+	private static final String responseLocation = System.getProperty("java.io.tmpdir") + File.separator + "sample";
 
 	@Test
 	public void testRemoteDownloader() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
