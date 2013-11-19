@@ -492,10 +492,15 @@ public abstract class AbstractRemoteProcessor {
 		request.setVersion(properties.getHttpVersion());
 		request.setMethod(properties.getHttpVerb());
 		request.setNumberOfRetries(properties.getRetryAttempts());
-		request.setSocketTimeout(properties.getSocketTimeout());
 		request.setConnectionTimeout(properties.getConnectionTimeout());
-		request.setPort(properties.getPort());
 		request.setChunkedEncoding(properties.isChunkedEncoding());
+		
+		if(properties.getSocketTimeout() > 0){
+			request.setSocketTimeout(properties.getSocketTimeout());
+		}
+		if(properties.getPort() > 0){
+			request.setPort(properties.getPort());
+		}
 
 		// Set the Other header to HttpRequest
 		if (properties.getOtherRequestHeader() != null) {
