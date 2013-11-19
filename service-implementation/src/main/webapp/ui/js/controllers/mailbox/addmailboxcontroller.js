@@ -140,8 +140,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
                             } else alert(data.addMailBoxResponse.response.message);
-
-                            $scope.isMailBoxEdit = true;
                         }
                         $scope.mailBox.properties = [];
 
@@ -186,7 +184,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             enablePaging: false,
             showFooter: false,
             useExternalSorting: true,
-            rowHeight: 40,
+            rowHeight: 100,
             columnDefs: [{
                 field: "name",
                 width: 500,
