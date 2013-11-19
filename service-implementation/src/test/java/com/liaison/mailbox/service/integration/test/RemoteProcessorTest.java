@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.liaison.commons.exceptions.LiaisonException;
@@ -49,7 +51,14 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
  */
 public class RemoteProcessorTest extends BaseServiceTest {
 
-	private static final String responseLocation = System.getProperty("java.io.tmpdir") + File.separator + "sample";
+	private static String responseLocation;
+
+	@BeforeClass
+	public static void setUp() throws Exception {
+		responseLocation = System.getProperty("java.io.tmpdir") + File.separator + "sample";
+		Files.deleteIfExists(Paths.get(responseLocation));
+		Files.createDirectory(Paths.get(responseLocation));
+	}
 
 	@Test
 	public void testRemoteDownloader() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
