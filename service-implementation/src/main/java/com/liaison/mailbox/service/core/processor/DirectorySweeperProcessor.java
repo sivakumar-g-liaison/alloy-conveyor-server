@@ -11,16 +11,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -31,17 +36,18 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
+import com.liaison.fs2.api.FS2MetaSnapshotImpl;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.MetaDataDTO;
+import com.liaison.mailbox.service.dto.directorysweeper.FileGroupDTO;
+import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
-import com.liaison.mailbox.service.util.MailBoxServiceUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -71,24 +77,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	public void invoke() {
 
 		try {
-
-			// Directory Sweeper executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
-
-				ScriptEngineManager manager = new ScriptEngineManager();
-				ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-				Invocable inv = (Invocable) engine;
-
-				// invoke the method in javascript
-				inv.invokeFunction("init", this);
-
-			} else {
-				// Directory Sweeper executed through Java
-				executeRequest();
-			}
-
+			executeRequest();
 			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
 
@@ -129,13 +118,60 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			for (List<FileAttributesDTO> fileGroup : fileGroups) {
 
 				String jsonResponse = constructMetaDataJson(fileGroup);
-
 				LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
 				postToQueue(jsonResponse);
 			}
 
 		}
 
+	}
+
+	/**
+	 * Method is used to retrieve all the files attributes from the given mailbox. This method
+	 * supports both FS2 and Java File API
+	 * 
+	 * @param root
+	 *            The mailbox root directory
+	 * @param includeSubDir
+	 * @param listDirectoryOnly
+	 * @param sweepConditions
+	 * @return
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 */
+	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
+			SweepConditions sweepConditions, String fileRenameFormat) throws IOException, URISyntaxException,
+			MailBoxServicesException, FS2Exception {
+
+		List<Path> result = new ArrayList<>();
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(root), defineFilter(listDirectoryOnly))) {
+			for (Path file : stream) {
+
+				if (!file.getFileName().toString().contains(fileRenameFormat)) {
+					result.add(file);
+				}
+			}
+		} catch (IOException e) {
+			throw e;
+		}
+
+		List<FileAttributesDTO> fileAttributes = new ArrayList<>();
+		FileAttributesDTO attribute = null;
+		for (Path path : result) {
+
+			attribute = new FileAttributesDTO();
+			attribute.setFilePath(path.toAbsolutePath().toString());
+
+			BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+			attribute.setTimestamp(attr.creationTime().toString());
+			attribute.setSize(attr.size());
+			attribute.setFilename(path.toFile().getName());
+			fileAttributes.add(attribute);
+		}
+
+		return fileAttributes;
 	}
 
 	/**
@@ -153,7 +189,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	private List<List<FileAttributesDTO>> groupingFiles(List<FileAttributesDTO> files)
 			throws ScriptException, IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
 
-		String groupingJsPath = getMailBoxProperties().getProperty(MailBoxConstants.GROUPING_JS_PROP_NAME);
+		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
 
 		if (!MailBoxUtility.isEmpty(groupingJsPath)) {
@@ -166,10 +202,6 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// invoke the method in javascript
 			inv.invokeFunction("init", files);
-
-			// TODO grouping the files- based on the properties given in the mailbox.
-			// TODO The input of the js should be List<FileAttributesDTO>
-			// TODO The output from the js should be List<List<FileAttributesDTO>
 
 		} else {
 
@@ -243,27 +275,27 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	public void markAsSweeped(List<FileAttributesDTO> fileList, String fileRenameFormat) throws IOException,
 			JSONException, FS2Exception, URISyntaxException {
 
+		LOGGER.info("Renaming the processed files");
 		for (FileAttributesDTO file : fileList) {
 
-			if (file.getFilePath().startsWith("fs2:")) {
+			Path oldPath = new File(file.getFilePath()).toPath();
+			Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
+			move(oldPath, newPath);
+			file.setFilePath(newPath.toFile().getAbsolutePath());
+			file.setGuid(MailBoxUtility.getGUID());
 
-				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-				FS2MetaSnapshot old = FS2.fetchObject(new URI(file.getFilePath()));
-				URI uri = new URI(old + fileRenameFormat);
-				FS2.move(old.getURI(), uri);
-				LOGGER.info("Renaming the processed files");
-				file.setFilePath(uri.toString());
+			// Creating meta snapshot
+			FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
+			File fileLoc = new File(newPath.toFile().getAbsolutePath());
+			FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
 
-			} else {
-
-				Path oldPath = new File(file.getFilePath()).toPath();
-				Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
-				move(oldPath, newPath);
-				LOGGER.info("Renaming the processed files");
-				file.setFilePath(newPath.toFile().getAbsolutePath());
-			}
-
+			// Constructing the file
+			URI fs2File = new URI(file.getFilename().replace(" ", "%20"));
+			FS2.createObjectEntry(fs2File, metaSnapShot.toJSON(), null);
+			file.setFilePath(fs2File.toString());
+			LOGGER.info("Response is successfully written" + metaSnapShot.getURI());
 		}
+		LOGGER.info("Renaming the processed files - done");
 
 	}
 
@@ -289,17 +321,16 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws JsonGenerationException
 	 * @throws JsonMappingException
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
 	private String constructMetaDataJson(List<FileAttributesDTO> files)
 			throws JsonGenerationException, JsonMappingException,
-			IOException {
+			IOException, JAXBException {
 
-		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
-		fileGroups.add(files);
-		MetaDataDTO meta = new MetaDataDTO();
-		meta.setMetaData(fileGroups);
+		FileGroupDTO group = new FileGroupDTO();
+		group.getFileAttributes().addAll(files);
 
-		String jsonResponse = MailBoxServiceUtil.convertObjectToJson(meta);
+		String jsonResponse = MailBoxUtility.marshalToJSON(group);
 		return jsonResponse;
 	}
 

@@ -9,10 +9,12 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
-import java.io.FileNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,37 +22,26 @@ import javax.xml.bind.JAXBException;
 
 import junit.framework.Assert;
 
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
-import org.junit.Before;
+import org.junit.AfterClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exceptions.LiaisonException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.core.processor.AbstractRemoteProcessor;
 import com.liaison.mailbox.service.core.processor.HttpRemoteDownloader;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
-import com.liaison.mailbox.service.dto.configuration.FolderDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
-import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
-import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * @author praveenu
@@ -58,21 +49,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class RemoteProcessorTest extends BaseServiceTest {
 
-	private String jsonResponse;
-	private String jsonRequest;
-	private HTTPRequest request;
-	private Logger logger = null;
-	private AddMailBoxResponseDTO responseDTO;
-
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		logger = LoggerFactory.getLogger(MailBoxProcessorServiceTest.class);
-		// Adding the mailbox
-		responseDTO = createMailBox();
-	}
+	private static final String responseLocation = "/sample";
 
 	@Test
 	public void testRemoteDownloader() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
@@ -87,114 +64,204 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		List<Folder> folders = new ArrayList<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");
-		folder.setFldrUri("/sample");
+		folder.setFldrUri(responseLocation);
 		folders.add(folder);
 		processor.setFolders(folders);
-		HttpRemoteDownloader downloader = new HttpRemoteDownloader(processor);
+
+		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
 		HTTPRequest request = (HTTPRequest) downloader.getClientWithInjectedConfiguration();
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
 	}
 
-	public AddProcessorToMailboxResponseDTO createProcessor() throws LiaisonException, JSONException, JsonParseException,
-			JsonMappingException, JAXBException, IOException {
-
-		AddProcessorToMailboxRequestDTO addProcessorDTO = getProcessorRequest("RESPONSE_LOCATION", "db", "/sample", "ACTIVE",
-				"REMOTEDOWNLOADER", null);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
-
-		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
-		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
-				AddProcessorToMailboxResponseDTO.class);
-		return processorResponseDTO;
-	}
-
-	private AddProcessorToMailboxRequestDTO getProcessorRequest(String folderTye, String credentialType, String folderURI,
-			String processorStatus, String processorType, String javaScriptURI) throws JsonParseException, JsonMappingException,
-			JAXBException, IOException, LiaisonException {
-
-		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
-		List<FolderDTO> folderList = new ArrayList<FolderDTO>();
-
-		FolderDTO folderDto = new FolderDTO();
-		folderDto.setFolderType(folderTye);
-		folderDto.setFolderURI(folderURI);
-		folderList.add(folderDto);
+	@Test
+	public void testCredentialUtility() throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
 
 		CredentialDTO credentialDTO = new CredentialDTO();
-		credentialDTO.setCredentialType(credentialType);
-		credetnialList.add(credentialDTO);
+		credentialDTO.setCredentialType("KEY_STORE");
+		credentialDTO.setCredentialURI("\test");
+		credentialDTO.setIdpType("test");
+		credentialDTO.setIdpURI("\test");
+		credentialDTO.setPassword("123456");
+		credentialDTO.setUserId("test");
 
-		ProcessorDTO processorDTO = new ProcessorDTO();
-		processorDTO.setCredentials(credetnialList);
-		processorDTO.setFolders(folderList);
-		processorDTO.setStatus(processorStatus);
-		processorDTO.setRemoteProcessorProperties(getRemoteProcessorPropertiesString());
-		processorDTO.setType(processorType);
-		processorDTO.setJavaScriptURI(javaScriptURI);
-		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
+		Credential credential = new Credential();
+		credentialDTO.copyToEntity(credential);
 
-		String profileName = "Test" + System.nanoTime();
-		addProfile(profileName);
-		processorDTO.getLinkedProfiles().add(profileName);
+		CredentialDTO resultDTO = new CredentialDTO();
+		resultDTO.copyFromEntity(credential);
 
-		AddProcessorToMailboxRequestDTO addProcessorDTO = new AddProcessorToMailboxRequestDTO();
-		addProcessorDTO.setProcessor(processorDTO);
-		return addProcessorDTO;
+		Assert.assertEquals(credentialDTO.getCredentialType(), resultDTO.getCredentialType());
+		Assert.assertEquals(credentialDTO.getCredentialURI(), resultDTO.getCredentialURI());
+		Assert.assertEquals(credentialDTO.getIdpType(), resultDTO.getIdpType());
+		Assert.assertEquals(credentialDTO.getIdpURI(), resultDTO.getIdpURI());
+		Assert.assertEquals(credentialDTO.getPassword(), resultDTO.getPassword());
+		Assert.assertEquals(credentialDTO.getUserId(), resultDTO.getUserId());
+
 	}
 
-	private RemoteProcessorPropertiesDTO getRemoteProcessorPropertiesString() throws JsonParseException, JsonMappingException,
-			JAXBException, IOException {
+	@Test(expected = MailBoxConfigurationServicesException.class)
+	public void testCredentialUtility_InvalidCredentialType_ShoudFail() throws SymmetricAlgorithmException,
+			MailBoxConfigurationServicesException {
 
+		CredentialDTO credentialDTO = new CredentialDTO();
+		credentialDTO.setCredentialType("123456");
+
+		Credential credential = new Credential();
+		credentialDTO.copyToEntity(credential);
+
+	}
+
+	@Test
+	public void testWriteResponseToMailBox() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
+			FS2Exception {
+
+		Processor processor = new Processor();
+		processor.setProcsrName("TestProcessor");
+		processor.setProcsrStatus("ACTIVE");
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
-		RemoteProcessorPropertiesDTO remoteDTO = MailBoxUtility.unmarshalFromJSON(remoteProperties,
-				RemoteProcessorPropertiesDTO.class);
-		return remoteDTO;
+		processor.setProcsrProperties(remoteProperties);
+
+		List<Folder> folders = new ArrayList<Folder>();
+		Folder folder = new Folder();
+		folder.setFldrType("response_location");// Entity
+		folder.setFldrUri("/sample");
+		folders.add(folder);
+		processor.setFolders(folders);
+
+		String test = "Testing write response to mailbox.";
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write(test.getBytes());
+
+		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
+		downloader.writeResponseToMailBox(stream);
+	}
+
+	@Test
+	public void testWriteResponseToMailBox_WithoutProcessorName() throws JsonParseException, JsonMappingException,
+			LiaisonException, JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
+			FS2Exception {
+
+		Processor processor = new Processor();
+		processor.setProcsrStatus("ACTIVE");
+		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		processor.setProcsrProperties(remoteProperties);
+
+		List<Folder> folders = new ArrayList<Folder>();
+		Folder folder = new Folder();
+		folder.setFldrType("response_location");// Entity
+		folder.setFldrUri("/sample");
+		folders.add(folder);
+		processor.setFolders(folders);
+
+		String test = "Testing write response to mailbox.";
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write(test.getBytes());
+
+		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
+		downloader.writeResponseToMailBox(stream);
+	}
+
+	@Test
+	public void testWriteFileResponseToMailBox() throws JsonParseException, JsonMappingException, LiaisonException,
+			JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
+			FS2Exception {
+
+		Processor processor = new Processor();
+		processor.setProcsrName("TestProcessor");
+		processor.setProcsrStatus("ACTIVE");
+		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		processor.setProcsrProperties(remoteProperties);
+
+		List<Folder> folders = new ArrayList<Folder>();
+		Folder folder = new Folder();
+		folder.setFldrType("response_location");// Entity
+		folder.setFldrUri("/sample");
+		folders.add(folder);
+		processor.setFolders(folders);
+
+		String test = "Testing write file response to mailbox.";
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write(test.getBytes());
+
+		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
+		downloader.writeFileResponseToMailBox(stream, "test" + System.nanoTime() + ".txt");
+	}
+
+	@Test
+	public void testWriteFileResponseToMailBox_EveryTimeNewDirectory() throws JsonParseException, JsonMappingException,
+			LiaisonException,
+			JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
+			FS2Exception {
+
+		Processor processor = new Processor();
+		processor.setProcsrName("TestProcessor");
+		processor.setProcsrStatus("ACTIVE");
+		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		processor.setProcsrProperties(remoteProperties);
+
+		List<Folder> folders = new ArrayList<Folder>();
+		Folder folder = new Folder();
+		folder.setFldrType("response_location");// Entity
+		folder.setFldrUri("/sample/" + System.nanoTime());
+		folders.add(folder);
+		processor.setFolders(folders);
+
+		String test = "Testing write file response to mailbox.";
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write(test.getBytes());
+
+		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
+		downloader.writeFileResponseToMailBox(stream, "test" + System.nanoTime() + ".txt");
+	}
+
+	@Test
+	public void testWriteFileResponseToMailBox_WithFileNameWithSpaces() throws IOException, URISyntaxException, FS2Exception,
+			MailBoxServicesException {
+
+		Processor processor = new Processor();
+		processor.setProcsrName("TestProcessor");
+		processor.setProcsrStatus("ACTIVE");
+		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		processor.setProcsrProperties(remoteProperties);
+
+		List<Folder> folders = new ArrayList<Folder>();
+		Folder folder = new Folder();
+		folder.setFldrType("response_location");// Entity
+		folder.setFldrUri("/sample");
+		folders.add(folder);
+		processor.setFolders(folders);
+
+		String test = "Testing write file response to mailbox.";
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		stream.write(test.getBytes());
+
+		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
+		downloader.writeFileResponseToMailBox(stream, "test file name" + System.nanoTime() + ".txt");
 
 	}
 
-	private AddMailBoxResponseDTO createMailBox() throws JAXBException, JsonParseException, JsonMappingException, IOException,
-			JsonGenerationException, MalformedURLException, FileNotFoundException, LiaisonException {
-
-		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
-		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
-		requestDTO.setMailBox(mbxDTO);
-
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
-		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
-		return responseDTO;
+	@AfterClass
+	public static void tearDown() throws Exception {
+		deleteFolder(Paths.get(responseLocation));
 	}
 
-	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
-			JsonMappingException, IOException,
-			MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
+	public static void deleteFolder(Path folder) {
 
-		ProfileDTO profile = new ProfileDTO();
-		profile.setName(profileName);
-		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
-		profileRequstDTO.setProfile(profile);
-
-		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
-		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
-		request.execute();
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
-		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
-		return profileResponseDTO;
+		File[] files = folder.toFile().listFiles();
+		if (files != null) { // some JVMs return null for empty dirs
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteFolder(f.toPath());
+				} else {
+					f.delete();
+				}
+			}
+		}
+		folder.toFile().delete();
 	}
-
 }
