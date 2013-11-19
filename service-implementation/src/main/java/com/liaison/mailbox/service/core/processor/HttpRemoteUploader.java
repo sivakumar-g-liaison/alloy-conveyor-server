@@ -2,8 +2,14 @@ package com.liaison.mailbox.service.core.processor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -17,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
@@ -52,16 +59,48 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws JAXBException
+	 * @throws KeyStoreException 
+	 * @throws CertificateException 
+	 * @throws NoSuchAlgorithmException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException {
+			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
+		
+		String credentialURI = getCredentialURI();
+
+		if (!MailBoxUtility.isEmpty(credentialURI)) {
+
+			URI uri = new URI(credentialURI);
+			KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());        
+			FileInputStream instream = new FileInputStream(new File(uri.getPath())); 
+			try {
+				trustStore.load(instream, getUserCredetial(credentialURI)[1].toCharArray());
+			
+			} finally {
+				instream.close();
+			}
+
+			if (isTrustStore) {
+				request.truststore(trustStore);
+			} else {
+				request.keystore(trustStore, getUserCredetial(credentialURI)[1]);
+			}
+		}
+		
+		String UserCredentialURI = getUserCredentialURI();
+
+		if (!MailBoxUtility.isEmpty(UserCredentialURI)) {
+
+			String []credential =  getUserCredetial(UserCredentialURI);
+			request.setAuthenticationHandler(new BasicAuthenticationHandler(credential[0], credential[1]));
+		}
 
 		// Set the pay load value to http client input data for POST & PUT
 		// request
