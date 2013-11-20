@@ -639,7 +639,7 @@ public abstract class AbstractRemoteProcessor {
 
 		File file = new File(filePath);
 
-		Path targetDirectory = file.toPath().getParent().resolve(MailBoxConstants.PROCESSED_FOLDER.toLowerCase());
+		Path targetDirectory = file.toPath().getParent().resolve(MailBoxConstants.PROCESSED_FOLDER);
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating 'processed' folder");
 			Files.createDirectories(targetDirectory);
