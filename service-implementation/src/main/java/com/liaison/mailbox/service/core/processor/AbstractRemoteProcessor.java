@@ -20,12 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -40,8 +38,6 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.fs2.api.FS2Exception;
-import com.liaison.fs2.api.FS2MetaSnapshot;
-import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionStatus;
@@ -62,10 +58,8 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -77,7 +71,6 @@ public abstract class AbstractRemoteProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteProcessor.class);
 
-	private static final EmailNotifier NOTIFIER = new EmailNotifier();
 	private static final ProcessorConfigurationDAO PROCESSOR_DAO = new ProcessorConfigurationDAOBase();
 
 	public static boolean isTrustStore = false;
@@ -282,7 +275,7 @@ public abstract class AbstractRemoteProcessor {
 		} else {
 
 			mailBoxProperties = new Properties();
-			if (null != configurationInstance.getDynamicProperties()) {
+			if (null != configurationInstance.getMailbox().getMailboxProperties()) {
 				for (MailBoxProperty property : configurationInstance.getMailbox().getMailboxProperties()) {
 					mailBoxProperties.setProperty(property.getMbxPropName(), property.getMbxPropValue());
 				}
@@ -369,21 +362,18 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 * @throws FS2Exception
-	 * 
 	 */
 	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception,
 			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
-		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
 		String processorName = MailBoxConstants.PROCESSOR;
 		if (configurationInstance.getProcsrName() != null) {
 			processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
 		}
-		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + processorName + System.nanoTime());
-		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
-		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
-		LOGGER.info("Reponse is succefully written" + metaSnapShot.getURI());
+		String fileName = processorName + System.nanoTime();
+
+		writeFileResponseToMailBox(response, fileName);
 
 	}
 
@@ -394,19 +384,22 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 * @throws FS2Exception
-	 * 
 	 */
 	public void writeFileResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException,
 			IOException, FS2Exception,
 			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
-		FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-		URI fileLoc = new URI("fs2:" + getWriteResponseURI() + filename);
-		FS2MetaSnapshot metaSnapShot = FS2.createObjectEntry(fileLoc);
-		FS2.writePayloadFromBytes(metaSnapShot.getURI(), response.toByteArray());
-		LOGGER.info("Reponse is succefully written" + getWriteResponseURI() + "/" + metaSnapShot.getURI());
+		String responseLocation = getWriteResponseURI();
+		File directory = new File(responseLocation);
+		if (!directory.exists()) {
+			Files.createDirectory(directory.toPath());
+		}
 
+		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
+		Files.write(file.toPath(), response.toByteArray());
+
+		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
 	}
 
 	/**
@@ -567,75 +560,8 @@ public abstract class AbstractRemoteProcessor {
 			toEmailAddrList.addAll(configuredEmailAddress);
 		}
 
-		NOTIFIER.sendEmail(toEmailAddrList, subject, emailBody, type);
-	}
-
-	/**
-	 * Method is used to retrieve all the files attributes from the given mailbox. This method
-	 * supports both FS2 and Java File API
-	 * 
-	 * @param root
-	 *            The mailbox root directory
-	 * @param includeSubDir
-	 * @param listDirectoryOnly
-	 * @param sweepConditions
-	 * @return
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws MailBoxServicesException
-	 * @throws FS2Exception
-	 */
-	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
-			SweepConditions sweepConditions, String fileRenameFormat) throws IOException, URISyntaxException,
-			MailBoxServicesException, FS2Exception {
-
-		List<FileAttributesDTO> fileAttributes = new ArrayList<>();
-
-		if (root.startsWith("fs2:")) {
-
-			FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-			URI fileLoc = new URI(root);
-
-			Set<FS2MetaSnapshot> childrens = FS2.listChildren(fileLoc);
-
-			FileAttributesDTO attribute = null;
-			for (FS2MetaSnapshot file : childrens) {
-
-				attribute = new FileAttributesDTO();
-				attribute.setFilePath((file.getURI() == null ? "" : file.getURI().toString()));
-				attribute.setTimestamp((file.createdOn() == null ? "" : file.createdOn().toString()));
-				fileAttributes.add(attribute);
-			}
-
-		} else {
-
-			List<Path> result = new ArrayList<>();
-
-			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(root), defineFilter(listDirectoryOnly))) {
-				for (Path file : stream) {
-
-					if (!file.getFileName().toString().contains(fileRenameFormat)) {
-						result.add(file);
-					}
-				}
-			} catch (IOException e) {
-				throw e;
-			}
-
-			FileAttributesDTO attribute = null;
-			for (Path path : result) {
-
-				attribute = new FileAttributesDTO();
-				attribute.setFilePath(path.toAbsolutePath().toString());
-				BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-				attribute.setTimestamp(attr.creationTime().toString());
-				attribute.setSize(attr.size());
-				attribute.setFilename(path.toFile().getName());
-				fileAttributes.add(attribute);
-			}
-		}
-
-		return fileAttributes;
+		EmailNotifier notifier = new EmailNotifier();
+		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
 	}
 
 	/**
@@ -713,7 +639,7 @@ public abstract class AbstractRemoteProcessor {
 
 		File file = new File(filePath);
 
-		Path targetDirectory = file.toPath().getParent().resolve(MailBoxConstants.PROCESSED_FOLDER.toLowerCase());
+		Path targetDirectory = file.toPath().getParent().resolve(MailBoxConstants.PROCESSED_FOLDER);
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating 'processed' folder");
 			Files.createDirectories(targetDirectory);
@@ -746,13 +672,27 @@ public abstract class AbstractRemoteProcessor {
 	protected Boolean validateAdditionalGroupFile(List<FileAttributesDTO> fileGroup, FileAttributesDTO fileAttribute)
 			throws MailBoxServicesException {
 
-		long maxPayloadSize = Long.parseLong(getMailBoxProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD));
-		long maxNoOfFiles = Long.parseLong(getMailBoxProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD));
+		long maxPayloadSize = 0;
+		long maxNoOfFiles = 0;
+
+		try {
+
+			String payloadSize = getMailBoxProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
+			String maxFile = getMailBoxProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
+			if (!MailBoxUtility.isEmpty(payloadSize)) {
+				maxPayloadSize = Long.parseLong(payloadSize);
+			}
+			if (!MailBoxUtility.isEmpty(maxFile)) {
+				maxNoOfFiles = Long.parseLong(maxFile);
+			}
+
+		} catch (NumberFormatException e) {
+			throw new MailBoxServicesException("The given threshold size is not a valid one.");
+		}
 
 		if (maxPayloadSize == 0) {
 			maxPayloadSize = 131072;
 		}
-
 		if (maxNoOfFiles == 0) {
 			maxNoOfFiles = 10;
 		}

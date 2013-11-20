@@ -98,7 +98,7 @@
           <label>
             Protocol
           </label>
-          <select ng-disabled="isEdit || isSweeper" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+          <select ng-disabled="isEdit" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
           </select>
            </div>
         </div>

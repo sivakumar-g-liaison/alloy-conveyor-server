@@ -2,11 +2,20 @@ package com.liaison.mailbox.service.dto.directorysweeper;
 
 public class FileAttributesDTO {
 
+	private String guid;
 	private String filename;
 	private Long size;
 	private String folderdername;
 	private String timestamp;
 	private String filePath;
+
+	public String getGuid() {
+		return guid;
+	}
+
+	public void setGuid(String guid) {
+		this.guid = guid;
+	}
 
 	public String getFilePath() {
 		return filePath;
