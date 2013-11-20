@@ -93,7 +93,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         $scope.load();
 
-
         $scope.saveForm = function () {
 
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
@@ -118,7 +117,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             if (fromAddProcsr) {
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
-                            } else alert(data.reviseMailBoxResponse.response.message);
+                            } else if (data.reviseMailBoxResponse.response.status === 'success') {
+                                showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
+                            } else {
+                                showSaveMessage(data.reviseMailBoxResponse.response.message, 'error');
+                            }
+                        }else{
+                            showSaveMessage("Error while saving Mailbox", 'error'); 
                         }
                         $scope.mailBox.properties = [];
                     }
@@ -139,7 +144,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             if (fromAddProcsr) {
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
-                            } else alert(data.addMailBoxResponse.response.message);
+                            } else if (data.addMailBoxResponse.response.status === 'success') {
+                                showSaveMessage(data.addMailBoxResponse.response.message, 'success');
+                            } else {
+                                showSaveMessage(data.addMailBoxResponse.response.message, 'error');
+                            }
+                        }else{
+                             showSaveMessage("Error while saving Mailbox", 'error'); 
                         }
                         $scope.mailBox.properties = [];
 
@@ -209,7 +220,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             }]
         };
 
-
         // adds a resource to the 'data' object
         $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
 
@@ -258,8 +268,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 allStaticPropertiesThatAreNotAssignedValuesYet.push('');
             }
         };
-
-
 
         /*$scope.displayAllTableValues = function(){               
                 $scope.tableValues=$scope.mailBoxProperties;

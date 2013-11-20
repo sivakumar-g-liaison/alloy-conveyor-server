@@ -132,6 +132,9 @@ supports grid feature
           transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 
+.glyphicon-red {
+    color: red;
+}
 textarea {
 	resize: none;
 }

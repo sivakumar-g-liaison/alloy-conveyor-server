@@ -14,12 +14,12 @@ angular.module(
                 replace: true,
                 scope: {
                     allowAdd: '@',
-                    allProps: '=',
-                    enableTextbox: '&',
+                    allProps: '=',                   
                     selectedValue: '=',
                     addNew: '=',
                     addedProperty: '=',
-                    propName: '@'
+                    propName: '@',
+                    iconColor:'='
                 },
                 template: '<div ng-switch on="allowAdd">' +
                     '<div ng-switch-when="false">{{propName}}</div>' +
@@ -27,13 +27,8 @@ angular.module(
                         <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.name" ng-options="property for property in allStaticProperties">\n\
                              <option value="">-- select--</option>\n\
                         </select> <i>&nbsp</i>\n\
-                        <textarea class="tarea" ng-show="addNew.value"  ng-model="addedProperty.value"   placeholder="required" style="width:60%"></textarea>\n\
-                      </div>\n\
-                      <div ng-switch-default>\n\
-                           <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.name" ng-options="property for property in allStaticProperties">\n\
-                              <option value="">-- select--</option>\n\
-                           </select>\n\
-                       </div>',
+                        <textarea ng-show="addNew.value"  ng-model="addedProperty.value"   placeholder="required" style="width:60%"></textarea>\n\
+                      </div>',
                 link: function (scope) {
                     //scope.showAddnew = false;
                     scope.$watch("allProps", function (
@@ -47,8 +42,15 @@ angular.module(
                         }
                         scope.addNew.value = false;
                     }, true);
+                    
                     scope.shouldIShowAddTextBox =
                         function () {
+                            
+                           /* if(scope.selectedValue.name !== null){
+                                scope.iconColor.color="glyphicon-red";
+                            }else{
+                                scope.iconColor.color="glyphicon-white";
+                            } */
                             if (scope.selectedValue.name === "add new -->") {
                                 scope.addNew.value = true;
                                 scope.addedProperty.value ='';

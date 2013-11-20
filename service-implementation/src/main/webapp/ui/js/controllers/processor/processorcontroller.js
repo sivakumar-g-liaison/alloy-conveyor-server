@@ -6,11 +6,11 @@ var rest = myApp.controller(
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
-            
+
             $scope.loadOrigin = function () {
                 //          
                 $scope.isEdit = false;
-
+                $scope.isProcessorTypeSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;
                 //Model for Add MB
                 addRequest = $scope.addRequest = {
@@ -23,6 +23,11 @@ var rest = myApp.controller(
                         processor: {}
                     }
                 };
+
+                $scope.glyphIconColorForProcessorProperties = {
+                    color: "glyphicon-white"
+                };
+
                 $scope.processor = {
                     guid: "",
                     name: "",
@@ -62,8 +67,7 @@ var rest = myApp.controller(
                     'FTPS',
                     'HTTP',
                     'HTTPS',
-                    'SFTP',
-                    'SWEEPER'
+                    'SFTP'
                 ];
                 $scope.enumHttpVerb = [
                     'GET',
@@ -118,7 +122,7 @@ var rest = myApp.controller(
                     folderType: '',
                     folderDesc: '',
                     isMandatory: false,
-                    allowAdd: 'showNoAddBox'
+                    allowAdd: 'true'
                 }];
                 // Procsr Credential Props
                 $scope.processorCredProperties = [{
@@ -128,7 +132,7 @@ var rest = myApp.controller(
                     password: '',
                     idpType: '',
                     idpURI: '',
-                    allowAdd: 'showNoAddBox',
+                    allowAdd: 'true',
                     passwordDirtyState: ''
                 }];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
@@ -167,7 +171,7 @@ var rest = myApp.controller(
                 $scope.allProfiles = [];
                 $scope.selectedProfiles = [];
             };
-            
+
             $scope.loadOrigin();
             $scope.gridOptionsForProcessor = {
                 data: 'processorProperties',
@@ -182,7 +186,7 @@ var rest = myApp.controller(
                     width: "40%",
                     displayName: "Name*",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" />'
+                    cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" icon-color="glyphIconColorForProcessorProperties" />'
                 }, {
                     field: "value",
                     width: "53%",
@@ -209,14 +213,18 @@ var rest = myApp.controller(
                     enableCellEdit: false,
                     displayName: "Action",
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                        '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')">' +
+                        '<div ng-switch-when="true">\n\
+                                                <button   ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign" ng-class="glyphIconColorForProcessorProperties.color"></i></button></div>' +
+                        '<div ng-switch-when="false">\n\
+                                               <div ng-switch on="row.getProperty(\'isMandatory\')">' +
                         '<div ng-switch-when="true">-NA-</div>' +
                         '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,valueSelectedinSelectionBox)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
-                        '</div></div></div>'
+                        '</div>\n\
+                                        </div>\n\
+                                 </div>'
                 }]
             };
-            
+
             $scope.gridOptionsForProcessorFolder = {
                 data: 'processorFolderProperties',
                 displaySelectionCheckbox: false,
@@ -250,12 +258,11 @@ var rest = myApp.controller(
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                        '<div ng-switch-when="showNoAddBox"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                         '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')"><div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-when="true">-NA-</div></div></div>' +
                         '</div>'
                 }]
             };
-             // Credentials for Grid Options 
+            // Credentials for Grid Options 
             $scope.gridOptionsForProcessorCredential = {
                 data: 'processorCredProperties',
                 displaySelectionCheckbox: false,
@@ -307,7 +314,6 @@ var rest = myApp.controller(
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                        '<div ng-switch-when="showNoAddBox"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                         '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                         '</div>'
                 }]
@@ -372,7 +378,7 @@ var rest = myApp.controller(
                     $scope.readAllProcessors();
                 }
             }, true);
-            $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row)"><i class="glyphicon glyphicon-pencil"></i></button>';
+            $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row.getProperty(\'guid\'),true)"><i class="glyphicon glyphicon-pencil"></i></button>';
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
                     field: 'name',
@@ -410,11 +416,13 @@ var rest = myApp.controller(
                     $scope.verb = reqHeaderArray;
                 }
             };
-            $scope.editProcessor = function (row) {
-                block.blockUI();
+            $scope.editProcessor = function (processorId, blockuiFlag) {
+                if (blockuiFlag === true) {
+                    block.blockUI();
+                }
                 $scope.loadOrigin();
                 $scope.isEdit = true;
-                var procsrId = row.getProperty('guid');
+                var procsrId = processorId;;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
                         $log.info($filter('json')(data));
@@ -422,7 +430,9 @@ var rest = myApp.controller(
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
                                 $log.info($filter('json')(profData));
-                                block.unblockUI();
+                                if (blockuiFlag === true) {
+                                    block.unblockUI();
+                                }
                                 $scope.allProfiles = profData.getProfileResponse.profiles;
                                 $scope.clearProps();
                                 $scope.processor.guid = data.getProcessorResponse.processor.guid;
@@ -537,7 +547,7 @@ var rest = myApp.controller(
                                     folderURI: '',
                                     folderType: '',
                                     folderDesc: '',
-                                    allowAdd: 'showNoAddBox'
+                                    allowAdd: 'true'
                                 });
                                 $scope.processorCredProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                                 for (var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
@@ -562,7 +572,7 @@ var rest = myApp.controller(
                                     password: '',
                                     idpType: '',
                                     idpURI: '',
-                                    allowAdd: 'showNoAddBox'
+                                    allowAdd: 'true'
                                 });
                             }
                         );
@@ -617,13 +627,13 @@ var rest = myApp.controller(
             $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData, addedProperty) {
                 // validation
                 $log.info(valueSelectedinSelectionBox.name);
-                $log.info(row.getProperty('value'));                
+                $log.info(row.getProperty('value'));
                 if (valueSelectedinSelectionBox.name === 'add new -->' && addedProperty.value !== '') {
                     valueSelectedinSelectionBox.name = addedProperty.value;
                     addedProperty.value = '';
                 }
                 if (!valueSelectedinSelectionBox.name || valueSelectedinSelectionBox.name === 'add new -->' || !row.getProperty('value')) {
-                    showAlert('It is mandatory to set the name and value of the property being added.');
+                    showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                     return;
                 }
                 $scope.informer.inform("error message", "error");
@@ -669,7 +679,7 @@ var rest = myApp.controller(
                 $log.info(valueSelectedinSelectionBox.name);
                 $log.info(row.getProperty('folderURI'));
                 if (!valueSelectedinSelectionBox.name || !row.getProperty('folderURI')) {
-                    showAlert('It is mandatory to set the folder URI and Type.');
+                    showAlert('It is mandatory to set the folder URI and Type.', 'error');
                     return;
                 }
                 /*if (valueSelectedinSelectionBox.name === '' || row.getProperty('folderURI') === '' || typeof row.getProperty('folderURI') === 'undefined') {
@@ -694,7 +704,7 @@ var rest = myApp.controller(
                     folderURI: '',
                     folderType: '',
                     folderDesc: '',
-                    allowAdd: 'showNoAddBox'
+                    allowAdd: 'true'
                 });
                 valueSelectedinSelectionBox.name = '';
             };
@@ -711,11 +721,11 @@ var rest = myApp.controller(
             // For Procsr Credentials Props
             $scope.addCredentialRow = function (row, valueSelectedinSelectionBox, valueSelectedinSelectionBoxIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
                 if (valueSelectedinSelectionBox.name === '') {
-                    showAlert('It is mandatory to set credential type');
+                    showAlert('It is mandatory to set credential type', 'error');
                     return;
                 }
                 if (row.getProperty('passwordDirtyState') === "nomatch") {
-                    showAlert('The password and confirm password do not match');
+                    showAlert('The password and confirm password do not match', 'error');
                     return;
                 }
                 var index = gridData.indexOf(row.entity);
@@ -745,7 +755,7 @@ var rest = myApp.controller(
                     password: '',
                     idpType: '',
                     idpURI: '',
-                    allowAdd: 'showNoAddBox'
+                    allowAdd: 'true'
                 });
                 valueSelectedinSelectionBox.name = '';
                 valueSelectedinSelectionBoxIdp.name = '';
@@ -823,7 +833,7 @@ var rest = myApp.controller(
                 }
                 for (var i = 0; i < mandatoryArray.length; i++) {
                     if (mandatoryArray[i].value === '' || typeof mandatoryArray[i].value === 'undefined') {
-                        showAlert('Enter MandatoryProperties');
+                        showAlert('Enter MandatoryProperties', 'error');
                         return;
                     } else $scope.processor.remoteProcessorProperties[mandatoryArray[i].name] = mandatoryArray[i].value;
                 }
@@ -867,13 +877,21 @@ var rest = myApp.controller(
                     $log.info($filter('json')(editRequest));
                     $scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
                         function (data, status) {
-                            block.unblockUI();
+                           
                             if (status === 200) {
-                                alert(data.reviseProcessorResponse.response.message);
+                                $scope.editProcessor($scope.processor.guid, false);
+                                if (data.reviseProcessorResponse.response.status === 'success') {
+                                showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
+                                }else{
+                                showSaveMessage(data.reviseProcessorResponse.response.message, 'error');
+                                }
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 //$scope.readAllProfiles();
+                            }else{
+                               showSaveMessage("Error while saving processor", 'error');
                             }
+                             block.unblockUI();
                             $scope.clearProps();
                         }
                     );
@@ -882,16 +900,25 @@ var rest = myApp.controller(
                     $log.info($filter('json')(addRequest));
                     $scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
                         function (data, status) {
-                            block.unblockUI();
+
                             if (status === 200) {
-                                alert(data.addProcessorToMailBoxResponse.response.message);
+
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 //$scope.readAllProfiles();
                                 $scope.isEdit = true;
                                 $scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
+                                $scope.editProcessor($scope.processor.guid, false);
+                                if (data.addProcessorToMailBoxResponse.response.status === 'success') {
+                                    showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
+                                } else {
+                                    showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'error');
+                                }
+                            }else{
+                               showSaveMessage("Error while saving processor", 'error'); 
                             }
                             $scope.clearProps();
+                            block.unblockUI();
                         }
                     );
                 }
@@ -908,10 +935,17 @@ var rest = myApp.controller(
             };
             $scope.resetProcessorType = function (model) {
                 if (model.type === 'SWEEPER') {
-                    $scope.processor.protocol = $scope.enumprotocoltype[4];
+                    $scope.isProcessorTypeSweeper = true;
+                    $scope.processor.protocol="SWEEPER"
                     $scope.setFolderData(true);
+                    $scope.processorProperties =[{
+                    name: '',
+                    value: '',
+                    allowAdd: true,
+                    isMandatory: false
+                }];
                 } else {
-                    
+                    $scope.isProcessorTypeSweeper = false;
                     $scope.processor.protocol = $scope.enumprotocoltype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.setFolderData(false);
@@ -924,13 +958,13 @@ var rest = myApp.controller(
                     return;
                 }
                 if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
-				
+
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.setFolderData(false);
                 } else if ($scope.processor.protocol === "HTTP" || $scope.processor.protocol === "HTTPS") {
-				
-					if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
+
+                    if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     $scope.processorProperties = $scope.httpMandatoryProperties;
                     $scope.setFolderData(false);
                 } else {
@@ -953,7 +987,7 @@ var rest = myApp.controller(
                         folderType: '',
                         folderDesc: '',
                         isMandatory: false,
-                        allowAdd: 'showNoAddBox'
+                        allowAdd: 'true'
                     }];
                 } else {
                     $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
@@ -962,7 +996,7 @@ var rest = myApp.controller(
                         folderType: '',
                         folderDesc: '',
                         isMandatory: false,
-                        allowAdd: 'showNoAddBox'
+                        allowAdd: 'true'
                     }];
                     $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
                 }
@@ -980,6 +1014,15 @@ var rest = myApp.controller(
             };
             $scope.close = function () {
                 rowObj.entity.value = editor.getValue();
+            };
+
+            $scope.changeGlyphIconColor = function (icon, currentValue) {
+
+                if (currentValue !== '') {
+                    icon.color = "glyphicon-red";
+                } else {
+                    icon.color = "glyphicon-white";
+                };
             };
             // Editor Section Ends
         }
