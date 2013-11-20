@@ -135,7 +135,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		List<Folder> folders = new ArrayList<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("response_location");// Entity
-		folder.setFldrUri("/sample");
+		folder.setFldrUri(responseLocation);
 		folders.add(folder);
 		processor.setFolders(folders);
 
@@ -161,7 +161,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		List<Folder> folders = new ArrayList<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("response_location");// Entity
-		folder.setFldrUri("/sample");
+		folder.setFldrUri(responseLocation);
 		folders.add(folder);
 		processor.setFolders(folders);
 
@@ -188,7 +188,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		List<Folder> folders = new ArrayList<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("response_location");// Entity
-		folder.setFldrUri("/sample");
+		folder.setFldrUri(responseLocation);
 		folders.add(folder);
 		processor.setFolders(folders);
 
@@ -216,7 +216,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		List<Folder> folders = new ArrayList<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("response_location");// Entity
-		folder.setFldrUri("/sample/" + System.nanoTime());
+		folder.setFldrUri(responseLocation + File.separator + System.nanoTime());
 		folders.add(folder);
 		processor.setFolders(folders);
 
@@ -241,7 +241,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		List<Folder> folders = new ArrayList<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("response_location");// Entity
-		folder.setFldrUri("/sample");
+		folder.setFldrUri(responseLocation);
 		folders.add(folder);
 		processor.setFolders(folders);
 
