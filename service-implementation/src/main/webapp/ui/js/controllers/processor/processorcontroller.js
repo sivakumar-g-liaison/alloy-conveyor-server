@@ -12,7 +12,6 @@ var rest = myApp.controller(
 
                 //          
                 $scope.isEdit = false;
-                $scope.isSweeper = false;
 
                 $scope.mailboxName = $location.search().mbxname;
                 //Model for Add MB
@@ -1134,10 +1133,9 @@ var rest = myApp.controller(
                 if (model.type === 'SWEEPER') {
 
                     $scope.processor.protocol = $scope.enumprotocoltype[4];
-                    $scope.isSweeper = true;
                     $scope.setFolderData(true);
                 } else {
-                    $scope.isSweeper = false;
+                    
                     $scope.processor.protocol = $scope.enumprotocoltype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.setFolderData(false);
@@ -1153,17 +1151,19 @@ var rest = myApp.controller(
                 }
 
                 if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
-                    //alert($scope.processor.type);
+				
+                    if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.setFolderData(false);
                 } else if ($scope.processor.protocol === "HTTP" || $scope.processor.protocol === "HTTPS") {
+				
+					if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     $scope.processorProperties = $scope.httpMandatoryProperties;
                     $scope.setFolderData(false);
                 } else {
 
                     $scope.setFolderData(true);
                     $scope.processor.type = $scope.enumprocsrtype[2];
-                    $scope.isSweeper = true;
 
                 }
 
