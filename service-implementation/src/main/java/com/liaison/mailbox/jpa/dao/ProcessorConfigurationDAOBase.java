@@ -35,8 +35,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					.setParameter(PROF_NAME, profileName)
 					.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
 					.setParameter(EXEC_STATUS, ExecutionStatus.RUNNING.value())
-					.setParameter(MBX_NAME, "%" + (MailBoxUtility.isEmpty(mbxNamePattern) ? "''" : mbxNamePattern) + "%")
-					.setParameter(SHARD_KEY, "%" + (MailBoxUtility.isEmpty(shardKey) ? "" : shardKey) + "%")
+					.setParameter(MBX_NAME, (MailBoxUtility.isEmpty(mbxNamePattern) ? "''" : mbxNamePattern + "%"))
+					.setParameter(SHARD_KEY, (MailBoxUtility.isEmpty(shardKey) ? "%%" : shardKey))
 					.getResultList();
 
 			List<Processor> processors = new ArrayList<Processor>();
