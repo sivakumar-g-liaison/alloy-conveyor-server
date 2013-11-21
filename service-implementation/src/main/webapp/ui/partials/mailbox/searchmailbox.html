@@ -20,7 +20,7 @@
 			</div>
 			<div class="col-md-6">
 				<label for="prof"> Profiles </label> <select id="prof" ng-model="profile"
-					ng-options="prof.name for prof in profiles" ng-change="search()" class="form-control">
+					ng-options="prof.name for prof in profiles" ng-change="selectSearch()" class="form-control">
 					<option value="">-- select--</option>
 				</select>
 				<progress ng-show=showprogressbar> </progress>

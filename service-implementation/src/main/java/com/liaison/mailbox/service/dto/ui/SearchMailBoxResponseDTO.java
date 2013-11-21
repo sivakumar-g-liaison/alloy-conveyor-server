@@ -32,6 +32,7 @@ public class SearchMailBoxResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	private List<SearchMailBoxDTO> mailBox;
+	private String hitCounter;
 
 	public List<SearchMailBoxDTO> getMailBox() {
 
@@ -51,6 +52,14 @@ public class SearchMailBoxResponseDTO implements ResponseBuilder {
 
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
+	}
+
+	public String getHitCounter() {
+		return hitCounter;
+	}
+
+	public void setHitCounter(String hitCounter) {
+		this.hitCounter = hitCounter;
 	}
 
 	@Override

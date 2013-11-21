@@ -26,6 +26,9 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
                         alert(data.addProfileResponse.response.message);
                         $scope.profile.name = "";
                         $scope.loadProfiles();
+						if ($scope.pagingOptions.currentPage !== 1) {
+							$scope.pagingOptions.currentPage = 1;
+						}
                     }
 
                 }
@@ -85,6 +88,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 
             if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
                 $scope.loadProfiles();
+				newVal.currentPage = 1;
             }
         }, true);
 

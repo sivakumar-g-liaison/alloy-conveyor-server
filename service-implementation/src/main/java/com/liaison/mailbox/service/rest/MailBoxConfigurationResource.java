@@ -562,7 +562,7 @@ public class MailBoxConfigurationResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchMailBox(@QueryParam(value = "name") String mbxName,
-			@QueryParam(value = "profile") String profileName) {
+			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -574,6 +574,7 @@ public class MailBoxConfigurationResource {
 			SearchMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.searchMailBox(mbxName, profileName);
+			serviceResponse.setHitCounter(hitCounter);
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {

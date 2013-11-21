@@ -11,35 +11,64 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         //Search Details
         $scope.mailBoxName = null;
         $scope.profile = null;
+
+        // To enable "No records found" div
         $scope.info = false;
+		
+        // Counter to ensure the result is for the given request.
+		$scope.hitCounter = 1;
+		
+		// Modify the value to change the search criteria
+		$scope.searchMinCharacterCount = 3;
 
         // Profiles loads initially
         $scope.profiles = [];
 
         // Loading the profile details
         $scope.loadProfiles = function () {
-            $scope.restService.get($scope.base_url + "/profile").success(function (data) {
+            $scope.restService.get($scope.base_url + "/profile", function (data) {
                 $scope.profiles = data.getProfileResponse.profiles;
             })
         };
-        $scope.loadProfiles(); //loads the profile
+        $scope.loadProfiles(); //initial load for the profiles
 
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
 
-            if ($scope.mailBoxName !== null && $scope.mailBoxName.length >= 3) {
+            if ($scope.mailBoxName !== null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
+
                 $scope.search();
-            } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
-                $scope.search();
-            } else {
-                $scope.mailboxes = [];
-                $scope.info = false;
-				$scope.totalServerItems = 0;
-				if (!$scope.$$phase) {
-					$scope.$apply();
+				if ($scope.pagingOptions.currentPage !== 1) {
+					$scope.pagingOptions.currentPage = 1;
 				}
+				
+            } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
+
+                $scope.search();
+				if ($scope.pagingOptions.currentPage !== 1) {
+					$scope.pagingOptions.currentPage = 1;
+				}
+            } else {
+                $scope.reset();
             }
         });
+
+        /**
+         * Remove all the data in grid and disable the info message. 
+         */
+		$scope.reset=function () {
+		
+			$scope.mailboxes = [];
+			$scope.info = false;
+			$scope.totalServerItems = 0;
+			if (!$scope.$$phase) {
+				$scope.$apply();
+			}
+			// Set the default page to 1
+			if ($scope.pagingOptions.currentPage !== 1) {
+				$scope.pagingOptions.currentPage = 1;
+			}
+		};
 
         // Grid Setups
         $scope.filterOptions = {
@@ -97,13 +126,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         // calls the rest deactivate service
         $scope.deactivateMailBox = function () {
 
-            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid)
-                .success(function (data, status) {
-                    alert(data.deactivateMailBoxResponse.response.message);
+            $scope.restService.delete($scope.base_url + "/" + $scope.key.guid, function (data, status) {
+                    //alert(data.deactivateMailBoxResponse.response.message); TODO modal dialog
                     $scope.search();
-                })
-                .error(function (data, status) {
-                    alert(data);
                 });
             $scope.closeDelete();
         };
@@ -113,7 +138,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             $scope.deleteKey = false;
         };
 
-        // Dummy Impl for edit
+        // Navigate to mailbox screen for edit operation
         $scope.edit = function (row) {
             $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid);
         };
@@ -134,23 +159,45 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             }
 
             var mbxName = "";
-            if (null !== $scope.mailBoxName) {
+            if (null !== $scope.mailBoxName && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
                 mbxName = $scope.mailBoxName;
             }
 
-            $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName)
-                .success(function (data) {
-                    $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+			$scope.hitCounter = $scope.hitCounter + 1;
+            $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName + '&hitCounter=' + $scope.hitCounter,
+                function (data) {
+
+					if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
+						$scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+					}
                     $scope.showprogressbar = false;
                 });
         };
-
+		
+        // Customized search function for select component.
+		$scope.selectSearch = function() {
+		
+			console.info("MailboxName : " + $scope.mailBoxName);
+			console.info("ProfileName : " + $scope.profile);
+			if ($scope.profile == null && ($scope.mailBoxName == null || $scope.mailBoxName == "")) {
+				$scope.reset();
+			} else {
+				$scope.search();
+			}
+		
+			
+			
+		};
+		
+		// Watch for paging options
         $scope.$watch('pagingOptions', function (newVal, oldVal) {
+
             if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
                 $scope.search();
             }
             if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
                 $scope.search();
+				newVal.currentPage = 1;
             }
         }, true);
 

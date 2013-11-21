@@ -371,6 +371,7 @@ var rest = myApp.controller(
                 }
                 if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
                     $scope.readAllProcessors();
+					newVal.currentPage = 1;
                 }
             }, true);
             $scope.$watch('filterOptions', function (newVal, oldVal) {

@@ -117,9 +117,11 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			for (List<FileAttributesDTO> fileGroup : fileGroups) {
 
-				String jsonResponse = constructMetaDataJson(fileGroup);
-				LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
-				postToQueue(jsonResponse);
+				if (!fileGroup.isEmpty()) {
+					String jsonResponse = constructMetaDataJson(fileGroup);
+					LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
+					postToQueue(jsonResponse);
+				}
 			}
 
 		}
