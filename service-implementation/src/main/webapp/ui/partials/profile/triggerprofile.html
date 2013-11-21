@@ -12,24 +12,31 @@
 			<div class="row">
 				<div class="col-md-4">
 					<label for="name">Exclude Mailbox Name </label>
-					<input type="text" ng-maxlength=128 name="name" ng-model="mailBoxName" ng-trim="true" ng-pattern="/^[a-zA-Z0-9 ]+$/" class="form-control" />
+					<input type="text"  name="name" ng-model="mailBoxName" ng-trim="true" ng-pattern="userInputPattern" 
+					 ng-minlength=5 ng-maxlength=80 class="form-control" />
 				</div>
-				<div class="col-md-5">
-					<div class="alert alert-danger" ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-						<span ng-show="triggerForm.name.$error.pattern"><strong>Invalid Mailbox name.</strong></span>
-						<span ng-show="triggerForm.name.$error.maxlength"><strong>Mailbox name cannot be longer than 128 characters.</strong></span>
-					</div>
+                <br/>
+                <div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
+					<span class="help-block" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Mailbox Name.</strong></span>
+					<span class="help-block" ng-show="triggerForm.name.$error.minlength"><strong>Mailbox Name cannot be shorter than 
+					{{minimumLength}} characters.</strong></span>
+					<span class="help-block" ng-show="triggerForm.name.$error.maxlength"><strong>Mailbox Name cannot be longer than
+					 {{maximumLengthAllowedInTextBox}} characters.</strong></span>
 				</div>
+				
 			</div>
 			<div class="row">
 				<div class="col-md-3">
-					<label for="name"> Shard Key </label> <input type="text" ng-maxlength=512 name="sharedKey"
-						ng-model="mailBoxSharedKey" ng-trim="false" class="form-control" />
+					<label for="name"> Shard Key </label> <input type="text" name="shardKey" ng-pattern="userInputPattern"
+						ng-model="mailBoxSharedKey" ng-trim="false" ng-minLength=5 ng-maxLength=80 class="form-control" />
 				</div>
-				<div class="col-md-5">
-					<div class="alert alert-danger" ng-show="triggerForm.sharedKey.$dirty && triggerForm.sharedKey.$invalid">
-						<strong>ShardKey cannot be longer than 512 characters</strong>
-					</div>
+                <br/>
+				<div ng-show="triggerForm.shardKey.$dirty && triggerForm.shardKey.$invalid">
+                    <span class="help-block" ng-show="triggerForm.shardKey.$error.pattern"><strong>Invalid Shard Key.</strong></span>
+                    <span class="help-block" ng-show="triggerForm.shardKey.$error.minlength"><strong>Shard Key cannot be shorter than 
+                    {{minimumLength}} characters.</strong></span>
+					<span class="help-block" ng-show="triggerForm.shardKey.$error.maxlength"><strong>Shard Key cannot be longer than 
+					{{maximumLengthAllowedInTextBox}} characters.</strong></span>
 				</div>
 			</div>
 			<div class="row">

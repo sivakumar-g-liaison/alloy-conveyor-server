@@ -14,12 +14,12 @@ angular.module(
                 replace: true,
                 scope: {
                     allowAdd: '@',
-                    allProps: '=',                   
+                    allProps: '=',
                     selectedValue: '=',
                     addNew: '=',
                     addedProperty: '=',
                     propName: '@',
-                    iconColor:'='
+                    iconColor: '='
                 },
                 template: '<div ng-switch on="allowAdd">' +
                     '<div ng-switch-when="false">{{propName}}</div>' +
@@ -33,27 +33,25 @@ angular.module(
                     //scope.showAddnew = false;
                     scope.$watch("allProps", function (
                         newValue) {
-                        if (newValue[newValue.length - 1] === "") {
-                            newValue.splice(newValue.length - 1, 1);
-                        }
+
                         scope.allStaticProperties = angular.fromJson(newValue);
-                        if(scope.selectedValue.name === "add new -->"){
+                        if (scope.selectedValue.name === "add new -->") {
                             return;
                         }
                         scope.addNew.value = false;
                     }, true);
-                    
+
                     scope.shouldIShowAddTextBox =
                         function () {
-                            
-                           /* if(scope.selectedValue.name !== null){
+
+                            /* if(scope.selectedValue.name !== null){
                                 scope.iconColor.color="glyphicon-red";
                             }else{
                                 scope.iconColor.color="glyphicon-white";
                             } */
                             if (scope.selectedValue.name === "add new -->") {
                                 scope.addNew.value = true;
-                                scope.addedProperty.value ='';
+                                scope.addedProperty.value = '';
                             } else {
                                 scope.addNew.value = false;
                             }

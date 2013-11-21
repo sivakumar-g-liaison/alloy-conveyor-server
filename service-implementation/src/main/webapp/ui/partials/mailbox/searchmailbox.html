@@ -12,11 +12,18 @@
 			<h4>Search Mailbox</h4>
 
 		</div>
-
+		<form name="formSearchMbx" novalidate="" >
 		<div class="row">
 			<div class="col-md-6">
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="false"
-					class="form-control">
+					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
+				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
+                	<span class="help-block" ng-show="formSearchMbx.name.$error.pattern"><strong>Invalid MailBox Name.</strong></span>
+                	<span class="help-block" ng-show="formSearchMbx.name.$error.minlength"><strong>Mailbox Name cannot be 
+         			 shorter than {{minimumLength}} characters.</strong></span>
+		 			<span class="help-block" ng-show="formSearchMbx.name.$error.maxlength"><strong>Mailbox Name cannot be 
+		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                </div>
 			</div>
 			<div class="col-md-6">
 				<label for="prof"> Profiles </label> <select id="prof" ng-model="profile"
@@ -26,6 +33,7 @@
 				<progress ng-show=showprogressbar> </progress>
 			</div>
 		</div>
+		</form>
 	</div>
 	<br />
 

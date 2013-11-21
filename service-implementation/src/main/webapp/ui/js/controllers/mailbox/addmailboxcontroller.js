@@ -122,8 +122,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             } else {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'error');
                             }
-                        }else{
-                            showSaveMessage("Error while saving Mailbox", 'error'); 
+                        } else {
+                            showSaveMessage("Error while saving Mailbox", 'error');
                         }
                         $scope.mailBox.properties = [];
                     }
@@ -149,8 +149,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             } else {
                                 showSaveMessage(data.addMailBoxResponse.response.message, 'error');
                             }
-                        }else{
-                             showSaveMessage("Error while saving Mailbox", 'error'); 
+                        } else {
+                            showSaveMessage("Error while saving Mailbox", 'error');
                         }
                         $scope.mailBox.properties = [];
 
@@ -181,11 +181,18 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
         // Property grid
 
-        $scope.addedProperty = 'add new';
-        $scope.disableAddNewTextBox = 'true';
         $scope.valueSelectedinSelectionBox = {
             name: ''
         };
+
+        $scope.showAddNew = {
+            value: 'false'
+        };
+
+        $scope.addedProperty = {
+            value: ''
+        };
+
         $scope.tableValues = 'Not showing anything yet';
 
         $scope.gridOptionsForMailbox = {
@@ -194,26 +201,33 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             canSelectRows: false,
             enablePaging: false,
             showFooter: false,
-            useExternalSorting: true,
-            rowHeight: 100,
+            rowHeight: 60,
             columnDefs: [{
                 field: "name",
                 width: 500,
                 displayName: "Property Name",
-                cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} />'
+                cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" />'
             }, {
                 field: "value",
                 displayName: "Property Value",
                 enableCellEdit: false,
                 enableCellSelection: true,
                 enableFocusedCellEdit: true,
-                cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="true"><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required"></div><div ng-switch-when="false"><input type="text" ng-model="COL_FIELD"  required="" class="textboxingrid" placeholder="required" readonly></div></div>'
+                cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
+                                    <div ng-switch-when="">\n\
+                                         <textarea ng-model="COL_FIELD"  style="width:94%" row="4" placeholder="required" />\n\
+                                    </div>\n\
+                                    <div ng-switch-default>\n\
+                                         <textarea ng-model="COL_FIELD"  required style="width:94%" row="4" placeholder="required"/>\n\
+                                    </div>\n\
+                                  </div>'
 
             }, {
                 field: "allowAdd",
                 displayName: "Action",
+                sortable: false,
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
+                    '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                     '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                     '</div>'
 
@@ -221,15 +235,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         };
 
         // adds a resource to the 'data' object
-        $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
+        $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData, addedProperty) {
 
             // validation
 
             $log.info(valueSelectedinSelectionBox.name);
             $log.info(row.getProperty('value'));
 
+            if (valueSelectedinSelectionBox.name === 'add new -->' && addedProperty.value !== '') {
+                valueSelectedinSelectionBox.name = addedProperty.value;
+                addedProperty.value = '';
+            }
+
             if (!valueSelectedinSelectionBox.name || valueSelectedinSelectionBox.name === 'add new -->' || !row.getProperty('value')) {
-                showAlert('It is mandatory to set the name and value of the property being added.');
+                showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                 return;
             }
 
@@ -264,8 +283,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             var indexOfSelectedElement = allProps.indexOf(removedProperty);
             if (indexOfSelectedElement > -1) {
                 allStaticPropertiesThatAreNotAssignedValuesYet.push(removedProperty);
-            } else {
-                allStaticPropertiesThatAreNotAssignedValuesYet.push('');
             }
         };
 

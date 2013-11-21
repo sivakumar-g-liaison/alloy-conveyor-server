@@ -68,12 +68,12 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/profile/triggerprofile.html',
             controller: 'TriggerProfileCntrlr'
         });
-        
+
         $routeProvider.when('/account/addAccount', {
             templateUrl: 'partials/account/account.html',
             controller: 'AccountCntrlr'
         });
-        
+
         $routeProvider.when('/account/getAccount', {
             templateUrl: 'partials/account/searchaccount.html',
             controller: 'SearchAccountCntrlr'
@@ -114,6 +114,20 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
 
     $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
+
+    // validation of user input pattern
+    $rootScope.userInputPattern = /^[a-zA-Z0-9_ ]+$/;
+    $rootScope.inputPatternForCredentialsURI = /^/;
+    $rootScope.inputPatternForFolderURI = /^[a-zA-Z0-9_\/]+$/;
+    $rootScope.inputPatternForURI = /^/;
+
+    // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
+    // As of now used only for displaying the no of characters in error message.
+    $rootScope.maximumLengthAllowedInTextBox = 80;
+    $rootScope.minimumLength = 5;
+    $rootScope.maximumLengthAllowedInMailBoxDescription = 1024;
+    $rootScope.maximumLengthAllowedInProcessorDescription = 512;
+
     //FOR USE WITH PYTHON
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.restService = RESTService;

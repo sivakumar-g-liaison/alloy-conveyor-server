@@ -5,14 +5,17 @@
          <div class="row">
             <div class="col-md-3">
                <label for="name" class="control-label">Name</label>
-               <input type="text" name="name" ng-model="profile.name" required ng-trim="true" ng-pattern="/^[a-zA-Z0-9 ]+$/" ng-maxlength=128/>
+               <input type="text" name="name" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
+               ng-minLength=5 ng-maxLength=80 />
             </div>
-            <div class="col-md-3">
-               <div class="alert alert-danger" ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-                  <span ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
-                  <span ng-show="triggerForm.name.$error.maxlength"><strong>Profile name cannot be longer than 128 characters.</strong></span>
-                  <span ng-show="triggerForm.name.$error.required"><strong>Profile Name is mandatory.</strong></span>
-               </div>
+            <div  ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
+                  <span class="help-block" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
+                  <span class="help-block" ng-show="triggerForm.name.$error.required"><strong>Profile Name is mandatory.</strong></span>
+                  <span class="help-block" ng-show="triggerForm.name.$error.minlength"><strong>Profile Name cannot be shorter than
+                   {{minimumLength}} characters.</strong></span>
+				  <span class="help-block" ng-show="triggerForm.name.$error.maxlength"><strong>Profile Name cannot be longer than
+				   {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+            </div>
             </div>
          </div>
 		 <br/>

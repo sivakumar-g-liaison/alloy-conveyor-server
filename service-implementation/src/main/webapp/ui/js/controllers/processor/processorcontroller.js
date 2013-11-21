@@ -212,6 +212,7 @@ var rest = myApp.controller(
                     width: "7%",
                     enableCellEdit: false,
                     displayName: "Action",
+                    sortable: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true">\n\
                                                 <button   ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign" ng-class="glyphIconColorForProcessorProperties.color"></i></button></div>' +
@@ -256,6 +257,7 @@ var rest = myApp.controller(
                     width: "7%",
                     displayName: "Action",
                     enableCellEdit: false,
+                    sortable: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                         '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')"><div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-when="true">-NA-</div></div></div>' +
@@ -312,6 +314,7 @@ var rest = myApp.controller(
                     width: "7%",
                     displayName: "Action",
                     enableCellEdit: false,
+                    sortable: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                         '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
                         '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
@@ -371,7 +374,7 @@ var rest = myApp.controller(
                 }
                 if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
                     $scope.readAllProcessors();
-					newVal.currentPage = 1;
+                    newVal.currentPage = 1;
                 }
             }, true);
             $scope.$watch('filterOptions', function (newVal, oldVal) {
@@ -392,6 +395,7 @@ var rest = myApp.controller(
                     displayName: 'Status'
                 }, {
                     displayName: 'Action',
+                    sortable: false,
                     cellTemplate: $scope.editableInPopup
                 }],
                 data: 'processorList',
@@ -878,21 +882,21 @@ var rest = myApp.controller(
                     $log.info($filter('json')(editRequest));
                     $scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
                         function (data, status) {
-                           
+
                             if (status === 200) {
                                 $scope.editProcessor($scope.processor.guid, false);
                                 if (data.reviseProcessorResponse.response.status === 'success') {
-                                showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
-                                }else{
-                                showSaveMessage(data.reviseProcessorResponse.response.message, 'error');
+                                    showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
+                                } else {
+                                    showSaveMessage(data.reviseProcessorResponse.response.message, 'error');
                                 }
                                 //$scope.readOnlyProcessors = true;
                                 $scope.readAllProcessors();
                                 //$scope.readAllProfiles();
-                            }else{
-                               showSaveMessage("Error while saving processor", 'error');
+                            } else {
+                                showSaveMessage("Error while saving processor", 'error');
                             }
-                             block.unblockUI();
+                            block.unblockUI();
                             $scope.clearProps();
                         }
                     );
@@ -915,8 +919,8 @@ var rest = myApp.controller(
                                 } else {
                                     showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'error');
                                 }
-                            }else{
-                               showSaveMessage("Error while saving processor", 'error'); 
+                            } else {
+                                showSaveMessage("Error while saving processor", 'error');
                             }
                             $scope.clearProps();
                             block.unblockUI();
@@ -937,14 +941,14 @@ var rest = myApp.controller(
             $scope.resetProcessorType = function (model) {
                 if (model.type === 'SWEEPER') {
                     $scope.isProcessorTypeSweeper = true;
-                    $scope.processor.protocol="SWEEPER"
+                    $scope.processor.protocol = "SWEEPER"
                     $scope.setFolderData(true);
-                    $scope.processorProperties =[{
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
+                    $scope.processorProperties = [{
+                        name: '',
+                        value: '',
+                        allowAdd: true,
+                        isMandatory: false
+                    }];
                 } else {
                     $scope.isProcessorTypeSweeper = false;
                     $scope.processor.protocol = $scope.enumprotocoltype[0];
