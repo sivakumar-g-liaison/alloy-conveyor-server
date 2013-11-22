@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -145,16 +146,18 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 			throw new MailBoxServicesException("The given URI '" + path
 					+ "' does not exist.");
 		}
-		File root = new File(path);
+		/*
+		 * File root = new File(path);
+		 * 
+		 * if (root.isDirectory()) { downloadDirectory(ftpsRequest, path); }
+		 * else {
+		 * 
+		 * ByteArrayOutputStream response = new ByteArrayOutputStream();
+		 * ftpsRequest.getFile(root.getName(), response);
+		 * writeFileResponseToMailBox(response, "/" + root.getName()); }
+		 */
 
-		if (root.isDirectory()) {
-			downloadDirectory(ftpsRequest, path);
-		} else {
-
-			ByteArrayOutputStream response = new ByteArrayOutputStream();
-			ftpsRequest.getFile(root.getName(), response);
-			writeFileResponseToMailBox(response, "/" + root.getName());
-		}
+		downloadDirectory(ftpsRequest, path, getWriteResponseURI());
 		ftpsRequest.disconnect();
 	}
 
@@ -167,40 +170,42 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 
-	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir)
-			throws IOException, LiaisonException, URISyntaxException,
-			FS2Exception, MailBoxServicesException {
+	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir,
+			String loadDir) throws IOException, LiaisonException,
+			URISyntaxException, FS2Exception, MailBoxServicesException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
 		}
 
-		FTPFile[] subFiles = ftpClient.getNative().listFiles(dirToList);
+		FTPFile[] files = ftpClient.getNative().listFiles(dirToList);
 
-		if (subFiles != null && subFiles.length > 0) {
+		if (files != null) {
 
-			for (FTPFile aFile : subFiles) {
-				String currentFileName = aFile.getName();
+			for (FTPFile file : files) {
+				String currentFileName = file.getName();
 				if (currentFileName.equals(".") || currentFileName.equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
 				}
-				String filePath = currentDir + "/" + currentFileName;
-				if (currentDir.equals("")) {
-					filePath = currentFileName;
-				}
 
-				if (aFile.isDirectory()) {
-					downloadDirectory(ftpClient, currentFileName);
+				if (file.isDirectory()) {
+
+					String remotePath = dirToList + "/" + currentFileName;
+					String localDir = loadDir + "/" + currentFileName;
+					File directory = new File(localDir);
+					if (!directory.exists()) {
+						Files.createDirectory(directory.toPath());
+					}
+					downloadDirectory(ftpClient, remotePath, localDir);
+
 				} else {
-					// download the file
-					LOGGER.info(aFile.getName() + " File started downloading.");
+					String remotePath = dirToList + "/" + currentFileName;
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
-					ftpClient.getFile(filePath, stream);
-					writeFileResponseToMailBox(stream, "/" + aFile.getName());
-					LOGGER.info(aFile.getName()
-							+ " File completed downloading.");
+					ftpClient.getFile(remotePath, stream);
+					writeSFTPSResponseToMailBox(stream, loadDir + "/"
+							+ currentFileName);
 				}
 			}
 		}

@@ -148,14 +148,8 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 			throw new MailBoxServicesException("The given URI '" + path
 					+ "' does not exist.");
 		}
-		File root = new File(path);
 
-		if (root.isDirectory()) {
-			uploadDirectory(ftpsRequest, path, getWriteResponseURI());
-		} else {
-			InputStream inputStream = new FileInputStream(root);
-			ftpsRequest.putFile(root.getName(), inputStream);
-		}
+		uploadDirectory(ftpsRequest, path, getWriteResponseURI());
 
 		ftpsRequest.disconnect();
 	}
@@ -176,31 +170,42 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 		File[] subFiles = localDir.listFiles();
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
-				String remoteFilePath = remoteParentDir + "/" + item.getName();
-				if (remoteParentDir.equals("")) {
-					remoteFilePath = item.getName();
-				}
 
+				if (item.getName().equals(".") || item.getName().equals("..")) {
+					// skip parent directory and the directory itself
+					continue;
+				}
 				if (item.isFile()) {
+
+					String remoteFilePath = remoteParentDir + "/"
+							+ item.getName();
 					// upload the file
-					String localFilePath = item.getAbsolutePath();
-					File localFile = new File(localFilePath);
-					InputStream inputStream = new FileInputStream(localFile);
+					ftpsRequest.changeDirectory(remoteParentDir);
+					InputStream inputStream = new FileInputStream(item);
 					ftpsRequest.putFile(new File(remoteFilePath).getName(),
 							inputStream);
 
 				} else {
-					// create directory on the server
-					ftpsRequest.getNative().makeDirectory(remoteFilePath);
+					String remoteFilePath = remoteParentDir + "/"
+							+ item.getName();
+
+					boolean dirExists = ftpsRequest.getNative()
+							.changeWorkingDirectory(remoteFilePath);
+					if (!dirExists) {
+						// create directory on the server
+						ftpsRequest.getNative().makeDirectory(remoteFilePath);
+					}
 					// upload the sub directory
 					String parent = remoteParentDir + "/" + item.getName();
 					if (remoteParentDir.equals("")) {
 						parent = item.getName();
 					}
-
+					ftpsRequest.changeDirectory(parent);
 					localParentDir = item.getAbsolutePath();
+
 					uploadDirectory(ftpsRequest, localParentDir, parent);
 				}
+
 			}
 		}
 	}
