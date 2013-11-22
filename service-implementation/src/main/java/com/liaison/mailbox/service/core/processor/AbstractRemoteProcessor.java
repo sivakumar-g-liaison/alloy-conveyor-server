@@ -386,12 +386,16 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws FS2Exception
 	 */
 	public void writeFileResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException,
-			IOException, FS2Exception,
-			MailBoxServicesException {
+			IOException, FS2Exception, MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 		String responseLocation = getWriteResponseURI();
+		if (MailBoxUtility.isEmpty(responseLocation)) {
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+		}
+
 		File directory = new File(responseLocation);
+
 		if (!directory.exists()) {
 			Files.createDirectory(directory.toPath());
 		}
@@ -487,11 +491,11 @@ public abstract class AbstractRemoteProcessor {
 		request.setNumberOfRetries(properties.getRetryAttempts());
 		request.setConnectionTimeout(properties.getConnectionTimeout());
 		request.setChunkedEncoding(properties.isChunkedEncoding());
-		
-		if(properties.getSocketTimeout() > 0){
+
+		if (properties.getSocketTimeout() > 0) {
 			request.setSocketTimeout(properties.getSocketTimeout());
 		}
-		if(properties.getPort() > 0){
+		if (properties.getPort() > 0) {
 			request.setPort(properties.getPort());
 		}
 
@@ -556,8 +560,15 @@ public abstract class AbstractRemoteProcessor {
 	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
 
 		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
-		if (null != configuredEmailAddress) {
+		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty())
+				&& (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
+			LOGGER.info("There is no email address configured for this mailbox.");
+		}
+
+		if (null != configuredEmailAddress && null != toEmailAddrList) {
 			toEmailAddrList.addAll(configuredEmailAddress);
+		} else if (null != configuredEmailAddress) {
+			toEmailAddrList = configuredEmailAddress;
 		}
 
 		EmailNotifier notifier = new EmailNotifier();
@@ -629,10 +640,8 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method is used to move the file to the processed folder.
 	 * 
-	 * @param file
+	 * @param filePath
 	 *            The source location
-	 * @param target
-	 *            The target location
 	 * @throws IOException
 	 */
 	public void archiveFile(String filePath) throws IOException {

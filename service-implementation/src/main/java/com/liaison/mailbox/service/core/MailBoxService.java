@@ -40,8 +40,6 @@ public class MailBoxService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxService.class);
 
-	private static List<Processor> synchronizedProcessors = new ArrayList<>();
-
 	/**
 	 * The method gets the list of processors from the given profile, mailboxNamePattern and invokes
 	 * the processor.
@@ -79,7 +77,8 @@ public class MailBoxService {
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
-			validateProcessorExecution(processorMatchingProfile);
+
+			ProcessorSemaphore.validateProcessorExecution(processorMatchingProfile);
 			if (processorMatchingProfile.isEmpty()) {
 				LOG.info("The processor is already in progress.");
 			}
@@ -97,13 +96,11 @@ public class MailBoxService {
 					processorDAO.merge(processor);
 					processorService.invoke();
 
+					// Remove the processor from semaphore
+					ProcessorSemaphore.removeExecutedProcessor(processor);
 				} else {
 					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
 				}
-			}
-
-			if (processorMatchingProfile != null) {
-				removeExecutedProcessor(processorMatchingProfile);
 			}
 
 			// response message construction
@@ -120,29 +117,4 @@ public class MailBoxService {
 		}
 	}
 
-	private synchronized void validateProcessorExecution(List<Processor> processors) {
-
-		List<Processor> existingProcessors = new ArrayList<>();
-
-		for (Processor prcsr : synchronizedProcessors) {
-			for (Processor inputPrcsr : processors) {
-				if (prcsr.equals(inputPrcsr)) {
-					existingProcessors.add(inputPrcsr);
-				}
-			}
-		}
-
-		if (!existingProcessors.isEmpty()) {
-			processors.removeAll(existingProcessors);
-		}
-
-		if (!processors.isEmpty()) {
-			synchronizedProcessors.addAll(processors);
-		}
-
-	}
-
-	private synchronized void removeExecutedProcessor(List<Processor> processors) {
-		synchronizedProcessors.removeAll(processors);
-	}
 }

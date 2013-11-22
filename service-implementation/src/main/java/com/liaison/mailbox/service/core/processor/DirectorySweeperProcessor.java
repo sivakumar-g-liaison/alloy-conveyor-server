@@ -9,7 +9,6 @@ package com.liaison.mailbox.service.core.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -40,6 +39,7 @@ import com.liaison.fs2.api.FS2MetaSnapshotImpl;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
@@ -83,6 +83,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// TODO Re stage and update status in FSM
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e.getMessage(), "HTML");
 			e.printStackTrace();
 		}
 
@@ -96,7 +97,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		// Validation of the necessary properties
 		if (MailBoxUtility.isEmpty(inputLocation)) {
-			throw new MailBoxServicesException("The given input directroy location is empty.");
+			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED);
 		}
 		if (null == fileRenameFormat) {
 			fileRenameFormat = MailBoxConstants.SWEEPED_FILE_EXTN;
@@ -105,25 +106,28 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		// Sweeps the directory and constructs the list of file attributes dto.
 		List<FileAttributesDTO> files = sweepDirectory(inputLocation, false, false, null, fileRenameFormat);
 
-		// Read from mailbox property - grouping js location
-		List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
-
-		// Renaming the file
-		markAsSweeped(files, fileRenameFormat);
-
-		if (fileGroups.isEmpty()) {
-			LOGGER.info("The file group is empty.");
+		if (files.isEmpty()) {
+			LOGGER.info("The given directory is empty.");
 		} else {
 
-			for (List<FileAttributesDTO> fileGroup : fileGroups) {
+			// Read from mailbox property - grouping js location
+			List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
 
-				if (!fileGroup.isEmpty()) {
+			// Renaming the file
+			markAsSweeped(files, fileRenameFormat);
+
+			if (fileGroups.isEmpty()) {
+				LOGGER.info("The file group is empty.");
+			} else {
+
+				for (List<FileAttributesDTO> fileGroup : fileGroups) {
+
 					String jsonResponse = constructMetaDataJson(fileGroup);
 					LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
 					postToQueue(jsonResponse);
 				}
-			}
 
+			}
 		}
 
 	}
@@ -137,7 +141,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @param includeSubDir
 	 * @param listDirectoryOnly
 	 * @param sweepConditions
-	 * @return
+	 * @return List of FileAttributes
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
@@ -147,8 +151,13 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			SweepConditions sweepConditions, String fileRenameFormat) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception {
 
+		Path rootPath = Paths.get(root);
+		if (!rootPath.toFile().isDirectory()) {
+			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY);
+		}
+
 		List<Path> result = new ArrayList<>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(root), defineFilter(listDirectoryOnly))) {
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
 			for (Path file : stream) {
 
 				if (!file.getFileName().toString().contains(fileRenameFormat)) {
@@ -217,7 +226,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 				if (validateAdditionalGroupFile(fileGroup, file)) {
 					fileGroup.add(file);
 				} else {
-					fileGroups.add(fileGroup);
+					if (!fileGroup.isEmpty()) {
+						fileGroups.add(fileGroup);
+					}
 					fileGroup = new ArrayList<>();
 					fileGroup.add(file);
 
@@ -268,7 +279,6 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 *            Files list.
 	 * @param fileRenameFormat
 	 *            The file rename format
-	 * @return String which contains JSON string of the give file groups
 	 * @throws IOException
 	 * @throws JSONException
 	 * @throws FS2Exception
@@ -282,20 +292,19 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			Path oldPath = new File(file.getFilePath()).toPath();
 			Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
-			move(oldPath, newPath);
-			file.setFilePath(newPath.toFile().getAbsolutePath());
-			file.setGuid(MailBoxUtility.getGUID());
 
 			// Creating meta snapshot
 			FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
 			File fileLoc = new File(newPath.toFile().getAbsolutePath());
 			FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
 
-			// Constructing the file
-			URI fs2File = new URI(file.getFilename().replace(" ", "%20"));
-			FS2.createObjectEntry(fs2File, metaSnapShot.toJSON(), null);
-			file.setFilePath(fs2File.toString());
-			LOGGER.info("Response is successfully written" + metaSnapShot.getURI());
+			// Constructing the fs2 file
+			metaSnapShot = FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+
+			// Renaming the file at the end of the step when everything is done.
+			move(oldPath, newPath);
+			file.setFilePath(oldPath.toString());
+			file.setGuid(MailBoxUtility.getGUID());
 		}
 		LOGGER.info("Renaming the processed files - done");
 

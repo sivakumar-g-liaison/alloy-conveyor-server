@@ -86,7 +86,9 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			}
 			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
+
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e.getMessage(), "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
@@ -104,28 +106,29 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
-	 * @throws KeyStoreException 
-	 * @throws CertificateException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws NoSuchAlgorithmException
 	 * 
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
-		
+
 		String credentialURI = getCredentialURI();
 
 		if (!MailBoxUtility.isEmpty(credentialURI)) {
 
 			URI uri = new URI(credentialURI);
-			KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());        
-			FileInputStream instream = new FileInputStream(new File(uri.getPath())); 
+			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			FileInputStream instream = new FileInputStream(new File(uri.getPath()));
 			try {
 				trustStore.load(instream, getUserCredetial(credentialURI)[1].toCharArray());
-			
+
 			} finally {
 				instream.close();
 			}
@@ -136,12 +139,12 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				request.keystore(trustStore, getUserCredetial(credentialURI)[1]);
 			}
 		}
-		
+
 		String UserCredentialURI = getUserCredentialURI();
 
 		if (!MailBoxUtility.isEmpty(UserCredentialURI)) {
 
-			String []credential =  getUserCredetial(UserCredentialURI);
+			String[] credential = getUserCredetial(UserCredentialURI);
 			request.setAuthenticationHandler(new BasicAuthenticationHandler(credential[0], credential[1]));
 		}
 

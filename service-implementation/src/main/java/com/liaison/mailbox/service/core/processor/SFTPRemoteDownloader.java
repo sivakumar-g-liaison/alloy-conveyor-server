@@ -190,7 +190,9 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			}
 			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
+
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e.getMessage(), "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

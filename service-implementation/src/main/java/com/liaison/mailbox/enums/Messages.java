@@ -60,6 +60,9 @@ public enum Messages {
 			"Credential configured for processors, but they are missing Credetial type and Credetial uri."),
 	INJECTION_OF_PROPERTIES_FAILED("Injection of properties while building http client from processor configuration failed."),
 	HTTP_REQUEST_FAILED("HTTP request failed."),
+	RESPONSE_LOCATION_NOT_CONFIGURED("The response location is not configured or empty."),
+	PAYLOAD_LOCATION_NOT_CONFIGURED("The payload location is not configured or empty."),
+	INVALID_DIRECTORY("The given directory does not available in the system."),
 
 	// INVALID ENUM
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
@@ -74,8 +77,8 @@ public enum Messages {
 	EMPTY_VALUE("The given %s is empty."),
 	PERSIST_SUCCESS("%s persisted successfully."),
 	PERSIST_FAILURE("Failed to persist the %s."),
-	
-	//User Account Messages
+
+	// User Account Messages
 	INVALID_ACC_REQUEST("The input request is invalid."),
 	ACC_DOES_NOT_EXIST("User Account with the given id %s does not exist."),
 	DATA_PREPOPULATE("Data populated successfully");

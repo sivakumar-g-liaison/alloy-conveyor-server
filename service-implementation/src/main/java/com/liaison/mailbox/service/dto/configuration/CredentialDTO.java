@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.dto.configuration;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.CredentialType;
-import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -102,7 +101,6 @@ public class CredentialDTO {
 		credential.setCredsIdpUri(this.getIdpURI());
 
 		if (!MailBoxUtility.isEmpty(this.getPassword())) {
-
 			credential.setCredsPassword(MailBoxCryptoUtil.doPasswordEncryption(this.getPassword(), 1));
 		}
 		CredentialType foundCredentialType = CredentialType.findByName(this.getCredentialType());
@@ -136,7 +134,7 @@ public class CredentialDTO {
 		this.setUserId(credential.getCredsUsername());
 		this.setGuId(credential.getPguid());
 	}
-	
+
 	public String getDecryptedString(String encryptedValue) throws SymmetricAlgorithmException {
 		return MailBoxCryptoUtil.doPasswordEncryption(encryptedValue, 2);
 	}

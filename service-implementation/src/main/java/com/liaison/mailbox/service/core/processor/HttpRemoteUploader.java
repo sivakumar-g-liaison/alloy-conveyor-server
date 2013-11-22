@@ -59,9 +59,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws JAXBException
-	 * @throws KeyStoreException 
-	 * @throws CertificateException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws NoSuchAlgorithmException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
@@ -72,17 +72,17 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
-		
+
 		String credentialURI = getCredentialURI();
 
 		if (!MailBoxUtility.isEmpty(credentialURI)) {
 
 			URI uri = new URI(credentialURI);
-			KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());        
-			FileInputStream instream = new FileInputStream(new File(uri.getPath())); 
+			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			FileInputStream instream = new FileInputStream(new File(uri.getPath()));
 			try {
 				trustStore.load(instream, getUserCredetial(credentialURI)[1].toCharArray());
-			
+
 			} finally {
 				instream.close();
 			}
@@ -93,12 +93,12 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				request.keystore(trustStore, getUserCredetial(credentialURI)[1]);
 			}
 		}
-		
+
 		String UserCredentialURI = getUserCredentialURI();
 
 		if (!MailBoxUtility.isEmpty(UserCredentialURI)) {
 
-			String []credential =  getUserCredetial(UserCredentialURI);
+			String[] credential = getUserCredetial(UserCredentialURI);
 			request.setAuthenticationHandler(new BasicAuthenticationHandler(credential[0], credential[1]));
 		}
 
@@ -147,7 +147,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			}
 			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
 		} catch (Exception e) {
+
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e.getMessage(), "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
