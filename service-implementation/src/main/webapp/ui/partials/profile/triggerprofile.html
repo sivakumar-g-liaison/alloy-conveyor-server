@@ -17,10 +17,10 @@
 				</div>
                 <br/>
                 <div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-					<span class="help-block" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Mailbox Name.</strong></span>
-					<span class="help-block" ng-show="triggerForm.name.$error.minlength"><strong>Mailbox Name cannot be shorter than 
+					<span class="help-block-custom" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Mailbox Name.</strong></span>
+					<span class="help-block-custom" ng-show="triggerForm.name.$error.minlength"><strong>Mailbox Name cannot be shorter than
 					{{minimumLength}} characters.</strong></span>
-					<span class="help-block" ng-show="triggerForm.name.$error.maxlength"><strong>Mailbox Name cannot be longer than
+					<span class="help-block-custom" ng-show="triggerForm.name.$error.maxlength"><strong>Mailbox Name cannot be longer than
 					 {{maximumLengthAllowedInTextBox}} characters.</strong></span>
 				</div>
 				
@@ -32,10 +32,10 @@
 				</div>
                 <br/>
 				<div ng-show="triggerForm.shardKey.$dirty && triggerForm.shardKey.$invalid">
-                    <span class="help-block" ng-show="triggerForm.shardKey.$error.pattern"><strong>Invalid Shard Key.</strong></span>
-                    <span class="help-block" ng-show="triggerForm.shardKey.$error.minlength"><strong>Shard Key cannot be shorter than 
+                    <span class="help-block-custom" ng-show="triggerForm.shardKey.$error.pattern"><strong>Invalid Shard Key.</strong></span>
+                    <span class="help-block-custom" ng-show="triggerForm.shardKey.$error.minlength"><strong>Shard Key cannot be shorter than
                     {{minimumLength}} characters.</strong></span>
-					<span class="help-block" ng-show="triggerForm.shardKey.$error.maxlength"><strong>Shard Key cannot be longer than 
+					<span class="help-block-custom" ng-show="triggerForm.shardKey.$error.maxlength"><strong>Shard Key cannot be longer than
 					{{maximumLengthAllowedInTextBox}} characters.</strong></span>
 				</div>
 			</div>

@@ -4,6 +4,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         //Remove if not needed
         $scope.isMailBoxEdit = false;
 
+
+
         //Model for Add MB
         addRequest = $scope.addRequest = {
             addMailBoxRequest: {
@@ -106,7 +108,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             }
 
             if ($scope.isMailBoxEdit) {
+
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;
+                $scope.editReq.reviseMailBoxRequest.mailBox.guid = $scope.mailBoxId;
+
                 $log.info($filter('json')(editReq));
 
                 $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId, $filter('json')(editReq),
@@ -149,6 +154,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                             } else {
                                 showSaveMessage(data.addMailBoxResponse.response.message, 'error');
                             }
+
+                            $scope.isMailBoxEdit = true;
+
                         } else {
                             showSaveMessage("Error while saving Mailbox", 'error');
                         }
@@ -201,7 +209,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             canSelectRows: false,
             enablePaging: false,
             showFooter: false,
-            rowHeight: 60,
+            rowHeight: 80,
             columnDefs: [{
                 field: "name",
                 width: 500,
@@ -215,10 +223,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 enableFocusedCellEdit: true,
                 cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
                                     <div ng-switch-when="">\n\
-                                         <textarea ng-model="COL_FIELD"  style="width:94%" row="4" placeholder="required" />\n\
+                                         <textarea ng-model="COL_FIELD"  style="width:94%;height:45px" ng-pattern="' + $scope.userInputPattern + '" ng-minLength=5 ng-maxLength=512 placeholder="required" />\n\
                                     </div>\n\
                                     <div ng-switch-default>\n\
-                                         <textarea ng-model="COL_FIELD"  required style="width:94%" row="4" placeholder="required"/>\n\
+                                         <textarea ng-model="COL_FIELD"  required style="width:94%;height:45px"  ng-pattern="' + $scope.userInputPattern + '" ng-minLength=5 ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
                                   </div>'
 
@@ -287,8 +295,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         };
 
         /*$scope.displayAllTableValues = function(){               
-                $scope.tableValues=$scope.mailBoxProperties;
-            };*/
+         $scope.tableValues=$scope.mailBoxProperties;
+         };*/
 
     }
 ]);

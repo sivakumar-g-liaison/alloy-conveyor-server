@@ -8,7 +8,7 @@ angular.module(
 )
     .directive(
         'dynamicComponentDirectiveForName',
-        function () {
+        function ($rootScope) {
             return {
                 restrict: 'C',
                 replace: true,
@@ -24,10 +24,16 @@ angular.module(
                 template: '<div ng-switch on="allowAdd">' +
                     '<div ng-switch-when="false">{{propName}}</div>' +
                     '<div ng-switch-when="true">\n\
+                    <div ng-form name="form">\n\
                         <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.name" ng-options="property for property in allStaticProperties">\n\
                              <option value="">-- select--</option>\n\
                         </select> <i>&nbsp</i>\n\
-                        <textarea ng-show="addNew.value"  ng-model="addedProperty.value"   placeholder="required" style="width:60%"></textarea>\n\
+                        <textarea ng-show="addNew.value"  ng-model="addedProperty.value"   placeholder="required" style="width:60%"></textarea></div>\n\
+                        <div ng-show="form.name.$dirty && form.name.$invalid">\n\
+                            <span class="help-block-custom" ng-show="form.$error.pattern"><strong>Invalid Property Name.</strong></span>\n\
+                            <span class="help-block-custom" ng-show="form.$error.minlength"><strong>Property Name cannot be shorter than 3 characters.</strong></span>\n\
+                            <span class="help-block-custom" ng-show="form.$error.maxlength"><strong>Property Name cannot be longer than 128 characters.</strong></span>\n\
+                         </div>\n\
                       </div>',
                 link: function (scope) {
                     //scope.showAddnew = false;

@@ -9,11 +9,11 @@
                ng-minLength=5 ng-maxLength=80 />
             </div>
             <div  ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-                  <span class="help-block" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
-                  <span class="help-block" ng-show="triggerForm.name.$error.required"><strong>Profile Name is mandatory.</strong></span>
-                  <span class="help-block" ng-show="triggerForm.name.$error.minlength"><strong>Profile Name cannot be shorter than
+                  <span class="help-block-custom" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
+                  <span class="help-block-custom" ng-show="triggerForm.name.$error.required"><strong>Profile Name is mandatory.</strong></span>
+                  <span class="help-block-custom" ng-show="triggerForm.name.$error.minlength"><strong>Profile Name cannot be shorter than
                    {{minimumLength}} characters.</strong></span>
-				  <span class="help-block" ng-show="triggerForm.name.$error.maxlength"><strong>Profile Name cannot be longer than
+				  <span class="help-block-custom" ng-show="triggerForm.name.$error.maxlength"><strong>Profile Name cannot be longer than
 				   {{maximumLengthAllowedInTextBox}} characters.</strong></span>
             </div>
             </div>

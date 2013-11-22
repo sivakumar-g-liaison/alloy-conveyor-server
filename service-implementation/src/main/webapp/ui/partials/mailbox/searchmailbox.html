@@ -18,10 +18,10 @@
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="false"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
-                	<span class="help-block" ng-show="formSearchMbx.name.$error.pattern"><strong>Invalid MailBox Name.</strong></span>
-                	<span class="help-block" ng-show="formSearchMbx.name.$error.minlength"><strong>Mailbox Name cannot be 
+                	<span class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern"><strong>Invalid MailBox Name.</strong></span>
+                	<span class="help-block-custom" ng-show="formSearchMbx.name.$error.minlength"><strong>Mailbox Name cannot be
          			 shorter than {{minimumLength}} characters.</strong></span>
-		 			<span class="help-block" ng-show="formSearchMbx.name.$error.maxlength"><strong>Mailbox Name cannot be 
+		 			<span class="help-block-custom" ng-show="formSearchMbx.name.$error.maxlength"><strong>Mailbox Name cannot be
 		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</strong></span>
                 </div>
 			</div>

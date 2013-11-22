@@ -180,7 +180,7 @@ var rest = myApp.controller(
                 enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
-                rowHeight: 60,
+                rowHeight: 80,
                 columnDefs: [{
                     field: "name",
                     width: "40%",
@@ -194,18 +194,75 @@ var rest = myApp.controller(
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
                                     <div ng-switch-when="">\n\
-                                         <textarea ng-model="COL_FIELD"  style="width:94%" row="4" placeholder="required" />\n\
+                                         <textarea ng-model="COL_FIELD" style="width:94%;height:45px" placeholder="required" />\n\
                                          <a ng-click="isModal(row)" data-toggle="modal" data-backdrop="static" data-keyboard="false" href="#valueModal" class = "right">\n\
                                              <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                     </div>\n\
                                     <div ng-switch-default>\n\
-                                         <textarea ng-model="COL_FIELD"  required style="width:94%" row="4" placeholder="required"/>\n\
+                                         <textarea ng-model="COL_FIELD" ng-minLength=5 ng-maxLength=2048  required style="width:94%;height: 45px" placeholder="required"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                    </div>\n\
+                                    <div ng-switch-when="otherRequestHeader">\n\
+                                         <textarea ng-model="COL_FIELD" ng-minLength=5 ng-maxLength=512  required style="width:94%;height: 45px" placeholder="required"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                    </div>\n\
+                                    <div ng-switch-when="encodingFormat">\n\
+                                         <textarea ng-model="COL_FIELD" ng-minLength=5 ng-maxLength=512  required style="width:94%;height: 45px" placeholder="required"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                    </div>\n\
+                                    <div ng-switch-when="chunkedEncoding">\n\
+                                         <textarea ng-model="COL_FIELD" ng-minLength=5 ng-maxLength=512  required style="width:94%;height: 45px" placeholder="required"/>\n\
                                          <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
                                         <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                     </div>\n\
                                     <div ng-switch-when="httpVerb">\n\
                                          <select ng-model="verb" ng-change="onVerbChange(verb)"  ng-options="property for property in enumHttpVerb"></select>\n\
                                      </div>\n\
+                                     <div ng-switch-when="httpVersion">\n\
+                                        <textarea ng-model="COL_FIELD" name="httpVersion"  required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.httpVersionPattern + '"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                     <div ng-show="formAddPrcsr.httpVersion.$dirty && formAddPrcsr.httpVersion.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.httpVersion.$error.pattern><strong>Version should be 1.1</strong></span>\n\
+                                        </div></div>\n\
+                                        <div ng-switch-when="url">\n\
+                                        <textarea ng-model="COL_FIELD" name="propUrl"  required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.inputPatternForURL + '"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                     <div ng-show="formAddPrcsr.propUrl.$dirty && formAddPrcsr.propUrl.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.propUrl.$error.pattern><strong>Enter proper URL</strong></span>\n\
+                                        </div></div>\n\
+                                     <div ng-switch-when="socketTimeout">\n\
+                                        <textarea ng-model="COL_FIELD" name="socketTimeout"  required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                        <div ng-show="formAddPrcsr.socketTimeout.$dirty && formAddPrcsr.socketTimeout.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.socketTimeout.$error.pattern><strong>Invalid Data.</strong></span>\n\
+                                        </div></div>\n\
+                                     <div ng-switch-when="connectionTimeout">\n\
+                                        <textarea ng-model="COL_FIELD" name="connectionTimeout"  required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                     <div ng-show="formAddPrcsr.connectionTimeout.$dirty && formAddPrcsr.connectionTimeout.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.connectionTimeout.$error.pattern><strong>Invalid Data.</strong></span>\n\
+                                        </div></div>\n\
+                                     <div ng-switch-when="retryAttempts">\n\
+                                        <textarea ng-model="COL_FIELD" name="retryAttempts"  required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                     <div ng-show="formAddPrcsr.retryAttempts.$dirty && formAddPrcsr.retryAttempts.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.retryAttempts.$error.pattern><strong>Invalid Data.</strong></span>\n\
+                                        </div></div>\n\
+                                     <div ng-switch-when="port">\n\
+                                        <textarea ng-model="COL_FIELD" name="port"  required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                         <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class = "right">\n\
+                                        <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                     <div ng-show="formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.port.$error.pattern><strong>Invalid Data.</strong></span>\n\
+                                        </div></div>\n\
                                   </div>'
                 }, {
                     field: "allowAdd",
@@ -233,25 +290,68 @@ var rest = myApp.controller(
                 enableCellEditOnFocus: true,
                 enablePaging: false,
                 showFooter: false,
-                rowHeight: 60,
+                rowHeight: 80,
                 columnDefs: [{
                     field: "folderURI",
                     width: "33%",
                     displayName: "URI*",
                     enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')"><div ng-switch-when="false"><textarea ng-model="COL_FIELD"  style="width:95%" required  placeholder="required" /></div><div ng-switch-default><textarea ng-model="COL_FIELD" style="width:95%"   placeholder="required"/></div></div>'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
+                        '<div ng-switch-when="false">' +
+                        '<div ng-switch on="row.getProperty(\'folderType\')">\n\
+                            <div ng-switch-when="PAYLOAD_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" required  placeholder="required" name="folderuripayload" ng-pattern="' + $scope.inputPatternForFolderURI + '" ng-minLength=5 ng-maxLength=250 />\n\
+                                <div ng-show="formAddPrcsr.folderuripayload.$dirty && formAddPrcsr.folderuripayload.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.folderuripayload.$error.pattern><strong>Invalid Folder URI.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.folderuripayload.$error.minlength><strong>Folder URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.folderuripayload.$error.maxlength><strong>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span>\n\
+                           </div></div>\n\
+                        <div ng-switch-when="RESPONSE_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" required  placeholder="required" name="folderuriresponse" ng-pattern="' + $scope.inputPatternForFolderURI + '" ng-minLength=5 ng-maxLength=250 />\n\
+                            <div ng-show="formAddPrcsr.folderuriresponse.$dirty && formAddPrcsr.folderuriresponse.$invalid">\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.pattern><strong>Invalid Folder URI.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.minlength><strong>Folder URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><strong>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
+                        </div></div>' +
+                        '<div ng-switch-when="true">' +
+                        '<textarea name="folderuridefault" ng-model="COL_FIELD" style="width:95%;height:45px" placeholder="required" ng-pattern="' + $scope.inputPatternForFolderURI + '" ng-minLength=5 ng-maxLength=250/>\n\
+                    <div ng-show="formAddPrcsr.folderuridefault.$dirty && formAddPrcsr.folderuridefault.$invalid">\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.folderuridefault.$error.pattern><strong>Invalid Folder URI.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.folderuridefault.$error.minlength><strong>Folder URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.folderuridefault.$error.maxlength><strong>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span>\n\
+                        </div></div></div>'
                 }, {
                     field: "folderType",
                     width: "20%",
                     displayName: "Type*",
                     enableCellEdit: false,
                     cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder" selected-value="valueSelectedinSelectionBoxForProcessorFolder" prop-name={{row.getProperty(col.field)}} />'
+
                 }, {
                     field: "folderDesc",
                     width: "40%",
                     displayName: "Description",
                     enableCellEdit: false,
-                    cellTemplate: '<textarea style="width:95%" ng-model="COL_FIELD" ></textarea>'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
+                        '<div ng-switch-when="false">' +
+                        '<div ng-switch on="row.getProperty(\'folderType\')">\n\
+                            <div ng-switch-when="PAYLOAD_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputPattern + '" ng-minLength=5 ng-maxLength=250 />\n\
+                                <div ng-show="formAddPrcsr.descriptionpayload.$dirty && formAddPrcsr.descriptionpayload.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.pattern><strong>Invalid Description.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.minlength><strong>Description cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span>\n\
+                           </div></div>\n\
+                        <div ng-switch-when="RESPONSE_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputPattern + '" ng-minLength=5 ng-maxLength=250 />\n\
+                            <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.pattern><strong>Invalid Description.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.minlength><strong>Description cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
+                        </div></div>' +
+                        '<div ng-switch-when="true">' +
+                        '<textarea name="descriptiondefault" ng-model="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputPattern + '" ng-minLength=5 ng-maxLength=250/>\n\
+                    <div ng-show="formAddPrcsr.descriptiondefault.$dirty && formAddPrcsr.descriptiondefault.$invalid">\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.pattern><strong>Invalid Description.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.minlength><strong>Description cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span>\n\
+                        </div></div></div>'
                 }, {
                     field: "allowAdd",
                     width: "7%",
@@ -278,7 +378,34 @@ var rest = myApp.controller(
                     width: "20%",
                     displayName: "URI",
                     enableCellEdit: false,
-                    cellTemplate: '<textarea style="width:98%" rows="4" ng-model="COL_FIELD" />'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
+                        '<div ng-switch-when="false">' +
+                        '<div ng-switch on="row.getProperty(\'credentialType\')">\n\
+                            <div ng-switch-when="TRUST_STORE"><textarea ng-model="COL_FIELD"  style="width:98%" name="credentialuritrust" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=128 row="3" />\n\
+                                <div ng-show="formAddPrcsr.credentialuritrust.$dirty && formAddPrcsr.credentialuritrust.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.credentialuritrust.$error.pattern><strong>Invalid Credential URI.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.credentialuritrust.$error.minlength><strong>Credential URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.credentialuritrust.$error.maxlength><strong>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span>\n\
+                           </div></div>\n\
+                        <div ng-switch-when="KEY_STORE"><textarea ng-model="COL_FIELD"  style="width:95%" name="credentialurikey" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=128 />\n\
+                            <div ng-show="formAddPrcsr.credentialurikey.$dirty && formAddPrcsr.credentialurikey.$invalid">\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.credentialurikey.$error.pattern><strong>Invalid Credential URI.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.credentialurikey.$error.minlength><strong>Credential URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.credentialurikey.$error.maxlength><strong>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span></div></div>\n\
+                        <div ng-switch-when="LOGIN_CREDENTIAL"><textarea ng-model="COL_FIELD"  style="width:98%" name="credentialurilogin" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=128 row="3" />\n\
+                                <div ng-show="formAddPrcsr.credentialurilogin.$dirty && formAddPrcsr.credentialurilogin.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.credentialurilogin.$error.pattern><strong>Invalid Credential URI.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.credentialurilogin.$error.minlength><strong>Credential URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.credentialurilogin.$error.maxlength><strong>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span>\n\
+                           </div></div>\n\
+                        </div></div>' +
+                        '<div ng-switch-when="true">' +
+                        '<textarea name="credentialdefault" ng-model="COL_FIELD" style="width:95%" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=250/>\n\
+                    <div ng-show="formAddPrcsr.credentialdefault.$dirty && formAddPrcsr.credentialdefault.$invalid">\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.credentialdefault.$error.pattern><strong>Invalid Credential URI.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.credentialdefault.$error.minlength><strong>Credential URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.credentialdefault.$error.maxlength><strong>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span></div>\n\
+                    </div></div>'
                 }, {
                     field: "credentialType",
                     width: "17%",
@@ -308,7 +435,34 @@ var rest = myApp.controller(
                     width: "20%",
                     displayName: "IdpURI",
                     enableCellEdit: false,
-                    cellTemplate: '<textarea style="width:98%" rows="4" ng-model="COL_FIELD" />'
+                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
+                        '<div ng-switch-when="false">' +
+                        '<div ng-switch on="row.getProperty(\'credentialType\')">\n\
+                            <div ng-switch-when="TRUST_STORE"><textarea ng-model="COL_FIELD"  style="width:98%" name="idpuritrust" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=128 row="3" />\n\
+                                <div ng-show="formAddPrcsr.idpuritrust.$dirty && formAddPrcsr.idpuritrust.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.idpuritrust.$error.pattern><strong>Invalid IDP URI.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.idpuritrust.$error.minlength><strong>IDP URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.idpuritrust.$error.maxlength><strong>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span>\n\
+                           </div></div>\n\
+                        <div ng-switch-when="KEY_STORE"><textarea ng-model="COL_FIELD"  style="width:95%" name="idpurikey" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=128 />\n\
+                            <div ng-show="formAddPrcsr.idpurikey.$dirty && formAddPrcsr.idpurikey.$invalid">\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.idpurikey.$error.pattern><strong>Invalid IDP URI.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.idpurikey.$error.minlength><strong>IDP URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.idpurikey.$error.maxlength><strong>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span></div></div>\n\
+                        <div ng-switch-when="LOGIN_CREDENTIAL"><textarea ng-model="COL_FIELD"  style="width:98%" name="idpurilogin" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=128 row="3" />\n\
+                                <div ng-show="formAddPrcsr.idpurilogin.$dirty && formAddPrcsr.idpurilogin.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.idpurilogin.$error.pattern><strong>Invalid IDP URI.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.idpurilogin.$error.minlength><strong>IDP URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.idpurilogin.$error.maxlength><strong>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span>\n\
+                           </div></div>\n\
+                        </div></div>' +
+                        '<div ng-switch-when="true">' +
+                        '<textarea name="idpuridefault" ng-model="COL_FIELD" style="width:95%" ng-pattern="' + $scope.inputPatternForCredentialsURI + '" ng-minLength=5 ng-maxLength=250/>\n\
+                    <div ng-show="formAddPrcsr.idpuridefault.$dirty && formAddPrcsr.idpuridefault.$invalid">\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.idpuridefault.$error.pattern><strong>Invalid IDP URI.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.idpuridefault.$error.minlength><strong>IDP URI cannot be shorter than {{minimumLength}} characters.</strong></span>\n\
+                        <span class="help-block-custom" ng-show=formAddPrcsr.idpuridefault.$error.maxlength><strong>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</strong></span></div>\n\
+                    </div></div>'
                 }, {
                     field: "allowAdd",
                     width: "7%",
@@ -633,6 +787,16 @@ var rest = myApp.controller(
                 // validation
                 $log.info(valueSelectedinSelectionBox.name);
                 $log.info(row.getProperty('value'));
+
+                if (valueSelectedinSelectionBox.name === 'socketTimeout' || valueSelectedinSelectionBox.name === 'connectionTimeout' || valueSelectedinSelectionBox.name === 'retryAttempts' || valueSelectedinSelectionBox.name === 'port') {
+
+                    if (!($scope.numberPattern.test(row.getProperty('value')))) {
+
+                        showAlert('Value should be a number.', 'information');
+                        return;
+                    }
+                }
+
                 if (valueSelectedinSelectionBox.name === 'add new -->' && addedProperty.value !== '') {
                     valueSelectedinSelectionBox.name = addedProperty.value;
                     addedProperty.value = '';
@@ -939,6 +1103,8 @@ var rest = myApp.controller(
                 $scope.readAllProfiles();
             };
             $scope.resetProcessorType = function (model) {
+
+                $scope.resetStaticAndMandatoryProps();
                 if (model.type === 'SWEEPER') {
                     $scope.isProcessorTypeSweeper = true;
                     $scope.processor.protocol = "SWEEPER"
@@ -957,11 +1123,9 @@ var rest = myApp.controller(
                 }
             };
             $scope.resetProtocol = function (model) {
+
                 console.log(model);
-                //alert("iam called");
-                if ($scope.isEdit) {
-                    return;
-                }
+                $scope.resetStaticAndMandatoryProps();
                 if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
 
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
@@ -1006,6 +1170,50 @@ var rest = myApp.controller(
                     $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
                 }
             };
+
+            $scope.resetStaticAndMandatoryProps = function () {
+
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
+
+                $scope.ftpMandatoryProperties = [{
+                    name: 'url',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: '',
+                    value: '',
+                    allowAdd: true,
+                    isMandatory: false
+                }];
+
+                $scope.httpMandatoryProperties = [{
+                    name: 'url',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'httpVersion',
+                    value: '1.1',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'httpVerb',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'contentType',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: '',
+                    value: '',
+                    allowAdd: true,
+                    isMandatory: false
+                }];
+            }
             // Editor Section Begins
             var editor;
             var rowObj;

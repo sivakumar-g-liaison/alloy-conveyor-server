@@ -117,9 +117,11 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 
     // validation of user input pattern
     $rootScope.userInputPattern = /^[a-zA-Z0-9_ ]+$/;
-    $rootScope.inputPatternForCredentialsURI = /^/;
+    $rootScope.inputPatternForCredentialsURI = /^[a-zA-Z0-9_\/]+$/;
     $rootScope.inputPatternForFolderURI = /^[a-zA-Z0-9_\/]+$/;
-    $rootScope.inputPatternForURI = /^/;
+    $rootScope.inputPatternForURL = /^(http|ftp|ftps|sftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?/;
+    $rootScope.numberPattern = /^\d+$/;
+    $rootScope.httpVersionPattern = /\b1.1\b/;
 
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
     // As of now used only for displaying the no of characters in error message.
@@ -127,6 +129,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.minimumLength = 5;
     $rootScope.maximumLengthAllowedInMailBoxDescription = 1024;
     $rootScope.maximumLengthAllowedInProcessorDescription = 512;
+    $rootScope.minimumLengthAllowedInGrid = 3;
+    $rootScope.maximumLengthAllowedInGridForPropertyValue = 512;
+    $rootScope.maximumLengthAllowedInGridForFolderDetails = 250;
+    $rootScope.maximumLengthAllowedInGridForCredentialDetails = 128;
 
     //FOR USE WITH PYTHON
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
