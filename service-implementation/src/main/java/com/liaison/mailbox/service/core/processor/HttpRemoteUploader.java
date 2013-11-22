@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exceptions.LiaisonException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
@@ -33,13 +34,16 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote uploader to perform push operation, also it has support methods for JavaScript.
+ * Http remote uploader to perform push operation, also it has support methods
+ * for JavaScript.
  * 
  * @author veerasamyn
  */
-public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class HttpRemoteUploader extends AbstractRemoteProcessor implements
+		MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(HttpRemoteUploader.class);
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(HttpRemoteUploader.class);
 
 	@SuppressWarnings("unused")
 	private HttpRemoteUploader() {
@@ -62,12 +66,15 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws KeyStoreException
 	 * @throws CertificateException
 	 * @throws NoSuchAlgorithmException
+	 * @throws SymmetricAlgorithmException
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+	public void executeRequest() throws MailBoxServicesException,
+			LiaisonException, IOException, FS2Exception, URISyntaxException,
+			JAXBException, KeyStoreException, NoSuchAlgorithmException,
+			CertificateException, SymmetricAlgorithmException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
@@ -78,10 +85,13 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		if (!MailBoxUtility.isEmpty(credentialURI)) {
 
 			URI uri = new URI(credentialURI);
-			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-			FileInputStream instream = new FileInputStream(new File(uri.getPath()));
+			KeyStore trustStore = KeyStore.getInstance(KeyStore
+					.getDefaultType());
+			FileInputStream instream = new FileInputStream(new File(
+					uri.getPath()));
 			try {
-				trustStore.load(instream, getUserCredetial(credentialURI)[1].toCharArray());
+				trustStore.load(instream,
+						getUserCredetial(credentialURI)[1].toCharArray());
 
 			} finally {
 				instream.close();
@@ -99,12 +109,14 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		if (!MailBoxUtility.isEmpty(UserCredentialURI)) {
 
 			String[] credential = getUserCredetial(UserCredentialURI);
-			request.setAuthenticationHandler(new BasicAuthenticationHandler(credential[0], credential[1]));
+			request.setAuthenticationHandler(new BasicAuthenticationHandler(
+					credential[0], credential[1]));
 		}
 
 		// Set the pay load value to http client input data for POST & PUT
 		// request
-		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+		if ("POST".equals(request.getMethod())
+				|| "PUT".equals(request.getMethod())) {
 			StringBuffer buffer = new StringBuffer();
 			for (File entry : getProcessorPayload()) {
 				String content = FileUtils.readFileToString(entry, "UTF-8");
@@ -118,7 +130,8 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		HTTPResponse response = request.execute();
 		if (response.getStatusCode() != 200) {
-			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+			LOGGER.info("The reponse code recived is {} ",
+					response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		}
 	}
@@ -129,12 +142,14 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		try {
 
 			// HTTPRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+			if (!MailBoxUtility.isEmpty(configurationInstance
+					.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
+				engine.eval(getJavaScriptString(configurationInstance
+						.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
@@ -149,7 +164,10 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		} catch (Exception e) {
 
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(
+					null,
+					configurationInstance.getProcsrName() + ":"
+							+ e.getMessage(), e.getMessage(), "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
