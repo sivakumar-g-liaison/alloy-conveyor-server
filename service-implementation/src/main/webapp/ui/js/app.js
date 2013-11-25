@@ -117,9 +117,9 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 
     // validation of user input pattern
     $rootScope.userInputPattern = /^[a-zA-Z0-9_ ]+$/;
-    $rootScope.inputPatternForCredentialsURI = /^[a-zA-Z0-9_\/]+$/;
+    $rootScope.inputPatternForCredentialsURI =/^(ftp|ftps|sftp|http|https):\/\/([A-Za-z0-9_.]+:[A-Za-z0-9_*#@!.]+)?@[A-Za-z0-9_.]+([\/[A-Za-z0-9_]*]*)(.[a-z]*?)/
     $rootScope.inputPatternForFolderURI = /^[a-zA-Z0-9_\/]+$/;
-    $rootScope.inputPatternForURL = /^(http|ftp|ftps|sftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@?^=%&amp;\/~\+#])?/;
+    $rootScope.inputPatternForURL = /^(ftp|ftps|sftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
     $rootScope.numberPattern = /^\d+$/;
     $rootScope.httpVersionPattern = /\b1.1\b/;
 
