@@ -19,7 +19,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         $scope.hitCounter = 1;
 
         // Modify the value to change the search criteria
-        $scope.searchMinCharacterCount = 3;
+        $scope.searchMinCharacterCount = 5;
 
         // Profiles loads initially
         $scope.profiles = [];
