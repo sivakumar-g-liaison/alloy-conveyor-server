@@ -248,7 +248,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
-            useExternalSorting: true,
             totalServerItems: 'totalServerItems',
         };
 
