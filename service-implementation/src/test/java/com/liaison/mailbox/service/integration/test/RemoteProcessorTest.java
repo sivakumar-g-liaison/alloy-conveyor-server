@@ -62,7 +62,8 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 	@Test
 	public void testRemoteDownloader() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
-			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException {
+			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
+			SymmetricAlgorithmException {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("Processor");
