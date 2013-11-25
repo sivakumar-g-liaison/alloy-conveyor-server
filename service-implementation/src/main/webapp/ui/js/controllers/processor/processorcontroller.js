@@ -194,7 +194,7 @@ var rest = myApp.controller(
                     enableCellEdit: false,
                     cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
                                     <div ng-switch-when="">\n\
-                                         <textarea ng-model="COL_FIELD" style="width:94%;height:45px" placeholder="required" />\n\
+                                         <textarea ng-model="COL_FIELD" style="width:94%;height:45px" ng-minLength=5 ng-maxLength=512 placeholder="required" />\n\
                                          <a ng-click="isModal(row)" data-toggle="modal" data-backdrop="static" data-keyboard="false" href="#valueModal" class = "right">\n\
                                              <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                     </div>\n\
