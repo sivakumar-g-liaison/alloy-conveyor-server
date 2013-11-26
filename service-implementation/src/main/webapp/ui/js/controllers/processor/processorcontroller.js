@@ -64,6 +64,7 @@ var rest = myApp.controller(
                 $scope.processor.type = $scope.enumprocsrtype[0];
                 // Enum for protocol type
                 $scope.enumprotocoltype = [
+                    'FTP',
                     'FTPS',
                     'HTTP',
                     'HTTPS',
@@ -1126,7 +1127,7 @@ var rest = myApp.controller(
 
                 console.log(model);
                 $scope.resetStaticAndMandatoryProps();
-                if ($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
+                if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
 
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
