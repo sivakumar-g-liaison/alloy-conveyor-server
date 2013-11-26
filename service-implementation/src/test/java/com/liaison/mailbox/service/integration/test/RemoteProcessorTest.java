@@ -16,6 +16,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,20 +58,25 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		responseLocation = System.getProperty("java.io.tmpdir") + File.separator + "sample";
+		responseLocation = System.getProperty("java.io.tmpdir")
+				+ File.separator + "sample";
 		Files.deleteIfExists(Paths.get(responseLocation));
 		Files.createDirectory(Paths.get(responseLocation));
 	}
 
 	@Test
-	public void testRemoteDownloader() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
-			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
-			SymmetricAlgorithmException {
+	public void testRemoteDownloader() throws JsonParseException,
+			JsonMappingException, LiaisonException, JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException,
+			URISyntaxException, MailBoxServicesException,
+			SymmetricAlgorithmException, KeyStoreException,
+			NoSuchAlgorithmException, CertificateException {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("Processor");
 		processor.setProcsrStatus("ACTIVE");
-		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		String remoteProperties = ServiceUtils
+				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
 		List<Folder> folders = new ArrayList<Folder>();
@@ -79,13 +87,15 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
-		HTTPRequest request = (HTTPRequest) downloader.getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest) downloader
+				.getClientWithInjectedConfiguration();
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
 	}
 
 	@Test
-	public void testCredentialUtility() throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
+	public void testCredentialUtility() throws SymmetricAlgorithmException,
+			MailBoxConfigurationServicesException {
 
 		CredentialDTO credentialDTO = new CredentialDTO();
 		credentialDTO.setCredentialType("KEY_STORE");
@@ -101,17 +111,21 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		CredentialDTO resultDTO = new CredentialDTO();
 		resultDTO.copyFromEntity(credential);
 
-		Assert.assertEquals(credentialDTO.getCredentialType(), resultDTO.getCredentialType());
-		Assert.assertEquals(credentialDTO.getCredentialURI(), resultDTO.getCredentialURI());
+		Assert.assertEquals(credentialDTO.getCredentialType(),
+				resultDTO.getCredentialType());
+		Assert.assertEquals(credentialDTO.getCredentialURI(),
+				resultDTO.getCredentialURI());
 		Assert.assertEquals(credentialDTO.getIdpType(), resultDTO.getIdpType());
 		Assert.assertEquals(credentialDTO.getIdpURI(), resultDTO.getIdpURI());
-		Assert.assertEquals(credentialDTO.getPassword(), resultDTO.getPassword());
+		Assert.assertEquals(credentialDTO.getPassword(),
+				resultDTO.getPassword());
 		Assert.assertEquals(credentialDTO.getUserId(), resultDTO.getUserId());
 
 	}
 
 	@Test(expected = MailBoxConfigurationServicesException.class)
-	public void testCredentialUtility_InvalidCredentialType_ShoudFail() throws SymmetricAlgorithmException,
+	public void testCredentialUtility_InvalidCredentialType_ShoudFail()
+			throws SymmetricAlgorithmException,
 			MailBoxConfigurationServicesException {
 
 		CredentialDTO credentialDTO = new CredentialDTO();
@@ -123,14 +137,16 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testWriteResponseToMailBox() throws JsonParseException, JsonMappingException, LiaisonException, JSONException,
-			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
-			FS2Exception {
+	public void testWriteResponseToMailBox() throws JsonParseException,
+			JsonMappingException, LiaisonException, JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException,
+			URISyntaxException, MailBoxServicesException, FS2Exception {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("TestProcessor");
 		processor.setProcsrStatus("ACTIVE");
-		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		String remoteProperties = ServiceUtils
+				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
 		List<Folder> folders = new ArrayList<Folder>();
@@ -149,14 +165,16 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testWriteResponseToMailBox_WithoutProcessorName() throws JsonParseException, JsonMappingException,
-			LiaisonException, JSONException,
-			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
-			FS2Exception {
+	public void testWriteResponseToMailBox_WithoutProcessorName()
+			throws JsonParseException, JsonMappingException, LiaisonException,
+			JSONException, JAXBException, IOException,
+			com.google.gson.JsonParseException, URISyntaxException,
+			MailBoxServicesException, FS2Exception {
 
 		Processor processor = new Processor();
 		processor.setProcsrStatus("ACTIVE");
-		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		String remoteProperties = ServiceUtils
+				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
 		List<Folder> folders = new ArrayList<Folder>();
@@ -175,15 +193,16 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testWriteFileResponseToMailBox() throws JsonParseException, JsonMappingException, LiaisonException,
-			JSONException,
-			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
-			FS2Exception {
+	public void testWriteFileResponseToMailBox() throws JsonParseException,
+			JsonMappingException, LiaisonException, JSONException,
+			JAXBException, IOException, com.google.gson.JsonParseException,
+			URISyntaxException, MailBoxServicesException, FS2Exception {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("TestProcessor");
 		processor.setProcsrStatus("ACTIVE");
-		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		String remoteProperties = ServiceUtils
+				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
 		List<Folder> folders = new ArrayList<Folder>();
@@ -198,20 +217,22 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
-		downloader.writeFileResponseToMailBox(stream, "test" + System.nanoTime() + ".txt");
+		downloader.writeFileResponseToMailBox(stream,
+				"test" + System.nanoTime() + ".txt");
 	}
 
 	@Test
-	public void testWriteFileResponseToMailBox_EveryTimeNewDirectory() throws JsonParseException, JsonMappingException,
-			LiaisonException,
-			JSONException,
-			JAXBException, IOException, com.google.gson.JsonParseException, URISyntaxException, MailBoxServicesException,
-			FS2Exception {
+	public void testWriteFileResponseToMailBox_EveryTimeNewDirectory()
+			throws JsonParseException, JsonMappingException, LiaisonException,
+			JSONException, JAXBException, IOException,
+			com.google.gson.JsonParseException, URISyntaxException,
+			MailBoxServicesException, FS2Exception {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("TestProcessor");
 		processor.setProcsrStatus("ACTIVE");
-		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		String remoteProperties = ServiceUtils
+				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
 		List<Folder> folders = new ArrayList<Folder>();
@@ -226,17 +247,20 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
-		downloader.writeFileResponseToMailBox(stream, "test" + System.nanoTime() + ".txt");
+		downloader.writeFileResponseToMailBox(stream,
+				"test" + System.nanoTime() + ".txt");
 	}
 
 	@Test
-	public void testWriteFileResponseToMailBox_WithFileNameWithSpaces() throws IOException, URISyntaxException, FS2Exception,
+	public void testWriteFileResponseToMailBox_WithFileNameWithSpaces()
+			throws IOException, URISyntaxException, FS2Exception,
 			MailBoxServicesException {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("TestProcessor");
 		processor.setProcsrStatus("ACTIVE");
-		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
+		String remoteProperties = ServiceUtils
+				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
 		List<Folder> folders = new ArrayList<Folder>();
@@ -251,7 +275,8 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
-		downloader.writeFileResponseToMailBox(stream, "test file name" + System.nanoTime() + ".txt");
+		downloader.writeFileResponseToMailBox(stream,
+				"test file name" + System.nanoTime() + ".txt");
 
 	}
 

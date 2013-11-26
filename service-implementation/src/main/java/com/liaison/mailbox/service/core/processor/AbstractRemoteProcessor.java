@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.core.processor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +43,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.http.HTTPRequest;
+import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
@@ -45,6 +51,7 @@ import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Credential;
@@ -95,12 +102,47 @@ public abstract class AbstractRemoteProcessor {
 	 */
 	public Object getClient() {
 
+		Protocol foundProtocolType = Protocol.findByCode(configurationInstance
+				.getProcsrProtocol());
+
 		switch (configurationInstance.getProcessorType()) {
 
 		case REMOTEDOWNLOADER:
-			return new HTTPRequest(null, LOGGER);
+			switch (foundProtocolType) {
+
+			case FTPS:
+				return new G2FTPSClient();
+
+			case SFTP:
+				return new G2SFTPClient();
+
+			case HTTP:
+				return new HTTPRequest(null, LOGGER);
+			case HTTPS:
+				return new HTTPRequest(null, LOGGER);
+
+			default:
+				break;
+
+			}
 		case REMOTEUPLOADER:
-			return new HTTPRequest(null, LOGGER);
+			switch (foundProtocolType) {
+
+			case FTPS:
+				return new G2FTPSClient();
+
+			case SFTP:
+				return new G2SFTPClient();
+
+			case HTTP:
+				return new HTTPRequest(null, LOGGER);
+			case HTTPS:
+				return new HTTPRequest(null, LOGGER);
+
+			default:
+				break;
+
+			}
 		default:
 			return null;
 		}
@@ -536,11 +578,15 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws NoSuchAlgorithmException
 	 */
 	public Object getClientWithInjectedConfiguration()
 			throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, LiaisonException, URISyntaxException,
-			MailBoxServicesException, SymmetricAlgorithmException {
+			MailBoxServicesException, SymmetricAlgorithmException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
 		// Create HTTPRequest and set the properties
@@ -580,6 +626,42 @@ public abstract class AbstractRemoteProcessor {
 		// Set the content type header to HttpRequest
 		if (!MailBoxUtility.isEmpty(properties.getContentType())) {
 			request.addHeader("Content-Type", properties.getContentType());
+		}
+
+		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
+			String credentialURI = getCredentialURI();
+
+			if (!MailBoxUtility.isEmpty(credentialURI)) {
+
+				URI uri = new URI(credentialURI);
+				KeyStore trustStore = KeyStore.getInstance(KeyStore
+						.getDefaultType());
+				FileInputStream instream = new FileInputStream(new File(
+						uri.getPath()));
+				try {
+					trustStore.load(instream,
+							getUserCredetial(credentialURI)[1].toCharArray());
+
+				} finally {
+					instream.close();
+				}
+
+				if (isTrustStore) {
+					request.truststore(trustStore);
+				} else {
+					request.keystore(trustStore,
+							getUserCredetial(credentialURI)[1]);
+				}
+			}
+
+			String UserCredentialURI = getUserCredentialURI();
+
+			if (!MailBoxUtility.isEmpty(UserCredentialURI)) {
+
+				String[] credential = getUserCredetial(UserCredentialURI);
+				request.setAuthenticationHandler(new BasicAuthenticationHandler(
+						credential[0], credential[1]));
+			}
 		}
 
 		LOGGER.info("Returns HTTP/S configured HTTPClient");
