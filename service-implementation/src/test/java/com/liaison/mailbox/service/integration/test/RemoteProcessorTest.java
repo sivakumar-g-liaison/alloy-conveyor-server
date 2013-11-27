@@ -75,6 +75,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		Processor processor = new Processor();
 		processor.setProcsrName("Processor");
 		processor.setProcsrStatus("ACTIVE");
+		processor.setProcsrProtocol("HTTP");
 		String remoteProperties = ServiceUtils
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
