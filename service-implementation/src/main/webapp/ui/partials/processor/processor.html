@@ -110,11 +110,9 @@
                         Description
                     </label>
                     <textarea width="40px" height="20px" ng-model="processor.description" name="description" ng-pattern="userInputPattern"
-                    ng-minLength=5 ng-maxLength=512 class="form-control"></textarea>
+                    ng-maxLength=512 class="form-control"></textarea>
                     <div class = "help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                         <span ng-show="formAddPrcsr.description.$error.pattern"><strong>Invalid Description</strong></span>
-                        <span class = "help-block-custom" ng-show="formAddPrcsr.description.$error.minlength"><strong>Description cannot be shorter than
-                         {{minimumLength}} characters.</strong></span>
                         <span class = "help-block-custom" ng-show="formAddPrcsr.description.$error.maxlength"><strong>Description cannot be longer than
                         {{maximumLengthAllowedInProcessorDescription}} characters.</strong></span>
                     </div>

@@ -208,6 +208,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             displaySelectionCheckbox: false,
             canSelectRows: false,
             enablePaging: false,
+            enableRowSelection: false,
             showFooter: false,
             rowHeight: 80,
             columnDefs: [{
