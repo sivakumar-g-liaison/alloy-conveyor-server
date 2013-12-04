@@ -39,9 +39,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         $scope.mailBox.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
-        $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'filerenameformat'];
+        $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'filerenameformat', 'receivers'];
         //Data from server
-        $scope.allStaticProperties = ['filerenameformat'];
+        $scope.allStaticProperties = ['filerenameformat', 'receivers'];
 
         //Data from server
         $scope.mailBoxProperties = [{
