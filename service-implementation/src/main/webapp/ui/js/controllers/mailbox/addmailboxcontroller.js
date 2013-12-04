@@ -251,24 +251,34 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             $log.info(valueSelectedinSelectionBox.name);
             $log.info(row.getProperty('value'));
 
-            if (valueSelectedinSelectionBox.name === 'add new -->' && addedProperty.value !== '') {
-                valueSelectedinSelectionBox.name = addedProperty.value;
-                addedProperty.value = '';
+            var attrName = '';
+
+            if (valueSelectedinSelectionBox.name !== 'add new -->') {
+
+                attrName = valueSelectedinSelectionBox.name;
+            } else if (addedProperty.value !== '') {
+                attrName = addedProperty.value;
             }
 
-            if (!valueSelectedinSelectionBox.name || valueSelectedinSelectionBox.name === 'add new -->' || !row.getProperty('value')) {
+            if (!attrName || !row.getProperty('value')) {
                 showAlert('It is mandatory to set the name and value of the property being added.', 'error');
+                return;
+            }
+
+            if (checkNameDuplicate(gridData, attrName)) {
+
+                showAlert('Name already added.', 'error');
                 return;
             }
 
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
             gridData.push({
-                name: valueSelectedinSelectionBox.name,
+                name: attrName,
                 value: row.getProperty('value'),
                 allowAdd: false
             });
-            var indexOfSelectedElement = allPropsWithNovalue.indexOf(valueSelectedinSelectionBox.name);
+            var indexOfSelectedElement = allPropsWithNovalue.indexOf(attrName);
 
             if (indexOfSelectedElement != -1) {
                 allPropsWithNovalue.splice(indexOfSelectedElement, 1);
@@ -282,6 +292,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             });
 
             valueSelectedinSelectionBox.name = '';
+            addedProperty.value = '';
 
         };
 
