@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2MetaSnapshotImpl;
+import com.liaison.fs2.api.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionStatus;
@@ -113,8 +114,18 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			// Read from mailbox property - grouping js location
 			List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
 
+			String sweepedFileLocation = getMailBoxProperties().getProperty(MailBoxConstants.SWEEPED_FILE_LOCATION);
+			if (!MailBoxUtility.isEmpty(sweepedFileLocation)) {
+
+				// If the given sweeped file location is not available then system will create that.
+				Path path = Paths.get(sweepedFileLocation);
+				if (!Files.isDirectory(path)) {
+					Files.createDirectories(path);
+				}
+			}
+
 			// Renaming the file
-			markAsSweeped(files, fileRenameFormat);
+			markAsSweeped(files, fileRenameFormat, sweepedFileLocation);
 
 			if (fileGroups.isEmpty()) {
 				LOGGER.info("The file group is empty.");
@@ -152,7 +163,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			MailBoxServicesException, FS2Exception {
 
 		Path rootPath = Paths.get(root);
-		if (!rootPath.toFile().isDirectory()) {
+		if (!Files.isDirectory(rootPath)) {
 			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY);
 		}
 
@@ -273,7 +284,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Method is used to rename the processed files using given file rename format
+	 * Method is used to rename the processed files using given file rename format. If
+	 * sweepedFileLocation is available in the mailbox files will be moved to the given location.
 	 * 
 	 * @param fileList
 	 *            Files list.
@@ -284,27 +296,67 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws FS2Exception
 	 * @throws URISyntaxException
 	 */
-	public void markAsSweeped(List<FileAttributesDTO> fileList, String fileRenameFormat) throws IOException,
+	public void markAsSweeped(List<FileAttributesDTO> fileList, String fileRenameFormat, String sweepedFileLocation)
+			throws IOException,
 			JSONException, FS2Exception, URISyntaxException {
 
-		LOGGER.info("Renaming the processed files");
-		for (FileAttributesDTO file : fileList) {
+		if (MailBoxUtility.isEmpty(sweepedFileLocation)) {
 
-			Path oldPath = new File(file.getFilePath()).toPath();
-			Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
+			LOGGER.info("Renaming the processed files");
+			for (FileAttributesDTO file : fileList) {
 
-			// Creating meta snapshot
-			FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-			File fileLoc = new File(newPath.toFile().getAbsolutePath());
-			FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
+				Path oldPath = new File(file.getFilePath()).toPath();
+				Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
 
-			// Constructing the fs2 file
-			metaSnapShot = FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+				// Creating meta snapshot
+				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
+				File fileLoc = new File(newPath.toFile().getAbsolutePath());
+				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
 
-			// Renaming the file at the end of the step when everything is done.
-			move(oldPath, newPath);
-			file.setFilePath(oldPath.toString());
-			file.setGuid(MailBoxUtility.getGUID());
+				// Constructing the fs2 file
+				try {
+					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+
+				} catch (FS2ObjectAlreadyExistsException e) {
+					FS2.deleteRecursive(oldPath.toUri());
+					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+				}
+
+				// Renaming the file at the end of the step when everything is done.
+				move(oldPath, newPath);
+				file.setFilePath(oldPath.toString());
+				file.setGuid(MailBoxUtility.getGUID());
+			}
+
+		} else {
+
+			LOGGER.info("Renaming the processed files with sweeped file location.");
+
+			Path target = Paths.get(sweepedFileLocation);
+			for (FileAttributesDTO file : fileList) {
+
+				Path oldPath = new File(file.getFilePath()).toPath();
+				Path newPath = target.resolve(oldPath.toFile().getName() + fileRenameFormat);
+
+				// Creating meta snapshot
+				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
+				File fileLoc = new File(newPath.toFile().getAbsolutePath());
+				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
+
+				// Constructing the fs2 file
+				try {
+					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+
+				} catch (FS2ObjectAlreadyExistsException e) {
+					FS2.deleteRecursive(oldPath.toUri());
+					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+				}
+
+				// Renaming the file at the end of the step when everything is done.
+				move(oldPath, newPath);
+				file.setFilePath(oldPath.toString());
+				file.setGuid(MailBoxUtility.getGUID());
+			}
 		}
 		LOGGER.info("Renaming the processed files - done");
 
@@ -320,7 +372,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws IOException
 	 */
 	private void move(Path file, Path target) throws IOException {
-		Files.move(file, target, StandardCopyOption.ATOMIC_MOVE);
+		Files.move(file, target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	/**

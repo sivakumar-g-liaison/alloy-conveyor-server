@@ -231,7 +231,7 @@ public class HornetQJMSUtil {
 
 		initializeConext(jndidto);
 		sendMessage(jndidto.getMessage(), jndidto.getQueueName());
-		receiveMessage(jndidto.getQueueName());
+		// receiveMessage(jndidto.getQueueName());
 
 	}
 

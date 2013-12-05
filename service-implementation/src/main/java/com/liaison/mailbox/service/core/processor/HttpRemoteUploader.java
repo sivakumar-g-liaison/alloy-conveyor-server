@@ -30,8 +30,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote uploader to perform push operation, also it has support methods
- * for JavaScript.
+ * Http remote uploader to perform push operation, also it has support methods for JavaScript.
  * 
  * @author veerasamyn
  */
@@ -78,16 +77,20 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements
 
 		// Set the pay load value to http client input data for POST & PUT
 		// request
-		if ("POST".equals(request.getMethod())
-				|| "PUT".equals(request.getMethod())) {
-			StringBuffer buffer = new StringBuffer();
-			for (File entry : getProcessorPayload()) {
-				String content = FileUtils.readFileToString(entry, "UTF-8");
-				buffer.append(content);
-				archiveFile(entry.getAbsolutePath());
-			}
-			if (buffer.length() > 0) {
-				request.inputData(buffer.toString());
+		File[] files = null;
+		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+
+			files = getProcessorPayload();
+			if (null != files) {
+
+				StringBuffer buffer = new StringBuffer();
+				for (File entry : files) {
+					String content = FileUtils.readFileToString(entry, "UTF-8");
+					buffer.append(content);
+				}
+				if (buffer.length() > 0) {
+					request.inputData(buffer.toString());
+				}
 			}
 		}
 
@@ -96,6 +99,10 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements
 			LOGGER.info("The reponse code recived is {} ",
 					response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
+		} else {
+			if (null != files) {
+				archiveFiles(files);
+			}
 		}
 	}
 
