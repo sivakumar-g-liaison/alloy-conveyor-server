@@ -691,4 +691,33 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 	}
 
+	@POST
+	@Path("/test")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response test(@Context HttpServletRequest request) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		try {
+
+			LOG.info("The directory sweeper meta data json ");
+			returnResponse = Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry")
+					.build();
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+	}
+
 }

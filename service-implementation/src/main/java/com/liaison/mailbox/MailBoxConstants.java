@@ -48,6 +48,7 @@ public interface MailBoxConstants {
 	public final static String GROUPING_JS_PROP_NAME = "filegroupingjspath";
 
 	public final static String FILE_RENAME_FORMAT_PROP_NAME = "filerenameformat";
+	public final static String SWEEPED_FILE_LOCATION = "sweepedfilelocation";
 
 	public final static String FOLDER_HEADER = "folderlocation";
 	public final static String FILE_NAME_HEADER = "filename";
