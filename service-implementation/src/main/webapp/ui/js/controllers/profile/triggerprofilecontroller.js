@@ -21,7 +21,7 @@ myApp.controller('TriggerProfileCntrlr', ['$scope', '$location',
             $scope.restService.get($scope.base_url + "/profile").success(function (data) {
                 $scope.profiles = data.getProfileResponse.profiles;
             }).error(function (data) {
-                alert("Failed to load profiles.");
+                showSaveMessage("Failed to load Profiles", 'error');
             });
         };
         $scope.loadProfiles(); //loads the profile
@@ -51,7 +51,10 @@ myApp.controller('TriggerProfileCntrlr', ['$scope', '$location',
             		+ '&excludeMailbox=' + mbxName
             		+ '&shardKey=' + shardKey, "{}")
                 .success(function (data) {
-                    alert(data.triggerProfileResponse.response.message);
+                     var messageType = (data.triggerProfileResponse.response.status == 'success')?'success':'error';
+                	 showSaveMessage(data.triggerProfileResponse.response.message, messageType);
+                }).error(function (data){
+                	 showSaveMessage(data.triggerProfileResponse.response.message, 'error');
                 });
         };
 		

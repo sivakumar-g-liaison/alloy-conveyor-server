@@ -23,7 +23,8 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
                 function (data, status) {
 
                     if (status === 200) {
-                        alert(data.addProfileResponse.response.message);
+                    	var messageType = (data.addProfileResponse.response.status == 'success')?'success':'error';
+                        showSaveMessage(data.addProfileResponse.response.message, messageType);
                         $scope.profile.name = "";
                         $scope.loadProfiles();
 						if ($scope.pagingOptions.currentPage !== 1) {
@@ -63,7 +64,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
             $scope.restService.get(url).success(function (data) {
                 $scope.getPagedDataAsync(data.getProfileResponse.profiles, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
             }).error(function (data) {
-                alert("Failed to load profiles.");
+                showSaveMessage("Failed to load profiles.", 'error');
             });
 
 
