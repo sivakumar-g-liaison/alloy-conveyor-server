@@ -31,7 +31,7 @@ public interface MailBoxConstants {
 	public final static String SWEEPED_FILE_EXTN = ".queued";
 
 	/** Property which is used to get the configured receivers from mailbox. */
-	public final static String MBX_RCVR_PROPERTY = "receivers";
+	public final static String MBX_RCVR_PROPERTY = "emailnotificationids";
 
 	public final static String MBX_STATUS = "MailBoxStatus";
 
@@ -49,6 +49,7 @@ public interface MailBoxConstants {
 
 	public final static String FILE_RENAME_FORMAT_PROP_NAME = "filerenameformat";
 	public final static String SWEEPED_FILE_LOCATION = "sweepedfilelocation";
+	public final static String PROCESSED_FILE_LOCATION = "processedfilelocation";
 
 	public final static String FOLDER_HEADER = "folderlocation";
 	public final static String FILE_NAME_HEADER = "filename";

@@ -176,7 +176,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                 function (data, status) {
                     if (status == 200) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
-                            showSaveMessage(data.searchMailBoxResponse.response.message, 'error');
+                        	//Commented out because of inconsistency
+                            //showSaveMessage(data.searchMailBoxResponse.response.message, 'error');
                         }
                     } else {
                     	 showSaveMessage("retrieval of search results failed", 'error');

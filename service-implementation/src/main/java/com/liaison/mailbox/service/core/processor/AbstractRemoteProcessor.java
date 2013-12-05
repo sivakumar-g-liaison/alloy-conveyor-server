@@ -105,18 +105,18 @@ public abstract class AbstractRemoteProcessor {
 
 		switch (foundProtocolType) {
 
-		case FTP:
-			return new G2FTPSClient();
-		case FTPS:
-			return new G2FTPSClient();
-		case SFTP:
-			return new G2SFTPClient();
-		case HTTP:
-			return new HTTPRequest(null, LOGGER);
-		case HTTPS:
-			return new HTTPRequest(null, LOGGER);
-		default:
-			return null;
+			case FTP:
+				return new G2FTPSClient();
+			case FTPS:
+				return new G2FTPSClient();
+			case SFTP:
+				return new G2SFTPClient();
+			case HTTP:
+				return new HTTPRequest(null, LOGGER);
+			case HTTPS:
+				return new HTTPRequest(null, LOGGER);
+			default:
+				return null;
 		}
 	}
 
@@ -254,9 +254,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the URI to which the response should be written, this can be used if
-	 * the JS decides to write the response straight to the file system or
-	 * database
+	 * Get the URI to which the response should be written, this can be used if the JS decides to
+	 * write the response straight to the file system or database
 	 * 
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
@@ -301,8 +300,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the credential URI of TrustStore & Keystore to execute the FTPS
-	 * uploader/downloader
+	 * Get the credential URI of TrustStore & Keystore to execute the FTPS uploader/downloader
 	 * 
 	 * @return String URI
 	 * @throws MailBoxServicesException
@@ -329,8 +327,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the credential URI for login details to execute the FTPS & SFTP
-	 * uploader/downloader
+	 * Get the credential URI for login details to execute the FTPS & SFTP uploader/downloader
 	 * 
 	 * @return String URI
 	 * @throws MailBoxServicesException
@@ -355,8 +352,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the login details from credentialURI to execute the FTPS & SFTP
-	 * uploader/downloader
+	 * Get the login details from credentialURI to execute the FTPS & SFTP uploader/downloader
 	 * 
 	 * @return String[]
 	 * @throws MailBoxServicesException
@@ -417,7 +413,6 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		File directory = new File(responseLocation);
-
 		if (!directory.exists()) {
 			Files.createDirectories(directory.toPath());
 		}
@@ -430,8 +425,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the list of dynamic properties of the MailBox known only to java
-	 * script
+	 * Get the list of dynamic properties of the MailBox known only to java script
 	 * 
 	 * @return MailBox dynamic properties
 	 */
@@ -621,8 +615,7 @@ public abstract class AbstractRemoteProcessor {
 	 * Sent notifications for trigger system failure.
 	 * 
 	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
+	 *            The extra receivers. The default receiver will be available in the mailbox.
 	 * @param subject
 	 *            The notification subject
 	 * @param emailBody
@@ -653,8 +646,7 @@ public abstract class AbstractRemoteProcessor {
 	 * Sent notifications for trigger system failure.
 	 * 
 	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
+	 *            The extra receivers. The default receiver will be available in the mailbox.
 	 * @param subject
 	 *            The notification subject
 	 * @param exc
@@ -676,35 +668,42 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * 
 	 */
-	private void listFiles(String directoryName, List<File> files) throws MailBoxServicesException {
+	private void listFiles(String path, List<File> files) throws MailBoxServicesException {
 
-		if (MailBoxUtility.isEmpty(directoryName)) {
-			LOGGER.info("The given URI {} does not exist.", directoryName);
-			throw new MailBoxServicesException("The given URI '" + directoryName + "' does not exist.");
-		}
-		File directory = new File(directoryName);
-
-		if (!directory.isDirectory()) {
-			LOGGER.info("The given URI {} is not a directory.", directoryName);
-			throw new MailBoxServicesException("The given URI '" + directoryName + "' is not a directory.");
+		if (MailBoxUtility.isEmpty(path)) {
+			LOGGER.info("The given URI {} does not exist.", path);
+			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
 		}
 
-		if (!directory.exists()) {
-			LOGGER.info("The given directory {} does not exist.", directoryName);
-			throw new MailBoxServicesException("The given directory '" + directoryName + "' does not exist.");
+		// Modified to support both file and directory.
+		File location = new File(path);
+		if (location.isFile()) {
+
+			if (location.exists()) {
+				files.add(location);
+			} else {
+				LOGGER.info("The given file {} does not exist.", path);
+				throw new MailBoxServicesException("The given file '" + path + "' does not exist.");
+			}
+
 		} else {
 
-			// get all the files from a directory
-			for (File file : directory.listFiles()) {
+			if (!location.exists()) {
+				LOGGER.info("The given directory {} does not exist.", path);
+				throw new MailBoxServicesException("The given directory '" + path + "' does not exist.");
+			} else {
 
-				if (file.isFile()) {
-					if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
-						files.add(file);
-					}
-				} else if (file.isDirectory()) { // get all files from inner
-					// directory.
-					if (!MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
-						listFiles(file.getAbsolutePath(), files);
+				// get all the files from a directory
+				for (File file : location.listFiles()) {
+
+					if (file.isFile()) {
+						if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
+							files.add(file);
+						}
+					} else if (file.isDirectory()) { // get all files from inner directory.
+						if (!MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
+							listFiles(file.getAbsolutePath(), files);
+						}
 					}
 				}
 			}
@@ -714,8 +713,8 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Creates a filter for directories only.
 	 * 
-	 * @return Object which implements DirectoryStream.Filter interface and that
-	 *         accepts directories only.
+	 * @return Object which implements DirectoryStream.Filter interface and that accepts directories
+	 *         only.
 	 */
 	public DirectoryStream.Filter<Path> defineFilter(final boolean listDirectoryOnly) {
 
@@ -749,11 +748,11 @@ public abstract class AbstractRemoteProcessor {
 		}
 		Path target = targetDirectory.resolve(file.getName());
 		// moving to processed folder
-		Files.move(file.toPath(), target, StandardCopyOption.ATOMIC_MOVE);
+		Files.move(file.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	/**
-	 * Method is used to move the file to the processed folder.
+	 * Method is used to move the files to the processed folder.
 	 * 
 	 * @param filePath
 	 *            The source location
@@ -762,6 +761,29 @@ public abstract class AbstractRemoteProcessor {
 	public void archiveFiles(File[] files) throws IOException {
 		for (File file : files) {
 			archiveFile(file.getAbsolutePath());
+		}
+	}
+
+	/**
+	 * Method is used to move the uploaded file to the given folder.
+	 * 
+	 * @param filePath
+	 *            The source location
+	 * @throws IOException
+	 */
+	public void archiveFiles(File[] files, String processedFileLcoation) throws IOException {
+
+		Path oldPath = null;
+		Path newPath = null;
+		for (File file : files) {
+
+			oldPath = Paths.get(file.toURI());
+			newPath = Paths.get(processedFileLcoation).resolve(file.getName());
+
+			if (!Files.exists(newPath.getParent())) {
+				Files.createDirectories(newPath.getParent());
+			}
+			Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
@@ -938,8 +960,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Method is used to get the CredentialInfo model for getting login username
-	 * & password.
+	 * Method is used to get the CredentialInfo model for getting login username & password.
 	 * 
 	 * @throws SymmetricAlgorithmException
 	 * @throws URISyntaxException
@@ -981,8 +1002,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Method is used to get the CredentialInfoModel for getting keystore
-	 * credentials
+	 * Method is used to get the CredentialInfoModel for getting keystore credentials
 	 * 
 	 * @throws SymmetricAlgorithmException
 	 * @throws URISyntaxException

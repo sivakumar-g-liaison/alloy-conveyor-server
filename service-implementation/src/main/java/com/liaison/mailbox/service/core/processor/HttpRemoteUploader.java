@@ -22,6 +22,7 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -30,8 +31,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote uploader to perform push operation, also it has support methods
- * for JavaScript.
+ * Http remote uploader to perform push operation, also it has support methods for JavaScript.
  * 
  * @author veerasamyn
  */
@@ -98,8 +98,15 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		} else {
+
 			if (null != files) {
-				archiveFiles(files);
+
+				String processedFileLcoation = getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION);
+				if (MailBoxUtility.isEmpty(processedFileLcoation)) {
+					archiveFiles(files);
+				} else {
+					archiveFiles(files, processedFileLcoation);
+				}
 			}
 		}
 	}
