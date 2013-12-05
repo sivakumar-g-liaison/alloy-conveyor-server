@@ -10,11 +10,11 @@ myApp.factory('RESTService',
                     url: url
                 }).
                 success(function (data, status, headers, config) {
-                    callback(data);
+                    callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
-                    alert("failed to retrieve data");
-                    callback(data);
+                    //alert("failed to retrieve data");
+                    callback(data, status);
                 });
             },
             post: function (url, body, callback) {

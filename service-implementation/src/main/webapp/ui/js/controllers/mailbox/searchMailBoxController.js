@@ -26,8 +26,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
         // Loading the profile details
         $scope.loadProfiles = function () {
-            $scope.restService.get($scope.base_url + "/profile", function (data) {
-                $scope.profiles = data.getProfileResponse.profiles;
+            $scope.restService.get($scope.base_url + "/profile", function (data, status) {
+                if (status == 200) {
+                    $scope.profiles = data.getProfileResponse.profiles;
+                    if (data.getProfileResponse.response.status == 'failure') {
+                        showSaveMessage(data.getProfileResponse.response.message, 'error');
+                    }
+                } else {
+                    showSaveMessage("failed to load Profiles", 'error');
+                }
+
             })
         };
         $scope.loadProfiles(); //initial load for the profiles
@@ -165,8 +173,14 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
             $scope.hitCounter = $scope.hitCounter + 1;
             $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName + '&hitCounter=' + $scope.hitCounter,
-                function (data) {
-
+                function (data, status) {
+                    if (status == 200) {
+                        if (data.searchMailBoxResponse.response.status == 'failure') {
+                            showSaveMessage(data.searchMailBoxResponse.response.message, 'error');
+                        }
+                    } else {
+                    	 showSaveMessage("retrieval of search results failed", 'error');
+                    }
                     if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
                         $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
                     }
