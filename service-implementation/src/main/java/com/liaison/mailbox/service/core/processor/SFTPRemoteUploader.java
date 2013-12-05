@@ -41,11 +41,9 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author praveenu
  */
-public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
-		MailBoxProcessor {
+public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(SFTPRemoteUploader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SFTPRemoteUploader.class);
 
 	@SuppressWarnings("unused")
 	private SFTPRemoteUploader() {
@@ -69,10 +67,8 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 	@Override
-	public G2SFTPClient getClientWithInjectedConfiguration()
-			throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException,
-			SymmetricAlgorithmException {
+	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
 
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
 
@@ -93,21 +89,43 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 	 * @throws SymmetricAlgorithmException
 	 * 
 	 */
-	private void executeRequest() throws LiaisonException, IOException,
-			JAXBException, URISyntaxException, FS2Exception,
-			MailBoxServicesException, SftpException,
-			SymmetricAlgorithmException {
+	private void executeRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
+			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();
 
+		String path = getPayloadURI();
+
+		if (MailBoxUtility.isEmpty(path)) {
+			LOGGER.info("The given URI {} does not exist.", path);
+			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+		}
+
 		if (sftpRequest.openChannel()) {
 
-			String path = getPayloadURI();
-			uploadDirectory(sftpRequest, path, getWriteResponseURI());
+			String remotePath = getWriteResponseURI();
+			if (MailBoxUtility.isEmpty(remotePath)) {
+				LOGGER.info("The given remote URI {} does not exist.", remotePath);
+				throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+			}
+			Boolean dirExists = true;
+			try {
+				sftpRequest.getNative().lstat(remotePath);
+			} catch (Exception ex) {
+				dirExists = false;
+			}
+			if (!dirExists) {
+				// create directory on the server
+				sftpRequest.getNative().mkdir(new File(remotePath).getName());
+			}
 
+			sftpRequest.changeDirectory(remotePath);
+			uploadDirectory(sftpRequest, path, remotePath);
 		}
 		sftpRequest.disconnect();
+
+		// archiveFile(path);
 	}
 
 	/**
@@ -119,9 +137,8 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 	 * @throws MailBoxServicesException
 	 * 
 	 */
-	public void uploadDirectory(G2SFTPClient sftpRequest,
-			String localParentDir, String remoteParentDir) throws IOException,
-			LiaisonException, SftpException, MailBoxServicesException {
+	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir)
+			throws IOException, LiaisonException, SftpException, MailBoxServicesException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -132,19 +149,9 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 					// skip parent directory and the directory itself
 					continue;
 				}
-				if (item.isFile()) {
+				if (item.isDirectory()) {
 
-					String remoteFilePath = remoteParentDir + "/"
-							+ item.getName();
-					// upload the file
-					sftpRequest.changeDirectory(remoteParentDir);
-					InputStream inputStream = new FileInputStream(item);
-					sftpRequest.putFile(new File(remoteFilePath).getName(),
-							inputStream);
-
-				} else {
-					String remoteFilePath = remoteParentDir + "/"
-							+ item.getName();
+					String remoteFilePath = remoteParentDir + "/" + item.getName();
 
 					Boolean fileExists = true;
 					try {
@@ -152,23 +159,22 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 					} catch (Exception ex) {
 						fileExists = false;
 					}
-
 					if (!fileExists) {
 						// create directory on the server
-						sftpRequest.getNative().mkdir(
-								new File(remoteFilePath).getName());
+						sftpRequest.getNative().mkdir(new File(remoteFilePath).getName());
 					}
 					// upload the sub directory
-					String parent = remoteParentDir + "/" + item.getName();
-					if (remoteParentDir.equals("")) {
-						parent = item.getName();
-					}
-					sftpRequest.changeDirectory(parent);
+					sftpRequest.changeDirectory(remoteFilePath);
 					localParentDir = item.getAbsolutePath();
+					uploadDirectory(sftpRequest, localParentDir, remoteFilePath);
 
-					uploadDirectory(sftpRequest, localParentDir, parent);
+				} else {
+
+					// upload the file
+					sftpRequest.changeDirectory(remoteParentDir);
+					InputStream inputStream = new FileInputStream(item);
+					sftpRequest.putFile(item.getName(), inputStream);
 				}
-
 			}
 		}
 	}
@@ -180,14 +186,12 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 
 			LOGGER.info("Entering in invoke.");
 			// SFTPRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance
-					.getJavaScriptUri())) {
+			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				engine.eval(getJavaScriptString(configurationInstance
-						.getJavaScriptUri()));
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
@@ -201,10 +205,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements
 		} catch (Exception e) {
 
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(
-					null,
-					configurationInstance.getProcsrName() + ":"
-							+ e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

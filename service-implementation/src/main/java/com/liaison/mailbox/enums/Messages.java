@@ -56,8 +56,8 @@ public enum Messages {
 	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile."),
 	TRG_PROF_FAILURE("Error triggering the profile %s ."),
 	FOLDERS_CONFIGURATION_INVALID("Folders configured for processors, but they are missing folder type and folder uri."),
-	CREDENTIAL_CONFIGURATION_INVALID(
-			"Credential configured for processors, but they are missing Credetial type and Credetial uri."),
+	CREDENTIAL_CONFIGURATION_INVALID("Credential configured for processors, but they are missing Credetial type and Credetial uri."),
+	CREDENTIAL_URI_INVALID("Credential configured for processors, but Credetial uri is invalid."),
 	INJECTION_OF_PROPERTIES_FAILED("Injection of properties while building http client from processor configuration failed."),
 	HTTP_REQUEST_FAILED("HTTP request failed."),
 	RESPONSE_LOCATION_NOT_CONFIGURED("The response location is not configured or empty."),

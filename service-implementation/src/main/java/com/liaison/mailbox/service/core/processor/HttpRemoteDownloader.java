@@ -40,15 +40,14 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote downloader to perform pull operation, also it has support methods for JavaScript.
+ * Http remote downloader to perform pull operation, also it has support methods
+ * for JavaScript.
  * 
  * @author praveenu
  */
-public class HttpRemoteDownloader extends AbstractRemoteProcessor implements
-		MailBoxProcessor {
+public class HttpRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(HttpRemoteDownloader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private HttpRemoteDownloader() {
@@ -67,14 +66,12 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements
 
 			LOGGER.info("Entering in invoke.");
 			// HTTPRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance
-					.getJavaScriptUri())) {
+			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				engine.eval(getJavaScriptString(configurationInstance
-						.getJavaScriptUri()));
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
@@ -88,10 +85,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements
 		} catch (Exception e) {
 
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(
-					null,
-					configurationInstance.getProcsrName() + ":"
-							+ e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
@@ -114,11 +108,9 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements
 	 * @throws NoSuchAlgorithmException
 	 * 
 	 */
-	protected void executeRequest() throws MailBoxServicesException,
-			LiaisonException, IOException, FS2Exception, URISyntaxException,
-			JAXBException, MailBoxConfigurationServicesException,
-			SymmetricAlgorithmException, KeyStoreException,
-			NoSuchAlgorithmException, CertificateException {
+	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException,
+			KeyStoreException, NoSuchAlgorithmException, CertificateException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
@@ -140,13 +132,13 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements
 				if (buffer.length() > 0) {
 					request.inputData(buffer.toString());
 				}
+
 			}
 		}
 
 		HTTPResponse response = request.execute();
 		if (response.getStatusCode() != 200) {
-			LOGGER.info("The reponse code recived is {} ",
-					response.getStatusCode());
+			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		} else {
 			if (null != files) {

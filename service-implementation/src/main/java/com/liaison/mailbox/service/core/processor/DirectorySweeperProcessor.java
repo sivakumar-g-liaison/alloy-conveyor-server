@@ -55,8 +55,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * DirectorySweeper
  * 
  * <P>
- * DirectorySweeper sweeps the files from mail box and creates meta data about file and post it to
- * the queue.
+ * DirectorySweeper sweeps the files from mail box and creates meta data about
+ * file and post it to the queue.
  * 
  * @author veerasamyn
  */
@@ -84,10 +84,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// TODO Re stage and update status in FSM
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 		}
-
 	}
 
 	private void executeRequest() throws Exception {
@@ -117,7 +116,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			String sweepedFileLocation = getMailBoxProperties().getProperty(MailBoxConstants.SWEEPED_FILE_LOCATION);
 			if (!MailBoxUtility.isEmpty(sweepedFileLocation)) {
 
-				// If the given sweeped file location is not available then system will create that.
+				// If the given sweeped file location is not available then
+				// system will create that.
 				Path path = Paths.get(sweepedFileLocation);
 				if (!Files.isDirectory(path)) {
 					Files.createDirectories(path);
@@ -140,12 +140,11 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			}
 		}
-
 	}
 
 	/**
-	 * Method is used to retrieve all the files attributes from the given mailbox. This method
-	 * supports both FS2 and Java File API
+	 * Method is used to retrieve all the files attributes from the given
+	 * mailbox. This method supports both FS2 and Java File API
 	 * 
 	 * @param root
 	 *            The mailbox root directory
@@ -197,7 +196,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Grouping the files based on the payload threshold and no of files threshold.
+	 * Grouping the files based on the payload threshold and no of files
+	 * threshold.
 	 * 
 	 * @param files
 	 *            Group of all files in a given directory.
@@ -208,8 +208,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws NoSuchMethodException
 	 * @throws MailBoxServicesException
 	 */
-	private List<List<FileAttributesDTO>> groupingFiles(List<FileAttributesDTO> files)
-			throws ScriptException, IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
+	private List<List<FileAttributesDTO>> groupingFiles(List<FileAttributesDTO> files) throws ScriptException,
+			IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
@@ -284,8 +284,11 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Method is used to rename the processed files using given file rename format. If
-	 * sweepedFileLocation is available in the mailbox files will be moved to the given location.
+	 * <<<<<<< Updated upstream Method is used to rename the processed files
+	 * using given file rename format. If sweepedFileLocation is available in
+	 * the mailbox files will be moved to the given location. ======= Method is
+	 * used to rename the processed files using given file rename format >>>>>>>
+	 * Stashed changes
 	 * 
 	 * @param fileList
 	 *            Files list.
@@ -297,8 +300,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws URISyntaxException
 	 */
 	public void markAsSweeped(List<FileAttributesDTO> fileList, String fileRenameFormat, String sweepedFileLocation)
-			throws IOException,
-			JSONException, FS2Exception, URISyntaxException {
+			throws IOException, JSONException, FS2Exception, URISyntaxException {
 
 		if (MailBoxUtility.isEmpty(sweepedFileLocation)) {
 
@@ -322,7 +324,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
 				}
 
-				// Renaming the file at the end of the step when everything is done.
+				// Renaming the file at the end of the step when everything is
+				// done.
 				move(oldPath, newPath);
 				file.setFilePath(oldPath.toString());
 				file.setGuid(MailBoxUtility.getGUID());
@@ -352,7 +355,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
 				}
 
-				// Renaming the file at the end of the step when everything is done.
+				// Renaming the file at the end of the step when everything is
+				// done.
 				move(oldPath, newPath);
 				file.setFilePath(oldPath.toString());
 				file.setGuid(MailBoxUtility.getGUID());
@@ -376,7 +380,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Method is used to construct the MetaData JSON from the file attributes dto list.
+	 * Method is used to construct the MetaData JSON from the file attributes
+	 * dto list.
 	 * 
 	 * @param files
 	 *            The file attributes list
@@ -386,9 +391,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	private String constructMetaDataJson(List<FileAttributesDTO> files)
-			throws JsonGenerationException, JsonMappingException,
-			IOException, JAXBException {
+	private String constructMetaDataJson(List<FileAttributesDTO> files) throws JsonGenerationException,
+			JsonMappingException, IOException, JAXBException {
 
 		FileGroupDTO group = new FileGroupDTO();
 		group.getFileAttributes().addAll(files);

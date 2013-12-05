@@ -45,44 +45,52 @@ public class MailBoxProcessorFactory {
 
 			switch (foundProtocolType) {
 
-				case FTPS:
-					mailBoxProcessor = new FTPSRemoteDownloader(processor);
-					break;
+			case FTPS:
+				mailBoxProcessor = new FTPSRemoteDownloader(processor);
+				break;
 
-				case SFTP:
-					mailBoxProcessor = new SFTPRemoteDownloader(processor);
-					break;
+			case FTP:
+				mailBoxProcessor = new FTPSRemoteDownloader(processor);
+				break;
 
-				case HTTP:
-					mailBoxProcessor = new HttpRemoteDownloader(processor);
-					break;
-				case HTTPS:
-					mailBoxProcessor = new HttpRemoteDownloader(processor);
-					break;
-				default:
-					break;
+			case SFTP:
+				mailBoxProcessor = new SFTPRemoteDownloader(processor);
+				break;
+
+			case HTTP:
+				mailBoxProcessor = new HttpRemoteDownloader(processor);
+				break;
+			case HTTPS:
+				mailBoxProcessor = new HttpRemoteDownloader(processor);
+				break;
+			default:
+				break;
 
 			}
 		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
 
 			switch (foundProtocolType) {
 
-				case FTPS:
-					mailBoxProcessor = new FTPSRemoteUploader(processor);
-					break;
+			case FTPS:
+				mailBoxProcessor = new FTPSRemoteUploader(processor);
+				break;
 
-				case SFTP:
-					mailBoxProcessor = new SFTPRemoteUploader(processor);
-					break;
+			case FTP:
+				mailBoxProcessor = new FTPSRemoteUploader(processor);
+				break;
 
-				case HTTP:
-					mailBoxProcessor = new HttpRemoteUploader(processor);
-					break;
-				case HTTPS:
-					mailBoxProcessor = new HttpRemoteUploader(processor);
-					break;
-				default:
-					break;
+			case SFTP:
+				mailBoxProcessor = new SFTPRemoteUploader(processor);
+				break;
+
+			case HTTP:
+				mailBoxProcessor = new HttpRemoteUploader(processor);
+				break;
+			case HTTPS:
+				mailBoxProcessor = new HttpRemoteUploader(processor);
+				break;
+			default:
+				break;
 
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {

@@ -30,15 +30,14 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
- * Http remote uploader to perform push operation, also it has support methods for JavaScript.
+ * Http remote uploader to perform push operation, also it has support methods
+ * for JavaScript.
  * 
  * @author veerasamyn
  */
-public class HttpRemoteUploader extends AbstractRemoteProcessor implements
-		MailBoxProcessor {
+public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(HttpRemoteUploader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HttpRemoteUploader.class);
 
 	@SuppressWarnings("unused")
 	private HttpRemoteUploader() {
@@ -66,10 +65,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public void executeRequest() throws MailBoxServicesException,
-			LiaisonException, IOException, FS2Exception, URISyntaxException,
-			JAXBException, KeyStoreException, NoSuchAlgorithmException,
-			CertificateException, SymmetricAlgorithmException {
+	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			SymmetricAlgorithmException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
@@ -95,9 +93,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements
 		}
 
 		HTTPResponse response = request.execute();
+		LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 		if (response.getStatusCode() != 200) {
-			LOGGER.info("The reponse code recived is {} ",
-					response.getStatusCode());
+			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		} else {
 			if (null != files) {
@@ -112,14 +110,12 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements
 		try {
 
 			// HTTPRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance
-					.getJavaScriptUri())) {
+			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				engine.eval(getJavaScriptString(configurationInstance
-						.getJavaScriptUri()));
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
@@ -134,10 +130,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements
 		} catch (Exception e) {
 
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(
-					null,
-					configurationInstance.getProcsrName() + ":"
-							+ e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}

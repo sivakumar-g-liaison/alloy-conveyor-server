@@ -40,11 +40,9 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * @author praveenu
  * 
  */
-public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
-		MailBoxProcessor {
+public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(FTPSRemoteDownloader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FTPSRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteDownloader() {
@@ -61,14 +59,12 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 
 			LOGGER.info("Entering in invoke.");
 			// FTPSRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance
-					.getJavaScriptUri())) {
+			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				engine.eval(getJavaScriptString(configurationInstance
-						.getJavaScriptUri()));
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
@@ -82,10 +78,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 		} catch (Exception e) {
 
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(
-					null,
-					configurationInstance.getProcsrName() + ":"
-							+ e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
@@ -105,10 +98,8 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 	@Override
-	public G2FTPSClient getClientWithInjectedConfiguration()
-			throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException,
-			SymmetricAlgorithmException {
+	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -129,35 +120,30 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 
-	protected void executeRequest() throws MailBoxServicesException,
-			LiaisonException, IOException, FS2Exception, URISyntaxException,
-			JAXBException, SymmetricAlgorithmException {
+	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException, SymmetricAlgorithmException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		ftpsRequest.connect();
+		// ftpsRequest.setBinary(false);
+		// ftpsRequest.setPassive(true);
+		ftpsRequest.getNative().enterLocalPassiveMode();
 		ftpsRequest.login();
-		ftpsRequest.setBinary(false);
-		ftpsRequest.setPassive(true);
 
 		String path = getPayloadURI();
-
 		if (MailBoxUtility.isEmpty(path)) {
 			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path
-					+ "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
 		}
-		/*
-		 * File root = new File(path);
-		 * 
-		 * if (root.isDirectory()) { downloadDirectory(ftpsRequest, path); }
-		 * else {
-		 * 
-		 * ByteArrayOutputStream response = new ByteArrayOutputStream();
-		 * ftpsRequest.getFile(root.getName(), response);
-		 * writeFileResponseToMailBox(response, "/" + root.getName()); }
-		 */
 
-		downloadDirectory(ftpsRequest, path, getWriteResponseURI());
+		String remotePath = getWriteResponseURI();
+		if (MailBoxUtility.isEmpty(remotePath)) {
+			LOGGER.info("The given remote URI {} does not exist.", remotePath);
+			throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+		}
+
+		ftpsRequest.changeDirectory(path);
+		downloadDirectory(ftpsRequest, path, remotePath);
 		ftpsRequest.disconnect();
 	}
 
@@ -170,45 +156,45 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 
-	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir,
-			String loadDir) throws IOException, LiaisonException,
-			URISyntaxException, FS2Exception, MailBoxServicesException {
+	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
+			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
 		}
-
 		FTPFile[] files = ftpClient.getNative().listFiles(dirToList);
 
 		if (files != null) {
 
 			for (FTPFile file : files) {
-				String currentFileName = file.getName();
-				if (currentFileName.equals(".") || currentFileName.equals("..")) {
+
+				// File file = new File(fileName);
+
+				if (file.getName().equals(".") || file.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
 				}
-
-				if (file.isDirectory()) {
-
-					String remotePath = dirToList + "/" + currentFileName;
-					String localDir = loadDir + "/" + currentFileName;
-					File directory = new File(localDir);
-					if (!directory.exists()) {
-						Files.createDirectory(directory.toPath());
-					}
-					downloadDirectory(ftpClient, remotePath, localDir);
+				String currentFileName = file.getName();
+				if (file.isFile()) {
+					// String remotePath = dirToList + "/" + currentFileName;
+					String localDir = localFileDir + "/" + currentFileName;
+					ByteArrayOutputStream stream = new ByteArrayOutputStream();
+					ftpClient.changeDirectory(dirToList);
+					ftpClient.getFile(currentFileName, stream);
+					writeSFTPSResponseToMailBox(stream, localDir);
 
 				} else {
+					String localDir = localFileDir + "/" + currentFileName;
 					String remotePath = dirToList + "/" + currentFileName;
-					ByteArrayOutputStream stream = new ByteArrayOutputStream();
-					ftpClient.getFile(remotePath, stream);
-					writeSFTPSResponseToMailBox(stream, loadDir + "/"
-							+ currentFileName);
+					File directory = new File(localDir);
+					if (!directory.exists()) {
+						Files.createDirectories(directory.toPath());
+					}
+					ftpClient.changeDirectory(remotePath);
+					downloadDirectory(ftpClient, remotePath, localDir);
 				}
 			}
 		}
 	}
-
 }

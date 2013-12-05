@@ -43,11 +43,9 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * @author praveenu
  * 
  */
-public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
-		MailBoxProcessor {
+public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(FTPSRemoteUploader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FTPSRemoteUploader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteUploader() {
@@ -64,14 +62,12 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 
 			LOGGER.info("Entering in invoke.");
 			// FTPSRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance
-					.getJavaScriptUri())) {
+			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 				ScriptEngineManager manager = new ScriptEngineManager();
 				ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				engine.eval(getJavaScriptString(configurationInstance
-						.getJavaScriptUri()));
+				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 				Invocable inv = (Invocable) engine;
 
 				// invoke the method in javascript
@@ -85,10 +81,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 		} catch (Exception e) {
 
 			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
-			sendEmail(
-					null,
-					configurationInstance.getProcsrName() + ":"
-							+ e.getMessage(), e.getMessage(), "HTML");
+			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM
 		}
@@ -108,10 +101,8 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 	@Override
-	public G2FTPSClient getClientWithInjectedConfiguration()
-			throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException,
-			SymmetricAlgorithmException {
+	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -131,27 +122,39 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 	 * @throws SymmetricAlgorithmException
 	 * 
 	 */
-	protected void executeRequest() throws MailBoxServicesException,
-			LiaisonException, IOException, FS2Exception, URISyntaxException,
-			JAXBException, SymmetricAlgorithmException {
+	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException, SymmetricAlgorithmException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		ftpsRequest.connect();
+		ftpsRequest.getNative().enterLocalPassiveMode();
 		ftpsRequest.login();
 		ftpsRequest.setBinary(false);
 		ftpsRequest.setPassive(true);
 
 		String path = getPayloadURI();
-
 		if (MailBoxUtility.isEmpty(path)) {
 			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path
-					+ "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
 		}
 
-		uploadDirectory(ftpsRequest, path, getWriteResponseURI());
+		String remotePath = getWriteResponseURI();
+		if (MailBoxUtility.isEmpty(remotePath)) {
+			LOGGER.info("The given remote URI {} does not exist.", remotePath);
+			throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+		}
 
+		boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
+		if (!dirExists) {
+			// create directory on the server
+			ftpsRequest.getNative().makeDirectory(remotePath);
+		}
+		ftpsRequest.changeDirectory(remotePath);
+
+		uploadDirectory(ftpsRequest, path, remotePath);
 		ftpsRequest.disconnect();
+
+		// archiveFile(path);
 	}
 
 	/**
@@ -162,9 +165,8 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 	 * @throws SftpException
 	 * 
 	 */
-	public static void uploadDirectory(G2FTPSClient ftpsRequest,
-			String localParentDir, String remoteParentDir) throws IOException,
-			LiaisonException {
+	public static void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
+			throws IOException, LiaisonException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -177,33 +179,22 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements
 				}
 				if (item.isFile()) {
 
-					String remoteFilePath = remoteParentDir + "/"
-							+ item.getName();
-					// upload the file
+					// upload file
 					ftpsRequest.changeDirectory(remoteParentDir);
 					InputStream inputStream = new FileInputStream(item);
-					ftpsRequest.putFile(new File(remoteFilePath).getName(),
-							inputStream);
+					ftpsRequest.putFile(item.getName(), inputStream);
 
 				} else {
-					String remoteFilePath = remoteParentDir + "/"
-							+ item.getName();
 
-					boolean dirExists = ftpsRequest.getNative()
-							.changeWorkingDirectory(remoteFilePath);
+					String remoteFilePath = remoteParentDir + "/" + item.getName();
+
+					boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remoteFilePath);
 					if (!dirExists) {
 						// create directory on the server
 						ftpsRequest.getNative().makeDirectory(remoteFilePath);
 					}
-					// upload the sub directory
-					String parent = remoteParentDir + "/" + item.getName();
-					if (remoteParentDir.equals("")) {
-						parent = item.getName();
-					}
-					ftpsRequest.changeDirectory(parent);
-					localParentDir = item.getAbsolutePath();
-
-					uploadDirectory(ftpsRequest, localParentDir, parent);
+					ftpsRequest.changeDirectory(remoteFilePath);
+					uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath);
 				}
 
 			}
