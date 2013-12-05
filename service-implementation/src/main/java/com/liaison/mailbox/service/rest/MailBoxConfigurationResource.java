@@ -703,7 +703,7 @@ public class MailBoxConfigurationResource {
 		try {
 
 			LOG.info("The directory sweeper meta data json ");
-			returnResponse = Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry")
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry")
 					.build();
 
 		} catch (Exception e) {
@@ -720,4 +720,34 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 	}
 
+	@POST
+	@Path("/basicauth")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response httpServerListener(@Context HttpServletRequest request,
+			@HeaderParam("Authorization") String auth) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			LOG.info("Successfully retrieved the auth header : {} ", auth);
+			returnResponse = Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity(auth)
+					.build();
+
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+	}
 }
