@@ -60,7 +60,8 @@ public interface MailBoxConstants {
 	public final static String META_FILE_NAME = ".meta";
 	public final static String PROCESSED_FOLDER = "PROCESSED";
 
-	// used for write response for http remote downloader. This is the default processor name.
+	// used for write response for http remote downloader. This is the default
+	// processor name.
 	public final static String PROCESSOR = "PROCESSOR";
 
 	// Properties for sweeper grouping boundary condition

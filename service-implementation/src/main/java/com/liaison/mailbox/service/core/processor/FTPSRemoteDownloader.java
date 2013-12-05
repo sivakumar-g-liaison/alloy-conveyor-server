@@ -125,10 +125,14 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		ftpsRequest.connect();
-		// ftpsRequest.setBinary(false);
-		// ftpsRequest.setPassive(true);
-		ftpsRequest.getNative().enterLocalPassiveMode();
 		ftpsRequest.login();
+		if (getRemoteProcessorProperty() != null) {
+
+			// ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
+			// ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
+			ftpsRequest.setBinary(false);
+			ftpsRequest.setPassive(true);
+		}
 
 		String path = getPayloadURI();
 		if (MailBoxUtility.isEmpty(path)) {
@@ -178,15 +182,16 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				String currentFileName = file.getName();
 				if (file.isFile()) {
 					// String remotePath = dirToList + "/" + currentFileName;
-					String localDir = localFileDir + "/" + currentFileName;
+					String localDir = localFileDir + File.separatorChar + currentFileName;
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					ftpClient.changeDirectory(dirToList);
 					ftpClient.getFile(currentFileName, stream);
 					writeSFTPSResponseToMailBox(stream, localDir);
 
 				} else {
-					String localDir = localFileDir + "/" + currentFileName;
-					String remotePath = dirToList + "/" + currentFileName;
+
+					String localDir = localFileDir + File.separatorChar + currentFileName;
+					String remotePath = dirToList + File.separatorChar + currentFileName;
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());

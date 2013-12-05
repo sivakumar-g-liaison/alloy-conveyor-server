@@ -29,6 +29,7 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -122,10 +123,10 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 			sftpRequest.changeDirectory(remotePath);
 			uploadDirectory(sftpRequest, path, remotePath);
+
 		}
 		sftpRequest.disconnect();
 
-		// archiveFile(path);
 	}
 
 	/**
@@ -151,7 +152,12 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				}
 				if (item.isDirectory()) {
 
-					String remoteFilePath = remoteParentDir + "/" + item.getName();
+					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())) {
+						// skip processed folder
+						continue;
+					}
+
+					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
 
 					Boolean fileExists = true;
 					try {
@@ -174,6 +180,18 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					sftpRequest.changeDirectory(remoteParentDir);
 					InputStream inputStream = new FileInputStream(item);
 					sftpRequest.putFile(item.getName(), inputStream);
+				}
+				// archiveFile(item.getAbsolutePath());
+
+				if (null != item) {
+
+					String processedFileLcoation = getDynamicProperties().getProperty(
+							MailBoxConstants.PROCESSED_FILE_LOCATION);
+					if (MailBoxUtility.isEmpty(processedFileLcoation)) {
+						archiveFile(item.getAbsolutePath());
+					} else {
+						archiveFile(item, processedFileLcoation);
+					}
 				}
 			}
 		}

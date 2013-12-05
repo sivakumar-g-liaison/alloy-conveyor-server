@@ -108,10 +108,10 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				LOGGER.info("The given remote URI {} does not exist.", remotePath);
 				throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
 			}
+
 			downloadDirectory(sftpRequest, path, remotePath);
 		}
 		sftpRequest.disconnect();
-
 	}
 
 	/**
@@ -144,12 +144,12 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					// skip parent directory and the directory itself
 					continue;
 				}
-				boolean isDir = sftpRequest.getNative().stat(dirToList + "/" + aFile).isDir();
+				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 
 				if (isDir) {
 
-					String localDir = localFileDir + "/" + root.getName();
-					String remotePath = dirToList + "/" + root.getName();
+					String localDir = localFileDir + File.separatorChar + root.getName();
+					String remotePath = dirToList + File.separatorChar + root.getName();
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
@@ -160,7 +160,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				} else {
 
 					// String remotePath = dirToList + "/" + root.getName();
-					String localDir = localFileDir + "/" + root.getName();
+					String localDir = localFileDir + File.separatorChar + root.getName();
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					sftpRequest.changeDirectory(dirToList);
 					sftpRequest.getFile(root.getName(), stream);

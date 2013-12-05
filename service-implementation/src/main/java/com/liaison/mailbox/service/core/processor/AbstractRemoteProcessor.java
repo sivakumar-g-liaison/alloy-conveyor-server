@@ -105,18 +105,18 @@ public abstract class AbstractRemoteProcessor {
 
 		switch (foundProtocolType) {
 
-			case FTP:
-				return new G2FTPSClient();
-			case FTPS:
-				return new G2FTPSClient();
-			case SFTP:
-				return new G2SFTPClient();
-			case HTTP:
-				return new HTTPRequest(null, LOGGER);
-			case HTTPS:
-				return new HTTPRequest(null, LOGGER);
-			default:
-				return null;
+		case FTP:
+			return new G2FTPSClient();
+		case FTPS:
+			return new G2FTPSClient();
+		case SFTP:
+			return new G2SFTPClient();
+		case HTTP:
+			return new HTTPRequest(null, LOGGER);
+		case HTTPS:
+			return new HTTPRequest(null, LOGGER);
+		default:
+			return null;
 		}
 	}
 
@@ -254,8 +254,9 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the URI to which the response should be written, this can be used if the JS decides to
-	 * write the response straight to the file system or database
+	 * Get the URI to which the response should be written, this can be used if
+	 * the JS decides to write the response straight to the file system or
+	 * database
 	 * 
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
@@ -300,7 +301,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the credential URI of TrustStore & Keystore to execute the FTPS uploader/downloader
+	 * Get the credential URI of TrustStore & Keystore to execute the FTPS
+	 * uploader/downloader
 	 * 
 	 * @return String URI
 	 * @throws MailBoxServicesException
@@ -327,7 +329,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the credential URI for login details to execute the FTPS & SFTP uploader/downloader
+	 * Get the credential URI for login details to execute the FTPS & SFTP
+	 * uploader/downloader
 	 * 
 	 * @return String URI
 	 * @throws MailBoxServicesException
@@ -352,7 +355,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the login details from credentialURI to execute the FTPS & SFTP uploader/downloader
+	 * Get the login details from credentialURI to execute the FTPS & SFTP
+	 * uploader/downloader
 	 * 
 	 * @return String[]
 	 * @throws MailBoxServicesException
@@ -425,7 +429,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Get the list of dynamic properties of the MailBox known only to java script
+	 * Get the list of dynamic properties of the MailBox known only to java
+	 * script
 	 * 
 	 * @return MailBox dynamic properties
 	 */
@@ -615,7 +620,8 @@ public abstract class AbstractRemoteProcessor {
 	 * Sent notifications for trigger system failure.
 	 * 
 	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in the mailbox.
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
 	 * @param subject
 	 *            The notification subject
 	 * @param emailBody
@@ -646,7 +652,8 @@ public abstract class AbstractRemoteProcessor {
 	 * Sent notifications for trigger system failure.
 	 * 
 	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in the mailbox.
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
 	 * @param subject
 	 *            The notification subject
 	 * @param exc
@@ -700,7 +707,8 @@ public abstract class AbstractRemoteProcessor {
 						if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
 							files.add(file);
 						}
-					} else if (file.isDirectory()) { // get all files from inner directory.
+					} else if (file.isDirectory()) { // get all files from inner
+														// directory.
 						if (!MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
 							listFiles(file.getAbsolutePath(), files);
 						}
@@ -713,8 +721,8 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Creates a filter for directories only.
 	 * 
-	 * @return Object which implements DirectoryStream.Filter interface and that accepts directories
-	 *         only.
+	 * @return Object which implements DirectoryStream.Filter interface and that
+	 *         accepts directories only.
 	 */
 	public DirectoryStream.Filter<Path> defineFilter(final boolean listDirectoryOnly) {
 
@@ -762,6 +770,30 @@ public abstract class AbstractRemoteProcessor {
 		for (File file : files) {
 			archiveFile(file.getAbsolutePath());
 		}
+	}
+
+	/**
+	 * Method is used to move the uploaded file to the given folder.
+	 * 
+	 * @param file
+	 *            File to be moved
+	 * @param processedFileLcoation
+	 *            The source location
+	 * @throws IOException
+	 */
+	public void archiveFile(File file, String processedFileLcoation) throws IOException {
+
+		Path oldPath = null;
+		Path newPath = null;
+
+		oldPath = Paths.get(file.toURI());
+		newPath = Paths.get(processedFileLcoation).resolve(file.getName());
+
+		if (!Files.exists(newPath.getParent())) {
+			Files.createDirectories(newPath.getParent());
+		}
+
+		Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	/**
@@ -959,8 +991,17 @@ public abstract class AbstractRemoteProcessor {
 		return sftpRequest;
 	}
 
+	protected RemoteProcessorPropertiesDTO getRemoteProcessorProperty() throws JsonParseException,
+			JsonMappingException, JAXBException, IOException {
+
+		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(
+				configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
+		return properties;
+	}
+
 	/**
-	 * Method is used to get the CredentialInfo model for getting login username & password.
+	 * Method is used to get the CredentialInfo model for getting login username
+	 * & password.
 	 * 
 	 * @throws SymmetricAlgorithmException
 	 * @throws URISyntaxException
@@ -1002,7 +1043,8 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Method is used to get the CredentialInfoModel for getting keystore credentials
+	 * Method is used to get the CredentialInfoModel for getting keystore
+	 * credentials
 	 * 
 	 * @throws SymmetricAlgorithmException
 	 * @throws URISyntaxException

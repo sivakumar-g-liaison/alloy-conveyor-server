@@ -29,6 +29,7 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -127,10 +128,14 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		ftpsRequest.connect();
-		ftpsRequest.getNative().enterLocalPassiveMode();
 		ftpsRequest.login();
-		ftpsRequest.setBinary(false);
-		ftpsRequest.setPassive(true);
+		if (getRemoteProcessorProperty() != null) {
+
+			// ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
+			// ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
+			ftpsRequest.setBinary(false);
+			ftpsRequest.setPassive(true);
+		}
 
 		String path = getPayloadURI();
 		if (MailBoxUtility.isEmpty(path)) {
@@ -153,8 +158,6 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		uploadDirectory(ftpsRequest, path, remotePath);
 		ftpsRequest.disconnect();
-
-		// archiveFile(path);
 	}
 
 	/**
@@ -165,7 +168,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws SftpException
 	 * 
 	 */
-	public static void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
+	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
 			throws IOException, LiaisonException {
 
 		File localDir = new File(localParentDir);
@@ -186,7 +189,12 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 				} else {
 
-					String remoteFilePath = remoteParentDir + "/" + item.getName();
+					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())) {
+						// skip processed folder
+						continue;
+					}
+
+					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
 
 					boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remoteFilePath);
 					if (!dirExists) {
@@ -197,6 +205,16 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath);
 				}
 
+				if (null != item) {
+
+					String processedFileLcoation = getDynamicProperties().getProperty(
+							MailBoxConstants.PROCESSED_FILE_LOCATION);
+					if (MailBoxUtility.isEmpty(processedFileLcoation)) {
+						archiveFile(item.getAbsolutePath());
+					} else {
+						archiveFile(item, processedFileLcoation);
+					}
+				}
 			}
 		}
 	}
