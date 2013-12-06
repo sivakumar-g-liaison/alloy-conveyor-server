@@ -7,7 +7,7 @@ public class FileAttributesDTO {
 	private Long size;
 	private String folderdername;
 	private String timestamp;
-	private String filePath;
+	private String fs2Path;
 
 	public String getGuid() {
 		return guid;
@@ -17,12 +17,12 @@ public class FileAttributesDTO {
 		this.guid = guid;
 	}
 
-	public String getFilePath() {
-		return filePath;
+	public String getFs2Path() {
+		return fs2Path;
 	}
 
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+	public void setFs2Path(String fs2Path) {
+		this.fs2Path = fs2Path;
 	}
 
 	public String getFilename() {

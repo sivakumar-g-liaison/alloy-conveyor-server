@@ -33,6 +33,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.fs2.api.CoreFS2Utils;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2MetaSnapshotImpl;
@@ -55,8 +56,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * DirectorySweeper
  * 
  * <P>
- * DirectorySweeper sweeps the files from mail box and creates meta data about
- * file and post it to the queue.
+ * DirectorySweeper sweeps the files from mail box and creates meta data about file and post it to
+ * the queue.
  * 
  * @author veerasamyn
  */
@@ -143,8 +144,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Method is used to retrieve all the files attributes from the given
-	 * mailbox. This method supports both FS2 and Java File API
+	 * Method is used to retrieve all the files attributes from the given mailbox. This method
+	 * supports both FS2 and Java File API
 	 * 
 	 * @param root
 	 *            The mailbox root directory
@@ -183,7 +184,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		for (Path path : result) {
 
 			attribute = new FileAttributesDTO();
-			attribute.setFilePath(path.toAbsolutePath().toString());
+			attribute.setFs2Path(path.toAbsolutePath().toString());
 
 			BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
 			attribute.setTimestamp(attr.creationTime().toString());
@@ -196,8 +197,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Grouping the files based on the payload threshold and no of files
-	 * threshold.
+	 * Grouping the files based on the payload threshold and no of files threshold.
 	 * 
 	 * @param files
 	 *            Group of all files in a given directory.
@@ -284,11 +284,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * <<<<<<< Updated upstream Method is used to rename the processed files
-	 * using given file rename format. If sweepedFileLocation is available in
-	 * the mailbox files will be moved to the given location. ======= Method is
-	 * used to rename the processed files using given file rename format >>>>>>>
-	 * Stashed changes
+	 * Method is used to rename the processed files using given file rename
+	 * format. If sweepedFileLocation is available in the mailbox files will be moved to the given
+	 * location.
 	 * 
 	 * @param fileList
 	 *            Files list.
@@ -307,13 +305,12 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			LOGGER.info("Renaming the processed files");
 			for (FileAttributesDTO file : fileList) {
 
-				Path oldPath = new File(file.getFilePath()).toPath();
+				Path oldPath = new File(file.getFs2Path()).toPath();
 				Path newPath = oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat);
 
 				// Creating meta snapshot
 				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-				File fileLoc = new File(newPath.toFile().getAbsolutePath());
-				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
+				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(newPath.toUri(), new Date(), "DirectorySweeper");
 
 				// Constructing the fs2 file
 				try {
@@ -327,7 +324,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 				// Renaming the file at the end of the step when everything is
 				// done.
 				move(oldPath, newPath);
-				file.setFilePath(oldPath.toString());
+				file.setFs2Path(CoreFS2Utils.genURIFromPath(oldPath.toFile().getAbsolutePath()).toString());
 				file.setGuid(MailBoxUtility.getGUID());
 			}
 
@@ -338,13 +335,12 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			Path target = Paths.get(sweepedFileLocation);
 			for (FileAttributesDTO file : fileList) {
 
-				Path oldPath = new File(file.getFilePath()).toPath();
+				Path oldPath = new File(file.getFs2Path()).toPath();
 				Path newPath = target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 
 				// Creating meta snapshot
 				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-				File fileLoc = new File(newPath.toFile().getAbsolutePath());
-				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(fileLoc.toURI(), new Date(), "DirectorySweeper");
+				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(newPath.toUri(), new Date(), "DirectorySweeper");
 
 				// Constructing the fs2 file
 				try {
@@ -358,7 +354,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 				// Renaming the file at the end of the step when everything is
 				// done.
 				move(oldPath, newPath);
-				file.setFilePath(oldPath.toString());
+				file.setFs2Path(CoreFS2Utils.genURIFromPath(oldPath.toFile().getAbsolutePath()).toString());
 				file.setGuid(MailBoxUtility.getGUID());
 			}
 		}
@@ -380,8 +376,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Method is used to construct the MetaData JSON from the file attributes
-	 * dto list.
+	 * Method is used to construct the MetaData JSON from the file attributes dto list.
 	 * 
 	 * @param files
 	 *            The file attributes list
