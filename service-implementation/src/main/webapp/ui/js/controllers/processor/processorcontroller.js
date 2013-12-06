@@ -146,8 +146,8 @@ var rest = myApp.controller(
                 $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
                 $scope.allMandatoryFtpProperties = ['url'];
                 $scope.allMandatoryHttpProperties = ['httpVersion', 'httpVerb', 'url', 'contentType'];
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
-                $scope.allStaticPropertiesForProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION'];
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION', 'TARGET_LOCATION'];
+                $scope.allStaticPropertiesForProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION', 'TARGET_LOCATION'];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = ['TRUST_STORE', 'KEY_STORE', 'LOGIN_CREDENTIAL'];
                 $scope.allStaticPropertiesForProcessorCredential = ['TRUST_STORE', 'KEY_STORE', 'LOGIN_CREDENTIAL'];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = ['FTPS', 'SFTP'];
@@ -332,6 +332,10 @@ var rest = myApp.controller(
                             <div ng-show="formAddPrcsr.folderuriresponse.$dirty && formAddPrcsr.folderuriresponse.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.pattern><strong>Invalid Folder URI.</strong></span>\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><strong>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
+						<div ng-switch-when="TARGET_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" required  placeholder="required" name="folderuritarget" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
+                            <div ng-show="formAddPrcsr.folderuritarget.$dirty && formAddPrcsr.folderuritarget.$invalid">\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.folderuritarget.$error.pattern><strong>Invalid Folder URI.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.folderuritarget.$error.maxlength><strong>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea name="folderuridefault" ng-model="COL_FIELD" style="width:95%;height:45px" placeholder="required" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
@@ -363,6 +367,10 @@ var rest = myApp.controller(
                             <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.pattern><strong>Invalid Description.</strong></span>\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
+						<div ng-switch-when="TARGET_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptiontarget" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
+                            <div ng-show="formAddPrcsr.descriptiontarget.$dirty && formAddPrcsr.descriptiontarget.$invalid">\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.descriptiontarget.$error.pattern><strong>Invalid Description.</strong></span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.descriptiontarget.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea name="descriptiondefault" ng-model="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250/>\n\
