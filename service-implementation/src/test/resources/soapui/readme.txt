@@ -1,0 +1,1 @@
+This folder will contain the SOAP UI projects. These will used to run Integrations test though the CI build.
