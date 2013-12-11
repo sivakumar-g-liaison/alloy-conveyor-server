@@ -6,7 +6,30 @@ var rest = myApp.controller(
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
-
+            
+            // Function to modify the static properties to have additional properties of "binary"
+            // and "passive" for FTP & FTPS protocols.
+            $scope.modifyStaticPropertiesBasedOnProtocol = function() {
+                if ($scope.processor.protocol == "FTP" || $scope.processor.protocol == "FTPS") {
+                    $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push('binary', 'passive');
+                    $scope.allStaticProperties.push('binary',  'passive');
+                } else {
+                    // Remove binary and passive properties from the array allStaticPropertiesThatAreNotAssignedValuesYet 
+                     var indexOfBinary = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf('binary');
+                     if(indexOfBinary > -1 ) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfBinary, 1);     
+                     
+                     var indexOfPassive = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf('passive');
+                     if (indexOfPassive > -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPassive, 1);
+                     
+                      // Remove binary and passive properties from the array allStaticProperties
+                     indexOfBinary = $scope.allStaticProperties.indexOf('binary');
+                     if(indexOfBinary > -1 ) $scope.allStaticProperties.splice(indexOfBinary, 1);
+                     indexOfPassive = $scope.allStaticProperties.indexOf('passive');
+                     if (indexOfPassive > -1) $scope.allStaticProperties.splice(indexOfPassive, 1);
+                                  
+                }
+            }
+                        
             $scope.loadOrigin = function () {
                 //          
                 $scope.isEdit = false;
@@ -80,7 +103,7 @@ var rest = myApp.controller(
                 $scope.processor.protocol = $scope.enumprotocoltype[0];
 
                 // applying boolean value for chunked encoding
-                $scope.chunkedEncodingValues = [
+                $scope.booleanValues = [
                     true,
                     false
                 ];
@@ -144,6 +167,10 @@ var rest = myApp.controller(
                 }];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader', 'processedfilelocation'];
                 $scope.allStaticProperties = ['socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader'];
+                
+                 // function to modify the static properties if the protocol is FTP or FTPS
+                $scope.modifyStaticPropertiesBasedOnProtocol();
+                
                 $scope.allMandatoryFtpProperties = ['url'];
                 $scope.allMandatoryHttpProperties = ['httpVersion', 'httpVerb', 'url', 'contentType'];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = ['PAYLOAD_LOCATION', 'RESPONSE_LOCATION', 'TARGET_LOCATION'];
@@ -208,10 +235,16 @@ var rest = myApp.controller(
                                     <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                 </div>\n\
                                 <div ng-switch-when="chunkedEncoding">\n\
-                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in chunkedEncodingValues"></select>\n\
+                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
+                                </div>\n\
+                                 <div ng-switch-when="binary">\n\
+                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
+                                </div>\n\
+                                 <div ng-switch-when="passive">\n\
+                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
                                 </div>\n\
                                 <div ng-switch-default>\n\
-                                    <textarea ng-model="COL_FIELD" ng-maxLength=2048 required style="width:94%;height: 45px" placeholder="required" />\n\
+                                    <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-maxLength=2048 required style="width:94%;height: 45px" placeholder="required" />\n\
                                     <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class="right">\n\
                                     <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                 </div>\n\
@@ -233,7 +266,13 @@ var rest = myApp.controller(
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                         </div>\n\
                         <div ng-switch-when="chunkedEncoding">\n\
-                            <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in chunkedEncodingValues"></select>\n\
+                            <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
+                        </div>\n\
+                        <div ng-switch-when="binary">\n\
+                            <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
+                        </div>\n\
+                        <div ng-switch-when="passive">\n\
+                            <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                         </div>\n\
                         <div ng-switch-when="httpVerb">\n\
                             <select ng-model="verb" ng-change="onVerbChange(verb)" ng-options="property for property in enumHttpVerb"></select>\n\
@@ -251,9 +290,8 @@ var rest = myApp.controller(
                             <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.propUrl.$dirty && formAddPrcsr.propUrl.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.propUrl.$error.pattern><strong>Enter proper URL</strong></span>\n\
-                            </div>\n\
-                        </div>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.propUrl.$error.pattern><strong>Enter valid URL</strong></span>\n\
+                            </div></div>\n\
                         <div ng-switch-when="socketTimeout">\n\
                             <textarea ng-model="COL_FIELD" name="socketTimeout" required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class="right">\n\
@@ -814,9 +852,12 @@ var rest = myApp.controller(
 
                     attrName = valueSelectedinSelectionBox.name;
                 } else if (addedProperty.value !== '') {
-                    attrName = (addedProperty.value== true || addedProperty.value == false)?addedProperty.value.toString():addedProperty.value;
+                    attrName = addedProperty.value;
                 }
-
+             
+                // row.getProperty('value') is converted to string since the Propertyvalue may contain boolean value for the property
+                // "chunkedEncoding" if the user has entered the value of "false", then checking the !row.getProperty('value') 
+                // will always be true and the below alert will be displayed.
 
                 if (!attrName || !row.getProperty('value').toString()) {
                
@@ -829,7 +870,12 @@ var rest = myApp.controller(
                     showAlert('Name already added.', 'error');
                     return;
                 }
-
+				
+				  // Displays an alert if the dynamic property entered by user is already in static properties provided
+                if ((valueSelectedinSelectionBox.name == 'add new -->') && ($scope.allStaticProperties.indexOf(attrName) > -1) ) {
+                    showAlert('The property is already available in dropdown provided.Please use the appropriate property from dropdown menu','error');
+                    return;
+                }		
                 $scope.informer.inform("error message", "error");
                 $scope.informer.inform("info message", "info");
                 $scope.allInfos = $scope.informer.allInfos;
@@ -1201,7 +1247,11 @@ var rest = myApp.controller(
 
             $scope.resetStaticAndMandatoryProps = function () {
 
+
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'socketTimeout', 'connectionTimeout', 'retryAttempts', 'chunkedEncoding', 'encodingFormat', 'port', 'otherRequestHeader', 'processedfilelocation'];
+
+                // function to modify the static properties if the protocol is FTP or FTPS
+                $scope.modifyStaticPropertiesBasedOnProtocol();
 
                 $scope.ftpMandatoryProperties = [{
                     name: 'url',
@@ -1242,6 +1292,7 @@ var rest = myApp.controller(
                     isMandatory: false
                 }];
             }
+                   
             // Editor Section Begins
             var editor;
             var rowObj;

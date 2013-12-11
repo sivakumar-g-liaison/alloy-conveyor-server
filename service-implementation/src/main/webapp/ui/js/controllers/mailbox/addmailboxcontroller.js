@@ -32,6 +32,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             'ACTIVE',
             'INACTIVE'
         ];
+        
+        // Default values of payloadsize and no of files threshold
+        $scope.payloadSizeThreshold = 131072;
+        $scope.numberOfFilesThreshold = 10
 
         var block = $blockUI.createBlockUI();
         var fromAddProcsr = false;
@@ -223,11 +227,21 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 enableCellSelection: true,
                 enableFocusedCellEdit: true,
                 cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
-                                    <div ng-switch-when="">\n\
-                                         <textarea ng-model="COL_FIELD"  style="width:94%;height:45px" ng-maxLength=512 placeholder="required" />\n\
+                                   <div ng-switch-when="">\n\
+                                         <div ng-switch on="valueSelectedinSelectionBox.name">\n\
+                                            <div ng-switch-when="payloadsizethreshold">\n\
+                                                <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:94%;height:45px" ng-maxLength=512 placeholder="required" value=payloadSizeThreshold/>\n\
+                                            </div>\n\
+                                            <div ng-switch-when="numoffilesthreshold">\n\
+                                                <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=numberOfFilesThreshold"  style="width:94%;height:45px" ng-maxLength=512 placeholder="required" value=numberOfFilesThreshold/>\n\
+                                            </div>\n\
+                                            <div ng-switch-default>\n\
+                                                <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
+                                            </div>\n\
+                                          </div>\n\
                                     </div>\n\
-                                    <div ng-switch-default>\n\
-                                         <textarea ng-model="COL_FIELD"  required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
+                                   <div ng-switch-default>\n\
+                                        <textarea ng-model="COL_FIELD"  required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
                                   </div>'
 
@@ -270,6 +284,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 showAlert('Name already added.', 'error');
                 return;
             }
+      	  // Displays an alert if the dynamic property entered by user is already in static properties provided
+            if ((valueSelectedinSelectionBox.name == 'add new -->') && ($scope.allStaticProperties.indexOf(attrName) > -1) ) {
+                showAlert('The property is already available in dropdown provided.Please use the appropriate property from dropdown menu','error');
+                return;
+            }		
 
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
