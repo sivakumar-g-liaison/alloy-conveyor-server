@@ -27,7 +27,7 @@ supports grid feature
 
 .ngPagerControl .ngPagerButton {
     /** pagination buttons are pushed down 10px... fix that here... **/
-    margin-top: -10px;
+    margin-top: 0px;
 
     /** and a little space in between  **/
     margin-left: 2px;

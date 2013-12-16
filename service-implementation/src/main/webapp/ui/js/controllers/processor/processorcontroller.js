@@ -843,7 +843,7 @@ var rest = myApp.controller(
 
                     if (!($scope.numberPattern.test(row.getProperty('value')))) {
 
-                        showAlert('Value should be a number.', 'information');
+                        showAlert('Value should be a number.', 'error');
                         return;
                     }
                 }

@@ -207,7 +207,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         // Watch for paging options
         $scope.$watch('pagingOptions', function (newVal, oldVal) {
 
-            if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+        	if(newVal.currentPage === null) {
+				newVal.currentPage = 1;
+			}
+        	if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
                 $scope.search();
             }
             if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
