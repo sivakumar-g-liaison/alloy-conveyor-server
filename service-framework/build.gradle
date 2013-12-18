@@ -22,7 +22,7 @@ dependencies {
 
 
     // Liaison code
-    compile group: "com.liaison", name: "commons-lib", version: "0.0.2-SNAPSHOT", changing: true
+    compile group: "com.liaison", name: "commons-lib", version: "1.0.1-SNAPSHOT", changing: true
 	def slf4jVersion = '1.7.5';
     compile 'org.slf4j:slf4j-api:${slf4jVersion}'
     runtime 'org.slf4j:slf4j-simple:${slf4jVersion}'

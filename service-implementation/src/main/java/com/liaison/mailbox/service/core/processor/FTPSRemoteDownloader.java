@@ -124,14 +124,14 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			URISyntaxException, JAXBException, SymmetricAlgorithmException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
+		ftpsRequest.enableSessionReuse(true);
 		ftpsRequest.connect();
 		ftpsRequest.login();
+		ftpsRequest.enableDataChannelEncryption();
 		if (getRemoteProcessorProperty() != null) {
 
-			// ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
-			// ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
-			ftpsRequest.setBinary(false);
-			ftpsRequest.setPassive(true);
+			ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
+			ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
 		}
 
 		String path = getPayloadURI();

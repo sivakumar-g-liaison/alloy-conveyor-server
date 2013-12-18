@@ -895,8 +895,8 @@ public abstract class AbstractRemoteProcessor {
 
 		G2FTPSClient ftpsRequest = new G2FTPSClient();
 		ftpsRequest.setURI(properties.getUrl());
-		ftpsRequest.setDiagnosticLogger(LOGGER);
-		ftpsRequest.setCommandLogger(LOGGER);
+		ftpsRequest.setDiagnosticLogger(logger);
+		ftpsRequest.setCommandLogger(logger);
 		ftpsRequest.setConnectionTimeout(properties.getConnectionTimeout());
 
 		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
@@ -915,7 +915,7 @@ public abstract class AbstractRemoteProcessor {
 
 		if (keystoreModel != null) {
 
-			if (MailBoxUtility.isEmpty(keystoreModel.getFileURI()) || MailBoxUtility.isEmpty(keystoreModel.getFileURI())) {
+			if (MailBoxUtility.isEmpty(keystoreModel.getFileURI()) || MailBoxUtility.isEmpty(keystoreModel.getPassword())) {
 
 				LOGGER.info("Credential requires file path & password");
 				throw new MailBoxServicesException("Credential requires file path & password");
@@ -926,7 +926,7 @@ public abstract class AbstractRemoteProcessor {
 
 				ftpsRequest.setTrustManagerKeyStore(keystoreModel.getFileURI());
 				ftpsRequest.setTrustManagerKeyStoreType("jks");
-				ftpsRequest.setTrustManagerKeyStorePassword(keystoreModel.getFileURI());
+				ftpsRequest.setTrustManagerKeyStorePassword(keystoreModel.getPassword());
 
 			} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
 				ftpsRequest.setKeyManagerKeyStore(keystoreModel.getFileURI());
@@ -960,8 +960,8 @@ public abstract class AbstractRemoteProcessor {
 
 		G2SFTPClient sftpRequest = new G2SFTPClient();
 		sftpRequest.setURI(properties.getUrl());
-		sftpRequest.setDiagnosticLogger(LOGGER);
-		sftpRequest.setCommandLogger(LOGGER);
+		sftpRequest.setDiagnosticLogger(logger);
+		sftpRequest.setCommandLogger(logger);
 		sftpRequest.setTimeout(properties.getConnectionTimeout());
 		sftpRequest.setStrictHostChecking(false);
 		sftpRequest.setRetryInterval(properties.getRetryInterval());
@@ -974,6 +974,21 @@ public abstract class AbstractRemoteProcessor {
 				sftpRequest.setPassword(model.getPassword());
 			}
 		}
+		
+		CredentialInfoModel keystoreModel = getKeyStoreCredential();
+
+		if (keystoreModel != null) {
+
+			if (MailBoxUtility.isEmpty(keystoreModel.getFileURI())) {
+
+				LOGGER.info("Credential requires file path");
+				throw new MailBoxServicesException("Credential requires file path");
+			}
+			sftpRequest.setPrivateKeyPath(keystoreModel.getFileURI());
+			sftpRequest.setPassphrase(keystoreModel.getPassword());
+
+		}
+
 		return sftpRequest;
 	}
 
