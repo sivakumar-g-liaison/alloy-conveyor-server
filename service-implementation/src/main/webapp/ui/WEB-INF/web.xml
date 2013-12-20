@@ -31,6 +31,16 @@
         <servlet-name>InitializationServlet</servlet-name>
         <url-pattern>/init</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>HornetQMessageListnerServlet</servlet-name>
+        <servlet-class>com.liaison.mailbox.service.hornetq.util.HornetQMessageListnerServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HornetQMessageListnerServlet</servlet-name>
+        <url-pattern>/hqinit</url-pattern>
+    </servlet-mapping>
 
     <!-- Framework-defined dynamic services support, please do not modify -->
     <servlet>
