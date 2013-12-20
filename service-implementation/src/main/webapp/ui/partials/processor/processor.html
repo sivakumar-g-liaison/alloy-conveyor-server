@@ -84,14 +84,14 @@
                             Type
                         </label>
 
-                        <select ng-disabled="isEdit" ng-change="resetProcessorType(processor)" ng-model="processor.type" ng-options="type for type in enumprocsrtype" class="form-control">
+                        <select ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.name for type in enumprocsrtype" class="form-control">
                         </select>
                     </div>
                     <div class="form-group">
                         <label>
                             Status
                         </label>
-                        <select ng-model="processor.status" ng-options="e for e in enumstats" class="form-control">
+                        <select ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
                         </select>
 
                     </div>
