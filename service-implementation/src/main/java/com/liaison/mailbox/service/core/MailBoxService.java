@@ -200,11 +200,7 @@ public class MailBoxService {
 	
 	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
 		
-		String propertyFileName = "g2mailboxservice-dev.properties";
-		String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-		InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-		Properties properties = new Properties();
-		properties.load(is);
+		Properties properties = MailBoxUtility.getEnvironmentProperties();
 		String providerURL = properties.getProperty("providerurl");
 		String queueName =properties.getProperty("mailBoxProcessorQueue");
 
