@@ -278,7 +278,6 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		jndidto.setQueueName(queueName);
 		jndidto.setUrlPackagePrefixes("org.jboss.naming");
 		jndidto.setMessage(input);
-
 		util.postMessage(jndidto);
 
 	}

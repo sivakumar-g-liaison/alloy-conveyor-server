@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;

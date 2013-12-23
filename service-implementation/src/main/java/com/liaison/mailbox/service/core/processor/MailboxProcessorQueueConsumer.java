@@ -44,5 +44,4 @@ public class MailboxProcessorQueueConsumer {
 		
 		return qConsumerInstance;
 	}
-
 }

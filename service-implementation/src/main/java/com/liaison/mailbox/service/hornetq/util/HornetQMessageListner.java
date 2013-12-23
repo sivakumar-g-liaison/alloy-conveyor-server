@@ -18,15 +18,12 @@ import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 public class HornetQMessageListner implements MessageListener {
 	
 	private static final Logger logger = LoggerFactory.getLogger(HornetQMessageListner.class);
-	private static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
 	public HornetQMessageListner(final ConnectionFactory cf,
 			final Destination destination) throws JMSException {
@@ -51,7 +48,6 @@ public class HornetQMessageListner implements MessageListener {
 		try {
 			TextMessage textMessage = (TextMessage) message;
 			 MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
-			 
 			 qconsumer.invokeProcessor(textMessage.getText());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -65,13 +61,12 @@ public class HornetQMessageListner implements MessageListener {
 		
 		final Properties env = new Properties();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"org.jnp.interfaces.NamingContextFactory");
-		env.put(Context.PROVIDER_URL, configuration.getProperty("providerurl"));
+		env.put(Context.PROVIDER_URL, MailBoxUtility.getEnvironmentProperties().getProperty("providerurl"));
 		//env.put(Context.SECURITY_PRINCIPAL, "guest");
 		//env.put(Context.SECURITY_CREDENTIALS, "pass");
 		Context context = new InitialContext(env);
-		ConnectionFactory cf = (ConnectionFactory) context.lookup(configuration.getProperty("queueConnectionFactory").toString());
-		Destination destination = (Destination) context.lookup(configuration.getProperty("mailBoxProcessorQueue").toString());
-		//Destination destination = (Destination) context.lookup(MailBoxUtility.getEnvironmentProperties().getProperty("mailBoxProcessorQueue"));
+		ConnectionFactory cf = (ConnectionFactory) context.lookup(MailBoxUtility.getEnvironmentProperties().getProperty("queueConnectionFactory"));
+		Destination destination = (Destination) context.lookup(MailBoxUtility.getEnvironmentProperties().getProperty("mailBoxProcessorQueue"));
 		new HornetQMessageListner(cf, destination);
 		logger.info("Starting up the JMS listner");
 

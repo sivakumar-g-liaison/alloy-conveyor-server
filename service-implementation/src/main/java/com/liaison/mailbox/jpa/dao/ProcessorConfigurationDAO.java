@@ -18,18 +18,23 @@ import com.liaison.mailbox.jpa.model.Processor;
 						+ " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
 						+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
 						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS)
+						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS), 
+						@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROCESSOR_ID,
+						query = "select processor from Processor processor"
+								+ " where processor.pguid = :" + ProcessorConfigurationDAO.PGU_ID)
 
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
 	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
+	public static final String FIND_PROCESSOR_BY_PROCESSOR_ID = "findProcessorByProcessorId";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
 	public static final String STATUS = "status";
 	public static final String EXEC_STATUS = "exec_status";
 	public static final String SHARD_KEY = "shard_key";
+	public static final String PGU_ID = "pguid";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -41,5 +46,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return The list of processors.
 	 */
 	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
+	
+	/**
+	 * Find by processor pguid.
+	 * 
+	 * @param processorId
+	 *            The processor unique id.
+	  * @return a processor.
+	 */
+	public Processor findByProcessorId(String processorId);
 
 }

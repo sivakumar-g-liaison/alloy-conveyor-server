@@ -28,8 +28,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             properties: []
         };
 
-        $scope.enumstats = [{"name":"Active","id":"ACTIVE"},
-            {"name":"InActive","id":"INACTIVE"}];
+        $scope.enumstats = [
+            'ACTIVE',
+            'INACTIVE'
+        ];
         
         // Default values of payloadsize and no of files threshold
         $scope.payloadSizeThreshold = 131072;
@@ -38,22 +40,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         var block = $blockUI.createBlockUI();
         var fromAddProcsr = false;
 
-        $scope.status = $scope.enumstats[0];
+        $scope.mailBox.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
-
-        $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"File Rename Format","id":"filerenameformat"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"},
-            {"name":"Sweeped File Location","id":"sweepedfilelocation"},
-            {"name":"Payload Size Threshold","id":"payloadsizethreshold"},
-            {"name":"Number of File Threshold","id":"numoffilesthreshold"}];
-
-        $scope.allStaticProperties = [{"name":"File Rename Format","id":"filerenameformat"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"},
-            {"name":"Sweeped File Location","id":"sweepedfilelocation"},
-            {"name":"Payload Size Threshold","id":"payloadsizethreshold"},
-            {"name":"Number of File Threshold","id":"numoffilesthreshold"}];
+        $scope.allStaticPropertiesThatAreNotAssignedValuesYet = ['add new -->', 'filerenameformat', 'emailnotificationids', 'sweepedfilelocation', 'payloadsizethreshold', 'numoffilesthreshold'];
+        //Data from server
+        $scope.allStaticProperties = ['filerenameformat', 'emailnotificationids', 'sweepedfilelocation', 'payloadsizethreshold', 'numoffilesthreshold'];
 
         //Data from server
         $scope.mailBoxProperties = [{
@@ -65,7 +57,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         // Loads the details initially if edit
         $scope.load = function () {
 
-            if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On
+            if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On               
 
                 $scope.isMailBoxEdit = true;
                 $scope.mailBoxId = $location.search().mailBoxId;
@@ -80,24 +72,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                         $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
                         (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
-                            data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
+                            data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.mailBox.status = $scope.enumstats[0] : $scope.mailBox.status = $scope.enumstats[1];
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
                         $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                         for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
-
-                            var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
-                                data.getMailBoxResponse.mailBox.properties[i].name);
-
-                            if (indexOfElement !== -1) {
-                                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-                            }
-
                             $scope.mailBoxProperties.push({
-                                name: (indexOfElement == -1)?data.getMailBoxResponse.mailBox.properties[i].name:
-                                    getName($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name),
+                                name: data.getMailBoxResponse.mailBox.properties[i].name,
                                 value: data.getMailBoxResponse.mailBox.properties[i].value,
                                 allowAdd: false
                             });
+
+                            var indexOfElement = $scope.allStaticPropertiesThatAreNotAssignedValuesYet.indexOf(data.getMailBoxResponse.mailBox.properties[i].name);
+                            if (indexOfElement > 0) {
+                                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                            }
                         };
                         $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
                             name: '',
@@ -115,14 +103,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
             var len = $scope.mailBoxProperties.length;
-
             for (var i = 0; i < len - 1; i++) {
-
-                var index =  getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
-
                 $scope.mailBox.properties.push({
-                    name: (index === -1)?$scope.mailBoxProperties[i].name:getId($scope.allStaticProperties, $scope.mailBoxProperties[i].name),
-                    value: $scope.mailBoxProperties[i].value
+                    name: $scope.mailBoxProperties[i].name,
+                    value: $scope.mailBoxProperties[i].value,
 
                 });
             }
@@ -131,7 +115,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;
                 $scope.editReq.reviseMailBoxRequest.mailBox.guid = $scope.mailBoxId;
-                $scope.editReq.reviseMailBoxRequest.mailBox.status = $scope.status.id;
 
                 $log.info($filter('json')(editReq));
 
@@ -156,7 +139,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 );
             } else {
                 $scope.addRequest.addMailBoxRequest.mailBox = $scope.mailBox;
-                $scope.addRequest.addMailBoxRequest.mailBox.status =$scope.status.id;
                 $log.info($filter('json')(addRequest));
 
                 block.blockUI();
@@ -212,12 +194,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         // Property grid
 
         $scope.valueSelectedinSelectionBox = {
-            value: ''
+            name: ''
         };
-
-       /* $scope.valueSelectedinSelectionBox = {
-            name: '', id: ''
-        };*/
 
         $scope.showAddNew = {
             value: 'false'
@@ -250,7 +228,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 enableFocusedCellEdit: true,
                 cellTemplate: '<div ng-switch on="row.getProperty(\'name\')">\n\
                                    <div ng-switch-when="">\n\
-                                         <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
+                                         <div ng-switch on="valueSelectedinSelectionBox.name">\n\
                                             <div ng-switch-when="payloadsizethreshold">\n\
                                                 <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:94%;height:45px" ng-maxLength=512 placeholder="required" value=payloadSizeThreshold/>\n\
                                             </div>\n\
@@ -282,21 +260,16 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         // adds a resource to the 'data' object
         $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData, addedProperty) {
 
-            if (valueSelectedinSelectionBox.value === null) {
-                showAlert('It is mandatory to set the name and value of the property being added.', 'error');
-                return;
-            }
-
             // validation
 
-            $log.info(valueSelectedinSelectionBox.value.id);
+            $log.info(valueSelectedinSelectionBox.name);
             $log.info(row.getProperty('value'));
 
             var attrName = '';
 
-            if (valueSelectedinSelectionBox.value.id !== 'add new -->') {
+            if (valueSelectedinSelectionBox.name !== 'add new -->') {
 
-                attrName = valueSelectedinSelectionBox.value.name;
+                attrName = valueSelectedinSelectionBox.name;
             } else if (addedProperty.value !== '') {
                 attrName = addedProperty.value;
             }
@@ -311,23 +284,20 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 showAlert('Name already added.', 'error');
                 return;
             }
-
-            var indexOfSelectedElement = getIndex(allPropsWithNovalue, attrName);
-
-            // Displays an alert if the dynamic property entered by user is already in static properties provided
-            if ((valueSelectedinSelectionBox.value.id === 'add new -->') && (indexOfSelectedElement != -1) ) {
+      	  // Displays an alert if the dynamic property entered by user is already in static properties provided
+            if ((valueSelectedinSelectionBox.name == 'add new -->') && ($scope.allStaticProperties.indexOf(attrName) > -1) ) {
                 showAlert('The property is already available in dropdown provided.Please use the appropriate property from dropdown menu','error');
                 return;
-            }
+            }		
 
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
-
             gridData.push({
                 name: attrName,
                 value: row.getProperty('value'),
                 allowAdd: false
             });
+            var indexOfSelectedElement = allPropsWithNovalue.indexOf(attrName);
 
             if (indexOfSelectedElement != -1) {
                 allPropsWithNovalue.splice(indexOfSelectedElement, 1);
@@ -340,7 +310,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 allowAdd: true
             });
 
-            valueSelectedinSelectionBox.value = '';
+            valueSelectedinSelectionBox.name = '';
             addedProperty.value = '';
 
         };
@@ -349,9 +319,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             var index = gridData.indexOf(row.entity);
             gridData.splice(index, 1);
             var removedProperty = row.getProperty('name');
-            var indexOfSelectedElement = getIndex(allProps, removedProperty);
-            if (indexOfSelectedElement != -1) {
-                allStaticPropertiesThatAreNotAssignedValuesYet.push(allProps[indexOfSelectedElement]);
+            var indexOfSelectedElement = allProps.indexOf(removedProperty);
+            if (indexOfSelectedElement > -1) {
+                allStaticPropertiesThatAreNotAssignedValuesYet.push(removedProperty);
             }
         };
 

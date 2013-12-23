@@ -15,28 +15,44 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
+import junit.framework.Assert;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Resources;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
+import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * Test class to test mailbox configuration service.

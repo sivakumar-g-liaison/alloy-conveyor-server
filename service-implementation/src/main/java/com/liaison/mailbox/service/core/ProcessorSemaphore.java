@@ -33,6 +33,31 @@ public class ProcessorSemaphore {
 	public ProcessorSemaphore() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	/**
+	 * Check and add the processor to the running list.
+	 * 
+	 * @param boolean
+	 */
+	public static synchronized boolean validateProcessorExecution(Processor processor) {
+
+		List<Processor> existingProcessors = new ArrayList<>();
+		boolean result = false;
+		for (Processor prcsr : synchronizedProcessors) {
+				if (prcsr.equals(processor)) {
+					existingProcessors.add(processor);
+					break;
+			}
+		}
+
+		if (!existingProcessors.isEmpty()) {
+			result = false;
+		} else {
+			synchronizedProcessors.add(processor);
+			result = true;
+		}
+		return result;
+	}
 
 	/**
 	 * Check and add the processor to the running list.
