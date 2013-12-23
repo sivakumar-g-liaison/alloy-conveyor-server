@@ -10,12 +10,21 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import javax.jms.JMSException;
+import javax.naming.NamingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
@@ -26,9 +35,11 @@ import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
+import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -78,15 +89,86 @@ public class MailBoxService {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
 
-			ProcessorSemaphore.validateProcessorExecution(processorMatchingProfile);
-			if (processorMatchingProfile.isEmpty()) {
-				LOG.info("The processor is already in progress.");
+			List<String> messages = new ArrayList<String>();
+			for (Processor processor : processorMatchingProfile) {
+				messages.add(processor.getPguid());
 			}
 
-			// invoking the Processors
-			MailBoxProcessor processorService = null;
-			for (Processor processor : processorMatchingProfile) {
+			ConfigureJNDIDTO conf = getConfigureJNDIDTO();
+			conf.setMessages(messages);
+			HornetQJMSUtil.postMessages(conf);
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName, Messages.SUCCESS));
+			return serviceResponse;
 
+		} catch (MailBoxServicesException e) {
+
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+
+		} catch (NamingException e) {
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+			
+		} catch (JMSException e) {
+			
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+		} catch (UnsupportedEncodingException e) {
+			
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+		}  catch (Exception e) {
+			
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+		}
+	}
+	
+	
+	/**
+	 * The method gets the processor based on given processor id.
+	 * 
+	 * @param processorId
+	 *            Unique id for processor
+	 * @return The trigger profile response DTO
+	 */
+	public TriggerProfileResponseDTO executeProcessor(String processorId) {
+
+		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
+		Processor processor = null;
+
+		try {
+
+			// validates mandatory value.
+			if (MailBoxUtility.isEmpty(processorId)) {
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id");
+			}
+			LOG.info("The given processor id is {}", processorId);
+
+			// finding the matching processor for the given processor id
+			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+			processor = processorDAO.findByProcessorId(processorId);
+
+			if (processor == null) {
+				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
+			}
+
+			if (!ProcessorSemaphore.validateProcessorExecution(processor))  {
+				LOG.info("The processor is already in progress.");
+			} else {
+				
+				MailBoxProcessor processorService = null;
 				processorService = MailBoxProcessorFactory.getInstance(processor);
 				if (processorService != null) {
 
@@ -102,19 +184,36 @@ public class MailBoxService {
 					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
 				}
 			}
-
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName, Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.PROCESSOR_EXECUTION_SUCCESSFULLY, processorId, Messages.SUCCESS));
 			return serviceResponse;
 
 		} catch (MailBoxServicesException e) {
 
 			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
 			serviceResponse
-					.setResponse(new ResponseDTO(Messages.TRG_PROF_FAILURE, profileName, Messages.FAILURE, e.getMessage()));
+					.setResponse(new ResponseDTO(Messages.PROCESSOR_EXECUTION_FAILED, processorId, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 
 		}
+	}
+	
+	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
+		
+		String propertyFileName = "g2mailboxservice-dev.properties";
+		String props = ServiceUtils.readFileFromClassPath(propertyFileName);
+		InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
+		Properties properties = new Properties();
+		properties.load(is);
+		String providerURL = properties.getProperty("providerurl");
+		String queueName =properties.getProperty("mailBoxProcessorQueue");
+
+		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
+		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
+		jndidto.setProviderURL(providerURL);
+		jndidto.setQueueName(queueName);
+		jndidto.setUrlPackagePrefixes("org.jboss.naming");
+		return jndidto;
 	}
 
 }
