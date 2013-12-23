@@ -60,4 +60,31 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 	}
+	
+	@Override
+	public Processor findByProcessorId(String processorId) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+			
+			Processor processor = null;
+			Object proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_PROCESSOR_ID)
+					.setParameter(PGU_ID, processorId)
+					.getSingleResult();
+			if (proc != null) {
+				processor = (Processor) proc;
+			}
+			LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+					processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+					processor.getProcsrProperties(), processor.getProcsrStatus());
+
+			return processor;
+		} finally {
+			if (entityManager != null) {
+				entityManager.clear();
+			}
+		}
+
+	}
 }

@@ -1,11 +1,14 @@
 package com.liaison.mailbox.service.dto;
 
+import java.util.List;
+
 public class ConfigureJNDIDTO {
 
 	private String initialContextFactory;
 	private String providerURL;
 	private String urlPackagePrefixes;
 	private String message;
+	private List<String> messages;
 	private String queueName;
 
 	public String getInitialContextFactory() {
@@ -32,12 +35,12 @@ public class ConfigureJNDIDTO {
 		this.urlPackagePrefixes = urlPackagePrefixes;
 	}
 
-	public String getMessage() {
-		return message;
+	public List<String> getMessages() {
+		return messages;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setMessages(List<String> messages) {
+		this.messages = messages;
 	}
 
 	public String getQueueName() {
@@ -46,5 +49,13 @@ public class ConfigureJNDIDTO {
 
 	public void setQueueName(String queueName) {
 		this.queueName = queueName;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }
