@@ -42,7 +42,9 @@ angular.module(
                     if (scope.selectedValue.value.id === "add new -->") {
                         return;
                     }
-                    scope.addNew.value = false;
+                    if(typeof(scope.addNew) != 'undefined') {
+                        scope.addNew.value = false;
+                   }
                 }, true);
 
                 scope.shouldIShowAddTextBox =
@@ -60,7 +62,9 @@ angular.module(
                             scope.addNew.value = true;
                             scope.addedProperty.value = '';
                         } else {
-                            scope.addNew.value = false;
+                        	  if(typeof(scope.addNew) != 'undefined') {
+                                  scope.addNew.value = false;
+                             }
                         }
                     };
             }

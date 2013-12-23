@@ -122,6 +122,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.inputPatternForURL = /^(ftp|ftps|sftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
     $rootScope.numberPattern = /^\d+$/;
     $rootScope.httpVersionPattern = /\b1.1\b/;
+    $rootScope.multipleEmailPattern = /^(([a-zA-Z0-9_'+*$%\^&!\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9:]{2,7})([,]\W?(?!$))?)+$/;
+
 
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
     // As of now used only for displaying the no of characters in error message.
