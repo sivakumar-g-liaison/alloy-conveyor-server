@@ -159,7 +159,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		System.out.println(jsonResponse);
 	}
 	
-	@Test
+	//@Test
 		public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 
