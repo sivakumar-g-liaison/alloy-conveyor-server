@@ -1454,15 +1454,16 @@ var rest = myApp.controller(
                     allowAdd: 'true'
                 }];
             } else {
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
-                $scope.processorFolderProperties = [{
-                    folderURI: '',
-                    folderType: '',
-                    folderDesc: '',
-                    isMandatory: false,
-                    allowAdd: 'true'
-                }];
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = $scope.allStaticPropertiesForProcessorFolder;
+            	 $scope.processorFolderProperties = [{
+                     folderURI: '',
+                     folderType: '',
+                     folderDesc: '',
+                     isMandatory: false,
+                     allowAdd: 'true'
+                 }];
+                 $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [{"name":"Payload Location","id":"PAYLOAD_LOCATION"},
+                     {"name":"Response Location","id":"RESPONSE_LOCATION"},
+                     {"name":"Target Location","id":"TARGET_LOCATION"}];
             }
         };
 
