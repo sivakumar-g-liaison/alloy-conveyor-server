@@ -48,7 +48,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		inbox = System.getProperty("java.io.tmpdir") + File.separator + "INBOX";
+		inbox = System.getProperty("java.io.tmpdir") + File.separator + "INBOX1";
 		Files.deleteIfExists(Paths.get(inbox));
 		Files.createDirectory(Paths.get(inbox));
 		fileRenameFormat = ".tested";
