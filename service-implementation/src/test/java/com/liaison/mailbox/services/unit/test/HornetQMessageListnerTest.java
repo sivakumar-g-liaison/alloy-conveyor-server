@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
@@ -18,7 +18,7 @@ import com.liaison.mailbox.service.util.HornetQJMSUtil;
 
 
 public class HornetQMessageListnerTest {
-     @Test
+     
 	 public void postToQueue() throws NamingException, JMSException,Exception{
 		 
 		 HornetQJMSUtil util = new HornetQJMSUtil();
@@ -42,7 +42,7 @@ public class HornetQMessageListnerTest {
            System.out.println("Done posting");		 
 	 }
      
-     @Test
+     
 	 public void testThreading() throws InterruptedException {
 		 
     	 MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
