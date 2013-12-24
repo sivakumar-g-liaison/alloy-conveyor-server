@@ -21,8 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 public class DirectorySweeperTaskHandler implements Task<String>{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeperTaskHandler.class);
-	
 	private String response = null;
 	private String path = null;
 	
