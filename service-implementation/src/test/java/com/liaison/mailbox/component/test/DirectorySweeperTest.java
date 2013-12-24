@@ -52,11 +52,11 @@ public class DirectorySweeperTest {
     @Before
     public void setUp() throws Exception {
 	
-	inbox = System.getProperty("java.io.tmpdir")+ File.separator + "INBOX";
-	outbox = System.getProperty("java.io.tmpdir")+ File.separator + "OUTBOX";
-	dummy = System.getProperty("java.io.tmpdir")+ File.separator + "DUMMY";
-	dummyFolder = dummy + File.separator + "EMPTYFOLDER";
-	notExist = System.getProperty("java.io.tmpdir")+ File.separator + "NOTEXIST";
+	inbox = System.getProperty("java.io.tmpdir")+ File.separator + "INBOX1";
+	outbox = System.getProperty("java.io.tmpdir")+ File.separator + "OUTBOX1";
+	dummy = System.getProperty("java.io.tmpdir")+ File.separator + "DUMMY1";
+	dummyFolder = dummy + File.separator + "EMPTYFOLDER1";
+	notExist = System.getProperty("java.io.tmpdir")+ File.separator + "NOTEXIST1";
 
 	sweeper = new DirectorySweeper();
 	
