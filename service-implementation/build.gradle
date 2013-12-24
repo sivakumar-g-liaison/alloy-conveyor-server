@@ -132,7 +132,7 @@ dependencies {
 
 	// used for logging
 
-	def log4j2Version = '2.0-beta7';
+	def log4j2Version = '2.0-beta9';
 	compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
 	compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
 	compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
