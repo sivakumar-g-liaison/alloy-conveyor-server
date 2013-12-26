@@ -1,49 +1,56 @@
-<nav class="navbar navbar-inverse navbar-fixed-top">
+<style>
+    .nested ul li {
+    	display: block;
+    	position: relative;
+    }
 
-    <div id="top-nav" class="navbar-collapse collapse">
-	
-		<ul class="nav navbar-nav">
-              <li><a href="#">Home</a></li>
-        </ul>
-	
-        <ul class="nav navbar-nav">
-            <li class="dropdown">
-			
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    Mailbox
-                    <b class="caret"></b>
-                </a>
+    .nested ul li:hover {
+    	display: block;
+    }
+    
+    .nested ul li ul {
+    	display: none;
+    }
+    
+    .nested ul li:hover ul {
+		position: absolute;
+		left: 100%;
+		top: 0;
+		display: block;
+    }
+    
+    .nested ul li:hover li {
+    	float: none;
+    }
+</style>
 
-                <ul class="dropdown-menu">
-                   <li><a href="#/mailbox/addMailBox">Add Mailbox</a></li>
-					<li><a href="#/mailbox/getMailBox">Search Mailbox</a></li>		
-                </ul>
-            </li>
-        </ul>
-		
-		<ul class="nav navbar-nav">
-              <li><a href="#/profiles/addProfiles">Manage Profiles</a></li>
-        </ul>
-        
-        <ul class="nav navbar-nav">
-              <li><a href="#/profiles/trigger">Trigger Profile</a></li>
-        </ul>
-        
-       <!-- <ul class="nav navbar-nav">
-            <li class="dropdown">
-			
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    Account
-                    <b class="caret"></b>
-                </a>
+<div class="container pad-bottom pad-top" fade-in>
 
-                <ul class="dropdown-menu">
-                   <li><a href="#/account/addAccount">Add Account</a></li>
-				   <li><a href="#/account/getAccount">Get Account</a></li>
-                </ul>
-            </li>
-        </ul> -->
-
+    <div class="btn-group pad-bottom">
+        <a href="#/" class="btn-default btn btn-lg">
+            <span><i class="glyphicon glyphicon-home glyphicon-white"></i>&nbsp;Home</span>
+        </a>
     </div>
-</nav>
 
+    <div class="btn-group pad-bottom">
+        <button class="btn-default btn dropdown-toggle btn-lg" data-toggle="dropdown">Mailbox
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="#/mailbox/addMailBox">Add Mailbox</a></li>
+            <li><a href="#/mailbox/getMailBox">Search Mailbox</a></li>
+        </ul>
+    </div>
+    
+    <div class="btn-group pad-bottom">
+        <a href="#/profiles/addProfiles" class="btn-default btn btn-lg">
+            <span>Manage Profiles</span>
+        </a>
+    </div>
+    
+    <div class="btn-group pad-bottom">
+        <a href="#/profiles/trigger" class="btn-default btn btn-lg">
+            <span>Trigger Profile</span>
+        </a>
+    </div>
+</div>
