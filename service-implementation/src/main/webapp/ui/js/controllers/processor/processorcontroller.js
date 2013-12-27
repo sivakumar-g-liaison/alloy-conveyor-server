@@ -58,6 +58,7 @@ var rest = myApp.controller(
                 name: "",
                 type: "",
                 javaScriptURI: "",
+                certificateURI: "",
                 description: "",
                 status: "",
                 protocol: "",
@@ -72,6 +73,12 @@ var rest = myApp.controller(
                 "roleList": '',
                 "uri": ''
             };
+            
+            $scope.certificateModal = {
+                    "certificates": '',
+                    "certificateURI": ''
+                };
+            
             $scope.processor.remoteProcessorProperties = {
                 otherRequestHeader: []
             };
@@ -747,6 +754,7 @@ var rest = myApp.controller(
                             $scope.processor.name = data.getProcessorResponse.processor.name;
                             //$scope.processor.type = data.getProcessorResponse.processor.type;
                             $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+                            $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
                             $scope.processor.description = data.getProcessorResponse.processor.description;
 
                             (data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0]
@@ -918,6 +926,7 @@ var rest = myApp.controller(
                 function (data) {
                     $scope.allProfiles = data.getProfileResponse.profiles;
                     $scope.loadBrowseData();
+                    $scope.loadCertificateData();
                 }
             );
         };
@@ -930,6 +939,17 @@ var rest = myApp.controller(
                 }
             );
         };
+        
+        $scope.loadCertificateData = function () {
+            $scope.restService.get($scope.base_url + '/listCertificates', //Get mail box Data
+                function (data) {
+                    $scope.certificates = data.ArrayList;
+                    $log.info($scope.certificates);
+                    $scope.certificateModal.certificates = $scope.certificates;
+                }
+            );
+        };
+        
         $scope.initialLoad();
         // Browse Component related stuff.
         /*$scope.getData = function () {
@@ -1246,7 +1266,7 @@ var rest = myApp.controller(
 	                 });
                 }
 
-                if (name === 'httpVerb'|| name === 'contentType' || name === 'httpVersion' && ($scope.protocol == 'HTTP' || $scope.protocol == 'HTTPS')) {
+                if ((name === 'httpVerb'|| name === 'contentType' || name === 'httpVersion') && ($scope.protocol == 'HTTP' || $scope.protocol == 'HTTPS')) {
                     mandatoryArray.push({
                         name: name,
                         value: $scope.verb
@@ -1327,6 +1347,8 @@ var rest = myApp.controller(
             }
 
             $scope.processor.javaScriptURI = $scope.modal.uri;
+            $scope.processor.certificateURI = $scope.certificateModal.certificateURI;
+            
             block.blockUI();
 
             if ($scope.isEdit) {
@@ -1393,10 +1415,16 @@ var rest = myApp.controller(
             $scope.processor.credentials = [];
             $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
         };
+        
         $scope.addNew = function () {
-            $scope.loadOrigin();
-            $scope.readAllProfiles();
+        	
+        	var resp = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
+            if (resp === true) {
+             $scope.loadOrigin();
+             $scope.readAllProfiles();
+            }
         };
+        
         $scope.resetProcessorType = function (model) {
 
             $scope.resetStaticAndMandatoryProps();

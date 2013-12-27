@@ -1,5 +1,6 @@
 package com.liaison.mailbox.service.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,13 +9,30 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -70,9 +88,10 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
+	 * @throws JSONException 
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException {
 
 		LOGGER.info("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
@@ -109,6 +128,13 @@ public class ProcessorConfigurationService {
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
+			
+			String pkcGuid = uploadPublicKey(serviceRequest, null);
+			
+			if (pkcGuid != null) {
+				
+				createPublicKeyAndTrustStoreLink(pkcGuid);
+			}
 
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
@@ -130,6 +156,93 @@ public class ProcessorConfigurationService {
 
 	}
 
+	/**
+	 * Method which associates the generated publickey certificate with TrustStore
+	 * @param pkcGuid
+	 * @throws IOException 
+	 * @throws JSONException 
+	 */
+	private void createPublicKeyAndTrustStoreLink(String pkcGuid) throws IOException, JSONException {
+		
+	   String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
+	   JSONObject jsonRequest = new JSONObject(request);
+	   
+	   jsonRequest.getJSONObject("dataTransferObject").put("pguid", 
+			   String.valueOf(MailBoxUtility.getEnvironmentProperties().get("truststore-id")));
+	   
+	   JSONArray array = jsonRequest.getJSONObject("dataTransferObject").getJSONArray("trustStoreMemberships");
+	   ((JSONObject)array.get(0)).getJSONObject("publicKey").put("pguid", pkcGuid);
+
+	   HttpPut httpPut = new HttpPut(String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url")) +
+			   "/update/truststore/" + String.valueOf(MailBoxUtility.getEnvironmentProperties().get("truststore-id"))); 
+	   
+       DefaultHttpClient httpclient = new DefaultHttpClient();
+       
+       httpPut.addHeader("Content-Type", "application/json");
+       httpPut.setEntity(new StringEntity(jsonRequest.toString()));
+       
+       HttpResponse response = httpclient.execute(httpPut);
+       
+       //TODO check for 200, if not then throw an Exception. 
+       System.out.println(response.getStatusLine());
+	}
+
+	/**
+	 * Method which uploads public key
+	 * from to KMS
+	 *
+	 * @return guid of the uploaded Public Key
+	 * @throws MailBoxConfigurationServicesException 
+	 * @throws IOException 
+	 * @throws ClientProtocolException 
+	 * @throws JSONException 
+	 */
+	private String uploadPublicKey(AddProcessorToMailboxRequestDTO addRequest,
+			ReviseProcessorRequestDTO reviseRequest) throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
+		
+		if (null == reviseRequest) {
+			
+			if (addRequest.getProcessor().getProtocol().equalsIgnoreCase("https")) {
+				
+				if (!MailBoxUtility.isEmpty(addRequest.getProcessor().getCertificateURI())) {
+					
+					String request = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
+					JSONObject jsonRequest = new JSONObject(request);
+					jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
+					
+					HttpPost httpPost = new HttpPost(String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url")) 
+							+ "upload/public"); 
+					DefaultHttpClient httpclient = new DefaultHttpClient();
+					
+					StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
+					FileBody publicKeyCert = new FileBody(new File(addRequest.getProcessor().getCertificateURI()));
+					HttpEntity reqEntity = MultipartEntityBuilder.create()
+							.addPart("request", jsonRequestBody)
+							.addPart("key", publicKeyCert)
+							.build();
+					
+					httpPost.setEntity(reqEntity);
+					HttpResponse response = httpclient.execute(httpPost);
+					
+					// TODO Check for 200 Status code, Consume entity then get GUID and return
+					
+					if (response.getStatusLine().getStatusCode() == 201) {
+						
+						JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
+						JSONArray arr = obj.getJSONObject("dataTransferObject").getJSONArray("keyGroupMemberships");
+						return (((JSONObject)arr.get(0)).getJSONObject("keyBase").getString("pguid"));
+						
+					}
+				}
+				
+		        
+		        return null;
+			}
+		}
+		
+		return null;
+	}
+	
 	/**
 	 * Creates link between scheduleProfileref and processor.
 	 * 

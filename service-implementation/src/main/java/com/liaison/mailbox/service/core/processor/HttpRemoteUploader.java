@@ -14,9 +14,11 @@ import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonParseException;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -61,13 +63,15 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws CertificateException
 	 * @throws NoSuchAlgorithmException
 	 * @throws SymmetricAlgorithmException
+	 * @throws JSONException 
+	 * @throws JsonParseException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			SymmetricAlgorithmException {
+			SymmetricAlgorithmException, JsonParseException, JSONException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();

@@ -9,10 +9,12 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -27,7 +29,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
@@ -35,8 +39,12 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import sun.misc.BASE64Decoder;
 
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exceptions.LiaisonException;
@@ -71,6 +79,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.HTTPClientUtil;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -492,9 +501,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws KeyStoreException
 	 * @throws CertificateException
 	 * @throws NoSuchAlgorithmException
+	 * @throws JSONException 
 	 */
 	public Object getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException, JSONException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
 		// Create HTTPRequest and set the properties
@@ -557,8 +567,13 @@ public abstract class AbstractRemoteProcessor {
 				}
 
 				KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				FileInputStream instream = new FileInputStream(new File(keystoreModel.getFileURI()));
+				//InputStream instream = fetchTrustStore();
+				InputStream instream = new FileInputStream(new File(keystoreModel.getFileURI()));
+				//char[] password = {'L','i','a','i','s','o','n','@','1','2','3'};
+				
 				try {
+					
+					//trustStore.load(instream, password);
 					trustStore.load(instream, keystoreModel.getPassword().toCharArray());
 
 				} finally {
@@ -575,6 +590,40 @@ public abstract class AbstractRemoteProcessor {
 		LOGGER.info("Returns HTTP/S configured HTTPClient");
 		return request;
 
+	}
+
+	/**
+	 * 
+	 * Method for fetching TrustStore as an InputStream
+	 * 
+	 * @return InputStream
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws IOException
+	 */
+	private InputStream fetchTrustStore() throws LiaisonException, JSONException, IOException {
+		
+		InputStream is = null;
+		
+		String url = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url"));
+		url = url + "fetch/truststore/current/";
+		
+		// To be fetched from DataBase
+		String trustStoreId = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("truststore-id"));
+		url = url + trustStoreId;
+		
+		Map<String, String> headerMap = new HashMap<String, String>();
+		headerMap.put("Content-Type", "application/json");
+		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(url, headerMap);
+		
+		if (jsonResponse != null) {
+			
+			String base64EncodedStr = new JSONObject(jsonResponse).getJSONObject("dataTransferObject").getString("currentPublicKey");
+		    byte[] trustStoreBytes = new BASE64Decoder().decodeBuffer(base64EncodedStr);
+			is = new ByteArrayInputStream(trustStoreBytes);
+		}
+		
+		return is;
 	}
 
 	/**

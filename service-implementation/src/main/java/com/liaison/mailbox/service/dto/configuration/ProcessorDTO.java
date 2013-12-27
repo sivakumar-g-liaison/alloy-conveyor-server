@@ -48,6 +48,7 @@ public class ProcessorDTO {
 	private String type;
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private String javaScriptURI;
+	private String certificateURI;
 	private String description;
 	private String status;
 	private String protocol;
@@ -94,6 +95,14 @@ public class ProcessorDTO {
 
 	public void setJavaScriptURI(String javaScriptURI) {
 		this.javaScriptURI = javaScriptURI;
+	}
+
+	public String getCertificateURI() {
+		return certificateURI;
+	}
+
+	public void setCertificateURI(String certificateURI) {
+		this.certificateURI = certificateURI;
 	}
 
 	public String getDescription() {
@@ -227,6 +236,7 @@ public class ProcessorDTO {
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrName(this.getName());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
+		processor.setCertificateUri(this.getCertificateURI());
 
 		// Setting the folders.
 		Folder folder = null;
@@ -319,6 +329,7 @@ public class ProcessorDTO {
 
 		this.setType(processor.getProcessorType().name());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
+		this.setCertificateURI(processor.getCertificateUri());
 		this.setName(processor.getProcsrName());
 
 		// Set folders

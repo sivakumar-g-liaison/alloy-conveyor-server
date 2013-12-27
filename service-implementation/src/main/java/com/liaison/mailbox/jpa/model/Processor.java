@@ -50,6 +50,7 @@ public class Processor implements Identifiable {
 
 	private String pguid;
 	private String javaScriptUri;
+	private String certificateUri;
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
@@ -94,6 +95,15 @@ public class Processor implements Identifiable {
 
 	public void setJavaScriptUri(String javaScriptUri) {
 		this.javaScriptUri = javaScriptUri;
+	}
+
+	@Column(name = "CERTIFICATE_URI", length = 512)
+	public String getCertificateUri() {
+		return certificateUri;
+	}
+
+	public void setCertificateUri(String certificateUri) {
+		this.certificateUri = certificateUri;
 	}
 
 	@Column(name = "DESCRIPTION", length = 512)

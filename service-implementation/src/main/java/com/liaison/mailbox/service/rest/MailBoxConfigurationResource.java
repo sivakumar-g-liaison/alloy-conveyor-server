@@ -774,8 +774,8 @@ public class MailBoxConfigurationResource {
 			GetProfileResponseDTO serviceResponse = null;
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.searchProfiles(profileName);
-
 			returnResponse = serviceResponse.constructResponse();
+
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
@@ -786,8 +786,36 @@ public class MailBoxConfigurationResource {
 			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
+	}
+	
+	@GET
+	@Path("/listCertificates")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCertificatesList() {
 
+		serviceCallCounter.addAndGet(1);
+		Response returnResponse;
+
+		try {
+			String jsFileLocation = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("certificateDirectory"));
+			File file = new File(jsFileLocation);
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+
+			FileInfoDTO info = mailbox.getFileDetail(file);
+
+			List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
+			infos.add(info);
+			String response = MailBoxUtility.marshalToJSON(infos);
+
+			return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+		return returnResponse;
 	}
 }
