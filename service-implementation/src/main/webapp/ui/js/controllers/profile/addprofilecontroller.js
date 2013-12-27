@@ -13,6 +13,17 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
             id: "",
             name: ""
         };
+        // Search Profiles based on profile Name
+        $scope.profileName = null;
+        
+        // to hide add profile UI
+        $scope.showAddProfile = false;
+        
+         // To enable "No records found" div
+        $scope.info = false;
+        
+        // Modify the value to change the search criteria
+        $scope.searchMinCharacterCount = 5;
 
         // invokes add profile service
         $scope.insert = function () {
@@ -25,6 +36,8 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
                     if (status === 200) {
                     	var messageType = (data.addProfileResponse.response.status == 'success')?'success':'error';
                         showSaveMessage(data.addProfileResponse.response.message, messageType);
+                          // to hide the add profile UI once addition of profile done
+                        $scope.disableAddProfile();
                         $scope.profile.name = "";
                         $scope.loadProfiles();
 						if ($scope.pagingOptions.currentPage !== 1) {
@@ -34,8 +47,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 
                 }
             );
-
-        };
+         };
 
         // Grid Setups
         $scope.filterOptions = {
@@ -73,6 +85,14 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 
         // Set the paging data to grid from server object
         $scope.setPagingData = function (data, page, pageSize) {
+            
+             //To enable No Results found div
+             if (data === null || data.length <= 0) {
+                $scope.message = 'No results found.';
+                $scope.info = true;
+            } else {
+                $scope.info = false;
+            }
 
             var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
             $scope.profiles = pagedData;
@@ -84,21 +104,96 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 
         $scope.$watch('pagingOptions', function (newVal, oldVal) {
             if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
-                $scope.loadProfiles();
+               // $scope.loadProfiles();
+                if((typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.searchMinCharacterCount)) {
+                     $scope.search();
+                } else {
+                    $scope.loadProfiles();
+                }
+               
             }
 
             if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-                $scope.loadProfiles();
+               // $scope.loadProfiles();
+                if((typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.            searchMinCharacterCount)) {
+                    $scope.search();
+                } else {
+                    $scope.loadProfiles();
+                }
 				newVal.currentPage = 1;
             }
         }, true);
 
         $scope.$watch('filterOptions', function (newVal, oldVal) {
             if (newVal !== oldVal) {
-                $scope.loadProfiles();
+               // $scope.loadProfiles();
+                if((typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.searchMinCharacterCount)) {
+                     $scope.search();
+                } else {
+                    $scope.loadProfiles();
+                }
             }
         }, true);
+        
+        /**
+         * Remove all the data in grid and disable the info message.
+         */
+        $scope.reset = function () {
 
+            $scope.profiles = [];
+            $scope.info = false;
+            $scope.totalServerItems = 0;
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+            // Set the default page to 1
+            if ($scope.pagingOptions.currentPage !== 1) {
+                $scope.pagingOptions.currentPage = 1;
+            }
+        };
+
+         // Search logic for mailbox
+        $scope.search = function () {
+
+            $scope.showprogressbar = true;
+            var profName = "";
+            if (null !== $scope.profileName && $scope.profileName.length >= $scope.searchMinCharacterCount) {
+                profName = $scope.profileName;
+            }
+
+           $scope.restService.get($scope.base_url + "/findprofile" + '?name=' + profName ,
+                function (data, status) {
+                    if (status == 200) {
+                        if (data.getProfileResponse.response.status == 'failure') {
+                        	//Commented out because of inconsistency
+                            //showSaveMessage(data.searchMailBoxResponse.response.message, 'error');
+                        }
+                    } else {
+                    	 showSaveMessage("retrieval of search results failed", 'error');
+                    }
+                    
+                    $scope.getPagedDataAsync(data.getProfileResponse.profiles, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+                    
+                    $scope.showprogressbar = false;
+                });
+        };
+         // Whenever changes occur in the Profile Name it calls search method
+        $scope.$watch('profileName', function () {
+
+            if (typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.searchMinCharacterCount) {
+
+                $scope.search();
+                if ($scope.pagingOptions.currentPage !== 1) {
+                    $scope.pagingOptions.currentPage = 1;
+                }
+
+            } else if ($scope.profileName.length == 0) {
+                $scope.reset();
+                $scope.loadProfiles();
+            } else if(typeof($scope.profileName) == 'undefined' || $scope.profileName == null || $scope.profileName.length < $scope.searchMinCharacterCount) {
+                $scope.reset();
+            }
+        });
         // Setting the grid details
         $scope.gridOptions = {
             columnDefs: [{
@@ -118,5 +213,17 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
             filterOptions: $scope.filterOptions,
 			totalServerItems:'totalServerItems'
         };
+        
+        $scope.enableAddProfile = function() {
+            $scope.showAddProfile = true;
+        }
+         $scope.disableAddProfile = function() {
+            $scope.showAddProfile = false;
+        }
+        // To clear profile name in add profile div while clicking on cancel
+        $scope.doCancel = function() {
+            $scope.profile.name = "";
+            $scope.disableAddProfile();
+        } 
     }
 ]);

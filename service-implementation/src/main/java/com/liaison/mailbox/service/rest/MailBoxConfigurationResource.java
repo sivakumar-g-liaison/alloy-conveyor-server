@@ -750,4 +750,44 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
+	
+	/**
+	 * REST method to search profiles by profile Name.
+	 * 
+	 *  @param profileName
+	 *  		The profile name should be searched
+	 *            
+	 * @return Response Object
+	 */
+	@GET
+	@Path("/findprofile")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response findProfiles(@QueryParam(value = "name") String  profileName) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+		try {
+
+			// add the new profile details
+			GetProfileResponseDTO serviceResponse = null;
+			ProfileConfigurationService mailbox = new ProfileConfigurationService();
+			serviceResponse = mailbox.searchProfiles(profileName);
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
 }

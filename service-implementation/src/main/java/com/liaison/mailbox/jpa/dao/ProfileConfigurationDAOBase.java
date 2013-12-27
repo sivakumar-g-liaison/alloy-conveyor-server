@@ -1,5 +1,6 @@
 package com.liaison.mailbox.jpa.dao;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,5 +38,31 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public List <ScheduleProfilesRef> findProfilesByName(String profileName) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		
+		List<ScheduleProfilesRef> profileList = new ArrayList<ScheduleProfilesRef>();
+		
+		try {
+			
+			@SuppressWarnings("unchecked")
+			List<ScheduleProfilesRef> profiles = entityManager.createNamedQuery(FIND_PROFILES_BY_NAME)
+					.setParameter(PROF_NAME, "%" + profileName.toLowerCase() + "%").getResultList();
+			Iterator<?> iter = profiles.iterator();
+
+			while (iter.hasNext()) {
+				profileList.add((ScheduleProfilesRef) iter.next());
+			}
+			
+		} finally {
+			if (entityManager != null) {
+				entityManager.clear();
+			}
+		}
+		return profileList;
 	}
 }

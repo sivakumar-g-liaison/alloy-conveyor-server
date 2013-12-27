@@ -146,5 +146,13 @@ textarea {
     color: #FF0000;
 }
 
+.custom-info-block {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #3a87ad;
+}
+
+
 
 

@@ -139,5 +139,52 @@ public class ProfileConfigurationService {
 		}
 
 	}
+	
+	/**
+	 * Retrieves profiles based on the given profile name.
+	 * 
+	 * @return The GetProfileResponseDTO.
+	 */
+	
+	public GetProfileResponseDTO searchProfiles(String profName) {
+		
+		LOG.info("Entering into search profiles by name.");
+		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
+		
+		try {
+			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+			List <ScheduleProfilesRef> profiles = configDao.findProfilesByName(profName);
+			
+			if (profiles == null || profiles.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, PROFILE);
+			}
+			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
+			ProfileDTO profile = null;
+			for (ScheduleProfilesRef prof : profiles) {
+				profile = new ProfileDTO();
+				profile.copyFromEntity(prof);
+				profilesDTO.add(profile);
+			}
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
+			serviceResponse.setProfiles(profilesDTO);
+
+			LOG.info("Exiting from searching profiles operation.");
+
+			return serviceResponse;
+			
+		}  catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
+					.getMessage()));
+
+			return serviceResponse;
+		}
+
+		
+		
+	}
 
 }

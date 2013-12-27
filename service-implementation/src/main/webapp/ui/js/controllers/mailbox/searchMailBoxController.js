@@ -237,11 +237,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '50%',
+                    width: '37%',
                     displayName: 'Desc'
                 }, {
                     field: 'status',
-                    width: '10%',
+                    width: '23%',
                     displayName: 'Status'
                 },
                 /*{
