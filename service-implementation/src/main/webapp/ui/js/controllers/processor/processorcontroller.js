@@ -282,7 +282,7 @@ var rest = myApp.controller(
                                  <div ng-switch-when="passive">\n\
                                     <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
                                 </div>\n\
-                                <div ng-switch-default>\n\
+                				<div ng-switch-default>\n\
                                     <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-maxLength=2048 style="width:90%;height: 45px" placeholder="required" />\n\
                                     <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class="right">\n\
                                     <i class="glyphicon glyphicon-new-window"></i></a>\n\
@@ -499,22 +499,22 @@ var rest = myApp.controller(
                 cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
                     '<div ng-switch-when="false">' +
                     '<div ng-switch on="getFolderId(allStaticPropertiesForProcessorFolder, row)">\n\
-                        <div ng-switch-when="PAYLOAD_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
+                        <div ng-switch-when="PAYLOAD_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                                 <div ng-show="formAddPrcsr.descriptionpayload.$dirty && formAddPrcsr.descriptionpayload.$invalid">\n\
                                     <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.pattern><strong>Invalid Description.</strong></span>\n\
                                     <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span>\n\
                            </div></div>\n\
-                        <div ng-switch-when="RESPONSE_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
+                        <div ng-switch-when="RESPONSE_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                             <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.pattern><strong>Invalid Description.</strong></span>\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
-						<div ng-switch-when="TARGET_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptiontarget" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
+						<div ng-switch-when="TARGET_LOCATION"><textarea ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptiontarget" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                             <div ng-show="formAddPrcsr.descriptiontarget.$dirty && formAddPrcsr.descriptiontarget.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptiontarget.$error.pattern><strong>Invalid Description.</strong></span>\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptiontarget.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span></div></div>\n\
                         </div></div>' +
                     '<div ng-switch-when="true">' +
-                    '<textarea name="descriptiondefault" ng-model="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250/>\n\
+                    '<textarea name="descriptiondefault" ng-model="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250/>\n\
                     <div ng-show="formAddPrcsr.descriptiondefault.$dirty && formAddPrcsr.descriptiondefault.$invalid">\n\
                         <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.pattern><strong>Invalid Description.</strong></span>\n\
                         <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><strong>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</strong></span>\n\

@@ -93,7 +93,7 @@
                     <label>
                         Description
                     </label>
-                    <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputPattern"
+                    <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern"
                     ng-maxLength=512 class="form-control"></textarea>
                     <div class = "help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                         <span ng-show="formAddPrcsr.description.$error.pattern"><strong>Invalid Description</strong></span>
