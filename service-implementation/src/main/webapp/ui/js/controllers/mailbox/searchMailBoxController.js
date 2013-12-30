@@ -182,9 +182,15 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                     } else {
                     	 showSaveMessage("retrieval of search results failed", 'error');
                     }
-                    if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
-                        $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+                    // if the data does not contain proper response hitCounter property will not be available and throws an error,
+                    // the progress bar will be displayed even after the display of error message.
+                    // To avoid the above error, the hitCounter will be validated only if proper response is available
+                    if (data.searchMailBoxResponse) { 
+                    	 if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
+                             $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+                         }
                     }
+                   
                     $scope.showprogressbar = false;
                 });
         };

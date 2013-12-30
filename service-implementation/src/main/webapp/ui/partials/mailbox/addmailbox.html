@@ -88,7 +88,7 @@
               </label>
 
               <textarea class="form-control" ng-model="mailBox.description" id="description" rows="2" name="description"
-                        ng-pattern="userInputPattern" ng-maxLength=1024>          </textarea>
+                        ng-pattern="userInputDescriptionPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
                   <span class="help-block-custom" ng-show="formAddMbx.description.$error.pattern"><strong>Invalid Description.</strong></span>
           		  <span class="help-block-custom" ng-show="formAddMbx.description.$error.maxlength"><strong>Description cannot be longer than

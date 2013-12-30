@@ -123,6 +123,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.numberPattern = /^\d+$/;
     $rootScope.httpVersionPattern = /\b1.1\b/;
     $rootScope.multipleEmailPattern = /^(([a-zA-Z0-9_'+*$%\^&!\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9:]{2,7})([,]\W?(?!$))?)+$/;
+    $rootScope.userInputDescriptionPattern = /^[a-zA-Z0-9_. ,]*$/;
 
 
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
