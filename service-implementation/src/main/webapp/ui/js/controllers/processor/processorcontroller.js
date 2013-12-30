@@ -185,7 +185,7 @@ var rest = myApp.controller(
             $scope.allStaticProperties = [{"name":"Socket Timeout","id":"socketTimeout"}, {"name":"Connection Timeout","id":"connectionTimeout"},
                 {"name":"Retry Attempts","id":"retryAttempts"}, {"name":"Chunked Encoding","id":"chunkedEncoding"},
                 {"name":"Encoding Format","id":"encodingFormat"}, {"name":"Port","id":"port"},
-                {"name":"OtherRequest Header","id":"otherRequestHeader"}, {"name":"Processed File Location","id":"processedfilelocation"}] ;
+                {"name":"OtherRequest Header","id":"otherRequestHeader"}] ;
 
             // function to modify the static properties if the protocol is FTP or FTPS
             $scope.modifyStaticPropertiesBasedOnProtocol();
