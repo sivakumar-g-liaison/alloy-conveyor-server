@@ -794,14 +794,14 @@ var rest = myApp.controller(
                                             name: $scope.getNameValue(prop),
                                             value: (prop === 'otherRequestHeader' || prop === 'httpVerb') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
                                             allowAdd: false,
-                                            isMandatory: ($scope.allMandatoryHttpProperties.indexOf(prop) === -1) ? false : true
+                                            isMandatory: (getIndexOfId($scope.allMandatoryHttpProperties, prop) === -1) ? false : true
                                         });
                                     } else {
                                         $scope.ftpMandatoryProperties.push({
                                             name: $scope.getNameValue(prop),
                                             value: (prop === 'otherRequestHeader') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
                                             allowAdd: false,
-                                            isMandatory: ($scope.allMandatoryFtpProperties.indexOf(prop) === -1) ? false : true
+                                            isMandatory: (getIndexOfId($scope.allMandatoryFtpProperties, prop) === -1) ? false : true
                                         });
                                     }
                                     var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,prop);
@@ -1266,7 +1266,7 @@ var rest = myApp.controller(
 	                 });
                 }
 
-                if ((name === 'httpVerb'|| name === 'contentType' || name === 'httpVersion') && ($scope.protocol == 'HTTP' || $scope.protocol == 'HTTPS')) {
+                if (name === 'httpVerb' && ($scope.processor.protocol == 'HTTP' || $scope.processor.protocol == 'HTTPS')) {
                     mandatoryArray.push({
                         name: name,
                         value: $scope.verb
