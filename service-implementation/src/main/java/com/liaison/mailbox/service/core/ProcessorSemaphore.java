@@ -18,6 +18,9 @@ import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.dao.ParallelProcessorDAO;
 import com.liaison.mailbox.jpa.dao.ParallelProcessorDAOBase;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Processor Semaphore which ensures processor can be run only once at a time.
  * 
@@ -29,6 +32,9 @@ public class ProcessorSemaphore {
 	 * List of running processors.
 	 */
 	private static List<Processor> synchronizedProcessors = new ArrayList<>();
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ProcessorSemaphore.class);
+
 
 	/**
 	 * 
@@ -112,24 +118,23 @@ public class ProcessorSemaphore {
 	 * 
 	 * @param processorID
 	 */
-	public static synchronized boolean validateProcessorExecution(String processorId) {
+	public static synchronized void addToProcessorExecutionList(String processorId) {
 
-		boolean result = false;
 		ParallelProcessor processorFromDB = null;
 		
 		ParallelProcessorDAO processorDAO = new ParallelProcessorDAOBase();
 		processorFromDB = processorDAO.findById(processorId);	
 		// if processor id present in DB then processor is still running
 		if (processorFromDB != null) {
-			result = false;
+			LOG.info("The processor is already in progress , validated via DB."+ processorId);
 				
 		} else {
-			result = true;
+			
 			ParallelProcessor parallelProcessor = new ParallelProcessor();
 			parallelProcessor.setProcessorId(processorId);
 			processorDAO.persist(parallelProcessor);
 		}
-		return result;
+		
 	}
 	
 	/**

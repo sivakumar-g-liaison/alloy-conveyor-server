@@ -164,12 +164,14 @@ public class MailBoxService {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
 
-			if (!ProcessorSemaphore.validateProcessorExecution(processor.getPguid()))  {
+			if (ExecutionStatus.RUNNING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus()))  {
 				LOG.info("The processor is already in progress , validated via DB."+processor.getPguid());
 			} else {
 				
-				MailBoxProcessor processorService = null;
-				processorService = MailBoxProcessorFactory.getInstance(processor);
+				MailBoxProcessor processorService = MailBoxProcessorFactory.getInstance(processor);
+				
+				// To Maintain the running processor ids in a separate table in DB
+				ProcessorSemaphore.addToProcessorExecutionList(processor.getPguid());
 				if (processorService != null) {
 
 					LOG.info("The Processer id is {}", processor.getPguid());
