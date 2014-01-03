@@ -1,0 +1,26 @@
+{
+  "pipelineId" : "pipelineId",
+  "activityId" : "activityId",
+  "taskId" : "taskId",
+  "serviceInstanceId" : "Kriasddid1re7ikfg",
+  "userId" : "GRamamurthy@liaison.com",
+  "dataTransferObject" : 
+  {
+    "@class" : "com.liaison.keymanage.grammar.dto.PublicKey",
+    "createdBy" : "GRamamurthy@liaison.com",
+    "createdDate" : "2013-07-15T22:22:08.069Z",
+    "keyAlgorithm" : "RSA",
+    "keyScope" : "SYSTEM",
+    "keySignature" : "SHA1",
+    "keySize" : "1024",
+    "keyStatus" : "ACTIVE",
+    "keyType" : "PKCS7",
+    "name" : "test_httpclient_pk_009",
+    "notificationEmail" : "GRamamurthy@liaison.com",
+    "pgpUserId" : "pgpUserId",
+    "serialHex" : "serialHex",
+    "validityDateFrom" : "2013-07-15T22:22:08.069Z",
+    "validityDateTo" : "2013-07-15T22:22:08.069Z",
+    "version" : 0
+  }
+}

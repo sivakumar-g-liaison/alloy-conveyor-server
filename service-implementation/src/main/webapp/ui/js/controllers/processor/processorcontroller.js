@@ -1245,6 +1245,16 @@ var rest = myApp.controller(
 
             return getId($scope.allStaticProperties, name);
         };
+        
+        $scope.save = function () {
+			
+			console.log($scope.certificateModal.certificateURI);
+			if (!$scope.isEdit && $scope.processor.protocol === 'HTTPS' && $scope.certificateModal.certificateURI !== '') {
+				$scope.uploadFile();
+			} else {
+				$scope.saveProcessor();
+			}
+		}
 
         $scope.saveProcessor = function () {
 
@@ -1572,6 +1582,92 @@ var rest = myApp.controller(
                 icon.color = "glyphicon-white";
             };
         };
+        
+        // File Upload Section Begins
+		
+		$scope.setFiles = function(element) {
+			
+			console.log(element.value);
+			$scope.$apply(function($scope) {
+			
+			  // Turn the FileList object into an Array
+				$scope.files = []
+				for (var i = 0; i < element.files.length; i++) {
+				  $scope.files.push(element.files[i])
+				}
+				//console.log('files:', $scope.files);
+				$scope.certificateModal.certificateURI = $scope.files[0].name;
+				$scope.progressVisible = false
+			  });
+		};
+
+		$scope.uploadFile = function() {
+			
+			var fd = new FormData();
+			$scope.pkObj['serviceInstanceId'] = Date.now().toString();
+			fd.append("json", angular.toJson($scope.pkObj));
+			
+			for (var i in $scope.files) {
+				fd.append($scope.files[i].name, $scope.files[i])
+			}
+			
+			var xhr = new XMLHttpRequest()
+			xhr.addEventListener("load", uploadComplete, false)
+			xhr.addEventListener("error", uploadFailed, false)
+			xhr.addEventListener("abort", uploadCanceled, false)
+			xhr.open("POST", $scope.url_upload_key)
+			xhr.send(fd)
+		}
+
+		function uploadComplete(evt) {
+		
+			/* This event is raised when the server send back a response */
+			
+			if (evt.target.status == 201) {
+			
+				var resp = angular.fromJson(evt.target.responseText);
+				var arr = resp['dataTransferObject']['keyGroupMemberships'];
+				pkGuid = arr[0]['keyBase']['pguid'];
+				
+				var trustStoreId = '0C3A3BC50A0037B00665D98D2D86079D';
+				
+				// Public Key guid 
+				pkGuid = pkGuid.toString();
+				
+				// To put public key is association json to TrustStore
+				$scope.linkKeyTs['dataTransferObject']['trustStoreMemberships'][0]['publicKey']['pguid'] = pkGuid;
+				
+				$scope.restService.put($scope.url_link_key_store + trustStoreId, angular.toJson($scope.linkKeyTs),
+                    function (data, status) {
+					
+						if (status == 200) {
+						
+							$scope.saveProcessor();
+						} else {
+							showSaveMessage('Processor creation failed', 'error');
+							return;
+						}
+					}
+				);
+				
+			} else {
+				showSaveMessage('Processor creation failed', 'error');
+				return;
+			}
+			
+		}
+
+		function uploadFailed(evt) {
+			showSaveMessage('Processor creation failed', 'error');
+			return;
+		}
+
+		function uploadCanceled(evt) {
+			showSaveMessage('Processor creation failed', 'error');
+			return;
+		}
+		
+		// File Upload Section Ends
 
     }
 ]);
