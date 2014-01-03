@@ -16,7 +16,7 @@
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
-		
+		<class>com.liaison.mailbox.jpa.model.ParallelProcessor</class>
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
 			<property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" /> 

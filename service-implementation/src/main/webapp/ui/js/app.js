@@ -114,6 +114,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
 
     $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
+    $rootScope.url_upload_key = '../key-management/upload/public';
+	$rootScope.url_link_key_store = '../key-management/update/truststore/';
 
     // validation of user input pattern
     $rootScope.userInputPattern = /^[a-zA-Z0-9_ ]+$/;
@@ -155,6 +157,20 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.restService.get('data/generic-list.json', function (data) {
         $rootScope.listData = data;
     });
+    
+    // JSON which contains upload public key request
+	$rootScope.pkObj;
+	
+	$rootScope.restService.get('data/publickeyrequest.json', function (data) {
+		$rootScope.pkObj = data;
+	});
+	
+	// JSON which contains public key - Trust Store Association request
+	$rootScope.linkKeyTs;
+	
+	$rootScope.restService.get('data/truststore_update_request.json', function (data) {
+		$rootScope.linkKeyTs = data;
+	});
 
     // *****
     // Initialize authentication
