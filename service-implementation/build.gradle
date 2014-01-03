@@ -190,6 +190,10 @@ dependencies {
 	compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
 		exclude group: "commons-net",  module: "commons-net"
 	}
+	
+	//FSM
+	
+	compile group: "com.liaison", name: "fsm", version: "0.0.2-SNAPSHOT", changing: true
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
