@@ -129,13 +129,6 @@ public class ProcessorConfigurationService {
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
 			
-			String pkcGuid = uploadPublicKey(serviceRequest, null);
-			
-			if (pkcGuid != null) {
-				
-				createPublicKeyAndTrustStoreLink(pkcGuid);
-			}
-
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
 			configDAO.persist(processor);
