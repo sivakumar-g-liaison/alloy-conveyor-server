@@ -164,8 +164,8 @@ public class MailBoxService {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
 
-			if (!ProcessorSemaphore.validateProcessorExecution(processor))  {
-				LOG.info("The processor is already in progress.");
+			if (!ProcessorSemaphore.validateProcessorExecution(processor.getPguid()))  {
+				LOG.info("The processor is already in progress , validated via DB."+processor.getPguid());
 			} else {
 				
 				MailBoxProcessor processorService = null;
@@ -178,8 +178,8 @@ public class MailBoxService {
 					processorDAO.merge(processor);
 					processorService.invoke();
 
-					// Remove the processor from semaphore
-					ProcessorSemaphore.removeExecutedProcessor(processor);
+					// Remove the processor from Database
+					ProcessorSemaphore.removeExecutedProcessor(processor.getPguid());
 				} else {
 					LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
 				}
