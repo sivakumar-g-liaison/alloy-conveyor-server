@@ -8,6 +8,7 @@ public class FileAttributesDTO {
 	private String folderdername;
 	private String timestamp;
 	private String fs2Path;
+	private String pipeLineID;
 
 	public String getGuid() {
 		return guid;
@@ -55,6 +56,14 @@ public class FileAttributesDTO {
 
 	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public String getPipeLineID() {
+		return pipeLineID;
+	}
+
+	public void setPipeLineID(String pipeLineID) {
+		this.pipeLineID = pipeLineID;
 	}
 
 }

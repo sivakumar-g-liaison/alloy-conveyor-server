@@ -27,6 +27,7 @@ import javax.script.ScriptException;
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -44,6 +45,7 @@ import com.liaison.mailbox.enums.ExecutionStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileGroupDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
@@ -65,6 +67,12 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public class DirectorySweeperProcessor extends AbstractRemoteProcessor implements MailBoxProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeperProcessor.class);
+
+	private String pipeLineID;
+
+	public void setPipeLineID(String pipeLineID) {
+		this.pipeLineID = pipeLineID;
+	}
 
 	@SuppressWarnings("unused")
 	private DirectorySweeperProcessor() {
@@ -157,10 +165,11 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
+	 * @throws JAXBException 
 	 */
 	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
 			SweepConditions sweepConditions, String fileRenameFormat) throws IOException, URISyntaxException,
-			MailBoxServicesException, FS2Exception {
+			MailBoxServicesException, FS2Exception, JAXBException {
 
 		Path rootPath = Paths.get(root);
 		if (!Files.isDirectory(rootPath)) {
@@ -185,6 +194,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			attribute = new FileAttributesDTO();
 			attribute.setFs2Path(path.toAbsolutePath().toString());
+			attribute.setPipeLineID(getPipeLineID());
 
 			BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
 			attribute.setTimestamp(attr.creationTime().toString());
@@ -194,6 +204,28 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		}
 
 		return fileAttributes;
+	}
+
+	/**
+	 * Method to get the pipe line id from the remote processor properties.
+	 * 
+	 * @return
+	 * @throws JAXBException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	private String getPipeLineID() throws JAXBException,
+			JsonParseException, JsonMappingException, IOException {
+		
+		if(MailBoxUtility.isEmpty(this.pipeLineID)) {
+			
+			RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
+					RemoteProcessorPropertiesDTO.class);
+			this.setPipeLineID(properties.getPipeLineID());
+		}
+
+		return this.pipeLineID;
 	}
 
 	/**

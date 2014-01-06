@@ -118,6 +118,17 @@ var rest = myApp.controller(
                 false
             ];
             // Procsr Dynamic Props
+            $scope.sweeperMandatoryProperties = [{
+                name: 'PipeLine Id',
+                value: '',
+                allowAdd: false,
+                isMandatory: true
+            }, {
+                name: '',
+                value: '',
+                allowAdd: true,
+                isMandatory: false
+            }];
             $scope.ftpMandatoryProperties = [{
                 name: 'URL',
                 value: '',
@@ -191,6 +202,8 @@ var rest = myApp.controller(
             $scope.modifyStaticPropertiesBasedOnProtocol();
 
             $scope.allMandatoryFtpProperties = [{"name":"URL","id":"url"}];
+            
+            $scope.allMandatorySweeperProperties = [{"name":"PipeLine Id","id":"pipeLineID"}];
 
             $scope.allMandatoryHttpProperties = [{"name":"HTTP Version","id":"httpVersion"},
                 {"name":"HTTP Verb","id":"httpVerb"},
@@ -410,6 +423,11 @@ var rest = myApp.controller(
                 return httpVal;
             }
 
+            var sweeperVal = getId($scope.allMandatorySweeperProperties, row.getProperty('name'));
+            if (sweeperVal.length > 0) {
+                return sweeperVal;
+            }
+            
             var val = getId(objArray, row.getProperty('name'));
             if (val.length > 0) {
                 return val;
@@ -430,6 +448,10 @@ var rest = myApp.controller(
                 return httpVal;
             }
 
+            var sweeperVal = getId($scope.allMandatorySweeperProperties, name);
+            if (sweeperVal.length > 0) {
+                return sweeperVal;
+            }
             return getId($scope.allStaticProperties, name);
         };
 
@@ -445,6 +467,11 @@ var rest = myApp.controller(
                 return httpVal;
             }
 
+            var sweeperVal = getName($scope.allMandatorySweeperProperties, id);
+            if (sweeperVal.length > 0) {
+                return sweeperVal;
+            }
+            
             return getName($scope.allStaticProperties, id);
         };
 
@@ -778,6 +805,7 @@ var rest = myApp.controller(
                             $scope.processorProperties = []; //Removing now so that the add new option always shows below the available properties
                             $scope.httpMandatoryProperties = [];
                             $scope.ftpMandatoryProperties = [];
+                            $scope.sweeperMandatoryProperties = [];
                             var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
                             var otherReqIndex = -1;
                             var i = 0;
@@ -795,6 +823,13 @@ var rest = myApp.controller(
                                             value: (prop === 'otherRequestHeader' || prop === 'httpVerb') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
                                             allowAdd: false,
                                             isMandatory: (getIndexOfId($scope.allMandatoryHttpProperties, prop) === -1) ? false : true
+                                        });
+                                    } else if ($scope.processor.protocol === 'SWEEPER') {
+                                        $scope.sweeperMandatoryProperties.push({
+                                            name: $scope.getNameValue(prop),
+                                            value: (prop === 'otherRequestHeader') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
+                                            allowAdd: false,
+                                            isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
                                         });
                                     } else {
                                         $scope.ftpMandatoryProperties.push({
@@ -816,6 +851,8 @@ var rest = myApp.controller(
                             if (otherReqIndex !== -1) {
                                 if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
                                     $scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
+                                } else if ($scope.processor.protocol === 'SWEEPER'){
+                                    $scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1);
                                 } else {
                                     $scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
                                 }
@@ -831,7 +868,15 @@ var rest = myApp.controller(
                                         allowAdd: false,
                                         isMandatory: false
                                     });
-                                } else {
+                                } else if ($scope.processor.protocol === 'SWEEPER') {
+                                    $scope.sweeperMandatoryProperties.push({
+                                        name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                        value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                                        allowAdd: false,
+                                        isMandatory: false
+                                    });
+                                }                                
+                                else {
                                     $scope.ftpMandatoryProperties.push({
                                         name: data.getProcessorResponse.processor.dynamicProperties[i].name,
                                         value: data.getProcessorResponse.processor.dynamicProperties[i].value,
@@ -849,6 +894,14 @@ var rest = myApp.controller(
                                     isMandatory: false
                                 });
                                 $scope.processorProperties = $scope.httpMandatoryProperties;
+                            } else if ($scope.processor.protocol === 'SWEEPER') {
+                                $scope.sweeperMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
+                                    name: '',
+                                    value: '',
+                                    allowAdd: true,
+                                    isMandatory: false
+                                });
+                                $scope.processorProperties = $scope.sweeperMandatoryProperties;
                             } else {
                                 $scope.ftpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
                                     name: '',
@@ -1243,6 +1296,11 @@ var rest = myApp.controller(
                 return httpVal;
             }
 
+            var sweeperVal = getIndex($scope.allMandatorySweeperProperties, name);
+            if (sweeperVal !== -1) {
+                return sweeperVal;
+            }
+            
             return getId($scope.allStaticProperties, name);
         };
         
@@ -1276,6 +1334,14 @@ var rest = myApp.controller(
 	                 });
                 }
 
+                if (name === 'pipeLineID') {
+                    mandatoryArray.push({
+                        name: name,
+                        value: value
+	                 });
+                }
+
+                
                 if (name === 'httpVerb' && ($scope.processor.protocol == 'HTTP' || $scope.processor.protocol == 'HTTPS')) {
                     mandatoryArray.push({
                         name: name,
@@ -1288,6 +1354,8 @@ var rest = myApp.controller(
 
                 if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
                     indexMandatory = getIndex($scope.allMandatoryHttpProperties, $scope.processorProperties[i].name);
+                } else if ($scope.processor.protocol === 'SWEEPER') {
+                    indexMandatory = getIndex($scope.allMandatorySweeperProperties, $scope.processorProperties[i].name);
                 } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
 
                 if (index === -1 && indexMandatory === -1) {
@@ -1442,12 +1510,7 @@ var rest = myApp.controller(
                 $scope.isProcessorTypeSweeper = true;
                 $scope.processor.protocol = "SWEEPER"
                 $scope.setFolderData(true);
-                $scope.processorProperties = [{
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
+                $scope.processorProperties = $scope.sweeperMandatoryProperties;
             } else {
                 $scope.isProcessorTypeSweeper = false;
                 $scope.processor.protocol = $scope.enumprotocoltype[0];
@@ -1468,6 +1531,9 @@ var rest = myApp.controller(
 
                 if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                 $scope.processorProperties = $scope.httpMandatoryProperties;
+                $scope.setFolderData(false);
+            } else if ($scope.processor.protocol === "SWEEPER") {
+                $scope.processorProperties = $scope.sweeperMandatoryProperties;
                 $scope.setFolderData(false);
             } else {
                 $scope.setFolderData(true);
