@@ -560,21 +560,20 @@ public abstract class AbstractRemoteProcessor {
 
 			if (keystoreModel != null) {
 
-				if (MailBoxUtility.isEmpty(keystoreModel.getFileURI()) || MailBoxUtility.isEmpty(keystoreModel.getPassword())) {
+				if (MailBoxUtility.isEmpty(keystoreModel.getPassword())) {
 
-					LOGGER.info("Credential is missing file path & password to configure truststore/keystore");
-					throw new MailBoxServicesException("Credential is missing file path or password to configure truststore/keystore");
+					LOGGER.info("Credential is missing password to configure truststore/keystore");
+					throw new MailBoxServicesException("Credential is missing password to configure truststore/keystore");
 				}
 
 				KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				//InputStream instream = fetchTrustStore();
-				InputStream instream = new FileInputStream(new File(keystoreModel.getFileURI()));
-				//char[] password = {'L','i','a','i','s','o','n','@','1','2','3'};
+				InputStream instream = fetchTrustStore();
+				//InputStream instream = new FileInputStream(new File(keystoreModel.getFileURI()));
 				
 				try {
 					
-					//trustStore.load(instream, password);
 					trustStore.load(instream, keystoreModel.getPassword().toCharArray());
+					//trustStore.load(instream, keystoreModel.getPassword().toCharArray());
 
 				} finally {
 					instream.close();
