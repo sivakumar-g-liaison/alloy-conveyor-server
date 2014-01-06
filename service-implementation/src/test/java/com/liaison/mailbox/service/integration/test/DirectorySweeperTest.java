@@ -18,6 +18,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
 import junit.framework.Assert;
 
 import org.codehaus.jettison.json.JSONException;
@@ -55,7 +57,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception {
+	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JAXBException {
 
 		String name = "Purchase.txt";
 		Path target = Paths.get(inbox + File.separator + name);
@@ -82,7 +84,8 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testSweeperWithoutFilePermission() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception {
+	public void testSweeperWithoutFilePermission() throws IOException, URISyntaxException, MailBoxServicesException,
+			FS2Exception, Exception {
 
 		String name = "PurchaseError.txt";
 		Path target = Paths.get(inbox + File.separator + name);
@@ -113,7 +116,8 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testSweeperWithSpaceInFileName() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception {
+	public void testSweeperWithSpaceInFileName() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
+			JAXBException {
 
 		String name = "Purchase Error.txt";
 		Path target = Paths.get(inbox + File.separator + name);
@@ -140,7 +144,8 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	}
 
 	@Test
-	public void testMarkAsSweeped() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JSONException {
+	public void testMarkAsSweeped() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
+			JSONException, JAXBException {
 
 		String name = "Purchase Error.txt";
 		Path target = Paths.get(inbox + File.separator + name);
