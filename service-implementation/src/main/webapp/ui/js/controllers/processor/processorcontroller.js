@@ -59,6 +59,7 @@ var rest = myApp.controller(
                 type: "",
                 javaScriptURI: "",
                 certificateURI: "",
+				certificateType: "",
                 description: "",
                 status: "",
                 protocol: "",
@@ -779,7 +780,7 @@ var rest = myApp.controller(
                             $scope.clearProps();
                             $scope.processor.guid = data.getProcessorResponse.processor.guid;
                             $scope.processor.name = data.getProcessorResponse.processor.name;
-                            //$scope.processor.type = data.getProcessorResponse.processor.type;
+                            $scope.processor.certificateType = data.getProcessorResponse.processor.certificateType;
                             $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
                             $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
                             $scope.processor.description = data.getProcessorResponse.processor.description;
@@ -1695,7 +1696,7 @@ var rest = myApp.controller(
 				var arr = resp['dataTransferObject']['keyGroupMemberships'];
 				pkGuid = arr[0]['keyBase']['pguid'];
 				
-				var trustStoreId = '0C3A3BC50A0037B00665D98D2D86079D';
+				var trustStoreId = '0C3A3BC00A0037B00665D98DB3096BC8';
 				
 				// Public Key guid 
 				pkGuid = pkGuid.toString();
