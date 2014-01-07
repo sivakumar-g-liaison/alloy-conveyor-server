@@ -43,18 +43,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
 
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"File Rename Format","id":"filerenameformat"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"},
-            {"name":"Sweeped File Location","id":"sweepedfilelocation"},
-            {"name":"Payload Size Threshold","id":"payloadsizethreshold"},
-            {"name":"Number of File Threshold","id":"numoffilesthreshold"}];
+            {"name":"Email Notification Ids","id":"emailnotificationids"}];
 
-        $scope.allStaticProperties = [{"name":"File Rename Format","id":"filerenameformat"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"},
-            {"name":"Sweeped File Location","id":"sweepedfilelocation"},
-            {"name":"Payload Size Threshold","id":"payloadsizethreshold"},
-            {"name":"Number of File Threshold","id":"numoffilesthreshold"}];
-
+        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}];
         //Data from server
         $scope.mailBoxProperties = [{
             name: '',
@@ -252,18 +243,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 cellTemplate: '<div ng-switch on="getId(allStaticProperties, row)">\n\
                                    <div ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
-                                            <div ng-switch-when="payloadsizethreshold">\n\
-                                                <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:94%;height:45px" ng-maxLength=512 placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                                 <div ng-show="formAddMbx.payloadSizeThreshold.$dirty && formAddMbx.payloadSizeThreshold.$invalid">\n\
-            										 <span class="help-block-custom" ng-show=formAddMbx.payloadSizeThreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
-          									    </div>\n\
-                                            </div>\n\
-                                            <div ng-switch-when="numoffilesthreshold">\n\
-                                                <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=numberOfFilesThreshold"  style="width:94%;height:45px" ng-maxLength=512 placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                                 <div ng-show="formAddMbx.numoffilesthreshold.$dirty && formAddMbx.numoffilesthreshold.$invalid">\n\
-           											  <span class="help-block-custom" ng-show=formAddMbx.numoffilesthreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
-         									     </div>\n\
-                                            </div>\n\
                                             <div ng-switch-when="emailnotificationids">\n\
            										 <textarea ng-model="COL_FIELD" name="emailnotificationids" ng-maxLength=512 required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           											  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
@@ -275,18 +254,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\
-                                    <div ng-switch-when="payloadsizethreshold">\n\
-                                        <textarea ng-model="COL_FIELD" name ="payloadSizeThreshold" style="width:94%;height:45px" ng-maxLength=512 placeholder="required" value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
-           								    <div ng-show="formAddMbx.payloadSizeThreshold.$dirty && formAddMbx.payloadSizeThreshold.$invalid">\n\
-          										<span class="help-block-custom" ng-show=formAddMbx.payloadSizeThreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
-          									</div>\n\
-                                   </div>\n\
-                                   <div ng-switch-when="numoffilesthreshold">\n\
-                                   		<textarea ng-model="COL_FIELD" name="numoffilesthreshold" style="width:94%;height:45px" ng-maxLength=512 placeholder="required" value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
-           									 <div ng-show="formAddMbx.numoffilesthreshold.$dirty && formAddMbx.numoffilesthreshold.$invalid">\n\
-           										  <span class="help-block-custom" ng-show=formAddMbx.numoffilesthreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
-            								</div>\n\
-                                   </div>\n\
                                    <div ng-switch-when="emailnotificationids">\n\
            								 <textarea ng-model="COL_FIELD" name="emailnotificationids" ng-maxLength=512  style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\

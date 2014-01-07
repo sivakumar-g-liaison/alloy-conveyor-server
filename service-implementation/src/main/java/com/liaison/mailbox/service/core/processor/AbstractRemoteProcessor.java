@@ -874,8 +874,8 @@ public abstract class AbstractRemoteProcessor {
 
 		try {
 
-			String payloadSize = getMailBoxProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
-			String maxFile = getMailBoxProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
+			String payloadSize = getDynamicProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
+			String maxFile = getDynamicProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
 			if (!MailBoxUtility.isEmpty(payloadSize)) {
 				maxPayloadSize = Long.parseLong(payloadSize);
 			}

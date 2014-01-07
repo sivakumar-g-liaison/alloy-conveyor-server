@@ -102,7 +102,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
-		String fileRenameFormat = getMailBoxProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
+		String fileRenameFormat = getDynamicProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 
 		// Validation of the necessary properties
 		if (MailBoxUtility.isEmpty(inputLocation)) {
@@ -122,7 +122,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			// Read from mailbox property - grouping js location
 			List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
 
-			String sweepedFileLocation = getMailBoxProperties().getProperty(MailBoxConstants.SWEEPED_FILE_LOCATION);
+			String sweepedFileLocation = getDynamicProperties().getProperty(MailBoxConstants.SWEEPED_FILE_LOCATION);
 			if (!MailBoxUtility.isEmpty(sweepedFileLocation)) {
 
 				// If the given sweeped file location is not available then
