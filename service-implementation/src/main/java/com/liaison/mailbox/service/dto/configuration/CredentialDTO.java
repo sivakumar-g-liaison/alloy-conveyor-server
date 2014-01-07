@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.CredentialIdpType;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Credential;
@@ -110,11 +109,7 @@ public class CredentialDTO {
 		
 		credential.setCredsType(foundCredentialType.getCode());
 		
-		CredentialIdpType foundCredentialIdpType = CredentialIdpType.findByName(this.getIdpType());
-		if (foundCredentialIdpType == null) {
-			throw new MailBoxConfigurationServicesException(Messages.ENUM_IDPTYPE_DOES_NOT_SUPPORT, "Credential");
-		}
-		credential.setCredsIdpType(foundCredentialIdpType.getCode());
+		credential.setCredsIdpType(this.getIdpType());
 		credential.setCredsUri(this.getCredentialURI());
 		credential.setCredsUsername(this.getUserId());
 		credential.setPguid(this.getGuId());
@@ -138,12 +133,7 @@ public class CredentialDTO {
 		}
 		this.setCredentialType(foundCredentialType.name());
 		
-		CredentialIdpType foundCredentialIdpType = CredentialIdpType.findByCode(credential.getCredsIdpType());
-		if (foundCredentialIdpType == null) {
-			throw new MailBoxConfigurationServicesException(Messages.ENUM_IDPTYPE_DOES_NOT_SUPPORT, "Credential");
-		}
-		
-		this.setIdpType(foundCredentialIdpType.name());
+		this.setIdpType(credential.getCredsIdpType());
 		this.setCredentialURI(credential.getCredsUri());
 		this.setUserId(credential.getCredsUsername());
 		this.setGuId(credential.getPguid());
