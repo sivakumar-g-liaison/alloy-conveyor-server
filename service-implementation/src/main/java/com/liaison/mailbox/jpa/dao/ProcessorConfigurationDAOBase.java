@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -34,7 +34,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN)
 					.setParameter(PROF_NAME, profileName)
 					.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
-					.setParameter(EXEC_STATUS, ExecutionStatus.RUNNING.value())
+					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
 					.setParameter(MBX_NAME, (MailBoxUtility.isEmpty(mbxNamePattern) ? "''" : mbxNamePattern + "%"))
 					.setParameter(SHARD_KEY, (MailBoxUtility.isEmpty(shardKey) ? "%%" : shardKey))
 					.getResultList();

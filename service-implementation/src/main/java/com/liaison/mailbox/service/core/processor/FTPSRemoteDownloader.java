@@ -30,7 +30,7 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.FS2Exception;
-import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -74,10 +74,10 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				// FTPSRequest executed through Java
 				executeRequest();
 			}
-			modifyProcessorExecutionStatus(ExecutionStatus.COMPLETED);
+			modifyProcessorExecutionStatus(ExecutionState.COMPLETED);
 		} catch (Exception e) {
 
-			modifyProcessorExecutionStatus(ExecutionStatus.FAILED);
+			modifyProcessorExecutionStatus(ExecutionState.FAILED);
 			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			// TODO Re stage and update status in FSM

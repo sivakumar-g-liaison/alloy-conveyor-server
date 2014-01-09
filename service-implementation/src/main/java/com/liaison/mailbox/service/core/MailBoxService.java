@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
@@ -164,7 +164,7 @@ public class MailBoxService {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
 			}
 
-			if (ExecutionStatus.RUNNING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus()))  {
+			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus()))  {
 				LOG.info("The processor is already in progress , validated via DB."+processor.getPguid());
 			} else {
 				
@@ -176,7 +176,7 @@ public class MailBoxService {
 
 					LOG.info("The Processer id is {}", processor.getPguid());
 					LOG.info("The Processer type is {}", processor.getProcessorType());
-					processor.setProcsrExecutionStatus(ExecutionStatus.RUNNING.value());
+					processor.setProcsrExecutionStatus(ExecutionState.PROCESSING.value());
 					processorDAO.merge(processor);
 					processorService.invoke();
 

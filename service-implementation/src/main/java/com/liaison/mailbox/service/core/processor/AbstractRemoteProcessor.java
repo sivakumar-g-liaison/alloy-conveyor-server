@@ -57,7 +57,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.CredentialType;
-import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.Protocol;
@@ -850,7 +850,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method is used to modify the status during failure.
 	 */
-	protected void modifyProcessorExecutionStatus(ExecutionStatus status) {
+	protected void modifyProcessorExecutionStatus(ExecutionState status) {
 
 		configurationInstance.setProcsrExecutionStatus(status.value());
 		PROCESSOR_DAO.merge(configurationInstance);

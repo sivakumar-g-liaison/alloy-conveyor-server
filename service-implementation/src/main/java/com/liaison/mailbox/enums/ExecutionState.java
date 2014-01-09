@@ -17,16 +17,18 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  * 
  * @author veerasamyn
  */
-public enum ExecutionStatus {
+public enum ExecutionState {
 
-	READY("ready"),
-	RUNNING("running"),
-	FAILED("failed"),
-	COMPLETED("completed");
+	READY("READY"),
+	PROCESSING("PROCESSING"),
+	FAILED("FAILED"),
+	COMPLETED("COMPLETED"),
+	QUEUED("QUEUED"),
+	STAGED("STAGED");
 
 	private String value;
 
-	private ExecutionStatus(String status) {
+	private ExecutionState(String status) {
 		this.value = status;
 	}
 
@@ -34,10 +36,10 @@ public enum ExecutionStatus {
 		return value;
 	}
 
-	public static ExecutionStatus findByCode(String code) {
+	public static ExecutionState findByCode(String code) {
 
-		ExecutionStatus found = null;
-		for (ExecutionStatus value : ExecutionStatus.values()) {
+		ExecutionState found = null;
+		for (ExecutionState value : ExecutionState.values()) {
 
 			if (!MailBoxUtility.isEmpty(code) && code.equals(value.value())) {
 				found = value;
@@ -48,10 +50,10 @@ public enum ExecutionStatus {
 		return found;
 	}
 
-	public static ExecutionStatus findByName(String name) {
+	public static ExecutionState findByName(String name) {
 
-		ExecutionStatus found = null;
-		for (ExecutionStatus value : ExecutionStatus.values()) {
+		ExecutionState found = null;
+		for (ExecutionState value : ExecutionState.values()) {
 
 			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
 				found = value;

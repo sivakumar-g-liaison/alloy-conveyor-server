@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.model.Credential;
@@ -224,7 +224,7 @@ public class ProcessorDTO {
 
 		if (isCreate) {
 			processor.setPguid(MailBoxUtility.getGUID());
-			processor.setProcsrExecutionStatus(ExecutionStatus.READY.value());
+			processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
 
 		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
