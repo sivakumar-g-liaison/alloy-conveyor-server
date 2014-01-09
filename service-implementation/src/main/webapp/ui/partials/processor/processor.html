@@ -47,7 +47,7 @@
     .fileUpload {
 		position: relative;
 		overflow: hidden;
-		margin: 10px;
+		margin-top: 5px;
 	}
 	.fileUpload input.upload {
 		position: absolute;
@@ -59,6 +59,17 @@
 		cursor: pointer;
 		opacity: 0;
 		filter: alpha(opacity=0);
+	}
+	
+	/*This class is included to align browse button close to text area in processor details*/
+	
+	.adjustPaddingRight{
+		padding-right: 5px;
+	}
+	
+	/*This class is included to align browse button close to text area in processor details*/
+	.removePaddingLeft{
+		padding-left: 0px;
 	}
 </style>
 
@@ -130,16 +141,16 @@
 
              </div>
         </div>
-        <div class="col-sm-5 col-md-5">
+        <div class="col-sm-5 col-md-5 adjustPaddingRight">
         <label>
         Script File Path
         </label>
          <input type="text" ng-model="modal.uri" class="form-control">
         </div>
-        <div  class="col-sm-1 col-md-1">
+        <div  class="col-sm-1 col-md-1 removePaddingLeft">
             <br>
             <!-- Button trigger modal -->
-            <a style="margin-top:6px"data-toggle="modal" data-backdrop="static" data-keyboard="false" href="#myModal" class="btn btn-primary btn-sm">browse</a> 
+            <a style="margin-top:6px"data-toggle="modal" data-backdrop="static" data-keyboard="false" href="#myModal" class="btn btn-primary">browse</a> 
         </div>
       </div>
       <div class="row">
@@ -165,19 +176,29 @@
       </div>
       
       <div class="row">
-          <div class="col-sm-5 col-md-5">
+          <div class="col-sm-5 col-md-5 adjustPaddingRight">
              <label>
                 Certificate Path
             </label>
-            <input type="text" ng-disabled="isEdit" ng-model="certificateModal.certificateURI" class="form-control">
+            <input type="text" ng-model="certificateModal.certificateURI" class="form-control">
           </div>
-           <div  class="col-sm-1 col-md-1">
+           <div  class="col-sm-1 col-md-1 removePaddingLeft">
             <br>
 			
 			<div class="fileUpload btn btn-primary">
-				<span>Browse</span>
+				<span>browse</span>
 				<input ng-disabled="isEdit" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />
 			</div>
+        </div>
+		<div class="col-sm-6 col-md-6">
+            <div class="form-group">
+                <label>
+                    Certificate Type
+                </label><br/>
+                <input type="radio" ng-model="processor.certificateType" value="signed"> Signed<br/>
+				<input type="radio" ng-model="processor.certificateType" value="unsigned"> UnSigned
+                
+            </div>
         </div>
       </div>
       

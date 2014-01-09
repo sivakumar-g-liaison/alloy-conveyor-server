@@ -69,7 +69,6 @@ public enum Messages {
 
 	// INVALID ENUM
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
-	ENUM_IDPTYPE_DOES_NOT_SUPPORT("%s idpType is set to a value that is not supported."),
 	
 	// MBX GUID DOES NOT MATCH WITH THE GIVEN PROCESSOR
 	PROC_DOES_NOT_BELONG_TO_MBX("The given processor is not belongs to given mailbox."),

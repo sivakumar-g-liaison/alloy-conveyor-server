@@ -32,6 +32,31 @@ var rest = myApp.controller(
             }
         }
 
+         // Function to modify the static properties to have additional properties specific for Directory Sweeper.
+        $scope.modifyStaticPropertiesBasedOnProcessorType = function() {
+            if($scope.procsrType.id == "SWEEPER") {
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({"name":"File Rename Format","id":"filerenameformat"}, 
+                    {"name":"Sweeped File Location","id":"sweepedfilelocation"},
+                    {"name":"Payload Size Threshold","id":"payloadsizethreshold"},
+                    {"name":"Number of File Threshold","id":"numoffilesthreshold"});
+                             
+            } else {
+                 // Remove the static properties specific to processor Type SWEEPER from array allStaticPropertiesThatAreNotAssignedValuesYet
+                var indexOfFileRenameFormat = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'filerenameformat');
+                if(indexOfFileRenameFormat !== -1 ) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfFileRenameFormat, 1);
+
+                var indexOfPayloadThreshold = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'payloadsizethreshold');
+                if (indexOfPayloadThreshold !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPayloadThreshold, 1);
+                
+                var indexOfSweepedFileLocation = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'sweepedfilelocation');
+                if(indexOfSweepedFileLocation !== -1 ) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfSweepedFileLocation, 1);
+
+                var indexOfNumberOfFilesThreshold = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'numoffilesthreshold');
+                if (indexOfNumberOfFilesThreshold !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfNumberOfFilesThreshold, 1);
+                          
+            }
+        }
+
         $scope.loadOrigin = function () {
             //
             $scope.isEdit = false;
@@ -59,6 +84,7 @@ var rest = myApp.controller(
                 type: "",
                 javaScriptURI: "",
                 certificateURI: "",
+				certificateType: "",
                 description: "",
                 status: "",
                 protocol: "",
@@ -187,16 +213,27 @@ var rest = myApp.controller(
                 passwordDirtyState: ''
             }];
 
-            $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
+            // Default values of payloadsize and no of files threshold
+            $scope.payloadSizeThreshold = 131072;
+            $scope.numberOfFilesThreshold = 10
+          
+           $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
                 {"name":"Socket Timeout","id":"socketTimeout"}, {"name":"Connection Timeout","id":"connectionTimeout"},
                 {"name":"Retry Attempts","id":"retryAttempts"}, {"name":"Chunked Encoding","id":"chunkedEncoding"},
                 {"name":"Encoding Format","id":"encodingFormat"}, {"name":"Port","id":"port"},
                 {"name":"OtherRequest Header","id":"otherRequestHeader"}, {"name":"Processed File Location","id":"processedfilelocation"}] ;
 
-            $scope.allStaticProperties = [{"name":"Socket Timeout","id":"socketTimeout"}, {"name":"Connection Timeout","id":"connectionTimeout"},
+            $scope.allStaticProperties = [{"name":"Socket Timeout","id":"socketTimeout"}, 
+                {"name":"Connection Timeout","id":"connectionTimeout"},
                 {"name":"Retry Attempts","id":"retryAttempts"}, {"name":"Chunked Encoding","id":"chunkedEncoding"},
                 {"name":"Encoding Format","id":"encodingFormat"}, {"name":"Port","id":"port"},
                 {"name":"OtherRequest Header","id":"otherRequestHeader"}] ;
+                
+             $scope.dynamicPropertiesDisplayedAsStaticProperties = [{"name":"Processed File Location","id":"processedfilelocation"},
+                 {"name":"File Rename Format","id":"filerenameformat"}, 
+                 {"name":"Sweeped File Location","id":"sweepedfilelocation"},
+                 {"name":"Payload Size Threshold","id":"payloadsizethreshold"},
+                 {"name":"Number of File Threshold","id":"numoffilesthreshold"}];
 
             // function to modify the static properties if the protocol is FTP or FTPS
             $scope.modifyStaticPropertiesBasedOnProtocol();
@@ -295,7 +332,19 @@ var rest = myApp.controller(
                                  <div ng-switch-when="passive">\n\
                                     <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
                                 </div>\n\
-                				<div ng-switch-default>\n\
+                                <div ng-switch-when="payloadsizethreshold">\n\
+                                     <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                     <div ng-show="formAddPrcsr.payloadSizeThreshold.$dirty && formAddPrcsr.payloadSizeThreshold.$invalid">\n\
+                                        <span class="help-block-custom" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
+                                    </div>\n\
+                                </div>\n\
+                                <div ng-switch-when="numoffilesthreshold">\n\
+                                      <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=numberOfFilesThreshold"  style="width:90%;height:45px" ng-maxLength=512 placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                        <div ng-show="formAddPrcsr.numoffilesthreshold.$dirty && formAddPrcsr.numoffilesthreshold.$invalid">\n\
+                                            <span class="help-block-custom" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
+                                        </div>\n\
+                                  </div>\n\
+                                <div ng-switch-default>\n\
                                     <textarea ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-maxLength=2048 style="width:90%;height: 45px" placeholder="required" />\n\
                                     <a ng-click="isModal(row)" data-toggle="modal" href="#valueModal" class="right">\n\
                                     <i class="glyphicon glyphicon-new-window"></i></a>\n\
@@ -375,6 +424,18 @@ var rest = myApp.controller(
                             <div ng-show="formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.port.$error.pattern><strong>Invalid Data.</strong></span>\n\
                             </div>\n\
+                        </div>\n\
+                        <div ng-switch-when="payloadsizethreshold">\n\
+                            <textarea ng-model="COL_FIELD" name ="payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                <div ng-show="formAddPrcsr.payloadSizeThreshold.$dirty && formAddPrcsr.payloadSizeThreshold.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
+                                </div>\n\
+                        </div>\n\
+                        <div ng-switch-when="numoffilesthreshold">\n\
+                            <textarea ng-model="COL_FIELD" name="numoffilesthreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
+                                <div ng-show="formAddPrcsr.numoffilesthreshold.$dirty && formAddPrcsr.numoffilesthreshold.$invalid">\n\
+                                    <span class="help-block-custom" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern><strong>Enter valid number</strong></span>\n\
+            					</div>\n\
                         </div>\n\
                     </div>'
             },  {
@@ -779,7 +840,7 @@ var rest = myApp.controller(
                             $scope.clearProps();
                             $scope.processor.guid = data.getProcessorResponse.processor.guid;
                             $scope.processor.name = data.getProcessorResponse.processor.name;
-                            //$scope.processor.type = data.getProcessorResponse.processor.type;
+                            $scope.processor.certificateType = data.getProcessorResponse.processor.certificateType;
                             $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
                             $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
                             $scope.processor.description = data.getProcessorResponse.processor.description;
@@ -806,6 +867,10 @@ var rest = myApp.controller(
                             $scope.httpMandatoryProperties = [];
                             $scope.ftpMandatoryProperties = [];
                             $scope.sweeperMandatoryProperties = [];
+                            
+                            $scope.modifyStaticPropertiesBasedOnProtocol();
+                            $scope.modifyStaticPropertiesBasedOnProcessorType();
+                            
                             var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
                             var otherReqIndex = -1;
                             var i = 0;
@@ -860,17 +925,22 @@ var rest = myApp.controller(
                             }
 
                             for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
-
+                                
+                                // To get id as property value for the dynamic properties which are displayed as static properties
+                                var dynamicPropertyIndex = getIndex($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name );
+                                
+                                var dynamicPropertyName = (dynamicPropertyIndex == -1)?data.getProcessorResponse.processor.dynamicProperties[i].name:getName($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
+                                
                                 if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
                                     $scope.httpMandatoryProperties.push({
-                                        name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                        name: dynamicPropertyName,
                                         value: data.getProcessorResponse.processor.dynamicProperties[i].value,
                                         allowAdd: false,
                                         isMandatory: false
                                     });
                                 } else if ($scope.processor.protocol === 'SWEEPER') {
                                     $scope.sweeperMandatoryProperties.push({
-                                        name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                        name:  dynamicPropertyName,
                                         value: data.getProcessorResponse.processor.dynamicProperties[i].value,
                                         allowAdd: false,
                                         isMandatory: false
@@ -878,13 +948,19 @@ var rest = myApp.controller(
                                 }                                
                                 else {
                                     $scope.ftpMandatoryProperties.push({
-                                        name: data.getProcessorResponse.processor.dynamicProperties[i].name,
+                                        name:  dynamicPropertyName,
                                         value: data.getProcessorResponse.processor.dynamicProperties[i].value,
                                         allowAdd: false,
                                         isMandatory: false
                                     });
                                 }
+                                 // To remove already value assigned properties from array allStaticPropertiesThatAreNotAssignedValuesYet
+                                var indexOfElement = getIndex($scope.allStaticPropertiesThatAreNotAssignedValuesYet, data.getProcessorResponse.processor.dynamicProperties[i].name);
+                                if (indexOfElement !== -1) {
+                                    $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                                }
                             }
+                           
 
                             if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
                                 $scope.httpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
@@ -1053,7 +1129,8 @@ var rest = myApp.controller(
             var attrName = '';
 
             if (valueSelectedinSelectionBox.value.id === 'socketTimeout' || valueSelectedinSelectionBox.value.id === 'connectionTimeout'
-                || valueSelectedinSelectionBox.value.id === 'retryAttempts' || valueSelectedinSelectionBox.value.id === 'port') {
+                || valueSelectedinSelectionBox.value.id === 'retryAttempts' || valueSelectedinSelectionBox.value.id === 'port'
+                || valueSelectedinSelectionBox.value.id === 'payloadsizethreshold' || valueSelectedinSelectionBox.value.id === 'numoffilesthreshold') {
 
                 if (!($scope.numberPattern.test(row.getProperty('value')))) {
 
@@ -1348,6 +1425,13 @@ var rest = myApp.controller(
                         value: $scope.verb
                     });
                 }
+                
+                  if ((name === 'httpVersion' || name === 'contentType') && ($scope.processor.protocol == 'HTTP' || $scope.processor.protocol == 'HTTPS')) {
+                    mandatoryArray.push({
+                        name: name,
+                        value: value
+                    });
+                }
 
                 var index = getIndex($scope.allStaticProperties, $scope.processorProperties[i].name);
                 var indexMandatory;
@@ -1359,8 +1443,11 @@ var rest = myApp.controller(
                 } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
 
                 if (index === -1 && indexMandatory === -1) {
+                    // TO set proper id for dynamic properties which are displayed as static properties
+                    var dynamicPropertyIndex = getIndex($scope.dynamicPropertiesDisplayedAsStaticProperties, $scope.processorProperties[i].name );
+                    var dynamicPropertyName = (dynamicPropertyIndex == -1)?$scope.processorProperties[i].name:getId($scope.dynamicPropertiesDisplayedAsStaticProperties, $scope.processorProperties[i].name);
                     $scope.processor.dynamicProperties.push({
-                        name: $scope.processorProperties[i].name,
+                        name: dynamicPropertyName,
                         value: $scope.processorProperties[i].value
                     });
                 } else {
@@ -1517,6 +1604,10 @@ var rest = myApp.controller(
                 $scope.processorProperties = $scope.ftpMandatoryProperties;
                 $scope.setFolderData(false);
             }
+               // function to modify the static properties if the protocol is FTP or FTPS
+            $scope.modifyStaticPropertiesBasedOnProtocol();
+             // function to modify the static properties if the type is SWEEPER
+            $scope.modifyStaticPropertiesBasedOnProcessorType();
         };
         $scope.resetProtocol = function (model) {
 
@@ -1540,6 +1631,10 @@ var rest = myApp.controller(
                 $scope.processor.type = $scope.enumprocsrtype[2];
 
             }
+            // function to modify the static properties if the protocol is FTP or FTPS
+            $scope.modifyStaticPropertiesBasedOnProtocol();
+            // function to modify the static properties if the type is SWEEPER
+            $scope.modifyStaticPropertiesBasedOnProcessorType();
         };
         $scope.setFolderData = function (mandatory) {
             if (mandatory) {
@@ -1581,7 +1676,7 @@ var rest = myApp.controller(
                 {"name":"OtherRequest Header","id":"otherRequestHeader"}, {"name":"Processed File Location","id":"processedfilelocation"}] ;
 
             // function to modify the static properties if the protocol is FTP or FTPS
-            $scope.modifyStaticPropertiesBasedOnProtocol();
+           // $scope.modifyStaticPropertiesBasedOnProtocol();
 
             $scope.ftpMandatoryProperties = [{
                 name: 'URL',
@@ -1611,6 +1706,17 @@ var rest = myApp.controller(
                 isMandatory: true
             }, {
                 name: 'Content Type',
+                value: '',
+                allowAdd: false,
+                isMandatory: true
+            }, {
+                name: '',
+                value: '',
+                allowAdd: true,
+                isMandatory: false
+            }];
+            $scope.sweeperMandatoryProperties = [{
+                name: 'PipeLine Id',
                 value: '',
                 allowAdd: false,
                 isMandatory: true
@@ -1695,7 +1801,7 @@ var rest = myApp.controller(
 				var arr = resp['dataTransferObject']['keyGroupMemberships'];
 				pkGuid = arr[0]['keyBase']['pguid'];
 				
-				var trustStoreId = '0C3A3BC50A0037B00665D98D2D86079D';
+				var trustStoreId = '0C3A3BC00A0037B00665D98DB3096BC8';
 				
 				// Public Key guid 
 				pkGuid = pkGuid.toString();
