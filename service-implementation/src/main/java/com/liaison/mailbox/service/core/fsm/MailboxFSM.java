@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.liaison.fsm.ActiveEvent;
 import com.liaison.fsm.ActiveTransition;
 import com.liaison.fsm.Delegate;
@@ -14,8 +17,11 @@ import com.liaison.fsm.Transition;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.jpa.dao.MailBoxFSMDAOBase;
+import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
 public class MailboxFSM implements FSM<ProcessorState,ExecutionEvents>{
+	
+	
 	
 	public MailboxFSM(){
 		this.setFSMDao(new MailBoxFSMDAOBase());
@@ -28,6 +34,11 @@ public class MailboxFSM implements FSM<ProcessorState,ExecutionEvents>{
 	@Override
 	public void addState(String strName, ProcessorState state) {
 		fsmDao.addState(strName, state);
+		
+	}
+	
+	public void addState(ProcessorState state) {
+		this.addState(state.getExecutionId(), state);
 		
 	}
 
@@ -118,23 +129,36 @@ public class MailboxFSM implements FSM<ProcessorState,ExecutionEvents>{
 		
 	}
 	
-	public void addTransitionRules(ProcessorState stateDefination){
+	public boolean addDefaultStateTransitionRules(ProcessorState processorQueued) throws MailBoxFSMSetupException{
+		if(processorQueued.getExecutionState().value() != ExecutionState.QUEUED.value()){
+			
+			throw new MailBoxFSMSetupException("The Processor should be in the QUEUED status to use the default rules");
+		}
 		
 		//Transition Rules - QUEUED TO PROCESSING WHEN ExecutionEvents.PROCESSOR_EXECUTION_STARTED is passed on
 		Transition<ProcessorState,ExecutionEvents> transition = this.createTransition();        
-		transition.addCriteria(stateDefination.getExecutionId(), stateDefination);
+		transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
 		transition.setEvent( new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_STARTED) );	
-		ProcessorState processorProcessing = new ProcessorState().copyFrom(stateDefination,ExecutionState.PROCESSING);
+		ProcessorState processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.PROCESSING);
 		transition.addUpdate( processorProcessing.getExecutionId(), processorProcessing);        
 		this.addTransition( transition );
 			    
 		//Transition Rules - PROCESSING TO COMPLTED WHEN ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED is passed on
 		transition = this.createTransition();        
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
-		transition.setEvent( new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED) );	   
-		ProcessorState processorCompleted = new ProcessorState().copyFrom(processorProcessing,ExecutionState.COMPLETED);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED) );	   
+		ProcessorState processorCompleted = processorProcessing.createACopyWithNewState(ExecutionState.COMPLETED);
 		transition.addUpdate( processorCompleted.getExecutionId(), processorCompleted);        
 		this.addTransition( transition );
+		
+		//Transition Rules - PROCESSING TO FAILED WHEN ExecutionEvents.PROCESSOR_EXECUTION_FAILED is passed on
+		transition = this.createTransition();        
+		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_FAILED) );	   
+		ProcessorState processorFailed = processorProcessing.createACopyWithNewState(ExecutionState.FAILED);
+		transition.addUpdate( processorFailed.getExecutionId(), processorFailed);        
+		this.addTransition( transition );
+		return true;
 	}
 
 	

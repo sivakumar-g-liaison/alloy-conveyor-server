@@ -5,6 +5,12 @@ import com.liaison.mailbox.enums.ProcessorType;
 
 public class ProcessorState {
 	
+	public ProcessorState(String executionId,String processorId,ExecutionState executionState){
+		this.setExecutionId(executionId);
+		this.setExecutionState(executionState);
+		this.setProcessorId(processorId);
+	}
+	
 	private String processorId;
 	private String processorName;
 	private ProcessorType processorType;
@@ -66,14 +72,14 @@ public class ProcessorState {
 	}
 	
 	//TODO make a deep copy of everything.
-	public ProcessorState copyFrom(ProcessorState state,ExecutionState execState){
-		 this.setExecutionId(state.getExecutionId());
-		 this.setExecutionState(execState);
-		 return this;
+	public ProcessorState createACopyWithNewState(ExecutionState execState){
+		 ProcessorState newCopy = new  ProcessorState(this.getExecutionId(),this.getProcessorId(),execState);
+		 
+		 return newCopy;
 	}
 	
 	public boolean equals(ProcessorState incoming){
-		System.out.println("Trying to compare if the state object has ID "+incoming.executionId);
+		
 		return (this.executionId == incoming.executionId && this.executionState.name() == incoming.getExecutionState().name());
 		
 		

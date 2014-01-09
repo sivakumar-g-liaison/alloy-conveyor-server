@@ -1,9 +1,10 @@
 package com.liaison.mailbox.jpa.dao;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.xbean.finder.AnnotationFinder.SubArchive.E;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.fsm.ActiveEvent;
@@ -15,29 +16,32 @@ import com.liaison.mailbox.service.core.fsm.ProcessorState;
 
 public class MailBoxFSMDAOBase extends GenericDAOBase<FSMModel> implements FSMDao<ProcessorState, ExecutionEvents> {
 	
-	private List<Event<ExecutionEvents>> events = new LinkedList<Event<ExecutionEvents>>();
-	private ProcessorState state = null;
+	
+	private static Map<String,ProcessorState> dummyProcessorStateMap = new HashMap<>(); // TODO REMOVE THIS LATER THIS IS JUST TO MOCK THE DB
+	
 	@Override
-	public void addState(String arg0, ProcessorState arg1) {
-		System.out.println("The State of "+arg1.getExecutionId() + " now is "+arg1.getExecutionState());
-		//Fill model FSMMOdel and persist in DB
-		this.state= arg1;
+	public void addState(String executionId, ProcessorState state) {
+		
+		//TODO Fill model FSMMOdel and persist in DB. ALWAYS INSERT NEW STATE DO NOT UPDATE PREVIOUS ONE.
+		dummyProcessorStateMap.put(executionId, state);
+		System.out.println("The STATE of "+executionId+" is "+state.getExecutionState());
 	}
 
 
 
 	@Override
-	public ProcessorState getState(String arg0) {
-		System.out.println("Get state called with "+arg0);
-				
-		return state;
+	public ProcessorState getState(String executionId) {
+		
+		//TODO Fetch  the state from DB for the incoming execution id, 
+		//since we always add states we will have more than one state entry for the given execution ID so always get the latest one.	
+		return dummyProcessorStateMap.get(executionId);
 	}
 	
 	
 	@Override
-	public Event<ExecutionEvents> createEvent(ExecutionEvents arg0) {
-		Event<ExecutionEvents> event = new ActiveEvent<ExecutionEvents>(arg0);
-		events.add(event);
+	public Event<ExecutionEvents> createEvent(ExecutionEvents executionEvent) {
+		Event<ExecutionEvents> event = new ActiveEvent<ExecutionEvents>(executionEvent);
+		//events.add(event);
 		return event;
 	}
 
