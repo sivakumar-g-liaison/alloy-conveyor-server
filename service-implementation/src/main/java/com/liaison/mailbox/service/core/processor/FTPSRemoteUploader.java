@@ -185,6 +185,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					ftpsRequest.changeDirectory(remoteParentDir);
 					InputStream inputStream = new FileInputStream(item);
 					ftpsRequest.putFile(item.getName(), inputStream);
+					inputStream.close();
 
 				} else {
 
@@ -206,8 +207,8 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 				if (null != item) {
 
-					String processedFileLcoation = getDynamicProperties().getProperty(
-							MailBoxConstants.PROCESSED_FILE_LOCATION);
+					String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(
+							MailBoxConstants.PROCESSED_FILE_LOCATION));
 					if (MailBoxUtility.isEmpty(processedFileLcoation)) {
 						archiveFile(item.getAbsolutePath());
 					} else {

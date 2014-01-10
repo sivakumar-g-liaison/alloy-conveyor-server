@@ -67,5 +67,9 @@ public interface MailBoxConstants {
 	// Properties for sweeper grouping boundary condition
 	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
 	public final static String NUMER_OF_FILES_THRESHOLD = "numoffilesthreshold";
+	
+	// Added for processing Mount Location from Folder Path given by User
+	public final static String MOUNT_LOCATION = "MOUNT_POINT";
+	public final static String MOUNT_LOCATION_PATTERN = "(?i:MOUNT_POINT)";
 
 }

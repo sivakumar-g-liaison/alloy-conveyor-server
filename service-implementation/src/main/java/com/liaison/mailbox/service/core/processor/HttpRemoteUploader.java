@@ -105,7 +105,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 			if (null != files) {
 
-				String processedFileLcoation = getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION);
+				String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION));
 				if (MailBoxUtility.isEmpty(processedFileLcoation)) {
 					archiveFiles(files);
 				} else {

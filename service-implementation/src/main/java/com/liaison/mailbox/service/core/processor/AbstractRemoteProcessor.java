@@ -213,7 +213,7 @@ public abstract class AbstractRemoteProcessor {
 
 					LOGGER.debug("Started reading the payload files");
 					List<File> result = new ArrayList<>();
-					listFiles(folder.getFldrUri(), result);
+					listFiles(processMountLocation(folder.getFldrUri()), result);
 
 					if (!result.isEmpty()) {
 						files = Arrays.copyOf(result.toArray(), result.toArray().length, File[].class);
@@ -232,7 +232,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
 	 */
-	protected String getPayloadURI() throws MailBoxServicesException {
+	protected String getPayloadURI() throws MailBoxServicesException, IOException {
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -242,7 +242,7 @@ public abstract class AbstractRemoteProcessor {
 				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
-					return folder.getFldrUri();
+					return processMountLocation(folder.getFldrUri());
 				}
 			}
 		}
@@ -268,7 +268,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public String getWriteResponseURI() throws MailBoxServicesException {
+	public String getWriteResponseURI() throws MailBoxServicesException, IOException {
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -278,7 +278,7 @@ public abstract class AbstractRemoteProcessor {
 				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType) || FolderType.TARGET_LOCATION.equals(foundFolderType)) {
-					return folder.getFldrUri();
+					return processMountLocation(folder.getFldrUri());
 				}
 			}
 		}
@@ -1157,5 +1157,30 @@ public abstract class AbstractRemoteProcessor {
 		File file = new File(filename);
 		Files.write(file.toPath(), response.toByteArray());
 		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
+	}
+	
+	/**
+	 * Method is used to process the folder path given by user and replace the mount location
+	 * with proper value form properties file.
+	 * 
+	 * @param folderPath
+	 *            The folder path given by user
+	 *            
+	 * @return processedFolderPath
+	 * 			  The folder path with mount location	           
+	 * 
+	 */
+	protected String processMountLocation(String folderPath) throws IOException {
+		
+			String processedFolderPath = null; 
+			
+			if(folderPath != null && folderPath.toUpperCase().contains(MailBoxConstants.MOUNT_LOCATION)) {
+				String mountLocationValue = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("MOUNT_POINT"));
+				processedFolderPath = folderPath.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN, mountLocationValue);
+			} else {
+				return folderPath;
+			}
+			LOGGER.info("The Processed Folder Path is"+ processedFolderPath);
+			return processedFolderPath;
 	}
 }

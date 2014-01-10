@@ -122,7 +122,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			// Read from mailbox property - grouping js location
 			List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
 
-			String sweepedFileLocation = getDynamicProperties().getProperty(MailBoxConstants.SWEEPED_FILE_LOCATION);
+			String sweepedFileLocation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.SWEEPED_FILE_LOCATION));
 			if (!MailBoxUtility.isEmpty(sweepedFileLocation)) {
 
 				// If the given sweeped file location is not available then

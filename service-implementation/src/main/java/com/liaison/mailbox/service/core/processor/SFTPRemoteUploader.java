@@ -180,13 +180,14 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					sftpRequest.changeDirectory(remoteParentDir);
 					InputStream inputStream = new FileInputStream(item);
 					sftpRequest.putFile(item.getName(), inputStream);
+					inputStream.close();
 				}
 				// archiveFile(item.getAbsolutePath());
 
 				if (null != item) {
 
-					String processedFileLcoation = getDynamicProperties().getProperty(
-							MailBoxConstants.PROCESSED_FILE_LOCATION);
+					String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(
+							MailBoxConstants.PROCESSED_FILE_LOCATION));
 					if (MailBoxUtility.isEmpty(processedFileLcoation)) {
 						archiveFile(item.getAbsolutePath());
 					} else {
