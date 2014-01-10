@@ -96,7 +96,7 @@ public final class JavaScriptEngineUtil {
 		String response = null;
 	
 		if (scriptPath.startsWith("http://")) {
-			response = HTTPClientUtil.getHTTPResponseInString(scriptPath, null);
+			response = HTTPClientUtil.getHTTPResponseInString(LOGGER, scriptPath, null);
         } else if (scriptPath.startsWith("https://")) {
         	// TODO HTTPClient not support https protocol 
         } else if (scriptPath.startsWith("ftp://")) {

@@ -613,7 +613,7 @@ public abstract class AbstractRemoteProcessor {
 		
 		Map<String, String> headerMap = new HashMap<String, String>();
 		headerMap.put("Content-Type", "application/json");
-		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(url, headerMap);
+		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 		
 		if (jsonResponse != null) {
 			

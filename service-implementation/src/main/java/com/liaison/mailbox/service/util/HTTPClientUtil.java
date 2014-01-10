@@ -15,6 +15,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
+import org.slf4j.Logger;
+
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
@@ -39,11 +41,11 @@ public final class HTTPClientUtil {
 	 * @throws MalformedURLException
 	 * @throws LiaisonException
 	 */
-	public static String getHTTPResponseInString(String httpURL, Map<String, String> headers) throws MalformedURLException, LiaisonException {
+	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers) throws MalformedURLException, LiaisonException {
 		
 		String clientContent = null;
 		URL url = new URL(httpURL);		
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,null);
+		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,logger);
 		OutputStream output = new HTTPStringOutputStream();
 		request.setOutputStream(output);
 		setHeaders(request, headers);
