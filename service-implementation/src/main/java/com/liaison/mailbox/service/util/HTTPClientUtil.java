@@ -66,11 +66,11 @@ public final class HTTPClientUtil {
 	 * @throws FileNotFoundException
 	 * @throws LiaisonException
 	 */
-	public static File getHTTPResponseInFile(String httpURL, String filePath, Map<String, String> headers) throws MalformedURLException, FileNotFoundException, LiaisonException {
+	public static File getHTTPResponseInFile(Logger logger, String httpURL, String filePath, Map<String, String> headers) throws MalformedURLException, FileNotFoundException, LiaisonException {
 		
 		URL url = new URL(httpURL);		
 		File file = new File(filePath);
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,null);
+		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,logger);
 		FileOutputStream output = new FileOutputStream(file);			
 		request.setOutputStream(output);
 		setHeaders(request, headers);
