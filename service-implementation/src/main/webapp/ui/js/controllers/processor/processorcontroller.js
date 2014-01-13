@@ -3,9 +3,16 @@ var rest = myApp.controller(
         '$filter', '$location', '$log', '$blockUI',
         function ($scope, $filter,
                   $location, $log, $blockUI) {
+    	
             // To be Populated
         $scope.mailBoxId;
         var block = $blockUI.createBlockUI();
+        
+        // TrustStoreID Needed only to associate publickey with truststore
+        var globalTrustStoreId = '75D511420A0006340665134DFA242B47';
+        
+        //Need TrustStore Group ID needed for fetching the truststore during processor invocation.
+        var globalTrustStoreGroupId = '75D5112D0A0006340665134D334351D5';
 
         // Function to modify the static properties to have additional properties of "binary"
         // and "passive" for FTP & FTPS protocols.
@@ -58,7 +65,8 @@ var rest = myApp.controller(
         }
 
         $scope.loadOrigin = function () {
-            //
+            
+        	$scope.isFileSelected = false;
             $scope.isEdit = false;
             $scope.isProcessorTypeSweeper = false;
             $scope.mailboxName = $location.search().mbxname;
@@ -84,7 +92,8 @@ var rest = myApp.controller(
                 type: "",
                 javaScriptURI: "",
                 certificateURI: "",
-				certificateType: "",
+				isSelfSigned: "",
+				trustStoreId: "",
                 description: "",
                 status: "",
                 protocol: "",
@@ -840,7 +849,7 @@ var rest = myApp.controller(
                             $scope.clearProps();
                             $scope.processor.guid = data.getProcessorResponse.processor.guid;
                             $scope.processor.name = data.getProcessorResponse.processor.name;
-                            $scope.processor.certificateType = data.getProcessorResponse.processor.certificateType;
+                            $scope.processor.isSelfSigned = data.getProcessorResponse.processor.isSelfSigned;
                             $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
                             $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
                             $scope.processor.description = data.getProcessorResponse.processor.description;
@@ -1384,9 +1393,13 @@ var rest = myApp.controller(
         $scope.save = function () {
 			
 			console.log($scope.certificateModal.certificateURI);
-			if (!$scope.isEdit && $scope.processor.protocol === 'HTTPS' && $scope.certificateModal.certificateURI !== '') {
+			if ($scope.processor.protocol === 'HTTPS' && $scope.certificateModal.certificateURI !== '' && $scope.isFileSelected) {
+				
+				block.blockUI();
 				$scope.uploadFile();
 			} else {
+				
+				$scope.processor.trustStoreId = "";
 				$scope.saveProcessor();
 			}
 		}
@@ -1769,11 +1782,14 @@ var rest = myApp.controller(
 				}
 				//console.log('files:', $scope.files);
 				$scope.certificateModal.certificateURI = $scope.files[0].name;
+				$scope.isFileSelected = true;
 				$scope.progressVisible = false
 			  });
 		};
 
 		$scope.uploadFile = function() {
+			
+			console.log('Entering upload event');
 			
 			var fd = new FormData();
 			$scope.pkObj['serviceInstanceId'] = Date.now().toString();
@@ -1801,41 +1817,81 @@ var rest = myApp.controller(
 				var arr = resp['dataTransferObject']['keyGroupMemberships'];
 				pkGuid = arr[0]['keyBase']['pguid'];
 				
-				var trustStoreId = '0C3A3BC00A0037B00665D98DB3096BC8';
-				
 				// Public Key guid 
 				pkGuid = pkGuid.toString();
 				
-				// To put public key is association json to TrustStore
-				$scope.linkKeyTs['dataTransferObject']['trustStoreMemberships'][0]['publicKey']['pguid'] = pkGuid;
-				
-				$scope.restService.put($scope.url_link_key_store + trustStoreId, angular.toJson($scope.linkKeyTs),
-                    function (data, status) {
+				if ($scope.processor.isSelfSigned === 'N') {
 					
-						if (status == 200) {
-						
-							$scope.saveProcessor();
-						} else {
-							showSaveMessage('Processor creation failed', 'error');
-							return;
-						}
-					}
-				);
+					console.log('creating self signed trust store');
+					$scope.uploadToSelfSignedTrustStore(pkGuid);
+				} else {
+					
+					console.log('uploading to global trust store');
+					$scope.linkTrustStoreWithCertificate(pkGuid, globalTrustStoreId, globalTrustStoreGroupId);
+				}
 				
 			} else {
-				showSaveMessage('Processor creation failed', 'error');
+				block.unblockUI();
+				var msg = ($scope.isEdit === true)? 'Processor revision failed':'Processor creation failed';
+				showSaveMessage(msg, 'error');
 				return;
 			}
 			
 		}
+		
+		$scope.uploadToSelfSignedTrustStore = function(pkGuid) {
+			
+			$scope.restService.get($scope.base_url + '/uploadSelfSigned', //Get mail box Data
+	                function (data, status) {
+				
+						if (status == 200 && data.getTrustStoreResponse.response.status === 'success') {
+							
+							$scope.linkTrustStoreWithCertificate(pkGuid, data.getTrustStoreResponse.trustStore.trustStoreId, 
+							data.getTrustStoreResponse.trustStore.trustStoreGroupId);
+						} else {
+							block.unblockUI();
+							showSaveMessage(data.getTrustStoreResponse.response.message, 'error');
+							return;
+						}
+	                }
+	            );
+		}
+		
+		$scope.linkTrustStoreWithCertificate = function(pkGuid, trustStoreId, trustStoreGroupId) {
+			
+			// To put public key is association json to TrustStore
+			$scope.linkKeyTs['dataTransferObject']['trustStoreMemberships'][0]['publicKey']['pguid'] = pkGuid;
+			
+			$scope.restService.put($scope.url_link_key_store + trustStoreId, angular.toJson($scope.linkKeyTs),
+                function (data, status) {
+				
+					if (status == 200) {
+					
+						$scope.processor.trustStoreId = trustStoreGroupId;
+						$scope.saveProcessor();
+					} else {
+						block.unblockUI();
+						var msg = ($scope.isEdit === true)? 'Processor revision failed':'Processor creation failed';
+						showSaveMessage(msg, 'error');
+						return;
+					}
+				}
+			);
+		}
 
 		function uploadFailed(evt) {
-			showSaveMessage('Processor creation failed', 'error');
+			
+			block.unblockUI();
+			var msg = ($scope.isEdit === true)? 'Processor revision failed':'Processor creation failed';
+			showSaveMessage(msg, 'error');
 			return;
 		}
 
 		function uploadCanceled(evt) {
-			showSaveMessage('Processor creation failed', 'error');
+			
+			block.unblockUI();
+			var msg = ($scope.isEdit === true)? 'Processor revision failed':'Processor creation failed';
+			showSaveMessage(msg, 'error');
 			return;
 		}
 		

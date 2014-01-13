@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -37,7 +36,6 @@ import java.util.Properties;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -68,7 +66,6 @@ import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
-import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
@@ -556,23 +553,14 @@ public abstract class AbstractRemoteProcessor {
 		// Configure keystore for HTTPS request
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
 
-			CredentialInfoModel keystoreModel = getKeyStoreCredential();
-
-			if (keystoreModel != null) {
-
-				if (MailBoxUtility.isEmpty(keystoreModel.getPassword())) {
-
-					LOGGER.info("Credential is missing password to configure truststore/keystore");
-					throw new MailBoxServicesException("Credential is missing password to configure truststore/keystore");
-				}
 
 				KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				InputStream instream = fetchTrustStore();
+				InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
 				//InputStream instream = new FileInputStream(new File(keystoreModel.getFileURI()));
 				
 				try {
 					
-					trustStore.load(instream, keystoreModel.getPassword().toCharArray());
+					trustStore.load(instream, null);
 					//trustStore.load(instream, keystoreModel.getPassword().toCharArray());
 
 				} finally {
@@ -582,9 +570,8 @@ public abstract class AbstractRemoteProcessor {
 				if (CredentialType.TRUST_STORE.equals(foundCredentailType)) {
 					request.truststore(trustStore);
 				} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
-					request.keystore(trustStore, keystoreModel.getPassword());
+					request.keystore(trustStore, null);
 				}
-			}
 		}
 		LOGGER.info("Returns HTTP/S configured HTTPClient");
 		return request;
@@ -600,7 +587,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JSONException
 	 * @throws IOException
 	 */
-	private InputStream fetchTrustStore() throws LiaisonException, JSONException, IOException {
+	private InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException {
 		
 		InputStream is = null;
 		
@@ -608,7 +595,6 @@ public abstract class AbstractRemoteProcessor {
 		url = url + "fetch/truststore/current/";
 		
 		// To be fetched from DataBase
-		String trustStoreId = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("truststore-id"));
 		url = url + trustStoreId;
 		
 		Map<String, String> headerMap = new HashMap<String, String>();
@@ -654,54 +640,7 @@ public abstract class AbstractRemoteProcessor {
 		}
 	}
 
-	/**
-	 * Sent notifications for trigger system failure.
-	 * 
-	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
-	 * @param subject
-	 *            The notification subject
-	 * @param emailBody
-	 *            The body of the notification
-	 * @param type
-	 *            The notification type(TEXT/HTML).
-	 */
 
-	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
-
-		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
-		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty()) && (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
-			LOGGER.info("There is no email address configured for this mailbox.");
-		}
-
-		if (null != configuredEmailAddress && null != toEmailAddrList) {
-			toEmailAddrList.addAll(configuredEmailAddress);
-		} else if (null != configuredEmailAddress) {
-			toEmailAddrList = configuredEmailAddress;
-		}
-
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
-	}
-
-	/**
-	 * Sent notifications for trigger system failure.
-	 * 
-	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
-	 * @param subject
-	 *            The notification subject
-	 * @param exc
-	 *            The exception as body content
-	 * @param type
-	 *            The notification type(TEXT/HTML).
-	 */
-	public void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
-
-		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
-	}
 
 	/**
 	 * Method to list file from folder
@@ -1103,10 +1042,10 @@ public abstract class AbstractRemoteProcessor {
 		if (credential != null) {
 
 			model = new CredentialInfoModel();
-			if (!MailBoxUtility.isEmpty(credential.getCredsPassword()) && !MailBoxUtility.isEmpty(credential.getCredsUri())) {
+			if (!MailBoxUtility.isEmpty(credential.getCredsPassword())) {
 
 				model.setPassword(credential.getCredsPassword());
-				model.setFileURI(credential.getCredsUri());
+				//model.setFileURI(credential.getCredsUri());
 
 			} else if (!MailBoxUtility.isEmpty(credential.getCredsIdpUri())) {
 

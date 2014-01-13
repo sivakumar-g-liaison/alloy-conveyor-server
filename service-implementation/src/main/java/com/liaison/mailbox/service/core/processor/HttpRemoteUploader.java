@@ -25,7 +25,6 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -116,34 +115,24 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	}
 
 	@Override
-	public void invoke() {
+	public void invoke() throws Exception {
 
-		try {
+		// HTTPRequest executed through JavaScript
+		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
-			// HTTPRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+			ScriptEngineManager manager = new ScriptEngineManager();
+			ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-				ScriptEngineManager manager = new ScriptEngineManager();
-				ScriptEngine engine = manager.getEngineByName("JavaScript");
+			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
+			Invocable inv = (Invocable) engine;
 
-				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-				Invocable inv = (Invocable) engine;
+			// invoke the method in javascript
+			inv.invokeFunction("init", this);
+			// System.out.println(obj.toString());
 
-				// invoke the method in javascript
-				inv.invokeFunction("init", this);
-				// System.out.println(obj.toString());
-
-			} else {
-				// HTTPRequest executed through Java
-				executeRequest();
-			}
-			modifyProcessorExecutionStatus(ExecutionState.COMPLETED);
-		} catch (Exception e) {
-
-			modifyProcessorExecutionStatus(ExecutionState.FAILED);
-			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
-			e.printStackTrace();
-			// TODO Re stage and update status in FSM
+		} else {
+			// HTTPRequest executed through Java
+			executeRequest();
 		}
 	}
 }

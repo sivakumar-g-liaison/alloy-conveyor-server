@@ -56,6 +56,7 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxR
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
@@ -267,6 +268,45 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
+	
+	/**
+	 * 
+	 * REST method for uploading Self Signed TrustStore
+	 * @return Response Object
+	 */
+	@GET
+	@Path("/uploadSelfSigned")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response uploadSelfSignedTrustStore() {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			// add the new profile details
+			GetTrustStoreResponseDTO serviceResponse = null;
+			ProcessorConfigurationService processor = new ProcessorConfigurationService();
+			serviceResponse = processor.uploadSelfSignedTrustStore();
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}
+	
 
 	/**
 	 * REST method to initiate profile creation.

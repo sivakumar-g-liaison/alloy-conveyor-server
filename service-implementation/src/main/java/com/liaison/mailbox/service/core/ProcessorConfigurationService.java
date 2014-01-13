@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -53,11 +52,13 @@ import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -72,6 +73,7 @@ public class ProcessorConfigurationService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorConfigurationService.class);
 	private static String PROCESSOR = "Processor";
+	private static String TRUSTSTORE = "TrustStore";
 	private static String MAILBOX = "MailBox";
 	private static final String PROCESSOR_STATUS = "Processor Status";
 
@@ -179,6 +181,7 @@ public class ProcessorConfigurationService {
        //TODO check for 200, if not then throw an Exception. 
        System.out.println(response.getStatusLine());
 	}
+	
 
 	/**
 	 * Method which uploads public key
@@ -375,6 +378,64 @@ public class ProcessorConfigurationService {
 					.getMessage()));
 			return serviceResponse;
 		}
+	}
+	
+	public GetTrustStoreResponseDTO uploadSelfSignedTrustStore() throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
+		
+		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO(); 
+		
+		try {
+			
+			String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
+			JSONObject jsonRequest = new JSONObject(request);
+			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
+			
+			HttpPost httpPost = new HttpPost(String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url")) 
+					+ "upload/truststore"); 
+			DefaultHttpClient httpclient = new DefaultHttpClient();
+			
+			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
+			FileBody trustStore = new FileBody(new File(String.valueOf(MailBoxUtility.getEnvironmentProperties()
+					.get("certificateDirectory"))));
+			
+			HttpEntity reqEntity = MultipartEntityBuilder.create()
+					.addPart("request", jsonRequestBody)
+					.addPart("key", trustStore)
+					.build();
+			
+			httpPost.setEntity(reqEntity);
+			HttpResponse response = httpclient.execute(httpPost);
+			
+			// TODO Check for 200 Status code, Consume entity then get GUID and return
+			
+			if (response.getStatusLine().getStatusCode() == 201) {
+				
+				JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
+				
+				// Setting TrustStore ID
+				JSONArray arr = obj.getJSONObject("dataTransferObject").getJSONArray("trustStores");
+				String trustStoreId = (((JSONObject)arr.get(0)).getString("pguid"));
+				TrustStoreDTO dto = new TrustStoreDTO();
+				dto.setTrustStoreId(trustStoreId);
+				
+				//Setting TrustStore Group ID
+				dto.setTrustStoreGroupId(obj.getJSONObject("dataTransferObject").getString("pguid"));
+
+				serviceResponse.setTrustStore(dto);
+				serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, TRUSTSTORE, Messages.SUCCESS));
+				LOGGER.info("Exit from get mailbox.");
+				return serviceResponse;
+				
+			} else throw new MailBoxConfigurationServicesException(Messages.SELFSIGNED_TRUSTSTORE_CREATION_FAILED);
+			
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, TRUSTSTORE, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+		}
+		
 	}
 
 	/**

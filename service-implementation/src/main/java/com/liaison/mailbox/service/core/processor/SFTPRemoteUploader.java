@@ -30,7 +30,6 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -199,34 +198,24 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	}
 
 	@Override
-	public void invoke() {
+	public void invoke() throws Exception {
+		
+		LOGGER.info("Entering in invoke.");
+		// SFTPRequest executed through JavaScript
+		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
-		try {
+			ScriptEngineManager manager = new ScriptEngineManager();
+			ScriptEngine engine = manager.getEngineByName("JavaScript");
 
-			LOGGER.info("Entering in invoke.");
-			// SFTPRequest executed through JavaScript
-			if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
+			Invocable inv = (Invocable) engine;
 
-				ScriptEngineManager manager = new ScriptEngineManager();
-				ScriptEngine engine = manager.getEngineByName("JavaScript");
+			// invoke the method in javascript
+			inv.invokeFunction("init", this);
 
-				engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-				Invocable inv = (Invocable) engine;
-
-				// invoke the method in javascript
-				inv.invokeFunction("init", this);
-
-			} else {
-				// SFTPRequest executed through Java
-				executeRequest();
-			}
-			modifyProcessorExecutionStatus(ExecutionState.COMPLETED);
-		} catch (Exception e) {
-
-			modifyProcessorExecutionStatus(ExecutionState.FAILED);
-			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
-			e.printStackTrace();
-			// TODO Re stage and update status in FSM
+		} else {
+			// SFTPRequest executed through Java
+			executeRequest();
 		}
 	}
 }

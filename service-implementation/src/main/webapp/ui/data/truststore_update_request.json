@@ -2,7 +2,7 @@
        "activityId": "123451ZW22A340376029392 67890",
        "dataTransferObject": {
               "@class": "com.liaison.keymanage.grammar.dto.TrustStore",
-              "pguid": "0C3A3BC50A0037B00665D98D2D86079D",
+              "pguid": "75D5112D0A0006340665134D334351D5",
               "trustStoreMemberships": [{
                      "@class": "com.liaison.keymanage.grammar.dto.TrustStoreMembership",
             		 "pguid": "",

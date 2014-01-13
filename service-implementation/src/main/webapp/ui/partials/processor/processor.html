@@ -187,23 +187,23 @@
 			
 			<div class="fileUpload btn btn-primary">
 				<span>browse</span>
-				<input ng-disabled="isEdit" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />
+				<input type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />
 			</div>
         </div>
 		<div class="col-sm-6 col-md-6">
             <div class="form-group">
                 <label>
-                    Certificate Type
+                    Global TrustStore
                 </label><br/>
-                <input type="radio" ng-model="processor.certificateType" value="signed"> Signed<br/>
-				<input type="radio" ng-model="processor.certificateType" value="unsigned"> UnSigned
+                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y"> Yes<br/>
+				<input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N"> No
                 
             </div>
         </div>
       </div>
       
        <!-- Modal -->
-       <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-hidden="true">
+       <div class="modal fade" id="myModal" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -223,7 +223,7 @@
         </div>
         
         <!-- Modal Certificate Path -->
-       <div class="modal fade" id="myCertificateModal" tabindex="-1" role="dialog" aria-hidden="true">
+       <!-- <div class="modal fade" id="myCertificateModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -240,7 +240,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>  -->
 
             <div class="form-group">
                 <div>
@@ -252,7 +252,7 @@
                 <br>
             </div>
 
-            <div class="modal fade" id="valueModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal fade" id="valueModal" role="dialog" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">

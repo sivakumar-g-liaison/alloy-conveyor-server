@@ -51,13 +51,16 @@ public class Processor implements Identifiable {
 	private String pguid;
 	private String javaScriptUri;
 	private String certificateUri;
-	private String certificateType;
+	private char isSelfSigned;
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
 	private String procsrExecutionStatus;
 	private String procsrName;
 	private String procsrProtocol;
+
+	private String trustStoreId;
+	
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private List<ProcessorProperty> dynamicProperties;
@@ -97,6 +100,15 @@ public class Processor implements Identifiable {
 	public void setJavaScriptUri(String javaScriptUri) {
 		this.javaScriptUri = javaScriptUri;
 	}
+	
+	@Column(name = "SELF_SIGNED")
+	public char getIsSelfSigned() {
+		return isSelfSigned;
+	}
+
+	public void setIsSelfSigned(char isSelfSigned) {
+		this.isSelfSigned = isSelfSigned;
+	}
 
 	@Column(name = "CERTIFICATE_URI", length = 512)
 	public String getCertificateUri() {
@@ -105,15 +117,6 @@ public class Processor implements Identifiable {
 
 	public void setCertificateUri(String certificateUri) {
 		this.certificateUri = certificateUri;
-	}
-
-	@Column(name = "CERTIFICATE_TYPE", length = 128)
-	public String getCertificateType() {
-		return certificateType;
-	}
-
-	public void setCertificateType(String certificateType) {
-		this.certificateType = certificateType;
 	}
 
 	@Column(name = "DESCRIPTION", length = 512)
@@ -168,6 +171,15 @@ public class Processor implements Identifiable {
 
 	public void setProcsrProtocol(String procsrProtocol) {
 		this.procsrProtocol = procsrProtocol;
+	}
+
+	@Column(name = "TRUSTSTORE_ID" , length = 32)
+	public String getTrustStoreId() {
+		return trustStoreId;
+	}
+
+	public void setTrustStoreId(String trustStoreId) {
+		this.trustStoreId = trustStoreId;
 	}
 
 	// bi-directional many-to-one association to Credential

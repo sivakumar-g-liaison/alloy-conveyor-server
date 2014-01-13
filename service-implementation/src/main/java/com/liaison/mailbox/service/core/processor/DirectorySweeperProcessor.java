@@ -41,7 +41,6 @@ import com.liaison.fs2.api.FS2MetaSnapshotImpl;
 import com.liaison.fs2.api.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
@@ -84,18 +83,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	@Override
-	public void invoke() {
-
-		try {
-			executeRequest();
-			modifyProcessorExecutionStatus(ExecutionState.COMPLETED);
-		} catch (Exception e) {
-
-			// TODO Re stage and update status in FSM
-			modifyProcessorExecutionStatus(ExecutionState.FAILED);
-			sendEmail(null, configurationInstance.getProcsrName() + ":" + e.getMessage(), e, "HTML");
-			e.printStackTrace();
-		}
+	public void invoke() throws Exception {
+		executeRequest();			
 	}
 
 	private void executeRequest() throws Exception {

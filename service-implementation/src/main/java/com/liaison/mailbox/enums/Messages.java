@@ -84,7 +84,10 @@ public enum Messages {
 	// User Account Messages
 	INVALID_ACC_REQUEST("The input request is invalid."),
 	ACC_DOES_NOT_EXIST("User Account with the given id %s does not exist."),
-	DATA_PREPOPULATE("Data populated successfully");
+	DATA_PREPOPULATE("Data populated successfully"),
+	
+	// KMS Messages
+	SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed");
 
 	private String value;
 

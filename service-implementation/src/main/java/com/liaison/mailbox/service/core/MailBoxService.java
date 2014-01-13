@@ -10,9 +10,7 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +19,10 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
@@ -176,10 +174,23 @@ public class MailBoxService {
 
 					LOG.info("The Processer id is {}", processor.getPguid());
 					LOG.info("The Processer type is {}", processor.getProcessorType());
+					
+					try {
 					processor.setProcsrExecutionStatus(ExecutionState.PROCESSING.value());
 					processorDAO.merge(processor);
+					
 					processorService.invoke();
-
+					
+					processor.setProcsrExecutionStatus(ExecutionState.COMPLETED.value());
+					processorDAO.merge(processor);
+					} catch (Exception e) {
+						
+						processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
+						processorDAO.merge(processor);
+						
+						sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
+						e.printStackTrace();
+					}
 					// Remove the processor from Database
 					ProcessorSemaphore.removeExecutedProcessor(processor.getPguid());
 				} else {
@@ -212,6 +223,44 @@ public class MailBoxService {
 		jndidto.setQueueName(queueName);
 		jndidto.setUrlPackagePrefixes("org.jboss.naming");
 		return jndidto;
+	}
+	
+	/**
+	 * Sent notifications for trigger system failure.
+	 * 
+	 * @param toEmailAddrList
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
+	 * @param subject
+	 *            The notification subject
+	 * @param emailBody
+	 *            The body of the notification
+	 * @param type
+	 *            The notification type(TEXT/HTML).
+	 */
+
+	private void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
+
+		EmailNotifier notifier = new EmailNotifier();
+		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
+	}
+
+	/**
+	 * Sent notifications for trigger system failure.
+	 * 
+	 * @param toEmailAddrList
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
+	 * @param subject
+	 *            The notification subject
+	 * @param exc
+	 *            The exception as body content
+	 * @param type
+	 *            The notification type(TEXT/HTML).
+	 */
+	private void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
+
+		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
 	}
 
 }
