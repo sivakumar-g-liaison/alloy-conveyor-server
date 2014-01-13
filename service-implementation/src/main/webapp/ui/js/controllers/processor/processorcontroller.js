@@ -786,6 +786,9 @@ var rest = myApp.controller(
             }
         }, true);
         $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row.getProperty(\'guid\'),true)"><i class="glyphicon glyphicon-pencil"></i></button>';
+        $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">InActive</div></div>'
+        $scope.manageType = '<div ng-switch on="row.getProperty(\'type\')"><div ng-switch-when="REMOTEDOWNLOADER">Remote Downloader</div><div ng-switch-when="REMOTEUPLOADER">Remote Uploader</div><div ng-switch-when="SWEEPER">Directory Sweeper</div></div>'
+       
         $scope.gridOptionsForProcessorList = {
            columnDefs: [{
                     field: 'name',
@@ -794,11 +797,13 @@ var rest = myApp.controller(
                 }, {
                     field: 'type',
                     displayName: 'Type',
-                    width:"400px"
+                    width:"400px",
+                    cellTemplate: $scope.manageType
                 }, {
                     field: 'status',
                     displayName: 'Status',
-                    width:"250px"
+                    width:"250px",
+                    cellTemplate: $scope.manageStatus
                 }, {
                     displayName: 'Action',
                     sortable: false,

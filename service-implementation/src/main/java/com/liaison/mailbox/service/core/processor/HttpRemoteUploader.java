@@ -83,32 +83,38 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 			files = getProcessorPayload();
 			if (null != files) {
-
-				StringBuffer buffer = new StringBuffer();
+				
+				boolean failedStatus = false;
 				for (File entry : files) {
+					request = (HTTPRequest) getClientWithInjectedConfiguration();
+					responseStream = new ByteArrayOutputStream();
+					request.setOutputStream(responseStream);
+					
 					String content = FileUtils.readFileToString(entry, "UTF-8");
-					buffer.append(content);
+					if (content.length() > 0) {
+						request.inputData(content);
+					}
+					HTTPResponse response = request.execute();
+					LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+					if (response.getStatusCode() != 200) {
+						LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+						LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+						failedStatus = true;
+						continue;
+					} else {
+						if (null != entry) {
+
+							String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION));
+							if (MailBoxUtility.isEmpty(processedFileLcoation)) {
+								archiveFile(entry.getAbsolutePath());
+							} else {
+								archiveFile(entry, processedFileLcoation);
+							}
+						}
+					}
 				}
-				if (buffer.length() > 0) {
-					request.inputData(buffer.toString());
-				}
-			}
-		}
-
-		HTTPResponse response = request.execute();
-		LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
-		if (response.getStatusCode() != 200) {
-			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
-			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
-		} else {
-
-			if (null != files) {
-
-				String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION));
-				if (MailBoxUtility.isEmpty(processedFileLcoation)) {
-					archiveFiles(files);
-				} else {
-					archiveFiles(files, processedFileLcoation);
+				if (failedStatus) {
+					throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 				}
 			}
 		}
