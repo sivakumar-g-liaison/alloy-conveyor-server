@@ -82,3 +82,4 @@ service-implementation/src/main/webapp/ui/nbproject/
 /service-implementation/src/main/webapp/nbproject/private/
 /service-implementation/src/main/webapp/ui/nbproject/private/
 /service-implementation/test-output/
+*.wer1
