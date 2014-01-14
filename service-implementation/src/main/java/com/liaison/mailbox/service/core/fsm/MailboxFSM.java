@@ -111,11 +111,7 @@ public class MailboxFSM implements FSM<ProcessorState,ExecutionEvents>{
 		
 	}
 
-	@Override
-	public void printStates() {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	@Override
 	public void setDelegateMiss(Delegate<ProcessorState, ExecutionEvents> delegate) {
@@ -159,6 +155,12 @@ public class MailboxFSM implements FSM<ProcessorState,ExecutionEvents>{
 		transition.addUpdate( processorFailed.getExecutionId(), processorFailed);        
 		this.addTransition( transition );
 		return true;
+	}
+
+	@Override
+	public void setState(String arg0, ProcessorState arg1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

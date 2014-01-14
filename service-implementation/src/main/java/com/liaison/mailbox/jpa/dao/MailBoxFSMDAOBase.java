@@ -1,6 +1,7 @@
 package com.liaison.mailbox.jpa.dao;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -43,6 +44,38 @@ public class MailBoxFSMDAOBase extends GenericDAOBase<FSMModel> implements FSMDa
 		Event<ExecutionEvents> event = new ActiveEvent<ExecutionEvents>(executionEvent);
 		//events.add(event);
 		return event;
+	}
+
+
+
+	@Override
+	public void deleteStates(List<String> arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public List<ExecutionEvents> getEvents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public Map<String, ProcessorState> getStates() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public void setState(String arg0, ProcessorState arg1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
