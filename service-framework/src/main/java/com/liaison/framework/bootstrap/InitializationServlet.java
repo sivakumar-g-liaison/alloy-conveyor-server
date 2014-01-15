@@ -1,3 +1,6 @@
+// TODO check web.xml - this should be deprecated.
+
+
 /*
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
@@ -10,26 +13,16 @@
 
 package com.liaison.framework.bootstrap;
 
-import java.sql.SQLException;
 
-import javax.naming.NamingException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import oracle.ucp.UniversalConnectionPoolException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.datasource.OracleDataSource;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.framework.audit.AuditStatement;
-import com.liaison.framework.audit.DefaultAuditStatement;
-import com.liaison.framework.audit.pci.PCIV20Requirement;
 
 /**
  * Initialization Servlet
@@ -45,30 +38,13 @@ import com.liaison.framework.audit.pci.PCIV20Requirement;
  */
 public class InitializationServlet extends HttpServlet {
 
-	private static final Logger logger = LoggerFactory.getLogger(InitializationServlet.class);
-	private static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-	private static boolean isInitialized = false;
 
-	@Override
-	public void init(ServletConfig config) throws ServletException {
+	private static final long serialVersionUID = -8418412083748649428L;
+	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
 
-		if (!isInitialized) {
-			try {
-				OracleDataSource.initOracleDataSource(); // TODO This needs to be moved to JMX
-				DAOUtil.init(); // TODO This does the work of loading all JAP entity files. We
-								// should change to allow the query string to be passed.
-				UUIDGen.init();				
-				// To initialize the properties for FS2
-				//FS2DefaultConfiguration.init(ConfigurationManager.getDeploymentContext().getDeploymentEnvironment());
-				isInitialized = true;
-				DefaultAuditStatement audit = new DefaultAuditStatement(PCIV20Requirement.PCI10_2_6,
-						AuditStatement.Status.SUCCEED, "Initialization via servlet");
-				logger.info("Servlet Init", audit);
-			} catch (SQLException | NamingException | UniversalConnectionPoolException e) {
-				logger.error(e.getMessage(), e);
-				throw new ServletException("JPA Persistence initialialization failed! See log for details.");
-			}
-		}
-	}
+
+    public void init(ServletConfig config) throws ServletException {
+    	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initilize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+    }
 
 }

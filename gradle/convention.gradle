@@ -15,7 +15,7 @@
  */
 
 // For Artifactory
-rootProject.status = version.contains('-SNAPSHOT')?'snapshot':'release'
+status = project.hasProperty('preferredStatus')?project.preferredStatus:(version.contains('SNAPSHOT')?'snapshot':'release')
 
 subprojects { project ->
     apply plugin: 'java' // Plugin as major conventions

@@ -20,9 +20,16 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -42,11 +49,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Robert.Christian
  * @version 1.0
  */
-
+@Api(value="v1/metrics", description="JMX metrics") //swagger resource annotation
 @Path("v1/metrics")
 public class MetricsResource {
 
-    private static final Logger logger = LoggerFactory.getLogger(MetricsResource.class);
+	private static final Logger logger = LogManager.getLogger(MetricsResource.class);
 
     // For a more thorough metrics example, see
     // https://github.com/cfregly/fluxcapacitor/blob/master/flux-edge/src/main/java/com/fluxcapacitor/edge/jersey/resources/EdgeResource.java
@@ -65,10 +72,11 @@ public class MetricsResource {
         DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
     }
 
-    @Path("metrics/{input}")
+    @ApiOperation(value="show metrics", notes="jmx metrics")
+    @Path("/metrics/{input}")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public Response decode(@PathParam("input") String input) {
+    public Response decode() {
         serviceCallCounter.addAndGet(1);
         JSONObject response = new JSONObject();
         try {

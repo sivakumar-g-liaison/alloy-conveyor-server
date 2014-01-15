@@ -107,7 +107,7 @@ var fs2Controller = myApp.controller('FS2Controller', ['$scope', '$routeParams',
                 error(function (data, status, headers, config) {
                     // called asynchronously if an error occurs
                     // or server returns response with an error status.
-                    notifier.notify('error', data);
+                     notifier.notify('error', data);
                 });
         }
 

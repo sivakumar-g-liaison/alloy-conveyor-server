@@ -10,16 +10,23 @@
 
 package com.liaison.framework;
 
-import com.liaison.framework.audit.AuditLogger;
-import com.liaison.framework.audit.AuditStatement;
-import com.liaison.framework.audit.DefaultAuditStatement;
-import com.liaison.framework.audit.pci.PCIV20Requirement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+
+import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.log4j2.auditmessage.LogTags;
+import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.framework.exceptions.UnhandledApplicationException;
 
 import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * Framework Filter
@@ -32,8 +39,30 @@ import java.io.IOException;
 
 public class FrameworkFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger(FrameworkFilter.class);
+    private static final Logger logger = LogManager.getLogger(FrameworkFilter.class);
 
+    protected String initializeAuditID() {
+    	return UUID.randomUUID().toString();
+    }
+    
+    public void fishTag(ServletRequest request) {
+    	//Initial FishTags
+    	ThreadContext.put(LogTags.LOG_ID, initializeAuditID());
+    	ThreadContext.put(LogTags.REMOTE_ADDRESS, request.getRemoteAddr()); 
+    	
+    	if (request instanceof HttpServletRequest) {
+    		HttpServletRequest httpRequest = ((HttpServletRequest)request);
+   	     	ThreadContext.put(LogTags.RESOURCE, httpRequest.getServletPath());
+    	     ThreadContext.put(LogTags.REQUEST_URL, httpRequest.getRequestURL().toString()); 
+    	     ThreadContext.put(LogTags.REQUEST_QUERY, httpRequest.getQueryString());
+    	     String userPrincipal = (null != httpRequest.getUserPrincipal()) ? httpRequest.getUserPrincipal().getName() : "NOUSER";
+    	     ThreadContext.put(LogTags.USER_PRINCIPAL, userPrincipal);    	 
+    	     String remoteUser = (null != httpRequest.getRemoteUser()) ? httpRequest.getRemoteUser() : "NOUSER";
+    	     ThreadContext.put(LogTags.REMOTE_USER, remoteUser);    	 
+    	}
+    }
+    
+    
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         //logger.info("Initializing FrameworkFilter...");
@@ -41,42 +70,41 @@ public class FrameworkFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    	fishTag(request);
+    	logger.info(new DefaultAuditStatement(Status.ATTEMPT,"example log for attempted", PCIV20Requirement.PCI10_2_3));
 
-        //logger.info("Info!");
 
-        //AuditLogger.log(PCIV20Requirement.PCI10_2_2, AuditStatement.Status.ATTEMPT, "Attempting to create PID");
-
-        int pid = ProcessManager.initTransaction();
-
-        // TODO audit with PID
-
-        // threads are pooled and reused, so here we note not only the thread id but also the process id
-        //logger.debug("Filtering " + chain.toString() + " [thread=" + Thread.currentThread().getId() + ", PID=" + pid + "]");
 
         try {
-
             // audit
             chain.doFilter(request, response);
-
-
-            // audit
-            // TODO audit with PID
-
+               
         } catch (Throwable t) {
 
-            // log
-            String msg = "Error processing PID " + pid;
-            //logger.error("msg", t);
 
-            // audit
-            // TODO PID is thread local.  Should be able to audit with PID alone and correlate later?
+        	if (t instanceof AuditStatement) {
+            	logger.catching(t);        		
+        	}
+        	throw logger.throwing(new UnhandledApplicationException(t));
 
-            // respond in a terse fashion
-            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
-            // finish filtering
-            return;
         }
+        
+// audit sucess and fail logging
+// Because Jetty has an oldentimes HttpServletResponse we are unable to use this code block until it's removed.
+//      if (response instanceof HttpServletResponse) {
+//    	  HttpServletResponse hResponse = (HttpServletResponse)response;
+//    	  int status = hResponse.getStatus();
+//    	  if (status >= 200 && status < 300) {
+//    	    	logger.info(new DefaultAuditStatement(Status.SUCCEED,"response status >= 200 and < 300 so we assume success."));    		  
+//    	  } else {
+//    		    logger.error(new DefaultAuditStatement(Status.FAILED,"generic potential failure, response status:" + status));
+//    	  }
+//    	  
+//     } else {
+//     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"No response status or thrown errors... assuming success"));    	 
+//     }
+        
     }
 
     @Override

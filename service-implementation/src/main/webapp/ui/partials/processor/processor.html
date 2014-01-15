@@ -37,40 +37,37 @@
     .ace_editor {
         height: 200px;
     }
-   .multipleSelectionListButton {
-        margin-left:8px;
+    .multipleSelectionListButton {
+        margin-left: 8px;
     }
-   .multipleSelectionListBoundary {
+    .multipleSelectionListBoundary {
         margin-left: 3px;
         margin-right: 3px;
     }
     .fileUpload {
-		position: relative;
-		overflow: hidden;
-		margin-top: 5px;
-	}
-	.fileUpload input.upload {
-		position: absolute;
-		top: 0;
-		right: 0;
-		margin: 0;
-		padding: 0;
-		font-size: 20px;
-		cursor: pointer;
-		opacity: 0;
-		filter: alpha(opacity=0);
-	}
-	
-	/*This class is included to align browse button close to text area in processor details*/
-	
-	.adjustPaddingRight{
-		padding-right: 5px;
-	}
-	
-	/*This class is included to align browse button close to text area in processor details*/
-	.removePaddingLeft{
-		padding-left: 0px;
-	}
+        position: relative;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    .fileUpload input.upload {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        font-size: 20px;
+        cursor: pointer;
+        opacity: 0;
+        filter: alpha(opacity=0);
+    }
+    /*This class is included to align browse button close to text area in processor details*/
+    .adjustPaddingRight {
+        padding-right: 5px;
+    }
+    /*This class is included to align browse button close to text area in processor details*/
+    .removePaddingLeft {
+        padding-left: 0px;
+    }
 </style>
 
 <div class="container fade-in">
@@ -96,134 +93,105 @@
             <h3>
         Processors Details
       </h3>
-      <div class = "row"> 
-        <div class="col-sm-6 col-md-6">
-            <div class="form-group">
-                <label>
-                    Name
-                </label>
-                <input type="text" ng-model="processor.name" required="" name="name" ng-pattern="userInputPattern"
-                ng-minLength=5 ng-maxLength=80 class="form-control"/>
-                 <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
-                    <span class = "help-block-custom" ng-show="formAddPrcsr.name.$error.pattern"><strong>Invalid Processor Name.</strong></span>
-                    <span class = "help-block-custom" ng-show="formAddPrcsr.name.$error.required"><strong>Processor Name is mandatory.</strong></span>
-                    <span class = "help-block-custom" ng-show="formAddPrcsr.name.$error.minlength"><strong>Processor Name cannot be shorter than
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label>
+                            Name
+                        </label>
+                        <input type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
+                        <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern"><strong>Invalid Processor Name.</strong></span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.required"><strong>Processor Name is mandatory.</strong></span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.minlength"><strong>Processor Name cannot be shorter than
                     {{minimumLength}} characters.</strong></span>
-                    <span class = "help-block-custom" ng-show="formAddPrcsr.name.$error.maxlength"><strong>Processor Name cannot be longer than
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.maxlength"><strong>Processor Name cannot be longer than
                     {{maximumLengthAllowedInTextBox}} characters.</strong></span>
 
-                </div>
-            </div>
-        </div>
-         <div class="col-sm-6 col-md-6">
-         <div class= "form-group">
-                    <label>
-                        Description
-                    </label>
-                    <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern"
-                    ng-maxLength=512 class="form-control"></textarea>
-                    <div class = "help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                        <span ng-show="formAddPrcsr.description.$error.pattern"><strong>Invalid Description</strong></span>
-                        <span class = "help-block-custom" ng-show="formAddPrcsr.description.$error.maxlength"><strong>Description cannot be longer than
-                        {{maximumLengthAllowedInProcessorDescription}} characters.</strong></span>
-                    </div>
-                </div>
-              </div>  
-      </div>
-      <div class="row">
-        <div class="col-sm-6 col-md-6">
-             <div class="form-group">
-                <label>
-                    Status
-                </label>
-                <select ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
-                </select>
-
-             </div>
-        </div>
-        <div class="col-sm-5 col-md-5 adjustPaddingRight">
-        <label>
-        Script File Path
-        </label>
-         <input type="text" ng-model="modal.uri" class="form-control">
-        </div>
-        <div  class="col-sm-1 col-md-1 removePaddingLeft">
-            <br>
-            <!-- Button trigger modal -->
-            <a style="margin-top:6px"data-toggle="modal" data-backdrop="static" data-keyboard="false" href="#myModal" class="btn btn-primary">browse</a> 
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-6 col-md-6">
-         <div class="form-group">
-            <label>
-                Type
-            </label>
-
-            <select ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.name for type in enumprocsrtype" class="form-control">
-            </select>
-         </div>
-        </div>
-        <div class="col-sm-6 col-md-6">
-            <div class="form-group">
-                <label>
-                    Protocol
-                </label>
-                <select ng-disabled="isEdit || isProcessorTypeSweeper" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
-                </select>
-            </div>
-        </div>
-      </div>
-      
-      <div class="row">
-          <div class="col-sm-5 col-md-5 adjustPaddingRight">
-             <label>
-                Certificate Path
-            </label>
-            <input type="text" ng-model="certificateModal.certificateURI" class="form-control">
-          </div>
-           <div  class="col-sm-1 col-md-1 removePaddingLeft">
-            <br>
-			
-			<div class="fileUpload btn btn-primary">
-				<span>browse</span>
-				<input type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />
-			</div>
-        </div>
-		<div class="col-sm-6 col-md-6">
-            <div class="form-group">
-                <label>
-                    Global TrustStore
-                </label><br/>
-                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y"> Yes<br/>
-				<input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N"> No
-                
-            </div>
-        </div>
-      </div>
-      
-       <!-- Modal -->
-       <div class="modal fade" id="myModal" role="dialog" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
-                        <h4 class="modal-title">Choose your file</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div data-angular-treeview="true" data-tree-model="modal.roleList" data-node-id="roleName" data-node-label="roleId" data-node-children="children">
                         </div>
                     </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">choose</button>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label>
+                            Description
+                        </label>
+                        <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
+                        <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                            <span ng-show="formAddPrcsr.description.$error.pattern"><strong>Invalid Description</strong></span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.description.$error.maxlength"><strong>Description cannot be longer than
+                        {{maximumLengthAllowedInProcessorDescription}} characters.</strong></span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Modal Certificate Path -->
-       <!-- <div class="modal fade" id="myCertificateModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label>
+                            Status
+                        </label>
+                        <select ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
+                        </select>
+
+                    </div>
+                </div>
+                <div class="col-sm-5 col-md-5 adjustPaddingRight">
+                    <label>
+                        Script File Path
+                    </label>
+                    <input type="text" ng-model="modal.uri" class="form-control">
+                </div>
+                <div class="col-sm-1 col-md-1 removePaddingLeft">
+                    <br>
+                    <!-- Button trigger modal -->
+                    <a style="margin-top:6px" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#myModal" class="btn btn-primary">browse</a> 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label>
+                            Type
+                        </label>
+
+                        <select ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.name for type in enumprocsrtype" class="form-control">
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label>
+                            Protocol
+                        </label>
+                        <select ng-disabled="isEdit || isProcessorTypeSweeper" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <h4 class="modal-title">Choose your file</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div data-angular-treeview="true" data-tree-model="modal.roleList" data-node-id="roleName" data-node-label="roleId" data-node-children="children">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">choose</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Certificate Path -->
+            <!-- <div class="modal fade" id="myCertificateModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -284,8 +252,37 @@
             </div>
 
             <div class="form-group">
+
                 <div>
                     <h4>Credentials</h4>
+                    <div class="row">
+                        <div class="col-sm-5 col-md-5 adjustPaddingRight">
+                            <label>
+                                Certificate Path
+                            </label>
+                            <input type="text" ng-model="certificateModal.certificateURI" class="form-control">
+                        </div>
+                        <div class="col-sm-1 col-md-1 removePaddingLeft">
+                            <br>
+
+                            <div class="fileUpload btn btn-primary">
+                                <span>browse</span>
+                                <input type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-6">
+                            <div class="form-group">
+                                <label>
+                                    Add certificate to global trust store?
+                                </label>
+                                <br/>
+                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y">Yes
+                                <br/>
+                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N">No
+
+                            </div>
+                        </div>
+                    </div>
                     <div class="gridStyleCredentials" ng-grid="gridOptionsForProcessorCredential">
                     </div>
                 </div>
@@ -294,8 +291,8 @@
             <h3>
                 Scheduling
             </h3>
-          
-           <div class="row well multipleSelectionListBoundary">
+
+            <div class="row well multipleSelectionListBoundary">
                 <div class="col-sm-6 col-md-6">
                     <label>
                         <i>
@@ -306,12 +303,12 @@
                     </select>
                 </div>
                 <div class="col-md-1">
-                   <div> 
+                    <div>
                         <br>
                         <button class="btn btn-primary multipleSelectionListButton" ng-click="chooseProfile()">
                             &gt;&gt;
                         </button>
-                    </div> 
+                    </div>
                     <div>
                         <br>
                         <button class="btn btn-primary multipleSelectionListButton" ng-click="removeProfile()">
@@ -327,9 +324,9 @@
                     </label>
                     <select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles" class="form-control">
                     </select>
-                </div> 
+                </div>
 
-                    </div> 
+            </div>
         </form>
         <div>
             <button class="btn btn-primary" ng-click="backToMailbox()">

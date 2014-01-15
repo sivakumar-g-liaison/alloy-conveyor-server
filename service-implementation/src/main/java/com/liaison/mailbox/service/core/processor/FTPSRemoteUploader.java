@@ -116,9 +116,11 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 			URISyntaxException, JAXBException, SymmetricAlgorithmException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
+		
 		ftpsRequest.enableSessionReuse(true);
 		ftpsRequest.connect();
 		ftpsRequest.login();
+		
 		ftpsRequest.enableDataChannelEncryption();
 		if (getRemoteProcessorProperty() != null) {
 

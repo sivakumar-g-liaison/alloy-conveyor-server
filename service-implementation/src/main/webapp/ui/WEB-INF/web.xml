@@ -12,6 +12,11 @@
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
+    
+    <listener>
+        <listener-class>com.netflix.adminresources.MyGuiceServletConfig</listener-class>
+    </listener>
+    
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -20,17 +25,37 @@
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-
+    
+	<!--  Commented by senthilvel-->
+	<!--  This declaration part is deprecated by HelloworldComponent's initialize() -->
     <!-- Framework initialization servlet, please do not modify -->
-    <servlet>
-        <servlet-name>InitializationServlet</servlet-name>
+    <!--servlet>
+    <servlet-name>InitializationServlet</servlet-name>
         <servlet-class>com.liaison.framework.bootstrap.InitializationServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
+		<load-on-startup>0</load-on-startup>
     </servlet>
+	
     <servlet-mapping>
         <servlet-name>InitializationServlet</servlet-name>
         <url-pattern>/init</url-pattern>
+    </servlet-mapping --> 
+	
+	<!-- Added by senthilvel for AsyncServlet Injection -->
+	<servlet>
+        <servlet-name>AsyncServlet</servlet-name>
+        <servlet-class>com.liaison.framework.async.AsyncServlet</servlet-class>
+	<init-param>
+		<param-name>threadpoolsize</param-name>
+		<param-value>100</param-value>
+	</init-param>
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>AsyncServlet</servlet-name>
+        <url-pattern>/async</url-pattern>
     </servlet-mapping>
+
     
     <servlet>
         <servlet-name>HornetQMessageListnerServlet</servlet-name>
@@ -43,6 +68,10 @@
     </servlet-mapping>
 
     <!-- Framework-defined dynamic services support, please do not modify -->
+
+	
+	<!-- Framework-defined dynamic services support, please do not modify -->
+
     <servlet>
         <servlet-name>DynamicRest</servlet-name>
         <servlet-class>com.liaison.framework.dynamic.DynamicServicesServlet</servlet-class>
@@ -60,7 +89,9 @@
         </servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.liaison.mailbox.service</param-value>
+            <param-value>com.liaison.mailbox.service,com.liaison.service,com.wordnik.swagger.jersey.listing</param-value>
+              
+
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
@@ -68,9 +99,6 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
-
-    <!-- -->
 
     <filter>
         <filter-name>ExceptionFilter</filter-name>
@@ -106,11 +134,29 @@
     End:  Servlet implementation configuration
     =========================================================================
     -->
-    <!--  
+   
+
+	<!--Swagger config -->
+	<servlet>
+	  <servlet-name>JerseyJaxrsConfig</servlet-name>
+	  <servlet-class>com.wordnik.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
+	  <init-param>
+	    <param-name>api.version</param-name>
+	    <param-value>1.0.0</param-value>
+	  </init-param>
+	  <init-param>
+	    <param-name>swagger.api.basepath</param-name>
+	    <!-- change localhost to production server name -->
+	    <param-value>http://localhost:8989/hello-world/rest</param-value>
+	  </init-param>
+	  <load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	<!--  
     ==============================================================================
        Enable only for development when using python to make calls to tomcat  and 
        make sure containes (tomcat) provides the jar required for this
-    ==============================================================================
+    ============================================================================== -->
      
     <filter>
         <filter-name>CorsFilter</filter-name>
@@ -120,7 +166,7 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-  -->
+  
 
 
 </web-app>

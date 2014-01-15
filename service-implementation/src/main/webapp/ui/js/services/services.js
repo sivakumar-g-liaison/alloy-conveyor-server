@@ -66,7 +66,6 @@ myApp.factory('RESTService',
     }
 );
 
-
 // simple auth service that can use a lot of work... 
 myApp.factory('AuthService',
     function () {
@@ -78,26 +77,26 @@ myApp.factory('AuthService',
         var initialState = true;
 
         return {
-            initialState: function () {
+            initialState:function () {
                 return initialState;
             },
-            login: function (name, password) {
+            login:function (name, password) {
                 currentUser = name;
                 authorized = true;
                 //console.log("Logged in as " + name);
                 initialState = false;
             },
-            logout: function () {
+            logout:function () {
                 currentUser = null;
                 authorized = false;
             },
-            isLoggedIn: function () {
+            isLoggedIn:function () {
                 return authorized;
             },
-            currentUser: function () {
+            currentUser:function () {
                 return currentUser;
             },
-            authorized: function () {
+            authorized:function () {
                 return authorized;
             }
         };

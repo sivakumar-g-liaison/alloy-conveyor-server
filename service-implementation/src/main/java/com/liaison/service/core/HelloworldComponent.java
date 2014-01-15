@@ -16,18 +16,37 @@
 
 package com.liaison.service.core;
 
-import com.netflix.karyon.spi.Component;
+import java.sql.SQLException;
 
 import javax.annotation.PostConstruct;
+import javax.naming.NamingException;
+
+import oracle.ucp.UniversalConnectionPoolException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.liaison.commons.jpa.DAOUtil;
+import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.datasource.OracleDataSource;
+import com.netflix.karyon.spi.Component;
 
 /**
- * @author Nitesh Kant (nkant@netflix.com)
- */
+ * @author Nitesh Kant
+ *  */
 @Component
 public class HelloworldComponent {
-
-    @PostConstruct
-    public void initialize() {
-        // TODO: Initialization logic, eg: connection to DB etc.
+	private static final Logger logger = LoggerFactory.getLogger(HelloworldComponent.class);
+	
+	@PostConstruct
+    public void initialize() throws NamingException, SQLException, UniversalConnectionPoolException {
+        // Statements added for deprecating the Initialization Servlet defined in web.xml  
+		OracleDataSource.initOracleDataSource(); // TODO
+		  DAOUtil.init(); // TODO This does the work of loading all JAP entity files. We
+		      // should change to allow the query string to be passed.
+		  UUIDGen.init();
+		  
+		        // Statements added for deprecating the Initialization Servlet defined in web.xml  
+		logger.info("HelloworldComponent.initialize()");
     }
 }

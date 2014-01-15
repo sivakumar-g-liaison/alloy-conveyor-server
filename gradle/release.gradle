@@ -14,6 +14,8 @@
  *      limitations under the License.
  */
 
+apply plugin: 'release'
+
 [ uploadIvyLocal: 'uploadLocal', uploadArtifactory: 'artifactoryPublish', buildWithArtifactory: 'build' ].each { key, value ->
     // Call out to compile against internal repository
     task "${key}"(type: GradleBuild) {

@@ -1,14 +1,16 @@
 package com.liaison.service.health;
 
 import com.netflix.karyon.spi.HealthCheckHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class HealthCheck implements HealthCheckHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(HealthCheck.class);
+	private static final Logger logger = LogManager.getLogger(HealthCheck.class);
 
     @PostConstruct
     public void init() {
