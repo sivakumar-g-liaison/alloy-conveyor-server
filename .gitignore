@@ -96,3 +96,5 @@ service-implementation/src/main/webapp/ui/nbproject/
 
 /build
 
+*.wer1
+
