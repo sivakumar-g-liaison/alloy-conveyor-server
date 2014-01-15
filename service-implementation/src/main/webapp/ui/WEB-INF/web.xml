@@ -156,7 +156,7 @@
     ==============================================================================
        Enable only for development when using python to make calls to tomcat  and 
        make sure containes (tomcat) provides the jar required for this
-    ============================================================================== -->
+    ============================================================================== 
      
     <filter>
         <filter-name>CorsFilter</filter-name>
@@ -165,7 +165,7 @@
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping> -->
   
 
 
