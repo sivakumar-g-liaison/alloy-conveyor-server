@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.jpa.model;
 
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -36,7 +36,7 @@ public class FSMStateValue implements Identifiable {
 
 	private String pguid;
 	private String value;
-	private Date createdDate;
+	private Timestamp createdDate;
 	List<FSMTransitionState> oldTransitionStates;
 	List<FSMTransitionState> newTransitionStates;
 	private FSMState fsmState;
@@ -65,11 +65,11 @@ public class FSMStateValue implements Identifiable {
 	}
 
 	@Column(name = "CREATED_DATE", nullable = false)
-	public Date getCreatedDate() {
+	public Timestamp getCreatedDate() {
 		return createdDate;
 	}
 
-	public void setCreatedDate(Date createdDate) {
+	public void setCreatedDate(Timestamp createdDate) {
 		this.createdDate = createdDate;
 	}
 	
