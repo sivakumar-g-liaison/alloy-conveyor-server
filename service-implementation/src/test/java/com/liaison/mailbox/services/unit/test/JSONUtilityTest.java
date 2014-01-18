@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
@@ -50,8 +51,21 @@ public class JSONUtilityTest extends BaseServiceTest {
 	@Test
 	public void jsonTest() throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
-		String data = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
-		ReviseMailBoxRequestDTO responseDTO = MailBoxUtility.unmarshalFromJSON(data, ReviseMailBoxRequestDTO.class);
+		//String data = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
+		//ReviseMailBoxRequestDTO responseDTO = MailBoxUtility.unmarshalFromJSON(data, ReviseMailBoxRequestDTO.class);
+		
+		TriggerProcessorRequestDTO request = new TriggerProcessorRequestDTO("A", "B", "C");
+		request.setExecutionId("Test");
+		request.setProcessorId("testsfsdf");
+		
+		System.out.println(MailBoxUtility.marshalToJSON(request));
+		
+		String s = "{\"triggerProcessorRequest\":{\"executionId\":\"Test\",\"processorId\":\"testsfsdf\"}}";
+		TriggerProcessorRequestDTO dto = MailBoxUtility.unmarshalFromJSON(s, TriggerProcessorRequestDTO.class);
+		
+		System.out.println(dto.getExecutionId());
+		System.out.println(dto.getProcessorId());
+		
 
 	}
 

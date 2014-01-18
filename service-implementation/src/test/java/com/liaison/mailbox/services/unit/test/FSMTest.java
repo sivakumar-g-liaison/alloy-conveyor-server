@@ -12,12 +12,11 @@ package com.liaison.mailbox.services.unit.test;
 
 import org.junit.Test;
 
-import com.liaison.fsm.ActiveEvent;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.core.fsm.ProcessorState;
+import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
 /**
@@ -32,7 +31,7 @@ public class FSMTest extends BaseServiceTest {
 	@Test
 	public void testFSM() throws InterruptedException{
         //STEP 1: BUILD THIS AS SOON AS YOU GET A PROCESSOR FROM DB AFTER TRIGGERING A PROFILE. FILL AS MUCH AS YOU CAN IN stateDefination BUT MUST HAVE EXECUTION ID,PROCESSOR ID and PROFILE NAME 
-		ProcessorState initialProcessorState = new ProcessorState("GENERATED_EXECUTION_UDID_1","PROCESSOR_ID_FROM_DB",ExecutionState.QUEUED);
+		ProcessorStateDTO initialProcessorState = new ProcessorStateDTO("GENERATED_EXECUTION_UDID_1","PROCESSOR_ID_FROM_DB",ExecutionState.QUEUED);
 		initialProcessorState.setProfileName("DUMMY PROFILE NAME");	
 		//STEP 2: INITAIALZE FSM INSTANCE		
 		MailboxFSM fsm = new MailboxFSM();	
@@ -55,7 +54,7 @@ public class FSMTest extends BaseServiceTest {
         
         //STEP5:TRIGGER PROCESSING EVENT
         System.out.println("PICKED UP FROM THE QUEUE.");
-        fsm.handleEvent( fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED ) );
+        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED ) );
         System.out.println("PROCESSOR RUNNING...");;//ACTUAL PROCESSOR WORK WILL HAPPEN HERE
         //STEP 6: TRIGGER EVENT FOR SUCCESS OR FAILURE BASED ON PROCESSING RESULT
         fsm.handleEvent( fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED ) );

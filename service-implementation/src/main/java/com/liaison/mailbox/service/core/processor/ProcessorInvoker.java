@@ -17,12 +17,12 @@ import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResp
 
 class ProcessorInvoker implements Runnable {
 	
-	private String processorId = null;
+	private String request = null;
 
 	private static final Logger logger = LoggerFactory.getLogger(ProcessorInvoker.class);
 
-	public ProcessorInvoker(String processorId){
-		this.processorId=processorId;
+	public ProcessorInvoker(String request){
+		this.request=request;
 	}
 	
 	public MailBoxService getService(){
@@ -32,11 +32,11 @@ class ProcessorInvoker implements Runnable {
 	@Override
 	public void run() {
 
-		logger.info("processor with id:"+processorId+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
+		logger.info("processor with id:"+request+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		
-		TriggerProfileResponseDTO serviceResponse = getService().executeProcessor(processorId);
+		TriggerProfileResponseDTO serviceResponse = getService().executeProcessor(request);
 		
-		logger.info("processor with id:"+processorId+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
+		logger.info("processor with id:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance().printExecutorDiagonostics();
 	}
 }

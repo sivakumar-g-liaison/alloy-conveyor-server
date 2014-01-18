@@ -18,11 +18,15 @@ import java.util.Properties;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
@@ -31,10 +35,13 @@ import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
@@ -88,8 +95,16 @@ public class MailBoxService {
 			}
 
 			List<String> messages = new ArrayList<String>();
+			TriggerProcessorRequestDTO request = null;
+			String executionId = null;
+			String message = null;
 			for (Processor processor : processorMatchingProfile) {
-				messages.add(processor.getPguid());
+
+				executionId = MailBoxUtility.getGUID();
+				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
+				message = MailBoxUtility.marshalToJSON(request);
+				messages.add(message);
+				addProcessorToFSMState(executionId, processor, profileName);
 			}
 
 			ConfigureJNDIDTO conf = getConfigureJNDIDTO();
@@ -135,24 +150,56 @@ public class MailBoxService {
 	
 	
 	/**
+	 * Method to add the initial processor execution statue.
+	 * 
+	 * @param executionId
+	 * @param processor
+	 * @param profileName
+	 */
+	private void addProcessorToFSMState(String executionId, Processor processor, String profileName) {
+		
+		ProcessorStateDTO state = ProcessorStateDTO.getProcessorInstance(executionId, processor, profileName, ExecutionState.QUEUED, null);
+		MailboxFSM fsm = new MailboxFSM();
+		fsm.addState(state);
+		
+	}
+
+	/**
 	 * The method gets the processor based on given processor id.
 	 * 
 	 * @param processorId
 	 *            Unique id for processor
 	 * @return The trigger profile response DTO
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public TriggerProfileResponseDTO executeProcessor(String processorId) {
+	public TriggerProfileResponseDTO executeProcessor(String request) {
 
 		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
 		Processor processor = null;
+		String processorId = null;
+		String executionId = null;
 
 		try {
+			
+			LOG.info(request);
+			
+			TriggerProcessorRequestDTO dto = MailBoxUtility.unmarshalFromJSON(request, TriggerProcessorRequestDTO.class);
 
 			// validates mandatory value.
+			processorId = dto.getProcessorId();
 			if (MailBoxUtility.isEmpty(processorId)) {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id");
 			}
+			executionId = dto.getExecutionId();
+			if (MailBoxUtility.isEmpty(executionId)) {
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Execution Id");
+			}
 			LOG.info("The given processor id is {}", processorId);
+			LOG.info("The triggered profile name is {}", dto.getProfileName());
+			LOG.info("The execution id is {}", executionId);
 
 			// finding the matching processor for the given processor id
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
@@ -165,30 +212,44 @@ public class MailBoxService {
 			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus()))  {
 				LOG.info("The processor is already in progress , validated via DB."+processor.getPguid());
 			} else {
-				
+
 				MailBoxProcessor processorService = MailBoxProcessorFactory.getInstance(processor);
-				
+
 				// To Maintain the running processor ids in a separate table in DB
 				ProcessorSemaphore.addToProcessorExecutionList(processor.getPguid());
 				if (processorService != null) {
 
 					LOG.info("The Processer id is {}", processor.getPguid());
 					LOG.info("The Processer type is {}", processor.getProcessorType());
+
+					MailboxFSM fsm = new MailboxFSM();
+					ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorInstance(executionId, processor,
+							dto.getProfileName(), ExecutionState.QUEUED, null);
 					
 					try {
-					processor.setProcsrExecutionStatus(ExecutionState.PROCESSING.value());
-					processorDAO.merge(processor);
-					
-					processorService.invoke();
-					
-					processor.setProcsrExecutionStatus(ExecutionState.COMPLETED.value());
-					processorDAO.merge(processor);
-					} catch (Exception e) {
 						
-						processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
+						fsm.addDefaultStateTransitionRules(processorQueued);
+						
+						processor.setProcsrExecutionStatus(ExecutionState.PROCESSING.value());
+						processorDAO.merge(processor);
+
+						fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
+						
+						processorService.invoke();
+
+						processor.setProcsrExecutionStatus(ExecutionState.COMPLETED.value());
 						processorDAO.merge(processor);
 						
-						sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
+						fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+
+					} catch (Exception e) {
+
+						processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
+						processorDAO.merge(processor);
+						fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+
+						sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e,
+								"HTML");
 						e.printStackTrace();
 					}
 					// Remove the processor from Database
@@ -202,6 +263,13 @@ public class MailBoxService {
 			return serviceResponse;
 
 		} catch (MailBoxServicesException e) {
+
+			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.PROCESSOR_EXECUTION_FAILED, processorId, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+
+		} catch (Exception e) {
 
 			LOG.error(Messages.TRG_PROF_FAILURE.name(), e);
 			serviceResponse

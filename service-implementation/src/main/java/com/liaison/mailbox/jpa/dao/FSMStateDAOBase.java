@@ -1,40 +1,138 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.dao;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.fsm.ActiveEvent;
+import com.liaison.fsm.Event;
+import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.model.FSMState;
+import com.liaison.mailbox.jpa.model.FSMStateValue;
+import com.liaison.mailbox.service.core.MailBoxService;
+import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
-public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStateDAO, MailBoxDAO {
-
-	public FSMStateDAOBase() {
-		super(PERSISTENCE_UNIT_NAME);
+/**
+ * @author VNagarajan
+ *
+ */
+public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStateDAO {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxService.class);
+	
+	@Override
+	public void addState(String executionId, ProcessorStateDTO state) {
+		
+		FSMState entity = new FSMState();
+		state.copyToEntity(entity);
+		persist(entity);
+		
+		LOGGER.info("The STATE of "+ executionId+" is "+ state.getExecutionState());
+	}
+	
+	@Override
+	public ProcessorStateDTO getState(String executionId) {
+		
+		FSMState state = find(executionId);
+		
+		//Added annotation to order the items in descending order.
+		FSMStateValue value = state.getExecutionState().get(0);
+		
+		ProcessorStateDTO processorState = new ProcessorStateDTO(state.getExecutionId(), state.getProcessorId(),
+				ExecutionState.findByCode(value.getValue()), state.getProcessorName(),
+				ProcessorType.findByCode(state.getProcessorType()), state.getMailboxId(),
+				state.getProfileName(), state.getStateNotes());
+		
+		return processorState;
+		
+	}
+	
+	@Override
+	public Event<ExecutionEvents> createEvent(ExecutionEvents executionEvent) {
+		Event<ExecutionEvents> event = new ActiveEvent<ExecutionEvents>(executionEvent);
+		return event;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public FSMState find(String state) {
+	public void deleteStates(List<String> arg0) {
+		// TODO Auto-generated method stub
+	}
 
+	@Override
+	public List<ExecutionEvents> getEvents() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, ProcessorStateDTO> getStates() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setState(String executionId, ProcessorStateDTO processorState) {
+		
+		FSMStateValueDAO dao = new FSMStateValueDAOBase();
+		FSMState state = find(executionId);
+		
+		FSMStateValue value = new FSMStateValue();
+		value.setPguid(MailBoxUtility.getGUID());
+		value.setValue(processorState.getExecutionState().value());
+		value.setCreatedDate(MailBoxUtility.getTimestamp());
+		value.setFsmState(state);
+		
+		dao.persist(value);
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public FSMState find(String executionId) {
+		
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
 		try {
 
-			List<FSMState> fsmStates = entityManager.createNamedQuery(FIND_FSM_STATE_BY_NAME).setParameter(NAME, state).getResultList();
-			Iterator<FSMState> iter = fsmStates.iterator();
+			List<FSMState> states = entityManager.createNamedQuery(FIND_FSM_STATE_BY_NAME)
+					.setParameter(EXECUTION_ID, executionId)
+					.getResultList();
 
+			Iterator<FSMState> iter = states.iterator();
 			while (iter.hasNext()) {
 				return iter.next();
 			}
 
 		} finally {
+
 			if (entityManager != null) {
 				entityManager.clear();
 			}
+
 		}
+
 		return null;
 	}
+	
+
 }

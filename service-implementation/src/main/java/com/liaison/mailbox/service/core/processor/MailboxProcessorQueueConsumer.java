@@ -31,9 +31,8 @@ public class MailboxProcessorQueueConsumer {
 	private LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<Runnable>();
 	private MailBoxThreadPoolExecutor execSrvc = new MailBoxThreadPoolExecutor(THREAD_COUNT, THREAD_COUNT,60L, TimeUnit.MILLISECONDS,linkedBlockingQueue,true);
 	
-	public void invokeProcessor(String processorPGUID)
-			throws InterruptedException {		
-		execSrvc.execute(new ProcessorInvoker(processorPGUID));
+	public void invokeProcessor(String requestJSON) throws InterruptedException {		
+		execSrvc.execute(new ProcessorInvoker(requestJSON));
 		
 	}
  

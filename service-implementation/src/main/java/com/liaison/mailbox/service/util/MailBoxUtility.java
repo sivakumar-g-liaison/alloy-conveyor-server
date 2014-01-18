@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
@@ -140,6 +142,17 @@ public class MailBoxUtility {
 		}
 
 		return properties;
+	}
+	
+	/**
+	 * Method to get the current timestmp to insert into database.
+	 * 
+	 * @return
+	 */
+	public static Timestamp getTimestamp() {
+		
+		Date d = new Date();
+		return new Timestamp(d.getTime());
 	}
 
 }
