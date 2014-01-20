@@ -48,7 +48,7 @@ var rest = myApp.controller(
                         "name": "File Rename Format",
                         "id": "filerenameformat"
                     }, {
-                        "name": "Sweeped File Location",
+                        "name": "Swept File Location",
                         "id": "sweepedfilelocation"
                     }, {
                         "name": "Payload Size Threshold",
@@ -257,6 +257,9 @@ var rest = myApp.controller(
                 }, {
                     "name": "Processed File Location",
                     "id": "processedfilelocation"
+                }, {
+                    "name": "Error File Location",
+                    "id": "errorfilelocation"
                 }];
                 $scope.allStaticProperties = [{
                     "name": "Socket Timeout",
@@ -287,7 +290,7 @@ var rest = myApp.controller(
                     "name": "File Rename Format",
                     "id": "filerenameformat"
                 }, {
-                    "name": "Sweeped File Location",
+                    "name": "Swept File Location",
                     "id": "sweepedfilelocation"
                 }, {
                     "name": "Payload Size Threshold",
@@ -295,6 +298,9 @@ var rest = myApp.controller(
                 }, {
                     "name": "Number of File Threshold",
                     "id": "numoffilesthreshold"
+                 }, {
+                	"name": "Error File Location",
+                    "id": "errorfilelocation"
                 }];
                 // function to modify the static properties if the protocol is FTP or FTPS
                 $scope.modifyStaticPropertiesBasedOnProtocol();
@@ -1004,7 +1010,7 @@ var rest = myApp.controller(
                                 }
                                 for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
                                     // To get id as property value for the dynamic properties which are displayed as static properties
-                                    var dynamicPropertyIndex = getIndex($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
+                                    var dynamicPropertyIndex = getIndexOfId($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
                                     var dynamicPropertyName = (dynamicPropertyIndex === -1) ? data.getProcessorResponse.processor.dynamicProperties[i].name : getName($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
                                     if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
                                         $scope.httpMandatoryProperties.push({
@@ -1029,7 +1035,7 @@ var rest = myApp.controller(
                                         });
                                     }
                                     // To remove already value assigned properties from array allStaticPropertiesThatAreNotAssignedValuesYet
-                                    var indexOfElement = getIndex($scope.allStaticPropertiesThatAreNotAssignedValuesYet, data.getProcessorResponse.processor.dynamicProperties[i].name);
+                                    var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, data.getProcessorResponse.processor.dynamicProperties[i].name);
                                     if (indexOfElement !== -1) {
                                         $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
                                     }
@@ -1449,7 +1455,7 @@ var rest = myApp.controller(
                         indexMandatory = getIndex($scope.allMandatorySweeperProperties, $scope.processorProperties[i].name);
                     } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
                     if (index === -1 && indexMandatory === -1) {
-                        // TO set proper id for dynamic properties which are displayed as static properties
+                        // To set proper id for dynamic properties which are displayed as static properties
                         var dynamicPropertyIndex = getIndex($scope.dynamicPropertiesDisplayedAsStaticProperties, $scope.processorProperties[i].name);
                         var dynamicPropertyName = (dynamicPropertyIndex === -1) ? $scope.processorProperties[i].name : getId($scope.dynamicPropertiesDisplayedAsStaticProperties, $scope.processorProperties[i].name);
                         $scope.processor.dynamicProperties.push({
@@ -1679,6 +1685,9 @@ var rest = myApp.controller(
                 }, {
                     "name": "Processed File Location",
                     "id": "processedfilelocation"
+                }, {
+                    "name": "Error File Location",
+                    "id": "errorfilelocation"
                 }];
                 // function to modify the static properties if the protocol is FTP or FTPS
                 // $scope.modifyStaticPropertiesBasedOnProtocol();

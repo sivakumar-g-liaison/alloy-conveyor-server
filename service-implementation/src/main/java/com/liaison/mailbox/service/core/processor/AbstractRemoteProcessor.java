@@ -721,17 +721,17 @@ public abstract class AbstractRemoteProcessor {
 	 *            The source location
 	 * @throws IOException
 	 */
-	public void archiveFile(String filePath) throws IOException {
+	public void archiveFile(String filePath, boolean isError) throws IOException {
 
 		File file = new File(filePath);
-
-		Path targetDirectory = file.toPath().getParent().resolve(MailBoxConstants.PROCESSED_FOLDER);
+		String targetFolder = (isError)?MailBoxConstants.ERROR_FOLDER:MailBoxConstants.PROCESSED_FOLDER; 
+		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
-			LOGGER.info("Creating 'processed' folder");
+			LOGGER.info("Creating target(processed/error) folder");
 			Files.createDirectories(targetDirectory);
 		}
 		Path target = targetDirectory.resolve(file.getName());
-		// moving to processed folder
+		// moving to processed/error folder
 		Files.move(file.toPath(), target, StandardCopyOption.REPLACE_EXISTING);
 	}
 
@@ -742,9 +742,9 @@ public abstract class AbstractRemoteProcessor {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFiles(File[] files) throws IOException {
+	protected void archiveFiles(File[] files, boolean isError) throws IOException {
 		for (File file : files) {
-			archiveFile(file.getAbsolutePath());
+			archiveFile(file.getAbsolutePath(), isError);
 		}
 	}
 

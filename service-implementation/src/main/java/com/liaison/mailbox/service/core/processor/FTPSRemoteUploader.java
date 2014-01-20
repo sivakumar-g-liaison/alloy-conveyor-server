@@ -163,6 +163,8 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
+		// variable to hold the status of file upload request execution
+		int replyCode = 0;
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
 
@@ -175,7 +177,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					// upload file
 					ftpsRequest.changeDirectory(remoteParentDir);
 					InputStream inputStream = new FileInputStream(item);
-					ftpsRequest.putFile(item.getName(), inputStream);
+					replyCode = ftpsRequest.putFile(item.getName(), inputStream);
 					inputStream.close();
 
 				} else {
@@ -197,14 +199,27 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 				}
 
 				if (null != item) {
-
-					String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(
-							MailBoxConstants.PROCESSED_FILE_LOCATION));
-					if (MailBoxUtility.isEmpty(processedFileLcoation)) {
-						archiveFile(item.getAbsolutePath());
+					
+					// File Uploading done successfully so move the file to processed folder
+					if(replyCode == 226 || replyCode == 250) {
+						String processedFileLocation = processMountLocation(getDynamicProperties().getProperty(
+								MailBoxConstants.PROCESSED_FILE_LOCATION));
+						if (MailBoxUtility.isEmpty(processedFileLocation)) {
+							archiveFile(item.getAbsolutePath(), false);
+						} else {
+							archiveFile(item, processedFileLocation);
+						}
 					} else {
-						archiveFile(item, processedFileLcoation);
+						// File uploading failed so move the file to error folder
+						String errorFileLocation = processMountLocation(getDynamicProperties().getProperty(
+								MailBoxConstants.ERROR_FILE_LOCATION));
+						if (MailBoxUtility.isEmpty(errorFileLocation)) {
+							archiveFile(item.getAbsolutePath(), true);
+						} else {
+							archiveFile(item, errorFileLocation);
+						}
 					}
+					
 				}
 			}
 		}

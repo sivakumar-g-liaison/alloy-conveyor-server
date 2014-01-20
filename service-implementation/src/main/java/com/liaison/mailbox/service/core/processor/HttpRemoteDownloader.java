@@ -108,6 +108,9 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 		request.setOutputStream(responseStream);
+		
+		// Boolean to determine whether to archive files in processed folder or error folder.
+		boolean isError = false;
 
 		// Set the pay load value to http client input data for POST & PUT
 		// request
@@ -132,10 +135,14 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		HTTPResponse response = request.execute();
 		if (response.getStatusCode() != 200) {
 			LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+			isError = true;
+			if (null != files) {
+				archiveFiles(files, isError);
+			}
 			throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 		} else {
 			if (null != files) {
-				archiveFiles(files);
+				archiveFiles(files, isError);
 			}
 		}
 

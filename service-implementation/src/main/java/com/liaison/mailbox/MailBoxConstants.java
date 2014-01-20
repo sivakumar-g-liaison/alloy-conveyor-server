@@ -71,5 +71,9 @@ public interface MailBoxConstants {
 	// Added for processing Mount Location from Folder Path given by User
 	public final static String MOUNT_LOCATION = "MOUNT_POINT";
 	public final static String MOUNT_LOCATION_PATTERN = "(?i:MOUNT_POINT)";
+	
+	// Added for Error File Location
+	public final static String ERROR_FOLDER = "ERROR";
+	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
 
 }

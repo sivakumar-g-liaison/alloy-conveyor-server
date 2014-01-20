@@ -100,13 +100,19 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 						LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
 						LOGGER.info("Execution failure for ",entry.getAbsolutePath());
 						failedStatus = true;
+						String errorFileLocation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.ERROR_FILE_LOCATION));
+						if (MailBoxUtility.isEmpty(errorFileLocation)) {
+							archiveFile(entry.getAbsolutePath(), true);
+						} else {
+							archiveFile(entry, errorFileLocation);
+						}
 						continue;
 					} else {
 						if (null != entry) {
 
 							String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION));
 							if (MailBoxUtility.isEmpty(processedFileLcoation)) {
-								archiveFile(entry.getAbsolutePath());
+								archiveFile(entry.getAbsolutePath(), false);
 							} else {
 								archiveFile(entry, processedFileLcoation);
 							}
