@@ -56,7 +56,7 @@ supports grid feature
     user-select: none;
 }
 
-/** better position ngGrid cell contents **/
+/** better position ngGrid cell contents**/
 .ngCell div {
     margin-top: 5px;
     margin-left: 5px;
@@ -79,6 +79,8 @@ supports grid feature
     -ms-user-select: none;
     user-select: none;
 }
+
+
 
 /******** Header ********/
 
@@ -105,7 +107,7 @@ supports grid feature
 .textboxingrid {
   display: block;
   width: 90%;
-  height: 30px;
+  height: 35px;
   padding: 8px 12px;
   font-size: 14px;
   line-height: 1.428571429;

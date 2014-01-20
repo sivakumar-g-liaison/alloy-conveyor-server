@@ -23,17 +23,26 @@ angular.module(
                                 \n\
                                 <input type="password"  ng-show=showconfirmpassword ng-change="validate()" ng-model="repeatepassword" class="textboxingrid"  required placeholder="confirm password"/>\n\
                                 \n\
+            					<span class="help-block-custom" ng-show=showerrormessage><strong>Password cannot be longer than 63 characters.</strong></span>\n\
                                  </div>',
                 link: function (scope) {
                     scope.showConfirmBox =
                         function () {
                             if (scope.password === '') {
                                 scope.showconfirmpassword = false;
+                                scope.showerrormessage = false;
                                 scope.rowEntity[scope.colFiled] = '';
                                 scope.rowEntity.passwordDirtyState = 'matches';
                                 return;
                             }
+                          //This condition is added to check the password length and show corresponding error message 
+							if (scope.password.length >= 64) {
+                                scope.showerrormessage = true;
+								scope.showconfirmpassword = false;
+                                return;
+                            }
                             scope.showconfirmpassword = true;
+                            scope.showerrormessage = false;
                             scope.matchString = "doesn't match";
                             scope.repeatepassword = '';
                             scope.rowEntity.passwordDirtyState = 'nomatch';
