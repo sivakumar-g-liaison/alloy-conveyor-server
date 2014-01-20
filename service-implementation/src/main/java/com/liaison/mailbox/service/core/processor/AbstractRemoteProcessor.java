@@ -1045,7 +1045,7 @@ public abstract class AbstractRemoteProcessor {
 			if (!MailBoxUtility.isEmpty(credential.getCredsPassword())) {
 
 				model.setPassword(credential.getCredsPassword());
-				//model.setFileURI(credential.getCredsUri());
+				model.setFileURI(credential.getCredsUri());
 
 			} else if (!MailBoxUtility.isEmpty(credential.getCredsIdpUri())) {
 
