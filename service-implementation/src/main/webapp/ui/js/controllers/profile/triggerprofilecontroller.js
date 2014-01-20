@@ -3,8 +3,8 @@
 /**
  * Controller for trigger profile.
  */
-myApp.controller('TriggerProfileCntrlr', ['$scope', '$location',
-    function ($scope, $location) {
+myApp.controller('TriggerProfileCntrlr', ['$scope', '$location', '$blockUI',
+    function ($scope, $location, $blockUI) {
 
         $scope.title = "Trigger Profile"; //title
 
@@ -13,14 +13,21 @@ myApp.controller('TriggerProfileCntrlr', ['$scope', '$location',
         $scope.profile = null;
         $scope.mailBoxSharedKey = null;
 
+        var block = $blockUI.createBlockUI();
+        
         // Profiles loads initially
         $scope.profiles = [];
 
         // Loading the profile details
         $scope.loadProfiles = function () {
+        	
+        	block.blockUI();
+        	
             $scope.restService.get($scope.base_url + "/profile").success(function (data) {
                 $scope.profiles = data.getProfileResponse.profiles;
+                block.unblockUI();
             }).error(function (data) {
+            	block.unblockUI();
                 showSaveMessage("Failed to load Profiles", 'error');
             });
         };
