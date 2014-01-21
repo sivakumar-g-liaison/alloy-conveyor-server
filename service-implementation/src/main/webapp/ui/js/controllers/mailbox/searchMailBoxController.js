@@ -6,9 +6,9 @@
 myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
     function ($scope, $location) {
 
-        $scope.title = "MailBox Profiles"; //title
+        $scope.title = "MailBox Profiles"; // title
 
-        //Search Details
+        // Search Details
         $scope.mailBoxName = null;
         $scope.profile = null;
 
@@ -38,7 +38,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
             })
         };
-        $scope.loadProfiles(); //initial load for the profiles
+        $scope.loadProfiles(); // initial load for the profiles
 
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
@@ -62,8 +62,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         });
 
         /**
-         * Remove all the data in grid and disable the info message.
-         */
+		 * Remove all the data in grid and disable the info message.
+		 */
         $scope.reset = function () {
 
             $scope.mailboxes = [];
@@ -84,7 +84,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
             useExternalFilter: true
         };
 
-        //Paging set up
+        // Paging set up
         $scope.totalServerItems = 0;
 
         $scope.pagingOptions = {
@@ -135,7 +135,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         $scope.deactivateMailBox = function () {
 
             $scope.restService.delete($scope.base_url + "/" + $scope.key.guid, function (data, status) {
-                //alert(data.deactivateMailBoxResponse.response.message); TODO modal dialog
+                // alert(data.deactivateMailBoxResponse.response.message); TODO
+				// modal dialog
                 $scope.search();
             });
             $scope.closeDelete();
@@ -176,15 +177,19 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                 function (data, status) {
                     if (status == 200) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
-                        	//Commented out because of inconsistency
-                            //showSaveMessage(data.searchMailBoxResponse.response.message, 'error');
+                        	// Commented out because of inconsistency
+                            // showSaveMessage(data.searchMailBoxResponse.response.message,
+							// 'error');
                         }
                     } else {
                     	 showSaveMessage("retrieval of search results failed", 'error');
                     }
-                    // if the data does not contain proper response hitCounter property will not be available and throws an error,
-                    // the progress bar will be displayed even after the display of error message.
-                    // To avoid the above error, the hitCounter will be validated only if proper response is available
+                    // if the data does not contain proper response hitCounter
+					// property will not be available and throws an error,
+                    // the progress bar will be displayed even after the display
+					// of error message.
+                    // To avoid the above error, the hitCounter will be
+					// validated only if proper response is available
                     if (data.searchMailBoxResponse) { 
                     	 if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
                              $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
@@ -219,7 +224,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         	if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
                 $scope.search();
             }
-            if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
+        	if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize && (($scope.mailBoxName !== null && $scope.mailBoxName !== "")  || $scope.profile !== null)) {
                 $scope.search();
                 newVal.currentPage = 1;
             }
@@ -250,10 +255,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                     width: '23%',
                     displayName: 'Status'
                 },
-                /*{
-                    field: 'profiles',
-                    displayName: 'LinkedProfiles'
-                },*/
+                /*
+				 * { field: 'profiles', displayName: 'LinkedProfiles' },
+				 */
                 { // Customized column
                     displayName: 'Action',
                     width: '10%',
@@ -263,7 +267,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
             ],
             data: 'mailboxes',
-            //rowTemplate: customRowTemplate,
+            // rowTemplate: customRowTemplate,
             enablePaging: true,
             showFooter: true,
             canSelectRows: true,
