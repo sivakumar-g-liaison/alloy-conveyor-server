@@ -118,7 +118,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         // Enable the delete modal dialog
         $scope.openDelete = function (row) {
             $scope.key = row.entity;
-            $scope.deleteKey = true;
+            //$scope.deleteKey = true;
         };
 
         // Enable the delete modal dialog
@@ -144,7 +144,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
         // Close the modal
         $scope.closeDelete = function () {
-            $scope.deleteKey = false;
+        	$('#myModal').modal('hide')
         };
 
         // Navigate to mailbox screen for edit operation
@@ -237,7 +237,15 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         }, true);
 
         // Customized column in the grid.
-        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="INACTIVE"><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-disabled="true"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)"><i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button> <button class="btn btn-default btn-xs" ng-click="openDelete(row)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+        $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
+        <div ng-switch-when="INACTIVE"><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
+        <i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button>\n\
+        <button class="btn btn-default btn-xs" ng-disabled="true">\n\
+        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
+        <div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
+        <i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button>\n\
+        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
+        <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
 
         // Setting the grid details
         $scope.gridOptions = {
