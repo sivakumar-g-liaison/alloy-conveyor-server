@@ -15,7 +15,7 @@
 		<form name="formSearchMbx" novalidate="" >
 		<div class="row">
 			<div class="col-md-6">
-				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="false"
+				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
                 	<span class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern"><strong>Invalid MailBox Name.</strong></span>
@@ -66,7 +66,7 @@
 	</div>
 
 	<div>
-		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')">add new</button>
+		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')">Add New</button>
 	</div>
 </div>
 

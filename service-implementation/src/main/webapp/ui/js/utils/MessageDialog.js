@@ -23,7 +23,7 @@ function showAlert(msg, type) {
             afterClose: function () {}
         },
         buttons: [{
-            text: 'close',
+            text: 'Close',
             onClick: function ($noty) {
                 $noty.close();
             }
