@@ -92,12 +92,32 @@ public abstract class AbstractRemoteProcessor {
 
 	protected Processor configurationInstance;
 	protected Properties mailBoxProperties;
+	protected RemoteProcessorPropertiesDTO remoteProcessorProperties;
 
 	public AbstractRemoteProcessor() {
 	}
 
 	public AbstractRemoteProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
+	}
+	
+	/**
+	 * Construct DTO from Entity.
+	 * 
+	 * @return the remoteProcessorProperties
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public RemoteProcessorPropertiesDTO getRemoteProcessorProperties() throws JsonParseException, JsonMappingException, JAXBException, IOException {
+		
+		if (null == remoteProcessorProperties) {
+			remoteProcessorProperties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
+					RemoteProcessorPropertiesDTO.class);
+		}
+		
+		return remoteProcessorProperties;
 	}
 
 	/**
@@ -508,8 +528,7 @@ public abstract class AbstractRemoteProcessor {
 		HTTPRequest request = new HTTPRequest(null, LOGGER);
 
 		// Convert the json string to DTO
-		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
-				RemoteProcessorPropertiesDTO.class);
+		RemoteProcessorPropertiesDTO properties = getRemoteProcessorProperties();
 
 		// Set url to HTTPRequest
 		URL url = new URL(properties.getUrl());

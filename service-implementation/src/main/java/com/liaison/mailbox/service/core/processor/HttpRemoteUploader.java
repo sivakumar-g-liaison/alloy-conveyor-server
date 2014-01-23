@@ -27,6 +27,7 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -72,57 +73,74 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
 			SymmetricAlgorithmException, JsonParseException, JSONException {
 
-		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
-		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
-		request.setOutputStream(responseStream);
+		HTTPRequest request = null;
+		ByteArrayOutputStream responseStream = null;
+		HTTPResponse response = null;
+		boolean failedStatus = false;
+		String content = null;
 
-		// Set the pay load value to http client input data for POST & PUT
-		// request
+		RemoteProcessorPropertiesDTO remoteProcessorProperties = getRemoteProcessorProperties();
+
+		// Set the pay load value to http client input data for POST & PUT request
 		File[] files = null;
-		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+		if ("POST".equals(remoteProcessorProperties.getHttpVerb())
+				|| "PUT".equals(remoteProcessorProperties.getHttpVerb())) {
 
 			files = getProcessorPayload();
 			if (null != files) {
 				
-				boolean failedStatus = false;
 				for (File entry : files) {
+
 					request = (HTTPRequest) getClientWithInjectedConfiguration();
 					responseStream = new ByteArrayOutputStream();
 					request.setOutputStream(responseStream);
 					
-					String content = FileUtils.readFileToString(entry, "UTF-8");
+					content = FileUtils.readFileToString(entry, "UTF-8");
 					if (content.length() > 0) {
 						request.inputData(content);
 					}
-					HTTPResponse response = request.execute();
-					LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
+					
+					response = request.execute();
+					LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
 					if (response.getStatusCode() != 200) {
-						LOGGER.info("The reponse code recived is {} ", response.getStatusCode());
-						LOGGER.info("Execution failure for ",entry.getAbsolutePath());
-						failedStatus = true;
-						String errorFileLocation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.ERROR_FILE_LOCATION));
-						if (MailBoxUtility.isEmpty(errorFileLocation)) {
-							archiveFile(entry.getAbsolutePath(), true);
-						} else {
-							archiveFile(entry, errorFileLocation);
-						}
-						continue;
-					} else {
-						if (null != entry) {
 
-							String processedFileLcoation = processMountLocation(getDynamicProperties().getProperty(MailBoxConstants.PROCESSED_FILE_LOCATION));
-							if (MailBoxUtility.isEmpty(processedFileLcoation)) {
-								archiveFile(entry.getAbsolutePath(), false);
-							} else {
-								archiveFile(entry, processedFileLcoation);
-							}
+						LOGGER.info("The reponse code received is {} ", response.getStatusCode());
+						LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+
+						failedStatus = true;
+						delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
+						//continue;
+
+					} else {
+
+						if (null != entry) {
+							delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
 						}
 					}
 				}
+
 				if (failedStatus) {
 					throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Delegate method to archive the file.
+	 * 
+	 * @param file
+	 * @param locationName
+	 * @param isError
+	 * @throws IOException
+	 */
+	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException {
+
+		String fileLocation = processMountLocation(getDynamicProperties().getProperty(locationName));
+		if (MailBoxUtility.isEmpty(fileLocation)) {
+			archiveFile(file.getAbsolutePath(), isError);
+		} else {
+			archiveFile(file, fileLocation);
 		}
 	}
 
