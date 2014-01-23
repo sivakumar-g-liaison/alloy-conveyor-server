@@ -3,6 +3,9 @@
 -- and create if absent
 --
 
+set serverout on
+set echo on
+
 DECLARE
   v_stmt    VARCHAR2(4000);
 
