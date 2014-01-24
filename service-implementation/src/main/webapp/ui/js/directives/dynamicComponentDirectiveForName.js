@@ -23,12 +23,12 @@ angular.module(
             },
             template: '<div ng-switch on="allowAdd">' +
                 '<div ng-switch-when="false">{{propName}}</div>' +
-                '<div ng-switch-when="true">\n\
+                '<div class="alignDiv" ng-switch-when="true">\n\
                 <div ng-form name="form">\n\
                     <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.value" ng-options="property.name for property in allStaticProperties">\n\
                          <option value="">-- select--</option>\n\
                     </select> <i>&nbsp</i>\n\
-                    <textarea ng-show="addNew.value"  ng-model="addedProperty.value" ng-maxLength=128 placeholder="required" style="width:60%"></textarea></div>\n\
+                    <textarea class="form-control alignDynamicTextarea" ng-show="addNew.value"  ng-model="addedProperty.value" ng-maxLength=128 placeholder="required" style="width:60%;height:45px;"></textarea></div>\n\
                     <div ng-show="form.name.$dirty && form.name.$invalid">\n\
                         <span class="help-block-custom" ng-show="form.$error.maxlength"><strong>Property Name cannot be longer than 128 characters.</strong></span>\n\
                      </div>\n\

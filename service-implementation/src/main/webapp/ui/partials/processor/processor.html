@@ -63,11 +63,16 @@
     /*This class is included to align browse button close to text area in processor details*/
     .adjustPaddingRight {
         padding-right: 5px;
+		
     }
     /*This class is included to align browse button close to text area in processor details*/
     .removePaddingLeft {
         padding-left: 0px;
     }
+    /*This class is added to align the button glyphicon-plus-sign in gridOptionsForProcessor grid*/
+ 	div .alignButton {
+		margin-left: 15px;
+	}
 </style>
 
 <div class="container fade-in">
@@ -294,13 +299,14 @@
                                     Add certificate to global trust store?
                                 </label>
                                 <br/>
-                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y">Yes
-                                <br/>
-                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N">No
+                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y">  Yes
+                               
+                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N" style="margin-left:5px">  No
 
                             </div>
                         </div>
                     </div>
+                    <br/>
                     <div class="gridStyleCredentials" ng-grid="gridOptionsForProcessorCredential">
                     </div>
                 </div>

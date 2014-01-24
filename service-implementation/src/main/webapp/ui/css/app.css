@@ -80,8 +80,14 @@ supports grid feature
     user-select: none;
 }
 
-
-
+/*Aligning text area in grid*/
+div .alignDiv{
+	margin-left: -5px;
+  }
+/*This css is applied to align dynamic textarea used for add new option*/
+.alignDynamicTextarea {
+	display: inline ;
+}
 /******** Header ********/
 
 .ngGroupPanel {
