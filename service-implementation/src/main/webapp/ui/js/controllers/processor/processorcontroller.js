@@ -3,6 +3,10 @@ var rest = myApp.controller(
         '$filter', '$location', '$log', '$blockUI',
         function ($scope, $filter,
             $location, $log, $blockUI) {
+    	
+    		//GMB-201
+    		$scope.disableBrowseButton = true;
+    	
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
@@ -1462,7 +1466,7 @@ var rest = myApp.controller(
             };
             $scope.save = function () {
                 console.log($scope.certificateModal.certificateURI);
-                if ($scope.processor.protocol === 'HTTPS' && $scope.certificateModal.certificateURI !== '' && $scope.isFileSelected) {
+                if (($scope.processor.protocol === 'HTTPS' || $scope.processor.protocol === 'FTPS') && $scope.certificateModal.certificateURI !== '' && $scope.isFileSelected) {
                     block.blockUI();
                     $scope.uploadFile();
                 } else {
@@ -1676,6 +1680,17 @@ var rest = myApp.controller(
                 $scope.modifyStaticPropertiesBasedOnProtocol();
                 // function to modify the static properties if the type is SWEEPER
                 $scope.modifyStaticPropertiesBasedOnProcessorType();
+                
+                //GMB-201
+				if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
+					$scope.disableBrowseButton = false;
+					$scope.isFileSelected = true;
+					$scope.processor.isSelfSigned = 'N';
+				} else {
+					$scope.disableBrowseButton = true;
+					$scope.isFileSelected = false;
+					$scope.processor.isSelfSigned = "";
+				}
             };
             $scope.setFolderData = function (mandatory) {
                 if (mandatory) {
@@ -1920,5 +1935,16 @@ var rest = myApp.controller(
                 return;
             }
             // File Upload Section Ends
+            
+            //GMB-201
+			if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
+				$scope.disableBrowseButton = false;
+				$scope.isFileSelected = true;
+				$scope.processor.isSelfSigned = 'N';
+			} else {
+				$scope.disableBrowseButton = true;
+				$scope.isFileSelected = false;
+				$scope.processor.isSelfSigned = "";
+			}
         }
     ]);
