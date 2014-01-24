@@ -29,7 +29,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
         };
 
         $scope.enumstats = [{"name":"Active","id":"ACTIVE"},
-            {"name":"InActive","id":"INACTIVE"}];
+            {"name":"Inactive","id":"INACTIVE"}];
         
         // Default values of payloadsize and no of files threshold
         $scope.payloadSizeThreshold = 131072;

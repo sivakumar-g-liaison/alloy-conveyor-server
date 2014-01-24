@@ -82,10 +82,28 @@
         </div>
         <br/>
 
-        <button class="btn btn-primary" ng-click="addNew()">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addNewModal">
             Add New
         </button>
-
+        
+        <div class="modal" id="addNewModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <h4 class="modal-title">Confirmation</h4>
+					</button>
+				</div>
+                <div class="modal-body">
+                    Are you  sure you want to cancel the Operation? All unsaved changes will be lost.</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary" data-dismiss="modal" ng-click="addNew()">Confirm</button>
+					<button class="btn btn-primary cancel" data-dismiss="modal" ng-click="closeDelete()">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+        
         <form name="formAddPrcsr" novalidate="">
 
             <br>

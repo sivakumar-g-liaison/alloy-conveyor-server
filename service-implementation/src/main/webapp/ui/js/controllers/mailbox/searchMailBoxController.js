@@ -247,6 +247,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
         <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
         <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
 
+        $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div><div ng-switch-when="INCOMPLETE_CONFIGURATION">Incomplete_Configuration</div></div>';
         // Setting the grid details
         $scope.gridOptions = {
             columnDefs: [{
@@ -261,7 +262,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
                 }, {
                     field: 'status',
                     width: '23%',
-                    displayName: 'Status'
+                    displayName: 'Status',
+                    cellTemplate: $scope.manageStatus
                 },
                 /*
 				 * { field: 'profiles', displayName: 'LinkedProfiles' },

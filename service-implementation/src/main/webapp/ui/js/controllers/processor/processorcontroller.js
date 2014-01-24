@@ -121,7 +121,7 @@ var rest = myApp.controller(
                     "name": "Active",
                     "id": "ACTIVE"
                 }, {
-                    "name": "InActive",
+                    "name": "Inactive",
                     "id": "INACTIVE"
                 }];
                 $scope.status = $scope.enumstats[0];
@@ -863,7 +863,7 @@ var rest = myApp.controller(
                 }
             }, true);
             $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row.getProperty(\'guid\'),true)"><i class="glyphicon glyphicon-pencil"></i></button>';
-            $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">InActive</div></div>';
+            $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
             $scope.manageType = '<div ng-switch on="row.getProperty(\'type\')"><div ng-switch-when="REMOTEDOWNLOADER">Remote Downloader</div><div ng-switch-when="REMOTEUPLOADER">Remote Uploader</div><div ng-switch-when="SWEEPER">Directory Sweeper</div></div>';
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
@@ -1571,12 +1571,16 @@ var rest = myApp.controller(
                 $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
             $scope.addNew = function () {
-                var resp = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
-                if (resp === true) {
                     $scope.loadOrigin();
                     $scope.readAllProfiles();
-                }
+                    $scope.closeDelete();
             };
+            
+            // Close the modal
+            $scope.closeDelete = function () {
+                $('#myModal').modal('hide')
+            };
+        
             $scope.resetProcessorType = function (model) {
                 $scope.resetStaticAndMandatoryProps();
                 if (model.id === 'SWEEPER') {
