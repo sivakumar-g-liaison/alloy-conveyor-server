@@ -16,8 +16,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
         // Search Profiles based on profile Name
         $scope.profileName = null;
         
-        // to hide add profile UI
-        $scope.showAddProfile = false;
+      
         
          // To enable "No records found" div
         $scope.info = false;
@@ -37,7 +36,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
                     	var messageType = (data.addProfileResponse.response.status == 'success')?'success':'error';
                         showSaveMessage(data.addProfileResponse.response.message, messageType);
                           // to hide the add profile UI once addition of profile done
-                        $scope.disableAddProfile();
+                       
                         $scope.profile.name = "";
                         $scope.loadProfiles();
 						if ($scope.pagingOptions.currentPage !== 1) {
@@ -214,16 +213,10 @@ var rest = myApp.controller('ProfileCntrlr', ['$scope', '$filter', '$location', 
 			totalServerItems:'totalServerItems'
         };
         
-        $scope.enableAddProfile = function() {
-            $scope.showAddProfile = true;
-        }
-         $scope.disableAddProfile = function() {
-            $scope.showAddProfile = false;
-        }
         // To clear profile name in add profile div while clicking on cancel
         $scope.doCancel = function() {
             $scope.profile.name = "";
-            $scope.disableAddProfile();
+          
         } 
     }
 ]);

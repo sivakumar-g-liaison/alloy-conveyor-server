@@ -156,7 +156,7 @@ public class ProfileConfigurationService {
 			List <ScheduleProfilesRef> profiles = configDao.findProfilesByName(profName);
 			
 			if (profiles == null || profiles.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, PROFILE);
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE);
 			}
 			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
 			ProfileDTO profile = null;

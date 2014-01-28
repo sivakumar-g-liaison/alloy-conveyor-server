@@ -126,9 +126,9 @@
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
                             <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
                             <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.minlength">Processor Name cannot be shorter than
+                            <span class="custom-info-block" ng-show="formAddPrcsr.name.$error.minlength">Processor Name cannot be shorter than
                     {{minimumLength}} characters.</span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.maxlength">Processor Name cannot be longer than
+                            <span class="custom-info-block" ng-show="formAddPrcsr.name.$error.maxlength">Processor Name cannot be longer than
                     {{maximumLengthAllowedInTextBox}} characters.</span>
 
                         </div>
@@ -142,7 +142,7 @@
                         <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
                         <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.description.$error.maxlength">Description cannot be longer than
+                            <span class="custom-info-block" ng-show="formAddPrcsr.description.$error.maxlength">Description cannot be longer than
                         {{maximumLengthAllowedInProcessorDescription}} characters.</span>
                         </div>
                     </div>

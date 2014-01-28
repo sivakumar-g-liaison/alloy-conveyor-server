@@ -279,7 +279,8 @@ public class MailBoxConfigurationService {
 			if (!MailBoxUtility.isEmpty(profName)) {
 				retrievedMailBoxes = configDao.find(mbxName, profName);
 			}
-
+			
+	        
 			// If the profile name is empty it will use findByName
 			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
 
@@ -290,9 +291,13 @@ public class MailBoxConfigurationService {
 					retrievedMailBoxes.addAll(retrievedMailBoxesUsingName);
 				}
 			}
-
+			if (MailBoxUtility.isEmpty(profName) && MailBoxUtility.isEmpty(mbxName)){
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA);
+			}
+			
+			
 			if (null == retrievedMailBoxes || retrievedMailBoxes.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, MAILBOX);
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS,MAILBOX);
 			}
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes

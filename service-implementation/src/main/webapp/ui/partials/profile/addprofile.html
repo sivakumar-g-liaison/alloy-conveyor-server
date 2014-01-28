@@ -6,10 +6,45 @@
 	</div>
    <div class="form-inline">
     <div class="form-row">
+		<h4>Add Profile</h4>
+	</div>
+	 <form name="triggerForm" novalidate="">
+				
+                    <div class="row">
+                       <div class="col-md-6">
+                          
+                            <label for="profilename">Name</label>
+                            <input type="text" name="profilename" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
+                            ng-minLength=5 ng-maxLength=80 class="form-control" />
+                            <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">
+                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.pattern"><strong>Invalid Profile Name.</strong></span>
+                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.required"><strong>Profile Name is mandatory.</strong></span>
+                                <span class="custom-info-block" ng-show="triggerForm.profilename.$error.minlength"><strong>Profile Name cannot be shorter than
+                                {{minimumLength}} characters.</strong></span>
+                                <span class="custom-info-block" ng-show="triggerForm.profilename.$error.maxlength"><strong>Profile Name cannot be longer than
+                                {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                            </div>
+                       </div>
+                        <br>
+                        <div class = "col-md-6">
+                           
+                            <div class="row">
+                            <button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click='insert()'>
+                            Save</button>
+                             <button class="btn btn-primary" ng-click="doCancel()">
+                            Cancel
+                            </button>
+                            </div>
+                        </div>
+                    </div>
+               
+
+	<br/>
+    <div class="form-row">
 		<h4>Search Profile</h4>
 
     </div>
-      <form name="triggerForm">
+  
         
          <div class="row">
            <div class="col-md-6">
@@ -21,10 +56,10 @@
                     <input type="text" id="name" ng-model="profileName" ng-trim="false"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-                	<span class="help-block-custom" ng-show="triggerForm.name.$error.pattern">Invalid Profile Name.</span>
-                	<span class="help-block-custom" ng-show="triggerForm.name.$error.minlength">Requires a minimum of {{minimumLength}} characters to enable search.</span>
-		 			<span class="help-block-custom" ng-show="triggerForm.name.$error.maxlength">Profile Name cannot be
-		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+                	<span class="help-block-custom" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
+                	<span class="custom-info-block" ng-show="triggerForm.name.$error.minlength"><strong>Requires a minimum of {{minimumLength}} characters to enable search.</strong></span>
+		 			<span class="custom-info-block" ng-show="triggerForm.name.$error.maxlength"><strong>Profile Name cannot be
+		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</strong></span>
                 </div>
                 <progress ng-show=showprogressbar> </progress>
                 </div>
@@ -33,46 +68,14 @@
 			</div>
             </div>
             <div class = "form-group">
-            <br>
+				<br>
                 <div class="alert alert-info" ng-show="info">
-                     No results found. 
+              		No results found.
                 </div>
                 <div class="gridStyle" ng-grid="gridOptions"></div>
-                <br>
-                <div>
-                    <button id="addNew" class="btn btn-primary" ng-click="enableAddProfile()">Add New</button>
-                </div>
             </div>
             <br>
-              <div ng-show="showAddProfile">
-                    <div class="row">
-                       <div class="col-md-6">
-                            <br>
-                            <label for="profilename">Name</label>
-                            <input type="text" name="profilename" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
-                            ng-minLength=5 ng-maxLength=80 class="form-control" />
-                            <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">
-                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.pattern">Invalid Profile Name.</span>
-                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.required">Profile Name is mandatory.</span>
-                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.minlength">Profile Name cannot be shorter than
-                                {{minimumLength}} characters.</span>
-                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.maxlength">Profile Name cannot be longer than
-                                {{maximumLengthAllowedInTextBox}} characters.</span>
-                            </div>
-                       </div>
-                        <br>
-                        <div class = "col-md-6">
-                            <br>
-                            <div class="row">
-                            <button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click='insert()'>
-                            Save</button>
-                             <button class="btn btn-primary" ng-click="doCancel()">
-                            Cancel
-                            </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              
                  </form>
             </div>
 	
