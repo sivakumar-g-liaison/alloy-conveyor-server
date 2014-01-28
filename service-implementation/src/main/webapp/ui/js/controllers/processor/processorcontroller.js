@@ -6,7 +6,6 @@ var rest = myApp.controller(
     	
     		//GMB-201
     		$scope.disableBrowseButton = true;
-    	
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
@@ -74,6 +73,10 @@ var rest = myApp.controller(
                 }
             };
             $scope.loadOrigin = function () {
+				
+				//GMB-196
+				$scope.sorting = 'name';
+				
                 $scope.isFileSelected = false;
                 $scope.isEdit = false;
                 $scope.isProcessorTypeSweeper = false;
@@ -437,7 +440,7 @@ var rest = myApp.controller(
                     width: "50%",
                     displayName: "Name*",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" icon-color="glyphIconColorForProcessorProperties" />'
+                    cellTemplate: '<div class="dynamicComponentDirectiveForName" sort-name="sorting" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" icon-color="glyphIconColorForProcessorProperties" />'
                 }, {
                     field: "value",
                     width: "43%",
@@ -1305,6 +1308,7 @@ var rest = myApp.controller(
                 });
                 valueSelectedinSelectionBox.value = '';
                 addedProperty.value = '';
+				
             };
             // For Procsr Dynamic Props
             $scope.removeRow = function (row, allProps, allPropsWithNovalue, gridData, valueSelectedinSelectionBox) {
@@ -1946,5 +1950,7 @@ var rest = myApp.controller(
 				$scope.isFileSelected = false;
 				$scope.processor.isSelfSigned = "";
 			}
+			
+			
         }
     ]);

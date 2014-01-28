@@ -19,13 +19,14 @@ angular.module(
                 addNew: '=',
                 addedProperty: '=',
                 propName: '@',
-                iconColor: '='
+                iconColor: '=',
+				sortName: '='
             },
             template: '<div ng-switch on="allowAdd">' +
                 '<div ng-switch-when="false">{{propName}}</div>' +
                 '<div class="alignDiv" ng-switch-when="true">\n\
                 <div ng-form name="form">\n\
-                    <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.value" ng-options="property.name for property in allStaticProperties">\n\
+                    <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.value" ng-options="property.name for property in allStaticProperties | orderBy:sortName ">\n\
                          <option value="">-- select--</option>\n\
                     </select> <i>&nbsp</i>\n\
                     <textarea class="form-control alignDynamicTextarea" ng-show="addNew.value"  ng-model="addedProperty.value" ng-maxLength=128 placeholder="required" style="width:60%;height:45px;"></textarea></div>\n\
