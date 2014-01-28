@@ -35,16 +35,15 @@
           <label for="name">
             Name
           </label>
-
             <input type="text" class="form-control" id="name" ng-model="mailBox.name" required="" name="name"
                    ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.name.$dirty && formAddMbx.name.$invalid">
-                <span class="help-block-custom" ng-show="formAddMbx.name.$error.pattern"><strong>Invalid Mailbox Name.</strong></span>
-                <span class="help-block-custom" ng-show="formAddMbx.name.$error.required"><strong>Mailbox Name is mandatory.</strong></span>
-                 <span class="help-block-custom" ng-show="formAddMbx.name.$error.minlength"><strong>Mailbox Name cannot be
-              shorter than {{minimumLength}} characters.</strong></span>
-		        <span class="help-block-custom" ng-show="formAddMbx.name.$error.maxlength"><strong>Mailbox Name cannot be
-              longer than {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                <span class="help-block-custom" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
+                <span class="help-block-custom" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
+                 <span class="help-block-custom" ng-show="formAddMbx.name.$error.minlength">Mailbox Name cannot be
+              shorter than {{minimumLength}} characters.</span>
+		        <span class="help-block-custom" ng-show="formAddMbx.name.$error.maxlength">Mailbox Name cannot be
+              longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
 
 
@@ -71,11 +70,11 @@
             <input class="form-control" type="text" id="key" ng-model="mailBox.shardKey" name="key" ng-pattern="userInputPattern"
                    ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.key.$dirty && formAddMbx.key.$invalid">
-                <span class="help-block-custom" ng-show="formAddMbx.key.$error.pattern"><strong>Invalid Shard Key.</strong></span>
-            <span class="help-block-custom" ng-show="formAddMbx.key.$error.minlength"><strong>Shard Key cannot be shorter than
-                {{minimumLength}} characters.</strong></span>
-		    <span class="help-block-custom" ng-show="formAddMbx.key.$error.maxlength"><strong>Shard Key cannot be longer than
-                {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                <span class="help-block-custom" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
+            <span class="help-block-custom" ng-show="formAddMbx.key.$error.minlength">Shard Key cannot be shorter than
+                {{minimumLength}} characters.</span>
+		    <span class="help-block-custom" ng-show="formAddMbx.key.$error.maxlength">Shard Key cannot be longer than
+                {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
           
           
@@ -90,9 +89,9 @@
               <textarea class="form-control" ng-model="mailBox.description" id="description" rows="2" name="description"
                         ng-pattern="userInputDescriptionPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
-                  <span class="help-block-custom" ng-show="formAddMbx.description.$error.pattern"><strong>Invalid Description.</strong></span>
-          		  <span class="help-block-custom" ng-show="formAddMbx.description.$error.maxlength"><strong>Description cannot be longer than
-                {{maximumLengthAllowedInMailBoxDescription}} characters.</strong></span>
+                  <span class="help-block-custom" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
+          		  <span class="help-block-custom" ng-show="formAddMbx.description.$error.maxlength">Description cannot be longer than
+                {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
               </div>
               <br>
           </div>

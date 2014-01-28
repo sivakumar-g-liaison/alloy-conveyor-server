@@ -18,11 +18,11 @@
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
-                	<span class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern"><strong>Invalid MailBox Name.</strong></span>
-                	<span class="custom-info-block" ng-show="formSearchMbx.name.$error.minlength"><strong>Requires a minimum of 
-         			 {{minimumLength}} characters to enable search.</strong></span>
-		 			<span class="help-block-custom" ng-show="formSearchMbx.name.$error.maxlength"><strong>Mailbox Name cannot be
-		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                	<span class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern">Invalid MailBox Name.</span>
+                	<span class="custom-info-block" ng-show="formSearchMbx.name.$error.minlength">Requires a minimum of 
+         			 {{minimumLength}} characters to enable search.</span>
+		 			<span class="help-block-custom" ng-show="formSearchMbx.name.$error.maxlength">Mailbox Name cannot be
+		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                 </div>
 			</div>
 			<div class="col-md-6">
@@ -57,7 +57,7 @@
 	</div>
 
 	<div class="alert alert-info" ng-show="info">
-		<strong> No results found. </strong>
+		 No results found. 
 	</div>
 
 	<div>

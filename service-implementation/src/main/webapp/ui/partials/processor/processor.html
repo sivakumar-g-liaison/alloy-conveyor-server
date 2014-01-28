@@ -124,12 +124,12 @@
                         </label>
                         <input type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern"><strong>Invalid Processor Name.</strong></span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.required"><strong>Processor Name is mandatory.</strong></span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.minlength"><strong>Processor Name cannot be shorter than
-                    {{minimumLength}} characters.</strong></span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.maxlength"><strong>Processor Name cannot be longer than
-                    {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.minlength">Processor Name cannot be shorter than
+                    {{minimumLength}} characters.</span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.maxlength">Processor Name cannot be longer than
+                    {{maximumLengthAllowedInTextBox}} characters.</span>
 
                         </div>
                     </div>
@@ -141,9 +141,9 @@
                         </label>
                         <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
                         <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                            <span ng-show="formAddPrcsr.description.$error.pattern"><strong>Invalid Description</strong></span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.description.$error.maxlength"><strong>Description cannot be longer than
-                        {{maximumLengthAllowedInProcessorDescription}} characters.</strong></span>
+                            <span ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
+                            <span class="help-block-custom" ng-show="formAddPrcsr.description.$error.maxlength">Description cannot be longer than
+                        {{maximumLengthAllowedInProcessorDescription}} characters.</span>
                         </div>
                     </div>
                 </div>
