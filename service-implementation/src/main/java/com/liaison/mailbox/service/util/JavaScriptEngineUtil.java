@@ -7,7 +7,12 @@
  */
 package com.liaison.mailbox.service.util;
 
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.Map;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -20,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
+import com.liaison.commons.scripting.javascript.JavascriptExecutor;
+import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
@@ -125,6 +132,50 @@ public final class JavaScriptEngineUtil {
 	 */
 	private void loadJavaScriptInEngine(ScriptEngine engine, String script) throws ScriptException {
 		 engine.eval(script);
+	}
+	
+	
+	/**
+	 * Executes the specified method in the javascript available
+	 *  in the script path provided using G2 custom Js engine.
+	 * 
+	 * @param scriptPath String
+	 * @param methodName String
+	 * @Param parameters Object
+	 * @return Object
+	 * @throws Exception
+	 * 
+	 */
+	public static Object executeJavaScript(String scriptPath, String methodName,  Object... parameters) throws Exception {
+		Exception expectedException = null;
+		try {
+			JavascriptExecutor scriptExecutor = new JavascriptExecutor();
+			JavascriptScriptContext scriptContext = null;
+			String scriptName = null;
+			File sriptURL = new File(scriptPath);
+			URI scriptURI = sriptURL.toURI();
+			 if (scriptContext == null) {
+			     //TODO:  Make these Streams externally definable
+				 scriptContext = new JavascriptScriptContext(new InputStreamReader(System.in), new PrintWriter(System.out), new PrintWriter(System.err));
+			 }
+		    scriptExecutor.setScriptContext(scriptContext);
+
+		    // invoke a javascript function with arguments (function and function arguments are optional)
+		    // if no function is supplied, the script will only be evaluated.
+		    Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, scriptURI, methodName, parameters);
+
+		    // did my function call throw?
+		    expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
+		    if (null != expectedException) {
+		        // do something about it
+		    	throw expectedException;
+		    }
+		    return returnValue;	
+		} catch (Exception e) {
+		  	LOGGER.error(String.format("Could not evaluate script %s:"+ e.getLocalizedMessage()));
+            
+		}       
+		return null;
 	}
 }
 

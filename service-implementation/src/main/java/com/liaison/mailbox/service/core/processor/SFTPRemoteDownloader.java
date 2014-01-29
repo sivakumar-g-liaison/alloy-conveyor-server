@@ -33,6 +33,7 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -176,14 +177,17 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		// G2SFTP executed through JavaScript
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
-			ScriptEngineManager manager = new ScriptEngineManager();
+			/*ScriptEngineManager manager = new ScriptEngineManager();
 			ScriptEngine engine = manager.getEngineByName("JavaScript");
 
 			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
 			Invocable inv = (Invocable) engine;
 
 			// invoke the method in javascript
-			inv.invokeFunction("init", this);
+			inv.invokeFunction("init", this);*/
+			
+			// Use custom G2JavascriptEngine
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this);
 
 		} else {
 			// G2SFTP executed through Java
