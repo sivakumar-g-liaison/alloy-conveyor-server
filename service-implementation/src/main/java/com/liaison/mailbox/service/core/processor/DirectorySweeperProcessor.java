@@ -51,6 +51,7 @@ import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
+import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -230,21 +231,24 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws MailBoxServicesException
 	 */
 	private List<List<FileAttributesDTO>> groupingFiles(List<FileAttributesDTO> files) throws ScriptException,
-			IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
+			IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException, Exception {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
 
 		if (!MailBoxUtility.isEmpty(groupingJsPath)) {
 
-			ScriptEngineManager manager = new ScriptEngineManager();
+			/*ScriptEngineManager manager = new ScriptEngineManager();
 			ScriptEngine engine = manager.getEngineByName("JavaScript");
 
 			engine.eval(getJavaScriptString(groupingJsPath));
 			Invocable inv = (Invocable) engine;
 
 			// invoke the method in javascript
-			inv.invokeFunction("init", files);
+			inv.invokeFunction("init", files);*/
+			
+			// Use custom G2JavascriptEngine
+			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", files);
 
 		} else {
 
@@ -339,7 +343,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 				} catch (FS2ObjectAlreadyExistsException e) {
 					FS2.deleteRecursive(oldPath.toUri());
 					FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
-				}
+				} 
 
 				// Renaming the file at the end of the step when everything is
 				// done.

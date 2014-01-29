@@ -119,6 +119,9 @@ dependencies {
 	compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
 	compile "org.hornetq:hornetq-server:2.3.11.Final"
 	compile "jboss:jnp-client:4.0.2"
+	
+	// for G2Javascript engine
+	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.0-SNAPSHOT', changing: true
 
 	//Dependencies for MCC
 	compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
