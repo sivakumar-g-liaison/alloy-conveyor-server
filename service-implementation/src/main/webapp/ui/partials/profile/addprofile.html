@@ -17,12 +17,12 @@
                             <input type="text" name="profilename" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
                             ng-minLength=5 ng-maxLength=80 class="form-control" />
                             <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">
-                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.pattern"><strong>Invalid Profile Name.</strong></span>
-                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.required"><strong>Profile Name is mandatory.</strong></span>
-                                <span class="custom-info-block" ng-show="triggerForm.profilename.$error.minlength"><strong>Profile Name cannot be shorter than
-                                {{minimumLength}} characters.</strong></span>
-                                <span class="custom-info-block" ng-show="triggerForm.profilename.$error.maxlength"><strong>Profile Name cannot be longer than
-                                {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.pattern">Invalid Profile Name.</span>
+                                <span class="help-block-custom" ng-show="triggerForm.profilename.$error.required">Profile Name is mandatory.</span>
+                                <span class="custom-info-block" ng-show="triggerForm.profilename.$error.minlength">Profile Name cannot be shorter than
+                                {{minimumLength}} characters.</span>
+                                <span class="custom-info-block" ng-show="triggerForm.profilename.$error.maxlength">Profile Name cannot be longer than
+                                {{maximumLengthAllowedInTextBox}} characters.</span>
                             </div>
                        </div>
                         <br>
@@ -56,10 +56,10 @@
                     <input type="text" id="name" ng-model="profileName" ng-trim="false"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-                	<span class="help-block-custom" ng-show="triggerForm.name.$error.pattern"><strong>Invalid Profile Name.</strong></span>
-                	<span class="custom-info-block" ng-show="triggerForm.name.$error.minlength"><strong>Requires a minimum of {{minimumLength}} characters to enable search.</strong></span>
-		 			<span class="custom-info-block" ng-show="triggerForm.name.$error.maxlength"><strong>Profile Name cannot be
-		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</strong></span>
+                	<span class="help-block-custom" ng-show="triggerForm.name.$error.pattern">Invalid Profile Name.</span>
+                	<span class="custom-info-block" ng-show="triggerForm.name.$error.minlength">Requires a minimum of {{minimumLength}} characters to enable search.</span>
+		 			<span class="custom-info-block" ng-show="triggerForm.name.$error.maxlength">Profile Name cannot be
+		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                 </div>
                 <progress ng-show=showprogressbar> </progress>
                 </div>
