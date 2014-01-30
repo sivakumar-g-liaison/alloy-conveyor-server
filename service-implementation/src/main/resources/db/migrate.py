@@ -45,6 +45,10 @@ def main( argv ):
         printUsage()
         sys.exit( 2 )
 
+    # Very important that these things be upper case.
+    moniker = moniker.upper()
+    userprefix = userprefix.upper()
+
     if len(userprefix) == 0:
         dbuserprefix = moniker
     else:
@@ -56,10 +60,6 @@ def main( argv ):
     templatefolder = 'migration/'
     workingfolder = '~work/migration/' + dbuserprefix
     logfile = '~migration.' + dbuserprefix + '.log.txt'
-
-    # Very important that these things be upper case.
-    moniker = moniker.upper()
-    dbuserprefix = dbuserprefix.upper()
 
     # Display current settings
     # -------------------------
@@ -89,7 +89,7 @@ def main( argv ):
 
         # See http://flywaydb.org/documentation/commandline/ for more info
         migrationfolder = os.getcwd() + '/' + workingfolder
-		flyway = 'flyway -url=' + dbUrl + ' -user=' + dbuserprefix + '_OWNR -password=' + password + ' -locations=filesystem:' + migrationfolder + ' migrate'
+        flyway = 'flyway -url=' + dbUrl + ' -user=' + dbuserprefix + '_OWNR -password=' + password + ' -locations=filesystem:' + migrationfolder + ' migrate'
         if os.system( flyway + ' > ' + logfile) == 0:
             print 'Flyway Migration Successful'
         else:

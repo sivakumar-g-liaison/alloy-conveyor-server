@@ -48,6 +48,10 @@ def main( argv ):
         printUsage()
         sys.exit( 2 )
 
+    # Very important that these things be upper case.
+    moniker = moniker.upper()
+    userprefix = userprefix.upper()
+
     if len(userprefix) == 0:
         dbuserprefix = moniker
     else:
@@ -59,10 +63,6 @@ def main( argv ):
     templatefolder = 'provision'
     workingfolder = '~work/provision/' + dbuserprefix
     logfile = '~provision.' + dbuserprefix + '.log.txt'
-
-    # Very important that these things be upper case.
-    moniker = moniker.upper()
-    dbuserprefix = dbuserprefix.upper()
 
     # Display current settings
     # -------------------------
