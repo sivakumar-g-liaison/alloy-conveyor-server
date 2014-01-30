@@ -26,9 +26,9 @@ DECLARE
     v_stmt VARCHAR2(4000);
     v_c      int;
 BEGIN
-    SELECT count(*) INTO v_c FROM dba_tables WHERE upper(table_name) = upper('SCHEMA_VERSION') AND upper(owner) = upper('KEY_MGMT_OWNR');
+    SELECT count(*) INTO v_c FROM dba_tables WHERE upper(table_name) = upper('SCHEMA_VERSION') AND upper(owner) = upper('GATEWAY_OWNR');
     IF v_c = 0 THEN
-        v_stmt := 'CREATE TABLE "KEY_MGMT_OWNR"."schema_version"
+        v_stmt := 'CREATE TABLE "GATEWAY_OWNR"."schema_version"
               (
                 "version_rank"   NUMBER(*,0) NOT NULL ENABLE,
                 "installed_rank" NUMBER(*,0) NOT NULL ENABLE,
@@ -42,7 +42,7 @@ BEGIN
                 "execution_time" NUMBER(*,0) NOT NULL ENABLE,
                 "success"        NUMBER(1,0) NOT NULL ENABLE
               )
-            TABLESPACE "KEY_MGMT_CONF"
+            TABLESPACE "GATEWAY_CONF"
             STORAGE
             (
                 INITIAL 64K
@@ -51,15 +51,15 @@ BEGIN
             )
             NOPARALLEL';
         EXECUTE IMMEDIATE v_stmt;
-            
-        v_stmt := 'ALTER TABLE "KEY_MGMT_OWNR"."schema_version" ADD CONSTRAINT "schema_version_pk" PRIMARY KEY ("version") USING INDEX TABLESPACE "KEY_MGMT_CONF"';
+
+        v_stmt := 'ALTER TABLE "GATEWAY_OWNR"."schema_version" ADD CONSTRAINT "schema_version_pk" PRIMARY KEY ("version") USING INDEX TABLESPACE "GATEWAY_CONF"';
         EXECUTE IMMEDIATE v_stmt;
 
-        v_stmt := 'CREATE INDEX "KEY_MGMT_OWNR"."schema_version_s_idx" ON "KEY_MGMT_OWNR"."schema_version"("success") TABLESPACE "KEY_MGMT_CONF"';
+        v_stmt := 'CREATE INDEX "GATEWAY_OWNR"."schema_version_s_idx" ON "GATEWAY_OWNR"."schema_version"("success") TABLESPACE "GATEWAY_CONF"';
         EXECUTE IMMEDIATE v_stmt;
-        v_stmt := 'CREATE INDEX "KEY_MGMT_OWNR"."schema_version_ir_idx" ON "KEY_MGMT_OWNR"."schema_version" ("installed_rank") TABLESPACE "KEY_MGMT_CONF"';
+        v_stmt := 'CREATE INDEX "GATEWAY_OWNR"."schema_version_ir_idx" ON "GATEWAY_OWNR"."schema_version" ("installed_rank") TABLESPACE "GATEWAY_CONF"';
         EXECUTE IMMEDIATE v_stmt;
-        v_stmt := 'CREATE INDEX "KEY_MGMT_OWNR"."schema_version_vr_idx" ON "KEY_MGMT_OWNR"."schema_version" ("version_rank") TABLESPACE "KEY_MGMT_CONF"';
+        v_stmt := 'CREATE INDEX "GATEWAY_OWNR"."schema_version_vr_idx" ON "GATEWAY_OWNR"."schema_version" ("version_rank") TABLESPACE "GATEWAY_CONF"';
         EXECUTE IMMEDIATE v_stmt;
     END IF;
 END;
