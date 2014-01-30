@@ -66,13 +66,14 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws SymmetricAlgorithmException
 	 * @throws JSONException 
 	 * @throws JsonParseException 
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			SymmetricAlgorithmException, JsonParseException, JSONException {
+			SymmetricAlgorithmException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException {
 
 		HTTPRequest request = null;
 		ByteArrayOutputStream responseStream = null;

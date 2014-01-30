@@ -146,12 +146,12 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
         System.out.println(response.getStatusLine());
 	}
 	
-	//@Test
+	@Test
 	public void testFetchTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
 		// Get the mailbox
-		String url = "http://10.0.6.101:8080/key-management-1.0.1/fetch/truststore/current/0C3A3BC00A0037B00665D98DB3096BC8";
+		String url = "http://10.0.6.101:8989/key-management-1.0.1/fetch/truststore/current/75D5112D0A0006340665134D334351D5";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 

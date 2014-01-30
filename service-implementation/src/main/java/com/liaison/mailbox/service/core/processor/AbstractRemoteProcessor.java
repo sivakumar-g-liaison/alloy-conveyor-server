@@ -519,9 +519,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws CertificateException
 	 * @throws NoSuchAlgorithmException
 	 * @throws JSONException 
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 */
 	public Object getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException, JSONException {
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException, JSONException, com.liaison.commons.exception.LiaisonException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
 		// Create HTTPRequest and set the properties
@@ -891,10 +892,11 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws NoSuchAlgorithmException
 	 */
 	protected G2FTPSClient getFTPSClient(Logger logger) throws LiaisonException, JsonParseException, JsonMappingException, JAXBException, IOException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException {
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
 				RemoteProcessorPropertiesDTO.class);
@@ -957,9 +959,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 */
 	protected G2SFTPClient getSFTPClient(Logger logger) throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException {
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
 				RemoteProcessorPropertiesDTO.class);

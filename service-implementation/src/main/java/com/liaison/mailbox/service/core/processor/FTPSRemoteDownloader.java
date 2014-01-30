@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.net.ftp.FTPFile;
@@ -87,12 +84,13 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -110,11 +108,13 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
+	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JsonParseException 
 	 * 
 	 */
 
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, SymmetricAlgorithmException {
+			URISyntaxException, JAXBException, SymmetricAlgorithmException, JsonParseException, com.liaison.commons.exception.LiaisonException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		
@@ -150,12 +150,13 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws SftpException
 	 * 
 	 */
 
 	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException {
+			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException, com.liaison.commons.exception.LiaisonException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {

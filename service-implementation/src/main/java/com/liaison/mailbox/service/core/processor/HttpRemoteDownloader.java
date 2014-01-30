@@ -18,9 +18,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
@@ -103,11 +100,12 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws NoSuchAlgorithmException
 	 * @throws JSONException 
 	 * @throws JsonParseException 
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException,
-			KeyStoreException, NoSuchAlgorithmException, CertificateException, JsonParseException, JSONException {
+			KeyStoreException, NoSuchAlgorithmException, CertificateException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();

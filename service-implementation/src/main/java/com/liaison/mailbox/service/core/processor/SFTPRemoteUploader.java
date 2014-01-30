@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
@@ -33,8 +30,8 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
@@ -64,12 +61,13 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
 
@@ -88,10 +86,11 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
 	private void executeRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException {
+			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();
@@ -136,10 +135,11 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws LiaisonException
 	 * @throws SftpException
 	 * @throws MailBoxServicesException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir)
-			throws IOException, LiaisonException, SftpException, MailBoxServicesException {
+			throws IOException, LiaisonException, SftpException, MailBoxServicesException, com.liaison.commons.exception.LiaisonException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();

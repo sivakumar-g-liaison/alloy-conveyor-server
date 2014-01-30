@@ -16,9 +16,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.List;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
@@ -64,12 +61,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		// Convert the json string to DTO
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
@@ -86,12 +84,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws JAXBException
 	 * @throws SymmetricAlgorithmException
 	 * @throws SftpException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	private void executeSFTPRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SymmetricAlgorithmException, SftpException {
+			FS2Exception, MailBoxServicesException, SymmetricAlgorithmException, SftpException, com.liaison.commons.exception.LiaisonException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();
@@ -123,10 +122,11 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SftpException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException, SftpException {
+			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException, SftpException, com.liaison.commons.exception.LiaisonException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {

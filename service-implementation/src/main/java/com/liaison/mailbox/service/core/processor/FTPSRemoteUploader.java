@@ -15,9 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
@@ -91,12 +88,13 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -114,10 +112,11 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, SymmetricAlgorithmException {
+			URISyntaxException, JAXBException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		
@@ -159,11 +158,12 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
+	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws SftpException
 	 * 
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
-			throws IOException, LiaisonException {
+			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();

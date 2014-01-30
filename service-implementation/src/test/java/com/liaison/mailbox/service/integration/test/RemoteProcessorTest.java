@@ -70,7 +70,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 			JAXBException, IOException, com.google.gson.JsonParseException,
 			URISyntaxException, MailBoxServicesException,
 			SymmetricAlgorithmException, KeyStoreException,
-			NoSuchAlgorithmException, CertificateException {
+			NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("Processor");
