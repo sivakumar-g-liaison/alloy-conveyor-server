@@ -6,6 +6,8 @@ var rest = myApp.controller(
     	
     		//GMB-201
     		$scope.disableBrowseButton = true;
+            $scope.portRequired = true;
+            $scope.isPortDisabled = false;
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
@@ -217,6 +219,11 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
+                    name: 'Port',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
                     name: '',
                     value: '',
                     allowAdd: true,
@@ -224,6 +231,11 @@ var rest = myApp.controller(
                 }];
                 $scope.httpMandatoryProperties = [{
                     name: 'URL',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                },{
+                    name: 'Port',
                     value: '',
                     allowAdd: false,
                     isMandatory: true
@@ -290,9 +302,6 @@ var rest = myApp.controller(
                     "name": "Encoding Format",
                     "id": "encodingFormat"
                 }, {
-                    "name": "Port",
-                    "id": "port"
-                }, {
                     "name": "OtherRequest Header",
                     "id": "otherRequestHeader"
                 }, {
@@ -317,9 +326,6 @@ var rest = myApp.controller(
                 }, {
                     "name": "Encoding Format",
                     "id": "encodingFormat"
-                }, {
-                    "name": "Port",
-                    "id": "port"
                 }, {
                     "name": "OtherRequest Header",
                     "id": "otherRequestHeader"
@@ -395,6 +401,9 @@ var rest = myApp.controller(
                 $scope.allMandatoryFtpProperties = [{
                     "name": "URL",
                     "id": "url"
+                }, {
+                    "name": "Port",
+                    "id": "port"
                 }];
                 $scope.allMandatorySweeperProperties = [{
                     "name": "PipeLine Id",
@@ -497,7 +506,7 @@ var rest = myApp.controller(
 				return "sftpmandatoryProperty";
 				
 			};
-			
+            
             $scope.gridOptionsForProcessor = {
                 data: 'processorProperties',
                 displaySelectionCheckbox: false,
@@ -631,7 +640,7 @@ var rest = myApp.controller(
 	                            </div>\n\
                         </div>\n\
                         <div ng-switch-when="url">\n\
-                            <textarea class="form-control" ng-model="COL_FIELD" name="propUrl" ng-pattern="' + $scope.inputPatternForURL + '" required style="width:90%;height: 45px" placeholder="required" />\n\
+                            <textarea class="form-control" ng-model="COL_FIELD" name="propUrl" ng-pattern="' + $scope.inputPatternForURL + '" required style="width:90%;height: 45px" placeholder="required" ng-change = "OnChangeUrl(row)"/>\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.propUrl.$dirty && formAddPrcsr.propUrl.$invalid">\n\
@@ -662,7 +671,11 @@ var rest = myApp.controller(
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="port">\n\
-                            <textarea class="form-control" ng-model="COL_FIELD" name="port" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+                        <div ng-switch on="portRequired">\n\
+                        <div ng-switch-when="true"><textarea class="form-control" ng-model="COL_FIELD" ng-disabled="isPortDisabled" name="port" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+                            </div><div ng-switch-default>\n\
+                            <textarea class="form-control" ng-model="COL_FIELD" ng-disabled="isPortDisabled" name="port" style="width:90%;height: 45px" ng-pattern="' + $scope.numberPattern + '" />\n\
+                            </div></div>\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid">\n\
@@ -700,6 +713,38 @@ var rest = myApp.controller(
                              </div>'
                 }]
             };
+           $scope.isPortDisabled = false;
+            $scope.OnChangeUrl = function(row) {
+               // var elem = document.createElement('a');
+               // elem.href = row.entity.value;
+				//var port = elem.port;
+			   
+			   var url = row.entity.value;
+			   if(typeof url !== 'undefined') {
+					var ip = url.split('/')[2].split(':')[0];
+					var port = url.split('/')[2].split(':')[1]; 
+				}
+                
+                if (row.entity.value) {                    
+                    for(i = 0; i < $scope.processorProperties.length; i++) {
+                        if ($scope.processorProperties[i].name === 'Port') {
+							if(port.length <= 5) {
+								$scope.processorProperties[i].value = port;
+								$scope.isPortDisabled = true;
+							}
+                            if(port === '') $scope.isPortDisabled = false;
+                       }
+                    }
+                } else {
+                    for(i = 0; i < $scope.processorProperties.length; i++) {
+                        if ($scope.processorProperties[i].name === 'Port') {
+                            $scope.processorProperties[i].value = '';
+                            $scope.isPortDisabled = false;
+                       }
+                    }
+                }
+           }     
+            
             $scope.getFolderId = function (objArray, row) {
                 return getId(objArray, row.getProperty('folderType'));
             };
@@ -1112,6 +1157,9 @@ var rest = myApp.controller(
                                                 allowAdd: false,
                                                 isMandatory: (getIndexOfId($scope.allMandatoryHttpProperties, prop) === -1) ? false : true
                                             });
+                                            
+                                            if(prop === 'port') $scope.isPortDisabled = true;
+                                            
                                         } else if ($scope.processor.protocol === 'SWEEPER') {
                                             $scope.sweeperMandatoryProperties.push({
                                                 name: $scope.getNameValue(prop),
@@ -1126,6 +1174,8 @@ var rest = myApp.controller(
                                                 allowAdd: false,
                                                 isMandatory: (getIndexOfId($scope.allMandatoryFtpProperties, prop) === -1) ? false : true
                                             });
+                                            
+                                            if(prop === 'port') $scope.isPortDisabled = true;
                                         }
                                         var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, prop);
                                         if (indexOfElement !== -1) {
@@ -1153,12 +1203,23 @@ var rest = myApp.controller(
                                     var dynamicPropertyIndex = getIndexOfId($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
                                     var dynamicPropertyName = (dynamicPropertyIndex === -1) ? data.getProcessorResponse.processor.dynamicProperties[i].name : getName($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
                                     if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-                                        $scope.httpMandatoryProperties.push({
-                                            name: dynamicPropertyName,
-                                            value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-                                            allowAdd: false,
-                                            isMandatory: false
-                                        });
+                                        if (data.getProcessorResponse.processor.dynamicProperties[i].name == 'Port') {
+                                            $scope.httpMandatoryProperties.push({
+                                                name: dynamicPropertyName,
+                                                value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                                                allowAdd: false,
+                                                isMandatory: true
+                                            });
+                                            if (data.getProcessorResponse.processor.dynamicProperties[i].value !== '') $scope.isPortDisabled = true;
+                                        } else {
+                                            $scope.httpMandatoryProperties.push({
+                                                name: dynamicPropertyName,
+                                                value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                                                allowAdd: false,
+                                                isMandatory: false
+                                            });
+                                        }
+                                        
                                     } else if ($scope.processor.protocol === 'SWEEPER') {
                                         $scope.sweeperMandatoryProperties.push({
                                             name: dynamicPropertyName,
@@ -1173,6 +1234,10 @@ var rest = myApp.controller(
                                             allowAdd: false,
                                             isMandatory: false
                                         });
+                                        
+                                        if (data.getProcessorResponse.processor.dynamicProperties[i].name == 'Port' && data.getProcessorResponse.processor.dynamicProperties[i].value !== '')
+                                            $scope.isPortDisabled = true;
+                                        
                                     }
                                     // To remove already value assigned properties from array allStaticPropertiesThatAreNotAssignedValuesYet
                                     var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, data.getProcessorResponse.processor.dynamicProperties[i].name);
@@ -1597,6 +1662,12 @@ var rest = myApp.controller(
                             value: value
                         });
                     }
+                    if (name === 'Port') {
+                        mandatoryArray.push({
+                            name: name,
+                            value: value
+                        });
+                    }
                     if (name === 'pipeLineID') {
                         mandatoryArray.push({
                             name: name,
@@ -1749,6 +1820,7 @@ var rest = myApp.controller(
                     $scope.loadOrigin();
                     $scope.readAllProfiles();
                     $scope.closeDelete();
+                    $scope.isPortDisabled = false;
             };
             
             // Close the modal
@@ -1768,6 +1840,8 @@ var rest = myApp.controller(
                     $scope.processor.protocol = $scope.enumprotocoltype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.setFolderData(false);
+                    var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
+                    if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
                 }
                 // function to modify the static properties if the protocol is FTP or FTPS
                 $scope.modifyStaticPropertiesBasedOnProtocol();
@@ -1776,14 +1850,21 @@ var rest = myApp.controller(
             };
             $scope.resetProtocol = function (model) {
                 console.log(model);
+				$scope.isPortDisabled = false;
                 $scope.resetStaticAndMandatoryProps();
                 if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
+                    var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
+                    if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
+                    $scope.portRequired = true;
                     $scope.setFolderData(false);
                 } else if ($scope.processor.protocol === "HTTP" || $scope.processor.protocol === "HTTPS") {
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
+                    var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
+                    if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
                     $scope.processorProperties = $scope.httpMandatoryProperties;
+                    $scope.portRequired = false;
                     $scope.setFolderData(false);
                 } else if ($scope.processor.protocol === "SWEEPER") {
                     $scope.processorProperties = $scope.sweeperMandatoryProperties;
@@ -1887,6 +1968,11 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
+                    name: 'Port',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
                     name: '',
                     value: '',
                     allowAdd: true,
@@ -1894,6 +1980,11 @@ var rest = myApp.controller(
                 }];
                 $scope.httpMandatoryProperties = [{
                     name: 'URL',
+                    value: '',
+                    allowAdd: false,
+                    isMandatory: true
+                }, {
+                    name: 'Port',
                     value: '',
                     allowAdd: false,
                     isMandatory: true
@@ -2062,5 +2153,11 @@ var rest = myApp.controller(
 				$scope.isFileSelected = false;
 				$scope.processor.isSelfSigned = "";
 			}
+
+            if($scope.processor.protocol === "FTP" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTPS") {
+                $scope.portRequired = true;
+            } else {
+                $scope.portRequired = false;
+            }
         }
     ]);
