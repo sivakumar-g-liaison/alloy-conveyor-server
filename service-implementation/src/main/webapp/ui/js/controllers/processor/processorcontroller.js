@@ -374,26 +374,16 @@ var rest = myApp.controller(
                     "name": "Target Location",
                     "id": "TARGET_LOCATION"
                 }];
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = [{
-                    "name": "Trust Store",
-                    "id": "TRUST_STORE"
-                }, {
-                    "name": "Key Store",
-                    "id": "KEY_STORE"
-                }, {
-                    "name": "Login Credential",
-                    "id": "LOGIN_CREDENTIAL"
-                }];
-                $scope.allStaticPropertiesForProcessorCredential = [{
-                    "name": "Trust Store",
-                    "id": "TRUST_STORE"
-                }, {
-                    "name": "Key Store",
-                    "id": "KEY_STORE"
-                }, {
-                    "name": "Login Credential",
-                    "id": "LOGIN_CREDENTIAL"
-                }];
+                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = [
+	                {
+	                    "name": "Login Credential",
+	                    "id": "LOGIN_CREDENTIAL"
+	                }];
+                $scope.allStaticPropertiesForProcessorCredential = [
+	                {
+	                    "name": "Login Credential",
+	                    "id": "LOGIN_CREDENTIAL"
+	                }];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = [{
                     name: "FTPS",
                     id: "FTPS"

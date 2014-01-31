@@ -574,24 +574,18 @@ public abstract class AbstractRemoteProcessor {
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
 
 
-				KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
-				//InputStream instream = new FileInputStream(new File(keystoreModel.getFileURI()));
+			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
+			
+			try {
 				
-				try {
-					
-					trustStore.load(instream, null);
-					//trustStore.load(instream, keystoreModel.getPassword().toCharArray());
+				trustStore.load(instream, null);
 
-				} finally {
-					instream.close();
-				}
-				CredentialType foundCredentailType = CredentialType.findByCode(getCredential().getCredsType());
-				if (CredentialType.TRUST_STORE.equals(foundCredentailType)) {
-					request.truststore(trustStore);
-				} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
-					request.keystore(trustStore, null);
-				}
+			} finally {
+				instream.close();
+			}
+			
+			request.truststore(trustStore);
 		}
 		LOGGER.info("Returns HTTP/S configured HTTPClient");
 		return request;
@@ -893,10 +887,13 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JSONException 
+	 * @throws CertificateException 
 	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException 
 	 */
 	protected G2FTPSClient getFTPSClient(Logger logger) throws LiaisonException, JsonParseException, JsonMappingException, JAXBException, IOException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
 				RemoteProcessorPropertiesDTO.class);
@@ -919,29 +916,22 @@ public abstract class AbstractRemoteProcessor {
 			}
 		}
 
-		CredentialInfoModel keystoreModel = getKeyStoreCredential();
+		// Configure keystore for HTTPS request
+		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("ftps")) {
 
-		if (keystoreModel != null) {
 
-			if (MailBoxUtility.isEmpty(keystoreModel.getFileURI()) || MailBoxUtility.isEmpty(keystoreModel.getPassword())) {
+			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
+			
+			try {
+				
+				trustStore.load(instream, null);
 
-				LOGGER.info("Credential requires file path & password");
-				throw new MailBoxServicesException("Credential requires file path & password");
+			} finally {
+				instream.close();
 			}
-
-			CredentialType foundCredentailType = CredentialType.findByCode(getCredential().getCredsType());
-			if (CredentialType.TRUST_STORE.equals(foundCredentailType)) {
-
-				ftpsRequest.setTrustManagerKeyStore(keystoreModel.getFileURI());
-				ftpsRequest.setTrustManagerKeyStoreType("jks");
-				ftpsRequest.setTrustManagerKeyStorePassword(keystoreModel.getPassword());
-
-			} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
-				ftpsRequest.setKeyManagerKeyStore(keystoreModel.getFileURI());
-				ftpsRequest.setKeyManagerKeyStoreType("jks");
-				ftpsRequest.setKeyManagerKeyStorePassword(keystoreModel.getPassword());
-
-			}
+			
+			ftpsRequest.setTrustStore(trustStore);
 		}
 
 		return ftpsRequest;
