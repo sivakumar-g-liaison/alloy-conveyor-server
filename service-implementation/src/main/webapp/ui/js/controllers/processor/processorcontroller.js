@@ -158,8 +158,30 @@ var rest = myApp.controller(
                     'POST',
                     'DELETE'
                 ];
+                $scope.enumContentType = [
+                     'multipart/signed',
+                     'multipart/report',
+                     'message/disposition-notification',
+                     'application/PKCS7-signature',
+                     'application/PKCS7-mime',
+                     'application/EDI-X12',
+                     'application/EDIFACT',
+                     'application/edi-consent ',
+                     'application/atom+xml',
+                     'application/x-www-form-urlencoded',
+                     'application/json',
+                     'application/octet-stream',
+                     'application/svg+xml',
+                     'application/xhtml+xml',
+                     'application/xml',
+                     'multipart/form-data',
+                     'text/html',
+                     'text/plain',
+                     'text/xml'
+                ];                
                 $scope.verb = $scope.enumHttpVerb[0];
                 $scope.processor.protocol = $scope.enumprotocoltype[0];
+                $scope.content = $scope.enumContentType[0];
                 // applying boolean value for chunked encoding
                 $scope.booleanValues = [
                     true,
@@ -450,7 +472,7 @@ var rest = myApp.controller(
                     	<div class="alignDiv" ng-switch-when="">\n\
                             <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                 <div ng-switch-when="">\n\
-                                    <textarea class="form-control" ng-model="COL_FIELD" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" />\n\
+                                    <textarea class="form-control" ng-model="COL_FIELD" style="width:90%;height:45px" placeholder="required" />\n\
                                     <a ng-click="isModal(row)" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#valueModal"  class="right">\n\
                                     <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                 </div>\n\
@@ -464,19 +486,13 @@ var rest = myApp.controller(
                                     <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
                                 </div>\n\
                                 <div ng-switch-when="payloadsizethreshold">\n\
-                                     <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                     <div ng-show="formAddPrcsr.payloadSizeThreshold.$dirty && formAddPrcsr.payloadSizeThreshold.$invalid">\n\
-                                        <span class="help-block-custom" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern>Enter valid number</span>\n\
-                                    </div>\n\
+                                     <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:90%;height:45px" placeholder="required"/>\n\
                                 </div>\n\
                                 <div ng-switch-when="numoffilesthreshold">\n\
-                                      <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=numberOfFilesThreshold"  style="width:90%;height:45px" ng-maxLength=512 placeholder="required" ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                        <div ng-show="formAddPrcsr.numoffilesthreshold.$dirty && formAddPrcsr.numoffilesthreshold.$invalid">\n\
-                                            <span class="help-block-custom" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern>Enter valid number</span>\n\
-                                        </div>\n\
-                                  </div>\n\
+                                      <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=numberOfFilesThreshold"  style="width:90%;height:45px" placeholder="required"/>\n\
+                                </div>\n\
                                 <div ng-switch-default>\n\
-                                    <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-maxLength=2048 style="width:90%;height: 45px" placeholder="required" />\n\
+                                    <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:90%;height: 45px" placeholder="required" />\n\
                                     <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                                     <i class="glyphicon glyphicon-new-window"></i></a>\n\
                                 </div>\n\
@@ -536,7 +552,19 @@ var rest = myApp.controller(
                                     </div>\n\
                             </div>\n\
                       </div>\n\
-                        <div ng-switch-when="httpVersion">\n\
+                      <div ng-switch-when="contentType">\n\
+                              <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
+                                      <div ng-switch-when="httpMandatoryProperty">\n\
+                                      	<select ng-model="content" ng-change="onContentTypeChange(content)" ng-options="property for property in enumContentType"></select>\n\
+                                      </div>\n\
+                          			  <div ng-switch-default>\n\
+                                          <textarea class="form-control" ng-model="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
+                                          <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
+                                          <i class="glyphicon glyphicon-new-window"></i></a>\n\
+                                    </div>\n\
+                            </div>\n\
+                      </div>\n\
+                      <div ng-switch-when="httpVersion">\n\
                                   <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
                                       <div ng-switch-when="httpMandatoryProperty">\n\
 				                            <textarea class="form-control" ng-model="COL_FIELD" name="httpVersion" ng-pattern="' + $scope.httpVersionPattern + '" required style="width:90%;height: 45px" placeholder="required" />\n\
@@ -861,6 +889,9 @@ var rest = myApp.controller(
             $scope.onVerbChange = function (httpVerb) {
                 $scope.verb = httpVerb;
             };
+			$scope.onContentTypeChange = function (contentType) {
+                $scope.content = contentType;
+            };			
             $scope.initialLoad = function () {
                 $scope.readAllProcessors();
                 $scope.readAllProfiles();
@@ -962,9 +993,12 @@ var rest = myApp.controller(
                         colonArray.push(reqHeaderArray[i].name + ':' + reqHeaderArray[i].value);
                     }
                     return colonArray.toString();
-                } else {
+                } else if (value === 'httpVerb') {
+
                     $scope.verb = reqHeaderArray;
-                }
+                } else if (value === 'contentType') {
+					$scope.content = reqHeaderArray;
+				}
             };
             $scope.editProcessor = function (processorId, blockuiFlag) {
                 if (blockuiFlag === true) {
@@ -1025,7 +1059,7 @@ var rest = myApp.controller(
                                         if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
                                             $scope.httpMandatoryProperties.push({
                                                 name: $scope.getNameValue(prop),
-                                                value: (prop === 'otherRequestHeader' || prop === 'httpVerb') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
+                                                value: (prop === 'otherRequestHeader' || prop === 'httpVerb' || prop === 'contentType') ? $scope.setRemotePropData(json_data[prop], prop) : json_data[prop],
                                                 allowAdd: false,
                                                 isMandatory: (getIndexOfId($scope.allMandatoryHttpProperties, prop) === -1) ? false : true
                                             });
@@ -1248,32 +1282,41 @@ var rest = myApp.controller(
                     return;
                 }
                 var attrName = '';
-                if (valueSelectedinSelectionBox.value.id === 'socketTimeout' || valueSelectedinSelectionBox.value.id === 'connectionTimeout' || valueSelectedinSelectionBox.value.id === 'retryAttempts' || valueSelectedinSelectionBox.value.id === 'port' || valueSelectedinSelectionBox.value.id === 'payloadsizethreshold' || valueSelectedinSelectionBox.value.id === 'numoffilesthreshold') {
-                    if (!($scope.numberPattern.test(row.getProperty('value')))) {
-                        showAlert('Value should be a number.', 'error');
-                        return;
-                    }
-                }
-                if (valueSelectedinSelectionBox.value.id !== 'add new -->') {
+				if (valueSelectedinSelectionBox.value.id !== 'add new -->') {
                     attrName = valueSelectedinSelectionBox.value.name;
                 } else if (addedProperty.value !== '') {
                     attrName = addedProperty.value;
-                }
-                // row.getProperty('value') is converted to string since the Propertyvalue may contain boolean value for the property
-                // "chunkedEncoding" if the user has entered the value of "false", then checking the !row.getProperty('value')
-                // will always be true and the below alert will be displayed.
-                console.log(row.getProperty('value'));
-                // console.log(row.getProperty('value').toString());
-                var rowVal;
+                }				
+				var rowVal;
                 if (row.getProperty('value') === null) {
                     rowVal = '';
-                } else {
-                    rowVal = row.getProperty('value').toString();
-                }
-                if (!attrName || !rowVal) {
+               } else if (typeof(row.getProperty('value')) === 'undefined') {			   
+				    rowVal = null;
+			   } else {
+                    // row.getProperty('value') is converted to string since the Propertyvalue may contain boolean value for the property
+                    // "chunkedEncoding" if the user has entered the value of "false", then checking the !row.getProperty('value')
+                    // will always be true and the below alert will be displayed.
+                   rowVal = row.getProperty('value').toString();
+                }				
+                 // console.log(row.getProperty('value').toString());
+                 if (!attrName || !rowVal) {
                     showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                     return;
                 }
+                if (valueSelectedinSelectionBox.value.id === 'socketTimeout' || valueSelectedinSelectionBox.value.id === 'connectionTimeout' || valueSelectedinSelectionBox.value.id === 'retryAttempts' || valueSelectedinSelectionBox.value.id === 'port' || valueSelectedinSelectionBox.value.id === 'payloadsizethreshold' || valueSelectedinSelectionBox.value.id === 'numoffilesthreshold') {
+						if (!($scope.numberPattern.test(row.getProperty('value')))) {
+							showAlert('Value should be a number.', 'error');
+							return;
+						}
+				   } 
+                 if (attrName.length > 128) {
+					showAlert('Property Name cannot be longer than 128 characters.', 'information');
+					return;
+                } 				
+				if (rowVal.length > 2048) {
+				   showAlert('Property  Value cannot be longer than 2048 characters.', 'information');
+                    return;			
+			    }		
                 if (checkNameDuplicate(gridData, attrName)) {
                     showAlert('Name already added.', 'error');
                     return;
@@ -1504,12 +1547,18 @@ var rest = myApp.controller(
                             value: $scope.verb
                         });
                     }
-                    if ((name === 'httpVersion' || name === 'contentType') && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
+                    if ((name === 'httpVersion') && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
                         mandatoryArray.push({
                             name: name,
                             value: value
                         });
                     }
+					if (name === 'contentType' && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
+                        mandatoryArray.push({
+                            name: name,
+                            value: $scope.content
+                        });
+                    }   
                     var index = getIndex($scope.allStaticProperties, $scope.processorProperties[i].name);
                     var indexMandatory;
                     if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
@@ -1634,6 +1683,7 @@ var rest = myApp.controller(
                 $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
             $scope.addNew = function () {
+                    $scope.formAddPrcsr.$setPristine();
                     $scope.loadOrigin();
                     $scope.readAllProfiles();
                     $scope.closeDelete();
@@ -1950,7 +2000,5 @@ var rest = myApp.controller(
 				$scope.isFileSelected = false;
 				$scope.processor.isSelfSigned = "";
 			}
-			
-			
         }
     ]);

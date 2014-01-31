@@ -244,18 +244,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                                    <div class="alignDiv" ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                             <div ng-switch-when="emailnotificationids">\n\
-           										 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" ng-maxLength=512 required style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
-          											  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
-          												   <span class="help-block-custom" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
-         										      </div>\n\
-           								    </div>\n\
+           										 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+                                            </div>\n\
                                             <div ng-switch-default>\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\
                                    <div ng-switch-when="emailnotificationids">\n\
-           								 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" ng-maxLength=512  style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
+           								 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
             								 <span class="help-block-custom" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
@@ -292,15 +289,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
             $log.info(row.getProperty('value'));
 
             var attrName = '';
-            
-            // To allow only numeric values for properties numoffilesthreshold and payloadsizethreshold
-            if (valueSelectedinSelectionBox.value.id == 'numoffilesthreshold'  || valueSelectedinSelectionBox.value.id == 'payloadsizethreshold') {
-                   if (!($scope.numberPattern.test(row.getProperty('value')))) {
-                        showAlert('Value should be a number.', 'error');
-                        return;
-                    }
-            }
-
+                      
             if (valueSelectedinSelectionBox.value.id !== 'add new -->') {
 
                 attrName = valueSelectedinSelectionBox.value.name;
@@ -312,7 +301,23 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
                 showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                 return;
             }
-
+            if (attrName.length > 128) {
+				showAlert('Property  Name cannot be longer than 128 characters.', 'information');
+                return;
+            } 
+			
+			if (row.getProperty('value').length > 512) {
+			   showAlert('Property  Value cannot be longer than 512 characters.', 'information');
+                return;			
+			}            
+          
+             // To allow only proper mail Id values for property emailnotificationids
+            if (valueSelectedinSelectionBox.value.id == 'emailnotificationids') {
+                   if (!($scope.multipleEmailPattern.test(row.getProperty('value')))) {
+                        showAlert('Invalid Email address.', 'error');
+                        return;
+                    }
+            }
             if (checkNameDuplicate(gridData, attrName)) {
 
                 showAlert('Name already added.', 'error');
