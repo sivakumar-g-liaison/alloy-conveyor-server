@@ -38,11 +38,11 @@
             <input type="text" class="form-control" id="name" ng-model="mailBox.name" required="" name="name"
                    ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.name.$dirty && formAddMbx.name.$invalid">
-                <span class="help-block-custom" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
-                <span class="help-block-custom" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
-                 <span class="custom-info-block" ng-show="formAddMbx.name.$error.minlength">Mailbox Name cannot be
+                <span id="mbx-add-nameInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
+                <span id="mbx-add-nameInvalid-required" class="help-block-custom" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
+                <span id="mbx-add-nameInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.name.$error.minlength">Mailbox Name cannot be
               shorter than {{minimumLength}} characters.</span>
-		        <span class="custom-info-block" ng-show="formAddMbx.name.$error.maxlength">Mailbox Name cannot be
+		        <span id="mbx-add-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.name.$error.maxlength">Mailbox Name cannot be
               longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
 
@@ -70,10 +70,10 @@
             <input class="form-control" type="text" id="key" ng-model="mailBox.shardKey" name="key" ng-pattern="userInputPattern"
                    ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.key.$dirty && formAddMbx.key.$invalid">
-                <span class="help-block-custom" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
-            <span class="custom-info-block" ng-show="formAddMbx.key.$error.minlength">Shard Key cannot be shorter than
+                <span id="mbx-add-keyInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
+            <span id="mbx-add-keyInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.key.$error.minlength">Shard Key cannot be shorter than
                 {{minimumLength}} characters.</span>
-		    <span class="custom-info-block" ng-show="formAddMbx.key.$error.maxlength">Shard Key cannot be longer than
+		    <span id="mbx-add-keyInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.key.$error.maxlength">Shard Key cannot be longer than
                 {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
           
@@ -89,8 +89,8 @@
               <textarea class="form-control" ng-model="mailBox.description" id="description" rows="2" name="description"
                         ng-pattern="userInputDescriptionPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
-                  <span class="help-block-custom" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
-          		  <span class="custom-info-block" ng-show="formAddMbx.description.$error.maxlength">Description cannot be longer than
+                  <span id="mbx-add-descInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
+          		  <span id="mbx-add-descInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.description.$error.maxlength">Description cannot be longer than
                 {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
               </div>
               <br>
@@ -109,13 +109,13 @@
   </form>
   
   <div>
-    <button class="btn btn-primary" ng-click="doCancel()">
+    <button id="mbx-add-cancel" class="btn btn-primary" ng-click="doCancel()">
       Cancel
     </button>
-    <button class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid">
+    <button id="mbx-add-save" class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid">
       Save
     </button>
-    <button class="btn btn-primary" ng-click="addProcessor()" ng-disabled="formAddMbx.$invalid">
+    <button id="mbx-add-procsr" class="btn btn-primary" ng-click="addProcessor()" ng-disabled="formAddMbx.$invalid">
       Add Processors
     </button>
   </div></div>

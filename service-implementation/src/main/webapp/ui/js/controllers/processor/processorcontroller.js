@@ -17,6 +17,10 @@ var rest = myApp.controller(
             // and "passive" for FTP & FTPS protocols.
             $scope.modifyStaticPropertiesBasedOnProtocol = function () {
                 if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS") {
+                    /*issue: Binary and passive is added twice for FTP protocol.Hence condition is checked before adding the values. */
+				var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
+				var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
+                if (indexOfBinary === -1 && indexOfPassive === -1){
                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
                         "name": "Binary",
                         "id": "binary"
@@ -24,6 +28,10 @@ var rest = myApp.controller(
                         "name": "Passive",
                         "id": "passive"
                     });
+                }
+				var indexOfBinaryForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'binary');
+				var indexOfPassiveForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'passive');	
+				if (indexOfBinaryForAllStaticProperties === -1 && indexOfPassiveForAllStaticProperties === -1){
                     $scope.allStaticProperties.push({
                         "name": "Binary",
                         "id": "binary"
@@ -31,6 +39,7 @@ var rest = myApp.controller(
                         "name": "Passive",
                         "id": "passive"
                     });
+                 }   
                 } else {
                     // Remove binary and passive properties from the array allStaticPropertiesThatAreNotAssignedValuesYet
                     var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
@@ -78,6 +87,9 @@ var rest = myApp.controller(
 				$scope.sorting = 'name';
 				
                 $scope.isFileSelected = false;
+                 //This variable is added for sending to passwordDirective.js for disabling error message and repeatPassword text box. Initialising it on load as $watch is added on this variable.
+                $scope.hideValue=false;
+
                 $scope.isEdit = false;
                 $scope.isProcessorTypeSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;
@@ -331,6 +343,53 @@ var rest = myApp.controller(
                 	"name": "Error File Location",
                     "id": "errorfilelocation"
                 }];
+                 $scope.allStaticAndDynamicProperties = [{
+                    "name": "Socket Timeout",
+                    "id": "socketTimeout"
+                }, {
+                    "name": "Connection Timeout",
+                    "id": "connectionTimeout"
+                }, {
+                    "name": "Retry Attempts",
+                    "id": "retryAttempts"
+                }, {
+                    "name": "Chunked Encoding",
+                    "id": "chunkedEncoding"
+                }, {
+                    "name": "Encoding Format",
+                    "id": "encodingFormat"
+                }, {
+                    "name": "Port",
+                    "id": "port"
+                }, {
+                    "name": "OtherRequest Header",
+                    "id": "otherRequestHeader"
+                }, {
+                    "name": "Processed File Location",
+                    "id": "processedfilelocation"
+                }, {
+                    "name": "File Rename Format",
+                    "id": "filerenameformat"
+                }, {
+                    "name": "Swept File Location",
+                    "id": "sweepedfilelocation"
+                }, {
+                    "name": "Payload Size Threshold",
+                    "id": "payloadsizethreshold"
+                }, {
+                    "name": "Number of File Threshold",
+                    "id": "numoffilesthreshold"
+                 }, {
+                 "name": "Error File Location",
+                    "id": "errorfilelocation"
+                }, {
+                    "name": "Binary",
+                    "id": "binary"
+                }, {
+                    "name": "Passive",
+                    "id": "passive"
+                }];
+
                 // function to modify the static properties if the protocol is FTP or FTPS
                 $scope.modifyStaticPropertiesBasedOnProtocol();
                 $scope.allMandatoryFtpProperties = [{
@@ -458,7 +517,7 @@ var rest = myApp.controller(
                     width: "43%",
                     displayName: "Value*",
                     enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="getId(allStaticProperties, row)">\n\
+                    cellTemplate: '<div ng-switch on="getId(allStaticAndDynamicProperties, row)">\n\
                     	<div class="alignDiv" ng-switch-when="">\n\
                             <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                 <div ng-switch-when="">\n\
@@ -611,13 +670,13 @@ var rest = myApp.controller(
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="payloadsizethreshold">\n\
-                            <textarea class="form-control" ng-model="COL_FIELD" name ="payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
+                            <textarea class="form-control" ng-model="COL_FIELD" name ="payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
                                 <div ng-show="formAddPrcsr.payloadSizeThreshold.$dirty && formAddPrcsr.payloadSizeThreshold.$invalid">\n\
                                     <span class="help-block-custom" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern>Enter valid number</span>\n\
                                 </div>\n\
                         </div>\n\
                         <div ng-switch-when="numoffilesthreshold">\n\
-                            <textarea class="form-control" ng-model="COL_FIELD" name="numoffilesthreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
+                            <textarea class="form-control" ng-model="COL_FIELD" name="numoffilesthreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
                                 <div ng-show="formAddPrcsr.numoffilesthreshold.$dirty && formAddPrcsr.numoffilesthreshold.$invalid">\n\
                                     <span class="help-block-custom" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern>Enter valid number</span>\n\
             					</div>\n\
@@ -832,7 +891,7 @@ var rest = myApp.controller(
                     width: "14%",
                     displayName: "Password",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field"  />'
+                    cellTemplate: '<div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field" hide="hideValue"/>'
                 }, {
                     field: "idpType",
                     width: "10%",
@@ -1415,11 +1474,12 @@ var rest = myApp.controller(
                     showAlert('The password and confirm password do not match', 'error');
                     return;
                 }
-                /*This condition is used to prevent the data from getting pushed to gridData array when maximum length of password is exceeded*/
-                if(row.getProperty('password') === null || row.getProperty('password') === ""){
-					showAlert('The password cannot be longer than 63 characters', 'error');
-					return;
-				}
+               /*This condition is used to prevent the data from getting pushed to gridData array when maximum length of password is exceeded*/
+
+			if(row.getProperty('passwordDirtyState') === "maxlengthError"){
+				showAlert('The password cannot be longer than 63 characters', 'error');
+				return;
+			}
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
                 gridData.push({
@@ -1454,6 +1514,12 @@ var rest = myApp.controller(
             };
             // For Procsr Credentials Props
             $scope.removeCredentialRow = function (row, allProps, allPropsIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
+                 /*GMB-197 Fix: The variable is used to execute $watch in passwordDirective.js */
+                if($scope.hideValue == true) {
+                    $scope.hideValue = false;
+                }else{
+                    $scope.hideValue = true;
+                }
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
                 var removedProperty = row.getProperty('credentialType');
@@ -1512,6 +1578,12 @@ var rest = myApp.controller(
                 }
             };
             $scope.saveProcessor = function () {
+                /*GMB-197 Fix: The variable is used to execute $watch in passwordDirective.js */
+			if($scope.hideValue == true) {
+				$scope.hideValue = false;
+			}else{
+                $scope.hideValue = true;
+			}
                 var lenDynamicProps = $scope.processorProperties.length;
                 var commaSplit = [];
                 var mandatoryArray = [];

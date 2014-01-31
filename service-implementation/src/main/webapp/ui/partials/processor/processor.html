@@ -78,7 +78,7 @@
 <div class="container fade-in">
 
     <div class="form-row">
-        <h2>
+        <h2 id="mbx-procsr-mailboxName">
       Processors of Mailbox {{mailboxName}}
     </h2>
 
@@ -87,7 +87,7 @@
         </div>
         <br/>
 
-        <button class="btn btn-primary" data-toggle="modal" data-target="#addNewModal">
+        <button id="mbx-procsr-addNew" class="btn btn-primary" data-toggle="modal" data-target="#addNewModal">
             Add New
         </button>
         
@@ -102,8 +102,8 @@
                 <div class="modal-body">
                     Are you  sure you want to cancel the Operation? All unsaved changes will be lost.</div>
 				<div class="modal-footer">
-					<button class="btn btn-primary" data-dismiss="modal" ng-click="addNew()">Confirm</button>
-					<button class="btn btn-primary cancel" data-dismiss="modal" ng-click="closeDelete()">Cancel</button>
+					<button id="mbx-procsr-modal-addNew" class="btn btn-primary" data-dismiss="modal" ng-click="addNew()">Confirm</button>
+					<button id="mbx-procsr-modal-cancel" class="btn btn-primary cancel" data-dismiss="modal" ng-click="closeDelete()">Cancel</button>
 				</div>
 			</div>
 		</div>
@@ -124,11 +124,11 @@
                         </label>
                         <input type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
-                            <span class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
-                            <span class="custom-info-block" ng-show="formAddPrcsr.name.$error.minlength">Processor Name cannot be shorter than
+                            <span id="mbx-procsr-nameInvalid-pattern" class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
+                            <span id="mbx-procsr-nameInvalid-required" class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
+                            <span id="mbx-procsr-nameInvalid-minlength" class="custom-info-block" ng-show="formAddPrcsr.name.$error.minlength">Processor Name cannot be shorter than
                     {{minimumLength}} characters.</span>
-                            <span class="custom-info-block" ng-show="formAddPrcsr.name.$error.maxlength">Processor Name cannot be longer than
+                            <span id="mbx-procsr-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddPrcsr.name.$error.maxlength">Processor Name cannot be longer than
                     {{maximumLengthAllowedInTextBox}} characters.</span>
 
                         </div>
@@ -139,10 +139,10 @@
                         <label>
                             Description
                         </label>
-                        <textarea width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
+                        <textarea id="mbx-procsr-description" width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
                         <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                            <span ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
-                            <span class="custom-info-block" ng-show="formAddPrcsr.description.$error.maxlength">Description cannot be longer than
+                            <span id="mbx-procsr-descriptionInvalid-pattern" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
+                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="custom-info-block" ng-show="formAddPrcsr.description.$error.maxlength">Description cannot be longer than
                         {{maximumLengthAllowedInProcessorDescription}} characters.</span>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                         <label>
                             Status
                         </label>
-                        <select ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
+                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
                         </select>
 
                     </div>
@@ -163,12 +163,12 @@
                     <label>
                         Script File Path
                     </label>
-                    <input type="text" ng-model="modal.uri" class="form-control">
+                    <input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control">
                 </div>
                 <div class="col-sm-1 col-md-1 removePaddingLeft">
                     <br>
                     <!-- Button trigger modal -->
-                    <a style="margin-top:6px" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#myModal" class="btn btn-primary">Browse</a> 
+                    <a id="mbx-procsr-scriptbrowse" style="margin-top:6px" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#myModal" class="btn btn-primary">Browse</a> 
                 </div>
             </div>
             <div class="row">
@@ -178,7 +178,7 @@
                             Type
                         </label>
 
-                        <select ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.name for type in enumprocsrtype" class="form-control">
+                        <select id="mbx-procsr-type" ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.name for type in enumprocsrtype" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
                         <label>
                             Protocol
                         </label>
-                        <select ng-disabled="isEdit || isProcessorTypeSweeper" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -198,16 +198,16 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <button id="mbx-procsr-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                             <h4 class="modal-title">Choose your file</h4>
                         </div>
                         <div class="modal-body">
-                            <div data-angular-treeview="true" data-tree-model="modal.roleList" data-node-id="roleName" data-node-label="roleId" data-node-children="children">
+                            <div id="mbx-procsr-modal-roleList" data-angular-treeview="true" data-tree-model="modal.roleList" data-node-id="roleName" data-node-label="roleId" data-node-children="children">
                             </div>
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">Choose</button>
+                            <button id="mbx-procsr-modal-choose" type="button" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">Choose</button>
                         </div>
                     </div>
                 </div>
@@ -247,7 +247,7 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <button id="mbx-procsr-properties-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                             <h4 class="modal-title">Edit Value</h4>
                         </div>
                         <div class="modal-body">
@@ -259,7 +259,7 @@
 				}">
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="close()">Close</button>
+                                <button id="mbx-procsr-properties-close" type="button" class="btn btn-default" data-dismiss="modal" ng-click="close()">Close</button>
                             </div>
                         </div>
                     </div>
@@ -283,14 +283,14 @@
                             <label>
                                 Certificate Path
                             </label>
-                            <input type="text" ng-model="certificateModal.certificateURI" class="form-control" ng-disabled="true">
+                            <input id="mbx-procsr-certificatePath" type="text" ng-model="certificateModal.certificateURI" class="form-control" ng-disabled="true">
                         </div>
                         <div class="col-sm-1 col-md-1 removePaddingLeft">
                             <br>
 
                             <div class="fileUpload btn btn-primary">
                                 <span>Browse</span>
-                                <input ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />                            </div>
+                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />                            </div>
                         </div>
                         <div class="col-sm-6 col-md-6">
                             <div class="form-group">
@@ -298,9 +298,9 @@
                                     Add certificate to global trust store?
                                 </label>
                                 <br/>
-                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y">  Yes
+                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y">  Yes
                                
-                                <input type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N" style="margin-left:5px">  No
+                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N" style="margin-left:5px">  No
 
                             </div>
                         </div>
@@ -322,19 +322,19 @@
                         all available schedules
                         </i>
                     </label>
-                    <select multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
+                    <select id="mbx-procsr-availableSchedule" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
                     </select>
                 </div>
                 <div class="col-md-1">
                     <div>
                         <br>
-                        <button class="btn btn-primary multipleSelectionListButton" ng-click="chooseProfile()">
+                        <button id="mbx-procsr-chooseProfile" class="btn btn-primary multipleSelectionListButton" ng-click="chooseProfile()">
                             &gt;&gt;
                         </button>
                     </div>
                     <div>
                         <br>
-                        <button class="btn btn-primary multipleSelectionListButton" ng-click="removeProfile()">
+                        <button id="mbx-procsr-removeProfile" class="btn btn-primary multipleSelectionListButton" ng-click="removeProfile()">
                             &lt;&lt;
                         </button>
                     </div>
@@ -345,20 +345,20 @@
                         linked schedules
                         </i>
                     </label>
-                    <select multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles" class="form-control">
+                    <select id="mbx-procsr-linkedSchedules"  multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-options="selected.name for selected in selectedProfiles" class="form-control">
                     </select>
                 </div>
 
             </div>
         </form>
         <div>
-            <button class="btn btn-primary" ng-click="backToMailbox()">
+            <button id="mbx-procsr-backtoMailbox" class="btn btn-primary" ng-click="backToMailbox()">
                 Back to Mailbox
             </button>
-            <button class="btn btn-primary" ng-click="save()" ng-disabled="formAddPrcsr.$invalid">
+            <button id="mbx-procsr-save" class="btn btn-primary" ng-click="save()" ng-disabled="formAddPrcsr.$invalid">
                 Save
             </button>
-            <button class="btn btn-primary" ng-click="doCancel()">
+            <button id="mbx-procsr-cancel" class="btn btn-primary" ng-click="doCancel()">
                 Cancel
             </button>
         </div>

@@ -19,15 +19,15 @@
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
-                	<span class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern">Invalid MailBox Name.</span>
-                	<span class="custom-info-block" ng-show="formSearchMbx.name.$error.minlength">Requires a minimum of 
+                	<span id="mbx-search-nameInvalid-pattern" class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern">Invalid MailBox Name.</span>
+                	<span id="mbx-search-nameInvalid-minlength" class="custom-info-block" ng-show="formSearchMbx.name.$error.minlength">Requires a minimum of 
          			 {{minimumLength}} characters to enable search.</span>
-		 			<span class="custom-info-block" ng-show="formSearchMbx.name.$error.maxlength">Mailbox Name cannot be
+		 			<span id="mbx-search-nameInvalid-maxlength" class="custom-info-block" ng-show="formSearchMbx.name.$error.maxlength">Mailbox Name cannot be
 		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                 </div>
 			</div>
 			<div class="col-md-6">
-				<label for="prof"> Profiles </label> <select id="prof" ng-model="profile"
+				<label for="prof"> Profiles </label> <select id="mbx-search-prof" ng-model="profile"
 					ng-options="prof.name for prof in profiles" ng-change="selectSearch()" class="form-control">
 					<option value="">-- select--</option>
 				</select>
@@ -43,7 +43,7 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					<button id="mbx-search-delete" type="button" class="close" data-dismiss="modal" aria-hidden="true">
 						<i class="glyphicon glyphicon-remove-sign" ng-click="closeDelete()"> </i>
 					</button>
 					<h4 class="modal-title">Deactivate</h4>
