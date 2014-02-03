@@ -95,7 +95,7 @@
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+					<button id="mbx-procsr-addNewmodal-confirm" type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                             <h4 class="modal-title">Confirmation</h4>
 					</button>
 				</div>
@@ -122,7 +122,7 @@
                         <label>
                             Name
                         </label>
-                        <input type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
+                        <input id="mbx-procsr-name" type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
                             <span id="mbx-procsr-nameInvalid-pattern" class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
                             <span id="mbx-procsr-nameInvalid-required" class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
