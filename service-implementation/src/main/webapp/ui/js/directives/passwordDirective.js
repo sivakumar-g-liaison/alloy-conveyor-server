@@ -16,7 +16,6 @@ angular.module(
 
                     rowEntity: '=',
                     colFiled: '=',
-                    hide: '=',
                     password: '@'                    
                 },
                 template: '<div><input type="password"  ng-model="password" ng-change="showConfirmBox()" class="textboxingrid" />\n\
@@ -27,13 +26,14 @@ angular.module(
             					<span class="custom-info-block" ng-show=showerrormessage>Password cannot be longer than 63 characters.</span>\n\
                                  </div>',
                 link: function (scope) {
-				/*GMB-197 Fix : The variable is changed in removeCredentialRow() and save() 
-					and the error message and repeat password text box is not shown*/
-				 scope.$watch("hide", function (
-                    newValue) {
-					scope.showconfirmpassword = false;
-					scope.showerrormessage = false;
-				}, true);
+				/*The event is triggered in processorController to clear password and error message in UI*/
+            	scope.$on('clearPassword', function(event){
+            			scope.showconfirmpassword = false;
+    					scope.showerrormessage = false;
+    					scope.password = '';
+    					scope.repeatepassword = '';
+    				
+    				})
                 scope.showConfirmBox =
                         function () {
                             if (scope.password === '') {

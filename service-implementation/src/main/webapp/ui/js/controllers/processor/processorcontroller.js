@@ -87,12 +87,8 @@ var rest = myApp.controller(
 				
 				//GMB-196
 				$scope.sorting = 'name';
-				
                 $scope.isFileSelected = false;
-                 //This variable is added for sending to passwordDirective.js for disabling error message and repeatPassword text box. Initialising it on load as $watch is added on this variable.
-                $scope.hideValue=false;
-
-                $scope.isEdit = false;
+        		$scope.isEdit = false;
                 $scope.isProcessorTypeSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;
                 //Model for Add MB
@@ -671,7 +667,7 @@ var rest = myApp.controller(
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="port">\n\
-                        <div ng-switch on="portRequired">\n\
+                        <div class="alignDiv" ng-switch on="portRequired">\n\
                         <div ng-switch-when="true"><textarea class="form-control" ng-model="COL_FIELD" ng-disabled="isPortDisabled" name="port" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
                             </div><div ng-switch-default>\n\
                             <textarea class="form-control" ng-model="COL_FIELD" ng-disabled="isPortDisabled" name="port" style="width:90%;height: 45px" ng-pattern="' + $scope.numberPattern + '" />\n\
@@ -936,7 +932,7 @@ var rest = myApp.controller(
                     width: "14%",
                     displayName: "Password",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field" hide="hideValue"/>'
+                    cellTemplate: '<div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field"/>'
                 }, {
                     field: "idpType",
                     width: "10%",
@@ -1099,6 +1095,8 @@ var rest = myApp.controller(
                     block.blockUI();
                 }
                 $scope.loadOrigin();
+                //To notify passwordDirective to clear the password and error message
+                $scope.doSend();
                 $scope.isEdit = true;
                 var procsrId = processorId;;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
@@ -1540,11 +1538,10 @@ var rest = myApp.controller(
                     return;
                 }
                /*This condition is used to prevent the data from getting pushed to gridData array when maximum length of password is exceeded*/
-
-			if(row.getProperty('passwordDirtyState') === "maxlengthError"){
-				showAlert('The password cannot be longer than 63 characters', 'error');
-				return;
-			}
+                if(row.getProperty('passwordDirtyState') === "maxlengthError"){
+					showAlert('The password cannot be longer than 63 characters', 'error');
+					return;
+				}
                 var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
                 gridData.push({
@@ -1579,13 +1576,10 @@ var rest = myApp.controller(
             };
             // For Procsr Credentials Props
             $scope.removeCredentialRow = function (row, allProps, allPropsIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
-                 /*GMB-197 Fix: The variable is used to execute $watch in passwordDirective.js */
-                if($scope.hideValue == true) {
-                    $scope.hideValue = false;
-                }else{
-                    $scope.hideValue = true;
-                }
-                var index = gridData.indexOf(row.entity);
+
+            	//To notify passwordDirective to clear the password and error message
+                $scope.doSend();
+            	var index = gridData.indexOf(row.entity);
                 gridData.splice(index, 1);
                 var removedProperty = row.getProperty('credentialType');
                 var indexOfSelectedElement = getIndex(allProps, removedProperty);
@@ -1633,6 +1627,8 @@ var rest = myApp.controller(
                 return getId($scope.allStaticProperties, name);
             };
             $scope.save = function () {
+            	//To notify passwordDirective to clear the password and error message
+                $scope.doSend();
                 console.log($scope.certificateModal.certificateURI);
                 if (($scope.processor.protocol === 'HTTPS' || $scope.processor.protocol === 'FTPS') && $scope.certificateModal.certificateURI !== '' && $scope.isFileSelected) {
                     block.blockUI();
@@ -1643,13 +1639,8 @@ var rest = myApp.controller(
                 }
             };
             $scope.saveProcessor = function () {
-                /*GMB-197 Fix: The variable is used to execute $watch in passwordDirective.js */
-			if($scope.hideValue == true) {
-				$scope.hideValue = false;
-			}else{
-                $scope.hideValue = true;
-			}
-                var lenDynamicProps = $scope.processorProperties.length;
+
+            	var lenDynamicProps = $scope.processorProperties.length;
                 var commaSplit = [];
                 var mandatoryArray = [];
                 for (var i = 0; i < lenDynamicProps - 1; i++) {
@@ -1815,11 +1806,17 @@ var rest = myApp.controller(
                 $scope.processor.credentials = [];
                 $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
+            /*This function is used to notify passwordDirective to clear the password and error message*/
+            $scope.doSend = function(){
+				$scope.$broadcast('clearPassword');
+			}
             $scope.addNew = function () {
                     $scope.formAddPrcsr.$setPristine();
                     $scope.loadOrigin();
                     $scope.readAllProfiles();
                     $scope.closeDelete();
+                    //To notify passwordDirective to clear the password and error message
+                    $scope.doSend();
                     $scope.isPortDisabled = false;
             };
             
