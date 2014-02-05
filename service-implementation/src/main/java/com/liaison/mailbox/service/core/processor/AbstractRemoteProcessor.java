@@ -36,6 +36,7 @@ import java.util.Properties;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -66,6 +67,7 @@ import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
+import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
@@ -1133,5 +1135,54 @@ public abstract class AbstractRemoteProcessor {
 			}
 			LOGGER.info("The Processed Folder Path is"+ processedFolderPath);
 			return processedFolderPath;
+	}
+	
+	/**
+	 * Sent notifications for trigger system failure.
+	 * 
+	 * @param toEmailAddrList
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
+	 * @param subject
+	 *            The notification subject
+	 * @param emailBody
+	 *            The body of the notification
+	 * @param type
+	 *            The notification type(TEXT/HTML).
+	 */
+
+	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
+
+		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
+		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty()) && (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
+			LOGGER.info("There is no email address configured for this mailbox.");
+		}
+
+		if (null != configuredEmailAddress && null != toEmailAddrList) {
+			toEmailAddrList.addAll(configuredEmailAddress);
+		} else if (null != configuredEmailAddress) {
+			toEmailAddrList = configuredEmailAddress;
+		}
+
+		EmailNotifier notifier = new EmailNotifier();
+		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
+	}
+
+	/**
+	 * Sent notifications for trigger system failure.
+	 * 
+	 * @param toEmailAddrList
+	 *            The extra receivers. The default receiver will be available in
+	 *            the mailbox.
+	 * @param subject
+	 *            The notification subject
+	 * @param exc
+	 *            The exception as body content
+	 * @param type
+	 *            The notification type(TEXT/HTML).
+	 */
+	public void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
+
+		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
 	}
 }
