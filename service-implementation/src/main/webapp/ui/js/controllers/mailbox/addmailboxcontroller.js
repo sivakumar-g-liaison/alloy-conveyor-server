@@ -1,5 +1,5 @@
-var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location', '$log', '$blockUI',
-    function ($scope, $filter, $location, $log, $blockUI) {
+var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$blockUI',
+    function ($rootScope, $scope, $filter, $location, $log, $blockUI) {
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
@@ -133,7 +133,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $rootScope.pipeLineId);
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
                             } else {
@@ -161,7 +161,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$scope', '$filter', '$location
 
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $rootScope.pipeLineId);
                             } else if (data.addMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.addMailBoxResponse.response.message, 'success');
                             } else {
