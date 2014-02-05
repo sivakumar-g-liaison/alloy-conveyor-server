@@ -232,7 +232,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			inv.invokeFunction("init", this);*/
 			
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {
 			// SFTPRequest executed through Java

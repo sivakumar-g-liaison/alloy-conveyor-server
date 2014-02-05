@@ -148,14 +148,14 @@ public final class JavaScriptEngineUtil {
 	 */
 	public static Object executeJavaScript(String scriptPath, String methodName,  Object... parameters) throws Exception {
 		Exception expectedException = null;
-		try {
+		
 			JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 			JavascriptScriptContext scriptContext = null;
 			String scriptName = null;
 			File sriptURL = new File(scriptPath);
 			URI scriptURI = sriptURL.toURI();
 			 if (scriptContext == null) {
-			     //TODO:  Make these Streams externally definable
+			     
 				 scriptContext = new JavascriptScriptContext(new InputStreamReader(System.in), new PrintWriter(System.out), new PrintWriter(System.err));
 			 }
 		    scriptExecutor.setScriptContext(scriptContext);
@@ -167,15 +167,10 @@ public final class JavaScriptEngineUtil {
 		    // did my function call throw?
 		    expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
 		    if (null != expectedException) {
-		        // do something about it
-		    	throw expectedException;
+		       	throw expectedException;
 		    }
 		    return returnValue;	
-		} catch (Exception e) {
-		  	LOGGER.error(String.format("Could not evaluate script %s:"+ e.getLocalizedMessage()));
-            
-		}       
-		return null;
+		
 	}
 }
 

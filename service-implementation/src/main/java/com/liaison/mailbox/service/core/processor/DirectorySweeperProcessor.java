@@ -248,7 +248,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			inv.invokeFunction("init", files);*/
 			
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", files);
+			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", files,LOGGER);
 
 		} else {
 
