@@ -25,7 +25,7 @@ public class ParallelProcessorDAOBase extends GenericDAOBase<ParallelProcessor> 
 			return parallelProcessor;			
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}		
 	}

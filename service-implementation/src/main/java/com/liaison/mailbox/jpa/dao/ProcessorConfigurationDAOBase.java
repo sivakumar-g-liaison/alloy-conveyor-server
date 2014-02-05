@@ -55,7 +55,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			return processors;
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 
@@ -82,7 +82,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			return processor;
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 

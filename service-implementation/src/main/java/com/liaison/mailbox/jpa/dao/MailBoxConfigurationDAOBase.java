@@ -34,7 +34,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 		return null;
@@ -92,7 +92,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 		return mailBoxes;
