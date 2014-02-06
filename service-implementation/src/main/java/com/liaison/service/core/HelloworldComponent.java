@@ -41,7 +41,7 @@ public class HelloworldComponent {
 	@PostConstruct
     public void initialize() throws NamingException, SQLException, UniversalConnectionPoolException {
         // Statements added for deprecating the Initialization Servlet defined in web.xml  
-		OracleDataSource.initOracleDataSource(); // TODO
+		//OracleDataSource.initOracleDataSource(); // TODO
 		  DAOUtil.init(); // TODO This does the work of loading all JAP entity files. We
 		      // should change to allow the query string to be passed.
 		  UUIDGen.init();

@@ -131,6 +131,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Initialize authentication
     // *****
     $rootScope.authService = AuthService;
+    //*****
+	// pipeLineId
+	//*****
+	$rootScope.pipeLineId = prompt("Enter Pipeline ID","");
     // text input for login/password (only)
     $rootScope.loginInput = 'rob@gmail.com';
     $rootScope.passwordInput = 'complexpassword';

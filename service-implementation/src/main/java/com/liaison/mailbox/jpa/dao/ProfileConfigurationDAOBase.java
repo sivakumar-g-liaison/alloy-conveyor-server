@@ -34,7 +34,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 		return null;
@@ -60,7 +60,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 			
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 		return profileList;

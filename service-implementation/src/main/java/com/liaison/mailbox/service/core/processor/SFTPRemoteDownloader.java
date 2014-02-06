@@ -187,7 +187,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			inv.invokeFunction("init", this);*/
 			
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {
 			// G2SFTP executed through Java

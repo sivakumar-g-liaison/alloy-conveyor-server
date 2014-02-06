@@ -163,7 +163,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			// System.out.println(obj.toString());*/
 			
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {
 			// HTTPRequest executed through Java

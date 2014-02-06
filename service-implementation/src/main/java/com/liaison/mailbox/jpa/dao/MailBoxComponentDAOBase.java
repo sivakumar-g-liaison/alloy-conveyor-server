@@ -28,7 +28,7 @@ public class MailBoxComponentDAOBase extends GenericDAOBase <MailBoxComponent> i
            		
         } finally {
             if (entityManager != null) {
-                entityManager.clear();
+                entityManager.close();
             }
         }
 		return null ;

@@ -126,7 +126,7 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		} finally {
 
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 
 		}

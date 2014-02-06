@@ -32,7 +32,7 @@ public class FSMStateValueDAOBase extends GenericDAOBase<FSMStateValue> implemen
 
 		} finally {
 			if (entityManager != null) {
-				entityManager.clear();
+				entityManager.close();
 			}
 		}
 		return null;
