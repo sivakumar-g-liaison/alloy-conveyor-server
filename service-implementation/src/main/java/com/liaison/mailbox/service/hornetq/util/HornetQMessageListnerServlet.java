@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class HornetQMessageListnerServlet extends HttpServlet {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(HornetQMessageListnerServlet.class);
@@ -35,13 +35,13 @@ public class HornetQMessageListnerServlet extends HttpServlet {
 
 		if (!isInitialized) {
 			try {
-				
-				HornetQMessageListner.init();				
-				isInitialized = true;				
-				
+
+				HornetQMessageListner.init();
+				isInitialized = true;
+
 			} catch (NamingException| JMSException | IOException  e) {
 				logger.error(e.getMessage(), e);
-				throw new ServletException("Initialization of Message Listner Failed");
+				throw new ServletException("Initialization of Message Listner Failed", e);
 			}
 		}
 	}
