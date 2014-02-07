@@ -3,8 +3,15 @@
 /**
  * Controller for trigger profile.
  */
-myApp.controller('TriggerProfileCntrlr', ['$scope', '$location', '$blockUI',
-    function ($scope, $location, $blockUI) {
+myApp.controller('TriggerProfileCntrlr', ['$rootScope', '$scope', '$location', '$blockUI',
+    function ($rootScope, $scope, $location, $blockUI) {
+	
+		if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
+			$rootScope.pipelineId = $location.search().pipeLineId;
+		}
+		
+		//for pipeLineId
+		$scope.pipeId = $location.search().pipeLineId; 
 
         $scope.title = "Trigger Profile"; //title
 
