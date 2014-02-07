@@ -4,7 +4,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         //Remove if not needed
         $scope.isMailBoxEdit = false;
 
-
+		if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
+			$rootScope.pipelineId = $location.search().pipeLineId;
+		}
+		
+		//for pipeLineId
+		$scope.pipeId = $location.search().pipeLineId; 
 
         //Model for Add MB
         addRequest = $scope.addRequest = {
@@ -133,7 +138,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $rootScope.pipeLineId);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId);
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
                             } else {
@@ -161,7 +166,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $rootScope.pipeLineId);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId);
                             } else if (data.addMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.addMailBoxResponse.response.message, 'success');
                             } else {

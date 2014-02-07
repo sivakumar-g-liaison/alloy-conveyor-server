@@ -3,9 +3,10 @@
 /**
  * Controller for Configure mailbox setup search screen.
  */
-myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
-    function ($scope, $location) {
+myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',
+    function ($rootScope, $scope, $location) {
 
+		$rootScope.pipelineId = $location.search().pipeLineId;
         $scope.title = "MailBox Profiles"; // title
 
         // Search Details
@@ -149,7 +150,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$scope', '$location',
 
         // Navigate to mailbox screen for edit operation
         $scope.edit = function (row) {
-            $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid);
+            $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid).search('pipeLineId', $rootScope.pipelineId);
         };
 
         $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {

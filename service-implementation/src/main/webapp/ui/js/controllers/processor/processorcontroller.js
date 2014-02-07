@@ -1,10 +1,15 @@
 var rest = myApp.controller(
-    'ProcessorCntrlr', ['$scope',
+    'ProcessorCntrlr', ['$rootScope', '$scope',
         '$filter', '$location', '$log', '$blockUI',
-        function ($scope, $filter,
+        function ($rootScope, $scope, $filter,
             $location, $log, $blockUI) {
 			
+	    	//for pipeLineId
+			if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
+				$rootScope.pipelineId = $location.search().pipeLineId;
+			}
 			$scope.pipeId = $location.search().pipeLineId; 
+		
 			$scope.disablePipeLineId = false;
     	
     		//GMB-201
@@ -1333,7 +1338,7 @@ var rest = myApp.controller(
                                         isMandatory: false
                                     });
                                     $scope.processorProperties = $scope.sweeperMandatoryProperties;
-									$scope.processorProperties[0].value = $scope.pipeId;
+                                    $scope.processorProperties[0].value = $scope.pipeId;
 									$scope.disablePipeLineId = true;
 
                                 } else {
