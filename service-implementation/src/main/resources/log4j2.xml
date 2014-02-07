@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="DEBUG" packages="com.liaison.commons.audit.log4j2" verbose="false">
-   <appenders>
-      <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
-         <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
-         <!-- filters>
-	        <AuditStatementFilter  onMatch="DENY" onMismatch="ACCEPT"/>
-    	 </filters-->
-      </Console>
-      <Console name="ConsoleAudit" target="SYSTEM_OUT">
-         <AuditStatementRFC5424JSONLayout appName="GLSN" facility="LOCAL0" enterpriseNumber="99999" newLine="true" messageId="Audit" id="App" />
+<configuration status="DEBUG" packages="com.liaison.framework.audit.log4j2" verbose="false">
+  <appenders>
+    <Console name="Console" target="SYSTEM_OUT" >
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg %throwable{full}%n"/>
+    </Console>
+    <!-- Note, please configure audit-syslog-server in your /etc/hosts -->
+    <AuditSyslogAppender name="AuditSysLog"  host="audit-syslog-server" port="514"
+            protocol="UDP" appName="KMS" includeMDC="true"
+            facility="LOCAL0" enterpriseNumber="99999" newLine="true"
+            messageId="Audit" id="App" 
+            format="AuditStatementRFC5424JSON">
          <filters>
-            <AuditStatementFilter onMatch="ACCEPT" onMismatch="DENY" />
-         </filters>
-      </Console>
-      <!-- Note, please configure audit-syslog-server in your /etc/hosts -->
-      <AuditSyslogAppender name="AuditSysLog" host="audit-syslog-server" port="514" protocol="UDP" appName="GLSN" includeMDC="true" facility="LOCAL0" enterpriseNumber="99999" newLine="true" messageId="Audit" id="App" format="AuditStatementRFC5424JSON">
+	        <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+    	 </filters>
+    </AuditSyslogAppender>
+
+    <File name="FullLogFile" fileName="/opt/liaison/releases/current/tomcat/logs/full.log" append="true"  >
+      <PatternLayout>
+        <pattern>%d %p %c{1.} [%t] %m + %X %x%n</pattern>
+      </PatternLayout>
+    </File>
+
+    <File name="FileSyslogLogFile" fileName="/opt/liaison/releases/current/tomcat/logs/filesyslog.log" append="true" >
+      <AuditStatementRFC5424JSONLayout appName="MBX" enterpriseNumber="99999" facility="LOCAL0" id="App" includeMDC="true" messageID="Audit" newline="true" />
          <filters>
-            <AuditStatementFilter onMatch="ACCEPT" onMismatch="DENY" />
-         </filters>
-      </AuditSyslogAppender>
-      <File name="FullLogFile" fileName="/tmp/full.log" append="true">
-         <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
-      </File>
-      <File name="FileSyslogLogFile" fileName="/tmp/filesyslog.log" append="true">
-         <AuditStatementRFC5424JSONLayout appName="GLSN" enterpriseNumber="99999" facility="LOCAL0" id="App" messageID="Audit" newline="true" />
-         <filters>
-            <AuditStatementFilter onMatch="ACCEPT" onMismatch="DENY" />
-         </filters>
-      </File>
-   </appenders>
-   <loggers>
-      <root level="DEBUG">
-         <appender-ref ref="FullLogFile" />
-         <!--  logs syslog formatted audit messages to local file (not necessarily for production) -->
-         <appender-ref ref="Console" />
-         <!-- logs to console (not necessarily for production) -->
-         <!-- appender-ref ref="ConsoleAudit"/ -->
-         <!-- logs syslog formatted audit messages to console  (not for production)-->
-         <appender-ref ref="FileSyslogLogFile" />
-         <!--  logs syslog formatted audit messages to local file (not for production) -->
-         <appender-ref ref="AuditSysLog" />
-         <!-- logs audit statements via UDP to syslog server (for production and ok for dev) -->
-      </root>
-   </loggers>
+	        <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+    	 </filters>
+    </File>
+    <File name="MBXLogFile" fileName="/opt/liaison/releases/current/tomcat/logs/mbx.log" append="true"  >
+      <PatternLayout>
+        <pattern>%d %p %c{1.} [%t] %m %marker%n</pattern>
+      </PatternLayout>
+    </File>
+  </appenders>
+	<loggers>
+		<Logger name="com.liaison.mailbox.metrics.KPI" level="info" additivity="false">
+			<AppenderRef ref="MBXLogFile" />
+		</Logger>
+		<root level="DEBUG">
+			<appender-ref ref="FullLogFile" />
+			<appender-ref ref="Console" />
+			<appender-ref ref="FileSyslogLogFile" />
+			<appender-ref ref="AuditSysLog" />
+		</root>
+	</loggers>
 </configuration>

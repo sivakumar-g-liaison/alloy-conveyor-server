@@ -1,0 +1,14 @@
+// The preferred way to make local modifications to your build environment is through the use of Gradle init scripts.
+//    * http://www.gradle.org/docs/current/userguide/init_scripts.html
+
+allprojects {
+    // These are all overrides for properties that are found in key-management/gradle.properties
+    ext.dbServerName = 'seadv01-db03.hs.com'
+    ext.dbServerService = 'kili1.dev.liaison.net'
+    ext.dbSchemaNamePrefix = 'JENKINS'
+    ext.dbaPassword = '12345678'
+
+    ext.containerDebug = 'true'
+    
+    ext.dbDevSampleData = 'true'
+}

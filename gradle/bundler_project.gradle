@@ -4,7 +4,115 @@
 // By convention you should tasks that produce files required by deploy here.
 // Make distTar depend on the them to assure they are executed.
 
-
 // See bundler/README.md for more details
 // See bundler/examples for examples
 
+
+def installPath = file("$rootDir/install").getCanonicalPath()
+
+configurations {
+    deployDb
+    unlimitedJCE
+}
+
+def flywayVersion = '2.2'
+dependencies {
+    deployDb     "com.googlecode.flyway:flyway-commandline:${flywayVersion}@tar.gz"
+    deployDb     "com.oracle:ojdbc6:${oracleVersion}"
+    unlimitedJCE 'com.oracle.java:UnlimitedJCEPolicy:JDK7'
+}
+
+
+// stage installer scripts
+// =======================================================================
+task stageInstallerScripts(description: 'Stage installer scripts', group: "Production Bundler - Project Specific") << {
+    copy {
+        from ("$rootDir/src/scripts") {
+            include '**/*.*'
+        }
+        into "$installPath"
+    }
+    copy {
+        from ("$rootDir/src/init") {
+            include '**/tomcat'
+        }
+        into "$installPath/tomcat-init"
+    }    
+}
+distTar.dependsOn('stageInstallerScripts')
+
+
+
+// stage Flyway and DB scripts in the installer path
+// =======================================================================
+task stageFlyway(type: Copy, description: 'Unzips Flyway commandline', group: "Production Bundler - Project Specific") {
+    from(tarTree(configurations.deployDb.fileCollection{dep -> dep.name == 'flyway-commandline'}.singleFile))
+    into "$installPath"
+}
+task stageOracleDriver(type: Copy, description: 'Stages Oracle driver', group: "Production Bundler - Project Specific") {
+    from (configurations.deployDb.fileCollection{dep -> dep.name == 'ojdbc6'}.singleFile)
+    into "$installPath/db/jars"
+}
+task stageDbScripts(type: Copy, description: 'Stages DB migration helper script', group: "Production Bundler - Project Specific") {
+    from ("$rootDir/service-implementation/src/main/resources/db") {
+        include 'provision/**/*.*', '*.py'
+    }
+    into "$installPath/db";
+}
+task stageDbMigrateSQL(type: Copy, description: 'Stages DB migration SQL', group: "Production Bundler - Project Specific") {
+    from ("$rootDir/service-implementation/src/main/resources/db/migration") {
+        include '**/*.sql'
+    }
+    into "$installPath/db/migration"
+}
+task stageAllPersistence(description : 'ONE SHOT: stages flyway, oracle, db migration, db scripts', group: "Production Bundler - Project Specific") << {
+    stageFlyway.execute()
+    ant.move( toDir:"$installPath/db", overwrite:true ) {
+        fileset(dir: "$installPath/flyway-${flywayVersion}")
+    }
+    stageOracleDriver.execute()
+    stageDbMigrateSQL.execute()
+    stageDbScripts.execute()
+}
+distTar.dependsOn('stageAllPersistence')
+
+
+// stage application configs in the installer path
+// =======================================================================
+task stageUnlimitedJCE(dependsOn: 'stageJRE', description: 'Stages Unlimited JCE Policy for bundler', group: "Production Bundler - Project Specific") << {
+    copy {
+        from(zipTree(configurations.unlimitedJCE.fileCollection{dep -> dep.name == 'UnlimitedJCEPolicy'}.singleFile))
+        into "$installPath"
+    }
+    ant.move( toDir:"$installPath/jre/lib/security", overwrite:true ) {
+        fileset(dir: "$installPath/UnlimitedJCEPolicy")
+    }
+    ant.copy( file:"$installPath/jre/lib/security/cacerts", toFile:"$installPath/jre/lib/security/cacerts.original", overwrite:true )
+    ant.copy( file:"$installPath/jre/lib/security/java.security", toFile:"$installPath/jre/lib/security/java.security.original", overwrite:true )
+    ant.copy( toDir:"$installPath/configs/jre", overwrite:true ) {
+        fileset(dir: "$rootDir/src/jre-configs")
+    }
+}
+distTar.dependsOn('stageUnlimitedJCE')
+
+
+// stage application configs in the installer path
+// TODO - remove from war and have scripting to place them in Tomcat lib or somewhere classload-able
+// =======================================================================
+task stageAppConfigs(type: Copy, description: 'Stage application configs', group: "Production Bundler - Project Specific") {
+    from ("$rootDir/service-implementation/src/main/resources") {
+        include '*.json', '*.properties', '*EmailTemplate.txt', 'log4j2.xml'
+    }
+    into "$installPath/configs/app"
+}
+distTar.dependsOn('stageAppConfigs')
+
+// stage the initial, insecure KEK for first time install/startup
+task stageMockKEK(type: Copy, description: 'Stage application configs', group: "Production Bundler - Project Specific") {
+    from ("$rootDir/service-implementation/src/main/resources") {
+        include 'mockKEK/*1412FA07B1A*'
+        exclude 'mockKEK/*.password'
+    }
+    into "$installPath/tomcat"
+}
+distTar.dependsOn('stageMockKEK')

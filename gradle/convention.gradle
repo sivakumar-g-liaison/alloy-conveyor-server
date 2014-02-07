@@ -15,7 +15,7 @@
  */
 
 // For Artifactory
-status = project.hasProperty('preferredStatus')?project.preferredStatus:(version.contains('SNAPSHOT')?'snapshot':'release')
+rootProject.status = version.contains('-SNAPSHOT')?'snapshot':'release'
 
 subprojects { project ->
     apply plugin: 'java' // Plugin as major conventions
@@ -119,6 +119,6 @@ githubPages {
 }
 
 // Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
-task createWrapper(type: Wrapper) {
+task createWrapper(type: Wrapper, description:'Generates gradle wrapper', group:'Build Setup') {
     gradleVersion = '1.7'
 }

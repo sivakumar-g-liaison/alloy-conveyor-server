@@ -1,0 +1,37 @@
+import com.jcraft.jsch.*
+
+buildscript {
+    repositories { 
+        mavenCentral() 
+    }
+    dependencies {
+        // JSch is licensed under BSD style license. http://www.jcraft.com/jsch/LICENSE.txt
+        classpath 'com.jcraft:jsch:0.1.50'
+    }
+}
+
+// sample command line
+// $ gradle -Ptype=RSA -Pfilename=sshxxx -Ppassphrase=123 -Pcomment="this is acomment" sshGenKey
+task sshGenKey (description: 'example: gradle -Ptype=RSA -Pfilename=sshxxx -Ppassphrase=123 -Pcomment="this is acomment" sshGenKey', group : 'Tools')<< {
+    // figure out the key type
+    def keyType = KeyPair.RSA
+    if (type != null && type.length() > 0 && type.toUpperCase().startsWith('D')) {
+        keyType = KeyPair.DSA
+    }
+    
+    // normalize the filename
+    filename = file(filename).getCanonicalPath()
+    
+    def jsch = new JSch()
+    try {
+        KeyPair kpair=KeyPair.genKeyPair(jsch, keyType);
+        kpair.setPassphrase(passphrase);
+        kpair.writePrivateKey(filename);
+        kpair.writePublicKey(filename+".pub", comment);
+        out.println(filename + " finger print: "+kpair.getFingerPrint());
+        kpair.dispose();
+    } catch(Exception e) {
+        out.println(e);
+    }
+}
+

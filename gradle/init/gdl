@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# 
+# ASK FOR HELP?
+#
+if [ $# -ge 1 -a "$1" != "-?" -a "$1" != "--help" ];
+then
+
+# 
+# RUN GRADLE
+#
+# Use "gradle" instead of "gradlew" if you are NOT using the Gradle Wrapper.
+source ./gradlew $* -I init.gradle
+
+else
+    echo ''
+    echo ''
+    echo '.................................................................................'
+    echo 'A gradle runner for including init.gradle in the command line automatically'
+    echo '.................................................................................'
+    echo ''
+    echo 'Usage:'
+    echo '    %0 \<script_path\> \<command_arguments\>'
+    echo ''
+fi

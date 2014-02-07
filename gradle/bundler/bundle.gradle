@@ -46,4 +46,4 @@ task cleanBundleStaging(description: "Cleans the bundler staging folder", group:
     )
 }
 
-task cleanAll(description: "Cleans the bundler staging folder", dependsOn:['clean','cleanBundleStaging'])
+task cleanAll(description: "Deletes build directory and install directory", dependsOn:['clean','cleanBundleStaging'], group: 'Build')

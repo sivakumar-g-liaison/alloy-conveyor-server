@@ -2,6 +2,10 @@ apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
+apply from: file('../gradle/convention.gradle')
+apply from: file('../gradle/maven.gradle')
+apply from: file('../gradle/check.gradle')
+apply from: file('../gradle/license.gradle')
 
 
 
@@ -12,30 +16,27 @@ project.war.baseName = 'g2mailboxservice'
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 
-test { // TODO temp exclusion of j2ep
+test {
+	// TODO temp exclusion of j2ep
 	exclude 'org/sf/j2ep/*'
 	ignoreFailures true }
 
 
 buildscript {
 
-    repositories { 
-        mavenCentral() 
-        maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
-        maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
-    }
-    apply from: file("../gradle/buildscript.gradle"), to: buildscript
-    dependencies {
-        // Cargo Plugin
-        classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6'
-    }
+	repositories {
+		mavenCentral()
+		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
+		maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
+	}
+	apply from: file("../gradle/buildscript.gradle"), to: buildscript
+	dependencies { // Cargo Plugin
+		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6' }
 
 
 }
 
-configurations {
-	swaggerDoclet 
-}
+configurations { swaggerDoclet  }
 
 allprojects {
 	repositories { mavenCentral() }
@@ -47,17 +48,14 @@ allprojects {
 				//prefer 'slf4j-log4j2' over 'slf4j-simple', because
 				//it's required that only one logger.jar be present for deterministic behavior of slf4j
 				details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9"
-	        }
-	    }
-		
+			}
+		}
+
 	}
 }
 
 
-apply from: file('../gradle/convention.gradle')
-apply from: file('../gradle/maven.gradle')
-apply from: file('../gradle/check.gradle')
-apply from: file('../gradle/license.gradle')
+
 
 war {
 
@@ -68,24 +66,22 @@ war {
 
 	archiveName="g2mailboxservice.war"
 
-    // TODO
-    // Resources used for the Dynamic Services landing page are intentionally kept in the
-    // service-framework module (where dynamic services framework is also defined), and
-    // outside of the service-implementation.  Eventually the service-framework will be an
-    // artifact, and we will be unable to pull in resources like this.
-    from("../service-framework/src/main/resources") {
-        include '**/**';
-        into 'WEB-INF/classes/'
-    }
+	// TODO
+	// Resources used for the Dynamic Services landing page are intentionally kept in the
+	// service-framework module (where dynamic services framework is also defined), and
+	// outside of the service-implementation.  Eventually the service-framework will be an
+	// artifact, and we will be unable to pull in resources like this.
+	from("../service-framework/src/main/resources") {
+		include '**/**';
+		into 'WEB-INF/classes/'
+	}
+	// copy webapp
+	from('src/main/webapp/ui') {
+		include '**/**';
+		into '/'
+	}
 
-
-    // copy webapp
-    from('src/main/webapp/ui') {
-        include '**/**';
-        into '/'
-    }
-
-    //webXml = file('src/main/webapp/ui/WEB-INF/web.xml')
+	//webXml = file('src/main/webapp/ui/WEB-INF/web.xml')
 }
 
 
@@ -93,166 +89,149 @@ war {
 dependencies {
 
 
-    // resolve fs2 in nexus
-    compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
-    
-   
+	// resolve fs2 in nexus
+	compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
 
-    // inherited from NetFlix Karyon
-    //compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
+
+
+	// inherited from NetFlix Karyon
+	//compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
 	compile "com.netflix.karyon:karyon-extensions:1.0.22"
 
-    // currently not used during runtime (inherited dependency from NetFlix)
-    compile 'com.netflix.eureka:eureka-client:1.1.97'
+	// currently not used during runtime (inherited dependency from NetFlix)
+	compile 'com.netflix.eureka:eureka-client:1.1.97'
 
-    // for file upload
-    // TODO - See that we also depend on "jersey-bundle" inherently
-    // TODO - due to NetFlix... using the bundle is not advised... (remove)
+	// for file upload
+	// TODO - See that we also depend on "jersey-bundle" inherently
+	// TODO - due to NetFlix... using the bundle is not advised... (remove)
 
 	compile group: "com.liaison", name: "fsm", version: "0.0.2-SNAPSHOT", changing: true
 	// for http mime
 	compile "org.apache.httpcomponents:httpmime:4.3.1"
-    compile 'javax.mail:mail:1.4.6'
-    //compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
-	
+	compile 'javax.mail:mail:1.4.6'
+	//compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
+
 	// for hornetq jms
 	compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
 	compile "org.hornetq:hornetq-server:2.3.11.Final"
 	compile "jboss:jnp-client:4.0.2"
-	
+
 	// for G2Javascript engine
 	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.0-SNAPSHOT', changing: true
 
 	//Dependencies for MCC
-	compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
-	compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
-		exclude group: "commons-net",  module: "commons-net"
-		
-		// DataNucleus
-		def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
-		compile "org.datanucleus:datanucleus-core:3.2.5"
-		compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
-		compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
-	
-		// geronimo jpa spec
-		compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
-	
-		// Oracle OJDBC
-		// (This dependency is stored in the Liaison Nexus server.)
-		// def oracleVersion = '11g-11.2.0.3.0'
-		runtime 'com.oracle:ojdbc6:${oracleVersion}'
-		compile 'com.oracle:ucp:${oracleVersion}'
-	}
-	
-	
-    // used for logging
-    compile 'org.slf4j:slf4j-api:1.7.5'
+	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
+	//compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
+	//	exclude group: "commons-net",  module: "commons-net"
+	//}
 
-    compile 'com.sun.jersey:jersey-core:1.18'
-    compile 'com.sun.jersey:jersey-server:1.18'
-    compile 'com.sun.jersey:jersey-json:1.18'
-    compile 'com.sun.jersey.contribs:jersey-multipart:1.18'
-	
+	// DataNucleus
+	def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
+	compile "org.datanucleus:datanucleus-core:3.2.5"
+	compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
+	compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
 
-    // used for logging
-    def log4j2Version = '2.0-beta7';
-    compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
-    compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
-    compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+	// geronimo jpa spec
+	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+
+	// Oracle OJDBC
+	// (This dependency is stored in the Liaison Nexus server.)
+	// def oracleVersion = '11g-11.2.0.3.0'
+	runtime 'com.oracle:ojdbc6:${oracleVersion}'
+	compile 'com.oracle:ucp:${oracleVersion}'
 
 
-    // inherited from NetFlix Karyon (TODO integrate with main UI)
-    compile project(':karyon-admin-web')
 
-    // reusable utilities / framework components
-    compile project(':service-framework')
+	// used for logging
+	compile 'org.slf4j:slf4j-api:1.7.5'
 
-    // ************************************* beg cargo *********************************************
-    def cargoVersion = "1.4.0"
-    cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
-            "org.codehaus.cargo:cargo-ant:$cargoVersion"
-    // ************************************* end cargo *********************************************
+	compile 'com.sun.jersey:jersey-core:1.18'
+	compile 'com.sun.jersey:jersey-server:1.18'
+	compile 'com.sun.jersey:jersey-json:1.18'
+	compile 'com.sun.jersey.contribs:jersey-multipart:1.18'
+
+
+	// used for logging
+	def log4j2Version = '2.0-beta7';
+	compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
+	compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+	compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+
+
+	// inherited from NetFlix Karyon (TODO integrate with main UI)
+	compile project(':karyon-admin-web')
+
+	// reusable utilities / framework components
+	compile project(':service-framework')
+
+	// ************************************* beg cargo *********************************************
+	def cargoVersion = "1.4.0"
+	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
+			"org.codehaus.cargo:cargo-ant:$cargoVersion"
+	// ************************************* end cargo *********************************************
 
 }
 
-// Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
-// http://cargo.codehaus.org/
-// https://github.com/bmuschko/gradle-cargo-plugin
 def installRootPath = "${rootDir}/install"
 def tomcatInstallPath = "${installRootPath}/tomcat"
+def tomcatEnvironmentsInstallPath = "${installRootPath}/tomcat-environments"
 cargo {
+	containerId = 'tomcat7x'
+	port = new Integer(tomcatHttpPort)
 
-    containerId = 'tomcat7x'
-    port = new Integer(tomcatHttpPort)
-    
-    deployable{
-        // NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
-        // file = file('target/contivo-conversion-service-0.0.1.war')
-        context = project.war.baseName + "-${versionName}"
-                
-        // wait on this URL before continuing
-	// add by senthilvel from robert's version
-	def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/v1/hello/to/world"
-        //def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/ping"
-    }
+	deployable{
+		// NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
+		// file = file('target/contivo-conversion-service-0.0.1.war')
 
-    local {
-        homeDir = file(tomcatInstallPath) // TODO - should this be set from CATALINA_HOME?
-        output = file("$buildDir/tomcat-out.log")
+		// URL application context is set in src/main/resources/META-INF/context.xml
 
-	tomcat {
-            ajpPort = new Integer(tomcatAjpPort)
-        }
-         
-        // set the initial value
-        if(containerJVMArgs) {
-            jvmArgs = "$containerJVMArgs"
-        } else {
-            jvmArgs = ''
-        }
-
-        // the leading space is important
-        jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
-        jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
-        
-        // if containerDebug, append tomcat debug args to jvm args
-        if(project.hasProperty('containerDebug')) {
-            jvmArgs += ' '
-            if (project.hasProperty('suspendDebug')) {
-                jvmArgs += containerDebugJVMArgs.replace('suspend=n', 'suspend=y')
-            } else {
-                jvmArgs += containerDebugJVMArgs
-            }
-        }
-        
-        logger.info "=====jvmArgs===="
-        logger.info "$jvmArgs"
-    }
-
-}
-
-// This is for default config of Tomcat
-task configureTomcat(dependsOn: ['stageTomcat']) << {
-	//TODO replace tokens would be a nicer but heavier weight way of doing this.
-	logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
-	copy {
-		from ("${tomcatInstallPath}-configs/common") { include '**/*.*' }
-		into tomcatInstallPath
+		// wait on this URL before continuing
+		def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/application.wadl"
+		def pingTimeout = 600000
 	}
-	copy {
-		from ("${tomcatInstallPath}-configs/${deployEnvironment}")  { include '**/*.*' }
-		into tomcatInstallPath
+
+	local {
+		homeDir = file(tomcatInstallPath)
+		configHomeDir = file("${buildDir}/cargoLocal")
+		output = file("${buildDir}/tomcat-out.log")
+
+		rmiPort = new Integer(tomcatRmiPort)
+		tomcat.ajpPort = new Integer(tomcatAjpPort)
+		timeout = 600000
+		
+
+		// set the initial value
+		if(containerJVMArgs) {
+			jvmArgs = "$containerJVMArgs"
+		} else {
+			jvmArgs = ''
+		}
+
+		// the leading space is important
+		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
+		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+
+
+		// if containerDebug, append tomcat debug args to jvm args
+		if(project.hasProperty('containerDebug')) {
+			jvmArgs += " -Xdebug -Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend="
+			if (project.hasProperty('debugSuspend')) {
+				jvmArgs += 'y'
+			} else {
+				jvmArgs += 'n'
+			}
+		}
+
+		logger.info "=====jvmArgs===="
+		logger.info "$jvmArgs"
 	}
 }
-project.afterEvaluate {
-/*	cargoRunLocal.dependsOn('configureTomcat')
-	cargoStartLocal.dependsOn('configureTomcat')*/
-}
+
 
 
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
 task jettyRunSetProperties {
-	
+
 	logger.info "Setting jettyRun system properties"
 	// use the default port of the ws-backend-simulation module
 	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
@@ -305,92 +284,9 @@ jettyRunWar {
 
 }
 
-jettyStop{
-	
-	stopKey='stopJetty'
-	stopPort=9999	
-}
 
-
-
-import org.gradle.api.plugins.jetty.internal.Monitor
-[jettyRun, jettyRunWar]*.doLast {
-  /**
-   * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
-   *
-   * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
-   * When that happens, we shouldn't need the custom task any more
-   *
-   * Copied From: AbstractJettyRunTask
-   */
-   if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
-      Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
-      monitor.start();
-   }
-}
-
-/*apply plugin: 'jacoco'
-
-jacocoTestReport {
-	
-	group = "Reporting"
-	description = "Generate Jacoco coverage reports after running tests."
-	additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
-	reports {
-        xml.enabled true
-    }
-	
-
-    dependsOn 'jettyRunSetProperties'
-    logger.info "Running jetty"
-    httpPort = new Integer(jettyHttpPort)
-    reload = 'automatic'
-    scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
-    daemon = false
-    webAppSourceDirectory = file('src/main/webapp/ui')
-
-
-}*/
-
-
-
-
-// jettyRun configuration properties
-jettyRunWar {
-	dependsOn 'jettyRunSetProperties'
-	logger.info "Running jetty"
-	httpPort = new Integer(jettyHttpPort)
-	daemon = true
-	stopKey='stopJetty'
-	stopPort=9999
-
-}
-
-jettyStop{
-	
-	stopKey='stopJetty'
-	stopPort=9999
-}
-
-
-
-import org.gradle.api.plugins.jetty.internal.Monitor
-[jettyRun, jettyRunWar]*.doLast {
-  /**
-   * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
-   *
-   * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
-   * When that happens, we shouldn't need the custom task any more
-   *
-   * Copied From: AbstractJettyRunTask
-   */
-   if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
-	  Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
-	  monitor.start();
-   }
-}
-
-test { // TODO temp exclusion of j2ep
+test {
+	// TODO temp exclusion of j2ep
 	exclude '**/FS2ResourceTest.class'
 	exclude '**/HelloWorldResourceTest.class'}
 
@@ -400,3 +296,69 @@ task pingTest {
 	dependsOn 'jettyRunWar'
 	dependsOn 'test'
 }
+
+
+
+//ADDED TOWARDS DEPLOYMENT PROCESS
+
+
+project.afterEvaluate {
+	cargoRunLocal.dependsOn('configureTomcat')
+	cargoRunLocal.dependsOn('devConfigLogging')
+	//cargoStartLocal.dependsOn('configureTomcat')
+	//cargoStartLocal.dependsOn('devConfigLogging')
+
+}
+
+task setDevProperties << {
+	ant.copy( file:"src/main/resources/${rootProject.name}-dev.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
+	{
+		filterchain {
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_KEY_MGMT_APPL.sshenc") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
+		}
+	}
+}
+war.dependsOn('setDevProperties')
+
+// This is for default config of Tomcat
+task configureTomcat(dependsOn: [
+	'stageTomcat',
+	'setDevProperties',
+	'devConfigLogging'
+], group:'DEV/CI Deployment',
+description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
+	//TODO replace tokens would be a nicer but heavier weight way of doing this.
+	logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
+	copy {
+		from ("${tomcatEnvironmentsInstallPath}/common") { include '**/*.*' }
+		into tomcatInstallPath
+	}
+	copy {
+		from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  { include '**/*.*' }
+		into tomcatInstallPath
+	}
+	copy {
+		from ("${projectDir}/build/resources/main")  {
+			include '*.json', '*.properties', '*EmailTemplate.txt', 'log4j2.xml'
+		}
+		into "${tomcatInstallPath}/lib"
+	}
+}
+
+
+
+task devConfigLogging(description: 'configures log4j2 for build local log files', group:'DEV/CI Deployment') << {
+	ant.copy( file:"${projectDir}/src/main/resources/log4j2.xml", toFile:"${projectDir}/build/resources/main/log4j2.xml", overwrite:true ) {
+		filterchain {
+			tokenfilter {
+				replaceregex(pattern:'fileName="/opt/liaison/releases/current/tomcat/logs/([^"]*)"',
+				replace:'fileName="logs/\\1"')
+			}
+		}
+	}
+}
+

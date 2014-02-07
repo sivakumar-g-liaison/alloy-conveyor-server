@@ -14,35 +14,20 @@
  *      limitations under the License.
  */
 
-
 allprojects {
     if (project.hasProperty('codeCheck')) {
         // Checkstyle
         apply plugin: 'checkstyle'
-        tasks.withType(Checkstyle) { ignoreFailures = true }
         checkstyle {
             ignoreFailures = true // Waiting on GRADLE-2163
             configFile = rootProject.file('codequality/checkstyle.xml')
         }
 
-checkstyle {
-    ignoreFailures = true
-    configFile = rootProject.file('codequality/checkstyle.xml')
-}
-
-// FindBugs
-apply plugin: 'findbugs'
-findbugs {
-    // TODO should relax findbugs so that build passes with ignoreFailures = false
-    ignoreFailures = true
-}
-
-
         // FindBugs
         apply plugin: 'findbugs'
         tasks.withType(FindBugs) {
             ignoreFailures = true
-            reports.html.enabled true 
+            reports.html.enabled false 
             reports.xml.enabled true
         }
 
@@ -50,7 +35,7 @@ findbugs {
         apply plugin: 'pmd'
         tasks.withType(Pmd) { 
             ignoreFailures = true
-            reports.html.enabled true 
+            reports.html.enabled false 
             reports.xml.enabled true
         }
     }

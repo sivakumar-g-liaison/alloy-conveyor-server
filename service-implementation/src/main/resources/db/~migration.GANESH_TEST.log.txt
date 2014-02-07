@@ -1,0 +1,8 @@
+Flyway (Command-line Tool) v.2.3
+
+Current version of schema "GANESH_TEST_OWNR": << Empty Schema >>
+Migrating schema "GANESH_TEST_OWNR" to version 1.0.0.10
+Migrating schema "GANESH_TEST_OWNR" to version 1.0.0.20
+Migrating schema "GANESH_TEST_OWNR" to version 1.0.0.30
+Migrating schema "GANESH_TEST_OWNR" to version 1.0.0.40
+Successfully applied 4 migrations to schema "GANESH_TEST_OWNR" (execution time 00:02.206s).

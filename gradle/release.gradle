@@ -14,7 +14,7 @@
  *      limitations under the License.
  */
 
-apply plugin: 'release'
+ apply plugin: 'release'
 
 [ uploadIvyLocal: 'uploadLocal', uploadArtifactory: 'artifactoryPublish', buildWithArtifactory: 'build' ].each { key, value ->
     // Call out to compile against internal repository
@@ -27,6 +27,10 @@ apply plugin: 'release'
         startParameter.getExcludedTaskNames().add('check')
         tasks = [ 'build', value ]
     }
+}
+
+release {
+	git.requireBranch = null
 }
 
 // Marker task for following code to key in on
@@ -72,6 +76,4 @@ gradle.taskGraph.whenReady { taskGraph ->
 // Prevent plugin from asking for a version number interactively
 ext.'gradle.release.useAutomaticVersion' = "true"
 
-release {
-    git.requireBranch = null
-}
+
