@@ -9,7 +9,6 @@
 
 
 def installPath = file("$rootDir/install").getCanonicalPath()
-
 configurations {
     deployDb
     unlimitedJCE
@@ -26,6 +25,7 @@ dependencies {
 // stage installer scripts
 // =======================================================================
 task stageInstallerScripts(description: 'Stage installer scripts', group: "Production Bundler - Project Specific") << {
+	
     copy {
         from ("$rootDir/src/scripts") {
             include '**/*.*'
@@ -107,12 +107,17 @@ task stageAppConfigs(type: Copy, description: 'Stage application configs', group
 }
 distTar.dependsOn('stageAppConfigs')
 
+// TODO - should these go in the root build.gradle?
+distTar.dependsOn('stageJRE')
+distTar.dependsOn('stageTomcat')
+distTar.dependsOn('copyWarToInstall')
+
 // stage the initial, insecure KEK for first time install/startup
-task stageMockKEK(type: Copy, description: 'Stage application configs', group: "Production Bundler - Project Specific") {
-    from ("$rootDir/service-implementation/src/main/resources") {
-        include 'mockKEK/*1412FA07B1A*'
-        exclude 'mockKEK/*.password'
-    }
-    into "$installPath/tomcat"
-}
-distTar.dependsOn('stageMockKEK')
+//task stageMockKEK(type: Copy, description: 'Stage application configs', group: "Production Bundler - Project Specific") {
+//    from ("$rootDir/service-implementation/src/main/resources") {
+//        include 'mockKEK/*1412FA07B1A*'
+//        exclude 'mockKEK/*.password'
+//    }
+//   into "$installPath/tomcat"
+//}
+//distTar.dependsOn('stageMockKEK')

@@ -1,11 +1,14 @@
 apply plugin: 'war'
 apply plugin: 'jetty'
 apply plugin: 'cargo'
+apply plugin: 'flyway'
+
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
 apply from: file('../gradle/convention.gradle')
 apply from: file('../gradle/maven.gradle')
 apply from: file('../gradle/check.gradle')
 apply from: file('../gradle/license.gradle')
+
 
 
 
@@ -31,12 +34,19 @@ buildscript {
 	}
 	apply from: file("../gradle/buildscript.gradle"), to: buildscript
 	dependencies { // Cargo Plugin
-		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6' }
+		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6.1' 
+		// Flyway Plugin
+	    // License: Apache v2 - https://raw.github.com/ben-manes/gradle-flyway-plugin/master/LICENSE.txt
+	     classpath 'com.github.ben-manes:gradle-flyway-plugin:0.5'
+		 classpath "com.oracle:ojdbc6:11g-11.2.0.3.0"
+	}
 
 
 }
 
-configurations { swaggerDoclet  }
+configurations { swaggerDoclet 
+				  jdbc
+           }
 
 allprojects {
 	repositories { mavenCentral() }
@@ -92,7 +102,7 @@ dependencies {
 	// resolve fs2 in nexus
 	compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
 
-
+     
 
 	// inherited from NetFlix Karyon
 	//compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
@@ -169,6 +179,8 @@ dependencies {
 	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
 			"org.codehaus.cargo:cargo-ant:$cargoVersion"
 	// ************************************* end cargo *********************************************
+	jdbc "com.oracle:ojdbc6:${oracleVersion}"
+	
 
 }
 
@@ -316,8 +328,8 @@ task setDevProperties << {
 		filterchain {
 			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
 			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_KEY_MGMT_APPL.sshenc") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_GATEWAY_APPL") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_GATEWAY_APPL.sshenc") }
 			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
 		}
 	}
@@ -361,4 +373,84 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 		}
 	}
 }
+
+// Database build scripting
+def flywayWorkingRoot = "${projectDir}/src/main/resources/db/~work"
+def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
+flyway {
+	url = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
+	driver = 'oracle.jdbc.OracleDriver'
+	user = "${dbSchemaNamePrefix}_GATEWAY_OWNR"
+	password = "${dbaPassword}"
+	table = 'schema_version'
+	locations = [
+		//'classpath:com.mycompany.project.migration',  // use classpath for Java migrations
+		'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
+	]
+	//if (project.dbDevSampleData == 'true') {
+	//	System.out.println(':flyway: Including dev sample data.')
+	//	locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
+	//}
+}
+flywayMigrate.doFirst() {
+	logger.info("Building objects for database user '${dbSchemaNamePrefix}_GATEWAY_OWNR'...");
+}
+task flywaySetup << {
+	logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
+	ant.copy( toDir: flywayMigrationRoot, overwrite:true)
+	{
+		fileset(dir: 'src/main/resources/db/migration', includes: '**/*.sql')
+		filterchain {
+			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_GATEWAY_", flags: 'gis', byline: 'false') }
+		}
+	}
+	//ant.copy( toDir: flywayMigrationRoot+ '-dev', overwrite:true)
+	//{
+	//	fileset(dir: 'src/main/resources/db/migration-dev', includes: '**/*.sql')
+	//	filterchain {
+	//		tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_GATEWAY_", flags: 'gis', byline: 'false') }
+	//	}
+	//}
+}
+task buildFlywayTable << {
+	logger.info("Building flyway schema_version table...");
+	// This is a workaround for https://github.com/flyway/flyway/issues/98
+	// TODO - remove/refactor when the above issue is fixed
+	def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
+	ant.copy( toDir: flywayTableDir, overwrite:true)
+	{
+		fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
+		// the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+		filterchain {
+			tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+			tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+			tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+			tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+			tokenfilter { replaceregex(pattern:'AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)', replace:'') }
+			tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_GATEWAY_", flags: 'gis', byline: 'false') }
+		}
+	}
+	def driverClass = "oracle.jdbc.OracleDriver"
+	String jdbcUrl = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
+	configurations.jdbc.each { file ->
+		gradle.class.classLoader.addURL(file.toURI().toURL())
+	}
+	def sql = groovy.sql.Sql.newInstance(url: jdbcUrl, user: "${dbSchemaNamePrefix}_GATEWAY_OWNR", password: "${dbaPassword}", driver: driverClass)
+	def ddl = new File("${flywayTableDir}/schema_version_table.sql").text
+	sql.execute (ddl)
+}
+flywaySetup.dependsOn('buildFlywayTable')
+flywayMigrate.dependsOn('flywaySetup')
+
+flywayClean.doLast {
+	ant.delete(
+		dir:flywayWorkingRoot,
+		includes:'**/*',
+		includeemptydirs:true,
+		deleteonexit:true,
+		performGCOnFailedDelete:true
+	)
+}
+
 

@@ -2,7 +2,7 @@
 //    * http://www.gradle.org/docs/current/userguide/init_scripts.html
 
 allprojects {
-    // These are all overrides for properties that are found in key-management/gradle.properties
+    // These are all overrides for properties that are found in g2mailboxservice/gradle.properties
     ext.dbServerName = 'seadv01-db03.hs.com'
     ext.dbServerService = 'kili1.dev.liaison.net'
     ext.dbSchemaNamePrefix = 'SVR05'

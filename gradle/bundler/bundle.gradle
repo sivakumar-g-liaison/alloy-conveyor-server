@@ -27,10 +27,7 @@ task distTar(type: Tar, description:"Creates build distribution tarball", group:
 }
 
 
-// TODO - should these go in the root build.gradle?
-distTar.dependsOn('stageJRE')
-distTar.dependsOn('stageTomcat')
-distTar.dependsOn('copyWarToInstall')
+
 
 
 // cleanup task for the installer bundle staginf folder
