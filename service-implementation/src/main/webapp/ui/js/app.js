@@ -131,10 +131,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Initialize authentication
     // *****
     $rootScope.authService = AuthService;
-    //*****
-	// pipeLineId
-	//*****
-	$rootScope.pipeLineId = prompt("Enter Pipeline ID","");
+	$rootScope.pipelineId = null;
     // text input for login/password (only)
     $rootScope.loginInput = 'rob@gmail.com';
     $rootScope.passwordInput = 'complexpassword';
@@ -177,4 +174,19 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
         key: "How do I expose JMX metrics?",
         value: "Checkout the MetricsResource example."
     }];
+	
+	/*
+	* Pipeline Id code
+	*/
+	$rootScope.appendPipelineIDAddMBox = function() {
+		return "#/mailbox/addMailBox?pipeLineId=" + $rootScope.pipelineId;
+	};
+	
+	$rootScope.appendPipelineIDManage = function() {
+		return "#/profiles/addProfiles?pipeLineId=" + $rootScope.pipelineId;
+	};
+	
+	$rootScope.appendPipelineIDTrigger = function() {
+		return "#/profiles/trigger?pipeLineId=" + $rootScope.pipelineId;
+	};
 });
