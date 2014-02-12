@@ -1,12 +1,12 @@
 echo off
 
-:: 
+::
 :: CACHE ORIGINAL PATH
 ::
 IF "%_ORIGINAL_PATH%" == "" set _ORIGINAL_PATH=%Path%
 
 
-:: 
+::
 :: DEFAULT SETTINGS
 ::
 set _PLATFORM=windows
@@ -18,8 +18,8 @@ set SCRIPTS_HOME=%_ROOT%\tools\scripts
 set DISTROS_HOME=%INSTALL_HOME%\3rdParty
 
 
-:: 
-:: DETERMINE PROCESSOR ARCHITECTURE 
+::
+:: DETERMINE PROCESSOR ARCHITECTURE
 ::
 set OS_ARCH=x86
 set JDK_ARCH=i586
@@ -31,7 +31,7 @@ if not ""%PROCESSOR_ARCHITECTURE%"" == ""x86"" (
 )
 
 
-:: 
+::
 :: COMMAND LINE ARGUMENTS
 ::
 set ARGS=
@@ -47,24 +47,28 @@ if ""%1""==""-quiet"" (
     set USE_DEFAULTS=true
 ) else (
     set ARGS=%ARGS% %1
-) 
+)
 shift
 goto PARSE_ARGS
 :ARGS_DONE
 
 
-:: 
+::
 :: PROPERTIES SETTINGS
 ::
 for /F "tokens=1*" %%A IN ('type %_ROOT%\setenv.properties') DO set %%A
 
 
-:: 
+::
 :: TOOLS
 ::
+
+:: Flyway
+set TOOL_PATH=%_ROOT%\install\db
+
 :: CURL
 set EXE_CURL="%_ROOT%\tools\curl\curl.exe"
-set TOOL_PATH=%_ROOT%\tools\curl
+set TOOL_PATH=%TOOL_PATH%;%_ROOT%\tools\curl
 
 :: 7 ZIP
 set VERSION_7ZIP=9.20
@@ -92,24 +96,23 @@ for /F "tokens=1*" %%A IN ('echo "%PATH%" ^| find /c "Graphviz"') DO (
             echo ................................................................................
             echo Downloading %URL_GRAPHVIZ%
             %EXE_CURL% -o "%_ROOT%\tools\graphviz-windows-%VERSION_GRAPHVIZ%.zip" %URL_GRAPHVIZ%
-            %EXE_7ZIP% x -y "%_ROOT%\tools\graphviz-windows-%VERSION_GRAPHVIZ%.zip" -o%_ROOT%\tools 
+            %EXE_7ZIP% x -y "%_ROOT%\tools\graphviz-windows-%VERSION_GRAPHVIZ%.zip" -o%_ROOT%\tools
             del "%_ROOT%\tools\graphviz-windows-%VERSION_GRAPHVIZ%.zip"
         )
     )
     set TOOL_PATH=%TOOL_PATH%;%PATH_GRAPHVIZ%\bin
 )
 
-:: 
+::
 :: SETUP JDK
 ::
-set DOWNLOAD_JDK=n
 set JDK_HOME=%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%
 set URL_JDK=%ARTIFACT_REPO_URL%/thirdparty/com/oracle/java/jdk-%_PLATFORM%-%JDK_ARCH%/%JAVA_VER%u%JAVA_REL_VER%/jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip
 for /F "tokens=1,2,3" %%A IN ('java -version 2^>^&1 ^| find "java version ""1.7."') DO set MY_JDK_VERSION=%%~C
 set MY_JDK_MAJOR=%MY_JDK_VERSION:~2,-5%
 if not "%MY_JDK_MAJOR%" == "7" (
     if not exist "%JDK_HOME%\bin\java.exe" (
-        if not exist "%JDK_HOME%\no-jdk.txt" (    
+        if not exist "%JDK_HOME%\no-jdk.txt" (
             if not ""%USE_DEFAULTS%""==""true"" (
                 call set /P DOWNLOAD_JDK="JDK 7 was not found. Download JDK for this project? (y/n) ": %=%
             ) else (
@@ -121,12 +124,12 @@ if not "%MY_JDK_MAJOR%" == "7" (
         echo ................................................................................
         echo Downloading %URL_JDK%
         %EXE_CURL% -o "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" %URL_JDK%
-        %EXE_7ZIP% x -y "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" -o%_ROOT%\tools 
+        %EXE_7ZIP% x -y "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip" -o%_ROOT%\tools
         ren "%_ROOT%\tools\jdk-%JAVA_FULL_VERSION%-%_PLATFORM%-%JDK_ARCH%" jdk-%JAVA_FULL_VERSION%
         del "%_ROOT%\tools\jdk-%_PLATFORM%-%JDK_ARCH%-%JAVA_VER%u%JAVA_REL_VER%.zip"
     ) else (
         call set /P REMEMBER="Remember this decision? (y/n) ": %=%
-        if /I ""%REMEMBER%""==""y"" ( 
+        if /I ""%REMEMBER%""==""y"" (
             echo You have chosen to skip downloading JDK 7 and the JAVA_HOME environment variable is not set. Please set JAVA_HOME to an install of JDK 7.
             if not exist "%JDK_HOME%" mkdir "%JDK_HOME%"
             echo "no java">"%JDK_HOME%\no-jdk.txt"
@@ -135,18 +138,24 @@ if not "%MY_JDK_MAJOR%" == "7" (
 )
 if exist ""%JDK_HOME%\bin\java.exe""  (
     set JAVA_HOME=%JDK_HOME%
+    goto JAVA_HOME_SET
 )
 if exist ""%ProgramFiles%\Java\jdk%MY_JDK_VERSION%""  (
     set JAVA_HOME=%ProgramFiles%\Java\jdk%MY_JDK_VERSION%
+    goto JAVA_HOME_SET
 )
 if exist ""%ProgramFiles(x86)%\Java\jdk%MY_JDK_VERSION%"" (
     set JAVA_HOME=%ProgramFiles(x86)%\Java\jdk%MY_JDK_VERSION%
+    goto JAVA_HOME_SET
 )
 if exist ""%ProgramW6432%\Java\jdk%MY_JDK_VERSION%"" (
     set JAVA_HOME=%ProgramW6432%\Java\jdk%MY_JDK_VERSION%
+    goto JAVA_HOME_SET
 )
+:JAVA_HOME_SET
+
 for /F "tokens=1* delims=\" %%A IN ('echo %JAVA_HOME%') DO set FOUND_JAVA_HOME=true
-if [%FOUND_JAVA_HOME%]==[true] ( 
+if [%FOUND_JAVA_HOME%]==[true] (
     set TOOL_PATH=%TOOL_PATH%;%JAVA_HOME%\bin
 ) else (
     echo Unable to determine JAVA_HOME. Please make sure JDK 7 is installed.

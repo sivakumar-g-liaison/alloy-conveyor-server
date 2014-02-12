@@ -16,7 +16,7 @@
 *.gz
 *.tgz
 *.iso
-#*.jar
+*.jar
 *.rar
 *.tar
 *.zip
@@ -44,6 +44,8 @@ Thumbs.db
 .gradle/
 gradle-app.setting
 .m2
+init.gradle
+gdl*
 
 # Build output directies
 /target
@@ -54,6 +56,9 @@ install/
 tools/
 /bin
 */bin
+service-framework/bin/
+service-implementation/bin/
+service-implementation/cargoConfig/
 
 # IntelliJ specific files/directories
 out

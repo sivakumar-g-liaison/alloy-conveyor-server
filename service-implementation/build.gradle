@@ -1,16 +1,16 @@
-apply plugin: 'war'
+import java.sql.Timestamp
+import javax.xml.bind.annotation.XmlRootElement
+import org.apache.commons.io.output.NullOutputStream
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.apache.tools.ant.taskdefs.condition.Os
+
+import oracle.jdbc.OracleDriver
+
 apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply plugin: 'flyway'
 
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
-apply from: file('../gradle/convention.gradle')
-apply from: file('../gradle/maven.gradle')
-apply from: file('../gradle/check.gradle')
-apply from: file('../gradle/license.gradle')
-
-
-
 
 // set base name (impacts war name and context path)
 project.war.baseName = 'g2mailboxservice'
@@ -20,78 +20,112 @@ ext.githubProjectName = rootProject.name // Change if github project name is not
 
 
 test {
-	// TODO temp exclusion of j2ep
-	exclude 'org/sf/j2ep/*'
-	ignoreFailures true }
+    // TODO temp exclusion of j2ep
+    exclude 'org/sf/j2ep/*'
+    ignoreFailures true }
 
 
 buildscript {
 
-	repositories {
-		mavenCentral()
-		maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
-		maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
-	}
-	apply from: file("../gradle/buildscript.gradle"), to: buildscript
-	dependencies { // Cargo Plugin
-		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6.1' 
-		// Flyway Plugin
-	    // License: Apache v2 - https://raw.github.com/ben-manes/gradle-flyway-plugin/master/LICENSE.txt
-	     classpath 'com.github.ben-manes:gradle-flyway-plugin:0.5'
-		 classpath "com.oracle:ojdbc6:11g-11.2.0.3.0"
-	}
+    repositories { 
+        mavenCentral() 
+        maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
+        maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
+    }
+    apply from: file("../gradle/buildscript.gradle"), to: buildscript
+    dependencies {
+        // Cargo Plugin
+        classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6.1'
 
+        // Flyway Plugin
+        // License: Apache v2 - https://raw.github.com/ben-manes/gradle-flyway-plugin/master/LICENSE.txt
+        classpath 'com.github.ben-manes:gradle-flyway-plugin:0.5'
+        classpath "com.oracle:ojdbc6:11g-11.2.0.3.0"
 
+        // SOAP UI
+        // See http://www.soapui.org/repository/maven2/eviware/maven-soapui-plugin/
+        classpath ('eviware:maven-soapui-plugin:4.5.1') {
+            exclude group: "jtidy", module: "jtidy"
+            exclude group: "javax.jms", module: "jms"
+        }
+        classpath 'net.sf.jtidy:jtidy:r938'                    //override the java 1.5 transient dependency
+        classpath 'org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1'     // override javax.jms
+        classpath 'commons-io:commons-io:2.4'                // for NullOutputStream on SoapUI plugin
+    }
 }
 
-configurations { swaggerDoclet 
-				  jdbc
-           }
+configurations {
+    swaggerDoclet 
+    jdbc
+}
 
 allprojects {
-	repositories { mavenCentral() }
-	configurations.all {
-		// This is an incubating gradle language feature (as of 1.5) allowing, in this
-		// case, for FOO.pom to be swapped for any sub-dependencies of BAR.pom.
-		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-			if (details.requested.name == 'slf4j-simple') {
-				//prefer 'slf4j-log4j2' over 'slf4j-simple', because
-				//it's required that only one logger.jar be present for deterministic behavior of slf4j
-				details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9"
-			}
-		}
+    repositories { mavenCentral() }
+    configurations.all {
+        // This is an incubating gradle language feature (as of 1.5) allowing, in this
+        // case, for FOO.pom to be swapped for any sub-dependencies of BAR.pom.
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.name == 'slf4j-simple') {
+                //prefer 'slf4j-log4j2' over 'slf4j-simple', because
+                //it's required that only one logger.jar be present for deterministic behavior of slf4j
+                details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9"
+            }
+        }
 
-	}
+    }
 }
 
-
-
-
 war {
+    archiveName="g2mailboxservice.war"
 
-	from('resources') {
-		include '*.properties'
-		into 'WEB-INF/classes/'
-	}
+    // TODO
+    // Resources used for the Dynamic Services landing page are intentionally kept in the
+    // service-framework module (where dynamic services framework is also defined), and
+    // outside of the service-implementation.  Eventually the service-framework will be an
+    // artifact, and we will be unable to pull in resources like this.
+    from("${rootDir}/service-framework/src/main/resources") {
+        include 'dyn/**/*.*';
+        into 'WEB-INF/classes/'
+    }
 
-	archiveName="g2mailboxservice.war"
+    // copy webapp
+    from('src/main/webapp/ui') {
+        include '**/**'
+        into '/'
+    }
+    
+    from('build/resources/main') {
+        include '*.properties'
+        into 'WEB-INF/classes/'
+    }
 
-	// TODO
-	// Resources used for the Dynamic Services landing page are intentionally kept in the
-	// service-framework module (where dynamic services framework is also defined), and
-	// outside of the service-implementation.  Eventually the service-framework will be an
-	// artifact, and we will be unable to pull in resources like this.
-	from("../service-framework/src/main/resources") {
-		include '**/**';
-		into 'WEB-INF/classes/'
-	}
-	// copy webapp
-	from('src/main/webapp/ui') {
-		include '**/**';
-		into '/'
-	}
+    from('build/resources/main/WEB-INF') {
+        include 'web.xml'
+        into 'WEB-INF'
+    }
 
-	//webXml = file('src/main/webapp/ui/WEB-INF/web.xml')
+    from('build/resources/main/META-INF') {
+        include 'orm.xml', 'persistence.xml'
+        into 'WEB-INF/classes/META-INF'
+    }
+
+    from('build/resources/main/META-INF') {
+        include 'context.xml'
+        into 'META-INF'
+    }
+
+    // exclude the JPA configs, handled above
+    rootSpec.exclude 'META-INF/**'
+    // exclude the servlet configs, handled above
+    rootSpec.exclude 'WEB-INF/**'
+    // exclude the database build scripting from the war
+    rootSpec.exclude 'db/**'
+    // exclude the archaius properties, they are external
+    rootSpec.exclude 'key-manage*.properties'
+    // exclude the logging config, it is external
+    rootSpec.exclude "log4j2.xml"
+    // exclude the WADL tools, they are build time
+    rootSpec.exclude "*wadl*"
 }
 
 
@@ -99,358 +133,362 @@ war {
 dependencies {
 
 
-	// resolve fs2 in nexus
-	compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
+    // resolve fs2 in nexus
+    compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
 
      
 
-	// inherited from NetFlix Karyon
-	//compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
-	compile "com.netflix.karyon:karyon-extensions:1.0.22"
+    // inherited from NetFlix Karyon
+    //compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
+    compile "com.netflix.karyon:karyon-extensions:1.0.22"
 
-	// currently not used during runtime (inherited dependency from NetFlix)
-	compile 'com.netflix.eureka:eureka-client:1.1.97'
+    // currently not used during runtime (inherited dependency from NetFlix)
+    compile 'com.netflix.eureka:eureka-client:1.1.97'
 
-	// for file upload
-	// TODO - See that we also depend on "jersey-bundle" inherently
-	// TODO - due to NetFlix... using the bundle is not advised... (remove)
+    // for file upload
+    // TODO - See that we also depend on "jersey-bundle" inherently
+    // TODO - due to NetFlix... using the bundle is not advised... (remove)
 
-	compile group: "com.liaison", name: "fsm", version: "0.0.2-SNAPSHOT", changing: true
-	// for http mime
-	compile "org.apache.httpcomponents:httpmime:4.3.1"
-	compile 'javax.mail:mail:1.4.6'
-	//compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
+    compile group: "com.liaison", name: "fsm", version: "0.0.2-SNAPSHOT", changing: true
+    // for http mime
+    compile "org.apache.httpcomponents:httpmime:4.3.1"
+    compile 'javax.mail:mail:1.4.6'
+    //compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
 
-	// for hornetq jms
-	compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
-	compile "org.hornetq:hornetq-server:2.3.11.Final"
-	compile "jboss:jnp-client:4.0.2"
+    // for hornetq jms
+    compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
+    compile "org.hornetq:hornetq-server:2.3.11.Final"
+    compile "jboss:jnp-client:4.0.2"
 
-	// for G2Javascript engine
-	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.0-SNAPSHOT', changing: true
+    // for G2Javascript engine
+    compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.0-SNAPSHOT', changing: true
 
-	//Dependencies for MCC
-	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
-	//compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
-	//	exclude group: "commons-net",  module: "commons-net"
-	//}
+    //Dependencies for MCC
+    //compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
+    //compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
+    //    exclude group: "commons-net",  module: "commons-net"
+    //}
 
-	// DataNucleus
-	def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
-	compile "org.datanucleus:datanucleus-core:3.2.5"
-	compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
-	compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
+    // DataNucleus
+    def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
+    compile "org.datanucleus:datanucleus-core:3.2.5"
+    compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
+    compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
 
-	// geronimo jpa spec
-	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
+    // geronimo jpa spec
+    compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
 
-	// Oracle OJDBC
-	// (This dependency is stored in the Liaison Nexus server.)
-	// def oracleVersion = '11g-11.2.0.3.0'
-	runtime 'com.oracle:ojdbc6:${oracleVersion}'
-	compile 'com.oracle:ucp:${oracleVersion}'
-
-
-
-	// used for logging
-	compile 'org.slf4j:slf4j-api:1.7.5'
-
-	compile 'com.sun.jersey:jersey-core:1.18'
-	compile 'com.sun.jersey:jersey-server:1.18'
-	compile 'com.sun.jersey:jersey-json:1.18'
-	compile 'com.sun.jersey.contribs:jersey-multipart:1.18'
+    // Oracle OJDBC
+    // (This dependency is stored in the Liaison Nexus server.)
+    // def oracleVersion = '11g-11.2.0.3.0'
+    runtime 'com.oracle:ojdbc6:${oracleVersion}'
+    compile 'com.oracle:ucp:${oracleVersion}'
 
 
-	// used for logging
-	def log4j2Version = '2.0-beta7';
-	compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
-	compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
-	compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+
+    // used for logging
+    compile 'org.slf4j:slf4j-api:1.7.5'
+
+    compile 'com.sun.jersey:jersey-core:1.18'
+    compile 'com.sun.jersey:jersey-server:1.18'
+    compile 'com.sun.jersey:jersey-json:1.18'
+    compile 'com.sun.jersey.contribs:jersey-multipart:1.18'
 
 
-	// inherited from NetFlix Karyon (TODO integrate with main UI)
-	compile project(':karyon-admin-web')
+    // used for logging
+    def log4j2Version = '2.0-beta7';
+    compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
+    compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
 
-	// reusable utilities / framework components
-	compile project(':service-framework')
 
-	// ************************************* beg cargo *********************************************
-	def cargoVersion = "1.4.0"
-	cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
-			"org.codehaus.cargo:cargo-ant:$cargoVersion"
-	// ************************************* end cargo *********************************************
-	jdbc "com.oracle:ojdbc6:${oracleVersion}"
-	
+    // inherited from NetFlix Karyon (TODO integrate with main UI)
+    compile project(':karyon-admin-web')
 
+    // reusable utilities / framework components
+    compile project(':service-framework')
+
+    // ************************************* beg cargo *********************************************
+    def cargoVersion = "1.4.0"
+    cargo "org.codehaus.cargo:cargo-core-uberjar:$cargoVersion",
+            "org.codehaus.cargo:cargo-ant:$cargoVersion"
+    // ************************************* end cargo *********************************************
+    jdbc "com.oracle:ojdbc6:${oracleVersion}"
+    
 }
 
+// Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
+// http://cargo.codehaus.org/
+// https://github.com/bmuschko/gradle-cargo-plugin
 def installRootPath = "${rootDir}/install"
 def tomcatInstallPath = "${installRootPath}/tomcat"
 def tomcatEnvironmentsInstallPath = "${installRootPath}/tomcat-environments"
 cargo {
-	containerId = 'tomcat7x'
-	port = new Integer(tomcatHttpPort)
+    containerId = 'tomcat7x'
+    port = new Integer(tomcatHttpPort)
 
-	deployable{
-		// NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
-		// file = file('target/contivo-conversion-service-0.0.1.war')
+    deployable{
+        // NOTE: Override file to make it pick up an existing war instead of that produce by running other tasks
+        // file = file('target/contivo-conversion-service-0.0.1.war')
+        // URL application context is set in src/main/resources/META-INF/context.xml
+        context = project.war.baseName + "-${versionName}"
 
-		// URL application context is set in src/main/resources/META-INF/context.xml
+        // wait on this URL before continuing
+        def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}-${versionName}/application.wadl"
+        def pingTimeout = 600000
+    }
 
-		// wait on this URL before continuing
-		def pingURL = "http://localhost:${tomcatHttpPort}/${project.war.baseName}/application.wadl"
-		def pingTimeout = 600000
-	}
+    local {
+        homeDir = file(tomcatInstallPath) 
+        configHomeDir = file("${buildDir}/cargoLocal")
+        output = file("${buildDir}/tomcat-out.log")
 
-	local {
-		homeDir = file(tomcatInstallPath)
-		configHomeDir = file("${buildDir}/cargoLocal")
-		output = file("${buildDir}/tomcat-out.log")
+        rmiPort = new Integer(tomcatRmiPort)
+        tomcat.ajpPort = new Integer(tomcatAjpPort)
+        timeout = 600000
+        
+        // set the initial value
+        // MUST HAVE leading spaces for cargo JVM args
+        if(containerJVMArgs) {
+            jvmArgs = " $containerJVMArgs"
+        }
+        
+        jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
+        jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
 
-		rmiPort = new Integer(tomcatRmiPort)
-		tomcat.ajpPort = new Integer(tomcatAjpPort)
-		timeout = 600000
-		
+        // if containerDebug, append tomcat debug args to jvm args
+        if(project.hasProperty('containerDebug')) {
+            jvmArgs += ' -Xdebug'
+            if (project.hasProperty('debugSuspend')) {
+                jvmArgs += " -Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=y"
+            } else {
+                jvmArgs += " -Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend=n"
+            }
+        }
 
-		// set the initial value
-		if(containerJVMArgs) {
-			jvmArgs = "$containerJVMArgs"
-		} else {
-			jvmArgs = ''
-		}
+        logger.info "=====Cargo jvmArgs===="
+        logger.info "$jvmArgs"
+    }
+}
+project.afterEvaluate {
+    cargoRunLocal.dependsOn('configureTomcat')
+    cargoRunLocal.dependsOn('setDevProperties')
+    cargoRunLocal.dependsOn('devConfigLogging')
+    cargoStartLocal.dependsOn('configureTomcat')
+    cargoStartLocal.dependsOn('setDevProperties')
+    cargoStartLocal.dependsOn('devConfigLogging')
+}
 
-		// the leading space is important
-		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
-		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
-
-
-		// if containerDebug, append tomcat debug args to jvm args
-		if(project.hasProperty('containerDebug')) {
-			jvmArgs += " -Xdebug -Xrunjdwp:transport=dt_socket,address=${tomcatDebugPort},server=y,suspend="
-			if (project.hasProperty('debugSuspend')) {
-				jvmArgs += 'y'
-			} else {
-				jvmArgs += 'n'
-			}
-		}
-
-		logger.info "=====jvmArgs===="
-		logger.info "$jvmArgs"
-	}
+task devConfigLogging(description: 'configures log4j2 for build local log files', group:'DEV/CI Deployment') << {
+    ant.copy( file:"${projectDir}/src/main/resources/log4j2.xml", toFile:"${projectDir}/build/resources/main/log4j2.xml", overwrite:true ) {
+        filterchain {
+            tokenfilter {
+                replaceregex(pattern:'fileName="/opt/liaison/releases/current/tomcat/logs/([^"]*)"',
+                replace:'fileName="logs/\\1"')
+            }
+        }
+    }
 }
 
 
+task setDevProperties << {
+    ant.copy( file:"src/main/resources/${rootProject.name}-dev.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
+    {
+        filterchain {
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL.sshenc") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
+        }
+    }
+}
+
+// This is for default config of Tomcat
+task configureTomcat(dependsOn: ['stageTomcat', 'setDevProperties'], group:'DEV/CI Deployment', description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
+    //TODO replace tokens would be a nicer but heavier weight way of doing this.
+    logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
+    copy {
+        from ("${tomcatEnvironmentsInstallPath}/common") { include '**/*.*' }
+        into tomcatInstallPath
+    }
+    copy {
+        from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  { include '**/*.*' }
+        into tomcatInstallPath
+    }
+    copy {
+        from ("${projectDir}/build/resources/main")  {
+            include '*.json', '*.properties', 'log4j2.xml'
+        }
+        into "${tomcatInstallPath}/lib"
+    }
+}
 
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
-task jettyRunSetProperties {
-
-	logger.info "Setting jettyRun system properties"
-	// use the default port of the ws-backend-simulation module
-	System.setProperty('archaius.deployment.applicationId', project.war.baseName)
-	System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
-	// we only use jettyRun in dev... might as well output log4j debug
-	System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
+task jettyRunSetProperties {    
+    logger.info "Setting jettyRun system properties"
+    // use the default port of the ws-backend-simulation module
+    System.setProperty('archaius.deployment.applicationId', project.war.baseName)
+    System.setProperty('archaius.deployment.environment', "${deployEnvironment}")
+    // we only use jettyRun in dev... might as well output log4j debug
+    System.setProperty('log4j.debug', 'true') //TODO Is this correct for log4j2 -jfr
 
 }
 
 // JPA (datanucleus) bytecode enhancement
 task enhance  << {
-	logger.info("... Enhancing ...");
-	ant.taskdef(
-			name      : 'datanucleusenhancer',
-			classpath : project.runtimeClasspath.asPath,
-			classname : 'org.datanucleus.enhancer.EnhancerTask'
-			)
+    logger.info("... Enhancing ...");
+    ant.taskdef(
+            name      : 'datanucleusenhancer',
+            classpath : project.runtimeClasspath.asPath,
+            classname : 'org.datanucleus.enhancer.EnhancerTask'
+            )
 
-	ant.datanucleusenhancer(
-			classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
-			verbose     : true,
-			api : "JPA",
-			persistenceUnit : "mailbox-pu",
-			failonerror : true) {
-				fileset( dir : "$buildDir/classes/main/com/liaison/mailbox/jpa/model/" ) { }
-			}
+    ant.datanucleusenhancer(
+            classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
+            verbose     : true,
+            api : "JPA",
+            persistenceUnit : "mailbox-pu",
+            failonerror : true) {
+                fileset( dir : "$buildDir/classes/main/com/liaison/mailbox/jpa/model/" ) { }
+            }
 }
 classes.dependsOn('enhance')
 
 // jettyRun configuration properties
 jettyRun {
 
-	dependsOn 'jettyRunSetProperties'
-	logger.info "Running jetty"
-	httpPort = new Integer(jettyHttpPort)
-	reload = 'automatic'
-	scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
-	daemon = false
+    dependsOn 'jettyRunSetProperties'
+    logger.info "Running jetty"
+    httpPort = new Integer(jettyHttpPort)
+    reload = 'automatic'
+    scanIntervalSeconds = new Integer(jettyScanIntervalSeconds)
+    daemon = false
 
 }
 
 // jettyRun configuration properties
 jettyRunWar {
-	dependsOn 'jettyRunSetProperties'
-	logger.info "Running jetty"
-	httpPort = new Integer(jettyHttpPort)
-	daemon = true
-	stopKey='stopJetty'
-	stopPort=9999
+    dependsOn 'jettyRunSetProperties'
+    logger.info "Running jetty"
+    httpPort = new Integer(jettyHttpPort)
+    daemon = true
+    stopKey='stopJetty'
+    stopPort=9999
 
 }
 
+jettyStop{
+    
+    stopKey='stopJetty'
+    stopPort=9999    
+}
+
+
+
+import org.gradle.api.plugins.jetty.internal.Monitor
+[jettyRun, jettyRunWar]*.doLast {
+  /**
+   * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
+   *
+   * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
+   * When that happens, we shouldn't need the custom task any more
+   *
+   * Copied From: AbstractJettyRunTask
+   */
+   if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
+      Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
+      monitor.start();
+   }
+}
 
 test {
-	// TODO temp exclusion of j2ep
-	exclude '**/FS2ResourceTest.class'
-	exclude '**/HelloWorldResourceTest.class'}
+    // TODO temp exclusion of j2ep
+    exclude '**/FS2ResourceTest.class'
+    exclude '**/HelloWorldResourceTest.class'}
 
 
 task pingTest {
-	dependsOn 'clean'
-	dependsOn 'jettyRunWar'
-	dependsOn 'test'
-}
-
-
-
-//ADDED TOWARDS DEPLOYMENT PROCESS
-
-
-project.afterEvaluate {
-	cargoRunLocal.dependsOn('configureTomcat')
-	cargoRunLocal.dependsOn('devConfigLogging')
-	//cargoStartLocal.dependsOn('configureTomcat')
-	//cargoStartLocal.dependsOn('devConfigLogging')
-
-}
-
-task setDevProperties << {
-	ant.copy( file:"src/main/resources/${rootProject.name}-dev.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
-	{
-		filterchain {
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_GATEWAY_APPL") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_GATEWAY_APPL.sshenc") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
-		}
-	}
-}
-war.dependsOn('setDevProperties')
-
-// This is for default config of Tomcat
-task configureTomcat(dependsOn: [
-	'stageTomcat',
-	'setDevProperties',
-	'devConfigLogging'
-], group:'DEV/CI Deployment',
-description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
-	//TODO replace tokens would be a nicer but heavier weight way of doing this.
-	logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
-	copy {
-		from ("${tomcatEnvironmentsInstallPath}/common") { include '**/*.*' }
-		into tomcatInstallPath
-	}
-	copy {
-		from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  { include '**/*.*' }
-		into tomcatInstallPath
-	}
-	copy {
-		from ("${projectDir}/build/resources/main")  {
-			include '*.json', '*.properties', '*EmailTemplate.txt', 'log4j2.xml'
-		}
-		into "${tomcatInstallPath}/lib"
-	}
-}
-
-
-
-task devConfigLogging(description: 'configures log4j2 for build local log files', group:'DEV/CI Deployment') << {
-	ant.copy( file:"${projectDir}/src/main/resources/log4j2.xml", toFile:"${projectDir}/build/resources/main/log4j2.xml", overwrite:true ) {
-		filterchain {
-			tokenfilter {
-				replaceregex(pattern:'fileName="/opt/liaison/releases/current/tomcat/logs/([^"]*)"',
-				replace:'fileName="logs/\\1"')
-			}
-		}
-	}
+    dependsOn 'clean'
+    dependsOn 'jettyRunWar'
+    dependsOn 'test'
 }
 
 // Database build scripting
 def flywayWorkingRoot = "${projectDir}/src/main/resources/db/~work"
 def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
 flyway {
-	url = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
-	driver = 'oracle.jdbc.OracleDriver'
-	user = "${dbSchemaNamePrefix}_GATEWAY_OWNR"
-	password = "${dbaPassword}"
-	table = 'schema_version'
-	locations = [
-		//'classpath:com.mycompany.project.migration',  // use classpath for Java migrations
-		'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
-	]
-	//if (project.dbDevSampleData == 'true') {
-	//	System.out.println(':flyway: Including dev sample data.')
-	//	locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
-	//}
+    url = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
+    driver = 'oracle.jdbc.OracleDriver'
+    user = "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR"
+    password = "${dbaPassword}"
+    table = 'schema_version'
+    locations = [
+        //'classpath:com.mycompany.project.migration',  // use classpath for Java migrations
+        'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
+    ]
+    //if (project.dbDevSampleData == 'true') {
+    //    System.out.println(':flyway: Including dev sample data.')
+    //    locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
+    //}
 }
 flywayMigrate.doFirst() {
-	logger.info("Building objects for database user '${dbSchemaNamePrefix}_GATEWAY_OWNR'...");
+    logger.info("Building objects for database user '${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR'...");
 }
 task flywaySetup << {
-	logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
-	ant.copy( toDir: flywayMigrationRoot, overwrite:true)
-	{
-		fileset(dir: 'src/main/resources/db/migration', includes: '**/*.sql')
-		filterchain {
-			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_GATEWAY_", flags: 'gis', byline: 'false') }
-		}
-	}
-	//ant.copy( toDir: flywayMigrationRoot+ '-dev', overwrite:true)
-	//{
-	//	fileset(dir: 'src/main/resources/db/migration-dev', includes: '**/*.sql')
-	//	filterchain {
-	//		tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_GATEWAY_", flags: 'gis', byline: 'false') }
-	//	}
-	//}
+    logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
+    ant.copy( toDir: flywayMigrationRoot, overwrite:true)
+    {
+        fileset(dir: 'src/main/resources/db/migration', includes: '**/*.sql')
+        filterchain {
+            tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
+        }
+    }
+    //ant.copy( toDir: flywayMigrationRoot+ '-dev', overwrite:true)
+    //{
+    //    fileset(dir: 'src/main/resources/db/migration-dev', includes: '**/*.sql')
+    //    filterchain {
+    //        tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
+    //    }
+    //}
 }
 task buildFlywayTable << {
-	logger.info("Building flyway schema_version table...");
-	// This is a workaround for https://github.com/flyway/flyway/issues/98
-	// TODO - remove/refactor when the above issue is fixed
-	def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
-	ant.copy( toDir: flywayTableDir, overwrite:true)
-	{
-		fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
-		// the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
-		filterchain {
-			tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
-			tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
-			tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
-			tokenfilter { replaceregex(pattern:'^/$', replace:'') }
-			tokenfilter { replaceregex(pattern:'AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)', replace:'') }
-			tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
-			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_GATEWAY_", flags: 'gis', byline: 'false') }
-		}
-	}
-	def driverClass = "oracle.jdbc.OracleDriver"
-	String jdbcUrl = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
-	configurations.jdbc.each { file ->
-		gradle.class.classLoader.addURL(file.toURI().toURL())
-	}
-	def sql = groovy.sql.Sql.newInstance(url: jdbcUrl, user: "${dbSchemaNamePrefix}_GATEWAY_OWNR", password: "${dbaPassword}", driver: driverClass)
-	def ddl = new File("${flywayTableDir}/schema_version_table.sql").text
-	sql.execute (ddl)
+    logger.info("Building flyway schema_version table...");
+    // This is a workaround for https://github.com/flyway/flyway/issues/98
+    // TODO - remove/refactor when the above issue is fixed
+    def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
+    ant.copy( toDir: flywayTableDir, overwrite:true)
+    {
+        fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
+        // the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+        filterchain {
+            tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+            tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+            tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+            tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+            tokenfilter { replaceregex(pattern:'AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)', replace:'') }
+            tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+            tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
+        }
+    }
+    def driverClass = "oracle.jdbc.OracleDriver"
+    String jdbcUrl = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
+    configurations.jdbc.each { file ->
+        gradle.class.classLoader.addURL(file.toURI().toURL())
+    }
+    def sql = groovy.sql.Sql.newInstance(url: jdbcUrl, user: "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR", password: "${dbaPassword}", driver: driverClass)
+    def ddl = new File("${flywayTableDir}/schema_version_table.sql").text
+    sql.execute (ddl)
 }
 flywaySetup.dependsOn('buildFlywayTable')
 flywayMigrate.dependsOn('flywaySetup')
 
 flywayClean.doLast {
-	ant.delete(
-		dir:flywayWorkingRoot,
-		includes:'**/*',
-		includeemptydirs:true,
-		deleteonexit:true,
-		performGCOnFailedDelete:true
-	)
+    ant.delete(
+        dir:flywayWorkingRoot,
+        includes:'**/*',
+        includeemptydirs:true,
+        deleteonexit:true,
+        performGCOnFailedDelete:true
+    )
 }
-
-

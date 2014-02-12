@@ -7,7 +7,7 @@ def main( argv ):
     # Setup and initialize primary settings
     # --------------------------------------
     tnsname = 'kili1a.dev'
-    moniker = ''
+    moniker = 'GATEWAY'
     applpassword = '12345678'
     ownerpassword = '12345678'
     userprefix = ''
@@ -192,8 +192,8 @@ def printUsage():
     print 'Creates Oracle tablespaces and new schema users'
     print '    provision.py -u <userprefix> -m <moniker> -a <applpassword> -o <ownerpassword> -s <syspassword> -t <tnsname>'
     print 'Arguments:'
-    print ' --moniker (-m):       an required parameter that defines the base name from which'
-    print '                       database usernames are built from. (must be "SB_EDM" or "SB_RTDM")'
+    print ' --moniker (-m):       an optional parameter that defines the base name from which'
+    print '                       database usernames are built from. (default "MBX")'
     print ' --userprefix (-u):    an additional optional parameter that is added to the'
     print '                       moniker as a prefix.'
     print '                       (This is useful for deploying the same schema multiple times'
