@@ -35,6 +35,7 @@ fi
 # PROPERTIES SETTINGS
 #
 cat setenv.properties | awk -f readproperties.awk > ./temp.sh
+chmod ugo+x ./temp.sh
 source ./temp.sh
 rm ./temp.sh
 
@@ -134,6 +135,21 @@ if [[ (! -f "$JDK_HOME/bin/java") && ("$JDK_VER" != "$JAVA_VER") ]]; then
     fi
 fi
 
+# include Unlimited JCE in your local build environment's JDK (if you have chosen to use a build local JDK)
+export URL_JCE_POLICY=$ARTIFACT_REPO_URL/thirdparty/com/oracle/java/UnlimitedJCEPolicy/JDK7/UnlimitedJCEPolicy-JDK7.zip
+if [[ (-f "$JDK_HOME/bin/java") && (! -f "$JDK_HOME/jre/lib/security/local_policy.jar.original") ]]; then
+    if [[ "$INSTALL_JDK" = "y" || "$QUIET" = "true" ]]; then
+        echo '.................................................................................'
+        echo ' Downloading '$URL_JCE_POLICY
+        curl -o "$_ROOT/tools/UnlimitedJCEPolicy-JDK7.zip" $URL_JCE_POLICY
+        mv "$JDK_HOME/jre/lib/security/local_policy.jar" "$JDK_HOME/jre/lib/security/local_policy.jar.original"
+        mv "$JDK_HOME/jre/lib/security/README.txt" "$JDK_HOME/jre/lib/security/README.txt.original"
+        mv  "$JDK_HOME/jre/lib/security/US_export_policy.jar" "$JDK_HOME/jre/lib/security/US_export_policy.jar.original"
+        unzip -j "$_ROOT/tools/UnlimitedJCEPolicy-JDK7.zip" -d "$JDK_HOME/jre/lib/security"
+        rm "$_ROOT/tools/UnlimitedJCEPolicy-JDK7.zip"
+    fi
+fi
+
 if [[ -f "$JDK_HOME/bin/java" ]]; then
     export JAVA_HOME=$JDK_HOME
 fi
@@ -142,8 +158,18 @@ fi
 export BUILD_PATH=$JAVA_HOME/bin
 
 # set the build path
-export PATH=$BUILD_PATH:$_ORIGINAL_PATH
+export PATH=$BUILD_PATH:$_ROOT/install/db:$_ORIGINAL_PATH
 
+# include the buildbundle project in your tools path
+ if [[ ! -d "$_ROOT/tools/buildbundle" ]]; then
+     cd tools
+     git clone http://gitlab.hs.com/g2/buildbundle.git
+     cd ..
+ fi
+ 
+ cd tools/buildbundle
+ git pull
+ cd ../..
 
 if [[ "$QUIET" != "true" ]]; then
     echo '................................................................................'

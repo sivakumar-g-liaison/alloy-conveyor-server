@@ -1,0 +1,39 @@
+// The preferred way to make local modifications to your build environment is through the use of Gradle init scripts.
+//    * http://www.gradle.org/docs/current/userguide/init_scripts.html
+
+allprojects {
+    // These are all overrides for properties that are found in service-broker/gradle.properties
+    ext.dbServerNameEdm = 'seadv01-db03.hs.com'
+    ext.dbServerServiceEdm = 'kili1.dev.liaison.net'
+    ext.dbSchemaNamePrefixEdm = 'SHARED'
+    ext.dbaPasswordEdm = '12345678'
+
+    ext.dbServerNameRtdm = 'seadv01-db03.hs.com'
+    ext.dbServerServiceRtdm = 'kili1.dev.liaison.net'
+    ext.dbSchemaNamePrefixRtdm = 'SHARED'
+    ext.dbaPasswordRtdm = '12345678'
+    ext.dbDevSampleData = 'true'
+    
+    ext.containerDebug = 'true'
+}
+
+projectsEvaluated { 
+    rootProject.project(':service-implementation') {
+        task killJava(type:Exec) {
+            workingDir "${rootDir}/tools"
+
+            //on windows:
+            commandLine "${rootDir}\\tools\\kill-java.cmd"
+
+            //store the output instead of printing to the console:
+            // standardOutput = new ByteArrayOutputStream()
+
+            //extension method killJava.output() can be used to obtain the output:
+            // ext.output = { return standardOutput.toString() }
+        }
+        
+        afterEvaluate {
+            cargoStopLocal.dependsOn('killJava')
+        }
+    }
+}

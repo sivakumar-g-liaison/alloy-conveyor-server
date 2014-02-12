@@ -1,2 +1,4 @@
 /bin
-/~work
+test-output/
+login.properties
+datanucleus.log
