@@ -13,11 +13,11 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 
 /**
- * The persistent class for the PARALLEL_PROCESSOR database table
+ * The persistent class for the PROCESSOR_SEMAPHORE database table
  *
  */
 @Entity
-@Table(name = "PARALLEL_PROCESSOR")
+@Table(name = "PROCESSOR_SEMAPHORE")
 @NamedQuery(name = "ParallelProcessor.findAll", query = "SELECT p FROM ParallelProcessor p")
 public class ParallelProcessor implements Identifiable {
 	
