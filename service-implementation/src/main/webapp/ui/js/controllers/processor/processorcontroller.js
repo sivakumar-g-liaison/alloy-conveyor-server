@@ -1211,12 +1211,16 @@ var rest = myApp.controller(
 
                                              if (prop === 'otherRequestHeader') {
                                                 propertyValue = $scope.setRemotePropData(json_data[prop], prop);
-                                                 $scope.sweeperMandatoryProperties.push({
-                                                name: $scope.getNameValue(prop),
-                                                value: propertyValue,
-                                                allowAdd: false,
-                                                isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
-                                            });
+                                                
+                                                if(json_data[prop].length > 0) {
+                                                    $scope.sweeperMandatoryProperties.push({
+                                                        name: $scope.getNameValue(prop),
+                                                        value: propertyValue,
+                                                        allowAdd: false,
+                                                        isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
+                                                    });
+                                                }
+                                           
                                              } else if (prop === 'port') {
                                                 propertyValue = (json_data[prop] != 0)?json_data[prop]:$scope.getPortFromURL(json_data['url']);
                                              } else {
@@ -1228,13 +1232,7 @@ var rest = myApp.controller(
                                                 isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
                                             });
                                              }
-                                            /*$scope.sweeperMandatoryProperties.push({
-                                                name: $scope.getNameValue(prop),
-                                                value: propertyValue,
-                                                allowAdd: false,
-                                                isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
-                                            });*/
-											
+                                          											
                                         } else {
                                              if (prop === 'otherRequestHeader') {
                                                 propertyValue = $scope.setRemotePropData(json_data[prop], prop);
