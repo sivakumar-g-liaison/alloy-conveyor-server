@@ -162,14 +162,13 @@ public class ProcessorConfigurationService {
 	   String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
 	   JSONObject jsonRequest = new JSONObject(request);
 	   
-	   jsonRequest.getJSONObject("dataTransferObject").put("pguid", 
-			   String.valueOf(MailBoxUtility.getEnvironmentProperties().get("truststore-id")));
+	   jsonRequest.getJSONObject("dataTransferObject").put("pguid",MailBoxUtility.getEnvironmentProperties().getString("truststore-id"));
 	   
 	   JSONArray array = jsonRequest.getJSONObject("dataTransferObject").getJSONArray("trustStoreMemberships");
 	   ((JSONObject)array.get(0)).getJSONObject("publicKey").put("pguid", pkcGuid);
 
-	   HttpPut httpPut = new HttpPut(String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url")) +
-			   "/update/truststore/" + String.valueOf(MailBoxUtility.getEnvironmentProperties().get("truststore-id"))); 
+	   HttpPut httpPut = new HttpPut(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") +
+			   "/update/truststore/" +MailBoxUtility.getEnvironmentProperties().getString("truststore-id")); 
 	   
        DefaultHttpClient httpclient = new DefaultHttpClient();
        
@@ -206,7 +205,7 @@ public class ProcessorConfigurationService {
 					JSONObject jsonRequest = new JSONObject(request);
 					jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
 					
-					HttpPost httpPost = new HttpPost(String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url")) 
+					HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") 
 							+ "upload/public"); 
 					DefaultHttpClient httpclient = new DefaultHttpClient();
 					
@@ -390,13 +389,12 @@ public class ProcessorConfigurationService {
 			JSONObject jsonRequest = new JSONObject(request);
 			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
 			
-			HttpPost httpPost = new HttpPost(String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url")) 
+			HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") 
 					+ "upload/truststore"); 
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
-			FileBody trustStore = new FileBody(new File(String.valueOf(MailBoxUtility.getEnvironmentProperties()
-					.get("certificateDirectory"))));
+			FileBody trustStore = new FileBody(new File(MailBoxUtility.getEnvironmentProperties().getString("certificateDirectory")));
 			
 			HttpEntity reqEntity = MultipartEntityBuilder.create()
 					.addPart("request", jsonRequestBody)

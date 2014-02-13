@@ -292,10 +292,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 */
 	private void postToQueue(String input) throws Exception {
 
-		HornetQJMSUtil util = new HornetQJMSUtil();
-
-		String providerURL = MailBoxUtility.getEnvironmentProperties().getProperty("providerurl");
-		String queueName = MailBoxUtility.getEnvironmentProperties().getProperty("queuename");
+		String providerURL = MailBoxUtility.getEnvironmentProperties().getString("providerurl");
+		String queueName = MailBoxUtility.getEnvironmentProperties().getString("queuename");
 
 		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
 		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
@@ -303,7 +301,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		jndidto.setQueueName(queueName);
 		jndidto.setUrlPackagePrefixes("org.jboss.naming");
 		jndidto.setMessage(input);
-		util.postMessage(jndidto);
+		HornetQJMSUtil.postMessage(jndidto);
 
 	}
 

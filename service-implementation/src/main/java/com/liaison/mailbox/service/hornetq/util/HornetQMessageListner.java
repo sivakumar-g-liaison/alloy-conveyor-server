@@ -65,8 +65,8 @@ public class HornetQMessageListner implements MessageListener {
 		//env.put(Context.SECURITY_PRINCIPAL, "guest");
 		//env.put(Context.SECURITY_CREDENTIALS, "pass");
 		Context context = new InitialContext(env);
-		ConnectionFactory cf = (ConnectionFactory) context.lookup(MailBoxUtility.getEnvironmentProperties().getProperty("queueConnectionFactory"));
-		Destination destination = (Destination) context.lookup(MailBoxUtility.getEnvironmentProperties().getProperty("mailBoxProcessorQueue"));
+		ConnectionFactory cf = (ConnectionFactory) context.lookup(MailBoxUtility.getEnvironmentProperties().getString("queueConnectionFactory"));
+		Destination destination = (Destination) context.lookup(MailBoxUtility.getEnvironmentProperties().getString("mailBoxProcessorQueue"));
 		new HornetQMessageListner(cf, destination);
 		logger.info("Starting up the JMS listner");
 

@@ -641,7 +641,7 @@ public class MailBoxConfigurationResource {
 		Response returnResponse;
 
 		try {
-			String jsFileLocation = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("rootDirectory"));
+			String jsFileLocation = MailBoxUtility.getEnvironmentProperties().getString("rootDirectory");
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
@@ -838,7 +838,7 @@ public class MailBoxConfigurationResource {
 		Response returnResponse;
 
 		try {
-			String jsFileLocation = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("certificateDirectory"));
+			String jsFileLocation = MailBoxUtility.getEnvironmentProperties().getString("certificateDirectory");
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 

@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.util.ServiceUtils;
 import com.netflix.config.ConfigurationManager;
 
@@ -130,8 +132,10 @@ public class MailBoxUtility {
 		return str == null || str.isEmpty();
 	}
 
-	public static Properties getEnvironmentProperties() throws IOException {
-
+	public static DecryptableConfiguration getEnvironmentProperties() throws IOException {
+		
+		DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
+		/*
 		if (properties.isEmpty()) {
 
 			Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
@@ -139,9 +143,9 @@ public class MailBoxUtility {
 			String props = ServiceUtils.readFileFromClassPath(propertyFileName);
 			InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
 			properties.load(is);
-		}
+		}*/
 
-		return properties;
+		return configuration;
 	}
 	
 	/**

@@ -607,7 +607,7 @@ public abstract class AbstractRemoteProcessor {
 		
 		InputStream is = null;
 		
-		String url = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("kms-base-url"));
+		String url = MailBoxUtility.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/truststore/current/";
 		
 		// To be fetched from DataBase
@@ -1128,7 +1128,7 @@ public abstract class AbstractRemoteProcessor {
 			String processedFolderPath = null; 
 			
 			if(folderPath != null && folderPath.toUpperCase().contains(MailBoxConstants.MOUNT_LOCATION)) {
-				String mountLocationValue = String.valueOf(MailBoxUtility.getEnvironmentProperties().get("MOUNT_POINT"));
+				String mountLocationValue = MailBoxUtility.getEnvironmentProperties().getString("MOUNT_POINT");
 				processedFolderPath = folderPath.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN, mountLocationValue);
 			} else {
 				return folderPath;

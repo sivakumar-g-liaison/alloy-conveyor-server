@@ -281,9 +281,9 @@ public class MailBoxService {
 	
 	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
 		
-		Properties properties = MailBoxUtility.getEnvironmentProperties();
-		String providerURL = properties.getProperty("providerurl");
-		String queueName =properties.getProperty("mailBoxProcessorQueue");
+		MailBoxUtility.getEnvironmentProperties();
+		String providerURL = MailBoxUtility.getEnvironmentProperties().getString("providerurl");
+		String queueName = MailBoxUtility.getEnvironmentProperties().getString("mailBoxProcessorQueue");
 
 		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
 		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
