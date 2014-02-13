@@ -36,6 +36,7 @@ public class ServiceUtils {
         }
 
         URL url = Resources.getResource(path);
+        
         try {
             return Resources.toString(url, Charsets.UTF_8);
         } catch (Exception e) {

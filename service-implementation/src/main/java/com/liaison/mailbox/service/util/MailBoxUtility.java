@@ -135,7 +135,7 @@ public class MailBoxUtility {
 		if (properties.isEmpty()) {
 
 			Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
-			String propertyFileName = "g2mailboxservice-" + env + ".properties";
+			String propertyFileName = "g2mailboxservice-" + env + ".properties";			
 			String props = ServiceUtils.readFileFromClassPath(propertyFileName);
 			InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
 			properties.load(is);

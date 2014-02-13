@@ -88,40 +88,20 @@ war {
         into 'WEB-INF/classes/'
     }
 
-    // copy webapp
-    from('src/main/webapp/ui') {
-        include '**/**'
-        into '/'
-    }
-    
-    from('build/resources/main') {
-        include '*.properties'
-        into 'WEB-INF/classes/'
-    }
-
-    from('build/resources/main/WEB-INF') {
-        include 'web.xml'
-        into 'WEB-INF'
-    }
-
-    from('build/resources/main/META-INF') {
-        include 'orm.xml', 'persistence.xml'
-        into 'WEB-INF/classes/META-INF'
-    }
-
-    from('build/resources/main/META-INF') {
-        include 'context.xml'
-        into 'META-INF'
-    }
+	// copy webapp
+	from('src/main/webapp/ui') {
+		include '**/**'
+		into '/'
+	}
 
     // exclude the JPA configs, handled above
-    rootSpec.exclude 'META-INF/**'
+    //rootSpec.exclude 'META-INF/**'
     // exclude the servlet configs, handled above
-    rootSpec.exclude 'WEB-INF/**'
+    // rootSpec.exclude 'WEB-INF/**'
     // exclude the database build scripting from the war
     rootSpec.exclude 'db/**'
     // exclude the archaius properties, they are external
-    rootSpec.exclude 'key-manage*.properties'
+    rootSpec.exclude 'g2mailboxservice*.properties'
     // exclude the logging config, it is external
     rootSpec.exclude "log4j2.xml"
     // exclude the WADL tools, they are build time
