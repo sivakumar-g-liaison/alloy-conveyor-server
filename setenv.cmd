@@ -63,12 +63,9 @@ for /F "tokens=1*" %%A IN ('type %_ROOT%\setenv.properties') DO set %%A
 :: TOOLS
 ::
 
-:: Flyway
-set TOOL_PATH=%_ROOT%\install\db
-
 :: CURL
 set EXE_CURL="%_ROOT%\tools\curl\curl.exe"
-set TOOL_PATH=%TOOL_PATH%;%_ROOT%\tools\curl
+set TOOL_PATH=%_ROOT%\tools\curl
 
 :: 7 ZIP
 set VERSION_7ZIP=9.20
@@ -161,6 +158,9 @@ if [%FOUND_JAVA_HOME%]==[true] (
     echo Unable to determine JAVA_HOME. Please make sure JDK 7 is installed.
 )
 :JDK_COMPLETE
+
+:: Flyway CLI path
+set TOOL_PATH=%_ROOT%\install\db;%TOOL_PATH%
 
 :: set the build path
 set PATH=%TOOL_PATH%;%_ORIGINAL_PATH%
