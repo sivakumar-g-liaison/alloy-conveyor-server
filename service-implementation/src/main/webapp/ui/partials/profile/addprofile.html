@@ -1,3 +1,8 @@
+<style>
+    .infoiconimg {
+        height: 15px; width: 15px; overflow: hidden;     
+    }
+</style>
 <div class="container fade-in">
     <div class="form-row">
 		<h3 id="title" class="ng-binding">Profiles</h3>
@@ -19,10 +24,10 @@
                             <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">
                                 <span id="mbx-profile-nameInvalid-pattern" class="help-block-custom" ng-show="triggerForm.profilename.$error.pattern">Invalid Profile Name.</span>
                                 <span id="mbx-profile-nameInvalid-required" class="help-block-custom" ng-show="triggerForm.profilename.$error.required">Profile Name is mandatory.</span>
-                                <span id="mbx-profile-nameInvalid-minlength" class="custom-info-block" ng-show="triggerForm.profilename.$error.minlength">Profile Name cannot be shorter than
-                                {{minimumLength}} characters.</span>
-                                <span id="mbx-profile-nameInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.profilename.$error.maxlength">Profile Name cannot be longer than
-                                {{maximumLengthAllowedInTextBox}} characters.</span>
+                                <span id="mbx-profile-nameInvalid-minlength" class="custom-info-block" ng-show="triggerForm.profilename.$error.minlength">
+                                <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Profile Name cannot be shorter than {{minimumLength}} characters.</span>
+                                <span id="mbx-profile-nameInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.profilename.$error.maxlength">
+                                <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                             </div>
                        </div>
                         <br>
@@ -30,9 +35,9 @@
                            
                             <div class="row">
                             <button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click='insert()'>
-                            Save</button>
+                            Add</button>
                              <button id="mbx-profile-cancel" class="btn btn-primary" ng-click="doCancel()">
-                            Cancel
+                            Reset
                             </button>
                             </div>
                         </div>
@@ -48,25 +53,21 @@
         
          <div class="row">
            <div class="col-md-6">
-                <div class="row">
-                <div class="col-md-3">
                     <label for="name"> Profile Name </label> 
-                </div>
-                <div class="col-md-9">
                     <input type="text" id="profilename" ng-model="profileName" ng-trim="false"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
-				<div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-                	<span id="mbx-profile-profilenameInvalid-pattern" class="help-block-custom" ng-show="triggerForm.name.$error.pattern">Invalid Profile Name.</span>
-                	<span id="mbx-profile-profilenameInvalid-minlength" class="custom-info-block" ng-show="triggerForm.name.$error.minlength">Requires a minimum of {{minimumLength}} characters to enable search.</span>
-		 			<span id="mbx-profile-profilenameInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.name.$error.maxlength">Profile Name cannot be
-		 			 longer than {{maximumLengthAllowedInTextBox}} characters.</span>
-                </div>
+					<div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
+						<span id="mbx-profile-profilenameInvalid-pattern" class="help-block-custom" ng-show="triggerForm.name.$error.pattern">Invalid Profile Name.</span>
+						<span id="mbx-profile-profilenameInvalid-minlength" class="custom-info-block" ng-show="triggerForm.name.$error.minlength">
+						<img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Requires a minimum of {{minimumLength}} characters to enable search.</span>
+						<span id="mbx-profile-profilenameInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.name.$error.maxlength">
+						<img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+					</div>
                 <progress ng-show=showprogressbar> </progress>
-                </div>
-              </div>  
-           		
-			</div>
-            </div>
+		   </div>
+               
+         </div>  
+ 
             <div class = "form-group">
 				<br>
                 <div class="alert alert-info" ng-show="info">

@@ -1,3 +1,8 @@
+<style>
+    .infoiconimg {
+        height: 15px; width: 15px; overflow: hidden;     
+    }
+</style>
 <div class="container fade-in">
 
 	<div class="form-row">
@@ -18,10 +23,10 @@
                 <br/>
                 <div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
 					<span id="mbx-trigger-profile-nameInvalid-pattern" class="help-block-custom" ng-show="triggerForm.name.$error.pattern">Invalid Mailbox Name.</span>
-					<span id="mbx-trigger-profile-nameInvalid-minlength" class="custom-info-block" ng-show="triggerForm.name.$error.minlength">Mailbox Name cannot be shorter than
-					{{minimumLength}} characters.</span>
-					<span id="mbx-trigger-profile-nameInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.name.$error.maxlength">Mailbox Name cannot be longer than
-					 {{maximumLengthAllowedInTextBox}} characters.</span>
+					<span id="mbx-trigger-profile-nameInvalid-minlength" class="custom-info-block" ng-show="triggerForm.name.$error.minlength">
+					<img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Mailbox Name cannot be shorter than {{minimumLength}} characters.</span>
+					<span id="mbx-trigger-profile-nameInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.name.$error.maxlength">
+					<img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
 				</div>
 				
 			</div>
@@ -33,16 +38,16 @@
                 <br/>
 				<div ng-show="triggerForm.shardKey.$dirty && triggerForm.shardKey.$invalid">
                     <span id="mbx-trigger-profile-keyInvalid-pattern" class="help-block-custom" ng-show="triggerForm.shardKey.$error.pattern">Invalid Shard Key.</span>
-                    <span id="mbx-trigger-profile-keyInvalid-minlength" class="custom-info-block" ng-show="triggerForm.shardKey.$error.minlength">Shard Key cannot be shorter than
-                    {{minimumLength}} characters.</span>
-					<span id="mbx-trigger-profile-keyInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.shardKey.$error.maxlength">Shard Key cannot be longer than
-					{{maximumLengthAllowedInTextBox}} characters.</span>
+                    <span id="mbx-trigger-profile-keyInvalid-minlength" class="custom-info-block" ng-show="triggerForm.shardKey.$error.minlength">
+                    <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Shard Key cannot be shorter than {{minimumLength}} characters.</span>
+					<span id="mbx-trigger-profile-keyInvalid-maxlength" class="custom-info-block" ng-show="triggerForm.shardKey.$error.maxlength">
+					<img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Shard Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-5">
 					<label for="prof"> Profiles </label> <select id="mbx-trigger-profile-prof" name="prof" ng-model="profile"
-						ng-options="prof.name for prof in profiles" class="form-control" required>
+						ng-options="prof.name for prof in profiles | orderBy:'name'" class="form-control" required>
 						<option value="">-- select--</option>
 					</select>
 				</div>
