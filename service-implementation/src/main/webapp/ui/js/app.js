@@ -106,6 +106,9 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.maximumLengthAllowedInGridForPropertyValue = 512;
     $rootScope.maximumLengthAllowedInGridForFolderDetails = 250;
     $rootScope.maximumLengthAllowedInGridForCredentialDetails = 128;
+    
+    // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
+	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
    
     // JSON which contains upload public key request
     $rootScope.pkObj;

@@ -17,6 +17,9 @@
     height: 300px
   }
   
+  .infoiconimg {
+      height: 15px; width: 15px; overflow: hidden;     
+  }
 </style>
 
 <div class="container fade-in">
@@ -40,10 +43,10 @@
             <div ng-show="formAddMbx.name.$dirty && formAddMbx.name.$invalid">
                 <span id="mbx-add-nameInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
                 <span id="mbx-add-nameInvalid-required" class="help-block-custom" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
-                <span id="mbx-add-nameInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.name.$error.minlength">Mailbox Name cannot be
-              shorter than {{minimumLength}} characters.</span>
-		        <span id="mbx-add-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.name.$error.maxlength">Mailbox Name cannot be
-              longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+                <span id="mbx-add-nameInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.name.$error.minlength">
+                <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Mailbox Name cannot be shorter than {{minimumLength}} characters.</span>
+		        <span id="mbx-add-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.name.$error.maxlength">
+		        <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
 
 
@@ -71,10 +74,10 @@
                    ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.key.$dirty && formAddMbx.key.$invalid">
                 <span id="mbx-add-keyInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
-            <span id="mbx-add-keyInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.key.$error.minlength">Shard Key cannot be shorter than
-                {{minimumLength}} characters.</span>
-		    <span id="mbx-add-keyInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.key.$error.maxlength">Shard Key cannot be longer than
-                {{maximumLengthAllowedInTextBox}} characters.</span>
+            <span id="mbx-add-keyInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.key.$error.minlength">
+            <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Shard Key cannot be shorter than {{minimumLength}} characters.</span>
+		    <span id="mbx-add-keyInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.key.$error.maxlength">
+		    <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Shard Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
           
           
@@ -90,8 +93,8 @@
                         ng-pattern="userInputDescriptionPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
                   <span id="mbx-add-descInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
-          		  <span id="mbx-add-descInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.description.$error.maxlength">Description cannot be longer than
-                {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
+          		  <span id="mbx-add-descInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.description.$error.maxlength">
+          		  <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Description cannot be longer than {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
               </div>
               <br>
           </div>
