@@ -157,6 +157,9 @@ fi
 # build with JDK runtime, not JRE runtime
 export BUILD_PATH=$JAVA_HOME/bin
 
+# Flyway CLI path
+export BUILD_PATH=$_ROOT/install/db:$BUILD_PATH
+
 # set the build path
 export PATH=$BUILD_PATH:$_ROOT/install/db:$_ORIGINAL_PATH
 

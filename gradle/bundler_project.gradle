@@ -45,9 +45,14 @@ distTar.dependsOn('stageInstallerScripts')
 
 // stage Flyway and DB scripts in the installer path
 // =======================================================================
-task stageFlyway(type: Copy, description: 'Unzips Flyway commandline', group: "Production Bundler - Project Specific") {
-    from(tarTree(configurations.deployDb.fileCollection{dep -> dep.name == 'flyway-commandline'}.singleFile))
-    into "$installPath"
+task stageFlyway(description: 'Unzips Flyway commandline', group: "Production Bundler - Project Specific") << {
+    copy {
+        from(tarTree(configurations.deployDb.fileCollection{dep -> dep.name == 'flyway-commandline'}.singleFile))
+        into "${installPath}"
+    }
+    ant.move( toDir:"$installPath/db", overwrite:true ) {
+        fileset(dir: "$installPath/flyway-${flywayVersion}")
+    }
 }
 task stageOracleDriver(type: Copy, description: 'Stages Oracle driver', group: "Production Bundler - Project Specific") {
     from (configurations.deployDb.fileCollection{dep -> dep.name == 'ojdbc6'}.singleFile)
@@ -67,9 +72,6 @@ task stageDbMigrateSQL(type: Copy, description: 'Stages DB migration SQL', group
 }
 task stageAllPersistence(description : 'ONE SHOT: stages flyway, oracle, db migration, db scripts', group: "Production Bundler - Project Specific") << {
     stageFlyway.execute()
-    ant.move( toDir:"$installPath/db", overwrite:true ) {
-        fileset(dir: "$installPath/flyway-${flywayVersion}")
-    }
     stageOracleDriver.execute()
     stageDbMigrateSQL.execute()
     stageDbScripts.execute()
