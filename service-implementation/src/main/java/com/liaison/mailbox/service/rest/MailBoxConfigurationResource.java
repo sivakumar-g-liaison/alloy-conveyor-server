@@ -49,6 +49,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
@@ -268,6 +269,40 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
+	
+	/*@GET
+	@Path("/{id}/processorSID/{sid}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getMailBoxByGuidAndServiceInstId(@PathParam(value = "id") String guid, 
+			@PathParam(value = "sid") Integer serviceInstId) {
+
+		serviceCallCounter.addAndGet(1);
+
+		Response returnResponse;
+
+		try {
+
+			// add the new profile details
+			GetMailBoxResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+			serviceResponse = mailbox.getMailBoxByGuidAndServiceInstId(guid, serviceInstId);
+
+			returnResponse = serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+
+		return returnResponse;
+
+	}*/
 	
 	/**
 	 * 
@@ -535,7 +570,7 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-
+	
 	/**
 	 * REST method to update existing processor.
 	 * 
@@ -598,22 +633,29 @@ public class MailBoxConfigurationResource {
 	 *            The profile name should be searched
 	 * @return The Response
 	 */
-	@GET
+	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response searchMailBox(@QueryParam(value = "name") String mbxName,
+	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
 			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
 
 		serviceCallCounter.addAndGet(1);
 
 		Response returnResponse;
+		SearchMailboxRequestDTO searchMbxRequest;
+		InputStream requestStream;
 
 		try {
+			
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			searchMbxRequest = MailBoxUtility.unmarshalFromJSON(requestString, SearchMailboxRequestDTO.class);
 
 			// search the mailbox from the given details
 			SearchMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.searchMailBox(mbxName, profileName);
+			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName);
 			serviceResponse.setHitCounter(hitCounter);
 
 			returnResponse = serviceResponse.constructResponse();

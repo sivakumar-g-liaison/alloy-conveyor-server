@@ -87,4 +87,5 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 	}
+
 }

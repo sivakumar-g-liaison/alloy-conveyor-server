@@ -30,7 +30,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             description: "",
             status: "",
             shardKey: "",
-            properties: []
+            properties: [],
+            serviceInstanceId: $rootScope.serviceInstancePrimaryId
         };
 
         $scope.enumstats = [{"name":"Active","id":"ACTIVE"},

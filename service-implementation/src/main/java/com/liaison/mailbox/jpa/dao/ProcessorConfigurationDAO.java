@@ -21,7 +21,7 @@ import com.liaison.mailbox.jpa.model.Processor;
 						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS), 
 						@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROCESSOR_ID,
 						query = "select processor from Processor processor"
-								+ " where processor.pguid = :" + ProcessorConfigurationDAO.PGU_ID)
+								+ " where processor.pguid = :" + ProcessorConfigurationDAO.PGU_ID)	
 
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
@@ -55,5 +55,6 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	  * @return a processor.
 	 */
 	public Processor findByProcessorId(String processorId);
+	
 
 }

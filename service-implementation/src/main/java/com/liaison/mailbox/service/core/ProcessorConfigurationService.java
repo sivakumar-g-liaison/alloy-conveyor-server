@@ -37,15 +37,19 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.MailBoxDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.jpa.dao.ServiceInstanceDAO;
+import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
+import com.liaison.mailbox.jpa.model.ServiceInstanceId;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
@@ -120,7 +124,13 @@ public class ProcessorConfigurationService {
 					validator.validate(credentialDTO);
 				}
 			}
-
+			
+			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
+			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceRequest.getProcessor().getServiceInstanceId());
+			if (serviceInstance == null) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, serviceRequest.getProcessor().getServiceInstanceId());
+			}
+			
 			// Instantiate the processor and copying the values from DTO to
 			// entity.
 			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
@@ -130,6 +140,18 @@ public class ProcessorConfigurationService {
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
+			
+			//adding service instance id
+			processor.setServiceInstance(serviceInstance);
+			
+			//creating link between mailbox and service instance id
+			MailBoxConfigurationDAO mbxDAO = new MailBoxConfigurationDAOBase();
+			MailBox mbx = mbxDAO.findActiveMailBox(mailBoxGuid);
+			if (mbx == null) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxGuid);
+			}
+			MailBoxConfigurationService mbxConfService = new MailBoxConfigurationService();
+			mbxConfService.createPrivilegePermissionLink(serviceRequest.getProcessor().getServiceInstanceId(), mbx);
 			
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();

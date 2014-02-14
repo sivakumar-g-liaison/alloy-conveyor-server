@@ -129,7 +129,8 @@ var rest = myApp.controller(
                     folders: [],
                     credentials: [],
                     dynamicProperties: [],
-                    remoteProcessorProperties: {}
+                    remoteProcessorProperties: {},
+                    serviceInstanceId: $rootScope.serviceInstancePrimaryId
                 };
                 $scope.modal = {
                     "roleList": '',

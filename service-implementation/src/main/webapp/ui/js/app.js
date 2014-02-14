@@ -135,6 +135,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
     $rootScope.authService = AuthService;
 	$rootScope.pipelineId = null;
+	$rootScope.serviceInstancePrimaryId = prompt("Enter Primary ServiceInstance Id : ", "");
+	$rootScope.serviceInstanceSecondaryId = prompt("Enter Secondary ServiceInstance Id : ", "");
     // text input for login/password (only)
     $rootScope.loginInput = 'rob@gmail.com';
     $rootScope.passwordInput = 'complexpassword';

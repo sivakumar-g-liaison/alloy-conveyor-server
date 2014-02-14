@@ -14,6 +14,12 @@ import com.liaison.mailbox.jpa.model.MailBox;
 		@NamedQuery(name = MailBoxConfigurationDAO.FIND_ACTIVE_MAILBOX_BY_PGUID,
 				query = "SELECT mbc FROM MailBox mbc WHERE mbc.mbxStatus = 'active' and mbc.pguid = :"
 						+ MailBoxConfigurationDAO.PGUID),
+		@NamedQuery(name = MailBoxConfigurationDAO.FIND_MAILBOX_BY_PGUID_SIID,
+						query = "SELECT mbc FROM MailBox mbc"
+								+ " inner join mbc.mailboxProcessors prcsr"
+								+ " inner join prcsr.serviceInstance sid"
+								+ " where mbc.pguid = :" + MailBoxConfigurationDAO.PGUID
+								+ " and sid.name = :" + MailBoxConfigurationDAO.SERVICE_INST_ID),
 		@NamedQuery(name = MailBoxConfigurationDAO.INACTIVATE_MAILBOX,
 				query = "UPDATE MailBox mbc set mbc.mbxStatus = 'inactive' where mbc.pguid = :" + MailBoxConfigurationDAO.PGUID),
 		@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,
@@ -23,7 +29,15 @@ import com.liaison.mailbox.jpa.model.MailBox;
 						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
 						+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBX_NAME
 						+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
-						+ " order by mbx.mbxName")
+						+ " order by mbx.mbxName"),
+		@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_GUID_AND_PROCSR_SERVICE_INST_ID,
+		query = "SELECT mbx FROM MailBox mbx"
+				+ " inner join mbx.mailboxProcessors prcsr"
+				+ " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
+				+ " inner join schd_prof_processor.scheduleProfilesRef profile"
+				+ " where mbx.pguid = :" + MailBoxConfigurationDAO.PGUID
+				+ " and prcsr.serviceInstId = :" + MailBoxConfigurationDAO.SERVICE_INST_ID
+				+ " order by mbx.mbxName")
 })
 public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 
@@ -34,13 +48,18 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String MBX_NAME = "mbx_name";
 	public static final String GET_MBX = "findMailBoxes";
 	public static final String SCHD_PROF_NAME = "schd_name";
+	public static final String GET_MBX_BY_GUID_AND_PROCSR_SERVICE_INST_ID = "get_mbx_guid_sid";
+	public static final String SERVICE_INST_ID = "service_inst_id";
+	public static final String FIND_MAILBOX_BY_PGUID_SIID = "findMailBoxBySIId";
 
 	public MailBox findActiveMailBox(String guid);
+	
+	public MailBox findMailBox(String guid);
 
 	public int deactiveMailBox(String guid);
 
 	public Set<MailBox> find(String mbxName, String profName);
 
 	public Set<MailBox> findByName(String mbxName);
-
+	
 }

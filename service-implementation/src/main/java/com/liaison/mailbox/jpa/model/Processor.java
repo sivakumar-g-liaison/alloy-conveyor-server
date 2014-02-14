@@ -58,14 +58,13 @@ public class Processor implements Identifiable {
 	private String procsrExecutionStatus;
 	private String procsrName;
 	private String procsrProtocol;
-
+	private MailBox mailbox;
 	private String trustStoreId;
+	private ServiceInstanceId serviceInstance;
 	
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private List<ProcessorProperty> dynamicProperties;
-
-	private MailBox mailbox;
 	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
 
 	public Processor() {
@@ -243,6 +242,17 @@ public class Processor implements Identifiable {
 
 	public void setMailbox(MailBox mailbox) {
 		this.mailbox = mailbox;
+	}
+	
+	// bi-directional many-to-one association to Service instance id
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
+	public ServiceInstanceId getServiceInstance() {
+		return serviceInstance;
+	}
+
+	public void setServiceInstance(ServiceInstanceId serviceInstance) {
+		this.serviceInstance = serviceInstance;
 	}
 
 	// bi-directional many-to-one association to ScheduleProfileProcessor
