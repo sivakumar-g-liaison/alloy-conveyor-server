@@ -38,6 +38,8 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.MailBoxDAO;
+import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAO;
+import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
@@ -45,6 +47,7 @@ import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
+import com.liaison.mailbox.jpa.model.MailboxServiceInstance;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
@@ -144,18 +147,28 @@ public class ProcessorConfigurationService {
 			//adding service instance id
 			processor.setServiceInstance(serviceInstance);
 			
-			//creating link between mailbox and service instance id
-			MailBoxConfigurationDAO mbxDAO = new MailBoxConfigurationDAOBase();
-			MailBox mbx = mbxDAO.findActiveMailBox(mailBoxGuid);
-			if (mbx == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxGuid);
-			}
-			MailBoxConfigurationService mbxConfService = new MailBoxConfigurationService();
-			mbxConfService.createPrivilegePermissionLink(serviceRequest.getProcessor().getServiceInstanceId(), mbx);
-			
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
 			configDAO.persist(processor);
+			
+			//linking mailbox and service instance id
+			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
+			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(processor.getMailbox().getPguid(), serviceInstance.getPguid());
+			
+			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
+			MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, processor.getMailbox().getPguid());
+			if (null == mailBox) {
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, processor.getMailbox().getPguid());
+			}
+			
+			if (mailboxServiceInstance == null) {
+				//Creates relationship mailbox and service instance id
+				MailboxServiceInstance msi = new MailboxServiceInstance();
+				msi.setPguid(MailBoxUtility.getGUID());
+				msi.setServiceInstanceId(serviceInstance);
+				msi.setMailbox(mailBox);
+				msiDao.persist(msi);
+			} 
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey())));

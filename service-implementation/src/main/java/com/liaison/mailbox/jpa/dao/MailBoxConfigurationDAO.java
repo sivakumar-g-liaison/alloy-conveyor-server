@@ -9,8 +9,8 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.MailBox;
 
 @NamedQueries({
-		@NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_NAME,
-				query = "SELECT mbc FROM MailBox mbc where LOWER(mbc.mbxName) like :" + MailBoxConfigurationDAO.MBX_NAME),
+		@NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME,
+				query = "SELECT mbc FROM MailBox mbc where LOWER(mbc.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME),
 		@NamedQuery(name = MailBoxConfigurationDAO.FIND_ACTIVE_MAILBOX_BY_PGUID,
 				query = "SELECT mbc FROM MailBox mbc WHERE mbc.mbxStatus = 'active' and mbc.pguid = :"
 						+ MailBoxConfigurationDAO.PGUID),
@@ -27,7 +27,7 @@ import com.liaison.mailbox.jpa.model.MailBox;
 						+ " inner join mbx.mailboxProcessors prcsr"
 						+ " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
 						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
-						+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBX_NAME
+						+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
 						+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
 						+ " order by mbx.mbxName"),
 		@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX_BY_GUID_AND_PROCSR_SERVICE_INST_ID,
@@ -41,11 +41,11 @@ import com.liaison.mailbox.jpa.model.MailBox;
 })
 public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 
-	public static final String FIND_BY_NAME = "findByName";
+	public static final String FIND_BY_MBX_NAME = "findByMboxName";
 	public static final String FIND_ACTIVE_MAILBOX_BY_PGUID = "findActiveMailBoxCompByProfile";
 	public static final String INACTIVATE_MAILBOX = "inActivateMailBoxByGUID";
 	public static final String PGUID = "pguid";
-	public static final String MBX_NAME = "mbx_name";
+	public static final String MBOX_NAME = "mbox_name";
 	public static final String GET_MBX = "findMailBoxes";
 	public static final String SCHD_PROF_NAME = "schd_name";
 	public static final String GET_MBX_BY_GUID_AND_PROCSR_SERVICE_INST_ID = "get_mbx_guid_sid";
@@ -54,7 +54,7 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 
 	public MailBox findActiveMailBox(String guid);
 	
-	public MailBox findMailBox(String guid);
+	public MailBox findMailBox(String guid, String serviceInstanceId);
 
 	public int deactiveMailBox(String guid);
 

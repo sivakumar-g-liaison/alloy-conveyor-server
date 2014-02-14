@@ -35,6 +35,7 @@ import com.liaison.mailbox.jpa.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailboxServiceInstance;
+import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ServiceInstanceId;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
@@ -95,7 +96,7 @@ public class MailBoxConfigurationService {
 			mailBox.setPguid(MailBoxUtility.getGUID());
 			
 			//creating a link between mailbox and service instance table
-			createPrivilegePermissionLink(request.getMailBox().getServiceInstanceId(), mailBox);
+			createMailboxServiceInstanceIdLink(request.getMailBox().getServiceInstanceId(), mailBox);
 
 			// persisting the mailbox entity
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
@@ -118,7 +119,7 @@ public class MailBoxConfigurationService {
 
 	}
 	
-	public void createPrivilegePermissionLink(String serviceInstanceID, MailBox mailbox) throws MailBoxConfigurationServicesException {
+	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox) throws MailBoxConfigurationServicesException {
 		
 		try {
 
@@ -139,7 +140,7 @@ public class MailBoxConfigurationService {
 				msi.setServiceInstanceId(serviceInstance);
 				mbxServiceInstances.add(msi);
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
-			}
+			} 
 		
 		} catch (MailBoxConfigurationServicesException e) {
 			LOG.error("Error while creating a link between mailbox and service instance id.", e);
@@ -147,7 +148,7 @@ public class MailBoxConfigurationService {
 	}
 
 	/**
-	 * Get the mailbox using guid.
+	 * Get the mailbox using guid and its processor using service instance id.
 	 * 
 	 * @param guid
 	 *            The guid of the mailbox.
@@ -158,7 +159,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public GetMailBoxResponseDTO getMailBox(String guid) throws JsonParseException, JsonMappingException, JAXBException,
+	public GetMailBoxResponseDTO getMailBox(String guid, String  serviceInstanceId, boolean addConstraint) throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, SymmetricAlgorithmException {
 
 		LOG.info("Entering into get mailbox.");
@@ -170,7 +171,21 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			MailBox mailBox = configDao.find(MailBox.class, guid);
+			MailBox mailBoxWithAllProcessors = configDao.find(MailBox.class, guid);
+			MailBox filteredMailbox = new MailBox();
+			MailBox mailBox = new MailBox();
+			if(addConstraint) {				
+				filteredMailbox = mailBoxWithAllProcessors;
+				for(Processor procc : mailBoxWithAllProcessors.getMailboxProcessors()) {
+					if(!procc.getServiceInstance().getName().equals(serviceInstanceId)) {
+						filteredMailbox.getMailboxProcessors().remove(mailBoxWithAllProcessors.getMailboxProcessors().indexOf(procc));
+					}
+				}
+				mailBox = filteredMailbox;
+			} else {
+				mailBox = mailBoxWithAllProcessors; 
+			}
+			
 			if (mailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
@@ -192,6 +207,7 @@ public class MailBoxConfigurationService {
 		}
 
 	}
+	
 
 	/**
 	 * Method revise the mailbox configurations.
@@ -233,7 +249,7 @@ public class MailBoxConfigurationService {
 			retrievedMailBox.getMailboxProperties().clear();
 
 			//creating a link between mailbox and service instance table
-			createPrivilegePermissionLink(request.getMailBox().getServiceInstanceId(), retrievedMailBox);
+//			createMailboxServiceInstanceIdLink(request.getMailBox().getServiceInstanceId(), retrievedMailBox);
 			
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
@@ -315,6 +331,11 @@ public class MailBoxConfigurationService {
 			
 			String primarySIId = searchMailboxRequestDTO.getPrimaryServiceInstanceId();
 			List<String> secondarySIIds = searchMailboxRequestDTO.getSecondaryServiceInstanceIds();
+			
+			//combining the primary and secondary SI ids
+			Set<String> combinedServiceInstanceIds = new HashSet<>();
+			combinedServiceInstanceIds.add(primarySIId);
+			combinedServiceInstanceIds.addAll(secondarySIIds);
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
@@ -322,16 +343,14 @@ public class MailBoxConfigurationService {
 			Set<MailBox> retrievedMailBoxesTobeSent = new HashSet<>();
 			//below checking will filter the mailboxes based on primary and secondary service instance ids
 			if (!MailBoxUtility.isEmpty(profName)) {
-				Set<MailBox> retrievedMailBoxes = new HashSet<>();
-				retrievedMailBoxes = configDao.find(mbxName, profName);
+				
+				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
+				
 				for(MailBox mb : retrievedMailBoxes) {
 					List<MailboxServiceInstance> mbsis = mb.getMailboxServiceInstances();
-					for(MailboxServiceInstance mbsi : mbsis) {
-						if(mbsi.getServiceInstanceId().getName().equals(primarySIId)) {
-							retrievedMailBoxesTobeSent.add(mb);
-						}
-						for(String secSIId : secondarySIIds) {
-							if(mbsi.getServiceInstanceId().getName().equals(secSIId)) {
+					for(MailboxServiceInstance mbsi : mbsis) {						
+						for(String SIId : combinedServiceInstanceIds) {
+							if(mbsi.getServiceInstanceId().getName().equals(SIId)) {
 								retrievedMailBoxesTobeSent.add(mb);
 							}
 						}
@@ -348,11 +367,8 @@ public class MailBoxConfigurationService {
 				for(MailBox mb : retrievedMailBoxesUsingName) {
 					List<MailboxServiceInstance> mbsis = mb.getMailboxServiceInstances();
 					for(MailboxServiceInstance mbsi : mbsis) {
-						if(mbsi.getServiceInstanceId().getName().equals(primarySIId)) {
-							retrievedMailBoxesTobeSent.add(mb);
-						}
-						for(String secSIId : secondarySIIds) {
-							if(mbsi.getServiceInstanceId().getName().equals(secSIId)) {
+						for(String SIId : combinedServiceInstanceIds) {
+							if(mbsi.getServiceInstanceId().getName().equals(SIId)) {
 								retrievedMailBoxesTobeSent.add(mb);
 							}
 						}

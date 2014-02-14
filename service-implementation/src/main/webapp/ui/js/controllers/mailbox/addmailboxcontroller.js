@@ -69,7 +69,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 //$scope.sharedService.setProperty('test');
 
                 block.blockUI();
-                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId, //Get mail box Data
+                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?serviceInstanceId=' + $rootScope.serviceInstancePrimaryId+ '&addServiceInstanceIdConstraint=' + false, //Get mail box Data
                     function (data) {
 
                         block.unblockUI();

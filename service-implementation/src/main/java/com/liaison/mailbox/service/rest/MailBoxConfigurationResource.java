@@ -241,7 +241,8 @@ public class MailBoxConfigurationResource {
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response readMailBox(@PathParam(value = "id") String guid) {
+	public Response readMailBox(@PathParam(value = "id") String guid, @QueryParam(value = "serviceInstanceId") String serviceInstanceId,
+			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -252,7 +253,7 @@ public class MailBoxConfigurationResource {
 			// add the new profile details
 			GetMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.getMailBox(guid);
+			serviceResponse = mailbox.getMailBox(guid, serviceInstanceId, addConstraint);
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -269,44 +270,50 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
-	/*@GET
-	@Path("/{id}/processorSID/{sid}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getMailBoxByGuidAndServiceInstId(@PathParam(value = "id") String guid, 
-			@PathParam(value = "sid") Integer serviceInstId) {
 
-		serviceCallCounter.addAndGet(1);
+	/*
+	 * @GET
+	 * 
+	 * @Path("/{id}/processorSID/{sid}")
+	 * 
+	 * @Consumes(MediaType.APPLICATION_JSON)
+	 * 
+	 * @Produces(MediaType.APPLICATION_JSON) public Response
+	 * getMailBoxByGuidAndServiceInstId(@PathParam(value = "id") String guid,
+	 * 
+	 * @PathParam(value = "sid") Integer serviceInstId) {
+	 * 
+	 * serviceCallCounter.addAndGet(1);
+	 * 
+	 * Response returnResponse;
+	 * 
+	 * try {
+	 * 
+	 * // add the new profile details GetMailBoxResponseDTO serviceResponse =
+	 * null; MailBoxConfigurationService mailbox = new
+	 * MailBoxConfigurationService(); serviceResponse =
+	 * mailbox.getMailBoxByGuidAndServiceInstId(guid, serviceInstId);
+	 * 
+	 * returnResponse = serviceResponse.constructResponse(); } catch (Exception
+	 * e) {
+	 * 
+	 * int f = failureCounter.addAndGet(1); String errMsg =
+	 * "MailBoxConfigurationResource failure number: " + f + "\n" + e;
+	 * LOG.error(errMsg, e);
+	 * 
+	 * // should be throwing out of domain scope and into framework using //
+	 * above code returnResponse = Response.status(500).header("Content-Type",
+	 * MediaType.TEXT_PLAIN).entity(errMsg).build(); }
+	 * 
+	 * return returnResponse;
+	 * 
+	 * }
+	 */
 
-		Response returnResponse;
-
-		try {
-
-			// add the new profile details
-			GetMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.getMailBoxByGuidAndServiceInstId(guid, serviceInstId);
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-
-		return returnResponse;
-
-	}*/
-	
 	/**
 	 * 
 	 * REST method for uploading Self Signed TrustStore
+	 * 
 	 * @return Response Object
 	 */
 	@GET
@@ -341,7 +348,6 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
 
 	/**
 	 * REST method to initiate profile creation.
@@ -495,8 +501,7 @@ public class MailBoxConfigurationResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid,
-			@PathParam(value = "processorid") String guid) {
+	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -540,8 +545,7 @@ public class MailBoxConfigurationResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getProcessor(@PathParam(value = "mailboxid") String mailboxguid,
-			@PathParam(value = "processorid") String guid) {
+	public Response getProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -570,7 +574,7 @@ public class MailBoxConfigurationResource {
 		return returnResponse;
 
 	}
-	
+
 	/**
 	 * REST method to update existing processor.
 	 * 
@@ -624,8 +628,8 @@ public class MailBoxConfigurationResource {
 	}
 
 	/**
-	 * Rest method to search the mailbox based on the given query parameters. If both are empty it
-	 * returns all mailboxes.
+	 * Rest method to search the mailbox based on the given query parameters. If
+	 * both are empty it returns all mailboxes.
 	 * 
 	 * @param mbxName
 	 *            The mailbox name should be searched
@@ -646,7 +650,7 @@ public class MailBoxConfigurationResource {
 		InputStream requestStream;
 
 		try {
-			
+
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
@@ -707,8 +711,7 @@ public class MailBoxConfigurationResource {
 	@POST
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response httpServerListener(@Context HttpServletRequest request,
-			@HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
+	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
 			@HeaderParam(MailBoxConstants.FILE_NAME_HEADER) String filename) {
 
 		serviceCallCounter.addAndGet(1);
@@ -756,8 +759,7 @@ public class MailBoxConfigurationResource {
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			LOG.info("The directory sweeper meta data json : " + new JSONObject(requestString).toString(2));
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
-					.entity(Messages.SUCCESS.value()).build();
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(Messages.SUCCESS.value()).build();
 
 		} catch (Exception e) {
 
@@ -785,8 +787,7 @@ public class MailBoxConfigurationResource {
 		try {
 
 			LOG.info("The directory sweeper meta data json ");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry")
-					.build();
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry").build();
 
 		} catch (Exception e) {
 
@@ -806,8 +807,7 @@ public class MailBoxConfigurationResource {
 	@Path("/basicauth")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response httpServerListener(@Context HttpServletRequest request,
-			@HeaderParam("Authorization") String auth) {
+	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam("Authorization") String auth) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -816,8 +816,7 @@ public class MailBoxConfigurationResource {
 		try {
 
 			LOG.info("Successfully retrieved the auth header : {} ", auth);
-			returnResponse = Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity(auth)
-					.build();
+			returnResponse = Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity(auth).build();
 
 		} catch (Exception e) {
 
@@ -832,20 +831,20 @@ public class MailBoxConfigurationResource {
 
 		return returnResponse;
 	}
-	
+
 	/**
 	 * REST method to search profiles by profile Name.
 	 * 
-	 *  @param profileName
-	 *  		The profile name should be searched
-	 *            
+	 * @param profileName
+	 *            The profile name should be searched
+	 * 
 	 * @return Response Object
 	 */
 	@GET
 	@Path("/findprofile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findProfiles(@QueryParam(value = "name") String  profileName) {
+	public Response findProfiles(@QueryParam(value = "name") String profileName) {
 
 		serviceCallCounter.addAndGet(1);
 
@@ -870,7 +869,7 @@ public class MailBoxConfigurationResource {
 		}
 		return returnResponse;
 	}
-	
+
 	@GET
 	@Path("/listCertificates")
 	@Produces(MediaType.APPLICATION_JSON)
