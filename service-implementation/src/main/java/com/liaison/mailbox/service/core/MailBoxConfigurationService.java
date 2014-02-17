@@ -120,31 +120,25 @@ public class MailBoxConfigurationService {
 	}
 	
 	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox) throws MailBoxConfigurationServicesException {
-		
-		try {
 
-			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceInstanceID);
-			if (serviceInstance == null) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, serviceInstanceID);
-			}
-				
-			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
-			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(), serviceInstance.getPguid());
-			
-			List<MailboxServiceInstance> mbxServiceInstances = new ArrayList<MailboxServiceInstance>();
-			if (mailboxServiceInstance == null) {
-				//Creates relationship mailbox and service instance id
-				MailboxServiceInstance msi = new MailboxServiceInstance();
-				msi.setPguid(MailBoxUtility.getGUID());
-				msi.setServiceInstanceId(serviceInstance);
-				mbxServiceInstances.add(msi);
-				mailbox.setMailboxServiceInstances(mbxServiceInstances);
-			} 
-		
-		} catch (MailBoxConfigurationServicesException e) {
-			LOG.error("Error while creating a link between mailbox and service instance id.", e);
+		ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
+		ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceInstanceID);
+		if (serviceInstance == null) {
+			throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, serviceInstanceID);
 		}
+			
+		MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
+		MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(), serviceInstance.getPguid());
+		
+		List<MailboxServiceInstance> mbxServiceInstances = new ArrayList<MailboxServiceInstance>();
+		if (mailboxServiceInstance == null) {
+			//Creates relationship mailbox and service instance id
+			MailboxServiceInstance msi = new MailboxServiceInstance();
+			msi.setPguid(MailBoxUtility.getGUID());
+			msi.setServiceInstanceId(serviceInstance);
+			mbxServiceInstances.add(msi);
+			mailbox.setMailboxServiceInstances(mbxServiceInstances);
+		} 
 	}
 
 	/**
@@ -160,53 +154,49 @@ public class MailBoxConfigurationService {
 	 * @throws JsonParseException
 	 */
 	public GetMailBoxResponseDTO getMailBox(String guid, String  serviceInstanceId, boolean addConstraint) throws JsonParseException, JsonMappingException, JAXBException,
-			IOException, SymmetricAlgorithmException {
+		IOException, SymmetricAlgorithmException {
 
 		LOG.info("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);
-
+		
 		GetMailBoxResponseDTO serviceResponse = new GetMailBoxResponseDTO();
-
+		
 		try {
-
+		
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			MailBox mailBoxWithAllProcessors = configDao.find(MailBox.class, guid);
-			MailBox filteredMailbox = new MailBox();
-			MailBox mailBox = new MailBox();
-			if(addConstraint) {				
-				filteredMailbox = mailBoxWithAllProcessors;
-				for(Processor procc : mailBoxWithAllProcessors.getMailboxProcessors()) {
-					if(!procc.getServiceInstance().getName().equals(serviceInstanceId)) {
-						filteredMailbox.getMailboxProcessors().remove(mailBoxWithAllProcessors.getMailboxProcessors().indexOf(procc));
+			MailBox mailBox = configDao.find(MailBox.class, guid);
+			List<Processor> filteredProcessors = new ArrayList<Processor>();
+			if(addConstraint) {	
+				for(Processor proc : mailBox.getMailboxProcessors()) {
+					if(proc.getServiceInstance().getName().equals(serviceInstanceId)) {
+						filteredProcessors.add(proc);
 					}
 				}
-				mailBox = filteredMailbox;
-			} else {
-				mailBox = mailBoxWithAllProcessors; 
-			}
+				mailBox.setMailboxProcessors(filteredProcessors);
+			} 
 			
 			if (mailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
-
+		
 			MailBoxDTO dto = new MailBoxDTO();
 			dto.copyFromEntity(mailBox);
-
+		
 			serviceResponse.setMailBox(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			LOG.info("Exit from get mailbox.");
 			return serviceResponse;
-
+		
 		} catch (MailBoxConfigurationServicesException e) {
-
+		
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse
 					.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
-
-	}
+		
+		}	
 	
 
 	/**
@@ -245,15 +235,33 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL);
 			}
 
+
 			// Removing the child items.
 			retrievedMailBox.getMailboxProperties().clear();
-
-			//creating a link between mailbox and service instance table
-//			createMailboxServiceInstanceIdLink(request.getMailBox().getServiceInstanceId(), retrievedMailBox);
 			
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
 			configDao.merge(retrievedMailBox);
+			
+			//creating a link between mailbox and service instance table
+//			createMailboxServiceInstanceIdLink(c, retrievedMailBox);
+			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
+			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(request.getMailBox().getServiceInstanceId());
+			if (serviceInstance == null) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, request.getMailBox().getServiceInstanceId());
+			}
+			
+			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
+			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(guid, serviceInstance.getPguid());
+			if (mailboxServiceInstance == null) {
+				
+				//Creates relationship mailbox and service instance id
+				MailboxServiceInstance msi = new MailboxServiceInstance();
+				msi.setPguid(MailBoxUtility.getGUID());
+				msi.setServiceInstanceId(serviceInstance);
+				msi.setMailbox(retrievedMailBox);
+				msiDao.persist(msi);
+			}
 			
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
@@ -374,18 +382,11 @@ public class MailBoxConfigurationService {
 						}
 					}
 				}
-				
-				
-//				if (retrievedMailBoxesTobeSent.isEmpty() && !retrievedMailBoxesUsingName.isEmpty()) {
-//					retrievedMailBoxesTobeSent = retrievedMailBoxesUsingName;
-//				} else {
-//					retrievedMailBoxesTobeSent.addAll(retrievedMailBoxesUsingName);
-//				}
 			}
+			
 			if (MailBoxUtility.isEmpty(profName) && MailBoxUtility.isEmpty(mbxName)){
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA);
 			}
-			
 			
 			if (null == retrievedMailBoxesTobeSent || retrievedMailBoxesTobeSent.isEmpty()) {
 				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS,MAILBOX);
