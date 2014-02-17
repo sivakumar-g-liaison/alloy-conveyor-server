@@ -25,7 +25,6 @@ def main( argv ):
 
     # Process command line arguments
     # -------------------------------
-    isMonikerSupplied = False
     for opt, arg in opts:
         if opt == '-h':
             printUsage()
@@ -34,7 +33,6 @@ def main( argv ):
             userprefix = arg;
         elif opt in ("-m", "--moniker"):
             moniker = arg;
-            isMonikerSupplied = True
         elif opt in ("-a", "--applpassword"):
             applpassword = arg;
         elif opt in ("-o", "--ownerpassword"):
@@ -43,10 +41,6 @@ def main( argv ):
             syspassword = arg;
         elif opt in ("-t", "--tnsname"):
             tnsname = arg;
-
-    if isMonikerSupplied == False:
-        printUsage()
-        sys.exit( 2 )
 
     # Very important that these things be upper case.
     moniker = moniker.upper()
@@ -193,7 +187,7 @@ def printUsage():
     print '    provision.py -u <userprefix> -m <moniker> -a <applpassword> -o <ownerpassword> -s <syspassword> -t <tnsname>'
     print 'Arguments:'
     print ' --moniker (-m):       an optional parameter that defines the base name from which'
-    print '                       database usernames are built from. (default "MBX")'
+    print '                       database usernames are built from. (default "GATEWAY")'
     print ' --userprefix (-u):    an additional optional parameter that is added to the'
     print '                       moniker as a prefix.'
     print '                       (This is useful for deploying the same schema multiple times'
