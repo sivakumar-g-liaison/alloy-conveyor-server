@@ -72,8 +72,8 @@
     /*This class is added to align the button glyphicon-plus-sign in gridOptionsForProcessor grid*/
  	div .alignButton {
 		margin-left: 15px;
-	}	
-    .infoiconimg {
+	}		
+	.infoiconimg {
        height: 15px; width: 15px; overflow: hidden;     
    }
 </style>
@@ -123,7 +123,7 @@
                 <div class="col-sm-6 col-md-6">
                     <div class="form-group">
                         <label>
-                            Name
+                            Name *
                         </label>
                         <input id="mbx-procsr-name" type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
@@ -288,14 +288,15 @@
                             </label>
                             <input id="mbx-procsr-certificatePath" type="text" ng-model="certificateModal.certificateURI" class="form-control" ng-disabled="true">
                         </div>
-                        <div class="col-sm-1 col-md-1 removePaddingLeft">
+                        <div class="col-md-2 removePaddingLeft">
                             <br>
-
-                            <div class="fileUpload btn btn-primary">
-                                <span>Browse</span>
-                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" />                            </div>
+                            <div class="fileUpload btn btn-primary" ng-disabled="disableBrowseButton">
+                                <span>Add</span>
+                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" /> 
+						    </div>
+							<button id="mbx-procsr-certificateRemove" ng-disabled="disableBrowseButton" class="btn btn-primary" style="margin-top:5px" ng-click="doRemove()">Remove</button>
                         </div>
-                        <div class="col-sm-6 col-md-6">
+                        <div class="col-sm-5 col-md-5">
                             <div class="form-group">
                                 <label>
                                     Add certificate to global trust store?

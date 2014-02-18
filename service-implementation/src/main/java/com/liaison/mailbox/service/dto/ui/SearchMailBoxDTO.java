@@ -134,10 +134,6 @@ public class SearchMailBoxDTO {
 
 		this.setShardKey(mailBox.getShardKey());
 
-		if (null != mailBox.getServiceInstId()) {
-			this.setServiceInstId(mailBox.getServiceInstId().intValue());
-		}
-
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {
 
