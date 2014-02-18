@@ -89,10 +89,7 @@ public enum Messages {
 	DATA_PREPOPULATE("Data populated successfully"),
 	
 	// KMS Messages
-	SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed"),
-	
-	//for service instance id
-	NO_VALID_SERVICE_INSTANCE_ID("%s - Invalid service instance id.");
+	SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed");
 
 	private String value;
 

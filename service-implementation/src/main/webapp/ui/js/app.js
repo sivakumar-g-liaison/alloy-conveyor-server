@@ -135,8 +135,14 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
     $rootScope.authService = AuthService;
 	$rootScope.pipelineId = null;
-	$rootScope.serviceInstancePrimaryId = prompt("Enter Primary ServiceInstance Id : ", "");
-	$rootScope.serviceInstanceSecondaryId = prompt("Enter Secondary ServiceInstance Id : ", "");
+	$rootScope.serviceInstancePrimaryId = prompt("NOTE: This is a temporary arrangement till the INTEGRATION with ACL. " +
+													"Actual impelentation is to retrive this from ACL manifest." +
+													"Make sure you always use a same ID everytime you lauch the UI inorder to search/revise the mailbox and/or processors you added " +
+													"Enter PRIMARY Service Instance Id : ", "");
+	$rootScope.serviceInstanceSecondaryId = prompt("NOTE: This is a temporary arrangement till the INTEGRATION with ACL. " +
+													"Actual impelentation is to retrive this from ACL manifest." +
+													"Make sure you always use a same ID everytime you lauch the UI inorder to search/revise the mailbox and/or processors you added " +
+													"Enter SECONDARY Service Instance Id : ", "");
     // text input for login/password (only)
     $rootScope.loginInput = 'rob@gmail.com';
     $rootScope.passwordInput = 'complexpassword';
