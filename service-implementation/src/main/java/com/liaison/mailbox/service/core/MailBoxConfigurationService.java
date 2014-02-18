@@ -124,7 +124,10 @@ public class MailBoxConfigurationService {
 		ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 		ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceInstanceID);
 		if (serviceInstance == null) {
-			throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, serviceInstanceID);
+			serviceInstance = new ServiceInstanceId();
+			serviceInstance.setName(serviceInstanceID);
+			serviceInstance.setPguid(MailBoxUtility.getGUID());
+			serviceInstanceDAO.persist(serviceInstance);
 		}
 			
 		MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
@@ -248,7 +251,10 @@ public class MailBoxConfigurationService {
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(request.getMailBox().getServiceInstanceId());
 			if (serviceInstance == null) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, request.getMailBox().getServiceInstanceId());
+				serviceInstance = new ServiceInstanceId();
+				serviceInstance.setName(request.getMailBox().getServiceInstanceId());
+				serviceInstance.setPguid(MailBoxUtility.getGUID());
+				serviceInstanceDAO.persist(serviceInstance);
 			}
 			
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();

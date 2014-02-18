@@ -131,7 +131,10 @@ public class ProcessorConfigurationService {
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceRequest.getProcessor().getServiceInstanceId());
 			if (serviceInstance == null) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_VALID_SERVICE_INSTANCE_ID, serviceRequest.getProcessor().getServiceInstanceId());
+				serviceInstance = new ServiceInstanceId();
+				serviceInstance.setName(serviceRequest.getProcessor().getServiceInstanceId());
+				serviceInstance.setPguid(MailBoxUtility.getGUID());
+				serviceInstanceDAO.persist(serviceInstance);
 			}
 			
 			// Instantiate the processor and copying the values from DTO to
