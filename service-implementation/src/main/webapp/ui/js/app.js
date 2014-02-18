@@ -139,7 +139,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 													"Actual impelentation is to retrive this from ACL manifest." +
 													"Make sure you always use a same ID everytime you lauch the UI inorder to search/revise the mailbox and/or processors you added " +
 													"Enter PRIMARY Service Instance Id : ", "");
-	$rootScope.serviceInstanceSecondaryId = ("NOTE: This is a temporary arrangement till the INTEGRATION with ACL. " +
+	$rootScope.serviceInstanceSecondaryId = prompt("NOTE: This is a temporary arrangement till the INTEGRATION with ACL. " +
 													"Actual impelentation is to retrive this from ACL manifest." +
 													"Make sure you always use a same ID everytime you lauch the UI inorder to search/revise the mailbox and/or processors you added " +
 													"Enter SECONDARY Service Instance Id : ", "");
