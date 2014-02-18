@@ -18,7 +18,7 @@
                     <div class="row">
                        <div class="col-md-6">
                           
-                            <label for="profilename">Name</label>
+                            <label for="profilename">Name *</label>
                             <input id="mbx-profile-name" type="text" name="profilename" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
                             ng-minLength=5 ng-maxLength=80 class="form-control" />
                             <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">

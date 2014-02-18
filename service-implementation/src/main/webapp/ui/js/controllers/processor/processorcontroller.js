@@ -2248,5 +2248,9 @@ var rest = myApp.controller(
             } else {
                 $scope.portRequired = false;
             }
+            
+            $scope.doRemove = function() {			
+  			   $scope.certificateModal.certificateURI = '';
+  			}
         }
     ]);
