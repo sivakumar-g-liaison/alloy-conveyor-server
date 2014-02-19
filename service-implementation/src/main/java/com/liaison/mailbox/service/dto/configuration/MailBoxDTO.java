@@ -43,6 +43,8 @@ public class MailBoxDTO {
 	private String status;
 	private Integer serviceInstId;
 	private String shardKey;
+	private String serviceInstanceId;
+
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
 
@@ -96,6 +98,14 @@ public class MailBoxDTO {
 	public void setShardKey(String shardKey) {
 		this.shardKey = shardKey;
 	}
+	
+	public String getServiceInstanceId() {
+		return serviceInstanceId;
+	}
+
+	public void setServiceInstanceId(String serviceInstanceId) {
+		this.serviceInstanceId = serviceInstanceId;
+	}
 
 	public List<PropertyDTO> getProperties() {
 
@@ -133,11 +143,7 @@ public class MailBoxDTO {
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
-		if (null != this.getServiceInstId()) {
-			mailBox.setServiceInstId(new BigDecimal(this.getServiceInstId()));
-		} else {
-			mailBox.setServiceInstId(null);
-		}
+		
 
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
@@ -180,9 +186,6 @@ public class MailBoxDTO {
 
 		this.setShardKey(mailBox.getShardKey());
 
-		if (null != mailBox.getServiceInstId()) {
-			this.setServiceInstId(mailBox.getServiceInstId().intValue());
-		}
 
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

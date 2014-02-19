@@ -40,14 +40,14 @@ public class MailBox implements Identifiable {
 	private String mbxDesc;
 	private String mbxName;
 	private String mbxStatus;
-	private BigDecimal serviceInstId;
 	private String shardKey;
 	private List<MailBoxProperty> mailboxProperties;
 	private List<Processor> mailboxProcessors;
-
+	private List<MailboxServiceInstance> mailboxServiceInstances;
+	
 	public MailBox() {
 	}
-
+	
 	@Id
 	@Column(unique = true, nullable = false, length = 32)
 	public String getPguid() {
@@ -83,15 +83,6 @@ public class MailBox implements Identifiable {
 
 	public void setMbxStatus(String mbxStatus) {
 		this.mbxStatus = mbxStatus;
-	}
-
-	@Column(name = "SERVICE_INST_ID")
-	public BigDecimal getServiceInstId() {
-		return this.serviceInstId;
-	}
-
-	public void setServiceInstId(BigDecimal serviceInstId) {
-		this.serviceInstId = serviceInstId;
 	}
 
 	@Column(name = "SHARD_KEY", length = 512)
@@ -138,6 +129,16 @@ public class MailBox implements Identifiable {
 
 	public void setMailboxProcessors(List<Processor> mailboxProcessors) {
 		this.mailboxProcessors = mailboxProcessors;
+	}
+	
+	@OneToMany(mappedBy = "mailbox", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	public List<MailboxServiceInstance> getMailboxServiceInstances() {
+		return mailboxServiceInstances;
+	}
+
+	public void setMailboxServiceInstances(List<MailboxServiceInstance> mailboxServiceInstances) {
+		this.mailboxServiceInstances = mailboxServiceInstances;
 	}
 
 	@Override

@@ -129,7 +129,8 @@ var rest = myApp.controller(
                     folders: [],
                     credentials: [],
                     dynamicProperties: [],
-                    remoteProcessorProperties: {}
+                    remoteProcessorProperties: {},
+                    serviceInstanceId: $rootScope.serviceInstancePrimaryId
                 };
                 $scope.modal = {
                     "roleList": '',
@@ -1018,7 +1019,7 @@ var rest = myApp.controller(
                 currentPage: 1
             };
             $scope.readAllProcessors = function () {
-                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId, //Get mail box Data
+                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?serviceInstanceId=' + $rootScope.serviceInstancePrimaryId+ '&addServiceInstanceIdConstraint=' + true, //Get mail box Data
                     function (data) {
                         $scope.getPagedDataAsync(data,
                             $scope.pagingOptions.pageSize,
@@ -2247,5 +2248,9 @@ var rest = myApp.controller(
             } else {
                 $scope.portRequired = false;
             }
+            
+            $scope.doRemove = function() {			
+  			   $scope.certificateModal.certificateURI = '';
+  			}
         }
     ]);

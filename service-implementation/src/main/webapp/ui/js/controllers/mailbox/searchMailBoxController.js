@@ -3,8 +3,8 @@
 /**
  * Controller for Configure mailbox setup search screen.
  */
-myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',
-    function ($rootScope, $scope, $location) {
+myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '$filter',
+    function ($rootScope, $scope, $location, $filter) {
 
 		$rootScope.pipelineId = $location.search().pipeLineId;
         $scope.title = "MailBox Profiles"; // title
@@ -24,6 +24,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',
 
         // Profiles loads initially
         $scope.profiles = [];
+        
+        //SIIds
+        $scope.serviceInstanceIdsForSearch = {
+        		searchMailboxRequest :{
+        			primaryServiceInstanceId: $rootScope.serviceInstancePrimaryId,
+                	secondaryServiceInstanceIds:	[
+                	              	 	$rootScope.serviceInstanceSecondaryId
+                	              	]
+        		}
+        };
 
         // Loading the profile details
         $scope.loadProfiles = function () {
@@ -119,7 +129,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',
         // Enable the delete modal dialog
         $scope.openDelete = function (row) {
             $scope.key = row.entity;
-            //$scope.deleteKey = true;
+            // $scope.deleteKey = true;
         };
 
         // Enable the delete modal dialog
@@ -174,7 +184,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',
             }
 
             $scope.hitCounter = $scope.hitCounter + 1;
-            $scope.restService.get($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName + '&hitCounter=' + $scope.hitCounter,
+            $scope.restService.put($scope.base_url + "/" + '?name=' + mbxName + '&profile=' + profName + '&hitCounter=' + $scope.hitCounter, $filter('json')($scope.serviceInstanceIdsForSearch),
                 function (data, status) {
                     if (status == 200) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {

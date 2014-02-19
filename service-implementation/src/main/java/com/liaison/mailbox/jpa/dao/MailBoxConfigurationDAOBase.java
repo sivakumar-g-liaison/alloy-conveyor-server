@@ -24,12 +24,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
-			List<MailBox> mailBox = entityManager.createNamedQuery(FIND_ACTIVE_MAILBOX_BY_PGUID).setParameter(PGUID, guid)
+			List<?> mailBox = entityManager.createNamedQuery(FIND_ACTIVE_MAILBOX_BY_PGUID).setParameter(PGUID, guid)
 					.getResultList();
-			Iterator<MailBox> iter = mailBox.iterator();
+			Iterator<?> iter = mailBox.iterator();
 
 			while (iter.hasNext()) {
-				return iter.next();
+				return (MailBox) iter.next();
 			}
 
 		} finally {
@@ -39,7 +39,29 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return null;
 	}
+	
+	@Override
+	public MailBox findMailBox(String guid, String serviceInstId) {
 
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		try {
+
+			List<?> mailBox = entityManager.createNamedQuery(FIND_MAILBOX_BY_PGUID_SIID).setParameter(PGUID, guid).setParameter(SERVICE_INST_ID, serviceInstId)
+					.getResultList();
+			Iterator<?> iter = mailBox.iterator();
+
+			while (iter.hasNext()) {
+				return (MailBox) iter.next();
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public int deactiveMailBox(String guid) {
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
@@ -56,7 +78,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			List<?> object = em
 					.createNamedQuery(GET_MBX)
-					.setParameter(MailBoxConfigurationDAO.MBX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
+					.setParameter(MailBoxConfigurationDAO.MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(MailBoxConfigurationDAO.SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.getResultList();
 			Iterator<?> iter = object.iterator();
@@ -81,8 +103,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		try {
 
-			List<?> object = entityManager.createNamedQuery(FIND_BY_NAME)
-					.setParameter(MBX_NAME, "%" + mbxName.toLowerCase() + "%")
+			List<?> object = entityManager.createNamedQuery(FIND_BY_MBX_NAME)
+					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.getResultList();
 			Iterator<?> iter = object.iterator();
 
