@@ -188,9 +188,13 @@ if /I ""%REMEMBER%""==""y"" (
 
 :: Use cascading rules of thumb to locate JDK home
 :: First check local to the project
-set JDK_HOME=%TOOLS_JDK_HOME%
+if exist ""%TOOLS_JDK_HOME%\bin\java.exe""  (
+    set JAVA_HOME=%TOOLS_JDK_HOME%
+    goto APPLY_JCE_POLICY
+)
 if exist ""%REG_JAVA_HOME%\bin\java.exe""  (
-    set JDK_HOME=%REG_JAVA_HOME%
+    set JAVA_HOME=%REG_JAVA_HOME%
+    goto APPLY_JCE_POLICY
 )
 if exist ""%JDK_HOME%\bin\java.exe""  (
     set JAVA_HOME=%JDK_HOME%
