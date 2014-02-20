@@ -1171,6 +1171,18 @@ var rest = myApp.controller(
                                 } else {
                                     $scope.portRequired = false;
                                 }
+								
+								//GMB 221
+								if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
+									$scope.disableBrowseButton = false;
+									$scope.isFileSelected = true;
+									$scope.processor.isSelfSigned = 'N';
+								} else {
+									$scope.disableBrowseButton = true;
+									$scope.isFileSelected = false;
+									$scope.processor.isSelfSigned = "";
+								}
+			
                                 // Pushing out dynamis props
                                 $scope.processorProperties = []; //Removing now so that the add new option always shows below the available properties
                                 $scope.httpMandatoryProperties = [];
@@ -2251,6 +2263,11 @@ var rest = myApp.controller(
             
             $scope.doRemove = function() {			
   			   $scope.certificateModal.certificateURI = '';
+			   $scope.resetFiles();
   			}
+			
+			$scope.resetFiles = function() {
+				document.getElementById('fileToUpload').value = null;
+			}
         }
     ]);
