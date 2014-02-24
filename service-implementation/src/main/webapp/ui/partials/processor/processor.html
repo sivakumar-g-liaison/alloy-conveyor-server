@@ -73,9 +73,6 @@
  	div .alignButton {
 		margin-left: 15px;
 	}		
-	.infoiconimg {
-       height: 15px; width: 15px; overflow: hidden;     
-   }
 </style>
 
 <div class="container fade-in">
@@ -130,9 +127,9 @@
                             <span id="mbx-procsr-nameInvalid-pattern" class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
                             <span id="mbx-procsr-nameInvalid-required" class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
                             <span id="mbx-procsr-nameInvalid-minlength" class="custom-info-block" ng-show="formAddPrcsr.name.$error.minlength">
-                            <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Processor Name cannot be shorter than {{minimumLength}} characters.</span>
+                            <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be shorter than {{minimumLength}} characters.</span>
                             <span id="mbx-procsr-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddPrcsr.name.$error.maxlength">
-                            <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Processor Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
 
                         </div>
                     </div>
@@ -146,7 +143,7 @@
                         <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span id="mbx-procsr-descriptionInvalid-pattern" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
                             <span id="mbx-procsr-descriptionInvalid-maxlength" class="custom-info-block" ng-show="formAddPrcsr.description.$error.maxlength">
-                            <img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
+                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
                         </div>
                     </div>
                 </div>
@@ -292,7 +289,7 @@
                             <br>
                             <div class="fileUpload btn btn-primary" ng-disabled="disableBrowseButton">
                                 <span>Add</span>
-                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" /> 
+                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant ng-click="resetFiles()" onchange="angular.element(this).scope().setFiles(this)" /> 
 						    </div>
 							<button id="mbx-procsr-certificateRemove" ng-disabled="disableBrowseButton" class="btn btn-primary" style="margin-top:5px" ng-click="doRemove()">Remove</button>
                         </div>

@@ -144,10 +144,10 @@ dependencies {
     compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.0-SNAPSHOT', changing: true
 
     //Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
-    //compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
-    //compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
-    //    exclude group: "commons-net",  module: "commons-net"
-    //}
+    compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
+    compile ([group: "com.liaison", name: "spectrum-client", version: "0.0.1-SNAPSHOT", changing: true]){
+        exclude group: "commons-net",  module: "commons-net"
+    }
 
     // DataNucleus
     def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components

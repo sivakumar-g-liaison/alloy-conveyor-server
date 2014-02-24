@@ -144,7 +144,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
 		// variable to hold the status of file upload request execution
-		int replyCode = 0;
+		int replyCode = -1;
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
 
@@ -189,7 +189,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				if (null != item) {
 					
 					// File Uploading done successfully so move the file to processed folder
-					if (replyCode == 226 || replyCode == 250) {
+					if (replyCode == 0) {
 						
 						String processedFileLocation = processMountLocation(getDynamicProperties().getProperty(
 								MailBoxConstants.PROCESSED_FILE_LOCATION));
