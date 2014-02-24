@@ -837,22 +837,22 @@ var rest = myApp.controller(
                         <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:95%;height:45px" required  placeholder="required" name="folderuripayload" ng-pattern="' + $scope.inputPatternForFolderURI + '" ng-maxLength=250 />\n\
                                 <div ng-show="formAddPrcsr.folderuripayload.$dirty && formAddPrcsr.folderuripayload.$invalid">\n\
                                     <span class="help-block-custom" ng-show=formAddPrcsr.folderuripayload.$error.pattern>Invalid Folder URI.</span>\n\
-                                    <span class="custom-info-block" ng-show=formAddPrcsr.folderuripayload.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                                    <span class="custom-info-block" ng-show=formAddPrcsr.folderuripayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                            </div></div>\n\
                         <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:95%;height:45px" required  placeholder="required" name="folderuriresponse" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
                             <div ng-show="formAddPrcsr.folderuriresponse.$dirty && formAddPrcsr.folderuriresponse.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.pattern>Invalid Folder URI.</span>\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
+                                <span class="custom-info-block" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
 						<div ng-switch-when="TARGET_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:95%;height:45px" required  placeholder="required" name="folderuritarget" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
                             <div ng-show="formAddPrcsr.folderuritarget.$dirty && formAddPrcsr.folderuritarget.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.folderuritarget.$error.pattern>Invalid Folder URI.</span>\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.folderuritarget.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
+                                <span class="custom-info-block" ng-show=formAddPrcsr.folderuritarget.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea   class="form-control" name="folderuridefault" ng-model="COL_FIELD" style="width:95%;height:45px" placeholder="required" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
                     <div ng-show="formAddPrcsr.folderuridefault.$dirty && formAddPrcsr.folderuridefault.$invalid">\n\
                              <span class="help-block-custom" ng-show=formAddPrcsr.folderuridefault.$error.pattern>Invalid Folder URI.</span>\n\
-                             <span class="custom-info-block" ng-show=formAddPrcsr.folderuridefault.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                             <span class="custom-info-block" ng-show=formAddPrcsr.folderuridefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                         </div></div></div>'
                 }, {
                     field: "folderType",
@@ -871,22 +871,22 @@ var rest = myApp.controller(
                         <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                                 <div ng-show="formAddPrcsr.descriptionpayload.$dirty && formAddPrcsr.descriptionpayload.$invalid">\n\
                                     <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.pattern>Invalid Description.</span>\n\
-                                    <span class="custom-info-block" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                                    <span class="custom-info-block" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                            </div></div>\n\
                         <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                             <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.pattern>Invalid Description.</span>\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
+                                <span class="custom-info-block" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
 						<div ng-switch-when="TARGET_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:95%;height:45px" name="descriptiontarget" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                             <div ng-show="formAddPrcsr.descriptiontarget.$dirty && formAddPrcsr.descriptiontarget.$invalid">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.descriptiontarget.$error.pattern>Invalid Description.</span>\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.descriptiontarget.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
+                                <span class="custom-info-block" ng-show=formAddPrcsr.descriptiontarget.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea   class="form-control" name="descriptiondefault" ng-model="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250/>\n\
                     <div ng-show="formAddPrcsr.descriptiondefault.$dirty && formAddPrcsr.descriptiondefault.$invalid">\n\
                         <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.pattern>Invalid Description.</span>\n\
-                        <span class="custom-info-block" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                        <span class="custom-info-block" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                         </div></div></div>'
                 }, {
                     field: "allowAdd",
@@ -919,20 +919,20 @@ var rest = myApp.controller(
                         '<div ng-switch on="getCredentialId(allStaticPropertiesForProcessorCredential, row)">\n\
                         <div ng-switch-when="TRUST_STORE"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:98%;height:45px" name="credentialuritrust" ng-maxLength=128  row="3" />\n\
                           <div ng-show="formAddPrcsr.credentialuritrust.$dirty && formAddPrcsr.credentialuritrust.$invalid">\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.credentialuritrust.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
+                                <span class="custom-info-block" ng-show=formAddPrcsr.credentialuritrust.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
                        </div></div>\n\
                     <div ng-switch-when="KEY_STORE"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:98%;height:45px" name="credentialurikey" ng-maxLength=128 />\n\
                         <div ng-show="formAddPrcsr.credentialurikey.$dirty && formAddPrcsr.credentialurikey.$invalid">\n\
-                            <span class="custom-info-block" ng-show=formAddPrcsr.credentialurikey.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div></div>\n\
+                            <span class="custom-info-block" ng-show=formAddPrcsr.credentialurikey.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div></div>\n\
                     <div ng-switch-when="LOGIN_CREDENTIAL"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:98%;height:45px" name="credentialurilogin" ng-maxLength=128 row="3" />\n\
                             <div ng-show="formAddPrcsr.credentialurilogin.$dirty && formAddPrcsr.credentialurilogin.$invalid">\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.credentialurilogin.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
+                                <span class="custom-info-block" ng-show=formAddPrcsr.credentialurilogin.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
                        </div></div>\n\
                     </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea   class="form-control" name="credentialdefault" ng-model="COL_FIELD" style="width:98%;height:45px" ng-maxLength=128 />\n\
                 <div ng-show="formAddPrcsr.credentialdefault.$dirty && formAddPrcsr.credentialdefault.$invalid">\n\
-                     <span class="custom-info-block" ng-show=formAddPrcsr.credentialdefault.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div>\n\
+                     <span class="custom-info-block" ng-show=formAddPrcsr.credentialdefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Credential URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div>\n\
                 </div></div>'
                 }, {
                     field: "credentialType",
@@ -968,20 +968,20 @@ var rest = myApp.controller(
                         '<div ng-switch on="getCredentialId(allStaticPropertiesForProcessorCredential, row)">\n\
                         <div ng-switch-when="TRUST_STORE"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:98%;height:45px" name="idpuritrust" ng-maxLength=128  row="3" />\n\
                             <div ng-show="formAddPrcsr.idpuritrust.$dirty && formAddPrcsr.idpuritrust.$invalid">\n\
-                               <span class="custom-info-block" ng-show=formAddPrcsr.idpuritrust.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
+                               <span class="custom-info-block" ng-show=formAddPrcsr.idpuritrust.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
                        </div></div>\n\
                        <div ng-switch-when="KEY_STORE"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:98%;height:45px" name="idpurikey" ng-maxLength=128/>\n\
                         <div ng-show="formAddPrcsr.idpurikey.$dirty && formAddPrcsr.idpurikey.$invalid">\n\
-                             <span class="custom-info-block" ng-show=formAddPrcsr.idpurikey.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div></div>\n\
+                             <span class="custom-info-block" ng-show=formAddPrcsr.idpurikey.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div></div>\n\
                     <div ng-switch-when="LOGIN_CREDENTIAL"><textarea   class="form-control" ng-model="COL_FIELD"  style="width:98%;height:45px" name="idpurilogin" ng-maxLength=128  row="3" />\n\
                             <div ng-show="formAddPrcsr.idpurilogin.$dirty && formAddPrcsr.idpurilogin.$invalid">\n\
-                               <span class="custom-info-block" ng-show=formAddPrcsr.idpurilogin.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
+                               <span class="custom-info-block" ng-show=formAddPrcsr.idpurilogin.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span>\n\
                        </div></div>\n\
                     </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea   class="form-control" name="idpuridefault" ng-model="COL_FIELD" style="width:98%;height:45px" ng-maxLength=128 "/>\n\
                 <div ng-show="formAddPrcsr.idpuridefault.$dirty && formAddPrcsr.idpuridefault.$invalid">\n\
-                     <span class="custom-info-block" ng-show=formAddPrcsr.idpuridefault.$error.maxlength><img ng-src="{{infoIconImgUrl}}"  style="height:15px; width:15px;"/>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div>\n\
+                     <span class="custom-info-block" ng-show=formAddPrcsr.idpuridefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>IDP URI cannot be longer than {{maximumLengthAllowedInGridForCredentialDetails}} characters.</span></div>\n\
                 </div></div>'
                 }, {
                     field: "allowAdd",
