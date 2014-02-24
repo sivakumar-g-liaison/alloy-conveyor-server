@@ -16,6 +16,11 @@ var rest = myApp.controller(
     		$scope.disableBrowseButton = true;
             $scope.portRequired = true;
             $scope.isPortDisabled = false;
+			
+			//GMB-155
+			$scope.sftpDefaultPort = '22';
+			$scope.ftpDefaultPort = '21';
+			$scope.ftpsDefaultPort = '989';
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
@@ -744,6 +749,7 @@ var rest = myApp.controller(
 									$scope.isPortDisabled = true;
 							} else {
 								$scope.processorProperties[i].value = '';
+								$scope.defaultPortValue();
                                 $scope.isPortDisabled = false;    
 							}
                             if(port === '') $scope.isPortDisabled = false;
@@ -753,6 +759,7 @@ var rest = myApp.controller(
                     for(i = 0; i < $scope.processorProperties.length; i++) {
                         if ($scope.processorProperties[i].name === 'Port') {
                             $scope.processorProperties[i].value = '';
+							$scope.defaultPortValue();
                             $scope.isPortDisabled = false;
                        }
                     }
@@ -1190,6 +1197,7 @@ var rest = myApp.controller(
                                 $scope.sweeperMandatoryProperties = [];
                                 $scope.modifyStaticPropertiesBasedOnProtocol();
                                 $scope.modifyStaticPropertiesBasedOnProcessorType();
+								$scope.isPortDisabled = false;
                                 var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
                                 var otherReqIndex = -1;
                                 var i = 0;
@@ -1918,6 +1926,7 @@ var rest = myApp.controller(
                     //To notify passwordDirective to clear the password and error message
                     $scope.doSend();
                     $scope.isPortDisabled = false;
+					$scope.defaultPortValue();
 
             };
             
@@ -1946,6 +1955,7 @@ var rest = myApp.controller(
                     $scope.setFolderData(false);
                     var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
                     if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
+					$scope.defaultPortValue();
                 }
                 // function to modify the static properties if the protocol is FTP or FTPS
                 $scope.modifyStaticPropertiesBasedOnProtocol();
@@ -1963,6 +1973,7 @@ var rest = myApp.controller(
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.portRequired = true;
                     $scope.setFolderData(false);
+					$scope.defaultPortValue();
                 } else if ($scope.processor.protocol === "HTTP" || $scope.processor.protocol === "HTTPS") {
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
@@ -2255,8 +2266,26 @@ var rest = myApp.controller(
 				$scope.processor.isSelfSigned = "";
 			}
 
-            if($scope.processor.protocol === "FTP" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTPS") {
-                $scope.portRequired = true;
+			$scope.defaultPortValue = function() {
+				for (i = 0; i < $scope.processorProperties.length; i++) {
+					
+					if ($scope.processorProperties[i].name === 'Port') {
+						
+						if ($scope.processor.protocol === "FTP") {
+							$scope.processorProperties[i].value = $scope.ftpDefaultPort;
+						} else if ($scope.processor.protocol === "SFTP") {
+							$scope.processorProperties[i].value = $scope.sftpDefaultPort;
+						} else if ($scope.processor.protocol === "FTPS") {
+							$scope.processorProperties[i].value = $scope.ftpsDefaultPort;
+						}
+					}
+				}
+			}
+			
+            if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTPS") {
+				$scope.portRequired = true;
+				$scope.defaultPortValue();
+				
             } else {
                 $scope.portRequired = false;
             }
@@ -2267,7 +2296,7 @@ var rest = myApp.controller(
   			}
 			
 			$scope.resetFiles = function() {
-				document.getElementById('fileToUpload').value = null;
+				document.getElementById('mbx-procsr-certificatebrowse').value = null;
 			}
         }
     ]);

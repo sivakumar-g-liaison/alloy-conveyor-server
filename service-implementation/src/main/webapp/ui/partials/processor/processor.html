@@ -289,7 +289,7 @@
                             <br>
                             <div class="fileUpload btn btn-primary" ng-disabled="disableBrowseButton">
                                 <span>Add</span>
-                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant id="fileToUpload" onchange="angular.element(this).scope().setFiles(this)" /> 
+                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant ng-click="resetFiles()" onchange="angular.element(this).scope().setFiles(this)" /> 
 						    </div>
 							<button id="mbx-procsr-certificateRemove" ng-disabled="disableBrowseButton" class="btn btn-primary" style="margin-top:5px" ng-click="doRemove()">Remove</button>
                         </div>
