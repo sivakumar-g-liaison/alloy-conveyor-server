@@ -402,18 +402,37 @@ public class HttpListener
 		throws IllegalStateException, IOException
 	{
 		Header contentLength = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
-		int iContentLength = Integer.parseInt(contentLength.getValue());
+		int iContentLength = 0;
+
+		if (contentLength != null)
+		{
+			logger.debug("Response from Service Broker contained content length header with value: {}", contentLength.getValue());
+			iContentLength = Integer.parseInt(contentLength.getValue());
+		}
+		else
+		{
+			logger.debug("Response from Service Broker did not contain a content length header");
+		}
 
 		if (iContentLength > 0)
 		{
 			InputStream responseInputStream = httpResponse.getEntity().getContent();
 			Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
-//			ContentType contentType = getResponseContentType(httpResponse);
-//			InputStreamEntity entity = new InputStreamEntity(responseInputStream, contentLength, contentType);
-//			builder.entity(entity);
-			builder.entity(responseInputStream);
-			builder.header(contentType.getName(), contentType.getValue());
-			builder.header(contentLength.getName(), contentLength.getValue());
+
+			if (responseInputStream != null)
+			{
+				builder.entity(responseInputStream);
+			}
+
+			if (contentType != null)
+			{
+				builder.header(contentType.getName(), contentType.getValue());
+			}
+
+			if (contentLength != null)
+			{
+				builder.header(contentLength.getName(), contentLength.getValue());
+			}
 		}
 
 		copyResponseHeaders(httpResponse, builder);

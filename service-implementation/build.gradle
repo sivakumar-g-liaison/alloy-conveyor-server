@@ -27,8 +27,8 @@ test {
 
 buildscript {
 
-    repositories { 
-        mavenCentral() 
+    repositories {
+        mavenCentral()
         maven { url "${thirdpartyArtifactRepoURL}" }              // for ojdbc6.jar
         maven { url 'http://www.eviware.com/repository/maven2/' } // for SoapUI
     }
@@ -55,7 +55,7 @@ buildscript {
 }
 
 configurations {
-    swaggerDoclet 
+    swaggerDoclet
     jdbc
 }
 
@@ -88,11 +88,11 @@ war {
         into 'WEB-INF/classes/'
     }
 
-	// copy webapp
-	from('src/main/webapp/ui') {
-		include '**/**'
-		into '/'
-	}
+    // copy webapp
+    from('src/main/webapp/ui') {
+        include '**/**'
+        into '/'
+    }
 
     // exclude the JPA configs, handled above
     //rootSpec.exclude 'META-INF/**'
@@ -116,7 +116,7 @@ dependencies {
     // resolve fs2 in nexus
     compile group: "com.liaison", name: "fs2", version: "0.0.2-SNAPSHOT", changing: true
 
-     
+
 
     // inherited from NetFlix Karyon
     //compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
@@ -194,7 +194,7 @@ dependencies {
             "org.codehaus.cargo:cargo-ant:$cargoVersion"
     // ************************************* end cargo *********************************************
     jdbc "com.oracle:ojdbc6:${oracleVersion}"
-    
+
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
@@ -219,20 +219,20 @@ cargo {
     }
 
     local {
-        homeDir = file(tomcatInstallPath) 
+        homeDir = file(tomcatInstallPath)
         configHomeDir = file("${buildDir}/cargoLocal")
         output = file("${buildDir}/tomcat-out.log")
 
         rmiPort = new Integer(tomcatRmiPort)
         tomcat.ajpPort = new Integer(tomcatAjpPort)
         timeout = 600000
-        
+
         // set the initial value
         // MUST HAVE leading spaces for cargo JVM args
         if(containerJVMArgs) {
             jvmArgs = " $containerJVMArgs"
         }
-        
+
         jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
         jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
 
@@ -280,6 +280,8 @@ task setDevProperties << {
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL") }
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL.sshenc") }
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.mailbox\\.http\\.async\\.payload\\.dir=)(.*)', replace:"\\1${asyncpayloaddir}") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.servicebroker\\.sync\\.uri=)(.*)', replace:"\\1${servicebrokersyncuri}") }
         }
     }
 }
@@ -305,7 +307,7 @@ task configureTomcat(dependsOn: ['stageTomcat', 'setDevProperties'], group:'DEV/
 }
 
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
-task jettyRunSetProperties {    
+task jettyRunSetProperties {
     logger.info "Setting jettyRun system properties"
     // use the default port of the ws-backend-simulation module
     System.setProperty('archaius.deployment.applicationId', project.war.baseName)
@@ -359,9 +361,9 @@ jettyRunWar {
 }
 
 jettyStop{
-    
+
     stopKey='stopJetty'
-    stopPort=9999    
+    stopPort=9999
 }
 
 
