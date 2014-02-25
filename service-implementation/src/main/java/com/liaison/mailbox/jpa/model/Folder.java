@@ -53,7 +53,7 @@ public class Folder implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "DESCRIPTION", length = 250)
+	@Column(name = "DESCRIPTION", length = 256)
 	public String getFldrDesc() {
 		return this.fldrDesc;
 	}
@@ -62,7 +62,7 @@ public class Folder implements Identifiable {
 		this.fldrDesc = fldrDesc;
 	}
 
-	@Column(name = "TYPE", nullable = false, length = 50)
+	@Column(name = "TYPE", nullable = false, length = 64)
 	public String getFldrType() {
 		return this.fldrType;
 	}
@@ -71,7 +71,7 @@ public class Folder implements Identifiable {
 		this.fldrType = fldrType;
 	}
 
-	@Column(name = "URI", length = 250)
+	@Column(name = "URI", length = 256)
 	public String getFldrUri() {
 		return this.fldrUri;
 	}

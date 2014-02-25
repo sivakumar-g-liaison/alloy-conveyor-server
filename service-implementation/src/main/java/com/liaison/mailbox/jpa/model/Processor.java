@@ -31,6 +31,7 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * The persistent class for the PROCESSORS database table.
@@ -51,7 +52,7 @@ public class Processor implements Identifiable {
 	private String pguid;
 	private String javaScriptUri;
 	private String certificateUri;
-	private char isSelfSigned;
+	private Number isSelfSigned;
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
@@ -101,11 +102,11 @@ public class Processor implements Identifiable {
 	}
 	
 	@Column(name = "SELF_SIGNED")
-	public char getIsSelfSigned() {
+	public Number getIsSelfSigned() {
 		return isSelfSigned;
 	}
 
-	public void setIsSelfSigned(char isSelfSigned) {
+	public void setIsSelfSigned(Number isSelfSigned) {
 		this.isSelfSigned = isSelfSigned;
 	}
 

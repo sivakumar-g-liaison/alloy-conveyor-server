@@ -49,7 +49,7 @@ public class ProcessorDTO {
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private String javaScriptURI;
 	private String certificateURI;
-	private char isSelfSigned;
+	private Number isSelfSigned;
 	private String description;
 	private String status;
 	private String protocol;
@@ -108,11 +108,11 @@ public class ProcessorDTO {
 		this.certificateURI = certificateURI;
 	}
 
-	public char getIsSelfSigned() {
+	public Number getIsSelfSigned() {
 		return isSelfSigned;
 	}
 
-	public void setIsSelfSigned(char isSelfSigned) {
+	public void setIsSelfSigned(Number isSelfSigned) {
 		this.isSelfSigned = isSelfSigned;
 	}
 
