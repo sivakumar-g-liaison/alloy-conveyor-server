@@ -23,11 +23,11 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 
 /**
-* The persistent class for the MAILBOX_SERICEINSTANCE database table.
+* The persistent class for the MAILBOX_SVC_INSTANCE database table.
 * 
 */
 @Entity
-@Table(name = "MAILBOX_SERVICEINSTANCE")
+@Table(name = "MAILBOX_SVC_INSTANCE")
 @NamedQuery(name = "MailboxServiceInstance.findAll", query = "SELECT msi FROM MailboxServiceInstance msi")
 public class MailboxServiceInstance implements Identifiable {
 
@@ -51,7 +51,7 @@ public class MailboxServiceInstance implements Identifiable {
 	}
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@JoinColumn(name = "MBX_GUID", nullable = false)
+	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
 	public MailBox getMailbox() {
 		return mailbox;
 	}
@@ -61,7 +61,7 @@ public class MailboxServiceInstance implements Identifiable {
 	}
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@JoinColumn(name = "SERVICEINSTANCE_GUID", nullable = false)
+	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
 	public ServiceInstanceId getServiceInstanceId() {
 		return serviceInstanceId;
 	}

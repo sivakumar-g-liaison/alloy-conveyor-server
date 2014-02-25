@@ -124,7 +124,7 @@ var rest = myApp.controller(
                     type: "",
                     javaScriptURI: "",
                     certificateURI: "",
-                    isSelfSigned: "",
+                    isSelfSigned: 1,
                     trustStoreId: "",
                     description: "",
                     status: "",
@@ -1183,11 +1183,11 @@ var rest = myApp.controller(
 								if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 									$scope.disableBrowseButton = false;
 									$scope.isFileSelected = true;
-									$scope.processor.isSelfSigned = 'N';
+									$scope.processor.isSelfSigned = 0;
 								} else {
 									$scope.disableBrowseButton = true;
 									$scope.isFileSelected = false;
-									$scope.processor.isSelfSigned = "";
+									$scope.processor.isSelfSigned = 1;
 								}
 			
                                 // Pushing out dynamis props
@@ -1997,11 +1997,11 @@ var rest = myApp.controller(
 				if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 					$scope.disableBrowseButton = false;
 					$scope.isFileSelected = true;
-					$scope.processor.isSelfSigned = 'N';
+					$scope.processor.isSelfSigned = 0;
 				} else {
 					$scope.disableBrowseButton = true;
 					$scope.isFileSelected = false;
-					$scope.processor.isSelfSigned = "";
+					$scope.processor.isSelfSigned = 1;
 				}
             };
             $scope.setFolderData = function (mandatory) {
@@ -2194,7 +2194,7 @@ var rest = myApp.controller(
                     pkGuid = arr[0]['keyBase']['pguid'];
                     // Public Key guid 
                     pkGuid = pkGuid.toString();
-                    if ($scope.processor.isSelfSigned === 'N') {
+                    if ($scope.processor.isSelfSigned === 0) {
                         console.log('creating self signed trust store');
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
@@ -2259,11 +2259,11 @@ var rest = myApp.controller(
 			if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 				$scope.disableBrowseButton = false;
 				$scope.isFileSelected = true;
-				$scope.processor.isSelfSigned = 'N';
+				$scope.processor.isSelfSigned = 0;
 			} else {
 				$scope.disableBrowseButton = true;
 				$scope.isFileSelected = false;
-				$scope.processor.isSelfSigned = "";
+				$scope.processor.isSelfSigned = 1;
 			}
 
 			$scope.defaultPortValue = function() {
