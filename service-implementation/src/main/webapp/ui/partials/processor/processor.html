@@ -299,9 +299,9 @@
                                     Add certificate to global trust store?
                                 </label>
                                 <br/>
-                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="Y">  Yes
+                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="1">  Yes
                                
-                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="N" style="margin-left:5px">  No
+                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="0" style="margin-left:5px">  No
 
                             </div>
                         </div>
