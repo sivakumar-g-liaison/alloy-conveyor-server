@@ -41,6 +41,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
@@ -48,6 +49,7 @@ import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxReques
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
@@ -446,6 +448,29 @@ public class MailBoxConfigurationService {
 		}
 
 		return info;
+	}
+	
+	/**
+	 * 
+	 * get truststore id as a configurable property from properties file
+	 * 
+	 * @param trustStore
+	 * @return
+	 * @throws IOException
+	 */
+	public GetTrustStoreResponseDTO getTrustStoreId() throws IOException {
+		
+		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO(); 
+		
+		TrustStoreDTO dto = new TrustStoreDTO();
+		String globalTrustStoreId = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreId");
+		String globalTrustStoreGroupId = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId");
+		
+		dto.setTrustStoreId(globalTrustStoreId);
+		dto.setTrustStoreGroupId(globalTrustStoreGroupId);
+		serviceResponse.setTrustStore(dto);
+		return serviceResponse;
+		
 	}
 
 }

@@ -24,10 +24,7 @@ var rest = myApp.controller(
             // To be Populated
             $scope.mailBoxId;
             var block = $blockUI.createBlockUI();
-            // TrustStoreID Needed only to associate publickey with truststore
-            var globalTrustStoreId = '75D511420A0006340665134DFA242B47';
-            //Need TrustStore Group ID needed for fetching the truststore during processor invocation.
-            var globalTrustStoreGroupId = '75D5112D0A0006340665134D334351D5';
+			
             // Function to modify the static properties to have additional properties of "binary"
             // and "passive" for FTP & FTPS protocols.
             $scope.modifyStaticPropertiesBasedOnProtocol = function () {
@@ -141,6 +138,7 @@ var rest = myApp.controller(
                     "roleList": '',
                     "uri": ''
                 };
+                
                 $scope.certificateModal = {
                     "certificates": '',
                     "certificateURI": ''
@@ -1432,6 +1430,7 @@ var rest = myApp.controller(
                         $scope.allProfiles = data.getProfileResponse.profiles;
                         $scope.loadBrowseData();
                         $scope.loadCertificateData();
+                        $scope.getTrustStoreId();
                     }
                 );
             };
@@ -1450,6 +1449,15 @@ var rest = myApp.controller(
                         $scope.certificates = data.ArrayList;
                         $log.info($scope.certificates);
                         $scope.certificateModal.certificates = $scope.certificates;
+                    }
+                );
+            };
+            
+            $scope.getTrustStoreId = function () {
+                $scope.restService.get($scope.base_url + '/globalTrustStoreId',
+                    function (data) {
+                        $rootScope.globalTrustStoreId = data.getTrustStoreResponse.trustStore.trustStoreId;
+						$rootScope.globalTrustStoreGroupId = data.getTrustStoreResponse.trustStore.trustStoreGroupId;
                     }
                 );
             };
@@ -2174,6 +2182,14 @@ var rest = myApp.controller(
                 console.log('Entering upload event');
                 var fd = new FormData();
                 $scope.pkObj['serviceInstanceId'] = Date.now().toString();
+				$scope.pkObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.name,'_',$scope.certificateModal.certificateURI);
+				var currentDate = new Date();
+				var afterOneYear = new Date();
+				afterOneYear.setYear(currentDate.getFullYear() + 1);
+				$("#yearFromNow").append(afterOneYear.toString());
+				$scope.pkObj.dataTransferObject['createdDate'] = currentDate.toISOString();
+				$scope.pkObj.dataTransferObject['validityDateFrom'] = currentDate.toISOString();
+				$scope.pkObj.dataTransferObject['validityDateTo'] = afterOneYear.toISOString();
                 fd.append("json", angular.toJson($scope.pkObj));
                 for (var i in $scope.files) {
                     fd.append($scope.files[i].name, $scope.files[i]);
@@ -2199,7 +2215,7 @@ var rest = myApp.controller(
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
                         console.log('uploading to global trust store');
-                        $scope.linkTrustStoreWithCertificate(pkGuid, globalTrustStoreId, globalTrustStoreGroupId);
+                        $scope.linkTrustStoreWithCertificate(pkGuid, $rootScope.globalTrustStoreId, $rootScope.globalTrustStoreGroupId);
                     }
                 } else {
                     block.unblockUI();

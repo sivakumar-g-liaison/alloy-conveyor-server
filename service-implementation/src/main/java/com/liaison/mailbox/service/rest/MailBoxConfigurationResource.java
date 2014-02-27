@@ -899,4 +899,29 @@ public class MailBoxConfigurationResource {
 		}
 		return returnResponse;
 	}
+	
+	@GET
+	@Path("/globalTrustStoreId")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getGlobalTrustStoreId() {
+
+		serviceCallCounter.addAndGet(1);
+		Response returnResponse;
+
+		try {
+			GetTrustStoreResponseDTO serviceResponse = null;
+			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+			
+			serviceResponse = mailbox.getTrustStoreId();
+			returnResponse = serviceResponse.constructResponse();
+			
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+		return returnResponse;
+	}
 }
