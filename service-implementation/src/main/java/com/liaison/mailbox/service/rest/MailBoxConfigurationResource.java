@@ -75,7 +75,7 @@ import com.netflix.servo.monitor.Monitors;
  * @author veerasamyn
  */
 @Path("v1/mailbox")
-public class MailBoxConfigurationResource {
+public class MailBoxConfigurationResource extends BaseResource{
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
 
@@ -101,10 +101,12 @@ public class MailBoxConfigurationResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createMailBox(@Context HttpServletRequest request) {
-
+		
+		//Audit LOG the Attempt to create a mailbox
+		auditAttempt("createMailBox");
+		
 		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
+		 Response returnResponse;
 		InputStream requestStream;
 		AddMailboxRequestDTO serviceRequest;
 
@@ -118,14 +120,16 @@ public class MailBoxConfigurationResource {
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-
+            
 			// creates new mailbox
 			serviceResponse = mailbox.createMailBox(serviceRequest);
 
+			//Audit LOG the success
+			auditSuccess("createMailBox");
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
-
+			
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
@@ -134,7 +138,8 @@ public class MailBoxConfigurationResource {
 			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
+		//Audit LOG the failure
+		auditFailure("createMailBox");
 		return returnResponse;
 
 	}
@@ -642,9 +647,9 @@ public class MailBoxConfigurationResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
 			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
-
+		auditAttempt("Mailbox Configuration Service");
 		serviceCallCounter.addAndGet(1);
-
+		
 		Response returnResponse;
 		SearchMailboxRequestDTO searchMbxRequest;
 		InputStream requestStream;

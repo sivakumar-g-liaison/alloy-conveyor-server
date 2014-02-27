@@ -11,22 +11,29 @@
 package com.liaison.framework;
 
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.UUID;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-
-import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.log4j2.auditmessage.LogTags;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.framework.exceptions.UnhandledApplicationException;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Framework Filter
@@ -49,9 +56,14 @@ public class FrameworkFilter implements Filter {
     	//Initial FishTags
     	ThreadContext.put(LogTags.LOG_ID, initializeAuditID());
     	ThreadContext.put(LogTags.REMOTE_ADDRESS, request.getRemoteAddr()); 
+    	ThreadContext.put(LogTags.REMOTE_HOST, request.getRemoteHost()); 
+    	ThreadContext.put(LogTags.REMOTE_PORT, Integer.toString(request.getRemotePort())); 
+    	ThreadContext.put(LogTags.START, DateFormat.getDateTimeInstance().format(new Date()));
     	
     	if (request instanceof HttpServletRequest) {
+    		
     		HttpServletRequest httpRequest = ((HttpServletRequest)request);
+    		// logger.info("Fish Tagging Request URL..."+httpRequest.getRequestURL().toString());
    	     	ThreadContext.put(LogTags.RESOURCE, httpRequest.getServletPath());
     	     ThreadContext.put(LogTags.REQUEST_URL, httpRequest.getRequestURL().toString()); 
     	     ThreadContext.put(LogTags.REQUEST_QUERY, httpRequest.getQueryString());
@@ -65,21 +77,23 @@ public class FrameworkFilter implements Filter {
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        //logger.info("Initializing FrameworkFilter...");
+        logger.info("Initializing FrameworkFilter...");
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    	
+    	if (!ThreadContext.isEmpty()) {
+    		ThreadContext.clear();
+    	}
+    	
     	fishTag(request);
-    	logger.info(new DefaultAuditStatement(Status.ATTEMPT,"example log for attempted", PCIV20Requirement.PCI10_2_3));
-
-
-
-        try {
+    	//logger.info(new DefaultAuditStatement(Status.ATTEMPT,"example log for attempted", PCIV20Requirement.PCI10_2_3));
+           try {
             // audit
             chain.doFilter(request, response);
                
-        } catch (Throwable t) {
+          } catch (Throwable t) {
 
 
         	if (t instanceof AuditStatement) {
