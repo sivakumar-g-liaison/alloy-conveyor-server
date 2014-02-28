@@ -75,7 +75,7 @@ import com.netflix.servo.monitor.Monitors;
  * @author veerasamyn
  */
 @Path("v1/mailbox")
-public class MailBoxConfigurationResource extends BaseResource{
+public class MailBoxConfigurationResource extends BaseResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
 
@@ -157,8 +157,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response reviseMailBox(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
 
+		//Audit LOG the Attempt to revise a mailbox
+		auditAttempt("reviseMailBox");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		InputStream requestStream;
 		ReviseMailBoxRequestDTO serviceRequest;
@@ -176,6 +178,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// updates existing mailbox
 			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid);
 
+			//Audit LOG the success
+			auditSuccess("reviseMailBox");
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -188,7 +192,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
+		//Audit LOG the failure
+		auditFailure("reviseMailBox");
 		return returnResponse;
 	}
 
@@ -206,8 +211,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deactivateMailBox(@PathParam(value = "id") String guid) {
 
+		//Audit LOG the Attempt to deactivate a mailbox
+		auditAttempt("deactivateMailBox");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 
 		try {
@@ -218,6 +225,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// deactivates existing mailbox
 			serviceResponse = mailbox.deactivateMailBox(guid);
 
+			//Audit LOG the success
+			auditSuccess("deactivateMailBox");
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -230,7 +239,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
+		//Audit LOG the failure
+		auditFailure("deactivateMailBox");
 		return returnResponse;
 
 	}
@@ -249,8 +259,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	public Response readMailBox(@PathParam(value = "id") String guid, @QueryParam(value = "serviceInstanceId") String serviceInstanceId,
 			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint) {
 
+		//Audit LOG the Attempt to read mailbox
+		auditAttempt("readMailBox");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 
 		try {
@@ -260,6 +272,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.getMailBox(guid, serviceInstanceId, addConstraint);
 
+			//Audit LOG the success
+			auditSuccess("readMailBox");
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -269,9 +283,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("readMailBox");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -327,8 +342,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response uploadSelfSignedTrustStore() {
 
+		//Audit LOG the Attempt to uploadSelfSignedTrustStore
+		auditAttempt("uploadSelfSignedTrustStore");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 
 		try {
@@ -338,6 +355,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			ProcessorConfigurationService processor = new ProcessorConfigurationService();
 			serviceResponse = processor.uploadSelfSignedTrustStore();
 
+			//Audit LOG the success
+			auditSuccess("uploadSelfSignedTrustStore");
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -347,9 +366,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("uploadSelfSignedTrustStore");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -367,8 +387,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createProfile(@Context HttpServletRequest request) {
 
+		//Audit LOG the Attempt to createProfile
+		auditAttempt("createProfile");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		InputStream requestStream;
 		AddProfileRequestDTO serviceRequest;
@@ -386,6 +408,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// creates new profile
 			serviceResponse = profile.createProfile(serviceRequest);
 
+			//Audit LOG the success
+			auditSuccess("createProfile");
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -398,7 +422,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
+		//Audit LOG the failure
+		auditFailure("createProfile");
 		return returnResponse;
 
 	}
@@ -414,8 +439,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response readProfiles() {
 
+		//Audit LOG the Attempt to readProfiles
+		auditAttempt("readProfiles");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		try {
 
@@ -424,6 +451,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.getProfiles();
 
+			//Audit LOG the success
+			auditSuccess("readProfiles");
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -433,9 +462,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("readProfiles");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -456,8 +486,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createProcessor(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
 
+		//Audit LOG the Attempt to createProcessor
+		auditAttempt("createProcessor");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		InputStream requestStream;
 		AddProcessorToMailboxRequestDTO serviceRequest;
@@ -474,6 +506,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest);
 
+			//Audit LOG the success
+			auditSuccess("createProcessor");
 			// populate the response body
 			returnResponse = serviceResponse.constructResponse();
 
@@ -485,9 +519,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("createProcessor");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -508,8 +543,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
 
+		//Audit LOG the Attempt to deleteProcessor
+		auditAttempt("deleteProcessor");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 
 		try {
@@ -519,6 +556,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Deactivating processor
 			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
+			//Audit LOG the success
+			auditSuccess("deleteProcessor");
 			// Constructing response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -530,9 +569,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("deleteProcessor");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -552,8 +592,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
 
+		//Audit LOG the Attempt to getProcessor
+		auditAttempt("getProcessor");
+		
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 
 		try {
@@ -563,6 +605,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			// Gets processor details.
 			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
 			// constructs response.
+			//Audit LOG the success
+			auditSuccess("getProcessor");
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -573,9 +617,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("getProcessor");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -598,8 +643,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailboxguid,
 			@PathParam(value = "processorid") String guid) {
 
+		//Audit LOG the Attempt to reviseProcessor
+		auditAttempt("reviseProcessor");
+				
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		InputStream requestStream;
 		ReviseProcessorRequestDTO serviceRequest;
@@ -615,6 +662,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// updates existing processor
 			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
+			//Audit LOG the success
+			auditSuccess("reviseProcessor");
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -626,9 +675,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("reviseProcessor");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 	}
 
@@ -647,9 +697,11 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
 			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
-		auditAttempt("Mailbox Configuration Service");
-		serviceCallCounter.addAndGet(1);
 		
+		//Audit LOG the Attempt to searchMailBox
+		auditAttempt("searchMailBox");
+				
+		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 		SearchMailboxRequestDTO searchMbxRequest;
 		InputStream requestStream;
@@ -667,6 +719,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName);
 			serviceResponse.setHitCounter(hitCounter);
 
+			//Audit LOG the success
+			auditSuccess("searchMailBox");
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -676,9 +730,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("searchMailBox");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
@@ -688,6 +743,9 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getFileList() {
 
+		//Audit LOG the Attempt to getFileList
+		auditAttempt("getFileList");
+		
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 
@@ -702,6 +760,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			infos.add(info);
 			String response = MailBoxUtility.marshalToJSON(infos);
 
+			//Audit LOG the success
+			auditSuccess("getFileList");
 			return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
 		} catch (Exception e) {
 
@@ -710,6 +770,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			LOG.error(errMsg, e);
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
+		//Audit LOG the failure
+		auditFailure("getFileList");
 		return returnResponse;
 	}
 
@@ -719,8 +781,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
 			@HeaderParam(MailBoxConstants.FILE_NAME_HEADER) String filename) {
 
+		//Audit LOG the Attempt to httpServerListener
+	    auditAttempt("httpServerListener");
+	    
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		InputStream requestStream;
 
@@ -731,8 +795,9 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			HTTPServerListenerService service = new HTTPServerListenerService();
 			ServerListenerResponseDTO serviceResponse = service.serverListener(requestString, folder, filename);
+			//Audit LOG the success
+			auditSuccess("httpServerListener");
 			returnResponse = serviceResponse.constructResponse();
-
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
@@ -741,9 +806,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("httpServerListener");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 	}
 
@@ -752,9 +818,11 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response testSweeper(@Context HttpServletRequest request) {
-
+		
+		//Audit LOG the Attempt to testSweeper
+	    auditAttempt("testSweeper");
+	    
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		InputStream requestStream;
 
@@ -764,6 +832,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			LOG.info("The directory sweeper meta data json : " + new JSONObject(requestString).toString(2));
+			//Audit LOG the success
+			auditSuccess("testSweeper");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(Messages.SUCCESS.value()).build();
 
 		} catch (Exception e) {
@@ -774,9 +844,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("testSweeper");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 	}
 
@@ -786,12 +857,16 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response test(@Context HttpServletRequest request) {
 
+		//Audit LOG the Attempt to test
+	    auditAttempt("test");
 		serviceCallCounter.addAndGet(1);
 
 		Response returnResponse;
 		try {
 
 			LOG.info("The directory sweeper meta data json ");
+			//Audit LOG the success
+			auditSuccess("test");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry").build();
 
 		} catch (Exception e) {
@@ -802,9 +877,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("test");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 	}
 
@@ -814,13 +890,17 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam("Authorization") String auth) {
 
+		//Audit LOG the Attempt to httpServerListener
+	    auditAttempt("httpServerListener");
+	    
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 
 		try {
 
 			LOG.info("Successfully retrieved the auth header : {} ", auth);
+			//Audit LOG the success
+			auditSuccess("httpServerListener");
 			returnResponse = Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity(auth).build();
 
 		} catch (Exception e) {
@@ -831,9 +911,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("httpServerListener");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 	}
 
@@ -851,8 +932,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response findProfiles(@QueryParam(value = "name") String profileName) {
 
+		//Audit LOG the Attempt to findProfiles
+	    auditAttempt("findProfiles");
+	    
 		serviceCallCounter.addAndGet(1);
-
 		Response returnResponse;
 		try {
 
@@ -860,6 +943,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			GetProfileResponseDTO serviceResponse = null;
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.searchProfiles(profileName);
+			//Audit LOG the success
+			auditSuccess("findProfiles");
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -870,6 +955,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			//Audit LOG the failure
+			auditFailure("findProfiles");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
@@ -880,6 +967,9 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCertificatesList() {
 
+		//Audit LOG the Attempt to getCertificatesList
+	    auditAttempt("getCertificatesList");
+	    
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 
@@ -894,6 +984,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			infos.add(info);
 			String response = MailBoxUtility.marshalToJSON(infos);
 
+			//Audit LOG the success
+			auditSuccess("getCertificatesList");
 			return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
 		} catch (Exception e) {
 
@@ -902,6 +994,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			LOG.error(errMsg, e);
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
+		//Audit LOG the failure
+		auditFailure("getCertificatesList");
 		return returnResponse;
 	}
 	
@@ -909,7 +1003,10 @@ public class MailBoxConfigurationResource extends BaseResource{
 	@Path("/globalTrustStoreId")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getGlobalTrustStoreId() {
-
+		
+		//Audit LOG the Attempt to getGlobalTrustStoreId
+	    auditAttempt("getGlobalTrustStoreId");
+	    
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 
@@ -918,6 +1015,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			
 			serviceResponse = mailbox.getTrustStoreId();
+			//Audit LOG the success
+			auditSuccess("getGlobalTrustStoreId");
 			returnResponse = serviceResponse.constructResponse();
 			
 		} catch (Exception e) {
@@ -925,6 +1024,8 @@ public class MailBoxConfigurationResource extends BaseResource{
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
+			//Audit LOG the failure
+			auditFailure("getGlobalTrustStoreId");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;

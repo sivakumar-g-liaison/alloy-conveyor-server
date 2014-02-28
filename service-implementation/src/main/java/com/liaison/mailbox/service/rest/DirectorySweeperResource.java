@@ -43,7 +43,7 @@ import com.netflix.servo.monitor.Monitors;
  */
 //
 //@Path("v1/sweepdirectories")
-public class DirectorySweeperResource {
+public class DirectorySweeperResource extends BaseResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeperResource.class);
 
@@ -70,6 +70,8 @@ public class DirectorySweeperResource {
 //    @Produces({ MediaType.APPLICATION_JSON })
     public Response sweepDirectory() {
 
+    	//Audit LOG the Attempt to sweepDirectory
+    	auditAttempt("sweepDirectory");
         SERVICE_CALL_COUNTER.addAndGet(1);
 
         JSONObject response = new JSONObject();
@@ -91,11 +93,15 @@ public class DirectorySweeperResource {
             dirSweeper.markAsSweeped(sweepList);
             LOGGER.info("Returns json response.{}",new JSONObject(jsonResponse).toString(2));
             response.put("sweepresults", new JSONObject(jsonResponse));
+            //Audit LOG the success
+    		auditSuccess("sweepDirectory");
             return Response.ok(response.toString()).build();
         } catch (Exception e) {
 
             FAILURE_COUNTER.addAndGet(1);
             LOGGER.error("Error in directory sweeping.", e);
+            //Audit LOG the failure
+    		auditFailure("sweepDirectory");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -111,6 +117,9 @@ public class DirectorySweeperResource {
 //    @Produces({ MediaType.APPLICATION_JSON })
     public Response sweepDirectory(@QueryParam("path") String path) {
 
+    	//Audit LOG the Attempt to sweepDirectory
+    	auditAttempt("sweepDirectory");
+    	
         SERVICE_CALL_COUNTER.addAndGet(1);
 
         JSONObject response = new JSONObject();
@@ -123,11 +132,15 @@ public class DirectorySweeperResource {
         	String jsonResponse = executor.getResponse();        	
             LOGGER.info("Returns json response.{}",new JSONObject(jsonResponse).toString(2));
             response.put("sweepresults",new JSONObject(jsonResponse) );
+            //Audit LOG the success
+    		auditSuccess("sweepDirectory");
             return Response.ok(response.toString()).build();
         } catch (Exception e) {
 
             FAILURE_COUNTER.addAndGet(1);
             LOGGER.error("Error in directory sweeping.", e);
+            //Audit LOG the failure
+    		auditFailure("sweepDirectory");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

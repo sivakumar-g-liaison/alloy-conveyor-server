@@ -56,8 +56,8 @@ import com.netflix.servo.monitor.Monitors;
 @Path("process")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.WILDCARD)
-public class HttpListener
-{
+public class HttpListener extends BaseResource {
+	
 	private static final Logger logger = LoggerFactory.getLogger(HttpListener.class);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
@@ -112,6 +112,9 @@ public class HttpListener
 	@Path("sync")
 	public Response handleSync (@Context HttpServletRequest request)
 	{
+		//Audit LOG the Attempt to handleSync
+		auditAttempt("handleSync");
+		
 		Response restResponse = null;
 		serviceCallCounter.incrementAndGet();
 
@@ -127,15 +130,18 @@ public class HttpListener
 			HttpResponse httpResponse = forwardRequest(sessionContext, request);
 			ResponseBuilder builder = Response.ok();
 			copyResponseInfo(httpResponse, builder);
+			//Audit LOG the success
+			auditSuccess("handleSync");
 			restResponse = builder.build();
 		}
 		catch (Exception e)
 		{
 			logger.error("Error processing sync message", e);
 			e.printStackTrace();
+			//Audit LOG the failure
+			auditFailure("handleSync");
 			restResponse = Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-
 		return restResponse;
 	}
 
@@ -164,6 +170,8 @@ public class HttpListener
 	@Path("async")
 	public Response handleAsync (@Context HttpServletRequest request)
 	{
+		//Audit LOG the Attempt to handleAsync
+		auditAttempt("handleAsync");
 		Response restResponse = null;
 		serviceCallCounter.incrementAndGet();
 
@@ -179,6 +187,8 @@ public class HttpListener
 			storePayload(request, sessionContext);
 			createWorkTicket(request, sessionContext);
 
+			//Audit LOG the success
+			auditSuccess("handleAsync");
 			restResponse = Response.ok()
 				                   .status(Status.ACCEPTED)
 					               .type(MediaType.TEXT_PLAIN)
@@ -189,9 +199,10 @@ public class HttpListener
 		{
 			logger.error("Error processing async message", e);
 			e.printStackTrace();
+			//Audit LOG the failure
+			auditFailure("handleAsync");
 			restResponse = Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 		}
-
 		return restResponse;
 	}
 

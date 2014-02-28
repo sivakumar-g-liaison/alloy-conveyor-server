@@ -31,7 +31,7 @@ import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 
 @Path("v1/mailbox/triggerProfile")
-public class MailBoxResource {
+public class MailBoxResource extends BaseResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
 
@@ -62,6 +62,8 @@ public class MailBoxResource {
 			@QueryParam(value = "excludeMailbox") String mailboxNamePattern,
 			@QueryParam(value = "shardKey") String shardKey) {
 
+		//Audit LOG the Attempt to triggerProfile
+		auditAttempt("triggerProfile");
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 
@@ -71,6 +73,8 @@ public class MailBoxResource {
 			MailBoxService service = new MailBoxService();
 			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern, shardKey);
 
+			//Audit LOG the success
+			auditSuccess("triggerProfile");
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -79,10 +83,11 @@ public class MailBoxResource {
 			String errMsg = "MailboxResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
+			//Audit LOG the failure
+			auditFailure("triggerProfile");
 			// should be throwing out of domain scope and into framework using above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
-
 		return returnResponse;
 
 	}
