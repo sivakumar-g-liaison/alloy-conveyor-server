@@ -33,4 +33,8 @@ public class HttpOtherRequestHeaderDTO {
 	public void setValue(String value) {
 		this.value = value;
 	}
+	
+	public String toString() {
+		return "name:" + this.name + " value:" + this.value;
+	}
 }

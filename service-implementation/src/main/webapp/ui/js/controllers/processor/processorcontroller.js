@@ -121,7 +121,7 @@ var rest = myApp.controller(
                     type: "",
                     javaScriptURI: "",
                     certificateURI: "",
-                    isSelfSigned: 1,
+                    isSelfSigned: "1",
                     trustStoreId: "",
                     description: "",
                     status: "",
@@ -1136,7 +1136,7 @@ var rest = myApp.controller(
                 //To notify passwordDirective to clear the password and error message
                 $scope.doSend();
                 $scope.isEdit = true;
-                var procsrId = processorId;;
+                var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
                         $log.info($filter('json')(data));
@@ -1180,12 +1180,12 @@ var rest = myApp.controller(
 								//GMB 221
 								if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 									$scope.disableBrowseButton = false;
-									$scope.isFileSelected = true;
-									$scope.processor.isSelfSigned = 0;
+									//$scope.isFileSelected = true;
+									//$scope.processor.isSelfSigned = 0;
 								} else {
 									$scope.disableBrowseButton = true;
-									$scope.isFileSelected = false;
-									$scope.processor.isSelfSigned = 1;
+									//$scope.isFileSelected = false;
+									//$scope.processor.isSelfSigned = 1;
 								}
 			
                                 // Pushing out dynamis props
@@ -1743,9 +1743,18 @@ var rest = myApp.controller(
             	//To notify passwordDirective to clear the password and error message
                 $scope.doSend();
                 console.log($scope.certificateModal.certificateURI);
-                if (($scope.processor.protocol === 'HTTPS' || $scope.processor.protocol === 'FTPS') && $scope.certificateModal.certificateURI !== '' && $scope.isFileSelected) {
-                    block.blockUI();
-                    $scope.uploadFile();
+                  if (($scope.processor.protocol === 'HTTPS' || $scope.processor.protocol === 'FTPS') && $scope.certificateModal.certificateURI !== '') {
+                    
+                    // need to upload the certificate file and link it with trustore id only if user has selected a new certificate file.
+                    if ($scope.isFileSelected) {
+                        block.blockUI();
+                        $scope.isFileSelected = false;
+                        $scope.uploadFile();
+                    } else {
+                        $scope.saveProcessor();
+                    }
+                   
+                   
                 } else {
                     $scope.processor.trustStoreId = "";
                     $scope.saveProcessor();
@@ -2004,12 +2013,12 @@ var rest = myApp.controller(
                 //GMB-201
 				if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 					$scope.disableBrowseButton = false;
-					$scope.isFileSelected = true;
-					$scope.processor.isSelfSigned = 0;
+					//$scope.isFileSelected = true;
+					//$scope.processor.isSelfSigned = 0;
 				} else {
 					$scope.disableBrowseButton = true;
-					$scope.isFileSelected = false;
-					$scope.processor.isSelfSigned = 1;
+					//$scope.isFileSelected = false;
+					//$scope.processor.isSelfSigned = 1;
 				}
             };
             $scope.setFolderData = function (mandatory) {
@@ -2210,7 +2219,7 @@ var rest = myApp.controller(
                     pkGuid = arr[0]['keyBase']['pguid'];
                     // Public Key guid 
                     pkGuid = pkGuid.toString();
-                    if ($scope.processor.isSelfSigned === 0) {
+                    if ($scope.processor.isSelfSigned === "0") {
                         console.log('creating self signed trust store');
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
@@ -2274,12 +2283,12 @@ var rest = myApp.controller(
             //GMB-201
 			if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 				$scope.disableBrowseButton = false;
-				$scope.isFileSelected = true;
-				$scope.processor.isSelfSigned = 0;
+				//$scope.isFileSelected = true;
+				//$scope.processor.isSelfSigned = 0;
 			} else {
 				$scope.disableBrowseButton = true;
-				$scope.isFileSelected = false;
-				$scope.processor.isSelfSigned = 1;
+				//$scope.isFileSelected = false;
+				//$scope.processor.isSelfSigned = 1;
 			}
 
 			$scope.defaultPortValue = function() {
