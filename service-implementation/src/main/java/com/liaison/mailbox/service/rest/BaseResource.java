@@ -29,7 +29,7 @@ public class BaseResource {
 	
 	protected void auditFailure(String message){
 		
-		 AuditStatement auditStatement = new DefaultAuditStatement(Status.SUCCEED, message + "- operation failed");
+		 AuditStatement auditStatement = new DefaultAuditStatement(Status.FAILED, message + "- operation failed");
 		 logger.info(auditStatement); 
 		
 	}
