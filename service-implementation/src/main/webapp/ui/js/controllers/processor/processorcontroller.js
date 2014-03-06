@@ -1705,20 +1705,22 @@ var rest = myApp.controller(
                     allPropsWithNovalueIdp.push(allPropsIdp[indexOfSelectedElementIdp]);
                 }
             };
-            $scope.doCancel = function () {
-                var response = confirm("Are you  sure you want to cancel the Operation? Any unsaved changes will be lost");
-                if (response === true) {
-                    $location.$$search = {};
-                    $location.path('/mailbox/getMailBox');
-                }
+            $scope.doCancel = function () {			
+				$scope.closeModalView(); 
+				$location.$$search = {};
+				$location.path('/mailbox/getMailBox');
             };
-            $scope.backToMailbox = function () {
-                var response = confirm("Are you  sure you want to leave this page? Any unsaved changes will be lost");
-                if (response === true) {
-                    var redirectToId = $location.search().mailBoxId;
-                    $location.$$search = {};
-                    $location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId);
-                }
+	        $scope.closeModalView = function () {
+                 $('#cancelAction').modal('hide')
+            };
+            $scope.backToMailbox = function () {			
+				$scope.backToMailboxeModalView(); 
+				var redirectToId = $location.search().mailBoxId;
+				$location.$$search = {};
+				$location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId);
+            };
+			$scope.backToMailboxeModalView = function () {
+                 $('#backToMailboxAction').modal('hide')
             };
             $scope.processOtherHeaderValue = function (value) {
                 var commaSplit = val.split(",");

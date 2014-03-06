@@ -186,14 +186,16 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             }
         };
 
-        $scope.doCancel = function () {
-            var resp = confirm("Are you  sure you want to cancel the Operation? All unsaved changes will be lost.");
-            if (resp === true) {
-                $location.$$search = {};
-                $location.path('/mailbox/getMailBox');
-            }
+        $scope.doCancel = function () {        	
+    	    $scope.closeModalView(); 
+            $location.$$search = {};
+            $location.path('/mailbox/getMailBox');
         };
-
+        
+        $scope.closeModalView = function () {
+            $('#cancelAction').modal('hide')
+        };
+        
         $scope.addProcessor = function () {
 
             fromAddProcsr = true;

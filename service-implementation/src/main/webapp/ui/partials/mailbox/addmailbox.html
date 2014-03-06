@@ -108,7 +108,7 @@
   </form>
   
   <div>
-    <button id="mbx-add-cancel" class="btn btn-primary" ng-click="doCancel()">
+    <button id="mbx-add-cancel" class="btn btn-primary" data-toggle="modal" data-target="#cancelAction">
       Cancel
     </button>
     <button id="mbx-add-save" class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid">
@@ -118,3 +118,23 @@
       Add Processors
     </button>
   </div></div>
+  <!-- Model for Cancel Action -->
+<div class="modal" id="cancelAction" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirmation</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you  sure you want to cancel the Operation? All unsaved changes will be lost.</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="doCancel()">Confirm</button>
+				<button class="btn btn-primary cancel" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+  
