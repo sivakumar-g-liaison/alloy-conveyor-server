@@ -23,10 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exceptions.LiaisonException;
-import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
+import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
