@@ -52,6 +52,7 @@ public enum Messages {
 	INVALID_REQUEST("The input request is invalid."),
 	GUID_NOT_AVAIL("Input Id is not available in the system."),
 	GUID_DOES_NOT_MATCH("%s Id in the request does not match the resource."),
+	CERTIFICATE_RETRIEVE_FAILED("Unable to retrieve the certificate"),
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
