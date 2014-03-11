@@ -1968,7 +1968,10 @@ var rest = myApp.controller(
                        }
                     }
                 } else {
-                    $scope.isProcessorTypeSweeper = false;
+                	if($scope.isProcessorTypeSweeper) {
+						$scope.processor.protocol = $scope.enumprotocoltype[0];
+					}
+					$scope.isProcessorTypeSweeper = false;
                     $scope.processor.protocol = $scope.enumprotocoltype[0];
                     $scope.processorProperties = $scope.ftpMandatoryProperties;
                     $scope.setFolderData(false);

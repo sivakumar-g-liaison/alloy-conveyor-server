@@ -175,6 +175,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					sftpRequest.changeDirectory(remoteFilePath);
 					localParentDir = item.getAbsolutePath();
 					uploadDirectory(sftpRequest, localParentDir, remoteFilePath);
+					replyCode = 0;
 
 				} else {
 

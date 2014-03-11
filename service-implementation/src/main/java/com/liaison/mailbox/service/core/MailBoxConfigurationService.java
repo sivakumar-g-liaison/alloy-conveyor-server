@@ -76,7 +76,7 @@ public class MailBoxConfigurationService {
 	 *            The request DTO.
 	 * @return The responseDTO.
 	 */
-	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request) {
+	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request) throws MailBoxConfigurationServicesException{
 
 		LOG.info("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
@@ -123,27 +123,32 @@ public class MailBoxConfigurationService {
 	
 	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox) throws MailBoxConfigurationServicesException {
 
-		ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-		ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceInstanceID);
-		if (serviceInstance == null) {
-			serviceInstance = new ServiceInstanceId();
-			serviceInstance.setName(serviceInstanceID);
-			serviceInstance.setPguid(MailBoxUtility.getGUID());
-			serviceInstanceDAO.persist(serviceInstance);
-		}
-			
-		MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
-		MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(), serviceInstance.getPguid());
+		try {
 		
-		List<MailboxServiceInstance> mbxServiceInstances = new ArrayList<MailboxServiceInstance>();
-		if (mailboxServiceInstance == null) {
-			//Creates relationship mailbox and service instance id
-			MailboxServiceInstance msi = new MailboxServiceInstance();
-			msi.setPguid(MailBoxUtility.getGUID());
-			msi.setServiceInstanceId(serviceInstance);
-			mbxServiceInstances.add(msi);
-			mailbox.setMailboxServiceInstances(mbxServiceInstances);
-		} 
+			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
+			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceInstanceID);
+			if (serviceInstance == null) {
+				serviceInstance = new ServiceInstanceId();
+				serviceInstance.setName(serviceInstanceID);
+				serviceInstance.setPguid(MailBoxUtility.getGUID());
+				serviceInstanceDAO.persist(serviceInstance);
+			}
+				
+			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
+			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(), serviceInstance.getPguid());
+			
+			List<MailboxServiceInstance> mbxServiceInstances = new ArrayList<MailboxServiceInstance>();
+			if (mailboxServiceInstance == null) {
+				//Creates relationship mailbox and service instance id
+				MailboxServiceInstance msi = new MailboxServiceInstance();
+				msi.setPguid(MailBoxUtility.getGUID());
+				msi.setServiceInstanceId(serviceInstance);
+				mbxServiceInstances.add(msi);
+				mailbox.setMailboxServiceInstances(mbxServiceInstances);
+			} 
+		} catch (Exception e) {
+			throw new MailBoxConfigurationServicesException("Invalid service instance id.");
+		}
 	}
 
 	/**
@@ -394,10 +399,6 @@ public class MailBoxConfigurationService {
 			
 			if (MailBoxUtility.isEmpty(profName) && MailBoxUtility.isEmpty(mbxName)){
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA);
-			}
-			
-			if (null == retrievedMailBoxesTobeSent || retrievedMailBoxesTobeSent.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS,MAILBOX);
 			}
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes

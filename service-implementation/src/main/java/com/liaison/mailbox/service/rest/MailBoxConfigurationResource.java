@@ -131,7 +131,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		} catch (Exception e) {
 			
 			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e + e.getMessage();
 			LOG.error(errMsg, e);
 
 			// should be throwing out of domain scope and into framework using
