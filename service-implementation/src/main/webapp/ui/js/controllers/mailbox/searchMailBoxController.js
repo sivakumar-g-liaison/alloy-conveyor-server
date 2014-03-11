@@ -40,9 +40,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             $scope.restService.get($scope.base_url + "/profile", function (data, status) {
                 if (status == 200) {
                     $scope.profiles = data.getProfileResponse.profiles;
-                    if (data.getProfileResponse.response.status == 'failure') {
-                        showSaveMessage(data.getProfileResponse.response.message, 'error');
-                    }
                 } else {
                     showSaveMessage("failed to load Profiles", 'error');
                 }

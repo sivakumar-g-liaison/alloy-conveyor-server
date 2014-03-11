@@ -1140,6 +1140,7 @@ var rest = myApp.controller(
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
                         $log.info($filter('json')(data));
+                        //console.log("entered edit processor"+$scope.processor.trustStoreId);
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
@@ -1155,6 +1156,9 @@ var rest = myApp.controller(
                                 $scope.processor.isSelfSigned = data.getProcessorResponse.processor.isSelfSigned;
                                 $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
                                 $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
+                               /* console.log("trustoreid in edit processor response"+data.getProcessorResponse.processor.trustStoreId);
+                                $scope.processor.trustStoreId = data.getProcessorResponse.processor.trustStoreId;
+                                console.log("trustoreid in edit processor response"+$scope.processor.trustStoreId);*/
                                 $scope.processor.description = data.getProcessorResponse.processor.description;
                                 (data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                                 $scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
@@ -1242,6 +1246,14 @@ var rest = myApp.controller(
                                            
                                              } else if (prop === 'port') {
                                                 propertyValue = (json_data[prop] != 0)?json_data[prop]:$scope.getPortFromURL(json_data['url']);
+                                             } else if (prop === 'pipeLineID') {
+                                                propertyValue = $scope.pipeId;
+                                                $scope.sweeperMandatoryProperties.push({
+                                                name: $scope.getNameValue(prop),
+                                                value: propertyValue,
+                                                allowAdd: false,
+                                                isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
+                                                });
                                              } else {
                                                 propertyValue = json_data[prop];
                                                 $scope.sweeperMandatoryProperties.push({
@@ -1355,7 +1367,7 @@ var rest = myApp.controller(
                                         isMandatory: false
                                     });
                                     $scope.processorProperties = $scope.sweeperMandatoryProperties;
-                                    $scope.processorProperties[0].value = $scope.pipeId;
+                                   // $scope.processorProperties[0].value = $scope.pipeId;
 									$scope.disablePipeLineId = true;
 
                                 } else {
@@ -1786,7 +1798,7 @@ var rest = myApp.controller(
                     if (name === 'pipeLineID') {
                         mandatoryArray.push({
                             name: name,
-                            value: $scope.pipeLineId
+                            value: $scope.pipeId
                         });
                     }
                     if (name === 'httpVerb' && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
@@ -2164,7 +2176,7 @@ var rest = myApp.controller(
             };
             $scope.isModal = function (row) {
                 rowObj = row;
-                editor.setValue(row.getProperty('value'));
+                editor.setValue(row.getProperty('value').toString());
             };
             $scope.close = function () {
                 rowObj.entity.value = editor.getValue();
@@ -2321,7 +2333,8 @@ var rest = myApp.controller(
             }
             
             $scope.doRemove = function() {			
-  			   $scope.certificateModal.certificateURI = '';
+  			   $scope.certificateModal.certificateURI = "";
+               //$scope.processor.trustStoreId = "";
 			   $scope.resetFiles();
   			}
 			

@@ -110,11 +110,13 @@ public class ProfileConfigurationService {
 
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 			List<ScheduleProfilesRef> profiles = configDao.fetch(new ProfileOperationDelegate());
-			if (profiles == null || profiles.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_COMPONENT_EXISTS, PROFILE);
-			}
-
 			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
+			if (profiles == null || profiles.isEmpty()) {
+				serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, PROFILE, Messages.SUCCESS));
+				serviceResponse.setProfiles(profilesDTO);
+				return serviceResponse;
+			}
+			
 			ProfileDTO profile = null;
 			for (ScheduleProfilesRef prof : profiles) {
 				profile = new ProfileDTO();
@@ -129,7 +131,7 @@ public class ProfileConfigurationService {
 			LOG.info("Exiting from get all profiles operation.");
 
 			return serviceResponse;
-		} catch (MailBoxConfigurationServicesException e) {
+		} catch (Exception e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
