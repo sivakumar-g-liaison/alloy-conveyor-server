@@ -167,12 +167,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                             	$scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
                         	}
 
-                            if (fromAddProcsr) {
-                                $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId);
-                            } else if (data.addMailBoxResponse.response.status === 'success') {
-                                showSaveMessage(data.addMailBoxResponse.response.message, 'success');
-                                $scope.isMailBoxEdit = true;
+                        	if (data.addMailBoxResponse.response.status === 'success') {
+								if (fromAddProcsr) {
+									$location.$$search = {};
+									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId);
+								} else {
+									showSaveMessage(data.addMailBoxResponse.response.message, 'success');
+									$scope.isMailBoxEdit = true;
+								}
                             } else {
                                 showSaveMessage(data.addMailBoxResponse.response.message, 'error');
                             }
