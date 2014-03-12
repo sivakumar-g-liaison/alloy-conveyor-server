@@ -169,12 +169,12 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					}
 					if (!fileExists) {
 						// create directory on the server
-						sftpRequest.getNative().mkdir(new File(remoteFilePath).getName());
+						sftpRequest.getNative().mkdir(remoteFilePath);
 					}
 					// upload the sub directory
 					sftpRequest.changeDirectory(remoteFilePath);
-					localParentDir = item.getAbsolutePath();
-					uploadDirectory(sftpRequest, localParentDir, remoteFilePath);
+					String localDr = localParentDir + File.separatorChar + item.getName();
+					uploadDirectory(sftpRequest, localDr, remoteFilePath);
 					replyCode = 0;
 
 				} else {

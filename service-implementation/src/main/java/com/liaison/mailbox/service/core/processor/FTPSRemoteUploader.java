@@ -213,6 +213,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					}
 					ftpsRequest.changeDirectory(remoteFilePath);
 					uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath);
+					replyCode = 250;
 				}
 
 				if (null != item) {
