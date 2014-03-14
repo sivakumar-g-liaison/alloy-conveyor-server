@@ -929,6 +929,10 @@ public abstract class AbstractRemoteProcessor {
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
 			
+			if (instream == null) {
+				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
+			}
+			
 			try {
 				
 				trustStore.load(instream, null);
