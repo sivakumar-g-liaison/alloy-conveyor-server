@@ -1,3 +1,3 @@
 function init(processor, logger) {
-    console.log('js called from git...');
+	logger.info('js called from git...');
 }
