@@ -319,10 +319,10 @@ public class ProcessorDTO {
 		processor.setProcsrProtocol(protocol.getCode());
 		
 		// Done to avoid null entry during processor revise if file is not choosen
-		if (!MailBoxUtility.isEmpty(this.getTrustStoreId())) {
+		//if (!MailBoxUtility.isEmpty(this.getTrustStoreId())) {
 
 			processor.setTrustStoreId(this.getTrustStoreId());
-		}
+		//}
 
 		// Set the status
 		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());

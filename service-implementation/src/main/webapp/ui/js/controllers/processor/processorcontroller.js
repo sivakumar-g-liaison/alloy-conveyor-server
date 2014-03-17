@@ -1140,7 +1140,7 @@ var rest = myApp.controller(
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
                         $log.info($filter('json')(data));
-                        //console.log("entered edit processor"+$scope.processor.trustStoreId);
+                        console.log("entered edit processor"+$scope.processor.trustStoreId);
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
@@ -1156,9 +1156,9 @@ var rest = myApp.controller(
                                 $scope.processor.isSelfSigned = data.getProcessorResponse.processor.isSelfSigned;
                                 $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
                                 $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
-                               /* console.log("trustoreid in edit processor response"+data.getProcessorResponse.processor.trustStoreId);
+                                console.log("trustoreid in edit processor response"+data.getProcessorResponse.processor.trustStoreId);
                                 $scope.processor.trustStoreId = data.getProcessorResponse.processor.trustStoreId;
-                                console.log("trustoreid in edit processor response"+$scope.processor.trustStoreId);*/
+                                console.log("trustoreid in edit processor response"+$scope.processor.trustStoreId);
                                 $scope.processor.description = data.getProcessorResponse.processor.description;
                                 (data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                                 $scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
@@ -1367,8 +1367,7 @@ var rest = myApp.controller(
                                         isMandatory: false
                                     });
                                     $scope.processorProperties = $scope.sweeperMandatoryProperties;
-                                   // $scope.processorProperties[0].value = $scope.pipeId;
-									$scope.disablePipeLineId = true;
+                                   	$scope.disablePipeLineId = true;
 
                                 } else {
                                     $scope.ftpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
@@ -1762,7 +1761,7 @@ var rest = myApp.controller(
                     // need to upload the certificate file and link it with trustore id only if user has selected a new certificate file.
                     if ($scope.isFileSelected) {
                         block.blockUI();
-                        $scope.isFileSelected = false;
+                        //$scope.isFileSelected = false;
                         $scope.uploadFile();
                     } else {
                         $scope.saveProcessor();
@@ -1896,6 +1895,7 @@ var rest = myApp.controller(
                             if (status === 200) {
                                 $scope.editProcessor($scope.processor.guid, false);
                                 if (data.reviseProcessorResponse.response.status === 'success') {
+                                    if($scope.isFileSelected)  $scope.isFileSelected = false;
                                     showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
                                 } else {
                                     showSaveMessage(data.reviseProcessorResponse.response.message, 'error');
@@ -1925,6 +1925,7 @@ var rest = myApp.controller(
                                 $scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
                                 $scope.editProcessor($scope.processor.guid, false);
                                 if (data.addProcessorToMailBoxResponse.response.status === 'success') {
+                                    if($scope.isFileSelected)  $scope.isFileSelected = false;
                                     showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
                                 } else {
                                     showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'error');
@@ -2235,7 +2236,7 @@ var rest = myApp.controller(
                     pkGuid = arr[0]['keyBase']['pguid'];
                     // Public Key guid 
                     pkGuid = pkGuid.toString();
-                    if ($scope.processor.isSelfSigned === "0") {
+                    if ($scope.processor.isSelfSigned === "0" || $scope.processor.isSelfSigned == 0) {
                         console.log('creating self signed trust store');
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
@@ -2244,7 +2245,7 @@ var rest = myApp.controller(
                     }
                 } else {
                     block.unblockUI();
-                    var msg = ($scope.isEdit === true) ? 'Processor revision failed' : 'Processor creation failed';
+                    var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
                     showSaveMessage(msg, 'error');
                     return;
                 }
@@ -2273,7 +2274,7 @@ var rest = myApp.controller(
                             $scope.saveProcessor();
                         } else {
                             block.unblockUI();
-                            var msg = ($scope.isEdit === true) ? 'Processor revision failed' : 'Processor creation failed';
+                            var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
                             showSaveMessage(msg, 'error');
                             return;
                         }
@@ -2283,14 +2284,14 @@ var rest = myApp.controller(
 
             function uploadFailed(evt) {
                 block.unblockUI();
-                var msg = ($scope.isEdit === true) ? 'Processor revision failed' : 'Processor creation failed';
+                var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
                 showSaveMessage(msg, 'error');
                 return;
             }
 
             function uploadCanceled(evt) {
                 block.unblockUI();
-                var msg = ($scope.isEdit === true) ? 'Processor revision failed' : 'Processor creation failed';
+                var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
                 showSaveMessage(msg, 'error');
                 return;
             }
@@ -2333,7 +2334,8 @@ var rest = myApp.controller(
             
             $scope.doRemove = function() {			
   			   $scope.certificateModal.certificateURI = "";
-               //$scope.processor.trustStoreId = "";
+               $scope.processor.trustStoreId = "";
+               $scope.processor.isSelfSigned = 1;
 			   $scope.resetFiles();
   			}
 			

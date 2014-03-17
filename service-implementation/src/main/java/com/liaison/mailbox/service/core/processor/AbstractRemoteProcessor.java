@@ -575,9 +575,13 @@ public abstract class AbstractRemoteProcessor {
 		// Configure keystore for HTTPS request
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
 
-
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-			InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
+			// If no certificate is configured then use default global trustoreid
+			String trustoreID = ((configurationInstance.getCertificateUri() == null || configurationInstance.getCertificateUri().isEmpty()) &&
+									(configurationInstance.getIsSelfSigned().intValue()==1))?
+									(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
+									configurationInstance.getTrustStoreId();
+			InputStream instream = fetchTrustStore(trustoreID);
 			
 			if (instream == null) {
 				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
@@ -588,7 +592,8 @@ public abstract class AbstractRemoteProcessor {
 				trustStore.load(instream, null);
 
 			} finally {
-				instream.close();
+				
+				if (null != instream) instream.close();
 			}
 			
 			request.truststore(trustStore);
@@ -924,10 +929,14 @@ public abstract class AbstractRemoteProcessor {
 
 		// Configure keystore for HTTPS request
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("ftps")) {
-
-
+			
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-			InputStream instream = fetchTrustStore(configurationInstance.getTrustStoreId());
+			// If no certificate is configured then use default global trustoreid
+			String trustoreID = ((configurationInstance.getCertificateUri() == null || configurationInstance.getCertificateUri().isEmpty()) &&
+									(configurationInstance.getIsSelfSigned().intValue()==1))?
+									(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
+									configurationInstance.getTrustStoreId();
+			InputStream instream = fetchTrustStore(trustoreID);
 			
 			if (instream == null) {
 				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
@@ -938,7 +947,7 @@ public abstract class AbstractRemoteProcessor {
 				trustStore.load(instream, null);
 
 			} finally {
-				instream.close();
+				if(null != instream) instream.close();
 			}
 			
 			ftpsRequest.setTrustStore(trustStore);
