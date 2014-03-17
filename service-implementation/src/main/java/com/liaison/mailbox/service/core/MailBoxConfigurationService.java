@@ -40,6 +40,7 @@ import com.liaison.mailbox.jpa.model.ServiceInstanceId;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertiesFileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
@@ -49,6 +50,7 @@ import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxReques
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
@@ -451,27 +453,49 @@ public class MailBoxConfigurationService {
 		return info;
 	}
 	
+	
 	/**
 	 * 
-	 * get truststore id as a configurable property from properties file
+	 * getting values from java properties file
 	 * 
 	 * @param trustStore
 	 * @return
 	 * @throws IOException
 	 */
-	public GetTrustStoreResponseDTO getTrustStoreId() throws IOException {
+	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() throws IOException {
+	
+		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO(); 
+
+		try {
+			
+			PropertiesFileDTO dto = new PropertiesFileDTO();
+			
+			String globalTrustStoreId 	   = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreId");
+			String globalTrustStoreGroupId = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId");
+			String gitlabHost = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.host");
+			String gitlabPort = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.port");
+			String gitlabProjectName = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.project.name");
+			String gitlabBranchName = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.branch.name");
+			
+			dto.setTrustStoreId(globalTrustStoreId);
+			dto.setTrustStoreGroupId(globalTrustStoreGroupId);
+			dto.setGitlabHost(gitlabHost);
+			dto.setGitlabPort(gitlabPort);
+			dto.setGitlabBranchName(gitlabBranchName);
+			dto.setGitlabProjectName(gitlabProjectName);
+			
+			serviceResponse.setProperties(dto);
+			
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
+			
+			return serviceResponse;
 		
-		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO(); 
-		
-		TrustStoreDTO dto = new TrustStoreDTO();
-		String globalTrustStoreId = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreId");
-		String globalTrustStoreGroupId = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId");
-		
-		dto.setTrustStoreId(globalTrustStoreId);
-		dto.setTrustStoreGroupId(globalTrustStoreGroupId);
-		serviceResponse.setTrustStore(dto);
-		return serviceResponse;
+		} catch (IOException e) {
+	
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+		}
 		
 	}
-
 }

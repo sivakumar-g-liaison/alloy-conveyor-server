@@ -4,6 +4,10 @@ var rest = myApp.controller(
         function ($rootScope, $scope, $filter,
             $location, $log, $blockUI) {
 			
+			//for loading js from git
+			$scope.constructedGitUrl = $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
+			$scope.isGitUrlSelected = '1';
+
 	    	//for pipeLineId
 			if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
 				$rootScope.pipelineId = $location.search().pipeLineId;
@@ -1154,7 +1158,16 @@ var rest = myApp.controller(
                                 $scope.processor.guid = data.getProcessorResponse.processor.guid;
                                 $scope.processor.name = data.getProcessorResponse.processor.name;
                                 $scope.processor.isSelfSigned = data.getProcessorResponse.processor.isSelfSigned;
-                                $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+                               
+                                //check if it is the gitlab url
+                                if(data.getProcessorResponse.processor.javaScriptURI.indexOf("gitlab:") != -1) {
+                                	$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI.split("gitlab:").pop();
+                                	$scope.isGitUrlSelected = '1';
+                                } else {
+                                    $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+                                    $scope.isGitUrlSelected = '0';
+                                }
+                                
                                 $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
                                 console.log("trustoreid in edit processor response"+data.getProcessorResponse.processor.trustStoreId);
                                 $scope.processor.trustStoreId = data.getProcessorResponse.processor.trustStoreId;
@@ -1441,7 +1454,6 @@ var rest = myApp.controller(
                         $scope.allProfiles = data.getProfileResponse.profiles;
                         $scope.loadBrowseData();
                         $scope.loadCertificateData();
-                        $scope.getTrustStoreId();
                     }
                 );
             };
@@ -1464,14 +1476,7 @@ var rest = myApp.controller(
                 );
             };
             
-            $scope.getTrustStoreId = function () {
-                $scope.restService.get($scope.base_url + '/globalTrustStoreId',
-                    function (data) {
-                        $rootScope.globalTrustStoreId = data.getTrustStoreResponse.trustStore.trustStoreId;
-						$rootScope.globalTrustStoreGroupId = data.getTrustStoreResponse.trustStore.trustStoreGroupId;
-                    }
-                );
-            };
+           
             $scope.initialLoad();
             // Browse Component related stuff.
             /*$scope.getData = function () {
@@ -1766,15 +1771,19 @@ var rest = myApp.controller(
                     } else {
                         $scope.saveProcessor();
                     }
-                   
-                   
+
                 } else {
                     $scope.processor.trustStoreId = "";
                     $scope.saveProcessor();
                 }
             };
             $scope.saveProcessor = function () {
-
+			
+				//regarding loading js from git
+				if($scope.isGitUrlSelected === '1') {
+					$scope.modal.uri = "gitlab:" + $scope.modal.uri;
+				} 
+					
             	var lenDynamicProps = $scope.processorProperties.length;
                 var commaSplit = [];
                 var mandatoryArray = [];
@@ -2241,7 +2250,7 @@ var rest = myApp.controller(
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
                         console.log('uploading to global trust store');
-                        $scope.linkTrustStoreWithCertificate(pkGuid, $rootScope.globalTrustStoreId, $rootScope.globalTrustStoreGroupId);
+                        $scope.linkTrustStoreWithCertificate(pkGuid, $rootScope.javaProperties.globalTrustStoreId, $rootScope.javaProperties.globalTrustStoreGroupId);
                     }
                 } else {
                     block.unblockUI();
@@ -2341,6 +2350,6 @@ var rest = myApp.controller(
 			
 			$scope.resetFiles = function() {
 				document.getElementById('mbx-procsr-certificatebrowse').value = null;
-			}
+			}			
         }
     ]);

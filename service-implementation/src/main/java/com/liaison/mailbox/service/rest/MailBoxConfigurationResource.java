@@ -57,6 +57,7 @@ import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxR
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
@@ -1074,30 +1075,30 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 	}
 	
+	
 	@GET
-	@Path("/globalTrustStoreId")
+	@Path("/getPropertyFileValues")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getGlobalTrustStoreId() {
+	public Response getPropertyFileValues() {
 		
 		//Audit LOG the Attempt to getGlobalTrustStoreId
-	    auditAttempt("getGlobalTrustStoreId");
+	    auditAttempt("getjavaPropertyFileValues");
 	    
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 
 		try {
-			GetTrustStoreResponseDTO serviceResponse = null;
+			GetPropertiesValueResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			
-			serviceResponse = mailbox.getTrustStoreId();
+			serviceResponse = mailbox.getValuesFromPropertiesFile();
 			
 			//Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("getGlobalTrustStoreId");
+			if(serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("getjavaPropertyFileValues");
 			} else {
-				auditFailure("getGlobalTrustStoreId");
+				auditFailure("getjavaPropertyFileValues");
 			}
-			
 			returnResponse = serviceResponse.constructResponse();
 			
 		} catch (Exception e) {
@@ -1106,7 +1107,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 			//Audit LOG the failure
-			auditFailure("getGlobalTrustStoreId");
+			auditFailure("getjavaPropertyFileValues");
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;

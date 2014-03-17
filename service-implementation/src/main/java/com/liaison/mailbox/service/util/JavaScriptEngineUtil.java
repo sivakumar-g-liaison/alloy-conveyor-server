@@ -7,7 +7,6 @@
  */
 package com.liaison.mailbox.service.util;
 
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -26,6 +25,7 @@ import com.liaison.commons.exceptions.LiaisonException;
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 
 /**
@@ -146,29 +146,30 @@ public final class JavaScriptEngineUtil {
 	 * @throws Exception
 	 * 
 	 */
-	public static Object executeJavaScript(String scriptPath, String methodName,  Object... parameters) throws Exception {
+	public static Object executeJavaScript(String scripPath, String methodName,  Object... parameters) throws Exception {
 		Exception expectedException = null;
 		
 			JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 			JavascriptScriptContext scriptContext = null;
-			String scriptName = null;
-			File sriptURL = new File(scriptPath);
-			URI scriptURI = sriptURL.toURI();
-			 if (scriptContext == null) {
+			
+			URI myUri = new URI(scripPath);
+			String[] splited = scripPath.split("/");
+			String scriptName = splited[splited.length - 1];
+						
+			if (scriptContext == null) {
 			     
-				 scriptContext = new JavascriptScriptContext(new InputStreamReader(System.in), new PrintWriter(System.out), new PrintWriter(System.err));
-			 }
+				scriptContext = new JavascriptScriptContext(new InputStreamReader(System.in), new PrintWriter(System.out), new PrintWriter(System.err));
+			}
 		    scriptExecutor.setScriptContext(scriptContext);
-
-		    // invoke a javascript function with arguments (function and function arguments are optional)
-		    // if no function is supplied, the script will only be evaluated.
-		    Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, scriptURI, methodName, parameters);
+		    
+		    Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, myUri, methodName, parameters);
 
 		    // did my function call throw?
 		    expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get(scriptName + ":" + methodName);
 		    if (null != expectedException) {
 		       	throw expectedException;
 		    }
+		    
 		    return returnValue;	
 		
 	}

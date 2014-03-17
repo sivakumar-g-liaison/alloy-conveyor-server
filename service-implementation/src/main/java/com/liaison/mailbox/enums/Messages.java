@@ -90,7 +90,11 @@ public enum Messages {
 	DATA_PREPOPULATE("Data populated successfully"),
 	
 	// KMS Messages
-	SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed");
+	SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed"),
+	
+	//getting java properties
+	READ_JAVA_PROPERTIES_SUCCESSFULLY("%s properties read successfully."),
+	READ_JAVA_PROPERTIES_FAILED("%s properties read failed.");
 
 	private String value;
 
