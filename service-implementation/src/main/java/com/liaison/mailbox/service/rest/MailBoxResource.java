@@ -73,8 +73,13 @@ public class MailBoxResource extends BaseResource {
 			MailBoxService service = new MailBoxService();
 			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern, shardKey);
 
-			//Audit LOG the success
-			auditSuccess("triggerProfile");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("triggerProfile");
+			} else {
+				auditFailure("triggerProfile");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 

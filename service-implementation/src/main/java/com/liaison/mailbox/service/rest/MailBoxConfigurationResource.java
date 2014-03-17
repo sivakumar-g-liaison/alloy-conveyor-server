@@ -124,8 +124,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// creates new mailbox
 			serviceResponse = mailbox.createMailBox(serviceRequest);
 
-			//Audit LOG the success
-			auditSuccess("createMailBox");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("createMailBox");
+			} else {
+				auditFailure("createMailBox");
+			}
+			
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -178,8 +183,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// updates existing mailbox
 			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid);
 
-			//Audit LOG the success
-			auditSuccess("reviseMailBox");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("reviseMailBox");
+			} else {
+				auditFailure("reviseMailBox");
+			}
+			
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -225,8 +235,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// deactivates existing mailbox
 			serviceResponse = mailbox.deactivateMailBox(guid);
 
-			//Audit LOG the success
-			auditSuccess("deactivateMailBox");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("deactivateMailBox");
+			} else {
+				auditFailure("deactivateMailBox");
+			}
+			
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -272,8 +287,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.getMailBox(guid, serviceInstanceId, addConstraint);
 
-			//Audit LOG the success
-			auditSuccess("readMailBox");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("readMailBox");
+			} else {
+				auditFailure("readMailBox");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -355,8 +375,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService processor = new ProcessorConfigurationService();
 			serviceResponse = processor.uploadSelfSignedTrustStore();
 
-			//Audit LOG the success
-			auditSuccess("uploadSelfSignedTrustStore");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("uploadSelfSignedTrustStore");
+			} else {
+				auditFailure("uploadSelfSignedTrustStore");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -408,8 +433,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// creates new profile
 			serviceResponse = profile.createProfile(serviceRequest);
 
-			//Audit LOG the success
-			auditSuccess("createProfile");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("createProfile");
+			} else {
+				auditFailure("createProfile");
+			}
+			
 			// populate the response body
 			return serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -451,8 +481,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.getProfiles();
 
-			//Audit LOG the success
-			auditSuccess("readProfiles");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("readProfiles");
+			} else {
+				auditFailure("readProfiles");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -506,8 +541,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest);
 
-			//Audit LOG the success
-			auditSuccess("createProcessor");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("createProcessor");
+			} else {
+				auditFailure("createProcessor");
+			}
+			
 			// populate the response body
 			returnResponse = serviceResponse.constructResponse();
 
@@ -556,8 +596,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Deactivating processor
 			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
-			//Audit LOG the success
-			auditSuccess("deleteProcessor");
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("deleteProcessor");
+			} else {
+				auditFailure("deleteProcessor");
+			}
+			
 			// Constructing response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -605,8 +651,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// Gets processor details.
 			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
 			// constructs response.
-			//Audit LOG the success
-			auditSuccess("getProcessor");
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("getProcessor");
+			} else {
+				auditFailure("getProcessor");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -662,8 +714,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// updates existing processor
 			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
-			//Audit LOG the success
-			auditSuccess("reviseProcessor");
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("reviseProcessor");
+			} else {
+				auditFailure("reviseProcessor");
+			}
+			
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
 
@@ -719,8 +777,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName);
 			serviceResponse.setHitCounter(hitCounter);
 
-			//Audit LOG the success
-			auditSuccess("searchMailBox");
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("searchMailBox");
+			} else {
+				auditFailure("searchMailBox");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -795,8 +858,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			HTTPServerListenerService service = new HTTPServerListenerService();
 			ServerListenerResponseDTO serviceResponse = service.serverListener(requestString, folder, filename);
-			//Audit LOG the success
-			auditSuccess("httpServerListener");
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("httpServerListener");
+			} else {
+				auditFailure("httpServerListener");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
@@ -943,8 +1012,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 			GetProfileResponseDTO serviceResponse = null;
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.searchProfiles(profileName);
-			//Audit LOG the success
-			auditSuccess("findProfiles");
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("findProfiles");
+			} else {
+				auditFailure("findProfiles");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -1015,8 +1090,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			
 			serviceResponse = mailbox.getTrustStoreId();
-			//Audit LOG the success
-			auditSuccess("getGlobalTrustStoreId");
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("getGlobalTrustStoreId");
+			} else {
+				auditFailure("getGlobalTrustStoreId");
+			}
+			
 			returnResponse = serviceResponse.constructResponse();
 			
 		} catch (Exception e) {
