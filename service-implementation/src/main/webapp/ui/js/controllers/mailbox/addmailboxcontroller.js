@@ -81,7 +81,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
                         $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                         for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
-
+						   
                             var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
                                 data.getMailBoxResponse.mailBox.properties[i].name);
 
@@ -109,14 +109,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.load();
 
         $scope.saveForm = function () {
-
+        	
+        	block.blockUI();
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
             var len = $scope.mailBoxProperties.length;
 
             for (var i = 0; i < len - 1; i++) {
 
                 var index =  getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
-
+                
                 $scope.mailBox.properties.push({
                     name: (index === -1)?$scope.mailBoxProperties[i].name:getId($scope.allStaticProperties, $scope.mailBoxProperties[i].name),
                     value: $scope.mailBoxProperties[i].value
@@ -134,7 +135,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId, $filter('json')(editReq),
                     function (data, status) {
-
+                        
+                	    block.unblockUI();
                         if (status === 200) {
 
                             if (fromAddProcsr) {
@@ -156,7 +158,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.addRequest.addMailBoxRequest.mailBox.status =$scope.status.id;
                 $log.info($filter('json')(addRequest));
 
-                block.blockUI();
                 $scope.restService.post($scope.base_url, $filter('json')(addRequest),
                     function (data, status) {
 
