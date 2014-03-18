@@ -1160,14 +1160,16 @@ var rest = myApp.controller(
                                 $scope.processor.isSelfSigned = data.getProcessorResponse.processor.isSelfSigned;
                                
                                 //check if it is the gitlab url
-                                if(data.getProcessorResponse.processor.javaScriptURI.indexOf("gitlab:") != -1) {
-                                	$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI.split("gitlab:").pop();
-                                	$scope.isGitUrlSelected = '1';
-                                } else {
-                                    $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
-                                    $scope.isGitUrlSelected = '0';
+                                if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
+                                    if(data.getProcessorResponse.processor.javaScriptURI.indexOf("gitlab:") != -1) {
+                                        $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI.split("gitlab:").pop();
+                                        $scope.isGitUrlSelected = '1';
+                                    } else {
+                                        $scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+                                        $scope.isGitUrlSelected = '0';
+                                    }
                                 }
-                                
+                              
                                 $scope.certificateModal.certificateURI = data.getProcessorResponse.processor.certificateURI;
                                 console.log("trustoreid in edit processor response"+data.getProcessorResponse.processor.trustStoreId);
                                 $scope.processor.trustStoreId = data.getProcessorResponse.processor.trustStoreId;
