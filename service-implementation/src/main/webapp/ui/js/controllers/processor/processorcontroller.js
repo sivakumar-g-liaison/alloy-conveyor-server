@@ -1782,7 +1782,7 @@ var rest = myApp.controller(
             $scope.saveProcessor = function () {
 			
 				//regarding loading js from git
-				if($scope.isGitUrlSelected === '1') {
+				if($scope.isGitUrlSelected === '1' && $scope.modal.uri !== "" && $scope.modal.uri !== null) {
 					$scope.modal.uri = "gitlab:" + $scope.modal.uri;
 				} 
 					
