@@ -5,7 +5,7 @@ var rest = myApp.controller(
             $location, $log, $blockUI) {
 			
 			//for loading js from git
-			$scope.constructedGitUrl = $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
+			$scope.constructedGitUrl = "http://" + $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
 			$scope.isGitUrlSelected = '1';
 
 	    	//for pipeLineId

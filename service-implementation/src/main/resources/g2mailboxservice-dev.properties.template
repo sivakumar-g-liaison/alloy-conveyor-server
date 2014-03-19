@@ -84,3 +84,11 @@ com.liaison.servicebroker.sync.uri=http://dev01-g2-sb01:8989/service-broker-v1.0
 com.liaison.servicebroker.sync.max.request.size=10485760
 # This is 50meg
 com.liaison.servicebroker.async.max.request.size=52428800
+
+# loading js from git
+com.liaison.gitlab.script.server.host=gitlab.hs.com
+com.liaison.gitlab.script.server.port=80
+com.liaison.gitlab.script.server.user=
+com.liaison.gitlab.script.server.password=
+com.liaison.gitlab.script.project.name=g2/commons-scripting
+com.liaison.gitlab.script.branch.name=master
