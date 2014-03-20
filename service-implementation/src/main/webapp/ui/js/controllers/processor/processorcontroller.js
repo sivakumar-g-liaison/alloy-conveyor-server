@@ -1,11 +1,11 @@
 var rest = myApp.controller(
-    'ProcessorCntrlr', ['$rootScope', '$scope',
+    'ProcessorCntrlr', ['$rootScope', '$scope', '$timeout',
         '$filter', '$location', '$log', '$blockUI',
-        function ($rootScope, $scope, $filter,
+        function ($rootScope, $scope, $timeout, $filter,
             $location, $log, $blockUI) {
 			
 			//for loading js from git
-			$scope.constructedGitUrl = $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
+			$scope.constructedGitUrl = "http://" + $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
 			$scope.isGitUrlSelected = '1';
 
 	    	//for pipeLineId
@@ -665,27 +665,27 @@ var rest = myApp.controller(
                                 <span class="help-block-custom" ng-show=formAddPrcsr.propUrl.$error.pattern>Enter valid URL</span>\n\
                             </div></div>\n\
                         <div ng-switch-when="socketTimeout">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" name="socketTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+                            <textarea   class="form-control" ng-model="COL_FIELD" name="socketTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.socketTimeout.$dirty && formAddPrcsr.socketTimeout.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.socketTimeout.$error.pattern>Invalid Data.</span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.socketTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="connectionTimeout">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" name="connectionTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+                            <textarea   class="form-control" ng-model="COL_FIELD" name="connectionTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.connectionTimeout.$dirty && formAddPrcsr.connectionTimeout.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.connectionTimeout.$error.pattern>Invalid Data.</span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.connectionTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="retryAttempts">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" name="retryAttempts" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+                            <textarea   class="form-control" ng-model="COL_FIELD" name="retryAttempts" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.retryAttemptsPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.retryAttempts.$dirty && formAddPrcsr.retryAttempts.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.retryAttempts.$error.pattern>Invalid Data.</span>\n\
+                                <span class="help-block-custom" ng-show=formAddPrcsr.retryAttempts.$error.pattern>Must be a numeric value (0-4).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="port">\n\
@@ -1547,6 +1547,20 @@ var rest = myApp.controller(
 							showAlert('Value should be a number.', 'error');
 							return;
 						}
+						
+						if(valueSelectedinSelectionBox.value.id === 'retryAttempts') {
+							if(row.getProperty('value') < 0 || row.getProperty('value') > 4) {
+								showAlert('Value should be between 0 to 4.', 'error');
+								return;
+							}
+						}
+						
+						if(valueSelectedinSelectionBox.value.id === 'socketTimeout' || valueSelectedinSelectionBox.value.id === 'connectionTimeout') {
+							if(row.getProperty('value') < 1 || row.getProperty('value') > 60000) {
+								showAlert('Value should be between 1 to 60000.', 'error');
+								return;
+							}
+						}
 				   } 
                  if (attrName.length > 128) {
 					showAlert('Property Name cannot be longer than 128 characters.', 'information');
@@ -2185,10 +2199,24 @@ var rest = myApp.controller(
                 editor = _editor;
                 _editor.getSession().setUseWorker(false);
             };
+			
+			var enableAndFocusEditor = function() {
+				if (editor) {
+					editor.focus();
+					var session = editor.getSession();
+					//Get the number of lines
+					var count = session.getLength();
+					//Go to end of the last line
+					editor.gotoLine(session.getLine(count-1).length);
+                }
+            };
+			
             $scope.isModal = function (row) {
                 rowObj = row;
+				$timeout(enableAndFocusEditor,500);
                 editor.setValue(row.getProperty('value').toString());
             };
+			
             $scope.close = function () {
                 rowObj.entity.value = editor.getValue();
             };
