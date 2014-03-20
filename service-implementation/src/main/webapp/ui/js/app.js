@@ -93,6 +93,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.inputPatternForFolderURI = /^[a-zA-Z0-9_\\\/!@#\$%^&()--+=\/{}.,;'~` ]+$/;
     $rootScope.inputPatternForURL = /^(ftp|ftps|sftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
     $rootScope.numberPattern = /^\d+$/;
+    $rootScope.retryAttemptsPattern = /^[0-4]$/;
+    $rootScope.numberTimeOutPattern = /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$/;
     $rootScope.httpVersionPattern = /\b1.1\b/;
     $rootScope.multipleEmailPattern = /^(([a-zA-Z0-9_'+*$%\^&!\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9:]{2,7})([,]\W?(?!$))?)+$/;
     $rootScope.userInputDescriptionPattern = /^[a-zA-Z0-9_. ,]*$/;
