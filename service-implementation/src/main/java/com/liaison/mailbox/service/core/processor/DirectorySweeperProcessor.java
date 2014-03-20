@@ -39,6 +39,7 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2MetaSnapshotImpl;
 import com.liaison.fs2.api.FS2ObjectAlreadyExistsException;
+import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
@@ -332,7 +333,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 				// Creating meta snapshot
 				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(newPath.toUri(), new Date(), "DirectorySweeper");
+				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(newPath.toUri(),true, new Date(), "DirectorySweeper",new FS2ObjectHeaders());
 
 				// Constructing the fs2 file
 				try {
@@ -362,7 +363,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 				// Creating meta snapshot
 				FlexibleStorageSystem FS2 = FS2InstanceCreator.getFS2Instance();
-				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(newPath.toUri(), new Date(), "DirectorySweeper");
+				FS2MetaSnapshot metaSnapShot = new FS2MetaSnapshotImpl(newPath.toUri(),true, new Date(), "DirectorySweeper",new FS2ObjectHeaders());
 
 				// Constructing the fs2 file
 				try {
