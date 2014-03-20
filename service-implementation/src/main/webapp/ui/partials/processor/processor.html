@@ -160,32 +160,34 @@
                     </div>
                 </div>
 
-				<div class="col-sm-4 col-md-4 adjustPaddingRight">
+				<div class="col-sm-6 col-md-6" >
 					<label>Add script url</label>
 					<div ng-switch on="isGitUrlSelected">
 						<div ng-switch-when="1">
-							<small><label>{{constructedGitUrl}}</label></small>
+							<div class="col-sm-5 col-md-5 removePaddingLeft">
+								<small><label>{{constructedGitUrl}}</label></small>
+								
+							</div>
+							<div class="col-sm-7 col-md-7 adjustPaddingRight">
+								<input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control">
+							</div>
 						</div>
 						<div ng-switch-when="0">
-							<input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control">
+							<div class="col-sm-11 col-md-10 removePaddingLeft">
+								<input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control"/>
+								
+							</div>
+							<div class="col-sm-1 col-md-1 adjustPaddingRight">
+								<a id="mbx-procsr-scriptbrowse" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#myModal" class="btn btn-primary">Browse</a> 
+							</div>
 						</div>
 					</div>
-					<br>
-					<input id="mbx-procsr-git" type="radio" ng-change="onScriptTypeSelected()" ng-model="isGitUrlSelected"  value="1">  git url
-					<input id="mbx-procsr-filePath" type="radio" ng-change="onScriptTypeSelected()" ng-model="isGitUrlSelected" value="0">  file path url
+					<br><br>
+								<input id="mbx-procsr-git" type="radio" ng-change="onScriptTypeSelected()" ng-model="isGitUrlSelected"  value="1">  git url </input>
+								<input id="mbx-procsr-filePath" type="radio" ng-change="onScriptTypeSelected()" ng-model="isGitUrlSelected" value="0">  file path url </input>
+								</br></br>
 				</div>
-				<div class="col-sm-2 col-md-2 removePaddingLeft">
-					<br>
-					<!-- Button trigger modal -->
-					<div ng-switch on="isGitUrlSelected">
-						<div ng-switch-when="1">
-							<input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control">
-						</div>
-						<div ng-switch-when="0">
-							<a id="mbx-procsr-scriptbrowse" style="margin-top:6px" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#myModal" class="btn btn-primary">Browse</a> 
-						</div>
-					</div>
-				</div>						
+							
 			</div>
             <div class="row">
                 <div class="col-sm-6 col-md-6">
@@ -419,4 +421,3 @@
 		</div>
 	</div>
 </div>
-
