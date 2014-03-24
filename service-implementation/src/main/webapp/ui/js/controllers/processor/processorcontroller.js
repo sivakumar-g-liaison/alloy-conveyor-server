@@ -1912,6 +1912,7 @@ var rest = myApp.controller(
                 block.blockUI();
                 if ($scope.isEdit) {
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
+					$scope.appendPortToUrl();
                     editRequest.reviseProcessorRequest.processor.status = $scope.status.id;
                     editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.id;
                     $log.info($filter('json')(editRequest));
@@ -1937,6 +1938,7 @@ var rest = myApp.controller(
                     );
                 } else {
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
+					$scope.appendPortToUrl();
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
                     $log.info($filter('json')(addRequest));
@@ -2380,6 +2382,21 @@ var rest = myApp.controller(
 			
 			$scope.resetFiles = function() {
 				document.getElementById('mbx-procsr-certificatebrowse').value = null;
-			}			
+			}
+
+			$scope.appendPortToUrl = function() {
+				var baseUrl = $scope.processor.remoteProcessorProperties.url;
+				var basePort = baseUrl.split('/')[2].split(':')[1]
+				if (basePort === '' || basePort === null || typeof basePort === 'undefined') {
+					var defaultPort = $scope.processor.remoteProcessorProperties.port;
+					if (defaultPort != '' || defaultPort != null || typeof defaultPort != 'undefined') {
+						var url_parts = baseUrl.split('/');
+						var domain_name_parts = url_parts[2].split(':');
+						var domainWithPort = domain_name_parts[0].concat(':', defaultPort);
+						var newBaseUrl = baseUrl.replace(domain_name_parts[0], domainWithPort);
+						$scope.processor.remoteProcessorProperties.url = newBaseUrl;
+					}
+				}
+			}
         }
     ]);
