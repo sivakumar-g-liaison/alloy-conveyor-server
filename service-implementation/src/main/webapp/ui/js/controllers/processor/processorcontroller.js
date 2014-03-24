@@ -2012,7 +2012,9 @@ var rest = myApp.controller(
 						$scope.processor.protocol = $scope.enumprotocoltype[0];
 					}
 					$scope.isProcessorTypeSweeper = false;
-                    $scope.processorProperties = $scope.ftpMandatoryProperties;
+					if($scope.processor.protocol !== 'HTTP' && $scope.processor.protocol !== 'HTTPS') {
+						$scope.processorProperties = $scope.ftpMandatoryProperties;
+					}
                     $scope.setFolderData(false);
                     var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
                     if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
