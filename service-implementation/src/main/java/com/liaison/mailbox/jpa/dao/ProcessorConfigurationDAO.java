@@ -19,7 +19,7 @@ import com.liaison.mailbox.jpa.model.Processor;
 						+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
 						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
 						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS
-						+ " order by" + ProcessorConfigurationDAO.PROF_NAME), 
+						+ " order by " + ProcessorConfigurationDAO.PROF_NAME), 
 						@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROCESSOR_ID,
 						query = "select processor from Processor processor"
 								+ " where processor.pguid = :" + ProcessorConfigurationDAO.PGU_ID)	
