@@ -2388,15 +2388,17 @@ var rest = myApp.controller(
 
 			$scope.appendPortToUrl = function() {
 				var baseUrl = $scope.processor.remoteProcessorProperties.url;
-				var basePort = baseUrl.split('/')[2].split(':')[1]
-				if (basePort === '' || basePort === null || typeof basePort === 'undefined') {
-					var defaultPort = $scope.processor.remoteProcessorProperties.port;
-					if (defaultPort !== '') {
-						var url_parts = baseUrl.split('/');
-						var domain_name_parts = url_parts[2].split(':');
-						var domainWithPort = domain_name_parts[0].concat(':', defaultPort);
-						var newBaseUrl = baseUrl.replace(domain_name_parts[0], domainWithPort);
-						$scope.processor.remoteProcessorProperties.url = newBaseUrl;
+				if (typeof baseUrl !== 'undefined' && baseUrl !== '') {
+					var basePort = baseUrl.split('/')[2].split(':')[1]
+					if (basePort === '' || basePort === null || typeof basePort === 'undefined') {
+						var defaultPort = $scope.processor.remoteProcessorProperties.port;
+						if (defaultPort !== '') {
+							var url_parts = baseUrl.split('/');
+							var domain_name_parts = url_parts[2].split(':');
+							var domainWithPort = domain_name_parts[0].concat(':', defaultPort);
+							var newBaseUrl = baseUrl.replace(domain_name_parts[0], domainWithPort);
+							$scope.processor.remoteProcessorProperties.url = newBaseUrl;
+						}
 					}
 				}
 			}
