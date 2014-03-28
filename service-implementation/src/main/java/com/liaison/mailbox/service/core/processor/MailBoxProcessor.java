@@ -9,12 +9,14 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+
 /**
  * @author Ganesh
  * 
  */
 public interface MailBoxProcessor {
 
-	public void invoke() throws Exception;
+	public void invoke(String executionId,MailboxFSM fsm) throws Exception;
 
 }

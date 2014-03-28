@@ -28,6 +28,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
@@ -217,7 +218,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	}
 
 	@Override
-	public void invoke() throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		
 		LOGGER.info("Entering in invoke.");
 		// SFTPRequest executed through JavaScript

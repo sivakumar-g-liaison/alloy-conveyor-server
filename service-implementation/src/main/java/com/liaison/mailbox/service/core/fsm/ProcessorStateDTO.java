@@ -156,7 +156,7 @@ public class ProcessorStateDTO {
 	 * @param stateNotes
 	 * @return
 	 */
-	public static ProcessorStateDTO getProcessorInstance(String executionId, Processor processor, String profileName,
+	public static ProcessorStateDTO getProcessorStateInstance(String executionId, Processor processor, String profileName,
 			ExecutionState state, String stateNotes) {
 
 		return new ProcessorStateDTO(executionId, processor.getPguid(), state, processor.getProcsrName(),

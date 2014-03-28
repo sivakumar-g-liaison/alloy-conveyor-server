@@ -44,6 +44,7 @@ import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
@@ -85,7 +86,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	@Override
-	public void invoke() throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		executeRequest();			
 	}
 

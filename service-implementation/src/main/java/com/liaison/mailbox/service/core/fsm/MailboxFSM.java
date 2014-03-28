@@ -57,6 +57,13 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 	public Event<ExecutionEvents> createEvent(ExecutionEvents eventType) {
 		return fsmDao.createEvent(eventType);
 	}
+	
+	
+	public void createEvent(ExecutionEvents eventType,String executionId) {
+		//TODO use this methods to create INTERRUPT SIGNAL REVICED EVENT AND INTERRUPTED EVENT FOR THE EXECUTION ID
+		
+		
+	}
 
 	@Override
 	public Transition<ProcessorStateDTO, ExecutionEvents> createTransition() {
@@ -146,6 +153,24 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.PROCESSING);
 		transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
 		this.addTransition(transition);
+		
+		// Transition Rules - QUEUED TO SKIPPED WHEN ExecutionEvents.PROCESSOR_EXECUTION_STARTED
+		// is passed on
+		transition = this.createTransition();
+		transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
+		ProcessorStateDTO skipProcessing = processorQueued.createACopyWithNewState(ExecutionState.SKIPPED_SINCE_ALREADY_RUNNING);
+		transition.addUpdate(skipProcessing.getExecutionId(), skipProcessing);
+		this.addTransition(transition);
+		
+		// Transition Rules - PROCESSING TO INTERRUPTED WHEN
+		// ExecutionEvents.INTERRUPTED is passed on
+		transition = this.createTransition();
+		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.INTERRUPTED));
+		ProcessorStateDTO processorInterrupted = processorProcessing.createACopyWithNewState(ExecutionState.GRACEFULLY_INTERRUPTED);
+		transition.addUpdate(processorInterrupted.getExecutionId(), processorInterrupted);
+		this.addTransition(transition);
 
 		// Transition Rules - PROCESSING TO COMPLTED WHEN
 		// ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED is passed on
@@ -164,6 +189,34 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO processorFailed = processorProcessing.createACopyWithNewState(ExecutionState.FAILED);
 		transition.addUpdate(processorFailed.getExecutionId(), processorFailed);
 		this.addTransition(transition);
+		
+		// Transition Rules - PROCESSING TO HANDEDOVER TO JS WHEN
+		// ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS is passed on
+		transition = this.createTransition();
+		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+		ProcessorStateDTO processorHandedOverToJS = processorProcessing.createACopyWithNewState(ExecutionState.HANDED_OVER_TO_JS);
+		transition.addUpdate(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
+		this.addTransition(transition);	
+		
+		// Transition Rules - HANDEDOVER_TO_JS TO COMPLTED WHEN
+		// ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED is passed on
+		transition = this.createTransition();
+		transition.addCriteria(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+		ProcessorStateDTO processorCompletedAfterJS = processorHandedOverToJS.createACopyWithNewState(ExecutionState.COMPLETED);
+		transition.addUpdate(processorCompletedAfterJS.getExecutionId(), processorCompletedAfterJS);
+		this.addTransition(transition);
+		
+		// Transition Rules - HANDEDOVER_TO_JS TO FAILED WHEN ExecutionEvents.PROCESSOR_EXECUTION_FAILED
+		// is passed on
+		transition = this.createTransition();
+		transition.addCriteria(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
+		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+		ProcessorStateDTO processorFailedAfterJS = processorHandedOverToJS.createACopyWithNewState(ExecutionState.FAILED);
+		transition.addUpdate(processorFailedAfterJS.getExecutionId(), processorFailedAfterJS);
+		this.addTransition(transition);
+		
 		return true;
 	}
 

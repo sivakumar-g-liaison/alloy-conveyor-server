@@ -27,6 +27,7 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -147,22 +148,11 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	}
 
 	@Override
-	public void invoke() throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
-			/*ScriptEngineManager manager = new ScriptEngineManager();
-			ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-			Invocable inv = (Invocable) engine;
-
-			// invoke the method in javascript
-			inv.invokeFunction("init", this);
-			// System.out.println(obj.toString());*/
-			
-			// Use custom G2JavascriptEngine
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {

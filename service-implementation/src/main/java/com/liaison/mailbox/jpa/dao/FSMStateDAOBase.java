@@ -72,6 +72,11 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		Event<ExecutionEvents> event = new ActiveEvent<ExecutionEvents>(executionEvent);
 		return event;
 	}
+	
+	
+	public void createEvent(ExecutionEvents executionEvent,String executionId) {
+		//TODO ADD LOGIC HERE TO PERSIST INTERRUT_SIGNAL_RECEIVED TO FSM EVENT TABLE .
+	}
 
 	@Override
 	public void deleteStates(List<String> arg0) {

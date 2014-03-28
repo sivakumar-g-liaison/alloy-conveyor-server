@@ -34,7 +34,7 @@ class ProcessorInvoker implements Runnable {
 
 		logger.info("processor with id:"+request+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		
-		TriggerProfileResponseDTO serviceResponse = getService().executeProcessor(request);
+		getService().executeProcessor(request);
 		
 		logger.info("processor with id:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance().printExecutorDiagonostics();

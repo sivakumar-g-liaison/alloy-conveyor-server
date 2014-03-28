@@ -31,7 +31,9 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
@@ -58,22 +60,12 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	}
 
 	@Override
-	public void invoke() throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		
 		LOGGER.info("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
-
-			/*ScriptEngineManager manager = new ScriptEngineManager();
-			ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-			Invocable inv = (Invocable) engine;
-
-			// invoke the method in javascript
-			inv.invokeFunction("init", this);*/
-			
-			// Use custom G2JavascriptEngine
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {
@@ -177,6 +169,8 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
 			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException {
+		
+		//TODO find appropriate place to trigger event fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
