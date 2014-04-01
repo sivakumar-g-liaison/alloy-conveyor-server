@@ -2196,9 +2196,34 @@ var rest = myApp.controller(
                     isMandatory: false
                 }];
             };
+            
             // Editor Section Begins
             var editor;
             var rowObj;
+            var retryAttemptExp = /^[0-4]$/;
+			var timeoutExp = /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$/;
+            
+            $scope.onCloseEditor = function (url) {
+            
+				if (url !== '') {
+
+					var port = url.split('/')[2].split(':')[1];
+					for (i = 0; i < $scope.processorProperties.length; i++) {
+						if ($scope.processorProperties[i].name === 'Port') {
+							if (/^\d+$/.test(port) && port.length <= 5) {
+								$scope.processorProperties[i].value = port;
+								$scope.isPortDisabled = true;
+							} else {
+								$scope.processorProperties[i].value = '';
+								$scope.defaultPortValue();
+								$scope.isPortDisabled = false;
+							}
+						}
+
+					}
+				}
+			};
+            
             $scope.loadValueData = function (_editor) {
                 editor = _editor;
                 _editor.getSession().setUseWorker(false);
@@ -2218,13 +2243,32 @@ var rest = myApp.controller(
             $scope.isModal = function (row) {
                 rowObj = row;
 				$timeout(enableAndFocusEditor,500);
-                editor.setValue(row.getProperty('value').toString());
+				if (typeof rowObj.entity.value === 'undefined' || rowObj.entity.value === '') {
+					editor.setValue('',0) 
+				} else {
+                	editor.setValue(row.getProperty('value').toString());
+				}
             };
 			
             $scope.close = function () {
+            
+                var editorValue = editor.getValue();
+                var entityName = rowObj.entity.name;
+                
+                if (entityName === 'Retry Attempts' && !retryAttemptExp.test(editorValue)) {
+                    editor.setValue('', 0);
+                } else if ((entityName === 'Socket Timeout' || entityName === 'Connection Timeout')
+                			 && !timeoutExp.test(editorValue)) {
+                    editor.setValue('', 0);
+                } else if (entityName === 'URL') {
+                    $scope.onCloseEditor(editorValue);
+                }
+                
                 rowObj.entity.value = editor.getValue();
             };
+			    
             // Editor Section Ends
+			    
             $scope.changeGlyphIconColor = function (icon, currentValue) {
                 if (currentValue !== '') {
                     icon.color = "glyphicon-red";
