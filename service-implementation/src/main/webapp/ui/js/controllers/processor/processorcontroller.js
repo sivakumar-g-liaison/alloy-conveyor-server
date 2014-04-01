@@ -2445,6 +2445,10 @@ var rest = myApp.controller(
 						}
 					}
 				}
+			}	
+			
+			$scope.onScriptTypeSelected = function() {
+				$scope.modal.uri = '';
 			}
         }
     ]);
