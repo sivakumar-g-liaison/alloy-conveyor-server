@@ -25,6 +25,7 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -152,7 +153,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
-
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {

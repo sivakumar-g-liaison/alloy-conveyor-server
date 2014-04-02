@@ -23,6 +23,7 @@ import com.liaison.fsm.FSMDao;
 import com.liaison.fsm.Transition;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
 import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
 import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
@@ -61,8 +62,8 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 	
 	public void createEvent(ExecutionEvents eventType,String executionId) {
 		//TODO use this methods to create INTERRUPT SIGNAL REVICED EVENT AND INTERRUPTED EVENT FOR THE EXECUTION ID
-		
-		
+		FSMEventDAOBase configDao = new FSMEventDAOBase();
+		configDao.createEvent(eventType, executionId);
 	}
 
 	@Override

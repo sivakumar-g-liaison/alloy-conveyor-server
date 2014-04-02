@@ -43,6 +43,7 @@ import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
+import com.liaison.mailbox.service.dto.configuration.request.AddFSMExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
@@ -50,6 +51,7 @@ import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
@@ -62,6 +64,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreRespo
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -111,7 +114,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		auditAttempt("createMailBox");
 		
 		serviceCallCounter.addAndGet(1);
-		 Response returnResponse;
+		Response returnResponse;
 		InputStream requestStream;
 		AddMailboxRequestDTO serviceRequest;
 
@@ -1085,7 +1088,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPropertyFileValues() {
 		
-		//Audit LOG the Attempt to getGlobalTrustStoreId
+		//Audit LOG the Attempt to getjavaPropertyFileValues
 	    auditAttempt("getjavaPropertyFileValues");
 	    
 		serviceCallCounter.addAndGet(1);
@@ -1115,5 +1118,104 @@ public class MailBoxConfigurationResource extends BaseResource {
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
+	}
+	
+	@GET
+	@Path("/processor/execution")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") String status,
+			@QueryParam(value = "frmDate") String frmDate, @QueryParam(value = "toDate") String toDate, @QueryParam(value = "hitCounter") String hitCounter) {
+		
+		//Audit LOG the Attempt to getExecutingProcessors
+	    auditAttempt("getExecutingProcessors");
+	    
+		serviceCallCounter.addAndGet(1);
+		Response returnResponse;
+
+		try {
+			GetExecutingProcessorResponseDTO serviceResponse = null;
+			ProcessorConfigurationService processor = new ProcessorConfigurationService();
+			
+			serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
+			serviceResponse.setHitCounter(hitCounter);
+			
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("getExecutingProcessors");
+			} else {
+				auditFailure("getExecutingProcessors");
+			}
+			
+			returnResponse = serviceResponse.constructResponse();
+			
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+			//Audit LOG the failure
+			auditFailure("getExecutingProcessors");
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+		return returnResponse;
+	}
+	
+	/**
+	 * REST method to initiate FSM execution event creation.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
+	 */
+	@POST
+	@Path("/processor/executionEvent")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response createExecutionEvent(@Context HttpServletRequest request) {
+
+		//Audit LOG the Attempt to createExecutionEvent
+		auditAttempt("createExecutionEvent");
+		
+		serviceCallCounter.addAndGet(1);
+		Response returnResponse;
+		InputStream requestStream;
+		AddFSMExecutionEventRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddFSMExecutionEventRequestDTO.class);
+
+			AddFSMExecutionEventResponseDTO serviceResponse = null;
+			ProcessorConfigurationService processor = new ProcessorConfigurationService();
+
+			// creates new execution event
+			serviceResponse = processor.createExecutionEvent(serviceRequest);
+
+			//Audit LOG
+			if (serviceResponse.getResponse().getStatus() == "success") {
+				auditSuccess("createExecutionEvent");
+			} else {
+				auditFailure("createExecutionEvent");
+			}
+			
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+		//Audit LOG the failure
+		auditFailure("createExecutionEvent");
+		return returnResponse;
+
 	}
 }

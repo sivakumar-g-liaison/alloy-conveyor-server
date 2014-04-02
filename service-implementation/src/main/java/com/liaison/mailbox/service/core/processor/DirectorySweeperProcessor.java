@@ -42,6 +42,7 @@ import com.liaison.fs2.api.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -89,6 +90,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 	
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {	
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			// Use custom G2JavascriptEngine
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 		} else {

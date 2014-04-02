@@ -2,7 +2,10 @@ package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,12 +35,14 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.jpa.dao.FSMStateDAO;
+import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.MailBoxDAO;
 import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAO;
 import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
@@ -46,6 +51,7 @@ import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
+import com.liaison.mailbox.jpa.model.FSMStateValue;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailboxServiceInstance;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -53,21 +59,27 @@ import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.jpa.model.ServiceInstanceId;
+import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddFSMExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
+import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -83,6 +95,8 @@ public class ProcessorConfigurationService {
 	private static String TRUSTSTORE = "TrustStore";
 	private static String MAILBOX = "MailBox";
 	private static final String PROCESSOR_STATUS = "Processor Status";
+	private static String FSM_EVENT = "FSMEvent";
+	private static String EXECUTING_PROCESSORS = "Executing Processors";
 
 	private static final GenericValidator validator = new GenericValidator();
 
@@ -97,7 +111,7 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException {
@@ -127,7 +141,7 @@ public class ProcessorConfigurationService {
 					validator.validate(credentialDTO);
 				}
 			}
-			
+
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceRequest.getProcessor().getServiceInstanceId());
 			if (serviceInstance == null) {
@@ -136,7 +150,7 @@ public class ProcessorConfigurationService {
 				serviceInstance.setPguid(MailBoxUtility.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
 			}
-			
+
 			// Instantiate the processor and copying the values from DTO to
 			// entity.
 			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
@@ -146,32 +160,32 @@ public class ProcessorConfigurationService {
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
-			
-			//adding service instance id
+
+			// adding service instance id
 			processor.setServiceInstance(serviceInstance);
-			
+
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
 			configDAO.persist(processor);
-			
-			//linking mailbox and service instance id
+
+			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
 			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(processor.getMailbox().getPguid(), serviceInstance.getPguid());
-			
+
 			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, processor.getMailbox().getPguid());
 			if (null == mailBox) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, processor.getMailbox().getPguid());
 			}
-			
+
 			if (mailboxServiceInstance == null) {
-				//Creates relationship mailbox and service instance id
+				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtility.getGUID());
 				msi.setServiceInstanceId(serviceInstance);
 				msi.setMailbox(mailBox);
 				msiDao.persist(msi);
-			} 
+			}
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey())));
@@ -192,90 +206,88 @@ public class ProcessorConfigurationService {
 	/**
 	 * Method which associates the generated publickey certificate with TrustStore
 	 * @param pkcGuid
-	 * @throws IOException 
-	 * @throws JSONException 
+	 * @throws IOException
+	 * @throws JSONException
 	 */
 	private void createPublicKeyAndTrustStoreLink(String pkcGuid) throws IOException, JSONException {
-		
-	   String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
-	   JSONObject jsonRequest = new JSONObject(request);
-	   
-	   jsonRequest.getJSONObject("dataTransferObject").put("pguid",MailBoxUtility.getEnvironmentProperties().getString("truststore-id"));
-	   
-	   JSONArray array = jsonRequest.getJSONObject("dataTransferObject").getJSONArray("trustStoreMemberships");
-	   ((JSONObject)array.get(0)).getJSONObject("publicKey").put("pguid", pkcGuid);
+
+		String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
+		JSONObject jsonRequest = new JSONObject(request);
+
+		jsonRequest.getJSONObject("dataTransferObject").put("pguid", MailBoxUtility.getEnvironmentProperties().getString("truststore-id"));
+
+		JSONArray array = jsonRequest.getJSONObject("dataTransferObject").getJSONArray("trustStoreMemberships");
+		((JSONObject) array.get(0)).getJSONObject("publicKey").put("pguid", pkcGuid);
 
 	   HttpPut httpPut = new HttpPut(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") +
 			   "/update/truststore/" +MailBoxUtility.getEnvironmentProperties().getString("truststore-id")); 
-	   
-       DefaultHttpClient httpclient = new DefaultHttpClient();
-       
-       httpPut.addHeader("Content-Type", "application/json");
-       httpPut.setEntity(new StringEntity(jsonRequest.toString()));
-       
-       HttpResponse response = httpclient.execute(httpPut);
-       
-       //TODO check for 200, if not then throw an Exception. 
-       System.out.println(response.getStatusLine());
+
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+
+		httpPut.addHeader("Content-Type", "application/json");
+		httpPut.setEntity(new StringEntity(jsonRequest.toString()));
+
+		HttpResponse response = httpclient.execute(httpPut);
+
+		// TODO check for 200, if not then throw an Exception.
+		System.out.println(response.getStatusLine());
 	}
-	
 
 	/**
 	 * Method which uploads public key
 	 * from to KMS
-	 *
+	 * 
 	 * @return guid of the uploaded Public Key
-	 * @throws MailBoxConfigurationServicesException 
-	 * @throws IOException 
-	 * @throws ClientProtocolException 
-	 * @throws JSONException 
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws IOException
+	 * @throws ClientProtocolException
+	 * @throws JSONException
 	 */
 	private String uploadPublicKey(AddProcessorToMailboxRequestDTO addRequest,
 			ReviseProcessorRequestDTO reviseRequest) throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
-		
+
 		if (null == reviseRequest) {
-			
+
 			if (addRequest.getProcessor().getProtocol().equalsIgnoreCase("https")) {
-				
+
 				if (!MailBoxUtility.isEmpty(addRequest.getProcessor().getCertificateURI())) {
-					
+
 					String request = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
 					JSONObject jsonRequest = new JSONObject(request);
 					jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
-					
+
 					HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") 
 							+ "upload/public"); 
 					DefaultHttpClient httpclient = new DefaultHttpClient();
-					
+
 					StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
 					FileBody publicKeyCert = new FileBody(new File(addRequest.getProcessor().getCertificateURI()));
 					HttpEntity reqEntity = MultipartEntityBuilder.create()
 							.addPart("request", jsonRequestBody)
 							.addPart("key", publicKeyCert)
 							.build();
-					
+
 					httpPost.setEntity(reqEntity);
 					HttpResponse response = httpclient.execute(httpPost);
-					
+
 					// TODO Check for 200 Status code, Consume entity then get GUID and return
-					
+
 					if (response.getStatusLine().getStatusCode() == 201) {
-						
+
 						JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
 						JSONArray arr = obj.getJSONObject("dataTransferObject").getJSONArray("keyGroupMemberships");
-						return (((JSONObject)arr.get(0)).getJSONObject("keyBase").getString("pguid"));
-						
+						return (((JSONObject) arr.get(0)).getJSONObject("keyBase").getString("pguid"));
+
 					}
 				}
-				
-		        
-		        return null;
+
+				return null;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Creates link between scheduleProfileref and processor.
 	 * 
@@ -416,54 +428,54 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
-	
+
 	public GetTrustStoreResponseDTO uploadSelfSignedTrustStore() throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
-		
-		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO(); 
-		
+
+		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO();
+
 		try {
-			
+
 			String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 			JSONObject jsonRequest = new JSONObject(request);
 			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
-			
+
 			HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") 
 					+ "upload/truststore"); 
 			DefaultHttpClient httpclient = new DefaultHttpClient();
-			
+
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
 			FileBody trustStore = new FileBody(new File(MailBoxUtility.getEnvironmentProperties().getString("certificateDirectory")));
-			
+
 			HttpEntity reqEntity = MultipartEntityBuilder.create()
 					.addPart("request", jsonRequestBody)
 					.addPart("key", trustStore)
 					.build();
-			
+
 			httpPost.setEntity(reqEntity);
 			HttpResponse response = httpclient.execute(httpPost);
-			
+
 			// TODO Check for 200 Status code, Consume entity then get GUID and return
-			
+
 			if (response.getStatusLine().getStatusCode() == 201) {
-				
+
 				JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
-				
+
 				// Setting TrustStore ID
 				JSONArray arr = obj.getJSONObject("dataTransferObject").getJSONArray("trustStores");
-				String trustStoreId = (((JSONObject)arr.get(0)).getString("pguid"));
+				String trustStoreId = (((JSONObject) arr.get(0)).getString("pguid"));
 				TrustStoreDTO dto = new TrustStoreDTO();
 				dto.setTrustStoreId(trustStoreId);
-				
-				//Setting TrustStore Group ID
+
+				// Setting TrustStore Group ID
 				dto.setTrustStoreGroupId(obj.getJSONObject("dataTransferObject").getString("pguid"));
 
 				serviceResponse.setTrustStore(dto);
 				serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, TRUSTSTORE, Messages.SUCCESS));
 				LOGGER.info("Exit from get mailbox.");
 				return serviceResponse;
-				
+
 			} else throw new MailBoxConfigurationServicesException(Messages.SELFSIGNED_TRUSTSTORE_CREATION_FAILED);
-			
+
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
@@ -471,7 +483,7 @@ public class ProcessorConfigurationService {
 					.getMessage()));
 			return serviceResponse;
 		}
-		
+
 	}
 
 	/**
@@ -705,6 +717,105 @@ public class ProcessorConfigurationService {
 		MailBox mbx = processor.getMailbox();
 		if (!mailBoxGuid.equals(mbx.getPrimaryKey())) {
 			throw new MailBoxConfigurationServicesException(Messages.PROC_DOES_NOT_BELONG_TO_MBX);
+		}
+	}
+
+	/**
+	 * Get the executing processors
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws IOException 
+	 */
+	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) throws MailBoxConfigurationServicesException, IOException {
+		
+		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
+		LOGGER.info("Entering into getExecutingProcessors.");
+
+		String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours"); 
+//		Timestamp timeStmp = new Timestamp(Long.parseLong(listJobsIntervalInHours));
+		
+		Timestamp timeStmp = new Timestamp(new Date().getTime());
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(timeStmp);
+		cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
+		timeStmp.setTime(cal.getTime().getTime()); // or
+		timeStmp = new Timestamp(cal.getTime().getTime());
+		
+		FSMStateDAO procDAO = new FSMStateDAOBase();
+		
+		List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
+		
+		if(!MailBoxUtility.isEmpty(status) && !MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate)) {
+			listfsmStateVal = procDAO.findProcessorsExecutingByValueAndDate(status, frmDate, toDate);
+		}
+		
+		if (!MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
+			listfsmStateVal = procDAO.findProcessorsExecutingByValue(status, timeStmp);
+		}
+		
+		if(!MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate) && MailBoxUtility.isEmpty(status)) {
+			listfsmStateVal = procDAO.findProcessorsExecutingByDate(frmDate, toDate);
+		}
+		
+		if(MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
+			listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
+		}
+		
+		// Constructing the SearchMailBoxDTO from retrieved mailboxes
+		List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
+		GetExecutingProcessorDTO getExecutingDTO = null;
+		for (FSMStateValue fsmv : listfsmStateVal) {
+
+			getExecutingDTO = new GetExecutingProcessorDTO();
+			getExecutingDTO.copyFromEntity(fsmv);
+			getExecutingProcessorDTOList.add(getExecutingDTO);
+		}
+
+		serviceResponse.setExecutingProcessor(getExecutingProcessorDTOList);
+		serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, EXECUTING_PROCESSORS, Messages.SUCCESS));
+		LOGGER.info("Exit from getExecutingProcessors.");
+		return serviceResponse;
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param serviceRequest
+	 * 
+	 */
+	public AddFSMExecutionEventResponseDTO createExecutionEvent( AddFSMExecutionEventRequestDTO serviceRequest) {
+		
+		LOGGER.info("Entering into fsm execution event creation.");
+		AddFSMExecutionEventResponseDTO serviceResponse = new AddFSMExecutionEventResponseDTO();
+
+		try {
+
+			FSMEventDTO fsmEventDTO = serviceRequest.getFsmEvent();
+			if (fsmEventDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			validator.validate(fsmEventDTO);
+
+			MailboxFSM fsm = new MailboxFSM();
+
+			// persisting the FSMEvent entity
+			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, fsmEventDTO.getExecutionID());
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, FSM_EVENT, Messages.SUCCESS));
+
+			LOGGER.info("Exiting from fsm execution event creation.");
+
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, FSM_EVENT, Messages.FAILURE, e
+					.getMessage()));
+
+			return serviceResponse;
 		}
 	}
 }

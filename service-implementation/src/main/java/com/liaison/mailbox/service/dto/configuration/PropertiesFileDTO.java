@@ -24,7 +24,16 @@ public class PropertiesFileDTO {
 	private String gitlabPort;
 	private String gitlabProjectName;
 	private String gitlabBranchName;
+	private String listJobsIntervalInHours;
+	private String fsmEventCheckIntervalInSeconds;
 	
+	public String getFsmEventCheckIntervalInSeconds() {
+		return fsmEventCheckIntervalInSeconds;
+	}
+	public void setFsmEventCheckIntervalInSeconds(
+			String fsmEventCheckIntervalInSeconds) {
+		this.fsmEventCheckIntervalInSeconds = fsmEventCheckIntervalInSeconds;
+	}
 	public String getGitlabHost() {
 		return gitlabHost;
 	}
@@ -60,5 +69,11 @@ public class PropertiesFileDTO {
 	}
 	public void setTrustStoreGroupId(String trustStoreGroupId) {
 		this.trustStoreGroupId = trustStoreGroupId;
+	}
+	public String getListJobsIntervalInHours() {
+		return listJobsIntervalInHours;
+	}
+	public void setListJobsIntervalInHours(String listJobsIntervalInHours) {
+		this.listJobsIntervalInHours = listJobsIntervalInHours;
 	}
 }

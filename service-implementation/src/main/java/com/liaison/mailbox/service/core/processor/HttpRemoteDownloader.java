@@ -31,6 +31,7 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -66,14 +67,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
-			/*ScriptEngineManager manager = new ScriptEngineManager();
-			ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-			Invocable inv = (Invocable) engine;
-
-			// invoke the method in javascript
-			inv.invokeFunction("init", this);*/
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			
 			// Use custom G2JavascriptEngine
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);

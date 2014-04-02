@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
@@ -27,6 +28,8 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -90,7 +93,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
-	private void executeRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
+	private void executeRequest(String executionId, MailboxFSM fsm) throws LiaisonException, IOException, JAXBException, URISyntaxException,
 			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
@@ -122,7 +125,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			}
 
 			sftpRequest.changeDirectory(remotePath);
-			uploadDirectory(sftpRequest, path, remotePath);
+			uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 		}
 		sftpRequest.disconnect();
@@ -139,16 +142,31 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * 
 	 */
-	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir)
+	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, com.liaison.commons.exception.LiaisonException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
 		// variable to hold the status of file upload request execution
 		int replyCode = -1;
+		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
+		
+		Date lastCheckTime = new Date();
+		String constantInterval = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
+		
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
-
+				
+				//interrupt signal check
+				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+					lastCheckTime = new Date();
+					if(eventDAO.isThereAInterruptSignal(executionId)) {
+						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
+						fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
+						return;
+					}
+				}
+				
 				if (item.getName().equals(".") || item.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
@@ -175,7 +193,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					// upload the sub directory
 					sftpRequest.changeDirectory(remoteFilePath);
 					String localDr = localParentDir + File.separatorChar + item.getName();
-					uploadDirectory(sftpRequest, localDr, remoteFilePath);
+					uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm);
 					replyCode = 0;
 
 				} else {
@@ -224,21 +242,14 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		// SFTPRequest executed through JavaScript
 		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
 
-			/*ScriptEngineManager manager = new ScriptEngineManager();
-			ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-			engine.eval(getJavaScriptString(configurationInstance.getJavaScriptUri()));
-			Invocable inv = (Invocable) engine;
-
-			// invoke the method in javascript
-			inv.invokeFunction("init", this);*/
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			
 			// Use custom G2JavascriptEngine
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
 		} else {
 			// SFTPRequest executed through Java
-			executeRequest();
+			executeRequest(executionId, fsm);
 		}
 	}
 }

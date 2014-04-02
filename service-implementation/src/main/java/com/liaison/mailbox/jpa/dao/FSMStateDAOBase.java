@@ -10,12 +10,18 @@
 
 package com.liaison.mailbox.jpa.dao;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.apache.commons.net.ntp.TimeStamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +32,7 @@ import com.liaison.fsm.Event;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.jpa.model.FSMEvent;
 import com.liaison.mailbox.jpa.model.FSMState;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 import com.liaison.mailbox.service.core.MailBoxService;
@@ -73,10 +80,6 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		return event;
 	}
 	
-	
-	public void createEvent(ExecutionEvents executionEvent,String executionId) {
-		//TODO ADD LOGIC HERE TO PERSIST INTERRUT_SIGNAL_RECEIVED TO FSM EVENT TABLE .
-	}
 
 	@Override
 	public void deleteStates(List<String> arg0) {
@@ -140,4 +143,127 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 	}
 	
 
+	@Override
+	public List<FSMStateValue> findAllProcessorsExecuting(Timestamp listJobsIntervalInHours) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+			
+			List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+			
+			List<?> jobsRunning = entityManager
+								 .createNamedQuery(FIND_ALL_PROC_EXECUTING)
+								 .setParameter(INTERVAL_IN_HOURS,listJobsIntervalInHours)
+								 .getResultList();
+
+			Iterator<?> iter = jobsRunning.iterator();
+			FSMStateValue job;
+			while (iter.hasNext()) {
+				
+				job = (FSMStateValue) iter.next();
+				jobs.add(job);
+			}
+			return jobs;
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+	}
+	
+	@Override
+	public List<FSMStateValue> findProcessorsExecutingByValue(String value, Timestamp listJobsIntervalInHours) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+			
+			List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+			
+			List<?> jobsRunning = entityManager
+								  .createNamedQuery(FIND_PROC_EXECUTING_BY_VALUE)
+								  .setParameter(INTERVAL_IN_HOURS, listJobsIntervalInHours)
+								  .setParameter(BY_VALUE, value)
+								  .getResultList();
+
+			Iterator<?> iter = jobsRunning.iterator();
+			FSMStateValue job;
+			while (iter.hasNext()) {
+				
+				job = (FSMStateValue) iter.next();
+				jobs.add(job);
+			}
+			return jobs;
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+	}
+	
+	@Override
+	public List<FSMStateValue> findProcessorsExecutingByDate(String frmDate, String toDate) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+			
+			List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+			
+			List<?> jobsRunning = entityManager
+								  .createNamedQuery(FIND_PROC_EXECUTING_BY_DATE)
+								  .setParameter(FROM_DATE, frmDate)
+								  .setParameter(TO_DATE, toDate)
+								  .getResultList();
+
+			Iterator<?> iter = jobsRunning.iterator();
+			FSMStateValue job;
+			while (iter.hasNext()) {
+				
+				job = (FSMStateValue) iter.next();
+				jobs.add(job);
+			}
+			return jobs;
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+	}
+	
+	@Override
+	public List<FSMStateValue> findProcessorsExecutingByValueAndDate(String value, String frmDate, String toDate) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+			
+			List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+			
+			List<?> jobsRunning = entityManager
+								  .createNamedQuery(FIND_PROC_EXECUTING_BY_VALUE_AND_DATE)
+								  .setParameter(BY_VALUE, value)
+								  .setParameter(FROM_DATE, frmDate)
+								  .setParameter(TO_DATE, toDate)
+								  .getResultList();
+
+			Iterator<?> iter = jobsRunning.iterator();
+			FSMStateValue job;
+			while (iter.hasNext()) {
+				
+				job = (FSMStateValue) iter.next();
+				jobs.add(job);
+			}
+			return jobs;
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+	}
 }

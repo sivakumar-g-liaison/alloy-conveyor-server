@@ -191,11 +191,11 @@ public class MailBoxService {
 			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, dto.getProfileName(),ExecutionState.QUEUED, null);
 			fsm.addDefaultStateTransitionRules(processorQueued);
 			
-			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus())) {
+				if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus())) {
 				
-				fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
-				LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
-				return;
+					fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
+					LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
+					return;
 			    }
 			    	
 			    LOG.info("Verified if {} is already running and it is not",processorId);

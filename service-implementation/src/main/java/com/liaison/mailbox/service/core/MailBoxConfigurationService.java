@@ -42,7 +42,6 @@ import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertiesFileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
@@ -51,7 +50,6 @@ import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponse
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
@@ -476,6 +474,8 @@ public class MailBoxConfigurationService {
 			String gitlabPort = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.port");
 			String gitlabProjectName = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.project.name");
 			String gitlabBranchName = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.branch.name");
+			String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours");
+			String fsmEventCheckIntervalInSeconds = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
 			
 			dto.setTrustStoreId(globalTrustStoreId);
 			dto.setTrustStoreGroupId(globalTrustStoreGroupId);
@@ -483,6 +483,8 @@ public class MailBoxConfigurationService {
 			dto.setGitlabPort(gitlabPort);
 			dto.setGitlabBranchName(gitlabBranchName);
 			dto.setGitlabProjectName(gitlabProjectName);
+			dto.setListJobsIntervalInHours(listJobsIntervalInHours);
+			dto.setFsmEventCheckIntervalInSeconds(fsmEventCheckIntervalInSeconds);
 			
 			serviceResponse.setProperties(dto);
 			

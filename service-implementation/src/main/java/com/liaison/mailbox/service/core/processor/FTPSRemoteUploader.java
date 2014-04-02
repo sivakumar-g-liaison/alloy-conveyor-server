@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
@@ -32,6 +33,8 @@ import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -70,7 +73,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		} else {
 			// FTPSRequest executed through Java
-			executeRequest();
+			executeRequest(executionId, fsm);
 		}
 	}
 
@@ -120,7 +123,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws JsonParseException 
 	 * 
 	 */
-	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+	protected void executeRequest(String executionId, MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
@@ -154,7 +157,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		}
 		ftpsRequest.changeDirectory(remotePath);
 
-		uploadDirectory(ftpsRequest, path, remotePath);
+		uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm);
 		ftpsRequest.disconnect();
 	}
 
@@ -167,7 +170,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws SftpException
 	 * 
 	 */
-	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir)
+	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException {
 		
 		//TODO find appropriate place to trigger event fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
@@ -176,9 +179,25 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		File[] subFiles = localDir.listFiles();
 		// variable to hold the status of file upload request execution
 		int replyCode = 0;
+		
+		Date lastCheckTime = new Date();
+		String constantInterval = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
+
+		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
+		
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
-
+				
+				//interrupt signal check
+				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+					if(eventDAO.isThereAInterruptSignal(executionId)) {
+						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
+						fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
+						return;
+					}
+					lastCheckTime = new Date();
+				}
+				
 				if (item.getName().equals(".") || item.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
@@ -206,7 +225,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 						ftpsRequest.getNative().makeDirectory(remoteFilePath);
 					}
 					ftpsRequest.changeDirectory(remoteFilePath);
-					uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath);
+					uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath, executionId, fsm);
 					replyCode = 250;
 				}
 
