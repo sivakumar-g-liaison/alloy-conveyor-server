@@ -87,7 +87,13 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
-		executeRequest();			
+	
+		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {	
+			// Use custom G2JavascriptEngine
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+		} else {
+			executeRequest();	
+		}
 	}
 
 	private void executeRequest() throws Exception {

@@ -69,6 +69,8 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 /**
  * This is the gateway for the mailbox configuration services.
@@ -76,6 +78,7 @@ import com.netflix.servo.monitor.Monitors;
  * @author veerasamyn
  */
 @Path("v1/mailbox")
+@Api(value = "v1/mailbox", description = "This is the gateway for the mailbox configuration services.")
 public class MailBoxConfigurationResource extends BaseResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
@@ -99,6 +102,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
+	@ApiOperation(value = "Create an enterprise", notes = "This function is used to create a mailbox", position = 1)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createMailBox(@Context HttpServletRequest request) {
