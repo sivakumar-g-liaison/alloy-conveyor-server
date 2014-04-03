@@ -89,7 +89,7 @@
         </servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.liaison.mailbox.service,com.liaison.service,com.wordnik.swagger.jersey.listing</param-value>
+            <param-value>com.liaison.mailbox.service;com.wordnik.swagger.jersey.listing</param-value>
               
 
         </init-param>
@@ -147,7 +147,7 @@
 	  <init-param>
 	    <param-name>swagger.api.basepath</param-name>
 	    <!-- change localhost to production server name -->
-	    <param-value>http://localhost:8989/hello-world/rest</param-value>
+	    <param-value>http://localhost:9090/g2mailboxservice/rest</param-value>
 	  </init-param>
 	  <load-on-startup>2</load-on-startup>
 	</servlet>
