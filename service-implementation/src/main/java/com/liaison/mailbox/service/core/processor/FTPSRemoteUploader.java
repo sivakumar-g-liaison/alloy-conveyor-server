@@ -193,6 +193,9 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
 						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 						fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
+						LOGGER.info("##########################################################################");
+						LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
+						LOGGER.info("#############################################################################");
 						return;
 					}
 					lastCheckTime = new Date();

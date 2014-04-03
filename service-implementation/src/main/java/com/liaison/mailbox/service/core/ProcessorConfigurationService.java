@@ -799,6 +799,9 @@ public class ProcessorConfigurationService {
 			validator.validate(fsmEventDTO);
 
 			MailboxFSM fsm = new MailboxFSM();
+			LOGGER.info("##########################################################################");
+			LOGGER.info("INterrupt signal recived for   "+fsmEventDTO.getExecutionID());
+			LOGGER.info("#############################################################################");
 
 			// persisting the FSMEvent entity
 			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, fsmEventDTO.getExecutionID());

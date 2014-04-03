@@ -161,6 +161,9 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					lastCheckTime = new Date();
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
+						LOGGER.info("##########################################################################");
+						LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
+						LOGGER.info("#############################################################################");
 						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 						fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
 						return;
