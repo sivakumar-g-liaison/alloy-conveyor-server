@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.datasource.OracleDataSource;
 import com.netflix.karyon.spi.Component;
 
 /**

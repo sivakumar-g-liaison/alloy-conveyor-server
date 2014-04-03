@@ -121,6 +121,14 @@ public class MailBoxConfigurationService {
 
 	}
 	
+	/**
+	 * Create Mailbox ServiceInstance Id.
+	 * 
+	 * @param serviceInstanceID
+	 *           The serviceInstanceID of the mailbox
+	 * @param mailbox
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox) throws MailBoxConfigurationServicesException {
 
 		try {

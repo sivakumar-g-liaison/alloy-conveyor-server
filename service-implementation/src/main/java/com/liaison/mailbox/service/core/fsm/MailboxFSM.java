@@ -139,7 +139,13 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		this.fsmDao = fsmDao;
 
 	}
-
+    
+	/**
+	 * Check TransitionRules.
+	 * @param processorQueued
+	 * @return true when transition Rules passed
+	 * @throws MailBoxFSMSetupException
+	 */
 	public boolean addDefaultStateTransitionRules(ProcessorStateDTO processorQueued) throws MailBoxFSMSetupException {
 
 		if (!processorQueued.getExecutionState().value().equals(ExecutionState.QUEUED.value())) {

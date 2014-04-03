@@ -35,7 +35,14 @@ public enum FolderType {
 	public String getCode() {
 		return code;
 	}
-
+    
+	/**
+	 * This  method will retrieve the FolderType by given Folder type.
+	 * 
+	 * @param code 
+	 *        The Folder type
+	 * @return FolderType
+	 */
 	public static FolderType findByCode(String code) {
 
 		FolderType found = null;
@@ -49,7 +56,14 @@ public enum FolderType {
 
 		return found;
 	}
-
+    
+	/**
+	 * This  method will retrieve the FolderType by given folderType from FolderDTO.
+	 * 
+	 * @param name 
+	 *        The folder type
+	 * @return FolderType
+	 */
 	public static FolderType findByName(String name) {
 
 		FolderType found = null;

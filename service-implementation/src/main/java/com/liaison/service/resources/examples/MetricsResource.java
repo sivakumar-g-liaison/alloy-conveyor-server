@@ -16,28 +16,24 @@
 
 package com.liaison.service.resources.examples;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
+
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-
-import org.codehaus.jettison.json.JSONObject;
-
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * MetricsResource
@@ -71,7 +67,12 @@ public class MetricsResource {
     public MetricsResource() {
         DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
     }
-
+    
+    /**
+     * Rest method to retrieve json response. 
+     * 
+     * @return The Response Object
+     */
     @ApiOperation(value="show metrics", notes="jmx metrics")
     @Path("/metrics/{input}")
     @GET

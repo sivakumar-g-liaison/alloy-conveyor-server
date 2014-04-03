@@ -45,6 +45,10 @@ public class MailboxProcessorQueueConsumer {
 		logger.info("************************************************************************************************");
 	}
 	
+	/**
+	 * Get MailboxProcessorQueueConsumer Instance.
+	 * @return MailboxProcessorQueueConsumer
+	 */
 	public static MailboxProcessorQueueConsumer getMailboxProcessorQueueConsumerInstance() {
 		if (qConsumerInstance == null) {
 			qConsumerInstance = new MailboxProcessorQueueConsumer();

@@ -31,7 +31,6 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * The persistent class for the PROCESSORS database table.

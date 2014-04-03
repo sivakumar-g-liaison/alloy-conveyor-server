@@ -123,7 +123,13 @@ public class ProcessorStateDTO {
 				this.getProcessorName(), this.getProcessorType(), this.getMailboxId(), this.getProfileName(), this.getStateNotes());
 		return newCopy;
 	}
-
+    
+	/**
+	 * Copies all the data from dto to entity.
+	 * 
+	 * @param entity
+	 *         the FSMState
+	 */
 	public void copyToEntity(FSMState entity) {
 		
 		//Constructing the FSMStae
@@ -147,14 +153,14 @@ public class ProcessorStateDTO {
 	}
 	
 	/**
-	 * Construct processor state dto from the processor.
+	 * Copies all the data from processor to dto.
 	 * 
 	 * @param executionId
 	 * @param processor
 	 * @param profileName
 	 * @param state
 	 * @param stateNotes
-	 * @return
+	 * @return ProcessorStateDTO
 	 */
 	public static ProcessorStateDTO getProcessorStateInstance(String executionId, Processor processor, String profileName,
 			ExecutionState state, String stateNotes) {
@@ -163,6 +169,12 @@ public class ProcessorStateDTO {
 				processor.getProcessorType(), processor.getMailbox().getPguid(), profileName, stateNotes);
 	}
 	
+	/**
+	 * Validation for  executionId.
+	 * @param incoming
+	 *           executionId from ProcessorStateDTO
+	 * @return true validation passed
+	 */
 	public boolean equals(ProcessorStateDTO incoming) {
 		return (this.executionId.equals(incoming.executionId)
 				&& this.executionState.value().equals(incoming.getExecutionState().value()));

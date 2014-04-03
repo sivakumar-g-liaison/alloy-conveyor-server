@@ -16,23 +16,21 @@
 
 package com.liaison.service.resources.examples;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
-
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * CodecResource
@@ -52,7 +50,14 @@ public class CodecResource {
 
 	private static final Logger logger = LogManager.getLogger(CodecResource.class);
 
-
+    
+	/**
+	 * This method to decodes the base64 input string.
+	 * 
+	 * @param input
+	 *        The  base64 string
+	 * @return The Response Object
+	 */
     @ApiOperation(value="decode", notes="decodes base64 input string")
     @Path("/decode/{input}")
     @GET
@@ -73,7 +78,14 @@ public class CodecResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
-
+    
+    /**
+	 * This method to encodes the base64 input string.
+	 * 
+	 * @param input
+	 *        The  base64 string
+	 * @return The Response Object
+	 */
     @ApiOperation(value="encode", notes="encodes value as base64 input string")
     @Path("/encode/{input}")
     @GET

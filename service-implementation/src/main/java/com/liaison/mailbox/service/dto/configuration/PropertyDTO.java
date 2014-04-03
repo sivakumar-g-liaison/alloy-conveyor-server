@@ -42,7 +42,14 @@ public class PropertyDTO {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
+	
+    /**
+     *  Copies all the data from DTO to MailBoxProperty. 
+     * 
+     * @param entity
+     *        The MailBoxProperty Entity
+     * @param isMailBox
+     */
 	public void copyToEntity(Object entity, boolean isMailBox) {
 
 		if (isMailBox) {
@@ -61,7 +68,14 @@ public class PropertyDTO {
 		}
 
 	}
-
+    
+	/**
+	 * Copies all the data from MailBoxProperty to dto.
+	 * 
+	 * @param entity
+	 *        The MailBoxProperty Entity
+	 * @param isMailBox
+	 */
 	public void copyFromEntity(Object entity, boolean isMailBox) {
 
 		if (isMailBox) {

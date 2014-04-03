@@ -16,13 +16,6 @@
 
 package com.liaison.service.resources.examples;
 
-import com.wordnik.swagger.annotations.*;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -30,10 +23,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.liaison.commons.audit.DefaultAuditStatement;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
 import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.service.exceptions.examples.JSONParseException;
 import com.liaison.service.exceptions.examples.UnexpectedNameException;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * HelloWorldResource
@@ -52,7 +53,12 @@ public class HelloWorldResource {
 
     private static final Logger logger = LogManager.getLogger(HelloWorldResource.class);
 
-
+    /**
+     * example of returns a a string of greeting.
+     * 
+     * @param name
+     * @return The Response Object
+     */
     @ApiOperation(value="hello to given name", notes="this typically returns a string of greeting")
     @Path("/to/{name}")
     @GET
@@ -71,7 +77,12 @@ public class HelloWorldResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
-
+    
+    /**
+     *  example of returns a well known programming trope.
+     * 
+     * @return The Response Object
+     */
     @ApiOperation(value="hello to the world", notes="this returns a well known programming trope")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
@@ -92,7 +103,7 @@ public class HelloWorldResource {
      * 
      * 
      * @param name
-     * @return
+     * @return The Response Object
      */
     @Path("error/{name}")
     @GET

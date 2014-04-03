@@ -93,7 +93,15 @@ public class CredentialDTO {
 	public void setIdpURI(String idpURI) {
 		this.idpURI = idpURI;
 	}
-
+    
+	/**
+	 *Copies all data from DTO to entity.
+	 * 
+	 * @param entity
+	 *        the Credential Entity
+	 * @throws SymmetricAlgorithmException
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	public void copyToEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;
@@ -115,7 +123,15 @@ public class CredentialDTO {
 		credential.setPguid(this.getGuId());
 
 	}
-
+    
+	/**
+	 *Copies all data from entity to DTO.
+	 * 
+	 * @param entity
+	 *        the Credential Entity
+	 * @throws SymmetricAlgorithmException
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	public void copyFromEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;

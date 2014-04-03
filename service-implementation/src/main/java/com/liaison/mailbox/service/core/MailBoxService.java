@@ -11,18 +11,14 @@
 package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
@@ -240,6 +236,14 @@ public class MailBoxService {
 		
 	}
 	
+	/**
+	 * The method gets the ConfigureJNDIDTO.
+	 * 
+	 * @return ConfigureJNDIDTO
+	 * @throws NamingException
+	 * @throws JMSException
+	 * @throws IOException
+	 */
 	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
 		
 		MailBoxUtility.getEnvironmentProperties();

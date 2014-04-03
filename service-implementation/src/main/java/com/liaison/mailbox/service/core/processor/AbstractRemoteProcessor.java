@@ -35,6 +35,7 @@ import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -42,8 +43,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import sun.misc.BASE64Decoder;
 
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exceptions.LiaisonException;
@@ -245,7 +244,7 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * To Retrive the Payload URI
+	 * To Retrieve the Payload URI
 	 * 
 	 * @return Payload URI String
 	 * @throws MailBoxConfigurationServicesException
@@ -629,7 +628,7 @@ public abstract class AbstractRemoteProcessor {
 		if (jsonResponse != null) {
 			
 			String base64EncodedStr = new JSONObject(jsonResponse).getJSONObject("dataTransferObject").getString("currentPublicKey");
-		    byte[] trustStoreBytes = new BASE64Decoder().decodeBuffer(base64EncodedStr);
+			byte[] trustStoreBytes = Base64.decodeBase64(base64EncodedStr.getBytes());
 			is = new ByteArrayInputStream(trustStoreBytes);
 		}
 		

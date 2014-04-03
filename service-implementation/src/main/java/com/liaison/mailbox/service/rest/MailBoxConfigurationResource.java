@@ -808,7 +808,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 
 	}
-
+    
+	/**
+	 * REST method to retrieve a list of files from mailbox.
+	 * 
+	 * @return The Response Object
+	 */
 	@GET
 	@Path("/listFile")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -845,7 +850,18 @@ public class MailBoxConfigurationResource extends BaseResource {
 		auditFailure("getFileList");
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method to retrieve server listener response.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @param folder
+	 *           folder of the mailbox 
+	 * @param filename
+	 *            filename of the mailbox
+	 * @return The Response
+	 */
 	@POST
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -889,7 +905,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method will test directory sweeper.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @return The Response Object.
+	 */
 	@POST
 	@Path("/sweeper")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -927,7 +950,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method will test directory sweeper.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @return The Response Object.
+	 */
 	@POST
 	@Path("/test")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -960,7 +990,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method to retrieve the Authorization header.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @return The Response Object.
+	 */
 	@POST
 	@Path("/basicauth")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -1044,7 +1081,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * REST method to retrieve list of certificates.
+	 * 
+	 * @return Response Object
+	 */
 	@GET
 	@Path("/listCertificates")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1082,6 +1124,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 	}
 
+	
+	/**
+	 * REST method to retrieve property file values.
+	 * 
+	 * @return Response Object
+	 */
 	@GET
 	@Path("/getPropertyFileValues")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1119,6 +1167,17 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 	}
 
+	
+	/**
+	 * REST method to retrieve list of executing processors.
+	 * 
+	 * @param request
+	 * @param status
+	 * @param frmDate
+	 * @param toDate
+	 * @param hitCounter
+	 * @return Response Object
+	 */
 	@GET
 	@Path("/processor/execution")
 	@Produces(MediaType.APPLICATION_JSON)

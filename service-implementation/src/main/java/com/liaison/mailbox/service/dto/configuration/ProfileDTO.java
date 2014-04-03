@@ -39,11 +39,20 @@ public class ProfileDTO {
 	public void setId(String id) {
 		this.id = id;
 	}
-
+    
+	/**
+	 *  Copies the name from dto to profile.
+	 *  
+	 * @param profile
+	 */
 	public void copyToEntity(ScheduleProfilesRef profile) {
 		profile.setSchProfName(this.getName());
 	}
-
+    /**
+     * Copies the name and pguid from profile to dto.
+     * 
+     * @param profile
+     */
 	public void copyFromEntity(ScheduleProfilesRef profile) {
 		this.setId(profile.getPguid());
 		this.setName(profile.getSchProfName());

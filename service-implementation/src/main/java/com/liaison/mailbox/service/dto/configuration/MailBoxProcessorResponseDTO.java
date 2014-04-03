@@ -84,6 +84,11 @@ public class MailBoxProcessorResponseDTO {
 		this.status = status;
 	}
 
+	/**
+	 * Copies all the data from processor to DTO.
+	 * 
+	 * @param processor
+	 */
 	public void copyFromEntity(Processor processor) {
 
 		this.setGuid(processor.getPguid());

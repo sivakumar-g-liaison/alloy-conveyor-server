@@ -64,7 +64,14 @@ public class FolderDTO {
 	public void setFolderDesc(String folderDesc) {
 		this.folderDesc = folderDesc;
 	}
-
+    
+	/**
+	 * Copies all data from dto to entity.
+	 * 
+	 * @param entity
+	 *        the Folder Entity
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	public void copyToEntity(Object entity) throws MailBoxConfigurationServicesException {
 
 		Folder folder = (Folder) entity;
@@ -79,7 +86,14 @@ public class FolderDTO {
 		folder.setFldrUri(this.getFolderURI());
 		folder.setPguid(this.getGuId());
 	}
-
+    
+	/**
+	 * Copies all data from Entity to DTO.
+	 * 
+	 * @param entity
+	 *          The Folder Entity
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	public void copyFromEntity(Object entity) throws MailBoxConfigurationServicesException {
 
 		Folder folder = (Folder) entity;

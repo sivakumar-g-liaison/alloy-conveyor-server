@@ -30,7 +30,14 @@ public enum Protocol {
 	public String getCode() {
 		return code;
 	}
-
+    
+	/**
+	 * This  method will retrieve the Protocol by given Processor protocol.
+	 * 
+	 * @param code 
+	 *        The Processor protocol
+	 * @return Protocol
+	 */
 	public static Protocol findByCode(String code) {
 
 		Protocol found = null;
@@ -44,7 +51,14 @@ public enum Protocol {
 
 		return found;
 	}
-
+    
+	/**
+	 * This  method will retrieve the Protocol by given protocol from ProcessorDTO.
+	 * 
+	 * @param name 
+	 *        The ProcessorDTO protocol
+	 * @return Protocol
+	 */
 	public static Protocol findByName(String name) {
 
 		Protocol found = null;

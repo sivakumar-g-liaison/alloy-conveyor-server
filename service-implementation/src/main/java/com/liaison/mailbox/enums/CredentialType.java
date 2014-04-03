@@ -35,7 +35,14 @@ public enum CredentialType {
 	public String getCode() {
 		return code;
 	}
-
+    
+	/**
+	 * This  method will retrieve the CredentialType by given Credential type.
+	 * 
+	 * @param code 
+	 *        The Credential type 
+	 * @return CredentialType
+	 */
 	public static CredentialType findByCode(String code) {
 
 		CredentialType found = null;
@@ -49,7 +56,14 @@ public enum CredentialType {
 
 		return found;
 	}
-
+	
+   /**
+    * This  method will retrieve the CredentialType by given credentialType from CredentialDTO.
+    * 
+    * @param name 
+    *        The credential type
+    * @return CredentialType
+    */
 	public static CredentialType findByName(String name) {
 
 		CredentialType found = null;
