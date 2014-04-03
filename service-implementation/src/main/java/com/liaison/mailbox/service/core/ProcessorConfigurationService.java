@@ -667,8 +667,6 @@ public class ProcessorConfigurationService {
 		LOGGER.info("Entering into getExecutingProcessors.");
 
 		String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours"); 
-//		Timestamp timeStmp = new Timestamp(Long.parseLong(listJobsIntervalInHours));
-		
 		Timestamp timeStmp = new Timestamp(new Date().getTime());
 		
 		Calendar cal = Calendar.getInstance();

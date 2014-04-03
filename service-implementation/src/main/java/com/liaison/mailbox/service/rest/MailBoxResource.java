@@ -29,8 +29,11 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Path("v1/mailbox/triggerProfile")
+@Api(value = "v1/mailbox/triggerProfile", description = "Trigger profile services")
 public class MailBoxResource extends BaseResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
@@ -56,6 +59,7 @@ public class MailBoxResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
+	@ApiOperation(value = "Trigger profile", notes = "trigger a profile", position = 23)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response triggerProfile(@QueryParam(value = "name") String profileName,
