@@ -37,12 +37,18 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 				+ " where staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " and stateVal.value = :" + FSMStateDAO.BY_VALUE
 				+ " group by staVal.fsmState)"),
 @NamedQuery(name = FSMStateDAO.FIND_PROC_EXECUTING_BY_DATE,
-		query = "select stateVal from FSMStateValue stateVal"
-				+ " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE),
+        query = "select stateVal from FSMStateValue stateVal"
+                + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+                + " inner join sta.executionState staVal"
+                + " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
+                + " group by staVal.fsmState)"),
 @NamedQuery(name = FSMStateDAO.FIND_PROC_EXECUTING_BY_VALUE_AND_DATE,
-		query = "select stateVal from FSMStateValue stateVal"
-				+ " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
-				+ " and stateVal.value = :" + FSMStateDAO.BY_VALUE),
+        query = "select stateVal from FSMStateValue stateVal"
+                + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+                + " inner join sta.executionState staVal"
+                + " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
+                + " and stateVal.value = :" + FSMStateDAO.BY_VALUE
+                + " group by staVal.fsmState)"), 
 
 })
 
