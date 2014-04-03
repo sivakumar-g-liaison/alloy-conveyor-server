@@ -97,3 +97,6 @@ com.liaison.gitlab.script.branch.name=master
 listJobsIntervalInHours=24
 fsmEventCheckIntervalInSeconds=86400
 
+#ssh key implementation - privatekey file path
+privateKeyPath = D:\\doc\\sshprivatekey\\
+

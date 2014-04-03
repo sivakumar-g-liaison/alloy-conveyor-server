@@ -17,8 +17,8 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public enum CredentialType {
 
-	TRUST_STORE("trust_store"),
-	KEY_STORE("key_store"),
+	TRUSTSTORE_CERT("truststore_cert"),
+	SSH_KEYPAIR("ssh_keypair"),
 	LOGIN_CREDENTIAL("login_credential");
 
 	private final String code;

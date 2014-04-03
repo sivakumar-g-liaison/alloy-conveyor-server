@@ -35,7 +35,8 @@ public class CredentialDTO {
 	private String password;
 	private String idpType;
 	private String idpURI;
-
+			
+	
 	public String getGuId() {
 		return guId;
 	}
@@ -102,6 +103,7 @@ public class CredentialDTO {
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxConfigurationServicesException
 	 */
+
 	public void copyToEntity(Object entity) throws SymmetricAlgorithmException, MailBoxConfigurationServicesException {
 
 		Credential credential = (Credential) entity;

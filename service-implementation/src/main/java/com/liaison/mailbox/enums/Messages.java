@@ -53,6 +53,7 @@ public enum Messages {
 	GUID_NOT_AVAIL("Input Id is not available in the system."),
 	GUID_DOES_NOT_MATCH("%s Id in the request does not match the resource."),
 	CERTIFICATE_RETRIEVE_FAILED("Unable to retrieve the certificate"),
+	SSHKEY_RETRIEVE_FAILED("Unable to retrieve the SSH key"),
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),

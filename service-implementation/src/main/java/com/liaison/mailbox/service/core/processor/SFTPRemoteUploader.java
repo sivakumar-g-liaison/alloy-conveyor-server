@@ -18,6 +18,7 @@ import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
+import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +67,13 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JSONException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException {
 
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
 
@@ -91,10 +93,12 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JSONException 
+	 * @throws JsonParseException 
 	 * 
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
+			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();

@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -38,6 +39,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -342,10 +344,10 @@ public abstract class AbstractRemoteProcessor {
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (null == foundCredentailType) {
 					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
-				} else if (CredentialType.TRUST_STORE.equals(foundCredentailType)) {
+				} else if (CredentialType.TRUSTSTORE_CERT.equals(foundCredentailType)) {
 					return credential;
 
-				} else if (CredentialType.KEY_STORE.equals(foundCredentailType)) {
+				} else if (CredentialType.SSH_KEYPAIR.equals(foundCredentailType)) {
 					return credential;
 				}
 			}
@@ -563,11 +565,12 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		// Set the basic auth header for http request
-		CredentialInfoModel model = getLoginCredentials();
+		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-		if (model != null) {
-			if (!MailBoxUtility.isEmpty(model.getUsername()) && !MailBoxUtility.isEmpty(model.getPassword())) {
-				request.setAuthenticationHandler(new BasicAuthenticationHandler(model.getUsername(), model.getPassword()));
+		if ((loginCredential != null)) {
+			if (!MailBoxUtility.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtility.isEmpty(loginCredential.getCredsPassword())) {
+				String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+				request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), password));
 			}
 		}
 
@@ -575,12 +578,13 @@ public abstract class AbstractRemoteProcessor {
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
 
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
+			
 			// If no certificate is configured then use default global trustoreid
-			String trustoreID = ((configurationInstance.getCertificateUri() == null || configurationInstance.getCertificateUri().isEmpty()) &&
-									(configurationInstance.getIsSelfSigned().intValue()==1))?
+			String trustStoreID = (MailBoxUtility.isEmpty(trustStoreCredential.getCredsIdpUri()))?
 									(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
-									configurationInstance.getTrustStoreId();
-			InputStream instream = fetchTrustStore(trustoreID);
+									trustStoreCredential.getCredsIdpUri();
+			InputStream instream = fetchTrustStore(trustStoreID);
 			
 			if (instream == null) {
 				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
@@ -628,6 +632,7 @@ public abstract class AbstractRemoteProcessor {
 		if (jsonResponse != null) {
 			
 			String base64EncodedStr = new JSONObject(jsonResponse).getJSONObject("dataTransferObject").getString("currentPublicKey");
+
 			byte[] trustStoreBytes = Base64.decodeBase64(base64EncodedStr.getBytes());
 			is = new ByteArrayInputStream(trustStoreBytes);
 		}
@@ -635,6 +640,40 @@ public abstract class AbstractRemoteProcessor {
 		return is;
 	}
 
+	/**
+	 * 
+	 * Method for fetching SSH Privatekey as an InputStream
+	 * 
+	 * @return InputStream
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws IOException
+	 */
+	private byte[] fetchSSHPrivateKey(String keypairPguid) throws LiaisonException, JSONException, IOException {
+		
+		//InputStream is = null;
+		byte[] privateKeyBytes = null;
+		
+		String url = MailBoxUtility.getEnvironmentProperties().getString("kms-base-url");
+		url = url + "fetch/group/keypair/current/";
+		
+		// To be fetched from DataBase
+		url = url + keypairPguid;
+		
+		Map<String, String> headerMap = new HashMap<String, String>();
+		headerMap.put("Content-Type", "application/json");
+		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+		
+		if (jsonResponse != null) {
+			
+			String base64EncodedStr = new JSONObject(jsonResponse).getJSONObject("dataTransferObject").getString("currentPrivateKey");
+			privateKeyBytes = base64EncodedStr.getBytes();
+		}
+		
+		return privateKeyBytes;
+	}
+
+	
 	/**
 	 * Method to read the javascript file as string
 	 * 
@@ -916,26 +955,27 @@ public abstract class AbstractRemoteProcessor {
 
 		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
 		ftpsRequest.setRetryCount(properties.getRetryAttempts());
+	
+		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-		CredentialInfoModel model = getLoginCredentials();
-		if (model != null) {
-			if (!MailBoxUtility.isEmpty(model.getUsername()) && !MailBoxUtility.isEmpty(model.getPassword())) {
-
-				ftpsRequest.setUser(model.getUsername());
-				ftpsRequest.setPassword(model.getPassword());
+		if ((loginCredential != null)) {
+			if (!MailBoxUtility.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtility.isEmpty(loginCredential.getCredsPassword())) {
+				String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+				ftpsRequest.setUser(loginCredential.getCredsUsername());
+				ftpsRequest.setPassword(password);
 			}
 		}
-
+		
 		// Configure keystore for HTTPS request
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("ftps")) {
 			
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
 			// If no certificate is configured then use default global trustoreid
-			String trustoreID = ((configurationInstance.getCertificateUri() == null || configurationInstance.getCertificateUri().isEmpty()) &&
-									(configurationInstance.getIsSelfSigned().intValue()==1))?
-									(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
-									configurationInstance.getTrustStoreId();
-			InputStream instream = fetchTrustStore(trustoreID);
+			String trustStoreID = (MailBoxUtility.isEmpty(trustStoreCredential.getCredsIdpUri()))?
+					(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
+					trustStoreCredential.getCredsIdpUri();
+			InputStream instream = fetchTrustStore(trustStoreID);
 			
 			if (instream == null) {
 				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
@@ -968,9 +1008,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JSONException 
 	 */
 	protected G2SFTPClient getSFTPClient(Logger logger) throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException {
 
 		RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
 				RemoteProcessorPropertiesDTO.class);
@@ -983,26 +1024,44 @@ public abstract class AbstractRemoteProcessor {
 		sftpRequest.setStrictHostChecking(false);
 		sftpRequest.setRetryInterval(properties.getRetryInterval());
 		sftpRequest.setRetryCount(properties.getRetryAttempts());
+		
+		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-		CredentialInfoModel model = getLoginCredentials();
-		if (model != null) {
-			if (!MailBoxUtility.isEmpty(model.getUsername()) && !MailBoxUtility.isEmpty(model.getPassword())) {
-				sftpRequest.setUser(model.getUsername());
-				sftpRequest.setPassword(model.getPassword());
+		if ((loginCredential != null)) {
+			if (!MailBoxUtility.isEmpty(loginCredential.getCredsUsername())) {
+				sftpRequest.setUser(loginCredential.getCredsUsername());
+				
+			}
+			if(!MailBoxUtility.isEmpty(loginCredential.getCredsPassword())) {
+				String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+				sftpRequest.setPassword(password);
 			}
 		}
+		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
 		
-		CredentialInfoModel keystoreModel = getKeyStoreCredential();
+		
 
-		if (keystoreModel != null) {
+		if (sshKeyPairCredential != null) {
 
-			if (MailBoxUtility.isEmpty(keystoreModel.getFileURI())) {
+			if (MailBoxUtility.isEmpty(sshKeyPairCredential.getCredsIdpUri())) {
 
 				LOGGER.info("Credential requires file path");
 				throw new MailBoxServicesException("Credential requires file path");
 			}
-			sftpRequest.setPrivateKeyPath(keystoreModel.getFileURI());
-			sftpRequest.setPassphrase(keystoreModel.getPassword());
+			
+			byte[] privateKeyStream = fetchSSHPrivateKey(sshKeyPairCredential.getCredsIdpUri());
+			
+			if (privateKeyStream == null) {
+				throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED);
+			}
+			
+			String privateKeyPath = MailBoxUtility.getEnvironmentProperties().getString("privateKeyPath")+sshKeyPairCredential.getCredsUri()+".txt";
+			// write to a file
+			FileOutputStream out = new FileOutputStream(privateKeyPath);
+			out.write(privateKeyStream);
+			out.close();
+			sftpRequest.setPrivateKeyPath(privateKeyPath);
+			//sftpRequest.setPassphrase(sshKeyPairCredential.getCredsPassword());
 
 		}
 
@@ -1201,4 +1260,57 @@ public abstract class AbstractRemoteProcessor {
 
 		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
 	}
+	
+	/**
+	 * Get the credential Details configured for a processor
+	 *
+	 * 
+	 * @return String URI
+	 * @throws MailBoxServicesException
+	 * @throws SymmetricAlgorithmException
+	 */
+	protected Credential getCredentialOfSpecificType(CredentialType type) throws MailBoxServicesException, SymmetricAlgorithmException {
+
+		if (configurationInstance.getCredentials() != null) {
+
+			for (Credential credential : configurationInstance.getCredentials()) {
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
+				if (credential.getCredsType() == null) {
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+				} else if (foundCredentailType.equals(type)){
+					return credential;
+				}
+			}
+		}
+		return null;
+	} 
+	/**
+	 * Get the credential Details configured for a processor
+	 *
+	 * 
+	 * @return String URI
+	 * @throws MailBoxServicesException
+	 * @throws SymmetricAlgorithmException
+	 */
+	protected Map<String, Credential> getCredentials() throws MailBoxServicesException {
+
+		Map<String, Credential> credentialDetails = new HashMap<String, Credential>();
+		if (configurationInstance.getCredentials() != null) {
+
+			for (Credential credential : configurationInstance.getCredentials()) {
+
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
+				if (null == foundCredentailType) {
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+				} else if (CredentialType.TRUSTSTORE_CERT.equals(foundCredentailType)) {
+					credentialDetails.put(MailBoxConstants.TRUSTSTORE_CERT, credential);
+				} else if (CredentialType.SSH_KEYPAIR.equals(foundCredentailType)) {
+					credentialDetails.put(MailBoxConstants.SSH_KEYPAIR, credential);
+				} else if (CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)) {
+					credentialDetails.put(MailBoxConstants.LOGIN_CREDENTIAL, credential);
+				}
+			}
+		}
+		return credentialDetails;
+	} 
 }

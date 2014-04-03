@@ -75,5 +75,13 @@ public interface MailBoxConstants {
 	// Added for Error File Location
 	public final static String ERROR_FOLDER = "ERROR";
 	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
-
+	
+	// Type of Credentials
+	public final static String TRUSTSTORE_CERT = "truststore_cert";
+	public final static String SSH_KEYPAIR = "ssh_keypair";
+	public final static String LOGIN_CREDENTIAL = "login_credential";
+	
+	// Type of Truststore
+	public final static String GLOBAL = "GLOBAL";
+	public final static String SELFSIGNED = "SELFSIGNED";
 }

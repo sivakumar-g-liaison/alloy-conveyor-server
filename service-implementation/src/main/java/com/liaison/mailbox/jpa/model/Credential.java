@@ -42,7 +42,8 @@ public class Credential implements Identifiable {
 	private String credsUri;
 	private String credsUsername;
 	private Processor processor;
-
+	
+	
 	public Credential() {
 	}
 
@@ -109,7 +110,7 @@ public class Credential implements Identifiable {
 	public void setCredsUsername(String credsUsername) {
 		this.credsUsername = credsUsername;
 	}
-
+		
 	// bi-directional many-to-one association to Processor
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "PROCESSOR_GUID", nullable = false)

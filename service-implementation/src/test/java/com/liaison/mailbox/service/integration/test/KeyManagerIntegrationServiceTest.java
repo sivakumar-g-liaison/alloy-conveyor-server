@@ -12,12 +12,15 @@ package com.liaison.mailbox.service.integration.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -35,17 +38,22 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.commons.exceptions.LiaisonException;
+import sun.misc.BASE64Decoder;
+
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
+import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
-
+import com.liaison.mailbox.service.util.HTTPClientUtil;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 /**
  * Test class to test mailbox configuration service.
  * 
@@ -57,6 +65,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	private String jsonResponse;
 	private String jsonRequest;
 	private HTTPRequest request;
+	private G2SFTPClient sftpRequest;
 
 	/**
 	 * @throws java.lang.Exception
@@ -89,7 +98,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
         System.out.println(response.getStatusLine());
 	}
 	
-	//@Test
+	@Test
 	public void testUploadPublicKey() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
@@ -97,11 +106,11 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost("http://10.0.6.101:8080/key-management-1.0.1/upload/public"); 
+        HttpPost httpPost = new HttpPost("http://10.0.6.101:8989/key-management-1.0.1/upload/public"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
-        FileBody publicKeyCert = new FileBody(new File("C:\\publickey.cer"));
+        FileBody publicKeyCert = new FileBody(new File("D:\\doc\\certificates\\irctc.cer"));
         HttpEntity reqEntity = MultipartEntityBuilder.create()
                 .addPart("request", jsonRequestBody)
                 .addPart("key", publicKeyCert)
@@ -132,7 +141,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	
 	@Test
 	public void testFetchTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-			JAXBException, IOException {
+			JAXBException, IOException, com.liaison.commons.exceptions.LiaisonException {
 
 		// Get the mailbox
 		String url = "http://10.0.6.101:8989/key-management-1.0.1/fetch/truststore/current/75D5112D0A0006340665134D334351D5";
@@ -145,7 +154,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	
 	//@Test
 		public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exceptions.LiaisonException {
 
 			String url = "https://10.0.24.76:19443/g2mailboxservice/rest/v1/mailbox/profile";
 			
@@ -172,5 +181,80 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			
 			jsonResponse = getOutput().toString();
 			System.out.println(jsonResponse);
+		}
+		
+		@Test
+		public void testSFTPWithSSHKeypair() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exceptions.LiaisonException {
+			//InputStream is = null;
+			byte[] privateKeyBytes = null;
+			
+			String url = "http://10.0.6.101:8989/key-management/fetch/group/keypair/current/2798BD330A004E740665A6EF61AE4A01";
+			//  F45EE0F10A006FF106655CE31D400F66
+			
+			Map<String, String> headerMap = new HashMap<String, String>();
+			headerMap.put("Content-Type", "application/json");
+			String jsonResponse = HTTPClientUtil.getHTTPResponseInString(logger, url, headerMap);
+			
+			if (jsonResponse != null) {
+				
+				String base64EncodedStr = new JSONObject(jsonResponse).getJSONObject("dataTransferObject").getString("currentPrivateKey");
+			  	privateKeyBytes = Base64.decodeBase64(base64EncodedStr);
+				
+			}
+			String privateKeyPath = "E:\\opensslkeypair.pem";
+			String password = "passmein";
+			/*FileOutputStream out = new FileOutputStream(privateKeyPath);
+			out.write(privateKeyBytes);
+			out.close();*/
+			
+			sftpRequest = new G2SFTPClient();
+			sftpRequest.setURI("sftp://10.0.24.40:22");
+			sftpRequest.setPrivateKeyPath(privateKeyPath);
+			sftpRequest.setStrictHostChecking(false);
+			sftpRequest.setUser("g2testusr");
+			sftpRequest.setPassphrase(password);
+			sftpRequest.setDiagnosticLogger(logger);
+			sftpRequest.setCommandLogger(logger);
+			boolean value = sftpRequest.connect();
+			if(value) System.out.println("true sftp connected successfully");
+			
+		}
+		
+		@Test
+		public void testSFTPWithSSHKeypairDownloadedFromKeyManager() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exceptions.LiaisonException {
+			//InputStream is = null;
+			byte[] privateKeyBytes = null;
+			
+			String url = "http://10.0.6.101:8989/key-management/fetch/group/keypair/current/27C062AB0A004E740665A6EFCE333E6A";
+			
+			
+			Map<String, String> headerMap = new HashMap<String, String>();
+			headerMap.put("Content-Type", "application/json");
+			String jsonResponse = HTTPClientUtil.getHTTPResponseInString(logger, url, headerMap);
+			
+			if (jsonResponse != null) {
+				
+				String base64EncodedStr = new JSONObject(jsonResponse).getJSONObject("dataTransferObject").getString("currentPrivateKey");
+			  	privateKeyBytes = base64EncodedStr.getBytes();
+				
+			}
+			String privateKeyPath = "D:\\opt\\opensslkeypair.txt";
+			//String password = "passmein";
+			FileOutputStream out = new FileOutputStream(privateKeyPath);
+			out.write(privateKeyBytes);
+			out.close();
+			
+			sftpRequest = new G2SFTPClient();
+			sftpRequest.setURI("sftp://10.0.24.40:22");
+			sftpRequest.setPrivateKeyPath(privateKeyPath);
+			sftpRequest.setStrictHostChecking(false);
+			sftpRequest.setUser("g2testusr");
+			//sftpRequest.setPassphrase(password);
+			sftpRequest.setDiagnosticLogger(logger);
+			sftpRequest.setCommandLogger(logger);
+			boolean value = sftpRequest.connect();
+			if(value) System.out.println("true sftp connected successfully");
+			sftpRequest.disconnect();
+			
 		}
 }

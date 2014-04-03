@@ -21,7 +21,7 @@ angular.module(
                 template: '<div><input type="password"  ng-model="password" ng-change="showConfirmBox()" class="textboxingrid" />\n\
                                 <label ng-show=showconfirmpassword >{{matchString}}</label> \n\
                                 \n\
-                                <input type="password"  ng-show=showconfirmpassword ng-change="validate()" ng-model="repeatepassword" class="textboxingrid"  required placeholder="confirm password"/>\n\
+                                <input type="password"  ng-show=showconfirmpassword ng-change="validate()" ng-model="repeatepassword" class="textboxingrid"  placeholder="confirm password"/>\n\
                                 \n\
             					<span class="custom-info-block" ng-show=showerrormessage><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Password cannot be longer than 63 characters.</span>\n\
                                  </div>',
