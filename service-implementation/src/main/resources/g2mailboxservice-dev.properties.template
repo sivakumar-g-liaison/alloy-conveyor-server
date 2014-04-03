@@ -92,3 +92,8 @@ com.liaison.gitlab.script.server.user=
 com.liaison.gitlab.script.server.password=
 com.liaison.gitlab.script.project.name=g2/commons-scripting
 com.liaison.gitlab.script.branch.name=master
+
+# FSM jobs monitoring stuffs
+listJobsIntervalInHours=24
+fsmEventCheckIntervalInSeconds=86400
+
