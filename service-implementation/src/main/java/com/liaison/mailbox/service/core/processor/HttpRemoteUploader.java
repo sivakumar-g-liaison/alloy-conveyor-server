@@ -7,10 +7,8 @@ import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Date;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
@@ -27,6 +25,7 @@ import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
@@ -73,7 +72,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
-	public void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+	public void executeRequest(String executionId,MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
 			SymmetricAlgorithmException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException {
 
@@ -93,7 +92,24 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			files = getProcessorPayload();
 			if (null != files) {
 				
+				FSMEventDAOBase eventDAO = new FSMEventDAOBase();
+				Date lastCheckTime = new Date();
+				String constantInterval = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
+				
 				for (File entry : files) {
+					
+					//interrupt signal check
+					if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+						lastCheckTime = new Date();
+						if(eventDAO.isThereAInterruptSignal(executionId)) {
+							LOGGER.info("##########################################################################");
+							LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
+							LOGGER.info("#############################################################################");
+							fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
+							fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
+							return;
+						}
+					}
 
 					request = (HTTPRequest) getClientWithInjectedConfiguration();
 					responseStream = new ByteArrayOutputStream();
@@ -158,7 +174,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		} else {
 			// HTTPRequest executed through Java
-			executeRequest();
+			executeRequest(executionId, fsm);
 		}
 	}
 }

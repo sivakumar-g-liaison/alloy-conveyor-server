@@ -81,6 +81,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
@@ -726,7 +727,7 @@ public class ProcessorConfigurationService {
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws IOException 
 	 */
-	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) throws MailBoxConfigurationServicesException, IOException {
+	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) throws IOException {
 		
 		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
 		LOGGER.info("Entering into getExecutingProcessors.");
@@ -762,7 +763,6 @@ public class ProcessorConfigurationService {
 			listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
 		}
 		
-		// Constructing the SearchMailBoxDTO from retrieved mailboxes
 		List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
 		GetExecutingProcessorDTO getExecutingDTO = null;
 		for (FSMStateValue fsmv : listfsmStateVal) {
@@ -782,18 +782,19 @@ public class ProcessorConfigurationService {
 	 * 
 	 * 
 	 * @param serviceRequest
+	 * @throws MailBoxConfigurationServicesException 
 	 * 
 	 */
-	public AddFSMExecutionEventResponseDTO createExecutionEvent( AddFSMExecutionEventRequestDTO serviceRequest) {
+	public AddFSMExecutionEventResponseDTO interruptRunningProcessor( AddFSMExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
 		
-		LOGGER.info("Entering into fsm execution event creation.");
+		LOGGER.info("Entering into interrupt processor.");
 		AddFSMExecutionEventResponseDTO serviceResponse = new AddFSMExecutionEventResponseDTO();
 
 		try {
 
 			FSMEventDTO fsmEventDTO = serviceRequest.getFsmEvent();
 			if (fsmEventDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new ProcessorManagementFailedException(Messages.INVALID_REQUEST);
 			}
 
 			validator.validate(fsmEventDTO);
@@ -809,10 +810,10 @@ public class ProcessorConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, FSM_EVENT, Messages.SUCCESS));
 
-			LOGGER.info("Exiting from fsm execution event creation.");
+			LOGGER.info("Exiting from interrupt processor.");
 
 			return serviceResponse;
-		} catch (MailBoxConfigurationServicesException e) {
+		} catch (ProcessorManagementFailedException e) {
 
 			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, FSM_EVENT, Messages.FAILURE, e
