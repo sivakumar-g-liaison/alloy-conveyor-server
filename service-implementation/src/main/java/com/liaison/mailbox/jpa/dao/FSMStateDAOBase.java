@@ -246,9 +246,9 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 			
 			List<?> jobsRunning = entityManager
 								  .createNamedQuery(FIND_PROC_EXECUTING_BY_VALUE_AND_DATE)
-								  .setParameter(BY_VALUE, value)
 								  .setParameter(FROM_DATE, frmDate)
 								  .setParameter(TO_DATE, toDate)
+								  .setParameter(BY_VALUE, value)
 								  .getResultList();
 
 			Iterator<?> iter = jobsRunning.iterator();

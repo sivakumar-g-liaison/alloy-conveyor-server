@@ -801,7 +801,7 @@ public class ProcessorConfigurationService {
 
 			MailboxFSM fsm = new MailboxFSM();
 			LOGGER.info("##########################################################################");
-			LOGGER.info("INterrupt signal recived for   "+fsmEventDTO.getExecutionID());
+			LOGGER.info("Interrupt signal recived for   "+fsmEventDTO.getExecutionID());
 			LOGGER.info("#############################################################################");
 
 			// persisting the FSMEvent entity
