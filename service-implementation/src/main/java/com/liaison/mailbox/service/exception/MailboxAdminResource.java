@@ -74,7 +74,7 @@ public class MailboxAdminResource extends BaseResource{
 	 * @return Response
 	 */
 	@GET
-	@ApiOperation(value = "Get Executing Processor", notes = "executing processor", position = 21)
+	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21)
 	@Path("/processor/execution")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") String status,
@@ -122,8 +122,8 @@ public class MailboxAdminResource extends BaseResource{
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Event", notes = "interrupt running processor", position = 22)
-	@Path("/processor/executionEvent")
+	@ApiOperation(value = "Interrupt processors", notes = "interrupt running processor", position = 22)
+	@Path("/processor/execution")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response interruptRunningProcessor(@Context HttpServletRequest request) {
