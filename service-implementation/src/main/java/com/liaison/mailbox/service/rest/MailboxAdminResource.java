@@ -99,7 +99,7 @@ public class MailboxAdminResource extends BaseResource {
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			String errMsg = "MailboxAdminResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
@@ -152,7 +152,7 @@ public class MailboxAdminResource extends BaseResource {
 		} catch (Exception e) {
 
 			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			String errMsg = "MailboxAdminResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
 
 			// should be throwing out of domain scope and into framework using

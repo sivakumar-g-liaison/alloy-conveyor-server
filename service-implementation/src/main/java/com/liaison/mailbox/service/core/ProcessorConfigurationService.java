@@ -104,7 +104,7 @@ public class ProcessorConfigurationService {
 	private static String TRUSTSTORE = "TrustStore";
 	private static String MAILBOX = "MailBox";
 	private static final String PROCESSOR_STATUS = "Processor Status";
-	private static String FSM_EVENT = "FSMEvent";
+	private static String INTERRUPT_SIGNAL = "Interrupt Signal";
 	private static String EXECUTING_PROCESSORS = "Executing Processors";
 
 	private static final GenericValidator validator = new GenericValidator();
@@ -672,7 +672,7 @@ public class ProcessorConfigurationService {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(timeStmp);
 		cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
-		timeStmp.setTime(cal.getTime().getTime()); // or
+		timeStmp.setTime(cal.getTime().getTime());
 		timeStmp = new Timestamp(cal.getTime().getTime());
 		
 		FSMStateDAO procDAO = new FSMStateDAOBase();
@@ -733,23 +733,23 @@ public class ProcessorConfigurationService {
 			validator.validate(fsmEventDTO);
 
 			MailboxFSM fsm = new MailboxFSM();
-			LOGGER.info("##########################################################################");
-			LOGGER.info("Interrupt signal recived for   "+fsmEventDTO.getExecutionID());
+			LOGGER.info("############################################################################");
+			LOGGER.info("Interrupt signal received for   "+fsmEventDTO.getExecutionID());
 			LOGGER.info("#############################################################################");
 
 			// persisting the FSMEvent entity
 			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, fsmEventDTO.getExecutionID());
 
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, FSM_EVENT, Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_SUCCESSFULLY, INTERRUPT_SIGNAL, Messages.SUCCESS));
 
 			LOGGER.info("Exiting from interrupt processor.");
 
 			return serviceResponse;
 		} catch (ProcessorManagementFailedException e) {
 
-			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, FSM_EVENT, Messages.FAILURE, e
+			LOGGER.error(Messages.RECEIVED_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_OPERATION_FAILED, INTERRUPT_SIGNAL, Messages.FAILURE, e
 					.getMessage()));
 
 			return serviceResponse;
