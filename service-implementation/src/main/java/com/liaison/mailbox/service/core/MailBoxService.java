@@ -222,6 +222,10 @@ public class MailBoxService {
 			
 		} catch (MailBoxServicesException e){
 			
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
+			processorDAO.merge(processor);
+			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			e.printStackTrace();
 			
 		}
