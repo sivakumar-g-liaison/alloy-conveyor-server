@@ -1959,6 +1959,9 @@ var rest = myApp.controller(
                     $scope.doSend();
                     $scope.isPortDisabled = false;
 					$scope.defaultPortValue();
+                    $scope.disableSSHKeys = true;
+                    $scope.disableCertificates = true;
+                    formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
 
             };
             
@@ -1999,6 +2002,7 @@ var rest = myApp.controller(
                 $scope.modifyStaticPropertiesBasedOnProcessorType();
                   // function to clear the credential details if protocol is changed
                 $scope.resetProcessorCredentialDetails();
+                $scope.resetCredentialModal();
             };
             $scope.resetProtocol = function (model) {
                 console.log(model);
@@ -2033,6 +2037,7 @@ var rest = myApp.controller(
                 
                 // function to clear the credential details if protocol is changed
                 $scope.resetProcessorCredentialDetails();
+                $scope.resetCredentialModal();
                 //GMB-201
                 if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
 					$scope.disableCertificates = false;
@@ -2308,8 +2313,8 @@ var rest = myApp.controller(
                     }
                 } else {
                     block.unblockUI();
-                    var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
-                    showSaveMessage(msg, 'error');
+                    /*var msg = ($scope.isEdit === true) ? 'certificate uploading failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
+                    showSaveMessage('Certificate Uploading Failed', 'error');
                     return;
                 }
             }
@@ -2337,8 +2342,8 @@ var rest = myApp.controller(
                             $scope.addCertificateDetails();
                         } else {
                             block.unblockUI();
-                            var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
-                            showSaveMessage(msg, 'error');
+                           /* var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
+                            showSaveMessage('Certificate Uploading Failed', 'error');
                             return;
                         }
                     }
@@ -2347,15 +2352,15 @@ var rest = myApp.controller(
 
             function uploadFailed(evt) {
                 block.unblockUI();
-                var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
-                showSaveMessage(msg, 'error');
+                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
+                showSaveMessage('Certificate Uploading Failed', 'error');
                 return;
             }
 
             function uploadCanceled(evt) {
                 block.unblockUI();
-                var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';
-                showSaveMessage(msg, 'error');
+                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
+                showSaveMessage('Certificate Uploading Failed', 'error');
                 return;
             }
             // File Upload Section Ends
@@ -2453,6 +2458,7 @@ var rest = myApp.controller(
     				return;
     			}
                 block.blockUI();
+                formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
                 var fd = new FormData();
                 $scope.sshKeyObj['serviceInstanceId'] = Date.now().toString();
 				$scope.sshKeyObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.name,'_',$scope.sshkeyModal.sshkeyURI);
@@ -2490,23 +2496,23 @@ var rest = myApp.controller(
 
                } else {
                     block.unblockUI();
-                    var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';
-                    showSaveMessage(msg, 'error');
+                    /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
+                    showSaveMessage('SSH KeyPair Uploading Failed', 'error');
                     return;
                 }
             }
             
              function sshkeyUploadFailed(evt) {
                 block.unblockUI();
-                var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';
-                showSaveMessage(msg, 'error');
+                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
+                showSaveMessage('SSH KeyPair Uploading Failed', 'error');
                 return;
             }
 
             function sshkeyUploadCanceled(evt) {
                 block.unblockUI();
-                var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';
-                showSaveMessage(msg, 'error');
+               /* var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
+                showSaveMessage('SSH KeyPair Uploading Failed', 'error');
                 return;
             }
            
@@ -2533,7 +2539,7 @@ var rest = myApp.controller(
                     if (credObj.credentialType == 'TRUSTSTORE_CERT') {
                         $scope.certificateModal.certificateURI = credObj.credentialURI;
                         $scope.certificateModal.trustStoreGroupId = credObj.idpURI;
-                        $scope.certificateModal.isGlobalTrustore = (credObj.idpTyPe == 'GLOBAL')?"1":"0";
+                        $scope.certificateModal.isGlobalTrustore = (credObj.idpType == 'GLOBAL')?"1":"0";
                     }
                 }
             }
@@ -2624,10 +2630,27 @@ var rest = myApp.controller(
                     idpURI: '',
                     allowAdd: 'true',
                     passwordDirtyState: ''
-                }];
-               
-
-
+                }];    
+            }
+            $scope.resetCredentialModal = function() {
+                    $scope.certificateModal = {
+                    "certificates": '',
+                    "certificateURI": '',
+                    "isGlobalTrustore": '1',
+                    "trustStoreGroupId": ''
+                };
+                
+                $scope.sshkeyModal = {
+                    "sshKeys": '',
+                    "sshPrivateKeyURI": '',
+                    "sshPublicKeyURI": '',
+                    "sshKeyPairPguid": '',
+                    "sshKeyPairPassphrase":'',
+                    "sshKeyPairConfirmPassphrase":''
+                };
+                formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
+                $scope.isPrivateKeySelected = false;
+                $scope.isPublicKeySelected = false;
             }
             $scope.confirmPasswordColor = function () {		
   			  if (typeof($scope.sshkeyModal.sshKeyPairConfirmPassphrase) === 'undefined' || $scope.sshkeyModal.sshKeyPairConfirmPassphrase === '') {
@@ -2636,7 +2659,8 @@ var rest = myApp.controller(
   				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '#78FA89';	
   			  }	else {
   				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '#FA787E';
-  			  }	
-  	   }
+  			  }
+               
+           }
         }
     ]);

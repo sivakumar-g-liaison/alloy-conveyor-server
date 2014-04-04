@@ -50,6 +50,7 @@ public class Processor implements Identifiable {
 
 	private String pguid;
 	private String javaScriptUri;
+	private Number isSelfSigned;
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
@@ -96,7 +97,16 @@ public class Processor implements Identifiable {
 	public void setJavaScriptUri(String javaScriptUri) {
 		this.javaScriptUri = javaScriptUri;
 	}
-		
+	
+	@Column(name = "SELF_SIGNED")
+	public Number getIsSelfSigned() {
+		return isSelfSigned;
+	}
+
+	public void setIsSelfSigned(Number isSelfSigned) {
+		this.isSelfSigned = isSelfSigned;
+	}
+	
 	@Column(name = "DESCRIPTION", length = 512)
 	public String getProcsrDesc() {
 		return this.procsrDesc;

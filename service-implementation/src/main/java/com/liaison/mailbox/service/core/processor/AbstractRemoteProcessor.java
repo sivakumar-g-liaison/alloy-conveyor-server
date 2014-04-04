@@ -580,26 +580,30 @@ public abstract class AbstractRemoteProcessor {
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
 			
-			// If no certificate is configured then use default global trustoreid
-			String trustStoreID = (MailBoxUtility.isEmpty(trustStoreCredential.getCredsIdpUri()))?
-									(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
-									trustStoreCredential.getCredsIdpUri();
-			InputStream instream = fetchTrustStore(trustStoreID);
-			
-			if (instream == null) {
-				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
-			}
-			
-			try {
+			if (trustStoreCredential != null) {
+				// If no certificate is configured then use default global trustoreid
+				String trustStoreID = (MailBoxUtility.isEmpty(trustStoreCredential.getCredsIdpUri()))?
+										(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
+										trustStoreCredential.getCredsIdpUri();
+				InputStream instream = fetchTrustStore(trustStoreID);
 				
-				trustStore.load(instream, null);
+				if (instream == null) {
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
+				}
+				
+				try {
+					
+					trustStore.load(instream, null);
 
-			} finally {
+				} finally {
+					
+					if (null != instream) instream.close();
+				}
 				
-				if (null != instream) instream.close();
+				request.truststore(trustStore);
 			}
 			
-			request.truststore(trustStore);
+			
 		}
 		LOGGER.info("Returns HTTP/S configured HTTPClient");
 		return request;
@@ -971,27 +975,29 @@ public abstract class AbstractRemoteProcessor {
 			
 			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
-			// If no certificate is configured then use default global trustoreid
-			String trustStoreID = (MailBoxUtility.isEmpty(trustStoreCredential.getCredsIdpUri()))?
-					(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
-					trustStoreCredential.getCredsIdpUri();
-			InputStream instream = fetchTrustStore(trustStoreID);
-			
-			if (instream == null) {
-				throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
-			}
-			
-			try {
+			if (trustStoreCredential != null) {
+				// If no certificate is configured then use default global trustoreid
+				String trustStoreID = (MailBoxUtility.isEmpty(trustStoreCredential.getCredsIdpUri()))?
+						(MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId")):
+						trustStoreCredential.getCredsIdpUri();
+				InputStream instream = fetchTrustStore(trustStoreID);
 				
-				trustStore.load(instream, null);
+				if (instream == null) {
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
+				}
+				
+				try {
+					
+					trustStore.load(instream, null);
 
-			} finally {
-				if(null != instream) instream.close();
+				} finally {
+					if(null != instream) instream.close();
+				}
+				
+				ftpsRequest.setTrustStore(trustStore);
 			}
 			
-			ftpsRequest.setTrustStore(trustStore);
 		}
-
 		return ftpsRequest;
 	}
 
@@ -1063,7 +1069,7 @@ public abstract class AbstractRemoteProcessor {
 			sftpRequest.setPrivateKeyPath(privateKeyPath);
 			//sftpRequest.setPassphrase(sshKeyPairCredential.getCredsPassword());
 
-		}
+		} 
 
 		return sftpRequest;
 	}
@@ -1283,34 +1289,5 @@ public abstract class AbstractRemoteProcessor {
 			}
 		}
 		return null;
-	} 
-	/**
-	 * Get the credential Details configured for a processor
-	 *
-	 * 
-	 * @return String URI
-	 * @throws MailBoxServicesException
-	 * @throws SymmetricAlgorithmException
-	 */
-	protected Map<String, Credential> getCredentials() throws MailBoxServicesException {
-
-		Map<String, Credential> credentialDetails = new HashMap<String, Credential>();
-		if (configurationInstance.getCredentials() != null) {
-
-			for (Credential credential : configurationInstance.getCredentials()) {
-
-				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
-				if (null == foundCredentailType) {
-					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
-				} else if (CredentialType.TRUSTSTORE_CERT.equals(foundCredentailType)) {
-					credentialDetails.put(MailBoxConstants.TRUSTSTORE_CERT, credential);
-				} else if (CredentialType.SSH_KEYPAIR.equals(foundCredentailType)) {
-					credentialDetails.put(MailBoxConstants.SSH_KEYPAIR, credential);
-				} else if (CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)) {
-					credentialDetails.put(MailBoxConstants.LOGIN_CREDENTIAL, credential);
-				}
-			}
-		}
-		return credentialDetails;
-	} 
+	}
 }
