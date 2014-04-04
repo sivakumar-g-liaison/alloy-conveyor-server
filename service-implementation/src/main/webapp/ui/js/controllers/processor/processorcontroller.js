@@ -2555,7 +2555,7 @@ var rest = myApp.controller(
                                 idpType: idpType,
                                 allowAdd: false
                             });
-                 $scope.processorCredProperties= $scope.processorCredProperties.slice(0);
+                 $scope.processorCredProperties= $scope.processorCredProperties.slice();
                  block.unblockUI();
                 
             }
@@ -2579,8 +2579,7 @@ var rest = myApp.controller(
                     idpURI: $scope.sshkeyModal.sshKeyPairPguid,
                     idpType: 'PRIVATE',
                     allowAdd: false
-                });
-                $scope.processorCredProperties.splice(0,0,{
+                }, {
                     credentialURI: $scope.sshkeyModal.sshPublicKeyURI,
                     credentialType: 'SSH_KEYPAIR',
                     userId: '',
@@ -2589,8 +2588,9 @@ var rest = myApp.controller(
                     idpType: 'PUBLIC',
                     allowAdd: false
                 });
-               $scope.processorCredProperties = $scope.processorCredProperties.slice(0);
-               block.unblockUI();
+                $scope.processorCredProperties = $scope.processorCredProperties.slice();
+                $scope.$apply();
+                block.unblockUI();
             }
             $scope.removeSSHKeyDetails = function () {
                 for(var i = ($scope.processorCredProperties.length - 1); i >= 0; i--) {
