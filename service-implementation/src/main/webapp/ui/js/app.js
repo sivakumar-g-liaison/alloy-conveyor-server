@@ -85,6 +85,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.base_url = '../g2mailboxservice/rest/v1/mailbox';
     $rootScope.url_upload_key = '../key-management/upload/public';
+    $rootScope.url_ssh_upload_key = '../key-management/upload/keypair';
     $rootScope.url_link_key_store = '../key-management/update/truststore/';
     $rootScope.restService = RESTService;
     // validation of user input pattern
@@ -121,6 +122,11 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.linkKeyTs;
     $rootScope.restService.get('data/truststore_update_request.json', function (data) {
         $rootScope.linkKeyTs = data;
+    });
+      // JSON which contains upload ssh key request
+    $rootScope.sshKeyObj;
+    $rootScope.restService.get('data/upload_keypair_request.json', function (data) {
+        $rootScope.sshKeyObj = data;
     });
     // async load constants
     $rootScope.constants = [];

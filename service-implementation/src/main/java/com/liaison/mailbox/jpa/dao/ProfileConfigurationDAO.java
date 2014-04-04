@@ -1,12 +1,22 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.dao;
+
+import java.util.List;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
-
-import java.util.List;
 
 @NamedQueries({
 		@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"

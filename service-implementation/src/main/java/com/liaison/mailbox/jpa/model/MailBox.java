@@ -1,5 +1,5 @@
 /**
-\ * Copyright Liaison Technologies, Inc. All rights reserved.
+ * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
  * Liaison Technologies, Inc. ("Confidential Information").  You shall 
@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.jpa.model;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.persistence.CascadeType;

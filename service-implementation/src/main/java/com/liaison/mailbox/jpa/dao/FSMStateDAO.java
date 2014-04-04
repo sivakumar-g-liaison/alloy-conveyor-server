@@ -48,8 +48,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
                 + " inner join sta.executionState staVal"
                 + " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
                 + " and stateVal.value = :" + FSMStateDAO.BY_VALUE
-                + " group by staVal.fsmState)"), 
-
+                + " group by staVal.fsmState)")
 })
 
 public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorStateDTO, ExecutionEvents> {

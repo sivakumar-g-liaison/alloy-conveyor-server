@@ -9,18 +9,9 @@
  */
 package com.liaison.mailbox.service.dto.configuration.request;
 
-import java.io.IOException;
-
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * @author karthikeyanm
@@ -46,9 +37,5 @@ public class ReviseProcessorRequestDTO {
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
 	}
-
-	public void copyToEntity(Processor entity) throws MailBoxConfigurationServicesException, JsonGenerationException,
-			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
-		this.getProcessor().copyToEntity(entity, false);
-	}
+    
 }

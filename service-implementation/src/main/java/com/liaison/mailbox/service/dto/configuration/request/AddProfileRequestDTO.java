@@ -11,7 +11,6 @@ package com.liaison.mailbox.service.dto.configuration.request;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
@@ -32,7 +31,4 @@ public class AddProfileRequestDTO {
 		this.profile = profile;
 	}
 	
-	public void copyToEntity(ScheduleProfilesRef entity) {
-		this.getProfile().copyToEntity(entity);
-	}
 }

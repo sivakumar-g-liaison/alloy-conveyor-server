@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.core;
 
 import java.io.File;
@@ -205,91 +215,6 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Method which associates the generated publickey certificate with TrustStore
-	 * @param pkcGuid
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	private void createPublicKeyAndTrustStoreLink(String pkcGuid) throws IOException, JSONException {
-
-		String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
-		JSONObject jsonRequest = new JSONObject(request);
-
-		jsonRequest.getJSONObject("dataTransferObject").put("pguid", MailBoxUtility.getEnvironmentProperties().getString("truststore-id"));
-
-		JSONArray array = jsonRequest.getJSONObject("dataTransferObject").getJSONArray("trustStoreMemberships");
-		((JSONObject) array.get(0)).getJSONObject("publicKey").put("pguid", pkcGuid);
-
-	   HttpPut httpPut = new HttpPut(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") +
-			   "/update/truststore/" +MailBoxUtility.getEnvironmentProperties().getString("truststore-id")); 
-
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-
-		httpPut.addHeader("Content-Type", "application/json");
-		httpPut.setEntity(new StringEntity(jsonRequest.toString()));
-
-		HttpResponse response = httpclient.execute(httpPut);
-
-		// TODO check for 200, if not then throw an Exception.
-		System.out.println(response.getStatusLine());
-	}
-
-	/**
-	 * Method which uploads public key
-	 * from to KMS
-	 * 
-	 * @return guid of the uploaded Public Key
-	 * @throws MailBoxConfigurationServicesException
-	 * @throws IOException
-	 * @throws ClientProtocolException
-	 * @throws JSONException
-	 */
-	private String uploadPublicKey(AddProcessorToMailboxRequestDTO addRequest,
-			ReviseProcessorRequestDTO reviseRequest) throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
-
-		if (null == reviseRequest) {
-
-			if (addRequest.getProcessor().getProtocol().equalsIgnoreCase("https")) {
-
-				if (!MailBoxUtility.isEmpty(addRequest.getProcessor().getCertificateURI())) {
-
-					String request = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
-					JSONObject jsonRequest = new JSONObject(request);
-					jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
-
-					HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") 
-							+ "upload/public"); 
-					DefaultHttpClient httpclient = new DefaultHttpClient();
-
-					StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
-					FileBody publicKeyCert = new FileBody(new File(addRequest.getProcessor().getCertificateURI()));
-					HttpEntity reqEntity = MultipartEntityBuilder.create()
-							.addPart("request", jsonRequestBody)
-							.addPart("key", publicKeyCert)
-							.build();
-
-					httpPost.setEntity(reqEntity);
-					HttpResponse response = httpclient.execute(httpPost);
-
-					// TODO Check for 200 Status code, Consume entity then get GUID and return
-
-					if (response.getStatusLine().getStatusCode() == 201) {
-
-						JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
-						JSONArray arr = obj.getJSONObject("dataTransferObject").getJSONArray("keyGroupMemberships");
-						return (((JSONObject) arr.get(0)).getJSONObject("keyBase").getString("pguid"));
-
-					}
-				}
-
-				return null;
-			}
-		}
-
-		return null;
-	}
-
-	/**
 	 * Creates link between scheduleProfileref and processor.
 	 * 
 	 * @param addRequest
@@ -429,7 +354,16 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
-
+	
+	/**
+	 *  Get the TrustStoreResponse.
+	 *  
+	 * @return GetTrustStoreResponseDTO
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws JSONException
+	 */
 	public GetTrustStoreResponseDTO uploadSelfSignedTrustStore() throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
 
 		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO();
@@ -733,8 +667,6 @@ public class ProcessorConfigurationService {
 		LOGGER.info("Entering into getExecutingProcessors.");
 
 		String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours"); 
-//		Timestamp timeStmp = new Timestamp(Long.parseLong(listJobsIntervalInHours));
-		
 		Timestamp timeStmp = new Timestamp(new Date().getTime());
 		
 		Calendar cal = Calendar.getInstance();

@@ -13,13 +13,13 @@ package com.liaison.mailbox.service.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.liaison.mailbox.jpa.model.ParallelProcessor;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.dao.ParallelProcessorDAO;
-import com.liaison.mailbox.jpa.dao.ParallelProcessorDAOBase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.liaison.mailbox.jpa.dao.ParallelProcessorDAO;
+import com.liaison.mailbox.jpa.dao.ParallelProcessorDAOBase;
+import com.liaison.mailbox.jpa.model.ParallelProcessor;
+import com.liaison.mailbox.jpa.model.Processor;
 
 /**
  * Processor Semaphore which ensures processor can be run only once at a time.

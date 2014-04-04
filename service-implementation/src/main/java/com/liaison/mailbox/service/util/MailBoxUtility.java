@@ -10,9 +10,7 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Properties;
@@ -34,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.framework.util.ServiceUtils;
-import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.

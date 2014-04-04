@@ -48,13 +48,10 @@ public class ProcessorDTO {
 	private String type;
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private String javaScriptURI;
-	private String certificateURI;
-	private Number isSelfSigned;
 	private String description;
 	private String status;
 	private String protocol;
 	private String linkedMailboxId;
-	private String trustStoreId;
 	private List<String> linkedProfiles;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
@@ -100,22 +97,6 @@ public class ProcessorDTO {
 		this.javaScriptURI = javaScriptURI;
 	}
 
-	public String getCertificateURI() {
-		return certificateURI;
-	}
-
-	public void setCertificateURI(String certificateURI) {
-		this.certificateURI = certificateURI;
-	}
-
-	public Number getIsSelfSigned() {
-		return isSelfSigned;
-	}
-
-	public void setIsSelfSigned(Number isSelfSigned) {
-		this.isSelfSigned = isSelfSigned;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -142,14 +123,6 @@ public class ProcessorDTO {
 
 	public void setProtocol(String protocol) {
 		this.protocol = protocol;
-	}
-
-	public String getTrustStoreId() {
-		return trustStoreId;
-	}
-
-	public void setTrustStoreId(String trustStoreId) {
-		this.trustStoreId = trustStoreId;
 	}
 
 	@Mandatory(errorMessage = "Mailbox Id is mandatory.")
@@ -263,9 +236,7 @@ public class ProcessorDTO {
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrName(this.getName());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
-		processor.setCertificateUri(this.getCertificateURI());
-		processor.setIsSelfSigned(this.getIsSelfSigned());
-
+	
 		// Setting the folders.
 		Folder folder = null;
 		List<Folder> folders = new ArrayList<>();
@@ -289,7 +260,7 @@ public class ProcessorDTO {
 
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
-
+//			credential.setProcessor(processor);
 			credential.setPguid(MailBoxUtility.getGUID());
 			credentialList.add(credential);
 		}
@@ -318,13 +289,7 @@ public class ProcessorDTO {
 		Protocol protocol = Protocol.findByName(this.getProtocol());
 		processor.setProcsrProtocol(protocol.getCode());
 		
-		// Done to avoid null entry during processor revise if file is not choosen
-		//if (!MailBoxUtility.isEmpty(this.getTrustStoreId())) {
-
-			processor.setTrustStoreId(this.getTrustStoreId());
-		//}
-
-		// Set the status
+			// Set the status
 		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());
 		processor.setProcsrStatus(foundStatusType.value());
 
@@ -363,9 +328,6 @@ public class ProcessorDTO {
 
 		this.setType(processor.getProcessorType().name());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
-		this.setCertificateURI(processor.getCertificateUri());
-		this.setIsSelfSigned(processor.getIsSelfSigned());
-		this.setTrustStoreId(processor.getTrustStoreId());
 		this.setName(processor.getProcsrName());
 
 		// Set folders

@@ -33,7 +33,6 @@ import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionEvents;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;

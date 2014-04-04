@@ -39,6 +39,13 @@ public enum ExecutionState {
 		return value;
 	}
 
+	/**
+	 *This  method will retrieve the ExecutionState by given FSMStateValue value.
+	 * 
+	 * @param code 
+	 * 		  The FSMStateValue value
+	 * @return ExecutionState
+	 */
 	public static ExecutionState findByCode(String code) {
 
 		ExecutionState found = null;
@@ -52,20 +59,5 @@ public enum ExecutionState {
 
 		return found;
 	}
-
-	public static ExecutionState findByName(String name) {
-
-		ExecutionState found = null;
-		for (ExecutionState value : ExecutionState.values()) {
-
-			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
-				found = value;
-				break;
-			}
-		}
-
-		return found;
-
-	}
-
+	
 }

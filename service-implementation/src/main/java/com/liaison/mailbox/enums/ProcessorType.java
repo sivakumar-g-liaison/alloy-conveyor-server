@@ -27,7 +27,14 @@ public enum ProcessorType {
 	public String getCode() {
 		return code;
 	}
-
+	
+    /**
+     * This  method will retrieve the ProcessorType by given FSMState processorType.
+     * 
+     * @param code 
+     *        The FSMState processorType 
+     * @return ProcessorType
+     */
 	public static ProcessorType findByCode(String code) {
 
 		ProcessorType found = null;
@@ -41,7 +48,14 @@ public enum ProcessorType {
 
 		return found;
 	}
-
+    
+	/**
+	 * This  method will retrieve the ProcessorType by given processorType from ProcessorDTO.
+	 * 
+	 * @param name  
+	 *        The ProcessorDTO processorType
+	 * @return ProcessorType
+	 */
 	public static ProcessorType findByName(String name) {
 
 		ProcessorType found = null;

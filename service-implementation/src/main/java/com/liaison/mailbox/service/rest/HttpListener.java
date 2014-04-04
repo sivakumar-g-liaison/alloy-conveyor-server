@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.rest;
 
 import java.io.File;
@@ -107,7 +117,14 @@ public class HttpListener extends BaseResource {
 	{
 		return handleSync(request);
 	}
-
+    
+	/**
+	 * This method will processing the sync message by give request.
+	 * 
+	 * @param request
+	 *        The HttpServletRequest
+	 * @return The Response Object
+	 */
 	@POST
 	@Path("sync")
 	public Response handleSync (@Context HttpServletRequest request)
@@ -165,7 +182,14 @@ public class HttpListener extends BaseResource {
 	{
 		return handleAsync(request);
 	}
-
+    
+	/**
+	 * This method will processing the async message by give request.
+	 * 
+	 * @param request
+	 *        The HttpServletRequest
+	 * @return The Response Object
+	 */
 	@Post
 	@Path("async")
 	public Response handleAsync (@Context HttpServletRequest request)
@@ -205,7 +229,13 @@ public class HttpListener extends BaseResource {
 		}
 		return restResponse;
 	}
-
+    
+	/**
+	 * This method will validate the size of the request.
+	 * 
+	 * @param request
+	 *       The HttpServletRequest
+	 */
 	protected void validateRequestSize (HttpServletRequest request)
 	{
 		long contentLength = request.getContentLength();
@@ -222,14 +252,26 @@ public class HttpListener extends BaseResource {
 	{
 		// TODO - when User Management service is available.
 	}
-
+    
+	/**
+	 * This method will create session context by given request.
+	 * 
+	 * @param request
+	 *       the HttpServletRequest
+	 * @return SessionContext
+	 */
 	protected SessionContext createSessionContext (HttpServletRequest request)
 	{
 		SessionContext sessionContext = new SessionContext();
 		sessionContext.copyFrom(request);
 		return sessionContext;
 	}
-
+    
+	/**
+	 * This method will set globalProcessId to sessionContext.
+	 * 
+	 * @param sessionContext
+	 */
 	protected void assignGlobalProcessId (SessionContext sessionContext)
 	{
 		UUIDGen uuidGen = new UUIDGen();
@@ -241,7 +283,13 @@ public class HttpListener extends BaseResource {
 	{
 		sessionContext.setRequestTimestamp(new Date());
 	}
-
+    /**
+     * This method will store the payload file name by given request.
+     * 
+     * @param request
+     * @param sessionContext
+     * @throws IOException
+     */
 	protected void storePayload (HttpServletRequest request, SessionContext sessionContext)
 		throws IOException
 	{
@@ -272,7 +320,13 @@ public class HttpListener extends BaseResource {
 			}
 		}
 	}
-
+    
+	/**
+	 * This method will create payload file name by given sessionContext.
+	 * 
+	 * @param sessionContext
+	 * @return payloadFileName
+	 */
 	protected String createPayloadFileName (SessionContext sessionContext)
 	{
 		StringBuilder payloadFileName = new StringBuilder();
@@ -304,7 +358,13 @@ public class HttpListener extends BaseResource {
 
 		return payloadFileName.toString();
 	}
-
+    
+	/**
+	 * This method will create Payload Uri by given payloadFileName.
+	 * 
+	 * @param payloadFileName
+	 * @return payloadUri
+	 */
 	protected String createPayloadUri (String payloadFileName)
 	{
 		StringBuilder payloadUri = new StringBuilder();
@@ -314,7 +374,12 @@ public class HttpListener extends BaseResource {
 
 		return payloadUri.toString();
 	}
-
+    
+	/**
+	 * This method will validate Payload Directory by given payload File Name.
+	 * 
+	 * @param payloadFileName
+	 */
 	protected void ensurePayloadDirExists (String payloadFileName)
 	{
 		File payloadFile = new File(payloadFileName);
@@ -328,7 +393,12 @@ public class HttpListener extends BaseResource {
 			}
 		}
 	}
-
+    
+	/**
+	 * This method will retrieve Payload Directory.
+	 * 
+	 * @return payloadDirectory
+	 */
 	protected String getHttpAsyncPayloadDirectory ()
 	{
 		DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
@@ -376,7 +446,16 @@ public class HttpListener extends BaseResource {
 
 		HornetQJMSUtil.postMessage(jndidto);
 	}
-
+    
+	/**
+	 * This method will retrieve the HttpResponse from sessionContext.
+	 * 
+	 * @param sessionContext
+	 * @param request
+	 * @return HttpResponse
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
 	protected HttpResponse forwardRequest (SessionContext sessionContext, HttpServletRequest request)
 		throws ClientProtocolException, IOException
 	{
@@ -386,14 +465,24 @@ public class HttpListener extends BaseResource {
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
 		return httpResponse;
 	}
-
+    
+	/**
+	 * This method will create HttpClient.
+	 * 
+	 * @return HttpClient
+	 */
 	protected HttpClient createHttpClient ()
 	{
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		HttpClient httpClient = httpClientBuilder.build();
 		return httpClient;
 	}
-
+    
+	/**
+	 * This method will create HttpPost request by given request.
+	 * 
+	 * @return HttpPost
+	 */
 	protected HttpPost createHttpRequest (HttpServletRequest request)
 		throws IOException
 	{
@@ -408,7 +497,15 @@ public class HttpListener extends BaseResource {
 
 		return post;
 	}
-
+    
+	/**
+	 * This method will copy all Response Information.
+	 * 
+	 * @param httpResponse
+	 * @param builder
+	 * @throws IllegalStateException
+	 * @throws IOException
+	 */
 	protected void copyResponseInfo (HttpResponse httpResponse, ResponseBuilder builder)
 		throws IllegalStateException, IOException
 	{
@@ -448,7 +545,13 @@ public class HttpListener extends BaseResource {
 
 		copyResponseHeaders(httpResponse, builder);
 	}
-
+    
+	/**
+	 * This method will retrieve Response Content Length by given HttpResponse.
+	 * 
+	 * @param httpResponse
+	 * @return responsecontentLength
+	 */
 	protected int getResponseContentLength (HttpResponse httpResponse)
 	{
 		Header header = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
@@ -464,7 +567,13 @@ public class HttpListener extends BaseResource {
 
 		return length;
 	}
-
+    
+	/**
+	 * This method will retrieve Response Content type by given httpresponse.
+	 * 
+	 * @param httpResponse
+	 * @return ContentType
+	 */
 	protected ContentType getResponseContentType (HttpResponse httpResponse)
 	{
 		Header header = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
@@ -480,7 +589,13 @@ public class HttpListener extends BaseResource {
 
 		return contentType;
 	}
-
+    
+	/**
+	 * This method will retrieve Response headers by given httpresponse.
+	 * 
+	 * @param httpResponse
+	 * @param builder
+	 */
 	protected void copyResponseHeaders (HttpResponse httpResponse, ResponseBuilder builder)
 	{
 		// Copy headers that start with the Gateway prefix.
@@ -496,7 +611,12 @@ public class HttpListener extends BaseResource {
 			}
 		}
 	}
-
+    
+	/**
+	 * This method will retrieve the Service Broker Uri from config.
+	 * 
+	 * @return serviceBrokerUri
+	 */
 	protected String getServiceBrokerUriFromConfig ()
 	{
 		DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();

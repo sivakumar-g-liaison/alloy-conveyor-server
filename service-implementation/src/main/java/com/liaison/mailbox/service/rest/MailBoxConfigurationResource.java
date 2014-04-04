@@ -43,7 +43,6 @@ import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
-import com.liaison.mailbox.service.dto.configuration.request.AddFSMExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
@@ -51,7 +50,6 @@ import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
@@ -64,7 +62,6 @@ import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreRespo
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
-import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -74,6 +71,7 @@ import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * This is the gateway for the mailbox configuration services.
@@ -81,7 +79,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
  * @author veerasamyn
  */
 @Path("v1/mailbox")
-@Api(value = "v1/mailbox", description = "This is the gateway for the mailbox configuration services.")
+@Api(value = "v1/mailbox", description = "Gateway for the mailbox configuration services.")
 public class MailBoxConfigurationResource extends BaseResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
@@ -105,7 +103,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Create an enterprise", notes = "This function is used to create a mailbox", position = 1)
+	@ApiOperation(value = "Create Enterprise", notes = "create a new mailbox", position = 1)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createMailBox(@Context HttpServletRequest request) {
@@ -165,10 +163,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@PUT
+	@ApiOperation(value = "Update Enterprise", notes = "update details of existing mailbox", position = 2)
 	@Path("/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response reviseMailBox(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
+	public Response reviseMailBox(@Context HttpServletRequest request, 
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
 
 		// Audit LOG the Attempt to revise a mailbox
 		auditAttempt("reviseMailBox");
@@ -224,10 +224,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@DELETE
+	@ApiOperation(value = "Delete Enterprise", notes = "delete a mailbox", position = 3)
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deactivateMailBox(@PathParam(value = "id") String guid) {
+	public Response deactivateMailBox(
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
 
 		// Audit LOG the Attempt to deactivate a mailbox
 		auditAttempt("deactivateMailBox");
@@ -276,10 +278,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
+	@ApiOperation(value = "Enterprise Details", notes = "returns details of a valid mailbox", position = 4)
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response readMailBox(@PathParam(value = "id") String guid, @QueryParam(value = "serviceInstanceId") String serviceInstanceId,
+	public Response readMailBox(@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
+			@QueryParam(value = "serviceInstanceId") String serviceInstanceId,
 			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint) {
 
 		// Audit LOG the Attempt to read mailbox
@@ -365,6 +369,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
+	@ApiOperation(value = "Upload TrustStore", notes = "upload Self Signed TrustStore", position = 5)
 	@Path("/uploadSelfSigned")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -415,6 +420,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
+	@ApiOperation(value = "Create Profile", notes = "create a new profile", position = 6)
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -472,6 +478,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
+	@ApiOperation(value = "List Profiles", notes = "returns detail information of all the profiles", position = 7)
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -524,10 +531,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
+	@ApiOperation(value = "Create Processor", notes = "create a new processor", position = 8)
 	@Path("/{id}/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createProcessor(@Context HttpServletRequest request, @PathParam(value = "id") String guid) {
+	public Response createProcessor(@Context HttpServletRequest request,
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="processor id") String guid) {
 
 		// Audit LOG the Attempt to createProcessor
 		auditAttempt("createProcessor");
@@ -586,10 +595,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * 
 	 */
 	@DELETE
+	@ApiOperation(value = "Remove Processor", notes = "remove processor details", position = 9)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
+	public Response deleteProcessor(
+			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid, 
+			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id") String guid) {
 
 		// Audit LOG the Attempt to deleteProcessor
 		auditAttempt("deleteProcessor");
@@ -641,10 +653,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
+	@ApiOperation(value = "Processor Details", notes = "returns detail information of a valid processor", position = 10)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getProcessor(@PathParam(value = "mailboxid") String mailboxguid, @PathParam(value = "processorid") String guid) {
+	public Response getProcessor(
+			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid, 
+			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id")  String guid) {
 
 		// Audit LOG the Attempt to getProcessor
 		auditAttempt("getProcessor");
@@ -697,11 +712,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@PUT
+	@ApiOperation(value = "Update Processor", notes = "revise details of valid processor", position = 11)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response reviseProcessor(@Context HttpServletRequest request, @PathParam(value = "mailboxid") String mailboxguid,
-			@PathParam(value = "processorid") String guid) {
+	public Response reviseProcessor(@Context HttpServletRequest request, 
+			@PathParam(value = "mailboxid")  @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id") String guid) {
 
 		// Audit LOG the Attempt to reviseProcessor
 		auditAttempt("reviseProcessor");
@@ -759,12 +776,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return The Response
 	 */
 	@PUT
+	@ApiOperation(value = "Search Enterprise", notes = "search a mailbox using given query parameters", position = 12)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
 			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
-
-		// Audit LOG the Attempt to searchMailBox
+		//Audit LOG the Attempt to searchMailBox
 		auditAttempt("searchMailBox");
 
 		serviceCallCounter.addAndGet(1);
@@ -808,8 +825,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 
 	}
-
+    
+	/**
+	 * REST method to retrieve a list of files from mailbox.
+	 * 
+	 * @return The Response Object
+	 */
 	@GET
+	@ApiOperation(value = "List File", notes = "return list of files", position = 13)
 	@Path("/listFile")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getFileList() {
@@ -845,8 +868,20 @@ public class MailBoxConfigurationResource extends BaseResource {
 		auditFailure("getFileList");
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method to retrieve server listener response.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @param folder
+	 *           folder of the mailbox 
+	 * @param filename
+	 *            filename of the mailbox
+	 * @return The Response
+	 */
 	@POST
+	@ApiOperation(value = "Server Listener", notes = "listener for http server", position = 14)
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
@@ -889,8 +924,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method will test directory sweeper.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @return The Response Object.
+	 */
 	@POST
+	@ApiOperation(value = "Sweeper", notes = "directory sweeper", position = 15)
 	@Path("/sweeper")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -927,8 +970,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method will test directory sweeper.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @return The Response Object.
+	 */
 	@POST
+	@ApiOperation(value = "Test", notes = "test response", position = 16)
 	@Path("/test")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -960,8 +1011,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * Rest method to retrieve the Authorization header.
+	 * 
+	 * @param request
+	 *        HttpServletRequest, injected with context annotation
+	 * @return The Response Object.
+	 */
 	@POST
+	@ApiOperation(value = "Authorization", notes = "authorization header", position = 17)
 	@Path("/basicauth")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1004,6 +1063,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
+	@ApiOperation(value = "Find Profile", notes = "search a profile using given profile name", position = 18)
 	@Path("/findprofile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1044,8 +1104,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-
+    
+	/**
+	 * REST method to retrieve list of certificates.
+	 * 
+	 * @return Response Object
+	 */
 	@GET
+	@ApiOperation(value = "List Certificates", notes = "returns list of certificates", position = 19)
 	@Path("/listCertificates")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCertificatesList() {
@@ -1082,7 +1148,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 	}
 
+	
+	/**
+	 * REST method to retrieve property file values.
+	 * 
+	 * @return Response Object
+	 */
 	@GET
+	@ApiOperation(value = "Property File", notes = "returns property file values", position = 20)
 	@Path("/getPropertyFileValues")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getPropertyFileValues() {
@@ -1117,105 +1190,5 @@ public class MailBoxConfigurationResource extends BaseResource {
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
-	}
-
-	@GET
-	@Path("/processor/execution")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") String status,
-			@QueryParam(value = "frmDate") String frmDate, @QueryParam(value = "toDate") String toDate, @QueryParam(value = "hitCounter") String hitCounter) {
-
-		// Audit LOG the Attempt to getExecutingProcessors
-		auditAttempt("getExecutingProcessors");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
-		try {
-			GetExecutingProcessorResponseDTO serviceResponse = null;
-			ProcessorConfigurationService processor = new ProcessorConfigurationService();
-
-			serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
-			serviceResponse.setHitCounter(hitCounter);
-
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("getExecutingProcessors");
-			} else {
-				auditFailure("getExecutingProcessors");
-			}
-
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-			// Audit LOG the failure
-			auditFailure("getExecutingProcessors");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-		return returnResponse;
-	}
-
-	/**
-	 * REST method to initiate FSM execution event creation.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@POST
-	@Path("/processor/executionEvent")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response interruptRunningProcessor(@Context HttpServletRequest request) {
-
-		// Audit LOG the Attempt to interruptRunningProcessor
-		auditAttempt("interruptRunningProcessor ");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		InputStream requestStream;
-		AddFSMExecutionEventRequestDTO serviceRequest;
-
-		try {
-
-			requestStream = request.getInputStream();
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddFSMExecutionEventRequestDTO.class);
-
-			AddFSMExecutionEventResponseDTO serviceResponse = null;
-			ProcessorConfigurationService processor = new ProcessorConfigurationService();
-
-			// creates new execution event
-			serviceResponse = processor.interruptRunningProcessor(serviceRequest);
-
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("interruptRunningProcessor");
-			} else {
-				auditFailure("interruptRunningProcessor");
-			}
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-		// Audit LOG the failure
-		auditFailure("interruptRunningProcessor");
-		return returnResponse;
-
 	}
 }

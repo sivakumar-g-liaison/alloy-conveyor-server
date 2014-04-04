@@ -34,11 +34,21 @@ public class MailBoxResponseDTO {
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
-
+    
+	/**
+	 * Copies the guid from utility to mailbox.
+	 * 
+	 * @param mailBox
+	 */
 	public void copyToEntity(MailBox mailBox) {
 		mailBox.setPguid(MailBoxUtility.getGUID());
 	}
-
+    
+	/**
+	 * Copies the pguid from mailbox to dto.
+	 * 
+	 * @param mailBox
+	 */
 	public void copyFromEntity(MailBox mailBox) {
 		this.setGuid(mailBox.getPguid());
 	}

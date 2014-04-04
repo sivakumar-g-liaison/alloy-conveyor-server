@@ -1,14 +1,21 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
@@ -20,7 +27,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
-import com.liaison.mailbox.service.hornetq.util.HornetQMessageListner;
 
 public class HornetQJMSUtil {
 

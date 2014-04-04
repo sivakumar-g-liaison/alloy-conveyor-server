@@ -5,6 +5,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
+
 package com.liaison.mailbox.service.util;
 
 import java.io.File;

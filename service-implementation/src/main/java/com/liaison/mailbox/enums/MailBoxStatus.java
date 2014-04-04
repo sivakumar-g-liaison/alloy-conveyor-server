@@ -26,7 +26,13 @@ public enum MailBoxStatus {
 	public String value() {
 		return value;
 	}
-
+    
+	/**
+	 * This method will retrieve the MailBoxStatus by given MailBox status.
+	 * 
+	 * @param code the MailBox status as string
+	 * @return MailBoxStatus
+	 */
 	public static MailBoxStatus findByCode(String code) {
 
 		MailBoxStatus found = null;
@@ -40,7 +46,14 @@ public enum MailBoxStatus {
 
 		return found;
 	}
-
+    
+	/**
+	 * This method will retrieve the MailBoxStatus by given status from MailBoxDTO.
+	 * 
+	 * @param name 
+	 *        the MailBoxDTO status
+	 * @return MailBoxStatus
+	 */
 	public static MailBoxStatus findByName(String name) {
 
 		MailBoxStatus found = null;

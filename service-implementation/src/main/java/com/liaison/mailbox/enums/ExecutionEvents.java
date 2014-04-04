@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.enums;
 
-import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
@@ -34,39 +33,6 @@ public enum ExecutionEvents {
 
 	private ExecutionEvents(String status) {
 		this.value = status;
-	}
-
-	public String value() {
-		return value;
-	}
-
-	public static ExecutionEvents findByCode(String code) {
-
-		ExecutionEvents found = null;
-		for (ExecutionEvents value : ExecutionEvents.values()) {
-
-			if (!MailBoxUtility.isEmpty(code) && code.equals(value.value())) {
-				found = value;
-				break;
-			}
-		}
-
-		return found;
-	}
-
-	public static ExecutionEvents findByName(String name) {
-
-		ExecutionEvents found = null;
-		for (ExecutionEvents value : ExecutionEvents.values()) {
-
-			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
-				found = value;
-				break;
-			}
-		}
-
-		return found;
-
 	}
 
 }

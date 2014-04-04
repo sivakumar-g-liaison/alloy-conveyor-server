@@ -1,0 +1,21 @@
+{
+     "pipelineId": "pipelineId",
+     "activityId": "activityId",
+     "taskId": "taskId",
+     "serviceInstanceId": "siid-21223",
+     "userId": "userId",
+     "dataTransferObject": {
+        "@class": "com.liaison.keymanage.grammar.dto.PrivateKey",
+        "keyType": "SSH",
+        "keyScope": "CUSTOMER",
+        "keyStatus": "ACTIVE",
+        "keySize": "1024",
+        "keySignature": "SHA1",
+        "name": "test_ssh_keypair",
+        "notificationEmail": "kirithiga.devarajan@object-frontier.com",
+        "validityDateFrom": "2014-03-19T00:30:00.000Z",
+        "validityDateTo": "2014-04-19T00:30:00.000Z",
+        "custodianEmail": "GRamamurthy@liaison.com",
+        "custodianPassphrase": "passmein"
+     }
+ }

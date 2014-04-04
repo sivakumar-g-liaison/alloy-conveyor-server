@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.codehaus.jettison.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,12 +65,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JSONException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException {
 
 		// Convert the json string to DTO
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
@@ -87,12 +89,14 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws SymmetricAlgorithmException
 	 * @throws SftpException
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws JSONException 
+	 * @throws JsonParseException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	private void executeSFTPRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SymmetricAlgorithmException, SftpException, com.liaison.commons.exception.LiaisonException {
+			FS2Exception, MailBoxServicesException, SymmetricAlgorithmException, SftpException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();
@@ -147,7 +151,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					continue;
 				}
 				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
-
+				
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + root.getName();

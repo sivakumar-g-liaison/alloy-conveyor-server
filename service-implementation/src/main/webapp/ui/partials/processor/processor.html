@@ -298,30 +298,84 @@
 
                 <div>
                     <h4>Credentials</h4>
-                    <div class="row">
+                    <div class ="row" ng-show="!disableSSHKeys">
                         <div class="col-sm-5 col-md-5 adjustPaddingRight">
                             <label>
-                                Certificate
+                                SSH Private Key 
+                            </label>
+                            <input id="mbx-procsr-sshprivatekeypath" type="text" ng-model="sshkeyModal.sshPrivateKeyURI" class="form-control" ng-disabled="true">
+                        </div>
+                        <div class="col-md-1 removePaddingLeft">
+                            <br>
+                            <div class="fileUpload btn btn-primary">
+                                <span>Browse</span>
+                                <input id="mbx-procsr-sshprivatekeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPrivateKey(this)" /> 
+						    </div>
+						</div>
+                        <div class="col-sm-5 col-md-5 adjustPaddingRight">
+                            <label>
+                                SSH Public Key 
+                            </label>
+                            <input id="mbx-procsr-sshpublickeypath" type="text" ng-model="sshkeyModal.sshPublicKeyURI" class="form-control" ng-disabled="true">
+                        </div>
+                        <div class="col-md-1 removePaddingLeft">
+                            <br>
+                            <div class="fileUpload btn btn-primary">
+                                <span>Browse</span>
+                                <input id="mbx-procsr-sshpublickeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPublicKey(this)" /> 
+						    </div>
+					   </div>
+                      </div>
+                      <div class = "row" ng-show="!disableSSHKeys">
+                        <div class="col-md-6 col-sm-6 form-group">
+                        <label>
+                            Passphrase
+                        </label>
+                        <input id="mbx-procsr-sshkeypair-passphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairPassphrase" name="sshkeypassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
+                        <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                             <span id="mbx-sshKeyPairPassphrase-mandatory" class="custom-info-block" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
+                        </div>
+                        </div>
+                        <div class="col-md-5 col-sm-5 adjustPaddingRight">
+                             <label>
+                            Confirm Passphrase
+                            </label>
+                            <input id="mbx-procsr-sshkeypair-confirmpassphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairConfirmPassphrase" name="sshkeyconfirmpassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
+                            <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                                 <span id="mbx-sshKeyPairPassphrase-mandatory" class="custom-info-block" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
+                            </div>
+                        </div>
+                         <div class = "col-md-1 cod-sm-1 removePaddingLeft">
+                            <button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary" style="margin-top:25px;" ng-click="uploadSSHKey()">Upload</button>
+                        </div>
+                       
+                   </div>
+                   <div class="row" ng-show="!disableCertificates">
+
+                        <div class="col-sm-5 col-md-5 adjustPaddingRight">
+                            <label>
+                                Certificate 
                             </label>
                             <input id="mbx-procsr-certificatePath" type="text" ng-model="certificateModal.certificateURI" class="form-control" ng-disabled="true">
                         </div>
-                        <div class="col-md-2 removePaddingLeft">
+                        <div class="col-sm-1 col-md-1 removePaddingLeft">
                             <br>
-                            <div class="fileUpload btn btn-primary" ng-disabled="disableBrowseButton">
+                            <div class="fileUpload btn btn-primary" ng-disabled="disableCertificates">
                                 <span>Add</span>
-                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableBrowseButton" type="file" class="upload" ng-model-instant ng-click="resetFiles()" onchange="angular.element(this).scope().setFiles(this)" /> 
+                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableCertificates" type="file" class="upload" ng-model-instant ng-click="resetFiles()" onchange="angular.element(this).scope().setFiles(this)" /> 
 						    </div>
-							<button id="mbx-procsr-certificateRemove" ng-disabled="disableBrowseButton" class="btn btn-primary" style="margin-top:5px" ng-click="doRemove()">Remove</button>
-                        </div>
-                        <div class="col-sm-5 col-md-5">
+                        </div><br>
+
+
+                        <div class="col-sm-6 col-md-6">
                             <div class="form-group">
                                 <label>
                                     Add certificate to global trust store?
                                 </label>
                                 <br/>
-                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="1">  Yes
+                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
                                
-                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="processor.isSelfSigned" value="0" style="margin-left:5px">  No
+                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="0" style="margin-left:5px">  No
 
                             </div>
                         </div>

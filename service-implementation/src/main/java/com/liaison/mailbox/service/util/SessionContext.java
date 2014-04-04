@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.util;
 
 import java.util.ArrayList;
@@ -53,7 +63,13 @@ public class SessionContext
 	{
 		_headers = new ArrayList<Header>();
 	}
-
+    
+	/**
+	 * Copies all the data from the HttpServletRequest to SessionContext.
+	 * 
+	 * @param request
+	 *        HttpServletRequest
+	 */
 	public void copyFrom (HttpServletRequest request)
 	{
 		setRemoteAddress(request.getRemoteAddr());
@@ -69,7 +85,13 @@ public class SessionContext
 		copyRequestHeadersToSessionContext(request);
 		extractPipelineIdTokens(request);
 	}
-
+    
+	/**
+	 * Copies all the request header from HttpServletRequest to SessionContext.
+	 * 
+	 * @param request
+	 *        HttpServletRequest
+	 */
 	protected void copyRequestHeadersToSessionContext (HttpServletRequest request)
 	{
 		Enumeration<String> headerNames = request.getHeaderNames();
@@ -147,7 +169,13 @@ public class SessionContext
 
 		return tokens;
 	}
-
+    
+	/**
+	 * Copies all the data from SessionContext to HttpRequest.
+	 * 
+	 * @param request
+	 *        HttpRequest
+	 */
 	public void copyTo (HttpRequest request)
 	{
 		addNonNullHeaders(request, GATEWAY_REMOTE_ADDRESS_HEADER,     getRemoteAddress());

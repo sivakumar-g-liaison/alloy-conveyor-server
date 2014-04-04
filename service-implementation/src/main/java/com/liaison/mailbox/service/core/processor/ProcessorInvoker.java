@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.liaison.mailbox.service.core.MailBoxService;
-import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 
 class ProcessorInvoker implements Runnable {
 	

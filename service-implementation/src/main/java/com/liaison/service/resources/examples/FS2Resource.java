@@ -1,23 +1,34 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.service.resources.examples;
 
 
-import com.liaison.fs2.api.*;
-
-import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
-
-
-import javax.mail.Header;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-
-import javax.mail.internet.MimeMultipart;
 import java.io.InputStream;
 import java.net.URI;
-
 import java.util.HashMap;
 import java.util.Set;
-import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
-import org.codehaus.jettison.json.JSONObject;
+
+import javax.mail.internet.MimeMultipart;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,12 +40,10 @@ import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * Created with IntelliJ IDEA.
@@ -67,7 +76,11 @@ public class FS2Resource {
         }
     }
 
-
+    /**
+     * Rest method retrieve list of files.
+     * 
+     * @return The Response Object
+     */
     @ApiOperation(value="list Files", notes="lists Files returns json list of fs2 file decriptions")
     @GET
     @Produces(MediaType.APPLICATION_JSON) //TODO make return a DTO and patch into swagger.
@@ -111,7 +124,13 @@ public class FS2Resource {
         }
     }
 
-
+    /**
+     * Rest method to retrieve Resource.
+     * 
+     * @param obj
+     *        The JSONObject
+     * @return InputStream Object
+     */
     @ApiOperation(value="fetch Resource", notes="fetches a resource")
     @POST
     @Consumes(MediaType.APPLICATION_JSON) //TODO make return a DTO and patch into swagger.
@@ -139,7 +158,13 @@ public class FS2Resource {
         }
     }
 
-
+    /**
+     * This method will delete resource file.
+     * 
+     * @param obj
+     *        The JSONObject
+     * @return Response Object
+     */
     @ApiOperation(value="delete resource", notes="deletes file, expects {uri:\"/food/bar\"")
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON) //TODO make return a DTO and patch into swagger.
@@ -180,9 +205,13 @@ public class FS2Resource {
                     .build();
         }
     }
-
-
     
+    /**
+     * This method to download a files.
+     * 
+     * @param requestedURI
+     * @return InputStream Object.
+     */
     @ApiOperation(value="download", notes="downloads a file as an octet stream")
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -211,7 +240,13 @@ public class FS2Resource {
 
 
     //TODO refactor f2-* headers to be a dto.
-
+    /**
+     * This method to upload a file.
+     * 
+     * @param headers
+     * @param parts
+     * @return Response Object
+     */ 
     @ApiOperation(value="uploadFile", notes="uploads a file")
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
