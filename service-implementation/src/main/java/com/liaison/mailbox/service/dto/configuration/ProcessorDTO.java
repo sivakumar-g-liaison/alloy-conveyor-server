@@ -260,7 +260,6 @@ public class ProcessorDTO {
 
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
-//			credential.setProcessor(processor);
 			credential.setPguid(MailBoxUtility.getGUID());
 			credentialList.add(credential);
 		}

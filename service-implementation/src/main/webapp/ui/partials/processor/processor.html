@@ -373,9 +373,9 @@
                                     Add certificate to global trust store?
                                 </label>
                                 <br/>
-                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
+                                <input id="mbx-procsr-signed" type="radio" ng-disabled="(!isFileSelected && isEdit)" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
                                
-                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="0" style="margin-left:5px">  No
+                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="(!isFileSelected && isEdit)" ng-model="certificateModal.isGlobalTrustore" value="0" style="margin-left:5px">  No
 
                             </div>
                         </div>
