@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.exception;
+package com.liaison.mailbox.service.rest;
 
 /**
  * This is the gateway for the mailbox configuration services.
@@ -38,8 +38,6 @@ import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddFSMExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
-import com.liaison.mailbox.service.rest.BaseResource;
-import com.liaison.mailbox.service.rest.MailBoxConfigurationResource;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
