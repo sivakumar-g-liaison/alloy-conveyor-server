@@ -130,12 +130,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// creates new mailbox
 			serviceResponse = mailbox.createMailBox(serviceRequest);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("createMailBox");
-			} else {
-				auditFailure("createMailBox");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "createMailBox");
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -191,12 +187,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// updates existing mailbox
 			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("reviseMailBox");
-			} else {
-				auditFailure("reviseMailBox");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "reviseMailBox");
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -245,12 +237,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// deactivates existing mailbox
 			serviceResponse = mailbox.deactivateMailBox(guid);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("deactivateMailBox");
-			} else {
-				auditFailure("deactivateMailBox");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "deactivateMailBox");
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -299,12 +287,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			serviceResponse = mailbox.getMailBox(guid, serviceInstanceId, addConstraint);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("readMailBox");
-			} else {
-				auditFailure("readMailBox");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "readMailBox");
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -315,9 +299,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("readMailBox");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -388,12 +372,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService processor = new ProcessorConfigurationService();
 			serviceResponse = processor.uploadSelfSignedTrustStore();
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("uploadSelfSignedTrustStore");
-			} else {
-				auditFailure("uploadSelfSignedTrustStore");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "uploadSelfSignedTrustStore");
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -404,9 +384,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("uploadSelfSignedTrustStore");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -447,12 +427,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// creates new profile
 			serviceResponse = profile.createProfile(serviceRequest);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("createProfile");
-			} else {
-				auditFailure("createProfile");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "createProfile");
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -496,12 +472,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.getProfiles();
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("readProfiles");
-			} else {
-				auditFailure("readProfiles");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "readProfiles");
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -512,9 +484,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("readProfiles");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -558,12 +530,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("createProcessor");
-			} else {
-				auditFailure("createProcessor");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "createProcessor");
 
 			// populate the response body
 			returnResponse = serviceResponse.constructResponse();
@@ -576,9 +544,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("createProcessor");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -617,12 +585,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// Deactivating processor
 			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("deleteProcessor");
-			} else {
-				auditFailure("deleteProcessor");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "deleteProcessor");
 
 			// Constructing response
 			returnResponse = serviceResponse.constructResponse();
@@ -635,9 +599,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("deleteProcessor");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -673,15 +637,11 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Gets processor details.
 			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
+			
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "getProcessor");
+
 			// constructs response.
-
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("getProcessor");
-			} else {
-				auditFailure("getProcessor");
-			}
-
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -692,9 +652,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("getProcessor");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -740,12 +700,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// updates existing processor
 			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("reviseProcessor");
-			} else {
-				auditFailure("reviseProcessor");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "reviseProcessor");
 
 			// constructs response
 			returnResponse = serviceResponse.constructResponse();
@@ -758,9 +714,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("reviseProcessor");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
@@ -781,6 +737,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
 			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
+		
 		//Audit LOG the Attempt to searchMailBox
 		auditAttempt("searchMailBox");
 
@@ -802,12 +759,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName);
 			serviceResponse.setHitCounter(hitCounter);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("searchMailBox");
-			} else {
-				auditFailure("searchMailBox");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "searchMailBox");
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -818,9 +771,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("searchMailBox");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 
@@ -902,12 +855,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			HTTPServerListenerService service = new HTTPServerListenerService();
 			ServerListenerResponseDTO serviceResponse = service.serverListener(requestString, folder, filename);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("httpServerListener");
-			} else {
-				auditFailure("httpServerListener");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "httpServerListener");
 
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -918,9 +867,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("httpServerListener");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
@@ -964,9 +913,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("testSweeper");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
@@ -1005,9 +954,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("test");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
@@ -1047,9 +996,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("httpServerListener");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
@@ -1081,12 +1030,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.searchProfiles(profileName);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("findProfiles");
-			} else {
-				auditFailure("findProfiles");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "findProfiles");
 
 			returnResponse = serviceResponse.constructResponse();
 
@@ -1098,9 +1043,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// should be throwing out of domain scope and into framework using
 			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("findProfiles");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
@@ -1172,12 +1117,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			serviceResponse = mailbox.getValuesFromPropertiesFile();
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("getjavaPropertyFileValues");
-			} else {
-				auditFailure("getjavaPropertyFileValues");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "getjavaPropertyFileValues");
+			
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -1185,9 +1127,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("getjavaPropertyFileValues");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}

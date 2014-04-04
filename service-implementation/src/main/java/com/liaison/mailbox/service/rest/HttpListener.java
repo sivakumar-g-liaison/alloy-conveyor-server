@@ -155,9 +155,9 @@ public class HttpListener extends BaseResource {
 		{
 			logger.error("Error processing sync message", e);
 			e.printStackTrace();
+			restResponse = Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 			//Audit LOG the failure
 			auditFailure("handleSync");
-			restResponse = Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		return restResponse;
 	}
@@ -223,9 +223,9 @@ public class HttpListener extends BaseResource {
 		{
 			logger.error("Error processing async message", e);
 			e.printStackTrace();
+			restResponse = Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 			//Audit LOG the failure
 			auditFailure("handleAsync");
-			restResponse = Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 		}
 		return restResponse;
 	}

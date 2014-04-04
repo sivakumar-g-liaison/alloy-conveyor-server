@@ -78,11 +78,7 @@ public class MailBoxResource extends BaseResource {
 			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern, shardKey);
 
 			//Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("triggerProfile");
-			} else {
-				auditFailure("triggerProfile");
-			}
+			doAudit(serviceResponse.getResponse(), "triggerProfile");
 			
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
@@ -91,11 +87,10 @@ public class MailBoxResource extends BaseResource {
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
-
-			//Audit LOG the failure
-			auditFailure("triggerProfile");
 			// should be throwing out of domain scope and into framework using above code
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			//Audit LOG the failure
+			auditFailure("triggerProfile");
 		}
 		return returnResponse;
 

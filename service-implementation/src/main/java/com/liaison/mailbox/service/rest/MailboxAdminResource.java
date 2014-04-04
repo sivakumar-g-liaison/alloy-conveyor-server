@@ -48,7 +48,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Path("v1/mailbox/processoradmin")
 @Api(value = "v1/mailbox/processoradmin", description = "Administration of processor services")
-public class MailboxAdminResource extends BaseResource{
+public class MailboxAdminResource extends BaseResource {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
 
@@ -91,12 +91,8 @@ public class MailboxAdminResource extends BaseResource{
 			serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
 			serviceResponse.setHitCounter(hitCounter);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("getExecutingProcessors");
-			} else {
-				auditFailure("getExecutingProcessors");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "getExecutingProcessors");
 
 			returnResponse = serviceResponse.constructResponse();
 
@@ -105,15 +101,15 @@ public class MailboxAdminResource extends BaseResource{
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 			// Audit LOG the failure
 			auditFailure("getExecutingProcessors");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		return returnResponse;
 	}
 
 	/**
-	 * REST method to initiate FSM execution event creation.
+	 * REST method to interrupt the execution of running processor.
 	 * 
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
@@ -147,12 +143,8 @@ public class MailboxAdminResource extends BaseResource{
 			// creates new execution event
 			serviceResponse = processor.interruptRunningProcessor(serviceRequest);
 
-			// Audit LOG
-			if (serviceResponse.getResponse().getStatus() == "success") {
-				auditSuccess("interruptRunningProcessor");
-			} else {
-				auditFailure("interruptRunningProcessor");
-			}
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "interruptRunningProcessor");
 
 			// populate the response body
 			return serviceResponse.constructResponse();

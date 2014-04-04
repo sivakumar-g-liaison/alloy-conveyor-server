@@ -17,6 +17,8 @@ import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dto.ResponseDTO;
 
 public class BaseResource {
 	private static final Logger logger = LogManager.getLogger(BaseResource.class);
@@ -44,6 +46,35 @@ public class BaseResource {
 		
 	}
 	
+	/**
+	 * Audits it based on the response status
+	 *
+	 * @param response
+	 * @param operationName
+	 */
+	public void doAudit(ResponseDTO response, String operationName) {
+
+		if (isSuccess(response)) {
+			auditSuccess(operationName);
+		} else {
+			auditFailure(operationName);
+		}
+	}
+
+	/**
+	 * Checks the response status
+	 *
+	 * @param serviceResponse
+	 * @return true if it is success, false otherwise
+	 */
+	public boolean isSuccess(ResponseDTO serviceResponse) {
+
+		if (Messages.SUCCESS.value().equals(serviceResponse.getStatus())) {
+			return true;
+		}
+
+		return false;
+	}
 	
 }
 
