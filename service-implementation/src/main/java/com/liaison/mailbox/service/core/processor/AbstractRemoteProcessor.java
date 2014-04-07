@@ -1290,4 +1290,35 @@ public abstract class AbstractRemoteProcessor {
 		}
 		return null;
 	}
+	
+	/**
+	 * Method is used to process the response location and create folders if not already exists for SFTP/FTP(S).
+	 * 
+	 * @param filename
+	 *            The source location
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 */
+	protected void processResponseLocation(String fileName) throws URISyntaxException, IOException, 
+			MailBoxServicesException {
+
+		LOGGER.info("Started writing response");
+
+		String responseLocation = getWriteResponseURI();
+		if (MailBoxUtility.isEmpty(responseLocation)) {
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+		}
+
+		File directory = new File(responseLocation);
+		if (!directory.exists()) {
+			Files.createDirectories(directory.toPath());
+		}
+
+		if (MailBoxUtility.isEmpty(fileName)) {
+
+			LOGGER.info("The given URI {} does not exist.", fileName);
+			throw new MailBoxServicesException("The given URI '" + fileName + "' does not exist.");
+		}
+	}
 }

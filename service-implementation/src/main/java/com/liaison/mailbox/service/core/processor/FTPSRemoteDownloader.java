@@ -9,8 +9,9 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -182,10 +183,10 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				if (file.isFile()) {
 					// String remotePath = dirToList + "/" + currentFileName;
 					String localDir = localFileDir + File.separatorChar + currentFileName;
-					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					ftpClient.changeDirectory(dirToList);
-					ftpClient.getFile(currentFileName, stream);
-					writeSFTPSResponseToMailBox(stream, localDir);
+					processResponseLocation(localDir);
+					ftpClient.getFile(currentFileName, new BufferedOutputStream(new FileOutputStream(localDir)));
+					
 
 				} else {
 

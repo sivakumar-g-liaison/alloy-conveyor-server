@@ -944,8 +944,15 @@ var rest = myApp.controller(
                     width: "20%",
                     displayName: "Type*",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/>'
-                }, {
+                    cellTemplate: '<!--<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/>-->'+
+                    '<div ng-switch on = row.getProperty(\'credentialType\')>'+
+                    '<div ng-switch-when="Login Credential"><div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/></div>'+
+                    '<div ng-switch-when="SSH_KEYPAIR"><div ng-switch on = row.getProperty(\'idpType\')>\n\
+                    <div ng-switch-when="PRIVATE">SSH Private Key</div><div ng-switch-when="PUBLIC">SSH Public Key</div></div></div>'+
+                    '<div ng-switch-when="TRUSTSTORE_CERT">TrustStore Certificate</div>'+
+                    '<div ng-switch-default><div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/></div>'+
+                    '</div>'
+               }, {
                     field: "userId",
                     width: "20%",
                     displayName: "UserId",
@@ -973,7 +980,7 @@ var rest = myApp.controller(
                     displayName: "IdpURI",
                     enableCellEdit: false
                 }, {
-                    field: "idpTyPe",
+                    field: "idpType",
                     width: "0%",
                     displayName: "IdpType",
                     enableCellEdit: false
@@ -2268,7 +2275,6 @@ var rest = myApp.controller(
                     $scope.certificateModal.certificateURI = $scope.files[0].name;
                     $scope.isFileSelected = true;
                     $scope.progressVisible = false;
-                    $scope.uploadFile();
                 });
             };
             $scope.uploadFile = function () {
@@ -2303,6 +2309,7 @@ var rest = myApp.controller(
                     var arr = resp['dataTransferObject']['keyGroupMemberships'];
                     pkGuid = arr[0]['keyBase']['pguid'];
                     // Public Key guid 
+                    //var pkGuid = 'testdata';
                     pkGuid = pkGuid.toString();
                     if ($scope.processor.isSelfSigned === "0" || $scope.processor.isSelfSigned == 0) {
                         console.log('creating self signed trust store');

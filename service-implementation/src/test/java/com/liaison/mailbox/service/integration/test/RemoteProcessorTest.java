@@ -158,7 +158,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		String test = "Testing write response to mailbox.";
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
@@ -186,7 +186,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		String test = "Testing write response to mailbox.";
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
@@ -214,7 +214,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		String test = "Testing write file response to mailbox.";
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
@@ -244,7 +244,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		String test = "Testing write file response to mailbox.";
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
@@ -272,7 +272,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		String test = "Testing write file response to mailbox.";
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);

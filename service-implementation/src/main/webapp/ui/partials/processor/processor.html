@@ -352,30 +352,32 @@
                    </div>
                    <div class="row" ng-show="!disableCertificates">
 
-                        <div class="col-sm-5 col-md-5 adjustPaddingRight">
+                        <div class="col-sm-4 col-md-4 adjustPaddingRight">
                             <label>
                                 Certificate 
                             </label>
                             <input id="mbx-procsr-certificatePath" type="text" ng-model="certificateModal.certificateURI" class="form-control" ng-disabled="true">
                         </div>
-                        <div class="col-sm-1 col-md-1 removePaddingLeft">
+                        <div class="col-sm-1 col-md-1 adjustPaddingRight removePaddingLeft">
                             <br>
                             <div class="fileUpload btn btn-primary" ng-disabled="disableCertificates">
-                                <span>Add</span>
+                                <span>Browse</span>
                                 <input id="mbx-procsr-certificatebrowse" ng-disabled="disableCertificates" type="file" class="upload" ng-model-instant ng-click="resetFiles()" onchange="angular.element(this).scope().setFiles(this)" /> 
 						    </div>
-                        </div><br>
-
-
+                        </div>
+                        <div class="col-sm-1 col-md-1">
+                            <button id="mbx-procsr-certificateupload" ng-disabled="!isFileSelected" class="btn btn-primary" style="margin-top:25px;margin-left:-31px" ng-click="uploadFile()">Upload</button>
+                        </div>
+                        <br>
                         <div class="col-sm-6 col-md-6">
                             <div class="form-group">
                                 <label>
                                     Add certificate to global trust store?
                                 </label>
                                 <br/>
-                                <input id="mbx-procsr-signed" type="radio" ng-disabled="(!isFileSelected && isEdit)" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
-                               
-                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="(!isFileSelected && isEdit)" ng-model="certificateModal.isGlobalTrustore" value="0" style="margin-left:5px">  No
+                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
+                              
+                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="0" style="margin-left:5px">  No
 
                             </div>
                         </div>

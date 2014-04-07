@@ -122,7 +122,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 					}
 
 					request = (HTTPRequest) getClientWithInjectedConfiguration();
-					responseStream = new ByteArrayOutputStream();
+					responseStream = new ByteArrayOutputStream(4096);
 					request.setOutputStream(responseStream);
 					
 					content = FileUtils.readFileToString(entry, "UTF-8");

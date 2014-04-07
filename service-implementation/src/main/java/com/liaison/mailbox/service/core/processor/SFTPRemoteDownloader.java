@@ -9,8 +9,9 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -152,6 +153,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				}
 				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 				
+				
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + root.getName();
@@ -167,10 +169,9 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 					// String remotePath = dirToList + "/" + root.getName();
 					String localDir = localFileDir + File.separatorChar + root.getName();
-					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					sftpRequest.changeDirectory(dirToList);
-					sftpRequest.getFile(root.getName(), stream);
-					writeSFTPSResponseToMailBox(stream, localDir);
+					processResponseLocation(localDir);
+					sftpRequest.getFile(root.getName(), new BufferedOutputStream(new FileOutputStream(localDir)));
 				}
 			}
 		}

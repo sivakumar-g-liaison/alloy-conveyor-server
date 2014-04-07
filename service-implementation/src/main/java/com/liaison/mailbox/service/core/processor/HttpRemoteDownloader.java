@@ -103,7 +103,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			KeyStoreException, NoSuchAlgorithmException, CertificateException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException {
 
 		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
-		ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+		ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096);
 		request.setOutputStream(responseStream);
 		
 		// Boolean to determine whether to archive files in processed folder or error folder.
