@@ -194,6 +194,9 @@ dependencies {
             "org.codehaus.cargo:cargo-ant:$cargoVersion"
     // ************************************* end cargo *********************************************
     jdbc "com.oracle:ojdbc6:${oracleVersion}"
+	
+	//Dependency for ACL integration 
+	compile 'com.liaison.commons.acl:acl-commons-lib:2.0.+'
 
 }
 

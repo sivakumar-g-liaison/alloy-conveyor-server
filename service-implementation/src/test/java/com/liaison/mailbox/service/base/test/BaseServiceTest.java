@@ -23,7 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 
-import com.liaison.commons.exceptions.LiaisonException;
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;

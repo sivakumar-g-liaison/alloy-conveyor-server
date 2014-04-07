@@ -89,13 +89,17 @@
         </servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.liaison.mailbox.service;com.wordnik.swagger.jersey.listing</param-value>
-              
+            <param-value>com.liaison.mailbox.service;com.wordnik.swagger.jersey.listing;com.liaison.service.resources.acl</param-value>              
 
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
             <param-value>true</param-value>
+        </init-param>
+        <!-- ACL -->
+          <init-param>            
+            <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
+            <param-value>com.liaison.commons.acl.resource.filter.ValidationFilterFactory</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

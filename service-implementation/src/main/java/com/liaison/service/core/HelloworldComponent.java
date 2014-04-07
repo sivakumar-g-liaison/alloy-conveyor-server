@@ -26,6 +26,9 @@ import oracle.ucp.UniversalConnectionPoolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.acl.util.ACLUtil;
+import com.liaison.commons.acl.util.SignatureVerifier;
+import com.liaison.commons.acl.util.example.ExampleBase64EncodedSignatureVerifier;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.netflix.karyon.spi.Component;
@@ -44,6 +47,10 @@ public class HelloworldComponent {
 		  DAOUtil.init(); // TODO This does the work of loading all JAP entity files. We
 		      // should change to allow the query string to be passed.
 		  UUIDGen.init();
+		  
+		//Set ACL Filter Signature Verifier
+  		SignatureVerifier aclSignatureVerifier = new ExampleBase64EncodedSignatureVerifier();
+  		ACLUtil.setSignatureVerifier(aclSignatureVerifier);
 		  
 		        // Statements added for deprecating the Initialization Servlet defined in web.xml  
 		logger.info("HelloworldComponent.initialize()");

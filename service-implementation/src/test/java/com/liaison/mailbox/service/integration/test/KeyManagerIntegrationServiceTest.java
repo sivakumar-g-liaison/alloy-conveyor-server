@@ -141,7 +141,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	
 	@Test
 	public void testFetchTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-			JAXBException, IOException, com.liaison.commons.exceptions.LiaisonException {
+			JAXBException, IOException, com.liaison.commons.exception.LiaisonException {
 
 		// Get the mailbox
 		String url = "http://10.0.6.101:8989/key-management-1.0.1/fetch/truststore/current/75D5112D0A0006340665134D334351D5";
@@ -154,7 +154,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	
 	//@Test
 		public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exceptions.LiaisonException {
+				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
 
 			String url = "https://10.0.24.76:19443/g2mailboxservice/rest/v1/mailbox/profile";
 			
@@ -184,7 +184,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		}
 		
 		@Test
-		public void testSFTPWithSSHKeypair() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exceptions.LiaisonException {
+		public void testSFTPWithSSHKeypair() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exception.LiaisonException {
 			//InputStream is = null;
 			byte[] privateKeyBytes = null;
 			
@@ -221,7 +221,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		}
 		
 		@Test
-		public void testSFTPWithSSHKeypairDownloadedFromKeyManager() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exceptions.LiaisonException {
+		public void testSFTPWithSSHKeypairDownloadedFromKeyManager() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exception.LiaisonException {
 			//InputStream is = null;
 			byte[] privateKeyBytes = null;
 			

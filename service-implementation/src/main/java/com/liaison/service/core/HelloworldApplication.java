@@ -10,9 +10,9 @@
 
 package com.liaison.service.core;
 
-import com.netflix.karyon.spi.Application;
-
 import javax.annotation.PostConstruct;
+
+import com.netflix.karyon.spi.Application;
 
 
 @Application

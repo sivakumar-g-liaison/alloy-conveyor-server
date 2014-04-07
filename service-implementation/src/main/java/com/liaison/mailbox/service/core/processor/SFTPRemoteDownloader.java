@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
-import com.liaison.commons.exceptions.LiaisonException;
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;

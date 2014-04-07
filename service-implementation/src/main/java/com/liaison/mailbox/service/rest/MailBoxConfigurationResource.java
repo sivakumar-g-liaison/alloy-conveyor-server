@@ -36,6 +36,8 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
+import com.liaison.commons.acl.annotation.ResourceType;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
@@ -106,6 +108,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiOperation(value = "Create Enterprise", notes = "create a new mailbox", position = 1)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "createMailBox")
 	public Response createMailBox(@Context HttpServletRequest request) {
 
 		// Audit LOG the Attempt to create a mailbox
@@ -163,6 +166,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "reviseMailBox")
 	public Response reviseMailBox(@Context HttpServletRequest request, 
 			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
 
@@ -220,6 +224,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "deactivateMailBox")
 	public Response deactivateMailBox(
 			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
 
@@ -270,6 +275,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "readMailBox")
 	public Response readMailBox(@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
 			@QueryParam(value = "serviceInstanceId") String serviceInstanceId,
 			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint) {
@@ -357,6 +363,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/uploadSelfSigned")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "uploadSelfSignedTrustStore")
 	public Response uploadSelfSignedTrustStore() {
 
 		// Audit LOG the Attempt to uploadSelfSignedTrustStore
@@ -404,6 +411,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "createProfile")
 	public Response createProfile(@Context HttpServletRequest request) {
 
 		// Audit LOG the Attempt to createProfile
@@ -458,6 +466,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "readProfiles")
 	public Response readProfiles() {
 
 		// Audit LOG the Attempt to readProfiles
@@ -507,6 +516,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/{id}/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "createProcessor")
 	public Response createProcessor(@Context HttpServletRequest request,
 			@PathParam(value = "id") @ApiParam(name="id", required=true, value="processor id") String guid) {
 
@@ -564,9 +574,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@DELETE
 	@ApiOperation(value = "Remove Processor", notes = "remove processor details", position = 9)
-	@Path("/{mailboxid}/processor/{processorid}")
+	@Path("/{mailboxid}/processor/{processorid}")	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "deleteProcessor")
 	public Response deleteProcessor(
 			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid, 
 			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id") String guid) {
@@ -621,6 +632,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "getProcessor")
 	public Response getProcessor(
 			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid, 
 			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id")  String guid) {
@@ -676,6 +688,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "reviseProcessor")
 	public Response reviseProcessor(@Context HttpServletRequest request, 
 			@PathParam(value = "mailboxid")  @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid,
 			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id") String guid) {
@@ -735,6 +748,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiOperation(value = "Search Enterprise", notes = "search a mailbox using given query parameters", position = 12)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "searchMailBox")
 	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
 			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
 		
@@ -788,6 +802,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiOperation(value = "List File", notes = "return list of files", position = 13)
 	@Path("/listFile")
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "getFileList")
 	public Response getFileList() {
 
 		// Audit LOG the Attempt to getFileList
@@ -837,6 +852,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiOperation(value = "Server Listener", notes = "listener for http server", position = 14)
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "httpServerListener")
 	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
 			@HeaderParam(MailBoxConstants.FILE_NAME_HEADER) String filename) {
 
@@ -880,7 +896,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @param request
 	 *        HttpServletRequest, injected with context annotation
 	 * @return The Response Object.
-	 */
+	 *//*
 	@POST
 	@ApiOperation(value = "Sweeper", notes = "directory sweeper", position = 15)
 	@Path("/sweeper")
@@ -920,13 +936,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 	}
     
-	/**
+	*//**
 	 * Rest method will test directory sweeper.
 	 * 
 	 * @param request
 	 *        HttpServletRequest, injected with context annotation
 	 * @return The Response Object.
-	 */
+	 *//*
 	@POST
 	@ApiOperation(value = "Test", notes = "test response", position = 16)
 	@Path("/test")
@@ -959,7 +975,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			auditFailure("test");
 		}
 		return returnResponse;
-	}
+	}*/
     
 	/**
 	 * Rest method to retrieve the Authorization header.
@@ -973,6 +989,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/basicauth")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "basicauth")
 	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam("Authorization") String auth) {
 
 		// Audit LOG the Attempt to httpServerListener
@@ -1016,6 +1033,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/findprofile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "findProfiles")
 	public Response findProfiles(@QueryParam(value = "name") String profileName) {
 
 		// Audit LOG the Attempt to findProfiles
@@ -1059,6 +1077,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiOperation(value = "List Certificates", notes = "returns list of certificates", position = 19)
 	@Path("/listCertificates")
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "getCertificatesList")
 	public Response getCertificatesList() {
 
 		// Audit LOG the Attempt to getCertificatesList
@@ -1103,6 +1122,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiOperation(value = "Property File", notes = "returns property file values", position = 20)
 	@Path("/getPropertyFileValues")
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "getPropertyFileValues")
 	public Response getPropertyFileValues() {
 
 		// Audit LOG the Attempt to getjavaPropertyFileValues

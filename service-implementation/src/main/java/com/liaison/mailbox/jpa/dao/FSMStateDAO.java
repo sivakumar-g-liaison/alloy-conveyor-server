@@ -10,8 +10,8 @@
 
 package com.liaison.mailbox.jpa.dao;
 
-import java.util.List;
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
