@@ -111,8 +111,8 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		}
 
 		if (sftpRequest.openChannel()) {
-
-			String remotePath = getWriteResponseURI();
+			
+		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtility.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI {} does not exist.", remotePath);
 				throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
@@ -132,6 +132,8 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 		}
+		// remove the private key once connection established successfully
+		removePrivateKey();		
 		sftpRequest.disconnect();
 
 	}

@@ -103,7 +103,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		sftpRequest.connect();
 
 		if (sftpRequest.openChannel()) {
-
+			
 			String path = getPayloadURI();
 			if (MailBoxUtility.isEmpty(path)) {
 				LOGGER.info("The given URI {} does not exist.", path);
@@ -117,6 +117,8 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 			downloadDirectory(sftpRequest, path, remotePath);
 		}
+		// remove the private key once connection established successfully
+		removePrivateKey();
 		sftpRequest.disconnect();
 	}
 

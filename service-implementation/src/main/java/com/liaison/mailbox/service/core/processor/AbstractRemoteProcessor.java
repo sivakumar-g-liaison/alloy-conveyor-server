@@ -1282,8 +1282,13 @@ public abstract class AbstractRemoteProcessor {
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (credential.getCredsType() == null) {
 					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
-				} else if (foundCredentailType.equals(type)){
-					return credential;
+				} else if (foundCredentailType.equals(type)) {
+					
+					if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && credential.getCredsIdpType().equalsIgnoreCase("PRIVATE")) {
+						return credential;
+					}
+					if (!credential.getCredsIdpType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR))
+						return credential;
 				}
 			}
 		}
@@ -1319,5 +1324,23 @@ public abstract class AbstractRemoteProcessor {
 			LOGGER.info("The given URI {} does not exist.", fileName);
 			throw new MailBoxServicesException("The given URI '" + fileName + "' does not exist.");
 		}
+	}
+	
+	/**
+	 * Method used to remove the privatekey downloaded from keymanager once successfully authenticated using key
+	 * 
+	 * @param fileLocation
+	 * @throws IOException
+	 * @throws SymmetricAlgorithmException 
+	 * @throws MailBoxServicesException 
+	 */
+	protected void removePrivateKey() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
+		
+		LOGGER.info("Going to remove privateKey downloaded from keyManager");
+		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
+		String fileLocation = MailBoxUtility.getEnvironmentProperties().getString("privateKeyPath")+sshKeyPairCredential.getCredsUri()+".txt";
+		File privateKeyFile = new File(fileLocation);
+		if (privateKeyFile.exists()) privateKeyFile.delete();
+		LOGGER.info("privateKey downloaded from keyManager removed from local file system");
 	}
 }
