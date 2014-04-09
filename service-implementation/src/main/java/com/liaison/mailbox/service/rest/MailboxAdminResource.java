@@ -11,7 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 /**
- * This is the gateway for the mailbox configuration services.
+ * This is the gateway processors state monitoring and interrupt.
  * 
  * @author santoshc
  */
@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddFSMExecutionEventRequestDTO;
@@ -75,6 +76,7 @@ public class MailboxAdminResource extends BaseResource {
 	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21)
 	@Path("/processor/execution")
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "getExecutingProcessors")
 	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") String status,
 			@QueryParam(value = "frmDate") String frmDate, @QueryParam(value = "toDate") String toDate, @QueryParam(value = "hitCounter") String hitCounter) {
 
@@ -120,6 +122,7 @@ public class MailboxAdminResource extends BaseResource {
 	@Path("/processor/execution")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "interruptRunningProcessor")
 	public Response interruptRunningProcessor(@Context HttpServletRequest request) {
 
 		// Audit LOG the Attempt to interruptRunningProcessor

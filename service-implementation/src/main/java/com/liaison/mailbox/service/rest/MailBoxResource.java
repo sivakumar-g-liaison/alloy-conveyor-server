@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -62,6 +63,7 @@ public class MailBoxResource extends BaseResource {
 	@ApiOperation(value = "Trigger profile", notes = "trigger a profile", position = 23)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@AccessDescriptor(accessMethod = "triggerProfile")
 	public Response triggerProfile(@QueryParam(value = "name") String profileName,
 			@QueryParam(value = "excludeMailbox") String mailboxNamePattern,
 			@QueryParam(value = "shardKey") String shardKey) {
