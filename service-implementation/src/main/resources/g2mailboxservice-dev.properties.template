@@ -100,3 +100,7 @@ fsmEventCheckIntervalInSeconds=86400
 #ssh key implementation - privatekey file path
 privateKeyPath = D:\\doc\\sshprivatekey\\
 
+#for ACL filter
+liaison.acl.filter.skipACLFilter=true
+liaison.acl.filter.skipACLSignatureCheck=true
+
