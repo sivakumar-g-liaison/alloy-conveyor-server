@@ -27,6 +27,13 @@ import com.liaison.mailbox.service.util.HornetQJMSUtil;
 
 public class HornetQMessageListnerTest {
      
+	/**
+	 * Method construts ConfigureJNDIDTO.
+	 * 
+	 * @throws NamingException
+	 * @throws JMSException
+	 * @throws Exception
+	 */
 	 public void postToQueue() throws NamingException, JMSException,Exception{
 		 
 		 HornetQJMSUtil util = new HornetQJMSUtil();
@@ -50,7 +57,11 @@ public class HornetQMessageListnerTest {
            System.out.println("Done posting");		 
 	 }
      
-     
+     /**
+      * Method to test Thread.
+      * 
+      * @throws InterruptedException
+      */
 	 public void testThreading() throws InterruptedException {
 		 
     	 MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();

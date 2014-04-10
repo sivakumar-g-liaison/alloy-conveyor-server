@@ -1128,6 +1128,8 @@ var rest = myApp.controller(
                 if (blockuiFlag === true) {
                     block.blockUI();
                 }
+				
+				$scope.formAddPrcsr.$setPristine();
                 $scope.loadOrigin();
                 //To notify passwordDirective to clear the password and error message
                 $scope.doSend();
@@ -1765,6 +1767,7 @@ var rest = myApp.controller(
             	//To notify passwordDirective to clear the password and error message
                 $scope.doSend();
                 $scope.saveProcessor();
+                $scope.formAddPrcsr.$setPristine();
                
             };
             $scope.saveProcessor = function () {

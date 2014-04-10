@@ -33,7 +33,16 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	public ProcessorConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-
+    
+	/**
+	 * Fetches all the Processor from PROCESSOR database table by profileName and mailbox name pattern.
+	 * 
+	 * @param profileName
+	 *            The profile name.
+	 * @param mbxNamePattern
+	 *            The MailBox name pattern to exclude
+	 * @return The list of processors.
+	 */
 	@Override
 	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey) {
 
@@ -71,6 +80,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	}
 	
+	/**
+	 * Fetches all the Processor PROCESSOR database table by processor pguid.
+	 * 
+	 * @param processorId
+	 *            The processor unique id.
+	  * @return a processor.
+	 */
 	@Override
 	public Processor findByProcessorId(String processorId) {
 

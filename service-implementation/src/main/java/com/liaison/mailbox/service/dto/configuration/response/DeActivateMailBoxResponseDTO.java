@@ -46,7 +46,13 @@ public class DeActivateMailBoxResponseDTO implements ResponseBuilder {
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
-
+    
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws Exception
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws Exception {
 		String responseBody = MailBoxUtility.marshalToJSON(this);

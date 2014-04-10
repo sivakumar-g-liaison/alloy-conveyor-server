@@ -27,7 +27,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	public MailBoxConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-
+    
+	
 	@Override
 	public MailBox findActiveMailBox(String guid) {
 
@@ -77,7 +78,14 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		return entityManager.createNamedQuery(INACTIVATE_MAILBOX).setParameter(PGUID, guid).executeUpdate();
 	}
-
+    
+	/**
+	 * Fetches all MailBox from  MAILBOX database table by given mailbox name and profile name.
+	 * 
+	 * @param mbxName
+	 * @param profName
+	 * @return list of mailbox
+	 */
 	@Override
 	public Set<MailBox> find(String mbxName, String profName) {
 
@@ -104,7 +112,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return mailBoxes;
 	}
-
+    
+	/**
+	 * Fetches all  MailBox from  MAILBOX database table by given mailbox name.
+	 * 
+	 * @param mbxName
+	 * @return list of mailbox
+	 */
 	@Override
 	public Set<MailBox> findByName(String mbxName) {
 

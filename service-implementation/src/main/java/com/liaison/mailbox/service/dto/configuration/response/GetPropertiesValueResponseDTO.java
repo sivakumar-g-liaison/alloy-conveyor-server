@@ -46,7 +46,13 @@ public class GetPropertiesValueResponseDTO implements ResponseBuilder {
 	public void setProperties(PropertiesFileDTO properties) {
 		this.properties = properties;
 	}
-
+    
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws Exception
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws Exception {
 

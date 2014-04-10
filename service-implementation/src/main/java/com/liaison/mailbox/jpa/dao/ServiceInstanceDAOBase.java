@@ -47,6 +47,12 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstanceId> im
 		return null;
 	}*/
 	
+	/**
+	 * Fetches ServiceInstanceId from SERVICE_INSTANCE database table by given servInsId.
+	 * 
+	 * @param servInsId
+	 * @return ServiceInstanceId
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public ServiceInstanceId findByName(String servInsId) {

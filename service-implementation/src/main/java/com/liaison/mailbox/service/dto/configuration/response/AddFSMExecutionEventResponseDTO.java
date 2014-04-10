@@ -29,6 +29,12 @@ public class AddFSMExecutionEventResponseDTO implements ResponseBuilder {
 		this.response = response;
 	}
 	
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws Exception
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws Exception {
 		String responseBody = MailBoxUtility.marshalToJSON(this);

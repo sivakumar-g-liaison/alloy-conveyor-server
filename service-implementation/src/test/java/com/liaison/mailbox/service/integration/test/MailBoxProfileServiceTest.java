@@ -50,7 +50,19 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		super.initialSetUp();
 		logger = LoggerFactory.getLogger(MailBoxProfileServiceTest.class);
 	}
-
+    
+	/**
+	 * Method to test Profile.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateProfile() throws JsonGenerationException, JsonMappingException, JsonParseException,
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
@@ -58,7 +70,19 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 	}
-
+    
+	/**
+	 * Method to test profile with profile name as null.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateProfile_WithNullasProfileName() throws JsonGenerationException, JsonMappingException,
 			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
@@ -66,7 +90,19 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = addProfile(null);
 		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
 	}
-
+    
+	/**
+	 * Method to test profile with duplicate data. 
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateProfile_WithDuplicates() throws JsonGenerationException, JsonMappingException, JsonParseException,
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
@@ -75,7 +111,19 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO dupProfileResponseDTO = addProfile("OnceIn15Mins");
 		Assert.assertEquals(FAILURE, dupProfileResponseDTO.getResponse().getStatus());
 	}
-
+    
+	/**
+	 * Method to test profile with profile name as empty.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateProfile_WithProfileNameEmpty() throws JsonGenerationException, JsonMappingException,
 			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
@@ -83,7 +131,19 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = addProfile("");
 		Assert.assertEquals(FAILURE, profileResponseDTO.getResponse().getStatus());
 	}
-
+    
+	/**
+	 * Method to test profile with invalid profile name.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateProfile_WithProfileNameAsSpecialCharacter() throws JsonGenerationException, JsonMappingException,
 			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
@@ -91,7 +151,21 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = addProfile(System.nanoTime() + "#$%^%&@");
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 	}
-
+    
+	/**
+	 * Method to constructs profile.
+	 * 
+	 * @param profileName
+	 * @return AddProfileResponseDTO
+	 * @throws JAXBException
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws LiaisonException
+	 * @throws JsonParseException
+	 */
 	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 

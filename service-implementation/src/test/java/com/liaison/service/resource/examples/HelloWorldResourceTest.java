@@ -7,7 +7,7 @@ public class HelloWorldResourceTest {
     private static final long sleepTimeout = 1000;
     private static final String helloEndPoint  = "/hello-world/rest/v1/hello/to/me";
 
-  
+        /**     * Method to test response.     *      * @throws Exception     */
     @Test
     public void testHelloWorld() throws Exception {
     	
@@ -18,7 +18,7 @@ public class HelloWorldResourceTest {
     	
     }    
    
-    
+    /**     * Method to test ping with urlpage and client.     *      * @param client     * @param urlPage     * @param retries     * @return HttpResponse     * @throws Exception     */
     protected HttpResponse testPing(HttpClient client, HttpGet urlPage, int retries) throws Exception {
     	if (retries < 0) {
             throw new Exception("Failed to connect. Retries exceeded.");

@@ -51,7 +51,13 @@ public class ReviseProcessorResponseDTO implements ResponseBuilder {
 	public void setProcessor(ProcessorResponseDTO processor) {
 		this.processor = processor;
 	}
-
+    
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws Exception
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws Exception {
 

@@ -26,7 +26,13 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 	public ProfileConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-
+    
+	/**
+	 * Fetches  ScheduleProfilesRef from SCHED_PROFILE database table by given profileName.
+	 * 
+	 * @param profileName.
+	 * @return ScheduleProfilesRef
+	 */
 	@Override
 	public ScheduleProfilesRef findProfileByName(String profileName) {
 
@@ -50,6 +56,12 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 		return null;
 	}
 	
+	/**
+	 * Fetches all ScheduleProfilesRef from SCHED_PROFILE database table by given profileName.
+	 * 
+	 * @param profileName.
+	 * @return The list of ScheduleProfilesRef
+	 */
 	@Override
 	public List <ScheduleProfilesRef> findProfilesByName(String profileName) {
 		

@@ -10,9 +10,14 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+import java.io.IOException;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
@@ -44,6 +49,12 @@ public class AddProcessorToMailboxResponseDTO implements ResponseBuilder {
 		this.processor = processor;
 	}
 	
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws Exception
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws Exception {
 

@@ -26,7 +26,11 @@ public class FS2ResourceTest {
     private static final String fs2EndPoint  = "/hello-world/#/fs2";
 
    
-    
+    /**
+     * Method to test fs2URL.
+     * 
+     * @throws Exception
+     */
     @Test
     public void testFS2() throws Exception {
     	
@@ -37,6 +41,15 @@ public class FS2ResourceTest {
     	
     }
     
+    /**
+     * Method to test Ping operation with urlpage.
+     * 
+     * @param client
+     * @param urlPage
+     * @param retries
+     * @return HttpResponse
+     * @throws Exception
+     */
     protected HttpResponse testPing(HttpClient client, HttpGet urlPage, int retries) throws Exception {
     	if (retries < 0) {
             throw new Exception("Failed to connect. Retries exceeded.");

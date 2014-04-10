@@ -44,8 +44,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sun.misc.BASE64Decoder;
-
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
@@ -53,7 +51,6 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.util.HTTPClientUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
 /**
  * Test class to test mailbox configuration service.
  * 
@@ -74,8 +71,17 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	public void setUp() throws Exception {
 		logger = LoggerFactory.getLogger(KeyManagerIntegrationServiceTest.class);
 	}
-
-	//@Test
+    
+	/**
+	 * Method constructs TrustStore.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	public void testCreateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
@@ -98,6 +104,16 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
         System.out.println(response.getStatusLine());
 	}
 	
+	/**
+	 * Method to test upload public key with valid data.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	@Test
 	public void testUploadPublicKey() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
@@ -121,7 +137,16 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
         System.out.println(response.getStatusLine());
 	}
 	
-	//@Test
+	/**
+	 * Method to test upload trustStore with valid data.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	public void testUpdateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
@@ -139,6 +164,17 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
         System.out.println(response.getStatusLine());
 	}
 	
+	/**
+	 * Method to test fetch trustStore with valid data.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 */
 	@Test
 	public void testFetchTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, com.liaison.commons.exception.LiaisonException {
@@ -152,7 +188,20 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		System.out.println(jsonResponse);
 	}
 	
-	//@Test
+		/**
+		 * Method to test httpsTrustStore.
+		 * 
+		 * @throws LiaisonException
+		 * @throws JSONException
+		 * @throws JsonParseException
+		 * @throws JsonMappingException
+		 * @throws JAXBException
+		 * @throws IOException
+		 * @throws KeyStoreException
+		 * @throws NoSuchAlgorithmException
+		 * @throws CertificateException
+		 * @throws com.liaison.commons.exception.LiaisonException
+		 */
 		public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
 
@@ -183,6 +232,15 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			System.out.println(jsonResponse);
 		}
 		
+		/**
+		 * Method to test SFTP With SSH Keypair.
+		 * 
+		 * @throws IOException
+		 * @throws LiaisonException
+		 * @throws JSONException
+		 * @throws LiaisonException
+		 * @throws com.liaison.commons.exception.LiaisonException
+		 */
 		@Test
 		public void testSFTPWithSSHKeypair() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exception.LiaisonException {
 			//InputStream is = null;
@@ -220,6 +278,15 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			
 		}
 		
+		/**
+		 * Method to test SFTP with SSH key pair downloaded from keymanager.
+		 * 
+		 * @throws IOException
+		 * @throws LiaisonException
+		 * @throws JSONException
+		 * @throws LiaisonException
+		 * @throws com.liaison.commons.exception.LiaisonException
+		 */
 		@Test
 		public void testSFTPWithSSHKeypairDownloadedFromKeyManager() throws IOException, LiaisonException, JSONException, LiaisonException, com.liaison.commons.exception.LiaisonException {
 			//InputStream is = null;

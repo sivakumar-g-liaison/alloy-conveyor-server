@@ -44,6 +44,12 @@ public class GetTrustStoreResponseDTO implements ResponseBuilder {
 		this.response = response;
 	}
 	
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws Exception
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws Exception {
 

@@ -38,7 +38,12 @@ public class GenericValidatorTest {
 	public void setUp() throws Exception {
 		validator = new GenericValidator();
 	}
-
+    
+	/**
+	 * Method to validate mailbox with wrong status.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_WrongStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -47,7 +52,12 @@ public class GenericValidatorTest {
 		dto.setStatus("sss");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate mailbox without name.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_WithoutName_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -55,7 +65,12 @@ public class GenericValidatorTest {
 		dto.setStatus("sss");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate mailbox without status.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_WithoutStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -63,12 +78,22 @@ public class GenericValidatorTest {
 		dto.setName("Test");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate mailbox with null.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
 		validator.validate(null);
 	}
-
+    
+	/**
+	 * Method to validate mailbox.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test
 	public void testValidateMailBox() throws MailBoxConfigurationServicesException {
 
@@ -78,7 +103,12 @@ public class GenericValidatorTest {
 
 		Assert.assertEquals(true, validator.validate(dto));
 	}
-
+    
+	/**
+	 * Method to test profile.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	public void testProfile() throws MailBoxConfigurationServicesException {
 
 		ProfileDTO profile = new ProfileDTO();
@@ -86,19 +116,33 @@ public class GenericValidatorTest {
 
 		Assert.assertEquals(true, validator.validate(profile));
 	}
-
+    
+	/**
+	 * Method to test profile without name.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testProfile_WithoutName_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProfileDTO profile = new ProfileDTO();
 		validator.validate(profile);
 	}
-
+    
+	/**
+	 * Method to test profile with null.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testProfile_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
 		validator.validate(null);
 	}
-
+    /**
+     * Method to validate processor.
+     *  
+     * @throws MailBoxConfigurationServicesException
+     */
 	@Test
 	public void testValidateProcessor() throws MailBoxConfigurationServicesException {
 
@@ -109,7 +153,12 @@ public class GenericValidatorTest {
 		dto.setLinkedMailboxId("DUMMYID");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate processor with empty.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithEmptySpace_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -119,7 +168,12 @@ public class GenericValidatorTest {
 		// dto.setLinkedProfileId(" ");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate processor with invalid value.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithInvalidValue_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -129,7 +183,12 @@ public class GenericValidatorTest {
 		// dto.setLinkedProfileId("ASDERER1425SDSD");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate processor without status.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithoutStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -137,7 +196,12 @@ public class GenericValidatorTest {
 		dto.setType("SWEEPER");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate processor without type.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithoutType_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
@@ -145,7 +209,12 @@ public class GenericValidatorTest {
 		dto.setStatus("ACTIVE");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate Folder.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test
 	public void testValidateFolder() throws MailBoxConfigurationServicesException {
 
@@ -154,7 +223,12 @@ public class GenericValidatorTest {
 		dto.setFolderURI("/SAMPLE");
 		validator.validate(dto);
 	}
-
+    
+	/**
+	 * Method to validate folder with invalid value.
+	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testValidateFolder_WithInvalidValue_ShouldThrowException() throws MailBoxConfigurationServicesException {
 

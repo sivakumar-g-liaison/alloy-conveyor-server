@@ -25,7 +25,14 @@ public class MailboxServiceInstanceDAOBase extends GenericDAOBase<MailboxService
 	public MailboxServiceInstanceDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-
+    
+	/**
+	 * Fetches  MailboxServiceInstance from  MAILBOX_SVC_INSTANCE database table.
+	 * 
+	 * @param mailboxGuid
+	 * @param serviceInstanceGuid
+	 * @return MailboxServiceInstance
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public MailboxServiceInstance findByGuids(String mailboxGuid, String serviceInstanceGuid) {

@@ -63,11 +63,49 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	public static final String BY_VALUE = "by_value";
 	public static final String FROM_DATE = "from_date";
 	public static final String TO_DATE = "to_date";
-
+    
+	/**
+	 * Find FSMState by given status value.
+	 * 
+	 * @param state
+	 * @return FSMState
+	 */
 	public FSMState find(String state);
+	
+	/**
+	 * Find list of FSMStateValue by given time.
+	 * 
+	 * @param listJobsIntervalInHours
+	 * @return The list of FSMStateValue
+	 */
 	public List<FSMStateValue> findAllProcessorsExecuting(Timestamp listJobsIntervalInHours);
+	
+	/**
+	 * Find list of FSMStateValue by given status and time.
+	 * 
+	 * @param value
+	 * @param listJobsIntervalInHours
+	 * @return The list of FSMStateValue
+	 */
 	public List<FSMStateValue> findProcessorsExecutingByValue(String value, Timestamp listJobsIntervalInHours);
+	
+	/**
+	 * Find list of FSMStateValue by given date.
+	 * 
+	 * @param frmDate
+	 * @param toDate
+	 * @return The list of FSMStateValue
+	 */
 	public List<FSMStateValue> findProcessorsExecutingByDate(String frmDate, String toDate);
+	
+	/**
+	 * Find list of FSMStateValue by given status and date.
+	 * 
+	 * @param status
+	 * @param frmDate
+	 * @param toDate
+	 * @return The list of FSMStateValue
+	 */
 	public List<FSMStateValue> findProcessorsExecutingByValueAndDate(String value, String frmDate, String toDate);
 
 }

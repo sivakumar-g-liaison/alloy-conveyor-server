@@ -23,7 +23,14 @@ public interface MailboxServiceInstanceDAO extends GenericDAO<MailboxServiceInst
 	public static final String FIND_MBX_SI_GUID = "findByMbxAndServiceInsId";
 	public static final String SERVICE_INSTANCE_GUID = "serviceInstanceeGuid";
 	public static final String GUID_MBX = "guidOfMbx";
-
+    
+	/**
+	 * Find MailboxServiceInstance by given mailboxGuid and serviceInstanceGuid.
+	 * 
+	 * @param mailboxGuid
+	 * @param serviceInstanceGuid
+	 * @return MailboxServiceInstance
+	 */
 	public MailboxServiceInstance findByGuids(String mailboxGuid, String serviceInstanceGuid);
 
 }

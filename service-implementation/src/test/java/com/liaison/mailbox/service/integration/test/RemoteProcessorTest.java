@@ -63,7 +63,25 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		Files.deleteIfExists(Paths.get(responseLocation));
 		Files.createDirectory(Paths.get(responseLocation));
 	}
-
+    
+	/**
+	 * Method to test remote downloader with valid data.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws com.google.gson.JsonParseException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws SymmetricAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws NoSuchAlgorithmException
+	 * @throws CertificateException
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 */
 	@Test
 	public void testRemoteDownloader() throws JsonParseException,
 			JsonMappingException, LiaisonException, JSONException,
@@ -93,7 +111,13 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
 	}
-
+    
+	/**
+	 * Method to test credential utility.
+	 * 
+	 * @throws SymmetricAlgorithmException
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test
 	public void testCredentialUtility() throws SymmetricAlgorithmException,
 			MailBoxConfigurationServicesException {
@@ -123,7 +147,13 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		Assert.assertEquals(credentialDTO.getUserId(), resultDTO.getUserId());
 
 	}
-
+    
+	/**
+	 * Method to test credential utility with invalid credential type.
+	 * 
+	 * @throws SymmetricAlgorithmException
+	 * @throws MailBoxConfigurationServicesException
+	 */
 	@Test(expected = MailBoxConfigurationServicesException.class)
 	public void testCredentialUtility_InvalidCredentialType_ShoudFail()
 			throws SymmetricAlgorithmException,
@@ -136,7 +166,21 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		credentialDTO.copyToEntity(credential);
 
 	}
-
+    
+	/**
+	 * Method to test mailbox response.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws com.google.gson.JsonParseException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 */
 	@Test
 	public void testWriteResponseToMailBox() throws JsonParseException,
 			JsonMappingException, LiaisonException, JSONException,
@@ -164,7 +208,21 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream);
 	}
-
+    
+	/**
+	 * Method to test mailbox response without processor name.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws com.google.gson.JsonParseException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 */
 	@Test
 	public void testWriteResponseToMailBox_WithoutProcessorName()
 			throws JsonParseException, JsonMappingException, LiaisonException,
@@ -192,7 +250,21 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		AbstractRemoteProcessor downloader = new HttpRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream);
 	}
-
+    
+	/**
+	 *  Method to test mailbox response from file. 
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws com.google.gson.JsonParseException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 */
 	@Test
 	public void testWriteFileResponseToMailBox() throws JsonParseException,
 			JsonMappingException, LiaisonException, JSONException,
@@ -221,7 +293,21 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		downloader.writeFileResponseToMailBox(stream,
 				"test" + System.nanoTime() + ".txt");
 	}
-
+    
+	/**
+	 * Method to test mailbox response with new directory.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws com.google.gson.JsonParseException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 */
 	@Test
 	public void testWriteFileResponseToMailBox_EveryTimeNewDirectory()
 			throws JsonParseException, JsonMappingException, LiaisonException,
@@ -251,7 +337,15 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		downloader.writeFileResponseToMailBox(stream,
 				"test" + System.nanoTime() + ".txt");
 	}
-
+    
+	/**
+	 *  Method to test mailbox response with invalid file name.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws FS2Exception
+	 * @throws MailBoxServicesException
+	 */
 	@Test
 	public void testWriteFileResponseToMailBox_WithFileNameWithSpaces()
 			throws IOException, URISyntaxException, FS2Exception,

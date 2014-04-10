@@ -53,7 +53,17 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	public void setUp() throws Exception {
 		logger = LoggerFactory.getLogger(MailBoxServiceTest.class);
 	}
-
+    
+	/**
+	 * Method to test triggerprofile.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	@Test
 	public void testTriggerProfile() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {

@@ -25,7 +25,13 @@ import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
  * @author veerasamyn
  */
 public class ProfileOperationDelegate extends OperationDelegate {
-
+    
+	/**
+	 * Fetches a list of ScheduleProfilesRef form SCHED_PROFILE database table.
+	 * 
+	 * @param entity
+	 * @return The list of ScheduleProfilesRef
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<ScheduleProfilesRef> perform(EntityManager em) {

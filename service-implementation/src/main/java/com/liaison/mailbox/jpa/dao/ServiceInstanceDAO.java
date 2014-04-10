@@ -21,7 +21,13 @@ public interface ServiceInstanceDAO extends GenericDAO<ServiceInstanceId> {
 
 	public static final String FIND_BY_SERVICE_INSTANCEID = "findByServiceInstIdss";
 	public static final String INTANXE_ID = "serv_id";
-
+   
+	/**
+	 * Find by serviceInstanceId.
+	 * 
+	 * @param serviceInstanceId
+	 * @return ServiceInstanceId
+	 */
 	public ServiceInstanceId findByName(String serviceInstanceId);
 
 }

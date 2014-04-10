@@ -59,7 +59,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	public void setUp() throws Exception {
 		logger = LoggerFactory.getLogger(MailBoxConfigurationServiceTest.class);
 	}
-
+    
+	/**
+	 * Method constructs MailBox with valid data.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	@Test
 	public void testCreateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
@@ -104,7 +114,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 				getResponseDTO.getMailBox().getProperties().get(0).getValue());
 
 	}
-
+    
+	/**
+	 * Method to test mailbox with valid data.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	@Test
 	public void testGetMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException, JAXBException,
 			IOException {
@@ -149,7 +169,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 				getResponseDTO.getMailBox().getProperties().get(0).getValue());
 
 	}
-
+    
+	/**
+	 * Method to test deactivate mailbox.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	@Test
 	public void testDeactivateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
@@ -191,7 +221,14 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 	}
-
+    
+	/**
+	 * Method to test revise mailBox with liaison HTTPClient.
+	 * 
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 * @throws Exception
+	 */
 	@Test
 	public void testReviseMailBoxWithLiaisonHTTPClient() throws ClientProtocolException, IOException, Exception {
 
@@ -249,7 +286,16 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 				getResponseDTO.getMailBox().getProperties().get(0).getValue());
 
 	}
-
+    
+	/**
+	 * Method to test mailBox with valid mandatory fields.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateMailBox_MandatoryFields_ShouldPass() throws JsonGenerationException, JsonMappingException,
 			JAXBException, IOException, LiaisonException {
@@ -285,7 +331,16 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 		Assert.assertEquals(mailBox.getName(), getResponseDTO.getMailBox().getName());
 	}
-
+    
+	/**
+	 * Method to test mailBox without mandatory fields.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateMailBox_WithoutMandatoryFields_ShouldFail() throws JsonGenerationException, JsonMappingException,
 			JAXBException, IOException, LiaisonException {
@@ -320,7 +375,16 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(mailBox.getName(), getResponseDTO.getMailBox().getName());
 
 	}
-
+    
+	/**
+	 * Method to test mailBox with null.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateMailBox_MailBoxisNull_ShouldFail() throws JsonGenerationException, JsonMappingException,
 			JAXBException, IOException, LiaisonException {
@@ -341,7 +405,16 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 				responseDTO.getResponse().getMessage().contains(Messages.INVALID_REQUEST.value()));
 
 	}
-
+    
+	/**
+	 * Method to test mailBox with invalid id.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testGetMailBox_WrongId_ShouldFail() throws JsonGenerationException, JsonMappingException,
 			JAXBException, IOException, LiaisonException {
@@ -360,7 +433,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 
 	}
-
+    
+	/**
+	 * Method to test revise mailBox with null.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 */
 	@Test
 	public void testReviseMailBox_Null_ShouldFail() throws JsonGenerationException, JsonMappingException, JAXBException,
 			IOException, LiaisonException, JSONException {
@@ -379,7 +462,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
 
 	}
-
+    
+	/**
+	 * Method to test revise mailBox with wrong guid.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 */
 	@Test
 	public void testReviseMailBox_WrongGuids_ShouldFail() throws JsonGenerationException, JsonMappingException, JAXBException,
 			IOException, LiaisonException, JSONException {
@@ -398,7 +491,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
 
 	}
-
+    
+	/**
+	 * Method to test revise mailBox with invalid guid.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 */
 	@Test
 	public void testReviseMailBox_InvalidGuids_ShouldFail() throws JsonGenerationException, JsonMappingException, JAXBException,
 			IOException, LiaisonException, JSONException {
@@ -421,7 +524,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
 
 	}
-
+    
+	/**
+	 * Method to test deactivate mailBox with wrong id.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
 	@Test
 	public void testDeactivateMailBox_WrongId_ShouldFail() throws LiaisonException, JSONException, JsonParseException,
 			JsonMappingException, JAXBException, IOException {
@@ -436,7 +549,17 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "deactivateMailBoxResponse"));
 
 	}
-
+    
+	/**
+	 * Method to test Revise mailBox without mandatory field.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 */
 	@Test
 	public void testReviseMailBox_WithoutMandatory_ShouldFail() throws JsonGenerationException, JsonMappingException,
 			JAXBException,
@@ -456,7 +579,16 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
 
 	}
-
+    
+	/**
+	 * Method constructs mailbox with empty.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateMailBox_EmptyString_ShouldFail() throws JsonGenerationException, JsonMappingException,
 			JAXBException, IOException, LiaisonException {
@@ -478,7 +610,16 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
 
 	}
-
+    
+	/**
+	 * Method to constructs mailbox with invalid status.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
 	@Test
 	public void testCreateMailBox_InValidStatus_ShouldFail() throws JsonGenerationException, JsonMappingException,
 			JAXBException, IOException, LiaisonException {

@@ -23,7 +23,12 @@ import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 public class MailBoxCryptoUtilTest {
 
 	private String text = "14Demo!@";
-
+    
+	/**
+	 * Method to test password Encryption.
+	 * 
+	 * @throws SymmetricAlgorithmException
+	 */
 	@Test
 	public void testDoPasswordEncryption() throws SymmetricAlgorithmException {
 
@@ -31,7 +36,12 @@ public class MailBoxCryptoUtilTest {
 		String decryptedString = MailBoxCryptoUtil.doPasswordEncryption(encryptedString, 2);
 		Assert.assertEquals(text, decryptedString);
 	}
-
+    
+	/**
+	 * Method to test password Encryption with wrong text.
+	 * 
+	 * @throws SymmetricAlgorithmException
+	 */
 	@Test
 	public void testDoPasswordEncryption_WithWrongtext() throws SymmetricAlgorithmException {
 
@@ -39,7 +49,12 @@ public class MailBoxCryptoUtilTest {
 		String decryptedString = MailBoxCryptoUtil.doPasswordEncryption(encryptedString, 2);
 		Assert.assertNotSame(text, decryptedString);
 	}
-
+    
+	/**
+	 * Method to test password Encryption with empty.
+	 * 
+	 * @throws SymmetricAlgorithmException
+	 */
 	@Test
 	public void testDoPasswordEncryption_WithEmpty() throws SymmetricAlgorithmException {
 
@@ -47,7 +62,12 @@ public class MailBoxCryptoUtilTest {
 		String decryptedString = MailBoxCryptoUtil.doPasswordEncryption(encryptedString, 2);
 		Assert.assertEquals("", decryptedString);
 	}
-
+    
+	/**
+	 * Method to test password Encryption with null.
+	 * 
+	 * @throws SymmetricAlgorithmException
+	 */
 	@Test(expected = NullPointerException.class)
 	public void testDoPasswordEncryption_WithNull() throws SymmetricAlgorithmException {
 

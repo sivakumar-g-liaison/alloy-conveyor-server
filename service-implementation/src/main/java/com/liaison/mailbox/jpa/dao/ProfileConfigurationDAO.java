@@ -32,7 +32,19 @@ public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef>
 	public static final String GET_PROFILE_BY_NAME = "getProfileByName";
 	public static final String FIND_PROFILES_BY_NAME = "findProfilesByName";
 	
-
+    /**
+     * Find by profileName.
+     * 
+     * @param profileName
+     * @return ScheduleProfilesRef
+     */
 	public ScheduleProfilesRef findProfileByName(String profileName);
+	
+	/**
+	 * Find by profileName.
+	 * 
+	 * @param profileName
+	 * @return The list of ScheduleProfilesRef
+	 */
 	public List <ScheduleProfilesRef> findProfilesByName(String profileName);
 }

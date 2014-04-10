@@ -22,6 +22,11 @@ import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 
 public class JavaScriptEngineUtilTest {
 	
+	/**
+	 * Method to test execute JavaScript.
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void testExecuteJavaScript() throws Exception{
 		

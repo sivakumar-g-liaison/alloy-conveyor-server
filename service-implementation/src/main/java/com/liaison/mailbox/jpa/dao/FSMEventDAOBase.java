@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.jpa.dao;
 
 import java.util.Iterator;
@@ -17,6 +27,12 @@ public class FSMEventDAOBase extends  GenericDAOBase<FSMEvent> implements FSMEve
 		super(PERSISTENCE_UNIT_NAME);
 	}
 	
+	/**
+	 * Fetches  InterruptEvent from  FSM_EVENT database table.
+	 * 
+	 * @param excutionId
+	 * @return boolean
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isThereAInterruptSignal(String excutionId) {
@@ -47,6 +63,11 @@ public class FSMEventDAOBase extends  GenericDAOBase<FSMEvent> implements FSMEve
 		}
 	}
 	
+	/**
+	 * Method to creates FSMEvent by given ExecutionEvents type and id.
+	 * @param executionEvent
+	 * @param executionId
+	 */
 	public void createEvent(ExecutionEvents executionEvent,String executionId) {
 		
 		FSMEvent fsmEvent = new FSMEvent();

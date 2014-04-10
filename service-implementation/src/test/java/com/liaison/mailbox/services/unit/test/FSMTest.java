@@ -27,7 +27,11 @@ import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 public class FSMTest extends BaseServiceTest {
 
 	
-
+    /**
+     * Method to test FSM state.
+     * 
+     * @throws InterruptedException
+     */
 	@Test
 	public void testFSM() throws InterruptedException{
         //STEP 1: BUILD THIS AS SOON AS YOU GET A PROCESSOR FROM DB AFTER TRIGGERING A PROFILE. FILL AS MUCH AS YOU CAN IN stateDefination BUT MUST HAVE EXECUTION ID,PROCESSOR ID and PROFILE NAME 

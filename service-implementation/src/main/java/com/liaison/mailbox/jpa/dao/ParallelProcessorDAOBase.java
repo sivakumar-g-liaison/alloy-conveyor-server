@@ -21,7 +21,13 @@ public class ParallelProcessorDAOBase extends GenericDAOBase<ParallelProcessor> 
 	public ParallelProcessorDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}	
-		
+    
+	/**
+	 * Fetches all ParallelProcessor from  PROCESSOR_SEMAPHORE database table by given processor id.
+	 * 
+	 * @param processorID
+	 * @return ParallelProcessor
+	 */
 	public ParallelProcessor findById(String processorID) {
 		
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);		

@@ -55,7 +55,16 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		Files.createDirectory(Paths.get(inbox));
 		fileRenameFormat = ".tested";
 	}
-
+    
+	/**
+	 * Method to test Sweeper with valid data.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 * @throws JAXBException
+	 */
 	@Test
 	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JAXBException {
 
@@ -82,7 +91,16 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFilename());
 	}
-
+    
+	/**
+	 * Method to test Sweeper without file permission.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 * @throws Exception
+	 */
 	@Test
 	public void testSweeperWithoutFilePermission() throws IOException, URISyntaxException, MailBoxServicesException,
 			FS2Exception, Exception {
@@ -114,7 +132,16 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFilename());
 	}
-
+    
+	/**
+	 * Method to test Sweeper with space in file name.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 * @throws JAXBException
+	 */
 	@Test
 	public void testSweeperWithSpaceInFileName() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
 			JAXBException {
@@ -142,7 +169,17 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFilename());
 	}
-
+    
+	/**
+	 * Method to test mark as sweeped.
+	 * 
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws FS2Exception
+	 * @throws JSONException
+	 * @throws JAXBException
+	 */
 	@Test
 	public void testMarkAsSweeped() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
 			JSONException, JAXBException {

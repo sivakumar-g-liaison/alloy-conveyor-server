@@ -101,6 +101,8 @@ public class DirectorySweeperTest {
     }
 
     /**
+     * Method to test SweepDirectory with valid file.
+     * 
      * @throws IOException
      */
     @Test
@@ -115,6 +117,8 @@ public class DirectorySweeperTest {
     }
 
     /**
+     * Method to test SweepDirectory with empty file.
+     * 
      * @throws IOException
      */
     @Test
@@ -135,6 +139,8 @@ public class DirectorySweeperTest {
     }
     
     /**
+     * Method to test SweepDirectory with invalid file.
+     * 
      * @throws IOException
      */
     @Test
@@ -158,6 +164,7 @@ public class DirectorySweeperTest {
     }
 
     /**
+     * Method to test MarkAsSweeped as null.
      * @throws IOException
      * @throws JSONException 
      */

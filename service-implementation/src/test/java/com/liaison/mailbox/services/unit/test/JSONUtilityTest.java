@@ -45,7 +45,15 @@ public class JSONUtilityTest extends BaseServiceTest {
 	 * AddMailBoxResponseDTO.class); Assert.assertEquals(SUCCESS,
 	 * responseDTO.getResponse().getStatus()); }
 	 */
-
+	
+    /**
+     * Method to test un-marshal from JSON.
+     * 
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     */
 	@Test
 	public void jsonTest() throws JsonParseException, JsonMappingException, JAXBException, IOException {
 

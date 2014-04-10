@@ -51,7 +51,16 @@ public class AddMailBoxResponseDTO implements ResponseBuilder {
 	public void setResponse(ResponseDTO response) {
 		this.response = response;
 	}
-
+    
+	/**
+	 * Method constructs response.
+	 *
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @return Response.
+	 */
 	@Override
 	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
 		String responseBody = MailBoxUtility.marshalToJSON(this);

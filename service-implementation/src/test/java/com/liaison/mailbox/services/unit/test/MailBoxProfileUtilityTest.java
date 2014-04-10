@@ -71,7 +71,10 @@ public class MailBoxProfileUtilityTest {
 		 * serviceRequest.getStatus().equals(jsonAddProfile.getString("status"))); */
 
 	}
-
+	
+    /**
+     * Method to test string formation.
+     */
 	@Test
 	public void stringFormatTest() {
 		String data = String.format(Messages.CREATE_OPERATION_FAILED.value(), "test");
