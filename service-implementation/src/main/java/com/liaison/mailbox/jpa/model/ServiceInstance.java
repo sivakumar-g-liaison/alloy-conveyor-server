@@ -28,7 +28,7 @@ import com.liaison.commons.jpa.Identifiable;
 */
 @Entity
 @Table(name = "SERVICE_INSTANCE")
-public class ServiceInstanceId implements Identifiable {
+public class ServiceInstance implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,7 +36,7 @@ public class ServiceInstanceId implements Identifiable {
 	private String name;
 	private List<MailboxServiceInstance> mailboxServiceInstances;
 	
-	public ServiceInstanceId() {
+	public ServiceInstance() {
 	}
 	
 	@OneToMany(mappedBy = "serviceInstanceId", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,

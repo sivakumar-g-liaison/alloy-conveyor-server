@@ -36,7 +36,7 @@ public class MailboxServiceInstance implements Identifiable {
 
 	private String pguid;
 	private MailBox mailbox;
-	private ServiceInstanceId serviceInstanceId;
+	private ServiceInstance serviceInstance;
 
 	public MailboxServiceInstance() {
 	}
@@ -63,12 +63,12 @@ public class MailboxServiceInstance implements Identifiable {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
-	public ServiceInstanceId getServiceInstanceId() {
-		return serviceInstanceId;
+	public ServiceInstance getServiceInstanceId() {
+		return serviceInstance;
 	}
 
-	public void setServiceInstanceId(ServiceInstanceId serviceInstanceId) {
-		this.serviceInstanceId = serviceInstanceId;
+	public void setServiceInstanceId(ServiceInstance serviceInstance) {
+		this.serviceInstance = serviceInstance;
 	}
 
 	@Override

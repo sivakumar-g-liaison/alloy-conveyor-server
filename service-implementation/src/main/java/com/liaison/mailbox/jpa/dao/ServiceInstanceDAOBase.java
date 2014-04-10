@@ -16,9 +16,9 @@ import javax.persistence.EntityManager;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.mailbox.jpa.model.ServiceInstanceId;
+import com.liaison.mailbox.jpa.model.ServiceInstance;
 
-public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstanceId> implements ServiceInstanceDAO, MailBoxDAO {
+public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstance> implements ServiceInstanceDAO, MailBoxDAO {
 
 	public ServiceInstanceDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
@@ -26,14 +26,14 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstanceId> im
 
 	/*@Override
 	@SuppressWarnings("unchecked")
-	public ServiceInstanceId findByName(String serviceInstanceId) {
+	public ServiceInstance findByName(String serviceInstanceId) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
-			List<ServiceInstanceId> permissionRefs = entityManager.createNamedQuery(FIND_BY_NAME).setParameter(SERVICE_INSTANCE, serviceInstanceId)
+			List<ServiceInstance> permissionRefs = entityManager.createNamedQuery(FIND_BY_NAME).setParameter(SERVICE_INSTANCE, serviceInstanceId)
 					.getResultList();
-			Iterator<ServiceInstanceId> iter = permissionRefs.iterator();
+			Iterator<ServiceInstance> iter = permissionRefs.iterator();
 
 			while (iter.hasNext()) {
 				return iter.next();
@@ -48,20 +48,20 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstanceId> im
 	}*/
 	
 	/**
-	 * Fetches ServiceInstanceId from SERVICE_INSTANCE database table by given servInsId.
+	 * Fetches ServiceInstance from SERVICE_INSTANCE database table by given servInsId.
 	 * 
 	 * @param servInsId
-	 * @return ServiceInstanceId
+	 * @return ServiceInstance
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public ServiceInstanceId findByName(String servInsId) {
+	public ServiceInstance findById(String servInsId) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
-			List<ServiceInstanceId> serviceInsIds = entityManager.createNamedQuery(FIND_BY_SERVICE_INSTANCEID).setParameter(INTANXE_ID, servInsId).getResultList();
-			Iterator<ServiceInstanceId> iter = serviceInsIds.iterator();
+			List<ServiceInstance> serviceInsIds = entityManager.createNamedQuery(FIND_BY_SERVICE_INSTANCEID).setParameter(INTANXE_ID, servInsId).getResultList();
+			Iterator<ServiceInstance> iter = serviceInsIds.iterator();
 
 			while (iter.hasNext()) {
 				return iter.next();

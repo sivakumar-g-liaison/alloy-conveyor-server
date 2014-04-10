@@ -58,7 +58,7 @@ public class Processor implements Identifiable {
 	private String procsrName;
 	private String procsrProtocol;
 	private MailBox mailbox;
-	private ServiceInstanceId serviceInstance;
+	private ServiceInstance serviceInstance;
 	
 	private List<Credential> credentials;
 	private List<Folder> folders;
@@ -227,11 +227,11 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to Service instance id
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
-	public ServiceInstanceId getServiceInstance() {
+	public ServiceInstance getServiceInstance() {
 		return serviceInstance;
 	}
 
-	public void setServiceInstance(ServiceInstanceId serviceInstance) {
+	public void setServiceInstance(ServiceInstance serviceInstance) {
 		this.serviceInstance = serviceInstance;
 	}
 

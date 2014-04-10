@@ -36,7 +36,7 @@ import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.jpa.model.MailboxServiceInstance;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.ServiceInstanceId;
+import com.liaison.mailbox.jpa.model.ServiceInstance;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
@@ -134,9 +134,9 @@ public class MailBoxConfigurationService {
 		try {
 		
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceInstanceID);
+			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceID);
 			if (serviceInstance == null) {
-				serviceInstance = new ServiceInstanceId();
+				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceID);
 				serviceInstance.setPguid(MailBoxUtility.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
@@ -264,9 +264,9 @@ public class MailBoxConfigurationService {
 			//creating a link between mailbox and service instance table
 //			createMailboxServiceInstanceIdLink(c, retrievedMailBox);
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(request.getMailBox().getServiceInstanceId());
+			ServiceInstance serviceInstance = serviceInstanceDAO.findById(request.getMailBox().getServiceInstanceId());
 			if (serviceInstance == null) {
-				serviceInstance = new ServiceInstanceId();
+				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(request.getMailBox().getServiceInstanceId());
 				serviceInstance.setPguid(MailBoxUtility.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);

@@ -66,7 +66,7 @@ import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
-import com.liaison.mailbox.jpa.model.ServiceInstanceId;
+import com.liaison.mailbox.jpa.model.ServiceInstance;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
@@ -152,9 +152,9 @@ public class ProcessorConfigurationService {
 			}
 
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstanceId serviceInstance = serviceInstanceDAO.findByName(serviceRequest.getProcessor().getServiceInstanceId());
+			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceRequest.getProcessor().getServiceInstanceId());
 			if (serviceInstance == null) {
-				serviceInstance = new ServiceInstanceId();
+				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceRequest.getProcessor().getServiceInstanceId());
 				serviceInstance.setPguid(MailBoxUtility.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
