@@ -10,6 +10,8 @@
 
 package com.liaison.service.resource.examples;
 
+import org.testng.annotations.Test;
+import org.testng.Assert;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -50,7 +52,8 @@ public class FS2ResourceTest {
      * @return HttpResponse
      * @throws Exception
      */
-    protected HttpResponse testPing(HttpClient client, HttpGet urlPage, int retries) throws Exception {
+    @Test
+	protected HttpResponse testPing(HttpClient client, HttpGet urlPage, int retries) throws Exception {
     	if (retries < 0) {
             throw new Exception("Failed to connect. Retries exceeded.");
         }

@@ -10,11 +10,9 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import junit.framework.Assert;
-
-import org.junit.Before;
-import org.junit.Test;
-
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.Assert;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -34,7 +32,7 @@ public class GenericValidatorTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeMethod
 	public void setUp() throws Exception {
 		validator = new GenericValidator();
 	}
@@ -44,7 +42,7 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_WrongStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		MailBoxDTO dto = new MailBoxDTO();
@@ -58,7 +56,7 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_WithoutName_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		MailBoxDTO dto = new MailBoxDTO();
@@ -71,7 +69,8 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_WithoutStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		MailBoxDTO dto = new MailBoxDTO();
@@ -84,7 +83,7 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
 		validator.validate(null);
 	}
@@ -109,6 +108,8 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
+
+	@Test
 	public void testProfile() throws MailBoxConfigurationServicesException {
 
 		ProfileDTO profile = new ProfileDTO();
@@ -122,7 +123,8 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testProfile_WithoutName_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProfileDTO profile = new ProfileDTO();
@@ -134,7 +136,8 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testProfile_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
 		validator.validate(null);
 	}
@@ -159,7 +162,8 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithEmptySpace_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProcessorDTO dto = new ProcessorDTO();
@@ -174,7 +178,8 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithInvalidValue_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProcessorDTO dto = new ProcessorDTO();
@@ -189,7 +194,7 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithoutStatus_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProcessorDTO dto = new ProcessorDTO();
@@ -202,7 +207,7 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateProcessor_WithoutType_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProcessorDTO dto = new ProcessorDTO();
@@ -229,7 +234,7 @@ public class GenericValidatorTest {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateFolder_WithInvalidValue_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		FolderDTO dto = new FolderDTO();

@@ -9,10 +9,8 @@
  */
 package com.liaison.mailbox.services.unit.test;
 
-import junit.framework.Assert;
-
-import org.junit.Test;
-
+import org.testng.annotations.Test;
+import org.testng.Assert;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 
@@ -68,7 +66,7 @@ public class MailBoxCryptoUtilTest {
 	 * 
 	 * @throws SymmetricAlgorithmException
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void testDoPasswordEncryption_WithNull() throws SymmetricAlgorithmException {
 
 		String encryptedString = MailBoxCryptoUtil.doPasswordEncryption(null, 1);

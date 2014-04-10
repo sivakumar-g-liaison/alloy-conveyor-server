@@ -15,12 +15,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.codehaus.jettison.json.JSONException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
@@ -49,8 +49,8 @@ public class DirectorySweeperTest {
     /**
      * @throws java.lang.Exception
      */
-    @Before
-    public void setUp() throws Exception {
+    @BeforeMethod
+	public void setUp() throws Exception {
 	
 	inbox = System.getProperty("java.io.tmpdir")+ File.separator + "INBOX1";
 	outbox = System.getProperty("java.io.tmpdir")+ File.separator + "OUTBOX1";
@@ -76,8 +76,8 @@ public class DirectorySweeperTest {
     /**
      * @throws java.lang.Exception
      */
-    @After
-    public void tearDown() throws Exception {
+    @AfterMethod
+	public void tearDown() throws Exception {
 	
 	Files.deleteIfExists(dir);
 	Files.deleteIfExists(dirFileNotExist);
@@ -131,7 +131,7 @@ public class DirectorySweeperTest {
     /**
      * @throws IOException
      */
-    @Test(expected = NoSuchFileException.class)
+    @Test(expectedExceptions = NoSuchFileException.class)
     public void testsweepDirectyory_DirDoesNotExist_ShouldThrowException()
 	    throws IOException {
 
@@ -168,7 +168,7 @@ public class DirectorySweeperTest {
      * @throws IOException
      * @throws JSONException 
      */
-    @Test(expected=NullPointerException.class)
+    @Test(expectedExceptions=NullPointerException.class)
     public void testMarkAsSweeped_Null_ShouldThrowException() throws IOException, JSONException {
 	
 	sweeper.markAsSweeped(null);

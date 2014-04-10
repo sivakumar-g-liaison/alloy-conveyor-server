@@ -10,8 +10,7 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import org.junit.Test;
-
+import org.testng.annotations.Test;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;

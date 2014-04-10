@@ -9,6 +9,10 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.Assert;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -20,13 +24,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import junit.framework.Assert;
-
 import org.codehaus.jettison.json.JSONException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.jpa.model.Folder;
@@ -48,7 +46,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeMethod
 	public void setUp() throws Exception {
 		inbox = System.getProperty("java.io.tmpdir") + File.separator + "INBOX1";
 		Files.deleteIfExists(Paths.get(inbox));
@@ -209,7 +207,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 
 	}
 
-	@After
+	@AfterMethod
 	public void tearDown() throws Exception {
 		Files.deleteIfExists(Paths.get(inbox));
 	}

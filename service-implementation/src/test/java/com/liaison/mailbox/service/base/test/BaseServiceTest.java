@@ -9,6 +9,8 @@
  */
 package com.liaison.mailbox.service.base.test;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,8 +21,6 @@ import java.util.Properties;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
 import org.slf4j.Logger;
 
 import com.liaison.commons.exception.LiaisonException;
@@ -48,7 +48,7 @@ public abstract class BaseServiceTest {
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
 
-	@Before
+	@BeforeMethod
 	public void initialSetUp() throws FileNotFoundException, IOException {
 
 		if (BASE_URL == null) {
@@ -79,7 +79,7 @@ public abstract class BaseServiceTest {
 		BASE_URL = bASE_URL;
 	}
 
-	@After
+	@AfterMethod
 	public void finalCleanUp() {
 
 	}

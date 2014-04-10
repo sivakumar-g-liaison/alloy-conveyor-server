@@ -1,4 +1,4 @@
-/** * Copyright Liaison Technologies, Inc. All rights reserved. * * This software is the confidential and proprietary information of * Liaison Technologies, Inc. ("Confidential Information").  You shall  * not disclose such Confidential Information and shall use it only in * accordance with the terms of the license agreement you entered into * with Liaison Technologies. */package com.liaison.service.resource.examples;import org.apache.http.HttpResponse;import org.apache.http.client.HttpClient;import org.apache.http.client.methods.HttpGet;import org.apache.http.conn.HttpHostConnectException;import org.apache.http.impl.client.DefaultHttpClient;import org.testng.Assert;import org.testng.annotations.Test;
+/** * Copyright Liaison Technologies, Inc. All rights reserved. * * This software is the confidential and proprietary information of * Liaison Technologies, Inc. ("Confidential Information").  You shall  * not disclose such Confidential Information and shall use it only in * accordance with the terms of the license agreement you entered into * with Liaison Technologies. */package com.liaison.service.resource.examples;import org.testng.annotations.Test;import org.testng.Assert;import org.apache.http.HttpResponse;import org.apache.http.client.HttpClient;import org.apache.http.client.methods.HttpGet;import org.apache.http.conn.HttpHostConnectException;import org.apache.http.impl.client.DefaultHttpClient;import org.testng.Assert;import org.testng.annotations.Test;
 public class HelloWorldResourceTest {
 	
     
@@ -19,7 +19,7 @@ public class HelloWorldResourceTest {
     }    
    
     /**     * Method to test ping with urlpage and client.     *      * @param client     * @param urlPage     * @param retries     * @return HttpResponse     * @throws Exception     */
-    protected HttpResponse testPing(HttpClient client, HttpGet urlPage, int retries) throws Exception {
+    @Test	protected HttpResponse testPing(HttpClient client, HttpGet urlPage, int retries) throws Exception {
     	if (retries < 0) {
             throw new Exception("Failed to connect. Retries exceeded.");
         }
