@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.services.unit.test;
 
+import org.testng.annotations.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
@@ -62,7 +63,8 @@ public class HornetQMessageListnerTest {
       * 
       * @throws InterruptedException
       */
-	 public void testThreading() throws InterruptedException {
+	 @Test
+	public void testThreading() throws InterruptedException {
 		 
     	 MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
 			for(int i=0;i<10;i++){

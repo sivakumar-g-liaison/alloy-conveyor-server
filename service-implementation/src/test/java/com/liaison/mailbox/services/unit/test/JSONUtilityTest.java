@@ -10,15 +10,14 @@
 
 package com.liaison.mailbox.services.unit.test;
 
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
@@ -33,7 +32,7 @@ public class JSONUtilityTest extends BaseServiceTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeMethod
 	public void setUp() throws Exception {
 	}
 

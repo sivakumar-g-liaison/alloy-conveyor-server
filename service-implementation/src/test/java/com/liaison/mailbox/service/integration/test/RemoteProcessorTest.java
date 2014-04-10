@@ -9,6 +9,10 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.Assert;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -24,15 +28,9 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import junit.framework.Assert;
-
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -56,7 +54,8 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 	private static String responseLocation;
 
-	@BeforeClass
+	@BeforeMethod
+
 	public static void setUp() throws Exception {
 		responseLocation = System.getProperty("java.io.tmpdir")
 				+ File.separator + "sample";
@@ -154,7 +153,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	@Test(expected = MailBoxConfigurationServicesException.class)
+	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testCredentialUtility_InvalidCredentialType_ShoudFail()
 			throws SymmetricAlgorithmException,
 			MailBoxConfigurationServicesException {
@@ -375,7 +374,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 
 	}
 
-	@AfterClass
+	@AfterMethod
 	public static void tearDown() throws Exception {
 		deleteFolder(Paths.get(responseLocation));
 	}

@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.services.util.unit.test;
 
+import org.testng.annotations.Test;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;

@@ -10,19 +10,18 @@
 
 package com.liaison.mailbox.service.integration.test;
 
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.Assert;
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
-
-import junit.framework.Assert;
 
 import org.apache.http.client.ClientProtocolException;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeMethod
 	public void setUp() throws Exception {
 		logger = LoggerFactory.getLogger(MailBoxConfigurationServiceTest.class);
 	}

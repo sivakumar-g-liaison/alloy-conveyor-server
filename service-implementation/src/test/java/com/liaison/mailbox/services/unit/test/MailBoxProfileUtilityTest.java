@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.services.unit.test;
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
@@ -18,10 +21,6 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.Messages;
 
@@ -35,14 +34,14 @@ public class MailBoxProfileUtilityTest {
 	private String data;
 	private JSONObject jsonMaiboxProfile;
 
-	@Before
+	@BeforeMethod
 	public void setUp() throws JSONException {
 
 		data = ServiceUtils.readFileFromClassPath("requests/profile/profile.json");
 		jsonMaiboxProfile = new JSONObject(data);
 	}
 
-	@After
+	@AfterMethod
 	public void tearDown() {
 
 	}

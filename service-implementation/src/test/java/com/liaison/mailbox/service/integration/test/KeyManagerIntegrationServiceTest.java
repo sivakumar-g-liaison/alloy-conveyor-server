@@ -39,10 +39,11 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -67,7 +68,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@Before
+	@BeforeMethod
 	public void setUp() throws Exception {
 		logger = LoggerFactory.getLogger(KeyManagerIntegrationServiceTest.class);
 	}
@@ -82,6 +83,8 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
+
+	@Test
 	public void testCreateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
@@ -147,6 +150,8 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
+
+	@Test
 	public void testUpdateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
 
@@ -202,6 +207,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		 * @throws CertificateException
 		 * @throws com.liaison.commons.exception.LiaisonException
 		 */
+		@Test
 		public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
 
