@@ -20,8 +20,8 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jettison.json.JSONException;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
@@ -45,7 +45,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LogManager.getLogger(SFTPRemoteDownloader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SFTPRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private SFTPRemoteDownloader() {
