@@ -23,19 +23,19 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 public class GetExecutingProcessorResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
-	private List<GetExecutingProcessorDTO> executingProcessor;
+	private List<GetExecutingProcessorDTO> executingProcessors;
 	private String hitCounter;
 
 	public List<GetExecutingProcessorDTO> getExecutingProcessor() {
 
-		if (null == executingProcessor) {
-			executingProcessor = new ArrayList<GetExecutingProcessorDTO>();
+		if (null == executingProcessors) {
+			executingProcessors = new ArrayList<GetExecutingProcessorDTO>();
 		}
-		return executingProcessor;
+		return executingProcessors;
 	}
 
-	public void setExecutingProcessor(List<GetExecutingProcessorDTO> executingProcessor) {
-		this.executingProcessor = executingProcessor;
+	public void setExecutingProcessor(List<GetExecutingProcessorDTO> executingProcessors) {
+		this.executingProcessors = executingProcessors;
 	}
 
 	public ResponseDTO getResponse() {
