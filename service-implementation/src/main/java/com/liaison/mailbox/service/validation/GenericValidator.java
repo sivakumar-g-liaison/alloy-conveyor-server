@@ -14,8 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.FolderType;
@@ -32,7 +32,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
  */
 public class GenericValidator {
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(GenericValidator.class);
+	private final static Logger LOGGER = LogManager.getLogger(GenericValidator.class);
 
 	private StringBuffer errorMessage;
 

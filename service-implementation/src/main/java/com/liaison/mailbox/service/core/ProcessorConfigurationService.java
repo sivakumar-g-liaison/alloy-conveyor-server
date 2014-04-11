@@ -38,8 +38,8 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
@@ -99,7 +99,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  */
 public class ProcessorConfigurationService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorConfigurationService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
 	private static String PROCESSOR = "Processor";
 	private static String TRUSTSTORE = "TrustStore";
 	private static String MAILBOX = "MailBox";

@@ -25,15 +25,15 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 public class HornetQMessageListner implements MessageListener {
 	
-	private static final Logger logger = LoggerFactory.getLogger(HornetQMessageListner.class);
+	private static final Logger logger = LogManager.getLogger(HornetQMessageListner.class);
 
 	public HornetQMessageListner(final ConnectionFactory cf,
 			final Destination destination) throws JMSException {

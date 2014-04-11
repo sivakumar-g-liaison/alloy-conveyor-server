@@ -33,8 +33,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.acl.annotation.ResourceType;
@@ -84,7 +84,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Api(value = "v1/mailbox", description = "Gateway for the mailbox configuration services.")
 public class MailBoxConfigurationResource extends BaseResource {
 
-	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
+	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);

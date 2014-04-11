@@ -18,8 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
@@ -38,7 +38,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class HTTPServerListenerService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(HTTPServerListenerService.class);
+	private static final Logger LOG = LogManager.getLogger(HTTPServerListenerService.class);
 
 	private static final String PAYLOAD = "Payload";
 

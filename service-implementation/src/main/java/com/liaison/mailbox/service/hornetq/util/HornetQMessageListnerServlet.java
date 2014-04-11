@@ -18,8 +18,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class HornetQMessageListnerServlet extends HttpServlet {
 
@@ -27,7 +27,7 @@ public class HornetQMessageListnerServlet extends HttpServlet {
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(HornetQMessageListnerServlet.class);
+	private static final Logger logger = LogManager.getLogger(HornetQMessageListnerServlet.class);
 	private static boolean isInitialized = false;
 
 	@Override

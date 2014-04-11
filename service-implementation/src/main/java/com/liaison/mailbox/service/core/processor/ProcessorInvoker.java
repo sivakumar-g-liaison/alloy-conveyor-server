@@ -9,8 +9,8 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.core.MailBoxService;
 
@@ -18,7 +18,7 @@ class ProcessorInvoker implements Runnable {
 	
 	private String request = null;
 
-	private static final Logger logger = LoggerFactory.getLogger(ProcessorInvoker.class);
+	private static final Logger logger = LogManager.getLogger(ProcessorInvoker.class);
 
 	public ProcessorInvoker(String request){
 		this.request=request;

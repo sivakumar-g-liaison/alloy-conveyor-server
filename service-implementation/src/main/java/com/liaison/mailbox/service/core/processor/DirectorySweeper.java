@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 
 public class DirectorySweeper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeper.class);
+    private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 
     /**
      * Method is used to retrieve the files from the given mailbox.

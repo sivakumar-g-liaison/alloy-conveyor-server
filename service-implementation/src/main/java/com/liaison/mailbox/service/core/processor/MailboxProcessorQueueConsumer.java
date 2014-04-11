@@ -12,13 +12,13 @@ package com.liaison.mailbox.service.core.processor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class MailboxProcessorQueueConsumer {
 	
 	private final static int THREAD_COUNT = 5;	
-	private static final Logger logger = LoggerFactory.getLogger(MailboxProcessorQueueConsumer.class);
+	private static final Logger logger = LogManager.getLogger(MailboxProcessorQueueConsumer.class);
 	private static MailboxProcessorQueueConsumer qConsumerInstance = null;
 	
 	private MailboxProcessorQueueConsumer() {

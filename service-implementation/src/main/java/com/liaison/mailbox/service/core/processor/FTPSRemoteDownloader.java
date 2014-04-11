@@ -23,8 +23,8 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.net.ftp.FTPFile;
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
@@ -46,7 +46,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FTPSRemoteDownloader.class);
+	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteDownloader() {

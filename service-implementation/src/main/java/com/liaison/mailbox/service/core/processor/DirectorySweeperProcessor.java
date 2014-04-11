@@ -28,8 +28,8 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.fs2.api.CoreFS2Utils;
 import com.liaison.fs2.api.FS2Exception;
@@ -66,7 +66,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 
 public class DirectorySweeperProcessor extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeperProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeperProcessor.class);
 
 	private String pipeLineID;
 
