@@ -106,16 +106,16 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		String path = getPayloadURI();
 
 		if (MailBoxUtility.isEmpty(path)) {
-			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+			LOGGER.info("The given payload URI is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		if (sftpRequest.openChannel()) {
 			
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtility.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI {} does not exist.", remotePath);
-				throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+				LOGGER.info("The given remote URI is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.");
 			}
 			Boolean dirExists = true;
 			try {

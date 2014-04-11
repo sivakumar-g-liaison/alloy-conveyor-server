@@ -139,14 +139,14 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		}
 		String path = getPayloadURI();
 		if (MailBoxUtility.isEmpty(path)) {
-			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+			LOGGER.info("The given payload URI is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtility.isEmpty(remotePath)) {
-			LOGGER.info("The given remote URI {} does not exist.", remotePath);
-			throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+			LOGGER.info("The given remote URI is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.");
 		}
 
 		boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
@@ -170,7 +170,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * 
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException {
+			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException,MailBoxServicesException {
 		
 		//TODO find appropriate place to trigger event fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
 
@@ -255,6 +255,9 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					
 				}
 			}
+		} else {			 
+			LOGGER.info("The given payload URI'" + localDir + "' does not exist.");
+			throw new MailBoxServicesException("The given payload configuration '" + localDir + "' does not exist.");
 		}
 	}
 }
