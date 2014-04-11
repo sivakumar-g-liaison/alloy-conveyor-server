@@ -153,13 +153,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					// skip parent directory and the directory itself
 					continue;
 				}
-				boolean isDir = sftpRequest.getNative().stat(dirToList + "/" + aFile).isDir();
+				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 				
 				
 				if (isDir) {
 
-					String localDir = localFileDir + "/" + root.getName();
-					String remotePath = dirToList + "/" + root.getName();
+					String localDir = localFileDir + File.separatorChar + root.getName();
+					String remotePath = dirToList + File.separatorChar + root.getName();
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
