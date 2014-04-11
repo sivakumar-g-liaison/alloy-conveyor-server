@@ -25,8 +25,6 @@
 		<class>com.liaison.mailbox.jpa.model.FSMTransitionList</class>
 		<class>com.liaison.mailbox.jpa.model.FSMStateValue</class>
 		<class>com.liaison.mailbox.jpa.model.FSMTransitionState</class>
-		<class>com.liaison.mailbox.jpa.model.ServiceInstanceId</class>
-		<class>com.liaison.mailbox.jpa.model.MailboxServiceInstance</class>
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
 			<!--  <property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" /> -->
