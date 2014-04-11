@@ -296,7 +296,7 @@ public abstract class AbstractRemoteProcessor {
 				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 				if (null == foundFolderType) {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
-				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType) || FolderType.TARGET_LOCATION.equals(foundFolderType)) {
+				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return processMountLocation(folder.getFldrUri());
 				}
 			}
