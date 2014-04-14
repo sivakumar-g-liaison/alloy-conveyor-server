@@ -19,8 +19,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
@@ -36,7 +36,7 @@ import com.liaison.mailbox.service.core.processor.DirectorySweeper;
  */
 public final class JavaScriptEngineUtil {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(DirectorySweeper.class);
+	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 	private static final String SCTIPT_TYPE = "JavaScript";
 	
     //create a script engine manager

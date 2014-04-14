@@ -21,9 +21,9 @@ import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
@@ -51,7 +51,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FTPSRemoteUploader.class);
+	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteUploader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteUploader() {
@@ -96,7 +96,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 */
 	@Override
 	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;

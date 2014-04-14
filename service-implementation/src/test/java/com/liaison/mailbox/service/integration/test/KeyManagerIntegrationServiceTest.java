@@ -35,13 +35,12 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -70,7 +69,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	 */
 	@BeforeMethod
 	public void setUp() throws Exception {
-		logger = LoggerFactory.getLogger(KeyManagerIntegrationServiceTest.class);
+		logger = LogManager.getLogger(KeyManagerIntegrationServiceTest.class);
 	}
     
 	/**

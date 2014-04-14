@@ -39,11 +39,11 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exception.LiaisonException;
@@ -88,7 +88,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public abstract class AbstractRemoteProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteProcessor.class);
 
 	private static final ProcessorConfigurationDAO PROCESSOR_DAO = new ProcessorConfigurationDAOBase();
 
