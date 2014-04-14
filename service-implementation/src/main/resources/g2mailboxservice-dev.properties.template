@@ -104,3 +104,10 @@ privateKeyPath = D:\\doc\\sshprivatekey\\
 liaison.acl.filter.skipACLFilter=true
 liaison.acl.filter.skipACLSignatureCheck=true
 
+# Directory Sweeper - The allowed duration between current time and last modified time of the file should be greater than the given time limit
+diff_bt_current_and_last_modifed_time = 3
+
+#The files are modified before the given time limit will be considered for directory sweeper.
+#Time in Seconds
+last.modified.tolerance = 3
+
