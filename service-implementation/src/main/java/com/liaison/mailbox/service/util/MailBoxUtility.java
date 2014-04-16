@@ -12,7 +12,9 @@ package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
@@ -29,9 +31,13 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.acl.manifest.dto.ACLManifest;
+import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
+import com.liaison.commons.acl.manifest.dto.Platform;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.framework.util.ServiceUtils;
 
 /**
  * Utilities for MailBox.
@@ -153,6 +159,54 @@ public class MailBoxUtility {
 		
 		Date d = new Date();
 		return new Timestamp(d.getTime());
+	}
+	
+	/**
+	 * @param aclManifestDTO
+	 * @return
+	 */
+	public static String getServiceInstanceIdFromACLManifest(ACLManifest aclManifestDTO) {
+		
+		Platform platform = aclManifestDTO.getPlatform().get(0);
+		NestedServiceDependencyContraint nestedDependency = (platform != null)? platform.getNestedServiceDependencyContraint().get(0):null;
+		String primaryServiceInstanceId = (nestedDependency != null)? nestedDependency.getPrimaryId():null;
+		String secondaryServiceInstanceId = (nestedDependency != null)? nestedDependency.getNestedServiceId().get(0):null;
+		if(primaryServiceInstanceId != null) return primaryServiceInstanceId;
+		if(secondaryServiceInstanceId != null) return secondaryServiceInstanceId;
+		return null;
+		
+	}
+	
+	/**
+	 * @param aclManifestDTO
+	 * @return
+	 */
+	public static String getPrimaryServiceInstanceIdFromACLManifest(ACLManifest aclManifestDTO) {
+		
+		Platform platform = aclManifestDTO.getPlatform().get(0);
+		NestedServiceDependencyContraint nestedDependency = (platform != null)? platform.getNestedServiceDependencyContraint().get(0):null;
+		String primaryServiceInstanceId = (nestedDependency != null)? nestedDependency.getPrimaryId():null;
+		if(primaryServiceInstanceId != null) return primaryServiceInstanceId;
+		return null;
+	}
+	
+	/**
+	 * @param aclManifestDTO
+	 * @return
+	 */
+	public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(ACLManifest aclManifestDTO) {
+		
+		List<String> secondayServiceInstanceIDs = new ArrayList<String>();
+		Platform platform = aclManifestDTO.getPlatform().get(0);
+		NestedServiceDependencyContraint nestedDependency = (platform != null)? platform.getNestedServiceDependencyContraint().get(0):null;
+		if (nestedDependency != null) {
+			List<String> nestedDependencies = nestedDependency.getNestedServiceId();
+			for (String secondaryServiceInstance : nestedDependencies) {
+				secondayServiceInstanceIDs.add(secondaryServiceInstance);
+			}
+		}
+		return secondayServiceInstanceIDs;
+		
 	}
 
 }

@@ -23,7 +23,10 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+
+import com.liaison.commons.acl.manifest.dto.ACLManifest;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
@@ -65,7 +68,7 @@ public class MailBoxConfigurationService {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationService.class);
 	private static final String MAILBOX = "Mailbox";
-
+	
 	private static final GenericValidator validator = new GenericValidator();
 
 	/**
@@ -74,8 +77,9 @@ public class MailBoxConfigurationService {
 	 * @param request
 	 *            The request DTO.
 	 * @return The responseDTO.
+	 * @throws JAXBException 
 	 */
-	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request) throws MailBoxConfigurationServicesException{
+	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String aclManifestJson) throws MailBoxConfigurationServicesException, IOException, JAXBException {
 
 		LOG.info("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
@@ -96,8 +100,34 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(mailBox);
 			mailBox.setPguid(MailBoxUtility.getGUID());
 			
+			// retrieve the service instance id from acl-manifest only if the boolean check "get-serviceinstanceid-from-manifest" is true
+			// otherwise use the Dummy service instance id 
+			String serviceInstanceId = null;
+			String isReadFromACLManifest = MailBoxUtility.getEnvironmentProperties().getString("get-serviceinstanceid-from-manifest");
+			if (isReadFromACLManifest.equals("true")) {
+				
+				if (aclManifestJson == null) {
+					LOG.error("acl manifest is missing in the request header");
+					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_MISSING);
+				}
+				LOG.info("desearializing the acl manifest DTO from manifest json");
+				ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+				LOG.info("acl Manifest DTO deserialized successfully");
+				serviceInstanceId = MailBoxUtility.getServiceInstanceIdFromACLManifest(aclManifest);
+				LOG.info("Retrieving the service instance id from acl Manifest DTO");
+				if (serviceInstanceId == null) {
+					 LOG.error("retrieval of service instance id from acl manifest failed");
+					 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+				}
+				
+			} else {
+				LOG.info("Dummy service instance id is set since boolean check 'get-serviceinstanceid-from-manifest' is false");
+				serviceInstanceId = MailBoxConstants.DUMMY_SERVICE_INSTANCE_ID;
+			}
+						
 			//creating a link between mailbox and service instance table
-			createMailboxServiceInstanceIdLink(request.getMailBox().getServiceInstanceId(), mailBox);
+			createMailboxServiceInstanceIdLink(serviceInstanceId, mailBox);
+			//createMailboxServiceInstanceIdLink(request.getMailBox().getServiceInstanceId(), mailBox);
 
 			// persisting the mailbox entity
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
@@ -221,8 +251,9 @@ public class MailBoxConfigurationService {
 	 * 
 	 * @param guid
 	 *            The mailbox pguid.
+	 * @throws JAXBException 
 	 */
-	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid) {
+	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid, String aclManifestJson) throws JAXBException {
 
 		LOG.info("Entering into revise mailbox.The revise request is for {} ", guid);
 
@@ -260,10 +291,36 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(retrievedMailBox);
 			configDao.merge(retrievedMailBox);
 			
+			// retrieve the service instance id from acl-manifest only if the boolean check "get-serviceinstanceid-from-manifest" is true
+			// otherwise use the Dummy service instance id 
+			String serviceInstanceId = null;
+			LOG.info(MailBoxUtility.getEnvironmentProperties().getString("get-serviceinstanceid-from-manifest"));
+			String isReadFromACLManifest = MailBoxUtility.getEnvironmentProperties().getString("get-serviceinstanceid-from-manifest");
+			if (isReadFromACLManifest.equals("true")) {
+				if (aclManifestJson == null) {
+					LOG.error("acl manifest is missing in the request header");
+					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_MISSING);
+				}
+				LOG.info("desearializing the acl manifest DTO from manifest json");
+				ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+				LOG.info("acl Manifest DTO deserialized successfully");
+				serviceInstanceId = MailBoxUtility.getServiceInstanceIdFromACLManifest(aclManifest);
+				LOG.info("Retrieving the service instance id from acl Manifest DTO");
+				if (serviceInstanceId == null) {
+					 LOG.error("retrieval of service instance id from acl manifest failed");
+					 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+				}
+				
+			} else {
+				LOG.info("Dummy service instance id is set since boolean check 'get-serviceinstanceid-from-manifest' is false");
+				serviceInstanceId = MailBoxConstants.DUMMY_SERVICE_INSTANCE_ID;
+			}
+
 			//creating a link between mailbox and service instance table
 //			createMailboxServiceInstanceIdLink(c, retrievedMailBox);
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstance serviceInstance = serviceInstanceDAO.findById(request.getMailBox().getServiceInstanceId());
+			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
+			//ServiceInstance serviceInstance = serviceInstanceDAO.findById(request.getMailBox().getServiceInstanceId());
 			if (serviceInstance == null) {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(request.getMailBox().getServiceInstanceId());
@@ -291,6 +348,12 @@ public class MailBoxConfigurationService {
 
 		} catch (MailBoxConfigurationServicesException e) {
 
+			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+		} catch (IOException e) {
+			
 			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
 					.getMessage()));
@@ -348,8 +411,9 @@ public class MailBoxConfigurationService {
 	 *            The name of the profile
 	 * 
 	 * @return The SearchMailBoxResponseDTO
+	 * @throws JAXBException 
 	 */
-	public SearchMailBoxResponseDTO searchMailBox(SearchMailboxRequestDTO searchMailboxRequestDTO, String mbxName, String profName) {
+	public SearchMailBoxResponseDTO searchMailBox(SearchMailboxRequestDTO searchMailboxRequestDTO, String mbxName, String profName, String aclManifestJson) throws JAXBException {
 
 		LOG.info("Entering into search mailbox.");
 
@@ -357,8 +421,34 @@ public class MailBoxConfigurationService {
 
 		try {
 			
-			String primarySIId = searchMailboxRequestDTO.getPrimaryServiceInstanceId();
-			List<String> secondarySIIds = searchMailboxRequestDTO.getSecondaryServiceInstanceIds();
+			/*String primarySIId = searchMailboxRequestDTO.getPrimaryServiceInstanceId();
+			List<String> secondarySIIds = searchMailboxRequestDTO.getSecondaryServiceInstanceIds();*/
+			String primarySIId = null;
+			List<String> secondarySIIds = null;
+			
+			// retrieve service instance id from acl manifest only if the boolean check "get-serviceinstanceid-from-manifest" is true
+			// otherwise use the dummy service instance id
+			String isReadFromACLManifest = MailBoxUtility.getEnvironmentProperties().getString("get-serviceinstanceid-from-manifest");
+			if (isReadFromACLManifest.equals("true")) {
+				
+				if (aclManifestJson == null) {
+					LOG.error("acl manifest is missing in the request header");
+					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_MISSING);
+				}
+				LOG.info("desearializing the acl manifest DTO from manifest json");
+				ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+				LOG.info("acl Manifest DTO deserialized successfully");
+				LOG.info("Retrieving the service instance id from acl Manifest DTO");
+				primarySIId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifest);
+				secondarySIIds = MailBoxUtility.getSecondaryServiceInstanceIdSFromACLManifest(aclManifest);
+			} else {
+				LOG.info("Dummy service instance id is set since boolean check 'get-serviceinstanceid-from-manifest' is false");
+				primarySIId = MailBoxConstants.DUMMY_SERVICE_INSTANCE_ID;
+			}
+		
+			if (primarySIId == null) {
+				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+			}
 			
 			//combining the primary and secondary SI ids
 			Set<String> combinedServiceInstanceIds = new HashSet<>();
@@ -426,6 +516,12 @@ public class MailBoxConfigurationService {
 
 		} catch (MailBoxConfigurationServicesException e) {
 
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
+			return serviceResponse;
+		} catch (IOException e) {
+			
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse
 					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));

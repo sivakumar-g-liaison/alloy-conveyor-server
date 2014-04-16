@@ -127,20 +127,23 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 		InputStream requestStream;
 		AddMailboxRequestDTO serviceRequest;
-
+	
 		try {
 
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
-
+			
+			// retrieving acl manifest from header
+			String manifestJson = request.getHeader("acl-manifest");
+		
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// creates new mailbox
-			serviceResponse = mailbox.createMailBox(serviceRequest);
+			serviceResponse = mailbox.createMailBox(serviceRequest, manifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "createMailBox");
@@ -194,7 +197,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 		InputStream requestStream;
 		ReviseMailBoxRequestDTO serviceRequest;
-
+		
 		try {
 
 			requestStream = request.getInputStream();
@@ -205,8 +208,11 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ReviseMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
+			// retrieving acl manifest from header
+			String manifestJson = request.getHeader("acl-manifest");
+					
 			// updates existing mailbox
-			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid);
+			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, manifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "reviseMailBox");
@@ -584,7 +590,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 		InputStream requestStream;
 		AddProcessorToMailboxRequestDTO serviceRequest;
-
+		
 		try {
 
 			requestStream = request.getInputStream();
@@ -595,7 +601,11 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			serviceResponse = mailbox.createProcessor(guid, serviceRequest);
+			
+			// retrieving acl manifest from header
+			String manifestJson = request.getHeader("acl-manifest");
+			
+			serviceResponse = mailbox.createProcessor(guid, serviceRequest, manifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "createProcessor");
@@ -844,7 +854,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 		SearchMailboxRequestDTO searchMbxRequest;
 		InputStream requestStream;
-
+		
 		try {
 
 			requestStream = request.getInputStream();
@@ -855,7 +865,11 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// search the mailbox from the given details
 			SearchMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName);
+			
+			// retrieving acl manifest from header
+			String manifestJson = request.getHeader("acl-manifest");
+			
+			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName, manifestJson);
 			serviceResponse.setHitCounter(hitCounter);
 
 			//Audit LOG
