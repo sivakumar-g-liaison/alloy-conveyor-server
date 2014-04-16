@@ -10,7 +10,14 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import com.wordnik.swagger.annotations.ApiModel;
 
+/**
+ * 
+ * 
+ * @author OFS
+ */
+@ApiModel(value = "locale")
 public class LocaleDTO {
 
 	private String guid;

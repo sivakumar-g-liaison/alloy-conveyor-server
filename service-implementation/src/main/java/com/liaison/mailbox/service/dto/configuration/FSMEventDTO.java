@@ -11,7 +11,14 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.mailbox.jpa.model.FSMEvent;
+import com.wordnik.swagger.annotations.ApiModel;
 
+/**
+ * 
+ * 
+ * @author OFS
+ */
+@ApiModel(value = "fsmEvent")
 public class FSMEventDTO {
 
 	private String executionID;

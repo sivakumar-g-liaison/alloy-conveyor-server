@@ -20,6 +20,10 @@ import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
+/**
+ * 
+ * @author OFS
+ */
 public class GetExecutingProcessorResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;

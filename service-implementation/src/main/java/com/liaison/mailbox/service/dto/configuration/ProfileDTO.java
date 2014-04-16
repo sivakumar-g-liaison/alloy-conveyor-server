@@ -12,14 +12,18 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * 
  * 
  * @author praveenu
  */
+@ApiModel(value = "profile")
 public class ProfileDTO {
 
+	@ApiModelProperty( value = "Profile name", required = true)
 	private String name;
 	private String id;
 

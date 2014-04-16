@@ -45,7 +45,11 @@ import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiImplicitParam;
+import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.ApiResponse;
 
 @Path("v1/mailbox/processoradmin")
 @Api(value = "v1/mailbox/processoradmin", description = "Administration of processor services")
@@ -73,9 +77,15 @@ public class MailboxAdminResource extends BaseResource {
 	 * @return Response
 	 */
 	@GET
-	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21)
+	@ApiOperation(value = "Get Executing Processors",
+	notes = "get list of executing processors",
+	position = 21,
+	response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
 	@Path("/processor/execution")
 	@Produces(MediaType.APPLICATION_JSON)
+	@ApiResponses({
+		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+	})
 	@AccessDescriptor(accessMethod = "getExecutingProcessors")
 	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") String status,
 			@QueryParam(value = "frmDate") String frmDate, @QueryParam(value = "toDate") String toDate, @QueryParam(value = "hitCounter") String hitCounter) {
@@ -118,10 +128,18 @@ public class MailboxAdminResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Interrupt processors", notes = "interrupt running processor", position = 22)
+	@ApiOperation(value = "Interrupt processors",
+	notes = "interrupt running processor",
+	position = 22,
+	response = com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO.class)
 	@Path("/processor/execution")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Interrupt running processor", required = true,
+	dataType = "com.liaison.mailbox.swagger.dto.request.InterruptExecutionRequest", paramType = "body") })
+	@ApiResponses({
+		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+	})
 	@AccessDescriptor(accessMethod = "interruptRunningProcessor")
 	public Response interruptRunningProcessor(@Context HttpServletRequest request) {
 

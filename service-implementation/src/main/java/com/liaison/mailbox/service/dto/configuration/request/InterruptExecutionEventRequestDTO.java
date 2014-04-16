@@ -16,8 +16,13 @@ import com.liaison.mailbox.jpa.model.FSMEvent;
 import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
-@JsonRootName("interrupExecutionRequest")
+/**
+ * @author OFS
+ *
+ */
+@JsonRootName("interruptExecutionRequest")
 public class InterruptExecutionEventRequestDTO {
+	
 	private FSMEventDTO fsmEvent;
 	
 	public FSMEventDTO getFsmEvent() {
