@@ -36,9 +36,9 @@ public class SwaggerBootstrap extends HttpServlet {
 		}
 
 		if(!basePathParts[2].equals("localhost:8080")) {
-			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8080/usermanagement/rest");
+			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8080/g2mailboxservice/rest");
 		} else {
-			config.setBasePath("http://localhost:8080/usermanagement/rest");
+			config.setBasePath("http://localhost:8080/g2mailboxservice/rest");
 		}
 
 		ConfigFactory.setConfig(config);
