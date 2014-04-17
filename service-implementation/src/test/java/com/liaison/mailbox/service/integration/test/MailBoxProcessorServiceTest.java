@@ -91,8 +91,8 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER" ,"Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
-		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
-		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -103,9 +103,9 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		// Get Processor
-		String getProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
+		String url2 = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid() + "/processor" + "/"
 				+ processorResponseDTO.getProcessor().getGuId();
-		request = constructHTTPRequest(getBASE_URL() + getProcessor, HTTP_METHOD.GET, null, logger);
+		request = constructHTTPRequest(url2, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
