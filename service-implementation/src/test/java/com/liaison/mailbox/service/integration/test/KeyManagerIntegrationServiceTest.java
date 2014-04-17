@@ -41,7 +41,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
@@ -51,6 +51,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.util.HTTPClientUtil;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 /**
  * Test class to test mailbox configuration service.
  * 
@@ -67,9 +68,11 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	/**
 	 * @throws java.lang.Exception
 	 */
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() throws Exception {
 		logger = LogManager.getLogger(KeyManagerIntegrationServiceTest.class);
+		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+		System.setProperty("archaius.deployment.environment", "ci");
 	}
     
 	/**
@@ -91,11 +94,11 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost("http://10.0.6.101:8080/key-management-1.0.1/upload/truststore"); 
+        HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"upload/truststore"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
-        FileBody keyStore = new FileBody(new File("C:\\g2truststore.jks"));
+        FileBody keyStore = new FileBody(new File(this.getClass().getResource("/requests/keymanager/g2truststore.jks").getPath()));
         HttpEntity reqEntity = MultipartEntityBuilder.create()
                 .addPart("jsonRequest", jsonRequestBody)
                 .addPart("keystore", keyStore)
