@@ -301,6 +301,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		mailBox.setName("TestMailBox");
 		mailBox.setStatus("ACTIVE");
 		mailBox.setServiceInstanceId("TESTSERVICEID");
+		mailBox.setDescription("Test Mailbox");
 
 		// Adding the mailbox
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();

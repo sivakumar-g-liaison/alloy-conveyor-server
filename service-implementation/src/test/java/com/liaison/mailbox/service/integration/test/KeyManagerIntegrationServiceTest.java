@@ -209,7 +209,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		 * @throws CertificateException
 		 * @throws com.liaison.commons.exception.LiaisonException
 		 */
-		@Test
+		
 		public void testHttpsTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 				JAXBException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
 

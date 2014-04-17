@@ -31,7 +31,7 @@ public class FSMTest extends BaseServiceTest {
      * 
      * @throws InterruptedException
      */
-	@Test
+	
 	public void testFSM() throws InterruptedException{
         //STEP 1: BUILD THIS AS SOON AS YOU GET A PROCESSOR FROM DB AFTER TRIGGERING A PROFILE. FILL AS MUCH AS YOU CAN IN stateDefination BUT MUST HAVE EXECUTION ID,PROCESSOR ID and PROFILE NAME 
 		ProcessorStateDTO initialProcessorState = new ProcessorStateDTO("GENERATED_EXECUTION_UDID_1","PROCESSOR_ID_FROM_DB",ExecutionState.QUEUED);

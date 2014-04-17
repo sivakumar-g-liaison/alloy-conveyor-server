@@ -10,10 +10,13 @@
 
 package com.liaison.mailbox.services.util.unit.test;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.testng.annotations.Test;
@@ -29,16 +32,21 @@ public class JavaScriptEngineUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testExecuteJavaScript() throws Exception{
+	public void testExecuteJavaScript() {
 		
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "dev");
+		System.setProperty("archaius.deployment.environment", "ci");
 		
 		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 		JavascriptScriptContext scriptContext = null;
 		String testJs = "gitlab:/src/test/resources/sandbox-tests.js";
-		URI myUri = new URI(testJs);
-		String scriptName = null;
+		URI myUri = null;
+		try {
+			myUri = new URI(testJs);
+		} catch (URISyntaxException e) {
+		Assert.assertTrue(false);
+		}
+		
 		
 		 if (scriptContext == null) {
 		     
@@ -46,12 +54,13 @@ public class JavaScriptEngineUtilTest {
 		 }
 	    scriptExecutor.setScriptContext(scriptContext);
 	    
-	    Object returnValue = scriptExecutor.executeInContext(scriptContext, "sandbox-tests.js", myUri, "testHappyPath", null);
-
+	    Object returnValue = scriptExecutor.executeInContext(scriptContext, "sandbox-tests.js", myUri, "testHappyPathWithArgs", "Test");
+        System.out.println("returnValue "+returnValue);
 	    // did my function call throw?
-	    Exception expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get("sandbox-tests.js" + ":" + "testHappyPath");
+	    Exception expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get("sandbox-tests.js" + ":" + "testHappyPathWithArgs");
 	    if (null != expectedException) {
-	       	throw expectedException;
+	    	expectedException.printStackTrace();
+	    	Assert.assertTrue(false);
 	    }
 	   
 	}
