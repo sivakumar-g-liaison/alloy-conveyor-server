@@ -630,6 +630,7 @@ public abstract class AbstractRemoteProcessor {
 		
 		Map<String, String> headerMap = new HashMap<String, String>();
 		headerMap.put("Content-Type", "application/json");
+		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS "+url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 		
 		if (jsonResponse != null) {
@@ -1336,11 +1337,16 @@ public abstract class AbstractRemoteProcessor {
 	 */
 	protected void removePrivateKey() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
 		
-		LOGGER.info("Going to remove privateKey downloaded from keyManager");
+		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-		String fileLocation = MailBoxUtility.getEnvironmentProperties().getString("privateKeyPath")+sshKeyPairCredential.getCredsUri()+".txt";
-		File privateKeyFile = new File(fileLocation);
-		if (privateKeyFile.exists()) privateKeyFile.delete();
-		LOGGER.info("privateKey downloaded from keyManager removed from local file system");
+		if(sshKeyPairCredential.getCredsUri() !=null){
+			String fileLocation = MailBoxUtility.getEnvironmentProperties().getString("privateKeyPath")+sshKeyPairCredential.getCredsUri()+".txt";
+			File privateKeyFile = new File(fileLocation);
+			if (privateKeyFile.exists()) privateKeyFile.delete();		
+			LOGGER.info("privateKey downloaded from keyManager removed from local file system");
+			return;
+		 }
+		
+		LOGGER.info("Trigerring - The private key file path not configured.");
 	}
 }
