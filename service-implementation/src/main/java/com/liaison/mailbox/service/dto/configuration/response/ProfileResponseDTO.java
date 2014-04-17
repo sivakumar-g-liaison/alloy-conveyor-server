@@ -12,7 +12,7 @@ package com.liaison.mailbox.service.dto.configuration.response;
 
 /**
  * 
- * @author karthikeyanm
+ * @author OFS
  */
 public class ProfileResponseDTO {
 

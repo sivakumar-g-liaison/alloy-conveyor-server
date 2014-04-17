@@ -35,22 +35,29 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * 
  * 
  * @author sivakumarg
  */
+@ApiModel(value = "processor")
 public class ProcessorDTO {
 
 	private String guid;
 	private String name;
+	@ApiModelProperty( value = "Processor type", required = true)
 	private String type;
 	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private String javaScriptURI;
 	private String description;
+	@ApiModelProperty( value = "Processor status", required = true)
 	private String status;
+	@ApiModelProperty( value = "Processor protocol", required = true)
 	private String protocol;
+	@ApiModelProperty( value = "Mailbox id", required = true)
 	private String linkedMailboxId;
 	private List<String> linkedProfiles;
 	private List<FolderDTO> folders;

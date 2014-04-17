@@ -26,7 +26,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- * @author karthikeyanm
+ * @author OFS
  */
 @JsonRootName("addProfileResponse")
 public class AddProfileResponseDTO implements ResponseBuilder {

@@ -20,22 +20,26 @@ import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * 
  * 
  * @author sivakumarg
  */
+
+@ApiModel(value = "credential")
 public class CredentialDTO {
 
 	private String guId;
+	@ApiModelProperty( value = "Credential Type", required = true)
 	private String credentialType;
 	private String credentialURI;
 	private String userId;
 	private String password;
 	private String idpType;
 	private String idpURI;
-			
 	
 	public String getGuId() {
 		return guId;

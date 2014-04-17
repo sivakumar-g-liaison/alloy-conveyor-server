@@ -17,16 +17,21 @@ import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * 
  * 
  * @author sivakumarg
  */
+
+@ApiModel(value = "folder")
 public class FolderDTO {
 
 	private String guId;
 	private String folderURI;
+	@ApiModelProperty( value = "Folder Type", required = true)
 	private String folderType;
 	private String folderDesc;
 

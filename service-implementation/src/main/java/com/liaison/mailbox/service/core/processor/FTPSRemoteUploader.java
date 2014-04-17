@@ -21,9 +21,9 @@ import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
@@ -51,7 +51,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FTPSRemoteUploader.class);
+	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteUploader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteUploader() {
@@ -96,7 +96,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 */
 	@Override
 	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -139,14 +139,14 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		}
 		String path = getPayloadURI();
 		if (MailBoxUtility.isEmpty(path)) {
-			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+			LOGGER.info("The given payload URI is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtility.isEmpty(remotePath)) {
-			LOGGER.info("The given remote URI {} does not exist.", remotePath);
-			throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+			LOGGER.info("The given remote URI is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.");
 		}
 
 		boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
@@ -170,7 +170,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * 
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException {
+			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException,MailBoxServicesException {
 		
 		//TODO find appropriate place to trigger event fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
 
@@ -255,6 +255,9 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					
 				}
 			}
+		} else {			 
+			LOGGER.info("The given payload URI'" + localDir + "' does not exist.");
+			throw new MailBoxServicesException("The given payload configuration '" + localDir + "' does not exist.");
 		}
 	}
 }

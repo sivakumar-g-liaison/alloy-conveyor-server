@@ -13,8 +13,8 @@ package com.liaison.mailbox.service.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.mailbox.jpa.dao.ParallelProcessorDAO;
 import com.liaison.mailbox.jpa.dao.ParallelProcessorDAOBase;
@@ -33,7 +33,7 @@ public class ProcessorSemaphore {
 	 */
 	private static List<Processor> synchronizedProcessors = new ArrayList<>();
 	
-	private static final Logger LOG = LoggerFactory.getLogger(ProcessorSemaphore.class);
+	private static final Logger LOG = LogManager.getLogger(ProcessorSemaphore.class);
 
 
 	/**

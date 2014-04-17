@@ -14,14 +14,18 @@ import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * Data Transfer Object for MailBox & Processor Property.
  * 
  * @author veerasamyn
  */
+@ApiModel(value = "property")
 public class PropertyDTO {
 
+	@ApiModelProperty( value = "Property name", required = true)
 	private String name;
 	private String value;
 

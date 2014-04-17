@@ -20,8 +20,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.mailbox.service.core.MailBoxService;
@@ -32,12 +32,14 @@ import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 @Path("v1/mailbox/triggerProfile")
 @Api(value = "v1/mailbox/triggerProfile", description = "Trigger profile services")
 public class MailBoxResource extends BaseResource {
 
-	private static final Logger LOG = LoggerFactory.getLogger(MailBoxConfigurationResource.class);
+	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -60,9 +62,15 @@ public class MailBoxResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Trigger profile", notes = "trigger a profile", position = 23)
+	@ApiOperation(value = "Trigger profile",
+	notes = "trigger a profile",
+	position = 23,
+	response = com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+	@ApiResponses({
+		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+	})
 	@AccessDescriptor(accessMethod = "triggerProfile")
 	public Response triggerProfile(@QueryParam(value = "name") String profileName,
 			@QueryParam(value = "excludeMailbox") String mailboxNamePattern,

@@ -61,7 +61,7 @@ dependencies {
     compile 'com.oracle:ojdbc6:11g-11.2.0.3.0'
     compile 'com.oracle:ucp:11g-11.2.0.3.0'
     // Liaison code
-   compile group: "com.liaison", name: "commons-lib", version: "1.0.3-SNAPSHOT", changing: true
+   compile group: "com.liaison", name: "commons-lib", version: "1.0.5-SNAPSHOT", changing: true
 
 }
 

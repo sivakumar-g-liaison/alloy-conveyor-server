@@ -21,8 +21,8 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -52,7 +52,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class MailBoxService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(MailBoxService.class);
+	private static final Logger LOG = LogManager.getLogger(MailBoxService.class);
 
 	/**
 	 * The method gets the list of processors from the given profile,

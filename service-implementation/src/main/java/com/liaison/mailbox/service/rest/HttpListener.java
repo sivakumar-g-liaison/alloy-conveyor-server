@@ -41,8 +41,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
@@ -68,7 +68,7 @@ import com.netflix.servo.monitor.Monitors;
 @Produces(MediaType.WILDCARD)
 public class HttpListener extends BaseResource {
 	
-	private static final Logger logger = LoggerFactory.getLogger(HttpListener.class);
+	private static final Logger logger = LogManager.getLogger(HttpListener.class);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);

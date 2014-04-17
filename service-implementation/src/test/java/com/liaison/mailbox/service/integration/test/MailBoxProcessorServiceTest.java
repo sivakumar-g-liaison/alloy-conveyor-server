@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.integration.test;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 import org.testng.Assert;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,12 +21,12 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -67,7 +68,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	 */
 	@BeforeMethod
 	public void setUp() throws Exception {
-		logger = LoggerFactory.getLogger(MailBoxProcessorServiceTest.class);
+		logger = LogManager.getLogger(MailBoxProcessorServiceTest.class);
 		// Adding the mailbox
 		responseDTO = createMailBox();
 	}
@@ -87,7 +88,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER" ,"Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -136,7 +137,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER","Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", false);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -184,7 +185,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", false);
 		addProcessorDTO.getProcessor().setLinkedMailboxId(null);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
@@ -218,7 +219,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" ,false, "HTTP", false);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + "1241234123" + "/processor";
@@ -251,7 +252,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" ,false, "HTTP", true);
 		addProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
@@ -285,7 +286,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, null, true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, null, true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -318,7 +319,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "TEST", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "TEST", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -378,7 +379,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest("RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL",
 				"ACTIVE",
-				"REMOTEDOWNLOADER", false, "HTTP", true));
+				"REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -411,7 +412,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
 		jsonRequest = MailBoxUtility
-				.marshalToJSON(getProcessorRequest("ddd755", "/Sample", "LOGIN_CREDENTIAL", "fdfd", "85964", false, "HTTP", true));
+				.marshalToJSON(getProcessorRequest("ddd755", "/Sample", "LOGIN_CREDENTIAL", "fdfd", "85964", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -442,7 +443,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonGenerationException,
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
-		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest(null, null, null, null, null, false, null, true));
+		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest(null, null, null, null, null, null, null , false, null, true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -471,7 +472,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -544,7 +545,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" ,false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -559,7 +560,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		AddProcessorToMailboxRequestDTO addSecProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addSecProcessorDTO);
 
 		String addProcessorReq = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -605,7 +606,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonMappingException, JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -620,7 +621,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
-				"/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", true);
+				"/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", true);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
@@ -666,7 +667,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonMappingException, JAXBException, IOException {
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
-				"/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, null, true);
+				"/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, null, true);
 		reviseProcessorDTO.getProcessor().setGuid("123456");
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
@@ -697,7 +698,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonMappingException, JAXBException, IOException {
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
-				"/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "Test", true);
+				"/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "Test", true);
 		reviseProcessorDTO.getProcessor().setGuid("123456");
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 
@@ -729,7 +730,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		reviseProcessorDTO.getProcessor().setLinkedMailboxId(null);
 		reviseProcessorDTO.getProcessor().setGuid("21412341234");
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
@@ -764,7 +765,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		reviseProcessorDTO.getProcessor().setLinkedMailboxId("null");
 		reviseProcessorDTO.getProcessor().setGuid("dfasfasfdafd");
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
@@ -799,7 +800,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		// Add
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -815,7 +816,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		// Revise
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 
@@ -850,7 +851,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		// AddProcessor
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -879,7 +880,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		// Revise
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", false);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 
 		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
@@ -924,7 +925,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		// AddProcessor
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -940,7 +941,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		// Revise
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", true, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", true);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 		reviseProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
 
@@ -974,7 +975,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JAXBException, IOException {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
-				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", false, "HTTP", true);
+				"RESPONSE_LOCATION", "/Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -1128,7 +1129,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 	 * @throws LiaisonException
 	 */
 	private Object getProcessorRequest(String folderTye, String folderURI, String credentialType, String processorStatus,
-			String processorType, boolean isRevise, String protocolType, boolean setProfile) throws JsonParseException,
+			String processorType, String processorDescription, String processorServiceInstanceId, boolean isRevise, String protocolType, boolean setProfile) throws JsonParseException,
 			JsonMappingException,
 			JsonGenerationException,
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
@@ -1149,6 +1150,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		processorDTO.setCredentials(credetnialList);
 		processorDTO.setFolders(folderList);
 		processorDTO.setStatus(processorStatus);
+		
+		processorDTO.setDescription(processorDescription);
+		processorDTO.setServiceInstanceId(processorServiceInstanceId);
+		
 		processorDTO.setType(processorType);
 		processorDTO.setProtocol(protocolType);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());

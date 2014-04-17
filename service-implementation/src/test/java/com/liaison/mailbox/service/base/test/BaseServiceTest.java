@@ -11,6 +11,7 @@ package com.liaison.mailbox.service.base.test;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,9 +20,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -168,6 +169,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setServiceInstId(uniqueValue.intValue());
 			mailBoxDTO.setShardKey("MBX_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+			mailBoxDTO.setServiceInstanceId("MBX_SERVICE_ID"+uniqueValue);
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -179,6 +181,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setServiceInstId(uniqueValue.intValue());
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+			mailBoxDTO.setServiceInstanceId("MBX_REV_SERVICE_ID"+uniqueValue);
 
 			property.setName("MBX_REV_SIZE");
 			property.setValue("1024");

@@ -22,9 +22,9 @@ import java.security.cert.CertificateException;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.net.ftp.FTPFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
@@ -46,7 +46,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
  */
 public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FTPSRemoteDownloader.class);
+	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteDownloader() {
@@ -135,14 +135,14 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 		String path = getPayloadURI();
 		if (MailBoxUtility.isEmpty(path)) {
-			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+			LOGGER.info("The given payload URI is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtility.isEmpty(remotePath)) {
-			LOGGER.info("The given remote URI {} does not exist.", remotePath);
-			throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+			LOGGER.info("The given remote URI is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.");
 		}
 
 		ftpsRequest.changeDirectory(path);

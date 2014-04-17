@@ -13,8 +13,8 @@ package com.liaison.mailbox.service.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 /**
@@ -25,7 +25,7 @@ public class TimestampLogger
 	protected static final String TIMESTAMP_LOGGER_NAME = "TIMESTAMP_LOGGER";
 	protected static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-	private static final Logger timestampLogger = LoggerFactory.getLogger(TIMESTAMP_LOGGER_NAME);
+	private static final Logger timestampLogger = LogManager.getLogger(TIMESTAMP_LOGGER_NAME);
 
 
 	/**

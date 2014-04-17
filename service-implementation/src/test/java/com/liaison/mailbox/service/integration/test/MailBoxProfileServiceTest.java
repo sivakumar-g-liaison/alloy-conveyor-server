@@ -9,19 +9,20 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
-import org.testng.annotations.Test;
-import org.testng.Assert;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -43,11 +44,11 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 	private HTTPRequest request;
 	private String jsonRequest;
 	private String jsonResponse;
-
-	@Override
-	public void initialSetUp() throws FileNotFoundException, IOException {
-		super.initialSetUp();
-		logger = LoggerFactory.getLogger(MailBoxProfileServiceTest.class);
+    
+	@BeforeMethod
+	public void setUp() throws Exception {
+		//super.initialSetUp();
+		logger = LogManager.getLogger(MailBoxProfileServiceTest.class);
 	}
     
 	/**

@@ -14,7 +14,7 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 
 /**
- * @author karthikeyanm
+ * @author OFS
  * 
  */
 

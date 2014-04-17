@@ -29,7 +29,7 @@ import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
  * 
- * @author karthikeyanm
+ * @author OFS
  */
 @JsonRootName("getProfileResponse")
 public class GetProfileResponseDTO implements ResponseBuilder {

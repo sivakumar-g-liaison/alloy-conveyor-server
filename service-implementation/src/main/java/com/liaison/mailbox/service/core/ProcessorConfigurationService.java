@@ -38,8 +38,8 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
@@ -76,7 +76,7 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
-import com.liaison.mailbox.service.dto.configuration.request.AddFSMExecutionEventRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
@@ -99,7 +99,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  */
 public class ProcessorConfigurationService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorConfigurationService.class);
+	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
 	private static String PROCESSOR = "Processor";
 	private static String TRUSTSTORE = "TrustStore";
 	private static String MAILBOX = "MailBox";
@@ -160,8 +160,7 @@ public class ProcessorConfigurationService {
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
-			// Instantiate the processor and copying the values from DTO to
-			// entity.
+			// Instantiate the processor and copying the values from DTO to entity.
 			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
 			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
 			serviceRequest.getProcessor().copyToEntity(processor, true);
@@ -718,7 +717,7 @@ public class ProcessorConfigurationService {
 	 * @throws MailBoxConfigurationServicesException 
 	 * 
 	 */
-	public AddFSMExecutionEventResponseDTO interruptRunningProcessor( AddFSMExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
+	public AddFSMExecutionEventResponseDTO interruptRunningProcessor( InterruptExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
 		
 		LOGGER.info("Entering into interrupt processor.");
 		AddFSMExecutionEventResponseDTO serviceResponse = new AddFSMExecutionEventResponseDTO();

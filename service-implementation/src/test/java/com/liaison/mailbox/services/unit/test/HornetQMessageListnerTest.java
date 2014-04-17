@@ -63,7 +63,7 @@ public class HornetQMessageListnerTest {
       * 
       * @throws InterruptedException
       */
-	 @Test
+	/*@Test
 	public void testThreading() throws InterruptedException {
 		 
     	 MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
@@ -80,7 +80,7 @@ public class HornetQMessageListnerTest {
 				
 			};
           while(true);	 
-	 }
+	 }*/
 	 
 	
 

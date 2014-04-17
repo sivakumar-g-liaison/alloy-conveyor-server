@@ -13,9 +13,8 @@ package com.liaison.mailbox.service.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
@@ -39,7 +38,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 public class ProfileConfigurationService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ProfileConfigurationService.class);
+	private static final Logger LOG = LogManager.getLogger(ProfileConfigurationService.class);
 	private static final String PROFILE = "Profile";
 
 	private final GenericValidator validator = new GenericValidator();

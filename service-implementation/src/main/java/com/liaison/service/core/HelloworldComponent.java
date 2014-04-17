@@ -23,9 +23,8 @@ import javax.naming.NamingException;
 
 import oracle.ucp.UniversalConnectionPoolException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.acl.util.SignatureVerifier;
 import com.liaison.commons.acl.util.example.ExampleBase64EncodedSignatureVerifier;
@@ -38,7 +37,7 @@ import com.netflix.karyon.spi.Component;
  *  */
 @Component
 public class HelloworldComponent {
-	private static final Logger logger = LoggerFactory.getLogger(HelloworldComponent.class);
+	private static final Logger logger = LogManager.getLogger(HelloworldComponent.class);
 	
 	@PostConstruct
     public void initialize() throws NamingException, SQLException, UniversalConnectionPoolException {

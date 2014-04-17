@@ -151,10 +151,15 @@
 	  <init-param>
 	    <param-name>swagger.api.basepath</param-name>
 	    <!-- change localhost to production server name -->
-	    <param-value>http://localhost:9090/g2mailboxservice/rest</param-value>
+	    <param-value>http://10.0.24.76:8080/g2mailboxservice/rest</param-value>
 	  </init-param>
 	  <load-on-startup>2</load-on-startup>
 	</servlet>
+	<servlet>
+        <servlet-name>SwaggerBootstrap</servlet-name>
+        <servlet-class>com.liaison.service.core.SwaggerBootstrap</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
 	
 	<!--  
     ==============================================================================

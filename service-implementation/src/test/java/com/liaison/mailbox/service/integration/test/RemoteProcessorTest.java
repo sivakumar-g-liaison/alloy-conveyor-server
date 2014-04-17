@@ -9,10 +9,6 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.Assert;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +27,11 @@ import javax.xml.bind.JAXBException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -122,7 +123,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 			MailBoxConfigurationServicesException {
 
 		CredentialDTO credentialDTO = new CredentialDTO();
-		credentialDTO.setCredentialType("KEY_STORE");
+		credentialDTO.setCredentialType("LOGIN_CREDENTIAL");
 		credentialDTO.setCredentialURI("\test");
 		credentialDTO.setIdpType("test");
 		credentialDTO.setIdpURI("\test");

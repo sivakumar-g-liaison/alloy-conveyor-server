@@ -28,17 +28,22 @@ import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * 
  * 
  * @author veerasamyn
  */
+@ApiModel(value = "mailbox")
 public class MailBoxDTO {
 
 	private String guid;
+	@ApiModelProperty( value = "Mailbox name", required = true)
 	private String name;
 	private String description;
+	@ApiModelProperty( value = "Mailbox status", required = true)
 	private String status;
 	private Integer serviceInstId;
 	private String shardKey;
