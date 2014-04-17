@@ -1139,16 +1139,14 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		FolderDTO folderDto = new FolderDTO();
 		folderDto.setFolderType(folderTye);
 		folderDto.setFolderURI(folderURI);
+		folderDto.setFolderDesc("someDesc");
 		folderList.add(folderDto);
-
-		CredentialDTO credentialDTO = new CredentialDTO();
-		credentialDTO.setCredentialType(credentialType);
-		credetnialList.add(credentialDTO);
 
 		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.setCredentials(credetnialList);
 		processorDTO.setFolders(folderList);
 		processorDTO.setStatus(processorStatus);
+		processorDTO.setName(System.currentTimeMillis() + "");
 		
 		processorDTO.setDescription(processorDescription);
 		processorDTO.setServiceInstanceId(processorServiceInstanceId);
