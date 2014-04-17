@@ -127,11 +127,11 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost("http://10.0.6.101:8989/key-management-1.0.1/upload/public"); 
+        HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"/upload/public"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
-        FileBody publicKeyCert = new FileBody(new File("D:\\doc\\certificates\\irctc.cer"));
+        FileBody publicKeyCert = new FileBody(new File(this.getClass().getResource("/requests/keymanager/publickey.cer").getPath()));
         HttpEntity reqEntity = MultipartEntityBuilder.create()
                 .addPart("request", jsonRequestBody)
                 .addPart("key", publicKeyCert)
@@ -161,7 +161,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
 		
 		 // prepare post method  
-        HttpPut httpPut = new HttpPut("http://10.0.6.101:8080/key-management-1.0.1/update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
+        HttpPut httpPut = new HttpPut(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
         
         httpPut.addHeader("Content-Type", "application/json");
@@ -187,7 +187,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			JAXBException, IOException, com.liaison.commons.exception.LiaisonException {
 
 		// Get the mailbox
-		String url = "http://10.0.6.101:8989/key-management-1.0.1/fetch/truststore/current/75D5112D0A0006340665134D334351D5";
+		String url = MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"fetch/truststore/current/75D5112D0A0006340665134D334351D5";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -267,7 +267,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			  	privateKeyBytes = Base64.decodeBase64(base64EncodedStr);
 				
 			}
-			String privateKeyPath = "E:\\opensslkeypair.pem";
+			String privateKeyPath = this.getClass().getResource("/requests/keymanager/opensslkeypair.pem").getPath();
 			String password = "passmein";
 			/*FileOutputStream out = new FileOutputStream(privateKeyPath);
 			out.write(privateKeyBytes);
@@ -313,7 +313,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			  	privateKeyBytes = base64EncodedStr.getBytes();
 				
 			}
-			String privateKeyPath = "D:\\opt\\opensslkeypair.txt";
+			String privateKeyPath = this.getClass().getResource("/requests/keymanager/opensslkeypair.txt").getPath();
 			//String password = "passmein";
 			FileOutputStream out = new FileOutputStream(privateKeyPath);
 			out.write(privateKeyBytes);
