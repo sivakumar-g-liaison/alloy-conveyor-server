@@ -50,6 +50,7 @@ public final class HTTPClientUtil {
 		OutputStream output = new HTTPStringOutputStream();
 		request.setOutputStream(output);
 		setHeaders(request, headers);
+		request.setConnectionTimeout(60000);
 		HTTPResponse reponse = request.execute();
 		if (reponse.getStatusCode() == 200) {
 			clientContent = output.toString();
