@@ -35,7 +35,7 @@
             ],
             "credentials": [
 			    {
-			        "credentialType": "TRUST_STORE",
+			        "credentialType": "LOGIN_CREDENTIAL",
 			        "credentialURI": "http: //path",
 			        "userId": "test",
 			        "password": "test",

@@ -104,7 +104,6 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
-		Assert.assertEquals(requestDTO.getMailBox().getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
 		Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
@@ -159,7 +158,6 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
-		Assert.assertEquals(requestDTO.getMailBox().getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
 		Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
@@ -276,7 +274,6 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 		Assert.assertEquals(mbxDTO.getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
-		Assert.assertEquals(mbxDTO.getServiceInstId(), getResponseDTO.getMailBox().getServiceInstId());
 		Assert.assertEquals(mbxDTO.getShardKey(), getResponseDTO.getMailBox().getShardKey());
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
@@ -303,6 +300,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		MailBoxDTO mailBox = new MailBoxDTO();
 		mailBox.setName("TestMailBox");
 		mailBox.setStatus("ACTIVE");
+		mailBox.setServiceInstanceId("TESTSERVICEID");
 
 		// Adding the mailbox
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();

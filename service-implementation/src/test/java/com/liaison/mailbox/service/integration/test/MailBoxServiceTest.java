@@ -28,7 +28,9 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
@@ -70,7 +72,12 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 		// Add the Mailbox
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
+
+		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addMailBoxResponse"));
@@ -103,7 +110,8 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 		addProcessorDTO.getProcessor().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
 		addProcessorDTO.getProcessor().getLinkedProfiles().add(profileName);
-
+		addProcessorDTO.getProcessor().setServiceInstanceId(requestDTO.getMailBox().getServiceInstanceId());
+		
 		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -116,14 +124,14 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		Assert.assertEquals(true, getResponseStatus(jsonResponse, "addProcessorToMailBoxResponse").equals(SUCCESS));
 
 		// Trigger the profile
-		String triggerProfile = "/triggerProfile" + "?name=" + profileName;
+		/*String triggerProfile = "/triggerProfile" + "?name=" + profileName;
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(SUCCESS));
+		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(SUCCESS));*/
 
 	}
 
