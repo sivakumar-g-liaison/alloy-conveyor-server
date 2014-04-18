@@ -14,7 +14,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -39,7 +38,7 @@ public class ServiceInstance implements Identifiable {
 	public ServiceInstance() {
 	}
 	
-	@OneToMany(mappedBy = "serviceInstanceId", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "serviceInstance", orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;

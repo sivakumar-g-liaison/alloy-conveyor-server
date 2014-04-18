@@ -19,10 +19,11 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
@@ -30,6 +31,8 @@ import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAO;
 import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAOBase;
+import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.jpa.model.MailBox;
@@ -149,7 +152,7 @@ public class MailBoxConfigurationService {
 				//Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtility.getGUID());
-				msi.setServiceInstanceId(serviceInstance);
+				msi.setServiceInstance(serviceInstance);
 				mbxServiceInstances.add(msi);
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
 			} 
@@ -170,7 +173,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public GetMailBoxResponseDTO getMailBox(String guid, String  serviceInstanceId, boolean addConstraint) throws JsonParseException, JsonMappingException, JAXBException,
+	public GetMailBoxResponseDTO getMailBox(String guid, String serviceInstanceId, boolean addConstraint) throws JsonParseException, JsonMappingException, JAXBException,
 		IOException, SymmetricAlgorithmException {
 
 		LOG.info("Entering into get mailbox.");
@@ -179,32 +182,32 @@ public class MailBoxConfigurationService {
 		GetMailBoxResponseDTO serviceResponse = new GetMailBoxResponseDTO();
 		
 		try {
-		
+
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = configDao.find(MailBox.class, guid);
-			List<Processor> filteredProcessors = new ArrayList<Processor>();
-			if(addConstraint) {	
-				for(Processor proc : mailBox.getMailboxProcessors()) {
-					if(proc.getServiceInstance().getName().equals(serviceInstanceId)) {
-						filteredProcessors.add(proc);
-					}
-				}
-				mailBox.setMailboxProcessors(filteredProcessors);
-			} 
-			
+
 			if (mailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
 			}
-		
+
+			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
+			if (addConstraint) {
+				List<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(mailBox.getPguid(), serviceInstanceId);
+				mailBox.setMailboxProcessors(filteredProcessor);
+			} else {
+				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid());
+				mailBox.setMailboxProcessors(processors);
+			}
+
 			MailBoxDTO dto = new MailBoxDTO();
 			dto.copyFromEntity(mailBox);
-		
+
 			serviceResponse.setMailBox(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			LOG.info("Exit from get mailbox.");
 			return serviceResponse;
-		
+
 		} catch (MailBoxConfigurationServicesException e) {
 		
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
@@ -278,7 +281,7 @@ public class MailBoxConfigurationService {
 				//Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtility.getGUID());
-				msi.setServiceInstanceId(serviceInstance);
+				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(retrievedMailBox);
 				msiDao.persist(msi);
 			}
@@ -357,53 +360,31 @@ public class MailBoxConfigurationService {
 
 		try {
 			
-			String primarySIId = searchMailboxRequestDTO.getPrimaryServiceInstanceId();
-			List<String> secondarySIIds = searchMailboxRequestDTO.getSecondaryServiceInstanceIds();
+			String primaryServiceInstanceIds = searchMailboxRequestDTO.getPrimaryServiceInstanceId();
+			List<String> secondaryServiceInstanceIds = searchMailboxRequestDTO.getSecondaryServiceInstanceIds();
 			
 			//combining the primary and secondary SI ids
-			Set<String> combinedServiceInstanceIds = new HashSet<>();
-			combinedServiceInstanceIds.add(primarySIId);
-			combinedServiceInstanceIds.addAll(secondarySIIds);
+			secondaryServiceInstanceIds.add(primaryServiceInstanceIds);
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
-			Set<MailBox> retrievedMailBoxesTobeSent = new HashSet<>();
+			Set<MailBox> mailboxes = new HashSet<>();
 			//below checking will filter the mailboxes based on primary and secondary service instance ids
 			if (!MailBoxUtility.isEmpty(profName)) {
-				
-				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
-				
-				for(MailBox mb : retrievedMailBoxes) {
-					List<MailboxServiceInstance> mbsis = mb.getMailboxServiceInstances();
-					for(MailboxServiceInstance mbsi : mbsis) {						
-						for(String SIId : combinedServiceInstanceIds) {
-							if(mbsi.getServiceInstanceId().getName().equals(SIId)) {
-								retrievedMailBoxesTobeSent.add(mb);
-							}
-						}
-					}
-				}
+
+				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName, secondaryServiceInstanceIds);
+				mailboxes.addAll(retrievedMailBoxes);
 			}
-			
-	        
+
 			// If the profile name is empty it will use findByName
 			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
 
-				Set<MailBox> retrievedMailBoxesUsingName = configDao.findByName(mbxName);
-				
-				for(MailBox mb : retrievedMailBoxesUsingName) {
-					List<MailboxServiceInstance> mbsis = mb.getMailboxServiceInstances();
-					for(MailboxServiceInstance mbsi : mbsis) {
-						for(String SIId : combinedServiceInstanceIds) {
-							if(mbsi.getServiceInstanceId().getName().equals(SIId)) {
-								retrievedMailBoxesTobeSent.add(mb);
-							}
-						}
-					}
-				}
+				Set<MailBox> retrievedMailBoxes = configDao.findByName(mbxName, secondaryServiceInstanceIds);
+				mailboxes.addAll(retrievedMailBoxes);
 			}
-			
+
 			if (MailBoxUtility.isEmpty(profName) && MailBoxUtility.isEmpty(mbxName)){
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA);
 			}
@@ -411,10 +392,10 @@ public class MailBoxConfigurationService {
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
 			SearchMailBoxDTO serachMailBoxDTO = null;
-			for (MailBox mbx : retrievedMailBoxesTobeSent) {
+			for (MailBox mbx : mailboxes) {
 
 				serachMailBoxDTO = new SearchMailBoxDTO();
-				serachMailBoxDTO.copyFromEntity(mbx);
+				serachMailBoxDTO.copyFromEntity(mbx, dao.isMailboxHasProcessor(mbx.getPguid()));
 				searchMailBoxDTOList.add(serachMailBoxDTO);
 			}
 

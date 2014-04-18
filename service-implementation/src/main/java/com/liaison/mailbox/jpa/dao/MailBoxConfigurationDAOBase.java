@@ -27,77 +27,39 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	public MailBoxConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-    
-	
-	@Override
-	public MailBox findActiveMailBox(String guid) {
 
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		try {
-
-			List<?> mailBox = entityManager.createNamedQuery(FIND_ACTIVE_MAILBOX_BY_PGUID).setParameter(PGUID, guid)
-					.getResultList();
-			Iterator<?> iter = mailBox.iterator();
-
-			while (iter.hasNext()) {
-				return (MailBox) iter.next();
-			}
-
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
-		return null;
-	}
-	
-	@Override
-	public MailBox findMailBox(String guid, String serviceInstId) {
-
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		try {
-
-			List<?> mailBox = entityManager.createNamedQuery(FIND_MAILBOX_BY_PGUID_SIID).setParameter(PGUID, guid).setParameter(SERVICE_INST_ID, serviceInstId)
-					.getResultList();
-			Iterator<?> iter = mailBox.iterator();
-
-			while (iter.hasNext()) {
-				return (MailBox) iter.next();
-			}
-
-		} finally {
-			if (entityManager != null) {
-				entityManager.close();
-			}
-		}
-		return null;
-	}
-	
-	@Override
-	public int deactiveMailBox(String guid) {
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		return entityManager.createNamedQuery(INACTIVATE_MAILBOX).setParameter(PGUID, guid).executeUpdate();
-	}
-    
 	/**
-	 * Fetches all MailBox from  MAILBOX database table by given mailbox name and profile name.
+	 * Fetches all MailBox from  MAILBOX database table by given mailbox name, profile name and service instance ids.
 	 * 
 	 * @param mbxName
 	 * @param profName
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> find(String mbxName, String profName) {
+	public Set<MailBox> find(String mbxName, String profName, List<String> serviceInstanceIds) {
 
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
+			StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
+					.append(" inner join mbx.mailboxProcessors prcsr")
+					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
+					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
+					.append(" and mbx.pguid IN (SELECT mbo.pguid FROM MailBox mbo")
+					.append(" inner join mbo.mailboxServiceInstances msi")
+					.append(" inner join msi.serviceInstance si")
+					.append(" where LOWER(mbo.mbxName) like :" + MBOX_NAME)
+					.append(" and si.name IN (" + collectionToSqlString(serviceInstanceIds) + "))")
+					.append(" order by mbx.mbxName");
+
 			List<?> object = em
-					.createNamedQuery(GET_MBX)
-					.setParameter(MailBoxConfigurationDAO.MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-					.setParameter(MailBoxConfigurationDAO.SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+					.createQuery(query.toString())
+					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
+					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.getResultList();
 			Iterator<?> iter = object.iterator();
 
@@ -112,7 +74,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return mailBoxes;
 	}
-    
+
 	/**
 	 * Fetches all  MailBox from  MAILBOX database table by given mailbox name.
 	 * 
@@ -120,18 +82,24 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> findByName(String mbxName) {
+	public Set<MailBox> findByName(String mbxName, List<String> serviceInstanceIds) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
 		try {
 
-			List<?> object = entityManager.createNamedQuery(FIND_BY_MBX_NAME)
+			StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
+					.append(" inner join mbx.mailboxServiceInstances msi")
+					.append(" inner join msi.serviceInstance si")
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and si.name IN (" + collectionToSqlString(serviceInstanceIds) + ")");
+
+			List<?> object = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.getResultList();
-			Iterator<?> iter = object.iterator();
 
+			Iterator<?> iter = object.iterator();
 			while (iter.hasNext()) {
 				mailBoxes.add((MailBox) iter.next());
 			}
@@ -141,7 +109,31 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				entityManager.close();
 			}
 		}
+		
 		return mailBoxes;
+	}
+
+	/**
+	 * Generate "in" clause string from the list.
+	 *
+	 * @param sids list of service instance ids
+	 * @return String
+	 */
+	private String collectionToSqlString(List<String> sids) {
+
+		if (null == sids || sids.isEmpty()) {
+			return null;
+		}
+
+		StringBuilder s = new StringBuilder();
+		for (String str : sids) {
+			if (s.length() > 0) {
+				s.append(", ");
+			}
+			s.append(str);
+		}
+
+		return s.toString().replaceAll("(\\w+)", "\'$1\'");
 	}
 
 }

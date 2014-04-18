@@ -123,7 +123,7 @@ public class SearchMailBoxDTO {
 	 * @param mailBox
 	 *            The MailBox Entity
 	 */
-	public void copyFromEntity(MailBox mailBox) {
+	public void copyFromEntity(MailBox mailBox, boolean isMbxHasProcessors) {
 
 		this.setGuid(mailBox.getPguid());
 		this.setName(mailBox.getMbxName());
@@ -143,10 +143,10 @@ public class SearchMailBoxDTO {
 		}
 
 		// Boolean to denote the mailbox has processor or not
-		boolean isMbxHasProcessors = false;
+		/*boolean isMbxHasProcessors = false;
 		if (mailBox.getMailboxProcessors() != null && !mailBox.getMailboxProcessors().isEmpty()) {
 			isMbxHasProcessors = true;
-		}
+		}*/
 
 		if (MailBoxStatus.ACTIVE.value().equals(mailBox.getMbxStatus()) && !isMbxHasProcessors) {
 			this.setStatus(MailBoxConstants.INCOMPLETE_STATUS);

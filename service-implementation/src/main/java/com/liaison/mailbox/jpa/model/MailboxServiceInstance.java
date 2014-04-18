@@ -51,7 +51,7 @@ public class MailboxServiceInstance implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
 	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
 	public MailBox getMailbox() {
 		return mailbox;
@@ -63,11 +63,11 @@ public class MailboxServiceInstance implements Identifiable {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
-	public ServiceInstance getServiceInstanceId() {
+	public ServiceInstance getServiceInstance() {
 		return serviceInstance;
 	}
 
-	public void setServiceInstanceId(ServiceInstance serviceInstance) {
+	public void setServiceInstance(ServiceInstance serviceInstance) {
 		this.serviceInstance = serviceInstance;
 	}
 

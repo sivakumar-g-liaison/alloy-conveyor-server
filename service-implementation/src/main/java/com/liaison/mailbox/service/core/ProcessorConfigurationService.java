@@ -192,7 +192,7 @@ public class ProcessorConfigurationService {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
 				msi.setPguid(MailBoxUtility.getGUID());
-				msi.setServiceInstanceId(serviceInstance);
+				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(mailBox);
 				msiDao.persist(msi);
 			}

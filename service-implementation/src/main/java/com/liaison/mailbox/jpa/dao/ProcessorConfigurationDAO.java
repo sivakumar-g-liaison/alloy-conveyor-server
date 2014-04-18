@@ -30,22 +30,23 @@ import com.liaison.mailbox.jpa.model.Processor;
 						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
 						+ " and processor.procsrExecutionStatus not like :" + ProcessorConfigurationDAO.EXEC_STATUS
 						+ " order by " + ProcessorConfigurationDAO.PROF_NAME), 
-						@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROCESSOR_ID,
-						query = "select processor from Processor processor"
-								+ " where processor.pguid = :" + ProcessorConfigurationDAO.PGU_ID)	
-
+		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_COUNT,
+						query = "select count(processor) from Processor processor"
+								+ " inner join processor.mailbox mbx"
+								+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
 	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
-	public static final String FIND_PROCESSOR_BY_PROCESSOR_ID = "findProcessorByProcessorId";
+	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
 	public static final String STATUS = "status";
 	public static final String EXEC_STATUS = "exec_status";
 	public static final String SHARD_KEY = "shard_key";
-	public static final String PGU_ID = "pguid";
+	public static final String PGUID = "pguid";
+	public static final String SERV_INST_ID = "proc_serv_inst_id";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -57,15 +58,30 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return The list of processors.
 	 */
 	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
-	
+
 	/**
-	 * Find by processor pguid.
+	 * Checks the mailbox has the processor or not.
 	 * 
-	 * @param processorId
-	 *            The processor unique id.
-	  * @return a processor.
+	 * @param guid pguid of the mailbox
+	 * @return boolean
 	 */
-	public Processor findByProcessorId(String processorId);
-	
+	public boolean isMailboxHasProcessor(String guid);
+
+	/**
+	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
+	 * 
+	 * @param mbxGuid pguid of the mailbox
+	 * @param siGuid service instance id(name)
+	 * @return list of processor
+	 */
+	public List<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
+
+	/**
+	 * Retrieves list of processor from the given mailbox guid
+	 * 
+	 * @param mbxGuid the mailbox guid
+	 * @return list of processor
+	 */
+	public List<Processor> findProcessorByMbx(String mbxGuid);
 
 }

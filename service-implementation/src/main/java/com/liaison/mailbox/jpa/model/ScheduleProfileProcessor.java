@@ -51,7 +51,7 @@ public class ScheduleProfileProcessor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Processor
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "PROCESSOR_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;

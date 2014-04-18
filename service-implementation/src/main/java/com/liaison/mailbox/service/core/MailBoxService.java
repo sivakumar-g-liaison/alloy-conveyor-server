@@ -183,7 +183,7 @@ public class MailBoxService {
 			LOG.info("The execution id is {}", executionId);
 			
 			//Initiate FSM	
-			processor = processorDAO.findByProcessorId(processorId);
+			processor = processorDAO.find(Processor.class, processorId);
 			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, dto.getProfileName(),ExecutionState.QUEUED, null);
 			fsm.addDefaultStateTransitionRules(processorQueued);
 			

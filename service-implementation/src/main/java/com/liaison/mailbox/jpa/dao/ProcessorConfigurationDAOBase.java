@@ -33,7 +33,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	public ProcessorConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-    
+
 	/**
 	 * Fetches all the Processor from PROCESSOR database table by profileName and mailbox name pattern.
 	 * 
@@ -79,39 +79,129 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 	}
-	
+
 	/**
-	 * Fetches all the Processor PROCESSOR database table by processor pguid.
+	 * Checks the mailbox has the processor or not.
 	 * 
-	 * @param processorId
-	 *            The processor unique id.
-	  * @return a processor.
+	 * @param guid pguid of the mailbox
+	 * @return boolean
 	 */
 	@Override
-	public Processor findByProcessorId(String processorId) {
+	public boolean isMailboxHasProcessor(String guid) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		boolean status = false;
 
 		try {
-			
-			Processor processor = null;
-			Object proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_PROCESSOR_ID)
-					.setParameter(PGU_ID, processorId)
-					.getSingleResult();
-			if (proc != null) {
-				processor = (Processor) proc;
-			}
-			LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
-					processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-					processor.getProcsrProperties(), processor.getProcsrStatus());
 
-			return processor;
+			LOG.info("Fetching the processor count starts.");
+
+			long count = (Long) entityManager.createNamedQuery(FIND_PROCESSOR_COUNT)
+					.setParameter(PGUID, guid)
+					.getSingleResult();
+			if (count > 0) {
+ 				status = true; 
+			}
+
 		} finally {
 			if (entityManager != null) {
 				entityManager.close();
 			}
 		}
 
+		LOG.info("Fetching the processor count ends.");
+		return status;
+	}
+
+	/**
+	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
+	 * 
+	 * @param mbxGuid pguid of the mailbox
+	 * @param siGuid service instance id(name)
+	 * @return list of processor
+	 */
+	@Override
+	public List<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("find processor by mbx and service instacne starts.");
+
+			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+					.append(" inner join processor.mailbox mbx")
+					.append(" where mbx.pguid = :" + PGUID)
+					.append(" and processor.pguid in (select prcsr.pguid from Processor prcsr")
+					.append(" inner join prcsr.serviceInstance si")
+					.append(" where si.name like :" + SERV_INST_ID + ")");
+
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(PGUID, mbxGuid)
+					.setParameter(SERV_INST_ID, siGuid)
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		LOG.info("find processor by mbx and service instacne ends.");
+		return processors;
+	}
+
+	/**
+	 * Retrieves list of processor from the given mailbox guid
+	 * 
+	 * @param mbxGuid the mailbox guid
+	 * @return list of processor
+	 */
+	@Override
+	public List<Processor> findProcessorByMbx(String mbxGuid) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("Fetching the processor count starts.");
+
+			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+					.append(" inner join processor.mailbox mbx")
+					.append(" where mbx.pguid = :" + PGUID);
+
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(PGUID, mbxGuid)
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
 	}
 
 }
