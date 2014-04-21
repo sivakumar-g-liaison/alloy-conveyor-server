@@ -85,4 +85,7 @@ public interface MailBoxConstants {
 	// Type of Truststore
 	public final static String GLOBAL = "GLOBAL";
 	public final static String SELFSIGNED = "SELFSIGNED";
+	
+	// Dummy service instance id
+	public static final String DUMMY_SERVICE_INSTANCE_ID = "DummyServiceInstanceId";
 }

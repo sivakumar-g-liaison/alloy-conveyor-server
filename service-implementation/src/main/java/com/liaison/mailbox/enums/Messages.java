@@ -97,7 +97,11 @@ public enum Messages {
 	
 	//getting java properties
 	READ_JAVA_PROPERTIES_SUCCESSFULLY("%s properties read successfully."),
-	READ_JAVA_PROPERTIES_FAILED("%s properties read failed.");
+	READ_JAVA_PROPERTIES_FAILED("%s properties read failed."),
+	
+	//retrieving service instance id from acl manifest
+	SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Retrieval of service instance id from acl manifest is failed."),
+	ACL_MANIFEST_MISSING("ACL Manifest is Missing in the Request Header.");
 
 	private String value;
 
