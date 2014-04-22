@@ -32,12 +32,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
@@ -48,7 +50,6 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
@@ -63,6 +64,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -92,6 +94,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
+	
+	private static final String REQUEST_HEADER = "Request Header";
+	private static final String PROPERTIES_FILE = "Properties file";
 
 	public MailBoxConfigurationResource() throws IOException {
 
@@ -136,14 +141,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
 			
 			// retrieving acl manifest from header
+			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-		
+			String decodedManifestJson = getDecodedManifestJson(manifestJson);
+			
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// creates new mailbox
-			serviceResponse = mailbox.createMailBox(serviceRequest, manifestJson);
+			serviceResponse = mailbox.createMailBox(serviceRequest, decodedManifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "createMailBox");
@@ -209,10 +216,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// retrieving acl manifest from header
+			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
+			String decodedManifestJson = getDecodedManifestJson(manifestJson);
 					
 			// updates existing mailbox
-			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, manifestJson);
+			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, decodedManifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "reviseMailBox");
@@ -311,8 +320,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "readMailBox")
-	public Response readMailBox(@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
-			@QueryParam(value = "serviceInstanceId") String serviceInstanceId,
+	public Response readMailBox(@Context HttpServletRequest request, @PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
 			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint) {
 
 		// Audit LOG the Attempt to read mailbox
@@ -326,7 +334,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// add the new profile details
 			GetMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			serviceResponse = mailbox.getMailBox(guid, serviceInstanceId, addConstraint);
+			
+			// retrieving acl manifest from header
+			LOG.info("Retrieving acl manifest json from request header");
+			String manifestJson = request.getHeader("acl-manifest");
+			String decodedManifestJson = getDecodedManifestJson(manifestJson);
+			
+			serviceResponse = mailbox.getMailBox(guid, addConstraint, decodedManifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "readMailBox");
@@ -603,9 +617,11 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			
 			// retrieving acl manifest from header
+			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
+			String decodedManifestJson = getDecodedManifestJson(manifestJson);
 			
-			serviceResponse = mailbox.createProcessor(guid, serviceRequest, manifestJson);
+			serviceResponse = mailbox.createProcessor(guid, serviceRequest, decodedManifestJson);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "createProcessor");
@@ -831,15 +847,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 *            The profile name should be searched
 	 * @return The Response
 	 */
-	@PUT
+	@GET
 	@ApiOperation(value = "Search Enterprise",
 	notes = "search a mailbox using given query parameters",
 	position = 12,
 	response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Search mailbox", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.SearchMailboxRequest", paramType = "body") })
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
@@ -852,7 +865,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		SearchMailboxRequestDTO searchMbxRequest;
 		InputStream requestStream;
 		
 		try {
@@ -860,16 +872,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			searchMbxRequest = MailBoxUtility.unmarshalFromJSON(requestString, SearchMailboxRequestDTO.class);
-
 			// search the mailbox from the given details
 			SearchMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			
 			// retrieving acl manifest from header
+			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
+			String decodedManifestJson = getDecodedManifestJson(manifestJson);
 			
-			serviceResponse = mailbox.searchMailBox(searchMbxRequest, mbxName, profileName, manifestJson);
+			serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson);
 			serviceResponse.setHitCounter(hitCounter);
 
 			//Audit LOG
@@ -1278,5 +1290,48 @@ public class MailBoxConfigurationResource extends BaseResource {
 			auditFailure("getjavaPropertyFileValues");
 		}
 		return returnResponse;
+	}
+	
+	/**
+	 * Method to retrieve the base64 decoded acl manifest json
+	 * 
+	 * @param manifestJson
+	 * @return
+	 * @throws IOException
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	private String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
+		
+		String decodedManifestJson = null;
+		
+		// if manifest is available in the header then use acl-manifest in the header irrespective of
+		// the property "use.dummy.manifest" configured in properties file
+		if (!MailBoxUtility.isEmpty(manifestJson)) {
+			LOG.info("acl manifest available in the header");
+		} else {
+			// check the value of property "use.dummy.manifest"
+			// if it is true use dummy manifest else throw an error due to the 
+			// non-availability of manifest in header
+			if ((MailBoxUtility.getEnvironmentProperties().getString("use.dummy.manifest")).equals("true")) {
+				
+				LOG.info("Retrieving the dummy acl manifest json from properties file");
+				manifestJson = MailBoxUtility.getEnvironmentProperties().getString("acl-manifest-json");
+				if (MailBoxUtility.isEmpty(manifestJson)) {
+					LOG.error("dummy acl manifest is not available in the properties file");
+					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE);
+				}
+	
+			} else {
+				LOG.error("acl manifest is not available in the request header");
+				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER);
+			}
+			
+		}
+	
+		// decode the manifest using base64
+		LOG.info("decoding the acl manifest");
+		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
+		LOG.info("acl manifest decoded successfully");
+		return decodedManifestJson;
 	}
 }

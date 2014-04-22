@@ -64,7 +64,6 @@ public class ProcessorDTO {
 	private List<CredentialDTO> credentials;
 	private List<PropertyDTO> dynamicProperties;
 	private List<ProfileDTO> profiles;
-	private String serviceInstanceId;
 
 	public ProcessorDTO() {
 		super();
@@ -201,14 +200,6 @@ public class ProcessorDTO {
 
 	public void setRemoteProcessorProperties(RemoteProcessorPropertiesDTO remoteProcessorProperties) {
 		this.remoteProcessorProperties = remoteProcessorProperties;
-	}
-	
-	public String getServiceInstanceId() {
-		return serviceInstanceId;
-	}
-
-	public void setServiceInstanceId(String serviceInstanceId) {
-		this.serviceInstanceId = serviceInstanceId;
 	}
 
 	/**

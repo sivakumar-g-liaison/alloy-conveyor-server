@@ -10,8 +10,8 @@
             "platformName":"allApplication",
             "nestedServiceDependencyContraint":[
                {
-                  "serviceName":"mozillaService",
-                  "primaryId":"GD78GD",
+                  "serviceName":"mailbox",
+                  "primaryId":"ASDF000",
                   "nestedServiceId":[
                      "string1",
                      "string2"

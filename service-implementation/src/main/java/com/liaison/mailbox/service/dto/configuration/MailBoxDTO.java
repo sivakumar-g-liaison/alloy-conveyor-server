@@ -47,7 +47,6 @@ public class MailBoxDTO {
 	private String status;
 	private Integer serviceInstId;
 	private String shardKey;
-	private String serviceInstanceId;
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -103,14 +102,6 @@ public class MailBoxDTO {
 		this.shardKey = shardKey;
 	}
 	
-	public String getServiceInstanceId() {
-		return serviceInstanceId;
-	}
-
-	public void setServiceInstanceId(String serviceInstanceId) {
-		this.serviceInstanceId = serviceInstanceId;
-	}
-
 	public List<PropertyDTO> getProperties() {
 
 		if (null == properties) {

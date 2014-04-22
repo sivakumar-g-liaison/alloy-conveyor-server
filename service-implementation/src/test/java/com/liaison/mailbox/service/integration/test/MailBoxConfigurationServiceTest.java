@@ -26,8 +26,6 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 
-import com.liaison.commons.acl.manifest.dto.ACLManifest;
-import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
@@ -40,7 +38,6 @@ import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtility;
 
 /**
@@ -303,7 +300,6 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		MailBoxDTO mailBox = new MailBoxDTO();
 		mailBox.setName("TestMailBox");
 		mailBox.setStatus("ACTIVE");
-		mailBox.setServiceInstanceId("TESTSERVICEID");
 		mailBox.setDescription("Test Mailbox");
 
 		// Adding the mailbox
@@ -642,25 +638,5 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
-	}
-	
-	@Test
-	public void getServiceInstanceIdFromACLManifest() throws JsonParseException, JsonMappingException, JAXBException, IOException {
-		
-		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/aclmanifest.json");
-		ACLManifest aclManifestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, ACLManifest.class);
-		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "dev");
-		System.out.println(MailBoxUtility.getEnvironmentProperties().getString("get-serviceinstanceid-from-manifest"));
-		String check = MailBoxUtility.getEnvironmentProperties().getString("get-serviceinstanceid-from-manifest");
-		if (check.equals("true")) {
-			System.out.print("true");
-		}
-			
-		NestedServiceDependencyContraint nestedDependency = aclManifestDTO.getPlatform().get(0).getNestedServiceDependencyContraint().get(0);
-		String primaryServiceInstanceId = nestedDependency.getPrimaryId();
-		String secondaryServiceInstanceId = nestedDependency.getNestedServiceId().get(0);
-		System.out.println("Primary Service Instance id"+primaryServiceInstanceId);
-		System.out.println("seconday Service Instance id"+secondaryServiceInstanceId);
 	}
 }

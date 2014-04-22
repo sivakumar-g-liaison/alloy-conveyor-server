@@ -100,8 +100,8 @@ public enum Messages {
 	READ_JAVA_PROPERTIES_FAILED("%s properties read failed."),
 	
 	//retrieving service instance id from acl manifest
-	SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Retrieval of service instance id from acl manifest is failed."),
-	ACL_MANIFEST_MISSING("ACL Manifest is Missing in the Request Header.");
+	SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Manifest does not contain the Service Instance Id for mailbox."),
+	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s.");
 
 	private String value;
 

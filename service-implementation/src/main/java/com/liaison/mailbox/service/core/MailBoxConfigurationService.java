@@ -47,7 +47,6 @@ import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.SearchMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
@@ -77,8 +76,12 @@ public class MailBoxConfigurationService {
 	 * @param request
 	 *            The request DTO.
 	 * @return The responseDTO.
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request) throws MailBoxConfigurationServicesException{
+	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String aclManifestJson) throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException{
 
 		LOG.info("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
@@ -99,8 +102,12 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(mailBox);
 			mailBox.setPguid(MailBoxUtility.getGUID());
 			
+			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+			}
 			//creating a link between mailbox and service instance table
-			createMailboxServiceInstanceIdLink(request.getMailBox().getServiceInstanceId(), mailBox);
+			createMailboxServiceInstanceIdLink(serviceInstanceId, mailBox);
 
 			// persisting the mailbox entity
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
@@ -173,7 +180,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public GetMailBoxResponseDTO getMailBox(String guid, String serviceInstanceId, boolean addConstraint) throws JsonParseException, JsonMappingException, JAXBException,
+	public GetMailBoxResponseDTO getMailBox(String guid, boolean addConstraint, String aclManifestJson) throws JsonParseException, JsonMappingException, JAXBException,
 		IOException, SymmetricAlgorithmException {
 
 		LOG.info("Entering into get mailbox.");
@@ -189,6 +196,13 @@ public class MailBoxConfigurationService {
 
 			if (mailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
+			}
+			
+			// retrieve the service instance id from acl manifest
+			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+				 LOG.error("retrieval of service instance id from acl manifest failed");
+				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
 			}
 
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
@@ -224,8 +238,12 @@ public class MailBoxConfigurationService {
 	 * 
 	 * @param guid
 	 *            The mailbox pguid.
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid) {
+	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid, String aclManifestJson) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.info("Entering into revise mailbox.The revise request is for {} ", guid);
 
@@ -263,13 +281,20 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(retrievedMailBox);
 			configDao.merge(retrievedMailBox);
 			
+			// retrieve the service instance id from acl manifest
+			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+				 LOG.error("retrieval of service instance id from acl manifest failed");
+				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+			}
+			
 			//creating a link between mailbox and service instance table
 //			createMailboxServiceInstanceIdLink(c, retrievedMailBox);
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
-			ServiceInstance serviceInstance = serviceInstanceDAO.findById(request.getMailBox().getServiceInstanceId());
+			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {
 				serviceInstance = new ServiceInstance();
-				serviceInstance.setName(request.getMailBox().getServiceInstanceId());
+				serviceInstance.setName(serviceInstanceId);
 				serviceInstance.setPguid(MailBoxUtility.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
 			}
@@ -351,17 +376,26 @@ public class MailBoxConfigurationService {
 	 *            The name of the profile
 	 * 
 	 * @return The SearchMailBoxResponseDTO
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public SearchMailBoxResponseDTO searchMailBox(SearchMailboxRequestDTO searchMailboxRequestDTO, String mbxName, String profName) {
+	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String profName, String aclManifestJson) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.info("Entering into search mailbox.");
 
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
 
 		try {
+						
+			String primaryServiceInstanceIds = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			List<String> secondaryServiceInstanceIds = MailBoxUtility.getSecondaryServiceInstanceIdSFromACLManifest(aclManifestJson);
 			
-			String primaryServiceInstanceIds = searchMailboxRequestDTO.getPrimaryServiceInstanceId();
-			List<String> secondaryServiceInstanceIds = searchMailboxRequestDTO.getSecondaryServiceInstanceIds();
+			// if both primary and secondary service instance ids are not present, throw an exception
+			if (MailBoxUtility.isEmpty(primaryServiceInstanceIds) && secondaryServiceInstanceIds == null) {
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+			}
 			
 			//combining the primary and secondary SI ids
 			secondaryServiceInstanceIds.add(primaryServiceInstanceIds);

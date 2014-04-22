@@ -1149,7 +1149,6 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		processorDTO.setName(System.currentTimeMillis() + "");
 		
 		processorDTO.setDescription(processorDescription);
-		processorDTO.setServiceInstanceId(processorServiceInstanceId);
 		
 		processorDTO.setType(processorType);
 		processorDTO.setProtocol(protocolType);

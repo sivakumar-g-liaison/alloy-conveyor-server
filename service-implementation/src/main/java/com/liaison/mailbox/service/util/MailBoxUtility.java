@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -37,7 +36,6 @@ import com.liaison.commons.acl.manifest.dto.Platform;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.framework.util.ServiceUtils;
 
 /**
  * Utilities for MailBox.
@@ -162,49 +160,67 @@ public class MailBoxUtility {
 	}
 	
 	/**
+	 * Method to get the dependency constraint corresponding to the service name configured in properties file
+	 * 
 	 * @param aclManifestDTO
 	 * @return
+	 * @throws IOException
 	 */
-	public static String getServiceInstanceIdFromACLManifest(ACLManifest aclManifestDTO) {
+	private static NestedServiceDependencyContraint  getDependencyConstraintFromACLManifest(ACLManifest aclManifestDTO) throws IOException {
 		
+		//retrieve the very first platform object from acl manifest json
 		Platform platform = aclManifestDTO.getPlatform().get(0);
-		NestedServiceDependencyContraint nestedDependency = (platform != null)? platform.getNestedServiceDependencyContraint().get(0):null;
-		String primaryServiceInstanceId = (nestedDependency != null)? nestedDependency.getPrimaryId():null;
-		String secondaryServiceInstanceId = (nestedDependency != null)? nestedDependency.getNestedServiceId().get(0):null;
-		if(primaryServiceInstanceId != null) return primaryServiceInstanceId;
-		if(secondaryServiceInstanceId != null) return secondaryServiceInstanceId;
-		return null;
 		
-	}
-	
-	/**
-	 * @param aclManifestDTO
-	 * @return
-	 */
-	public static String getPrimaryServiceInstanceIdFromACLManifest(ACLManifest aclManifestDTO) {
-		
-		Platform platform = aclManifestDTO.getPlatform().get(0);
-		NestedServiceDependencyContraint nestedDependency = (platform != null)? platform.getNestedServiceDependencyContraint().get(0):null;
-		String primaryServiceInstanceId = (nestedDependency != null)? nestedDependency.getPrimaryId():null;
-		if(primaryServiceInstanceId != null) return primaryServiceInstanceId;
-		return null;
-	}
-	
-	/**
-	 * @param aclManifestDTO
-	 * @return
-	 */
-	public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(ACLManifest aclManifestDTO) {
-		
-		List<String> secondayServiceInstanceIDs = new ArrayList<String>();
-		Platform platform = aclManifestDTO.getPlatform().get(0);
-		NestedServiceDependencyContraint nestedDependency = (platform != null)? platform.getNestedServiceDependencyContraint().get(0):null;
-		if (nestedDependency != null) {
-			List<String> nestedDependencies = nestedDependency.getNestedServiceId();
-			for (String secondaryServiceInstance : nestedDependencies) {
-				secondayServiceInstanceIDs.add(secondaryServiceInstance);
+		// retrieve the dependency constraint having service name as per the configuration in properties file
+		List <NestedServiceDependencyContraint> dependencyConstraints = (platform != null)? platform.getNestedServiceDependencyContraint():null;
+		for (NestedServiceDependencyContraint dependencyConstraint : dependencyConstraints) {
+			
+			if (dependencyConstraint.getServiceName().equalsIgnoreCase(getEnvironmentProperties().getString("acl.constraint.service.name"))) {
+				return dependencyConstraint;
 			}
 		}
+		return null;
+
+	}
+	
+	
+	/**
+	 * Method to retrieve the primary service instance id from the given acl manifest dto
+	 * 
+	 * @param  String aclManifestJson
+	 * @return String primary Service instance id
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 */
+	public static String getPrimaryServiceInstanceIdFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
+		
+		// retrieve the service instance id from acl manifest
+		LOGGER.info("deserializing the acl manifest DTO from manifest json");
+		ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+		LOGGER.info("acl Manifest DTO deserialized successfully");
+		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
+		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
+		String primaryServiceInstanceId  = (dependencyConstraint != null)?dependencyConstraint.getPrimaryId():null;
+		return primaryServiceInstanceId;
+	}
+	
+	/**
+	 * Method to retrieve the list of secondary service instance ids from the given acl manifest dto
+	 * 
+	 * @param String aclManifestJson
+	 * @return
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 */
+	public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
+		
+		// retrieve the service instance id from acl manifest
+		LOGGER.info("deserializing the acl manifest DTO from manifest json");
+		ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+		LOGGER.info("acl Manifest DTO deserialized successfully");
+		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
+		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
+		List<String> secondayServiceInstanceIDs = (dependencyConstraint != null)?dependencyConstraint.getNestedServiceId():null;
 		return secondayServiceInstanceIDs;
 		
 	}
