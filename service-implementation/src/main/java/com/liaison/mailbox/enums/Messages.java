@@ -101,7 +101,9 @@ public enum Messages {
 	
 	//retrieving service instance id from acl manifest
 	SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Manifest does not contain the Service Instance Id for mailbox."),
-	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s.");
+	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),
+
+	READ_SECRET_FAILED("Read secret from KMS failed.");
 
 	private String value;
 

@@ -114,7 +114,7 @@ public class CredentialDTO {
 		credential.setCredsIdpUri(this.getIdpURI());
 
 		if (!MailBoxUtility.isEmpty(this.getPassword())) {
-			credential.setCredsPassword(MailBoxCryptoUtil.doPasswordEncryption(this.getPassword(), 1));
+			credential.setCredsPassword(this.getPassword());
 		}
 		CredentialType foundCredentialType = CredentialType.findByName(this.getCredentialType());
 		if (foundCredentialType == null) {
@@ -146,7 +146,7 @@ public class CredentialDTO {
 
 		if (!MailBoxUtility.isEmpty(credential.getCredsPassword())) {
 
-			this.setPassword(MailBoxCryptoUtil.doPasswordEncryption(credential.getCredsPassword(), 2));
+			this.setPassword(credential.getCredsPassword());
 		}
 		
 		CredentialType foundCredentialType = CredentialType.findByCode(credential.getCredsType());

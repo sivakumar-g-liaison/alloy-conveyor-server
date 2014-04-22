@@ -945,6 +945,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws NoSuchAlgorithmException
 	 * @throws KeyStoreException 
 	 */
+	@SuppressWarnings("unused")
 	protected G2FTPSClient getFTPSClient(Logger logger) throws LiaisonException, JsonParseException, JsonMappingException, JAXBException, IOException,
 			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
 		// Convert the json string to DTO
@@ -961,12 +962,32 @@ public abstract class AbstractRemoteProcessor {
 		ftpsRequest.setRetryCount(properties.getRetryAttempts());
 	
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
-
+		
+		/*
+		 * For FTPS, SFTP, and FTP processors credential password will be
+		 * getting from KM
+		 */
+		String passwordFromKMS = null;
 		if ((loginCredential != null)) {
-			if (!MailBoxUtility.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtility.isEmpty(loginCredential.getCredsPassword())) {
-				String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+			
+			Map<String, String> headerMap = new HashMap<String, String>();
+			headerMap.put("Content-Type", "application/json");
+			String url = MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") + "secret/"
+					+ loginCredential.getCredsPassword();
+			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+
+			if (base64EncodedPassword != null || base64EncodedPassword != "") {
+				String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
+				String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));
+				passwordFromKMS = base64DecodedPassword;
+			} else {
+				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
+			}
+			
+			if (!MailBoxUtility.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtility.isEmpty(passwordFromKMS)) {
+				//String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
 				ftpsRequest.setUser(loginCredential.getCredsUsername());
-				ftpsRequest.setPassword(password);
+				ftpsRequest.setPassword(passwordFromKMS);
 			}
 		}
 		
@@ -1016,6 +1037,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws JSONException 
 	 */
+	@SuppressWarnings("unused")
 	protected G2SFTPClient getSFTPClient(Logger logger) throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
 			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException {
 
@@ -1033,14 +1055,29 @@ public abstract class AbstractRemoteProcessor {
 		
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
+		String passwordFromKMS = null;
 		if ((loginCredential != null)) {
+			
+			Map<String, String> headerMap = new HashMap<String, String>();
+			headerMap.put("Content-Type", "application/json");
+			String url = MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") + "secret/"
+					+ loginCredential.getCredsPassword();
+			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+
+			if (base64EncodedPassword != null || base64EncodedPassword != "") {
+				String base64DecodedPassword = Base64.decodeBase64(Base64.decodeBase64(base64EncodedPassword)).toString();
+				passwordFromKMS = base64DecodedPassword;
+			} else {
+				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
+			}
+			
 			if (!MailBoxUtility.isEmpty(loginCredential.getCredsUsername())) {
 				sftpRequest.setUser(loginCredential.getCredsUsername());
 				
 			}
-			if(!MailBoxUtility.isEmpty(loginCredential.getCredsPassword())) {
-				String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
-				sftpRequest.setPassword(password);
+			if(!MailBoxUtility.isEmpty(passwordFromKMS)) {
+//				String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+				sftpRequest.setPassword(passwordFromKMS);
 			}
 		}
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);

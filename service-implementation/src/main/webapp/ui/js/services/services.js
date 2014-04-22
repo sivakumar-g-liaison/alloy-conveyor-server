@@ -17,13 +17,14 @@ myApp.factory('RESTService',
                     callback(data, status);
                 });
             },
-            post: function (url, body, callback) {
+            post: function (url, body, callback, headers) {
 
                 //alert(body);
                 return $http({
                     method: 'POST',
                     url: url,
-                    data: body
+                    data: body,
+					headers: headers
                 }).
                 success(function (data, status, headers, config) {
                     callback(data, status);
@@ -32,13 +33,14 @@ myApp.factory('RESTService',
                     callback(data, status);
                 });
             },
-            put: function (url, body, callback) {
+            put: function (url, body, callback, headers) {
 
                 //alert(body);
                 return $http({
                     method: 'PUT',
                     url: url,
-                    data: body
+                    data: body,
+					headers: headers
                 }).
                 success(function (data, status, headers, config) {
                     callback(data, status);

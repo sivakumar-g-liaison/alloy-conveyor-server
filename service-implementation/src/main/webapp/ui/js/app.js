@@ -87,6 +87,9 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.url_upload_key = '../key-management/upload/public';
     $rootScope.url_ssh_upload_key = '../key-management/upload/keypair';
     $rootScope.url_link_key_store = '../key-management/update/truststore/';
+	
+	$rootScope.url_secret_service = '../key-management/secret/';
+	
     $rootScope.restService = RESTService;
     // validation of user input pattern
     $rootScope.userInputPattern = /^[a-zA-Z0-9_ ]+$/;
