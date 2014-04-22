@@ -381,7 +381,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String profName, String aclManifestJson) throws JsonParseException, JsonMappingException, JAXBException, IOException {
+	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String profName) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.info("Entering into search mailbox.");
 
@@ -389,33 +389,21 @@ public class MailBoxConfigurationService {
 
 		try {
 						
-			String primaryServiceInstanceIds = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			List<String> secondaryServiceInstanceIds = MailBoxUtility.getSecondaryServiceInstanceIdSFromACLManifest(aclManifestJson);
-			
-			// if both primary and secondary service instance ids are not present, throw an exception
-			if (MailBoxUtility.isEmpty(primaryServiceInstanceIds) && secondaryServiceInstanceIds == null) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-			}
-			
-			//combining the primary and secondary SI ids
-			secondaryServiceInstanceIds.add(primaryServiceInstanceIds);
-
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			Set<MailBox> mailboxes = new HashSet<>();
-			//below checking will filter the mailboxes based on primary and secondary service instance ids
 			if (!MailBoxUtility.isEmpty(profName)) {
 
-				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName, secondaryServiceInstanceIds);
+				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
 				mailboxes.addAll(retrievedMailBoxes);
 			}
 
 			// If the profile name is empty it will use findByName
 			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
 
-				Set<MailBox> retrievedMailBoxes = configDao.findByName(mbxName, secondaryServiceInstanceIds);
+				Set<MailBox> retrievedMailBoxes = configDao.findByName(mbxName);
 				mailboxes.addAll(retrievedMailBoxes);
 			}
 

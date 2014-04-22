@@ -875,13 +875,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// search the mailbox from the given details
 			SearchMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = getDecodedManifestJson(manifestJson);
-			
-			serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson);
+						
+			serviceResponse = mailbox.searchMailBox(mbxName, profileName);
 			serviceResponse.setHitCounter(hitCounter);
 
 			//Audit LOG

@@ -36,7 +36,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> find(String mbxName, String profName, List<String> serviceInstanceIds) {
+	public Set<MailBox> find(String mbxName, String profName) {
 
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
@@ -49,11 +49,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
-					.append(" and mbx.pguid IN (SELECT mbo.pguid FROM MailBox mbo")
-					.append(" inner join mbo.mailboxServiceInstances msi")
-					.append(" inner join msi.serviceInstance si")
-					.append(" where LOWER(mbo.mbxName) like :" + MBOX_NAME)
-					.append(" and si.name IN (" + collectionToSqlString(serviceInstanceIds) + "))")
 					.append(" order by mbx.mbxName");
 
 			List<?> object = em
@@ -82,7 +77,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> findByName(String mbxName, List<String> serviceInstanceIds) {
+	public Set<MailBox> findByName(String mbxName) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
@@ -90,11 +85,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 
 			StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
-					.append(" inner join mbx.mailboxServiceInstances msi")
-					.append(" inner join msi.serviceInstance si")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and si.name IN (" + collectionToSqlString(serviceInstanceIds) + ")");
-
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME);
+					
 			List<?> object = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.getResultList();
