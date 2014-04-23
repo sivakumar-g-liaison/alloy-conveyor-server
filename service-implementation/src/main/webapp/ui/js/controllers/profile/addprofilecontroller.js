@@ -77,11 +77,15 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
         // Loading the profile details
         $scope.loadProfiles = function () {
 
-            $scope.restService.get(url).success(function (data) {
-                $scope.getPagedDataAsync(data.getProfileResponse.profiles, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
-            }).error(function (data) {
-                showSaveMessage("Failed to load profiles.", 'error');
-            });
+        $scope.restService.get(url, 
+        	function (data, status) {
+        		if(status === 200) {
+        			$scope.getPagedDataAsync(data.getProfileResponse.profiles, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+        		} else {
+        			showSaveMessage("Failed to load profiles.", 'error');
+        		}
+        	}
+        );
 
 
         };

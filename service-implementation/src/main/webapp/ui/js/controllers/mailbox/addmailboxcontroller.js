@@ -40,7 +40,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.payloadSizeThreshold = 131072;
         $scope.numberOfFilesThreshold = 10
 
-        var block = $blockUI.createBlockUI();
+        var block = $rootScope.block;
         var fromAddProcsr = false;
 
         $scope.status = $scope.enumstats[0];
