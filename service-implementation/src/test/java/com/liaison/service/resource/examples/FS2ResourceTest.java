@@ -10,8 +10,6 @@
 
 package com.liaison.service.resource.examples;
 
-import org.testng.annotations.Test;
-import org.testng.Assert;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;

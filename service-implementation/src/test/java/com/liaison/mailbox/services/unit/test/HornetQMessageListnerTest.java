@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import org.testng.annotations.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
@@ -19,7 +18,6 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
 

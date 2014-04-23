@@ -171,8 +171,6 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException,MailBoxServicesException {
-		
-		//TODO find appropriate place to trigger event fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -191,7 +189,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
 						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
-						fsm.handleEvent(fsm.createEvent(ExecutionEvents.GRACEFULLY_INTERRUPTED));
+						fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
 						LOGGER.info("##########################################################################");
 						LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
 						LOGGER.info("#############################################################################");

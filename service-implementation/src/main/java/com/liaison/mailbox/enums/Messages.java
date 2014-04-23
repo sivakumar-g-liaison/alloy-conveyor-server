@@ -56,6 +56,9 @@ public enum Messages {
 	GUID_DOES_NOT_MATCH("%s Id in the request does not match the resource."),
 	CERTIFICATE_RETRIEVE_FAILED("Unable to retrieve the certificate"),
 	SSHKEY_RETRIEVE_FAILED("Unable to retrieve the SSH key"),
+	INVALID_DATE_RANGE("Both From and To dates are required."),
+	INVALID_PROCESSOR_STATUS("Processor status is invalid."),
+	NO_PROCESSORS_AVAIL("No Processors available matching the given criteria."),
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),

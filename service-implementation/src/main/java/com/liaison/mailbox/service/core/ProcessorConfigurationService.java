@@ -32,18 +32,19 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -76,8 +77,8 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
-import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -671,49 +672,73 @@ public class ProcessorConfigurationService {
 		
 		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
 		LOGGER.info("Entering into getExecutingProcessors.");
-
-		String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours"); 
-		Timestamp timeStmp = new Timestamp(new Date().getTime());
-		
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(timeStmp);
-		cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
-		timeStmp.setTime(cal.getTime().getTime());
-		timeStmp = new Timestamp(cal.getTime().getTime());
-		
-		FSMStateDAO procDAO = new FSMStateDAOBase();
-		
-		List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
-		
-		if(!MailBoxUtility.isEmpty(status) && !MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate)) {
-			listfsmStateVal = procDAO.findProcessorsExecutingByValueAndDate(status, frmDate, toDate);
+		try {
+	
+			String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours"); 
+			Timestamp timeStmp = new Timestamp(new Date().getTime());
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(timeStmp);
+			cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
+			timeStmp.setTime(cal.getTime().getTime());
+			timeStmp = new Timestamp(cal.getTime().getTime());
+			
+			FSMStateDAO procDAO = new FSMStateDAOBase();
+			
+			List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
+			
+			if((!MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) || (MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate))) {
+				throw new ProcessorManagementFailedException(Messages.INVALID_DATE_RANGE);
+			}
+			
+			if(!MailBoxUtility.isEmpty(status) && ExecutionState.findByCode(status) == null) {
+				throw new ProcessorManagementFailedException(Messages.INVALID_PROCESSOR_STATUS);
+			}
+			
+			if(!MailBoxUtility.isEmpty(status) && !MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate)) {
+				listfsmStateVal = procDAO.findProcessorsExecutingByValueAndDate(status, frmDate, toDate);
+			}
+			
+			if (!MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
+				listfsmStateVal = procDAO.findProcessorsExecutingByValue(status, timeStmp);
+			}
+			
+			if(!MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate) && MailBoxUtility.isEmpty(status)) {
+				listfsmStateVal = procDAO.findProcessorsExecutingByDate(frmDate, toDate);
+			}
+			
+			if(MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
+				listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
+			}
+			
+			List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
+			GetExecutingProcessorDTO getExecutingDTO = null;
+			for (FSMStateValue fsmv : listfsmStateVal) {
+	
+				getExecutingDTO = new GetExecutingProcessorDTO();
+				getExecutingDTO.copyFromEntity(fsmv);
+				getExecutingProcessorDTOList.add(getExecutingDTO);
+			}
+	
+			serviceResponse.setExecutingProcessor(getExecutingProcessorDTOList);
+			
+			if(getExecutingProcessorDTOList == null || getExecutingProcessorDTOList.isEmpty()) {
+				serviceResponse.setResponse(new ResponseDTO(Messages.NO_PROCESSORS_AVAIL, EXECUTING_PROCESSORS, Messages.SUCCESS));
+			} else {
+				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, EXECUTING_PROCESSORS, Messages.SUCCESS));
+			}
+			
+			LOGGER.info("Exit from getExecutingProcessors.");
+			return serviceResponse;
+			
+		} catch(ProcessorManagementFailedException e) {
+			
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, EXECUTING_PROCESSORS, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
 		}
 		
-		if (!MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
-			listfsmStateVal = procDAO.findProcessorsExecutingByValue(status, timeStmp);
-		}
-		
-		if(!MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate) && MailBoxUtility.isEmpty(status)) {
-			listfsmStateVal = procDAO.findProcessorsExecutingByDate(frmDate, toDate);
-		}
-		
-		if(MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
-			listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
-		}
-		
-		List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
-		GetExecutingProcessorDTO getExecutingDTO = null;
-		for (FSMStateValue fsmv : listfsmStateVal) {
-
-			getExecutingDTO = new GetExecutingProcessorDTO();
-			getExecutingDTO.copyFromEntity(fsmv);
-			getExecutingProcessorDTOList.add(getExecutingDTO);
-		}
-
-		serviceResponse.setExecutingProcessor(getExecutingProcessorDTOList);
-		serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, EXECUTING_PROCESSORS, Messages.SUCCESS));
-		LOGGER.info("Exit from getExecutingProcessors.");
-		return serviceResponse;
 	}
 
 	/**

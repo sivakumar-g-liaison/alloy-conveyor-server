@@ -10,15 +10,13 @@
 
 package com.liaison.mailbox.services.util.unit.test;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
-
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
