@@ -35,7 +35,7 @@ var rest = myApp.controller(
 			$scope.ftpsDefaultPort = '989';
             // To be Populated
             $scope.mailBoxId;
-            var block = $blockUI.createBlockUI();
+            var block = $rootScope.block;
 			
             // Function to modify the static properties to have additional properties of "binary"
             // and "passive" for FTP & FTPS protocols.
@@ -1460,7 +1460,7 @@ var rest = myApp.controller(
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
 							block.unblockUI();
-							showSaveMessage('Read secret failed.');
+							showSaveMessage('Read secret failed', 'error');
 							return;
 						} 
 					}

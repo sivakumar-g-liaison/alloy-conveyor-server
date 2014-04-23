@@ -20,7 +20,7 @@ myApp.controller('TriggerProfileCntrlr', ['$rootScope', '$scope', '$location', '
         $scope.profile = null;
         $scope.mailBoxSharedKey = null;
 
-        var block = $blockUI.createBlockUI();
+        var block = $rootScope.block;
         
         // Profiles loads initially
         $scope.profiles = [];
@@ -30,13 +30,16 @@ myApp.controller('TriggerProfileCntrlr', ['$rootScope', '$scope', '$location', '
         	
         	block.blockUI();
         	
-            $scope.restService.get($scope.base_url + "/profile").success(function (data) {
-                $scope.profiles = data.getProfileResponse.profiles;
-                block.unblockUI();
-            }).error(function (data) {
-            	block.unblockUI();
-                showSaveMessage("Failed to load Profiles", 'error');
-            });
+            $scope.restService.get($scope.base_url + "/profile", 
+            	function (data, status) {
+            		if(status === 200) {
+            			$scope.profiles = data.getProfileResponse.profiles;
+            		} else {
+                        showSaveMessage("Failed to load Profiles", 'error');
+            		}
+            		block.unblockUI();
+            	}
+            );
         };
         $scope.loadProfiles(); //loads the profile
 

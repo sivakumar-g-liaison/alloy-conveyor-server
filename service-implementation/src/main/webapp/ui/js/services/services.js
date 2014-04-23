@@ -2,7 +2,7 @@
 
 // simple stub that could use a lot of work...
 myApp.factory('RESTService',
-    function ($http) {
+    function ($http, $rootScope) {
         return {
             get: function (url, callback) {
                 return $http({
@@ -10,11 +10,16 @@ myApp.factory('RESTService',
                     url: url
                 }).
                 success(function (data, status, headers, config) {
+					
                     callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
-                    //alert("failed to retrieve data");
-                    callback(data, status);
+                    if(status === 403) {
+						$rootScope.block.unblockUI();
+						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
+					} else {
+						callback(data, status);
+					}
                 });
             },
             post: function (url, body, callback, headers) {
@@ -30,7 +35,12 @@ myApp.factory('RESTService',
                     callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
-                    callback(data, status);
+					if(status === 403) {
+						$rootScope.block.unblockUI();
+						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
+					} else {
+						callback(data, status);
+					}
                 });
             },
             put: function (url, body, callback, headers) {
@@ -46,7 +56,12 @@ myApp.factory('RESTService',
                     callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
-                    callback(data, status);
+					if(status === 403) {
+						$rootScope.block.unblockUI();
+						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
+					} else {
+						callback(data, status);
+					}
                 });
             },
             delete: function (url, callback) {
@@ -60,7 +75,12 @@ myApp.factory('RESTService',
                     callback(data, status);
                 }).
                 error(function (data, status, headers, config) {
-                    callback(data, status);
+					if(status === 403) {
+						$rootScope.block.unblockUI();
+						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
+					} else {
+						callback(data, status);
+					}
                 });
             }
 

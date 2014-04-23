@@ -77,7 +77,7 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     }
 ]);
 // this is run after angular is instantiated and bootstrapped
-myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService) {
+myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, $blockUI) {
     // *****
     // Eager load some data using simple REST client
     // *****
@@ -89,6 +89,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.url_link_key_store = '../key-management/update/truststore/';
 	
 	$rootScope.url_secret_service = '../key-management/secret/';
+	
+	$rootScope.block = $blockUI.createBlockUI();
 	
     $rootScope.restService = RESTService;
     // validation of user input pattern
