@@ -13,9 +13,9 @@ com.netflix.karyon.eureka.disable=true
 
 # database connectivity properties
 com.liaison.DB_DRIVER=oracle.jdbc.OracleDriver
-com.liaison.DB_URL=jdbc:oracle:thin:@//localhost:1521/orcl.liaison.tech
-com.liaison.DB_USER=TEST2_GATEWAY_APPL
-com.liaison.DB_PASSWORD=12345678
+com.liaison.DB_URL=jdbc:oracle:thin:@10.0.24.54:1521:G2DSDV
+com.liaison.DB_USER=G2MAILBOX
+com.liaison.DB_PASSWORD=mailboxg2
 com.liaison.DB_MINPOOLSIZE=2
 com.liaison.DB_MAXPOOLSIZE=100
 com.liaison.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
@@ -85,8 +85,8 @@ com.liaison.servicebroker.sync.max.request.size=10485760
 # This is 50meg
 com.liaison.servicebroker.async.max.request.size=52428800
 
-# loading js from git
-com.liaison.gitlab.script.server.host=gitlab.hs.com
+# Properties to read JS file from  git lab
+com.liaison.gitlab.script.server.host=10.0.2.67
 com.liaison.gitlab.script.server.port=80
 com.liaison.gitlab.script.server.user=
 com.liaison.gitlab.script.server.password=
@@ -95,27 +95,23 @@ com.liaison.gitlab.script.branch.name=master
 
 # FSM jobs monitoring stuffs
 listJobsIntervalInHours=24
-fsmEventCheckIntervalInSeconds=86400
+fsmEventCheckIntervalInSeconds=2
 
 #ssh key implementation - privatekey file path
-privateKeyPath = D:\\doc\\sshprivatekey\\
+privateKeyPath =/opt/apps/mailbox/privatekey/
 
-#for ACL filter
-liaison.acl.filter.skipACLFilter=true
+# Override acl filter check
+liaison.acl.filter.skipACLFilter=false
 liaison.acl.filter.skipACLSignatureCheck=true
+signatureverifier.publickey.url=http://10.0.6.101:8989/key-management/export/public/
 
-# Directory Sweeper - The allowed duration between current time and last modified time of the file should be greater than the given time limit
-diff_bt_current_and_last_modifed_time = 3
-
-#The files are modified before the given time limit will be considered for directory sweeper.
-#Time in Seconds
+# Directory sweeper configuration to check files are modified with in the given time limit in SECONDS
 last.modified.tolerance = 3
 
 #retrieving serviceinstance id from acl manifest
-use.dummy.manifest = true
+use.dummy.manifest.as.backup = true
 acl.constraint.service.name = Mailbox
 
 #acl-manifest json string
-acl-manifest-json = ew0KICAgIkFDTE1hbmlmZXN0Ijp7DQogICAgICAiZW52ZWxvcGUiOnsNCiAgICAgICAgICJnbG9iYWxJZCI6Ijk2MzI1ODc0MSIsDQogICAgICAgICAicGFyZW50SWQiOiI3ODg4IiwNCiAgICAgICAgICJwcm9jZXNzSWQiOiI1NjQiDQogICAgICB9LA0KICAgICAgInBsYXRmb3JtIjpbDQogICAgICAgICB7DQogICAgICAgICAgICAicGxhdGZvcm1OYW1lIjoiYWxsQXBwbGljYXRpb24iLA0KICAgICAgICAgICAgIm5lc3RlZFNlcnZpY2VEZXBlbmRlbmN5Q29udHJhaW50IjpbDQogICAgICAgICAgICAgICB7DQogICAgICAgICAgICAgICAgICAic2VydmljZU5hbWUiOiJtYWlsYm94IiwNCiAgICAgICAgICAgICAgICAgICJwcmltYXJ5SWQiOiJBU0RGMDAwIiwNCiAgICAgICAgICAgICAgICAgICJuZXN0ZWRTZXJ2aWNlSWQiOlsNCiAgICAgICAgICAgICAgICAgICAgICJzdHJpbmcxIiwNCiAgICAgICAgICAgICAgICAgICAgICJzdHJpbmcyIg0KICAgICAgICAgICAgICAgICAgXSwNCiAgICAgICAgICAgICAgICAgICJuZXN0ZWRTZXJ2aWNlRGVwZW5kZW5jeSI6Ww0KICAgICAgICAgICAgICAgICAgICAgew0KICAgICAgICAgICAgICAgICAgICAgICAgInNlcnZpY2VOYW1lIjoic3BpZGVyIiwNCiAgICAgICAgICAgICAgICAgICAgICAgICJzZXJ2aWNlUHJpbWFyeUlkIjoiNjQ1T0lVTEtKNDUiDQogICAgICAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICAgICAgICBdDQogICAgICAgICAgICAgICB9DQogICAgICAgICAgICBdLA0KICAgICAgICAgICAgInJvbGVCYXNlZEFjY2Vzc0NvbnRyb2wiOlsNCiAgICAgICAgICAgICAgIHsNCiAgICAgICAgICAgICAgICAgICJkb21haW5OYW1lIjoiYWxsRG9tYWluIiwNCiAgICAgICAgICAgICAgICAgICJkb21haW5UeXBlIjoiYWxsRG9tVHlwZSIsDQogICAgICAgICAgICAgICAgICAicm9sZSI6Ww0KICAgICAgICAgICAgICAgICAgICAgImFsbFJvbGUiDQogICAgICAgICAgICAgICAgICBdDQogICAgICAgICAgICAgICB9DQogICAgICAgICAgICBdDQogICAgICAgICB9DQogICAgICBdDQogICB9DQp9
+acl-manifest-json = LCJyZXNvdXJjZVR5cGUiOiJSZXN0UmVzb3VyY2UiLCJyZXNvdXJjZUNvbnRleHQiOiIqIiwicGVybWlzc2lvbiI6W3sidmFsdWUiOiJzZWFyY2hNYWlsQm94IiwicGVybWlzc2lvblR5cGUiOiJXSElURUxJU1QifV19LHsicmVzb3VyY2UiOiJ2MS9tYWlsYm94IiwicmVzb3VyY2VUeXBlIjoiUmVzdFJlc291cmNlIiwicmVzb3VyY2VDb250ZXh0IjoiKiIsInBlcm1pc3Npb24iOlt7InZhbHVlIjoic2VhcmNoTWFpbEJveCIsInBlcm1pc3Npb25UeXBlIjoiV0hJVEVMSVNUIn1dfV19XSwibmVzdGVkU2VydmljZURlcGVuZGVuY3lDb250cmFpbnQiOlt7InNlcnZpY2VOYW1lIjoiTWFpbGJveCIsInByaW1hcnlJZCI6IjkwMzJBNDkxMEEwQTUyOTgwQTBFQzY3NkRCMzNBMTAyIiwibmVzdGVkU2VydmljZUlkIjpbXSwibmVzdGVkU2VydmljZURlcGVuZGVuY3kiOltdfV19XX0=
 
-usermanagement.url.authenticate = http://10.0.24.76:8080/usermanagement/rest/v1/usermanagement/authenticate

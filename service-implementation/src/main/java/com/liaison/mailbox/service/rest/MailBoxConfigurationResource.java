@@ -1307,7 +1307,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// check the value of property "use.dummy.manifest"
 			// if it is true use dummy manifest else throw an error due to the 
 			// non-availability of manifest in header
-			if ((MailBoxUtility.getEnvironmentProperties().getString("use.dummy.manifest")).equals("true")) {
+			if ((MailBoxUtility.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
 				
 				LOG.info("Retrieving the dummy acl manifest json from properties file");
 				manifestJson = MailBoxUtility.getEnvironmentProperties().getString("acl-manifest-json");
