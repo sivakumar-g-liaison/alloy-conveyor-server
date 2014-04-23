@@ -42,8 +42,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
@@ -271,9 +271,12 @@ public class HttpListener extends BaseResource {
 				String loginId = authenticationCredentials[0];
 				String token = authenticationCredentials[1];
 				// if both username and password is present call UM client to authenticate
-				UserManagementClient UMClient = UserManagementClient.getInstance();
+				UserManagementClient UMClient = new UserManagementClient();
 				UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
 				UMClient.authenticate();
+				if(!UMClient.isSuccessful()){
+					throw new RuntimeException(UMClient.getMessage());
+				}
 			} else {
 				throw new RuntimeException("Authorization Header does not contain UserName and Password");
 			}
