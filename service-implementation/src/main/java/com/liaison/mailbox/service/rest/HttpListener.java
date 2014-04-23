@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response.Status;
 
 import oracle.jdbc.proxy.annotation.Post;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -51,7 +52,9 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
+import com.liaison.mailbox.service.util.MailBoxUtility;
 import com.liaison.mailbox.service.util.SessionContext;
+import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.MonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -88,6 +91,8 @@ public class HttpListener extends BaseResource {
 	protected static final String GATEWAY_HEADER_PREFIX = "x-gate-";
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+	
+	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
 
 
 	public HttpListener ()
@@ -248,9 +253,34 @@ public class HttpListener extends BaseResource {
 		}
 	}
 
-	protected void authenticateRequestor (HttpServletRequest request)
+	protected void authenticateRequestor (HttpServletRequest request) 
 	{
-		// TODO - when User Management service is available.
+				
+		// retrieving the authentication header from request
+		String basicAuthenticationHeader = request.getHeader(HTTP_HEADER_BASIC_AUTH);
+		if (!MailBoxUtility.isEmpty(basicAuthenticationHeader)) {
+			
+			// trim the prefix basic and get the username:password part
+			basicAuthenticationHeader = basicAuthenticationHeader.replaceFirst(AUTHENTICATION_HEADER_PREFIX, "");
+			// decode the string to get username and password
+			String authenticationDetails = new String(Base64.decodeBase64(basicAuthenticationHeader));
+			String[] authenticationCredentials = authenticationDetails.split(":");
+			
+			if (authenticationCredentials.length == 2) {
+				
+				String loginId = authenticationCredentials[0];
+				String token = authenticationCredentials[1];
+				// if both username and password is present call UM client to authenticate
+				UserManagementClient UMClient = UserManagementClient.getInstance();
+				UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
+				UMClient.authenticate();
+			} else {
+				throw new RuntimeException("Authorization Header does not contain UserName and Password");
+			}
+		} else {
+			throw new RuntimeException("Authorization Header not available in the Request");
+		}
+		
 	}
     
 	/**
@@ -271,7 +301,7 @@ public class HttpListener extends BaseResource {
 	 * This method will set globalProcessId to sessionContext.
 	 * 
 	 * @param sessionContext
-	 */
+	 */ 
 	protected void assignGlobalProcessId (SessionContext sessionContext)
 	{
 		UUIDGen uuidGen = new UUIDGen();
