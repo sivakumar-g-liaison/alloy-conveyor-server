@@ -5,6 +5,7 @@
             "name": "google testremote downloader",
             "type": "REMOTEDOWNLOADER",
             "status": "ACTIVE",
+            "protocol": "HTTP",
             "description": "",
             "remoteDownloaderProperties": {
                 "httpVersion": "1.1",

@@ -45,7 +45,6 @@ public class MailBoxDTO {
 	private String description;
 	@ApiModelProperty( value = "Mailbox status", required = true)
 	private String status;
-	private Integer serviceInstId;
 	private String shardKey;
 
 	private List<PropertyDTO> properties;
@@ -84,14 +83,6 @@ public class MailBoxDTO {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-
-	public Integer getServiceInstId() {
-		return serviceInstId;
-	}
-
-	public void setServiceInstId(Integer serviceInstId) {
-		this.serviceInstId = serviceInstId;
 	}
 
 	public String getShardKey() {
