@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.acl.manifest.dto.ACLManifest;
 import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
 import com.liaison.commons.acl.manifest.dto.Platform;
+import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
@@ -196,7 +197,7 @@ public class MailBoxUtility {
 		
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
 		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
 		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
