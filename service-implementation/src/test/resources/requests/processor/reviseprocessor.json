@@ -5,6 +5,7 @@
             "name": "google remote downloader",
             "type": "REMOTEDOWNLOADER",
             "status": "ACTIVE",
+            "protocol": "HTTP",
             "description": "Sample revise description",
             "executionOrder":1,
             "remoteDownloaderProperties": {

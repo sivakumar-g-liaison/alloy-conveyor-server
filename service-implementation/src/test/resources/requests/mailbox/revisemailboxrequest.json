@@ -4,7 +4,6 @@
             "guid": "40288bc340cf19460140cf1947e00003",
             "name": "MCCWebAnalytics",
             "description": "Updatedmydescription",
-            "serviceInstId":"1234567",
 			"shardKey":"key_12345",
             "status": "ACTIVE",
             "properties": [

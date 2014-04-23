@@ -10,10 +10,6 @@
 
 package com.liaison.mailbox.service.integration.test;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.Assert;
-
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
@@ -25,6 +21,9 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -80,7 +79,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
-
+		
 		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
