@@ -1065,7 +1065,8 @@ public abstract class AbstractRemoteProcessor {
 			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 			if (base64EncodedPassword != null || base64EncodedPassword != "") {
-				String base64DecodedPassword = Base64.decodeBase64(Base64.decodeBase64(base64EncodedPassword)).toString();
+				String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
+				String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));
 				passwordFromKMS = base64DecodedPassword;
 			} else {
 				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
