@@ -18,7 +18,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.model.FSMState;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author
@@ -133,7 +133,7 @@ public class ProcessorStateDTO {
 	public void copyToEntity(FSMState entity) {
 		
 		//Constructing the FSMStae
-		entity.setPguid(MailBoxUtility.getGUID());
+		entity.setPguid(MailBoxUtil.getGUID());
 		entity.setExecutionId(this.getExecutionId());
 		entity.setProcessorId(this.getProcessorId());
 		entity.setProcessorName(this.getProcessorName());
@@ -144,9 +144,9 @@ public class ProcessorStateDTO {
 		
 		//Constructing FSMStateValue
 		FSMStateValue value = new FSMStateValue();
-		value.setPguid(MailBoxUtility.getGUID());
+		value.setPguid(MailBoxUtil.getGUID());
 		value.setValue(this.getExecutionState().value());
-		value.setCreatedDate(MailBoxUtility.getTimestamp());
+		value.setCreatedDate(MailBoxUtil.getTimestamp());
 		List<FSMStateValue> values = new ArrayList<FSMStateValue>();
 		values.add(value);
 		entity.setExecutionState(values);

@@ -47,7 +47,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponse
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author
@@ -88,7 +88,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER" ,"Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -97,7 +97,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -108,7 +108,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -137,7 +137,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER","Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", false);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -146,7 +146,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -157,7 +157,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -186,7 +186,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", false);
 		addProcessorDTO.getProcessor().setLinkedMailboxId(null);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -195,7 +195,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -219,7 +219,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" ,false, "HTTP", false);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + "1241234123" + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -228,7 +228,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -253,7 +253,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" ,false, "HTTP", true);
 		addProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -262,7 +262,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -286,7 +286,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, null, true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -295,7 +295,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -319,7 +319,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "TEST", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -328,7 +328,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -355,7 +355,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 
@@ -376,7 +376,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonParseException,
 			JsonMappingException, JAXBException, IOException {
 
-		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest("RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL",
+		jsonRequest = MailBoxUtil.marshalToJSON(getProcessorRequest("RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL",
 				"ACTIVE",
 				"REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true));
 
@@ -387,7 +387,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -410,7 +410,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonGenerationException,
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
-		jsonRequest = MailBoxUtility
+		jsonRequest = MailBoxUtil
 				.marshalToJSON(getProcessorRequest("ddd755", "Sample", "LOGIN_CREDENTIAL", "fdfd", "85964", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
@@ -420,7 +420,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 	}
@@ -442,7 +442,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonGenerationException,
 			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
 
-		jsonRequest = MailBoxUtility.marshalToJSON(getProcessorRequest(null, null, null, null, null, null, null , false, null, true));
+		jsonRequest = MailBoxUtil.marshalToJSON(getProcessorRequest(null, null, null, null, null, null, null , false, null, true));
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -451,7 +451,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 	}
@@ -472,7 +472,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -481,7 +481,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -493,7 +493,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -523,7 +523,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 	}
@@ -545,7 +545,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" ,false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -554,13 +554,13 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		AddProcessorToMailboxRequestDTO addSecProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addSecProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addSecProcessorDTO);
 
 		String addProcessorReq = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessorReq, HTTP_METHOD.POST, jsonRequest, logger);
@@ -569,7 +569,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorSecResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorSecResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorSecResponseDTO.getResponse().getStatus());
 
@@ -581,7 +581,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -606,7 +606,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -615,14 +615,14 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
 				"sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", true);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 
 		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor/"
 				+ processorResponseDTO.getProcessor().getGuId();
@@ -641,7 +641,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(reviseProcessorDTO.getProcessor().getName(), getResponseDTO.getProcessor().getName());
@@ -668,7 +668,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
 				"sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, null, true);
 		reviseProcessorDTO.getProcessor().setGuid("123456");
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 
 		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor/"
 				+ "123456";
@@ -699,7 +699,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest("RESPONSE_LOCATION",
 				"sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "Test", true);
 		reviseProcessorDTO.getProcessor().setGuid("123456");
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 
 		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor/"
 				+ "123456";
@@ -732,7 +732,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		reviseProcessorDTO.getProcessor().setLinkedMailboxId(null);
 		reviseProcessorDTO.getProcessor().setGuid("21412341234");
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 
 		String reviseProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor/"
 				+ "123456";
@@ -742,7 +742,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		ReviseProcessorResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		ReviseProcessorResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				ReviseProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -767,7 +767,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		reviseProcessorDTO.getProcessor().setLinkedMailboxId("null");
 		reviseProcessorDTO.getProcessor().setGuid("dfasfasfdafd");
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 
 		String reviseProcessor = "/" + null + "/processor/" + null;
 		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -776,7 +776,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		ReviseProcessorResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		ReviseProcessorResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				ReviseProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
@@ -800,7 +800,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		// Add
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -809,14 +809,14 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 		// Revise
 		ReviseProcessorRequestDTO reviseProcessorDTO = (ReviseProcessorRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 
 		String reviseProcessor = "/" + addProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
@@ -827,7 +827,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				ReviseProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, revProcessorResponseDTO.getResponse().getStatus());
 
@@ -851,7 +851,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		// AddProcessor
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -860,7 +860,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -872,7 +872,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(false, getResponseDTO.getProcessor().getProfiles().isEmpty());
@@ -882,7 +882,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , true, "HTTP", false);
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 		String reviseProcessor = "/" + reviseProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
 				+ processorResponseDTO.getProcessor().getGuId();
 		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -891,7 +891,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				ReviseProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, revProcessorResponseDTO.getResponse().getStatus());
 
@@ -901,7 +901,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(true, getResponseDTO.getProcessor().getProfiles().isEmpty());
@@ -925,7 +925,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		// AddProcessor
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -934,7 +934,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -944,7 +944,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		reviseProcessorDTO.getProcessor().setGuid(processorResponseDTO.getProcessor().getGuId());
 		reviseProcessorDTO.getProcessor().getLinkedProfiles().set(0, "dummy profiles");
 
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseProcessorDTO);
 		String reviseProcessor = "/" + reviseProcessorDTO.getProcessor().getLinkedMailboxId() + "/processor/"
 				+ processorResponseDTO.getProcessor().getGuId();
 		request = constructHTTPRequest(getBASE_URL() + reviseProcessor, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -953,7 +953,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		ReviseProcessorResponseDTO revProcessorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				ReviseProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, revProcessorResponseDTO.getResponse().getStatus());
 
@@ -975,7 +975,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "sample", "LOGIN_CREDENTIAL", "ACTIVE", "REMOTEDOWNLOADER", "Dummy_DESCRIPTION", "SERVICE_INSTANCE_ID" , false, "HTTP", true);
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
@@ -984,7 +984,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
@@ -997,7 +997,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				DeActivateProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDeactivateDTO.getResponse().getStatus());
 
@@ -1008,7 +1008,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		GetProcessorResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
+		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
@@ -1039,7 +1039,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				DeActivateProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDeactivateDTO.getResponse().getStatus());
 
@@ -1069,7 +1069,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse,
+		DeActivateProcessorResponseDTO responseDeactivateDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				DeActivateProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDeactivateDTO.getResponse().getStatus());
 
@@ -1095,13 +1095,13 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 		return responseDTO;
 	}
@@ -1198,13 +1198,13 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
 		profileRequstDTO.setProfile(profile);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
 		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
 
 		return profileResponseDTO;
 	}

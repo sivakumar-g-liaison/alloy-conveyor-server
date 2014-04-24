@@ -283,7 +283,7 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 
 
 task setDevProperties << {
-    ant.copy( file:"src/main/resources/${rootProject.name}-dev.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
+    ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
     {
         filterchain {
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }

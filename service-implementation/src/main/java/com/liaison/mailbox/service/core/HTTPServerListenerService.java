@@ -29,7 +29,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Class to receive the payload and persist to the folder.
@@ -64,15 +64,15 @@ public class HTTPServerListenerService {
 
 		try {
 
-			if (MailBoxUtility.isEmpty(folderPath)) {
+			if (MailBoxUtil.isEmpty(folderPath)) {
 				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "Path");
 			}
 
-			if (MailBoxUtility.isEmpty(filename)) {
+			if (MailBoxUtil.isEmpty(filename)) {
 				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "FileName");
 			}
 
-			if (MailBoxUtility.isEmpty(payload)) {
+			if (MailBoxUtil.isEmpty(payload)) {
 				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "Payload");
 			}
 

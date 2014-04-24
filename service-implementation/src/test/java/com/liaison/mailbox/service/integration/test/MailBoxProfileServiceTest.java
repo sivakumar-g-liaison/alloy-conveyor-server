@@ -31,7 +31,7 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Test class which tests the mailbox profile operations.
@@ -174,13 +174,13 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
 		profileRequstDTO.setProfile(profile);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
 		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
 
 		return profileResponseDTO;
 	}

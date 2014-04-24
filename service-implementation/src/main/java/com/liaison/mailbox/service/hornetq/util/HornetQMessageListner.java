@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class HornetQMessageListner implements MessageListener {
 	
@@ -71,12 +71,12 @@ public class HornetQMessageListner implements MessageListener {
 		
 		final Properties env = new Properties();
 		env.put(Context.INITIAL_CONTEXT_FACTORY,"org.jnp.interfaces.NamingContextFactory");
-		env.put(Context.PROVIDER_URL, MailBoxUtility.getEnvironmentProperties().getProperty("providerurl"));
+		env.put(Context.PROVIDER_URL, MailBoxUtil.getEnvironmentProperties().getProperty("g2.queueing.server.url"));
 		//env.put(Context.SECURITY_PRINCIPAL, "guest");
 		//env.put(Context.SECURITY_CREDENTIALS, "pass");
 		Context context = new InitialContext(env);
-		ConnectionFactory cf = (ConnectionFactory) context.lookup(MailBoxUtility.getEnvironmentProperties().getString("queueConnectionFactory"));
-		Destination destination = (Destination) context.lookup(MailBoxUtility.getEnvironmentProperties().getString("mailBoxProcessorQueue"));
+		ConnectionFactory cf = (ConnectionFactory) context.lookup(MailBoxUtil.getEnvironmentProperties().getString("queueConnectionFactory"));
+		Destination destination = (Destination) context.lookup(MailBoxUtil.getEnvironmentProperties().getString("triggered.profile.processor.queue.name"));
 		new HornetQMessageListner(cf, destination);
 		logger.info("Starting up the JMS listner");
 

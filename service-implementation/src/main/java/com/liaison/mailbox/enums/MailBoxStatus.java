@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.enums;
 
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public enum MailBoxStatus {
 
@@ -38,7 +38,7 @@ public enum MailBoxStatus {
 		MailBoxStatus found = null;
 		for (MailBoxStatus value : MailBoxStatus.values()) {
 
-			if (!MailBoxUtility.isEmpty(code) && code.equals(value.value())) {
+			if (!MailBoxUtil.isEmpty(code) && code.equals(value.value())) {
 				found = value;
 				break;
 			}
@@ -59,7 +59,7 @@ public enum MailBoxStatus {
 		MailBoxStatus found = null;
 		for (MailBoxStatus value : MailBoxStatus.values()) {
 
-			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+			if (!MailBoxUtil.isEmpty(name) && name.equals(value.name())) {
 				found = value;
 				break;
 			}

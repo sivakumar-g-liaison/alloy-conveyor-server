@@ -41,8 +41,8 @@ public class HornetQMessageListnerTest {
 			InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
 			Properties properties = new Properties();
 			properties.load(is);
-			String providerURL = properties.getProperty("providerurl");
-			String queueName =properties.getProperty("mailBoxProcessorQueue");
+			String providerURL = properties.getProperty("g2.queueing.server.url");
+			String queueName =properties.getProperty("triggered.profile.processor.queue.name");
 
 			ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
 			jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");

@@ -18,6 +18,7 @@ import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -37,17 +38,20 @@ import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * Utilities for MailBox.
  * 
  * @author veerasamyn
  */
-public class MailBoxUtility {
+public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
-	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxUtility.class);
-	private static final Properties properties = new Properties();
+	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxUtil.class);
+	private static final String REQUEST_HEADER = "Request Header";
+	private static final String PROPERTIES_FILE = "Properties file";
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -217,13 +221,56 @@ public class MailBoxUtility {
 		
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = MailBoxUtility.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+		ACLManifest aclManifest = MailBoxUtil.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
 		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
 		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
 		List<String> secondayServiceInstanceIDs = (dependencyConstraint != null)?dependencyConstraint.getNestedServiceId():null;
 		return secondayServiceInstanceIDs;
 		
+	}
+	
+	/**
+	 * Method to retrieve the base64 decoded acl manifest json
+	 * 
+	 * @param manifestJson
+	 * @return
+	 * @throws IOException
+	 * @throws MailBoxConfigurationServicesException
+	 */
+	public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
+		
+		String decodedManifestJson = null;
+		
+		// if manifest is available in the header then use acl-manifest in the header irrespective of
+		// the property "use.dummy.manifest" configured in properties file
+		if (!MailBoxUtil.isEmpty(manifestJson)) {
+			LOGGER.info("acl manifest available in the header");
+		} else {
+			// check the value of property "use.dummy.manifest"
+			// if it is true use dummy manifest else throw an error due to the 
+			// non-availability of manifest in header
+			if ((MailBoxUtil.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
+				
+				LOGGER.info("Retrieving the dummy acl manifest json from properties file");
+				manifestJson = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");
+				if (MailBoxUtil.isEmpty(manifestJson)) {
+					LOGGER.error("dummy acl manifest is not available in the properties file");
+					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE);
+				}
+	
+			} else {
+				LOGGER.error("acl manifest is not available in the request header");
+				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER);
+			}
+			
+		}
+	
+		// decode the manifest using base64
+		LOGGER.info("decoding the acl manifest");
+		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
+		LOGGER.info("acl manifest decoded successfully");
+		return decodedManifestJson;
 	}
 
 }

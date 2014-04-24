@@ -32,7 +32,7 @@ import com.liaison.mailbox.jpa.model.ProcessorProperty;
 import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -221,13 +221,13 @@ public class ProcessorDTO {
 			JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
 		if (isCreate) {
-			processor.setPguid(MailBoxUtility.getGUID());
+			processor.setPguid(MailBoxUtil.getGUID());
 			processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
 
 		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
 		if (null != propertiesDTO) {
-			String propertiesJSON = MailBoxUtility.marshalToJSON(this.getRemoteProcessorProperties());
+			String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
 			processor.setProcsrProperties(propertiesJSON);
 		}
 
@@ -243,7 +243,7 @@ public class ProcessorDTO {
 			folder = new Folder();
 			folderDTO.copyToEntity(folder);
 
-			folder.setPguid(MailBoxUtility.getGUID());
+			folder.setPguid(MailBoxUtil.getGUID());
 			folders.add(folder);
 		}
 
@@ -258,7 +258,7 @@ public class ProcessorDTO {
 
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
-			credential.setPguid(MailBoxUtility.getGUID());
+			credential.setPguid(MailBoxUtil.getGUID());
 			credentialList.add(credential);
 		}
 
@@ -310,15 +310,15 @@ public class ProcessorDTO {
 		this.setDescription(processor.getProcsrDesc());
 
 		String propertyJSON = processor.getProcsrProperties();
-		if (!MailBoxUtility.isEmpty(propertyJSON)) {
+		if (!MailBoxUtil.isEmpty(propertyJSON)) {
 
-			RemoteProcessorPropertiesDTO propertiesDTO = MailBoxUtility.unmarshalFromJSON(propertyJSON,
+			RemoteProcessorPropertiesDTO propertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJSON,
 					RemoteProcessorPropertiesDTO.class);
 			this.setRemoteProcessorProperties(propertiesDTO);
 		}
 
 		String status = processor.getProcsrStatus();
-		if (!MailBoxUtility.isEmpty(status)) {
+		if (!MailBoxUtil.isEmpty(status)) {
 			MailBoxStatus foundStatus = MailBoxStatus.findByCode(status);
 			this.setStatus(foundStatus.name());
 		}

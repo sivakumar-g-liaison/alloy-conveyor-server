@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.enums;
 
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -51,7 +51,7 @@ public enum ExecutionState {
 		ExecutionState found = null;
 		for (ExecutionState value : ExecutionState.values()) {
 
-			if (!MailBoxUtility.isEmpty(code) && code.equals(value.value())) {
+			if (!MailBoxUtil.isEmpty(code) && code.equals(value.value())) {
 				found = value;
 				break;
 			}

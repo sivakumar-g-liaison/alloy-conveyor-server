@@ -9,7 +9,7 @@
  */
 package com.liaison.mailbox.enums;
 
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author praveenu
@@ -47,7 +47,7 @@ public enum FolderType {
 		FolderType found = null;
 		for (FolderType value : FolderType.values()) {
 
-			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+			if (!MailBoxUtil.isEmpty(code) && code.equals(value.getCode())) {
 				found = value;
 				break;
 			}
@@ -68,7 +68,7 @@ public enum FolderType {
 		FolderType found = null;
 		for (FolderType value : FolderType.values()) {
 
-			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+			if (!MailBoxUtil.isEmpty(name) && name.equals(value.name())) {
 				found = value;
 				break;
 			}

@@ -37,7 +37,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Test class to test mailbox configuration service.
@@ -75,18 +75,18 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		// Adding the mailbox
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
-		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 		
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
@@ -97,7 +97,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
@@ -129,18 +129,18 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		// Adding the mailbox
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
-		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
@@ -151,7 +151,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
@@ -183,18 +183,18 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		// Adding the mailbox
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
-		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Deactivate the mailbox
@@ -214,7 +214,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 	}
@@ -235,13 +235,13 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Constructing the revise
@@ -249,7 +249,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), false);
 		mbxDTO.setGuid(responseDTO.getMailBox().getGuid());
 		reviseRequestDTO.setMailBox(mbxDTO);
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
 		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -267,7 +267,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
@@ -305,13 +305,13 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		requestDTO.setMailBox(mailBox);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
@@ -322,7 +322,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
@@ -348,13 +348,13 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		requestDTO.setMailBox(mailBox);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
@@ -365,7 +365,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
 		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
@@ -390,13 +390,13 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		requestDTO.setMailBox(null);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
 		Assert.assertEquals(true,
 				responseDTO.getResponse().getMessage().contains(Messages.INVALID_REQUEST.value()));
@@ -424,7 +424,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		GetMailBoxResponseDTO getResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
+		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
@@ -448,7 +448,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Constructing the revise
 		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
 		reviseRequestDTO.setMailBox(null);
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
 		String url = getBASE_URL() + "/" + "fasdfasdfdas";
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -477,7 +477,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Constructing the revise
 		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
 		reviseRequestDTO.setMailBox(constructDummyMailBoxDTO(System.currentTimeMillis(), true));
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
 		String url = getBASE_URL() + "/" + "3432432";
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -510,7 +510,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		mailBox.setGuid("123456");
 		reviseRequestDTO.setMailBox(mailBox);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
 		String url = getBASE_URL() + "/" + "123456";
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -565,7 +565,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Constructing the revise
 		ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
 		reviseRequestDTO.setMailBox(null);
-		jsonRequest = MailBoxUtility.marshalToJSON(reviseRequestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
 		String url = getBASE_URL() + "/" + "3432432";
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
@@ -597,13 +597,13 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		dto.setName("");
 		requestDTO.setMailBox(dto);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
 
 	}
@@ -629,13 +629,13 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		dto.setStatus("sfrafda");
 		requestDTO.setMailBox(dto);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
 	}
 }

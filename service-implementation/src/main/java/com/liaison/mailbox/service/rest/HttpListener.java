@@ -52,7 +52,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.SessionContext;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -85,8 +85,8 @@ public class HttpListener extends BaseResource {
 	protected static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 	protected static final String CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR = "com.liaison.mailbox.http.async.payload.dir";
-	protected static final String CONFIGURATION_QUEUE_PROVIDER_URL = "providerurl";
-	protected static final String CONFIGURATION_QUEUE_NAME = "queuename";
+	protected static final String CONFIGURATION_QUEUE_PROVIDER_URL = "g2.queueing.server.url";
+	protected static final String CONFIGURATION_QUEUE_NAME = "directory.sweeper.queue.name";
 	protected static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	protected static final String GATEWAY_HEADER_PREFIX = "x-gate-";
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
@@ -258,7 +258,7 @@ public class HttpListener extends BaseResource {
 				
 		// retrieving the authentication header from request
 		String basicAuthenticationHeader = request.getHeader(HTTP_HEADER_BASIC_AUTH);
-		if (!MailBoxUtility.isEmpty(basicAuthenticationHeader)) {
+		if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
 			
 			// trim the prefix basic and get the username:password part
 			basicAuthenticationHeader = basicAuthenticationHeader.replaceFirst(AUTHENTICATION_HEADER_PREFIX, "");

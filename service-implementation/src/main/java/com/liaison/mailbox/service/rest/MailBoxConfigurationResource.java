@@ -65,7 +65,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResp
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -95,8 +95,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 	
-	private static final String REQUEST_HEADER = "Request Header";
-	private static final String PROPERTIES_FILE = "Properties file";
+	
 
 	public MailBoxConfigurationResource() throws IOException {
 
@@ -138,12 +137,12 @@ public class MailBoxConfigurationResource extends BaseResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
+			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
 			
 			// retrieving acl manifest from header
 			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
 			
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
@@ -210,7 +209,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseMailBoxRequestDTO.class);
+			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseMailBoxRequestDTO.class);
 
 			ReviseMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -218,7 +217,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// retrieving acl manifest from header
 			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
 					
 			// updates existing mailbox
 			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, decodedManifestJson);
@@ -338,7 +337,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// retrieving acl manifest from header
 			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
 			
 			serviceResponse = mailbox.getMailBox(guid, addConstraint, decodedManifestJson);
 
@@ -490,7 +489,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
+			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
 
 			AddProfileResponseDTO serviceResponse = null;
 			ProfileConfigurationService profile = new ProfileConfigurationService();
@@ -610,7 +609,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
+			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
 
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
@@ -619,7 +618,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// retrieving acl manifest from header
 			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
 			
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest, decodedManifestJson);
 
@@ -809,7 +808,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
-			serviceRequest = MailBoxUtility.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
+			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
 
 			ReviseProcessorResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
@@ -921,7 +920,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 
 		try {
-			String jsFileLocation = MailBoxUtility.getEnvironmentProperties().getString("rootDirectory");
+			String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString("processor.javascript.root.directory");
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
@@ -929,7 +928,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
 			infos.add(info);
-			String response = MailBoxUtility.marshalToJSON(infos);
+			String response = MailBoxUtil.marshalToJSON(infos);
 
 			// Audit LOG the success
 			auditSuccess("getFileList");
@@ -1214,7 +1213,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 
 		try {
-			String jsFileLocation = MailBoxUtility.getEnvironmentProperties().getString("certificateDirectory");
+			String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString("certificateDirectory");
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
@@ -1222,7 +1221,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
 			infos.add(info);
-			String response = MailBoxUtility.marshalToJSON(infos);
+			String response = MailBoxUtil.marshalToJSON(infos);
 
 			// Audit LOG the success
 			auditSuccess("getCertificatesList");
@@ -1286,47 +1285,5 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-	
-	/**
-	 * Method to retrieve the base64 decoded acl manifest json
-	 * 
-	 * @param manifestJson
-	 * @return
-	 * @throws IOException
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	private String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
 		
-		String decodedManifestJson = null;
-		
-		// if manifest is available in the header then use acl-manifest in the header irrespective of
-		// the property "use.dummy.manifest" configured in properties file
-		if (!MailBoxUtility.isEmpty(manifestJson)) {
-			LOG.info("acl manifest available in the header");
-		} else {
-			// check the value of property "use.dummy.manifest"
-			// if it is true use dummy manifest else throw an error due to the 
-			// non-availability of manifest in header
-			if ((MailBoxUtility.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
-				
-				LOG.info("Retrieving the dummy acl manifest json from properties file");
-				manifestJson = MailBoxUtility.getEnvironmentProperties().getString("acl-manifest-json");
-				if (MailBoxUtility.isEmpty(manifestJson)) {
-					LOG.error("dummy acl manifest is not available in the properties file");
-					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE);
-				}
-	
-			} else {
-				LOG.error("acl manifest is not available in the request header");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER);
-			}
-			
-		}
-	
-		// decode the manifest using base64
-		LOG.info("decoding the acl manifest");
-		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
-		LOG.info("acl manifest decoded successfully");
-		return decodedManifestJson;
-	}
 }

@@ -59,7 +59,7 @@ public class LocaleDTO {
 	
 	/*public void copyToEntity(Locale locale) throws MailBoxConfigurationServicesException {
 		
-		//locale.setPguid(MailBoxUtility.getGUID());
+		//locale.setPguid(MailBoxUtil.getGUID());
 		locale.setCurrencyFormat(this.getCurrencyFormat());
 		locale.setDateFormat(this.getDateFormat());
 		locale.setNumberFormat(this.getNumberFormat());

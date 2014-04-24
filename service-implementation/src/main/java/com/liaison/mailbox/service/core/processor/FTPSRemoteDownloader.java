@@ -38,7 +38,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author praveenu
@@ -61,7 +61,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		
 		LOGGER.info("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
-		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
@@ -134,13 +134,13 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		}
 
 		String path = getPayloadURI();
-		if (MailBoxUtility.isEmpty(path)) {
+		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given payload URI is Empty.");
 			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
-		if (MailBoxUtility.isEmpty(remotePath)) {
+		if (MailBoxUtil.isEmpty(remotePath)) {
 			LOGGER.info("The given remote URI is Empty.");
 			throw new MailBoxServicesException("The given remote configuration is Empty.");
 		}

@@ -52,7 +52,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * DirectorySweeper
@@ -87,7 +87,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 
-		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			// Use custom G2JavascriptEngine
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
@@ -103,10 +103,10 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		String fileRenameFormat = getDynamicProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
-		long timeLimit = MailBoxUtility.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
+		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
 
 		// Validation of the necessary properties
-		if (MailBoxUtility.isEmpty(inputLocation)) {
+		if (MailBoxUtil.isEmpty(inputLocation)) {
 			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED);
 		}
 
@@ -123,7 +123,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			String sweepedFileLocation = processMountLocation(getDynamicProperties().getProperty(
 					MailBoxConstants.SWEEPED_FILE_LOCATION));
-			if (!MailBoxUtility.isEmpty(sweepedFileLocation)) {
+			if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
 
 				// If the given sweeped file location is not available then system will create that.
 				Path path = Paths.get(sweepedFileLocation);
@@ -213,9 +213,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 */
 	private String getPipeLineID() throws JAXBException, JsonParseException, JsonMappingException, IOException {
 
-		if (MailBoxUtility.isEmpty(this.pipeLineID)) {
+		if (MailBoxUtil.isEmpty(this.pipeLineID)) {
 
-			RemoteProcessorPropertiesDTO properties = MailBoxUtility.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
+			RemoteProcessorPropertiesDTO properties = MailBoxUtil.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
 					RemoteProcessorPropertiesDTO.class);
 			this.setPipeLineID(properties.getPipeLineID());
 		}
@@ -241,7 +241,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
 
-		if (!MailBoxUtility.isEmpty(groupingJsPath)) {
+		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
 
 			// Use custom G2JavascriptEngine
 			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", files, LOGGER);
@@ -288,8 +288,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 */
 	private void postToQueue(String input) throws Exception {
 
-		String providerURL = MailBoxUtility.getEnvironmentProperties().getString("providerurl");
-		String queueName = MailBoxUtility.getEnvironmentProperties().getString("queuename");
+		String providerURL = MailBoxUtil.getEnvironmentProperties().getString("g2.queueing.server.url");
+		String queueName = MailBoxUtil.getEnvironmentProperties().getString("directory.sweeper.queue.name");
 
 		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
 		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
@@ -324,7 +324,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		FlexibleStorageSystem FS2 = null;
 		FS2MetaSnapshot metaSnapShot = null;
 
-		if (!MailBoxUtility.isEmpty(sweepedFileLocation)) {
+		if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
 			target = Paths.get(sweepedFileLocation);
 		}
 
@@ -352,7 +352,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			// Renaming the file at the end of the step when everything is done.
 			move(oldPath, newPath);
 			file.setFs2Path(CoreFS2Utils.genURIFromPath(oldPath.toFile().getAbsolutePath()).toString());
-			file.setGuid(MailBoxUtility.getGUID());
+			file.setGuid(MailBoxUtil.getGUID());
 		}
 
 		LOGGER.info("Renaming the processed files - done");
@@ -389,7 +389,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		FileGroupDTO group = new FileGroupDTO();
 		group.getFileAttributes().addAll(files);
 
-		String jsonResponse = MailBoxUtility.marshalToJSON(group);
+		String jsonResponse = MailBoxUtil.marshalToJSON(group);
 		return jsonResponse;
 	}
 

@@ -39,7 +39,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -66,7 +66,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		
 		LOGGER.info("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
-		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 
@@ -138,13 +138,13 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 			ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
 		}
 		String path = getPayloadURI();
-		if (MailBoxUtility.isEmpty(path)) {
+		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given payload URI is Empty.");
 			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
-		if (MailBoxUtility.isEmpty(remotePath)) {
+		if (MailBoxUtil.isEmpty(remotePath)) {
 			LOGGER.info("The given remote URI is Empty.");
 			throw new MailBoxServicesException("The given remote configuration is Empty.");
 		}
@@ -178,7 +178,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		int replyCode = 0;
 		
 		Date lastCheckTime = new Date();
-		String constantInterval = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
+		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
 
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 		
@@ -235,7 +235,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					if(replyCode == 226 || replyCode == 250) {
 						String processedFileLocation = processMountLocation(getDynamicProperties().getProperty(
 								MailBoxConstants.PROCESSED_FILE_LOCATION));
-						if (MailBoxUtility.isEmpty(processedFileLocation)) {
+						if (MailBoxUtil.isEmpty(processedFileLocation)) {
 							archiveFile(item.getAbsolutePath(), false);
 						} else {
 							archiveFile(item, processedFileLocation);
@@ -244,7 +244,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 						// File uploading failed so move the file to error folder
 						String errorFileLocation = processMountLocation(getDynamicProperties().getProperty(
 								MailBoxConstants.ERROR_FILE_LOCATION));
-						if (MailBoxUtility.isEmpty(errorFileLocation)) {
+						if (MailBoxUtil.isEmpty(errorFileLocation)) {
 							archiveFile(item.getAbsolutePath(), true);
 						} else {
 							archiveFile(item, errorFileLocation);

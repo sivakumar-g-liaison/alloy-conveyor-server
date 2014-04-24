@@ -55,7 +55,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxRespo
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -100,10 +100,10 @@ public class MailBoxConfigurationService {
 
 			MailBox mailBox = new MailBox();
 			mailboxDTO.copyToEntity(mailBox);
-			mailBox.setPguid(MailBoxUtility.getGUID());
+			mailBox.setPguid(MailBoxUtil.getGUID());
 			
-			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+			String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
 				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
 			}
 			//creating a link between mailbox and service instance table
@@ -147,7 +147,7 @@ public class MailBoxConfigurationService {
 			if (serviceInstance == null) {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceID);
-				serviceInstance.setPguid(MailBoxUtility.getGUID());
+				serviceInstance.setPguid(MailBoxUtil.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 				
@@ -158,7 +158,7 @@ public class MailBoxConfigurationService {
 			if (mailboxServiceInstance == null) {
 				//Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
-				msi.setPguid(MailBoxUtility.getGUID());
+				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				mbxServiceInstances.add(msi);
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
@@ -199,8 +199,8 @@ public class MailBoxConfigurationService {
 			}
 			
 			// retrieve the service instance id from acl manifest
-			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+			String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
 				 LOG.error("retrieval of service instance id from acl manifest failed");
 				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
 			}
@@ -282,8 +282,8 @@ public class MailBoxConfigurationService {
 			configDao.merge(retrievedMailBox);
 			
 			// retrieve the service instance id from acl manifest
-			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+			String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
 				 LOG.error("retrieval of service instance id from acl manifest failed");
 				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
 			}
@@ -295,7 +295,7 @@ public class MailBoxConfigurationService {
 			if (serviceInstance == null) {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceId);
-				serviceInstance.setPguid(MailBoxUtility.getGUID());
+				serviceInstance.setPguid(MailBoxUtil.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 			
@@ -305,7 +305,7 @@ public class MailBoxConfigurationService {
 				
 				//Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
-				msi.setPguid(MailBoxUtility.getGUID());
+				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(retrievedMailBox);
 				msiDao.persist(msi);
@@ -394,20 +394,20 @@ public class MailBoxConfigurationService {
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			Set<MailBox> mailboxes = new HashSet<>();
-			if (!MailBoxUtility.isEmpty(profName)) {
+			if (!MailBoxUtil.isEmpty(profName)) {
 
 				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName);
 				mailboxes.addAll(retrievedMailBoxes);
 			}
 
 			// If the profile name is empty it will use findByName
-			if (MailBoxUtility.isEmpty(profName) && !MailBoxUtility.isEmpty(mbxName)) {
+			if (MailBoxUtil.isEmpty(profName) && !MailBoxUtil.isEmpty(mbxName)) {
 
 				Set<MailBox> retrievedMailBoxes = configDao.findByName(mbxName);
 				mailboxes.addAll(retrievedMailBoxes);
 			}
 
-			if (MailBoxUtility.isEmpty(profName) && MailBoxUtility.isEmpty(mbxName)){
+			if (MailBoxUtil.isEmpty(profName) && MailBoxUtil.isEmpty(mbxName)){
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA);
 			}
 
@@ -478,14 +478,14 @@ public class MailBoxConfigurationService {
 			
 			PropertiesFileDTO dto = new PropertiesFileDTO();
 			
-			String globalTrustStoreId 	   = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreId");
-			String globalTrustStoreGroupId = MailBoxUtility.getEnvironmentProperties().getString("globalTrustStoreGroupId");
-			String gitlabHost = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.host");
-			String gitlabPort = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.port");
-			String gitlabProjectName = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.project.name");
-			String gitlabBranchName = MailBoxUtility.getEnvironmentProperties().getString("com.liaison.gitlab.script.branch.name");
-			String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours");
-			String fsmEventCheckIntervalInSeconds = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
+			String globalTrustStoreId 	   = MailBoxUtil.getEnvironmentProperties().getString("mailbox.global.truststore.id");
+			String globalTrustStoreGroupId = MailBoxUtil.getEnvironmentProperties().getString("mailbox.global.trustgroup.id");
+			String gitlabHost = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.host");
+			String gitlabPort = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.gitlab.script.server.port");
+			String gitlabProjectName = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.gitlab.script.project.name");
+			String gitlabBranchName = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.gitlab.script.branch.name");
+			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours");
+			String fsmEventCheckIntervalInSeconds = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
 			
 			dto.setTrustStoreId(globalTrustStoreId);
 			dto.setTrustStoreGroupId(globalTrustStoreGroupId);

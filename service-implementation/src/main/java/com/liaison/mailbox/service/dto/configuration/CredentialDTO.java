@@ -17,7 +17,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -113,7 +113,7 @@ public class CredentialDTO {
 		Credential credential = (Credential) entity;
 		credential.setCredsIdpUri(this.getIdpURI());
 
-		if (!MailBoxUtility.isEmpty(this.getPassword())) {
+		if (!MailBoxUtil.isEmpty(this.getPassword())) {
 			credential.setCredsPassword(this.getPassword());
 		}
 		CredentialType foundCredentialType = CredentialType.findByName(this.getCredentialType());
@@ -144,7 +144,7 @@ public class CredentialDTO {
 
 		this.setIdpURI(credential.getCredsIdpUri());
 
-		if (!MailBoxUtility.isEmpty(credential.getCredsPassword())) {
+		if (!MailBoxUtil.isEmpty(credential.getCredsPassword())) {
 
 			this.setPassword(credential.getCredsPassword());
 		}

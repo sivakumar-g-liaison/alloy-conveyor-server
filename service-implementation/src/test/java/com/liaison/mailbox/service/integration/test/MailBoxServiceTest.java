@@ -35,7 +35,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailb
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Test class which tests the mailbox functional services.
@@ -72,19 +72,19 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 		// Add the Mailbox
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
-		AddMailboxRequestDTO requestDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(requestDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
 		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addMailBoxResponse"));
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Add the Profile
@@ -94,24 +94,24 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
 		profileRequstDTO.setProfile(profile);
 
-		jsonRequest = MailBoxUtility.marshalToJSON(profileRequstDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
 		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		AddProfileResponseDTO profileResponseDTO = MailBoxUtility.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 
 		// Add the Processor
 		String jsonRequest = ServiceUtils.readFileFromClassPath("requests/processor/createprocessorfortriggerprofile.json");
-		AddProcessorToMailboxRequestDTO addProcessorDTO = MailBoxUtility.unmarshalFromJSON(jsonRequest,
+		AddProcessorToMailboxRequestDTO addProcessorDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest,
 				AddProcessorToMailboxRequestDTO.class);
 
 		addProcessorDTO.getProcessor().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
 		addProcessorDTO.getProcessor().getLinkedProfiles().add(profileName);
 		
-		jsonRequest = MailBoxUtility.marshalToJSON(addProcessorDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);

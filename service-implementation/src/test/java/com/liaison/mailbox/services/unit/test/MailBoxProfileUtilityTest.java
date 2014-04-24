@@ -54,7 +54,7 @@ public class MailBoxProfileUtilityTest {
 		 * jsonMaiboxProfile.getJSONObject("addProfileToMailBoxRequest"); JSONObject jsonProfile =
 		 * jsonAddProfile.getJSONObject("profile");
 		 * 
-		 * AddProfileToMailBoxRequestDTO serviceRequest = MailBoxUtility .unmarshalFromJSON(data,
+		 * AddProfileToMailBoxRequestDTO serviceRequest = MailBoxUtil .unmarshalFromJSON(data,
 		 * AddProfileToMailBoxRequestDTO.class);
 		 * 
 		 * Assert.assertNotNull(serviceRequest.getMailBoxGuid()); Assert.assertEquals(true,

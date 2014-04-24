@@ -19,7 +19,7 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.jpa.model.FSMEvent;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class FSMEventDAOBase extends  GenericDAOBase<FSMEvent> implements FSMEventDAO, MailBoxDAO {
 
@@ -72,10 +72,10 @@ public class FSMEventDAOBase extends  GenericDAOBase<FSMEvent> implements FSMEve
 		
 		FSMEvent fsmEvent = new FSMEvent();
 		
-		fsmEvent.setPguid(MailBoxUtility.getGUID());
+		fsmEvent.setPguid(MailBoxUtil.getGUID());
 		fsmEvent.setName(executionEvent.toString());
 		fsmEvent.setData(executionId);
-		fsmEvent.setCreatedDate(MailBoxUtility.getTimestamp());
+		fsmEvent.setCreatedDate(MailBoxUtil.getTimestamp());
 		persist(fsmEvent);
 	}
 }

@@ -51,7 +51,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.util.HTTPClientUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Test class to test mailbox configuration service.
  * 
@@ -94,7 +94,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"upload/truststore"); 
+        HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"upload/truststore"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
@@ -127,7 +127,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"/upload/public"); 
+        HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"/upload/public"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
@@ -161,7 +161,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
 		
 		 // prepare post method  
-        HttpPut httpPut = new HttpPut(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
+        HttpPut httpPut = new HttpPut(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
         
         httpPut.addHeader("Content-Type", "application/json");
@@ -187,7 +187,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			JAXBException, IOException, com.liaison.commons.exception.LiaisonException {
 
 		// Get the mailbox
-		String url = MailBoxUtility.getEnvironmentProperties().getString("kms-base-url")+"fetch/truststore/current/75D5112D0A0006340665134D334351D5";
+		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"fetch/truststore/current/75D5112D0A0006340665134D334351D5";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 

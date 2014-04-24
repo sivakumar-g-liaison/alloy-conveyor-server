@@ -20,7 +20,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -40,7 +40,7 @@ public class JSONUtilityTest extends BaseServiceTest {
 	 * @Test public void jsonTest() throws JsonParseException, JsonMappingException, JAXBException,
 	 * IOException { String data =
 	 * ServiceUtils.readFileFromClassPath("response/mailbox/addmailboxresponse.json");
-	 * AddMailBoxResponseDTO responseDTO = MailBoxUtility.unmarshalFromJSON(data,
+	 * AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(data,
 	 * AddMailBoxResponseDTO.class); Assert.assertEquals(SUCCESS,
 	 * responseDTO.getResponse().getStatus()); }
 	 */
@@ -57,16 +57,16 @@ public class JSONUtilityTest extends BaseServiceTest {
 	public void jsonTest() throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		//String data = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
-		//ReviseMailBoxRequestDTO responseDTO = MailBoxUtility.unmarshalFromJSON(data, ReviseMailBoxRequestDTO.class);
+		//ReviseMailBoxRequestDTO responseDTO = MailBoxUtil.unmarshalFromJSON(data, ReviseMailBoxRequestDTO.class);
 		
 		TriggerProcessorRequestDTO request = new TriggerProcessorRequestDTO("A", "B", "C");
 		request.setExecutionId("Test");
 		request.setProcessorId("testsfsdf");
 		
-		System.out.println(MailBoxUtility.marshalToJSON(request));
+		System.out.println(MailBoxUtil.marshalToJSON(request));
 		
 		String s = "{\"triggerProcessorRequest\":{\"executionId\":\"Test\",\"processorId\":\"testsfsdf\"}}";
-		TriggerProcessorRequestDTO dto = MailBoxUtility.unmarshalFromJSON(s, TriggerProcessorRequestDTO.class);
+		TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(s, TriggerProcessorRequestDTO.class);
 		
 		System.out.println(dto.getExecutionId());
 		System.out.println(dto.getProcessorId());

@@ -43,7 +43,7 @@ import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Class which has mailbox functional related operations.
@@ -72,7 +72,7 @@ public class MailBoxService {
 		try {
 
 			// validates mandatory value.
-			if (MailBoxUtility.isEmpty(profileName)) {
+			if (MailBoxUtil.isEmpty(profileName)) {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Name");
 			}
 			LOG.info("The given profile name is {}", profileName);
@@ -98,9 +98,9 @@ public class MailBoxService {
 			String message = null;
 			for (Processor processor : processorMatchingProfile) {
 
-				executionId = MailBoxUtility.getGUID();
+				executionId = MailBoxUtil.getGUID();
 				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
-				message = MailBoxUtility.marshalToJSON(request);
+				message = MailBoxUtil.marshalToJSON(request);
 				messages.add(message);
 				addProcessorToFSMState(executionId, processor, profileName);
 			}
@@ -165,16 +165,16 @@ public class MailBoxService {
 			
 			LOG.info("#####################----PROCESSOR EXECUTION BLOCK---############################################");
 			
-			TriggerProcessorRequestDTO dto = MailBoxUtility.unmarshalFromJSON(request, TriggerProcessorRequestDTO.class);
+			TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, TriggerProcessorRequestDTO.class);
 
 			// validates mandatory value.			
 			processorId = dto.getProcessorId();
-			if (MailBoxUtility.isEmpty(processorId)) {
+			if (MailBoxUtil.isEmpty(processorId)) {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id");
 			}
 			
 			executionId = dto.getExecutionId();
-			if (MailBoxUtility.isEmpty(executionId)) {
+			if (MailBoxUtil.isEmpty(executionId)) {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Execution Id");
 			}
 			
@@ -250,9 +250,9 @@ public class MailBoxService {
 	 */
 	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
 		
-		MailBoxUtility.getEnvironmentProperties();
-		String providerURL = MailBoxUtility.getEnvironmentProperties().getString("providerurl");
-		String queueName = MailBoxUtility.getEnvironmentProperties().getString("mailBoxProcessorQueue");
+		MailBoxUtil.getEnvironmentProperties();
+		String providerURL = MailBoxUtil.getEnvironmentProperties().getString("g2.queueing.server.url");
+		String queueName = MailBoxUtil.getEnvironmentProperties().getString("triggered.profile.processor.queue.name");
 
 
 		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();

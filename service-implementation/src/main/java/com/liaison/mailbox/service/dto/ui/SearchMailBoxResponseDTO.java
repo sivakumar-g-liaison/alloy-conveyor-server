@@ -20,7 +20,7 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -64,7 +64,7 @@ public class SearchMailBoxResponseDTO implements ResponseBuilder {
 
 	@Override
 	public Response constructResponse() throws Exception {
-		String responseBody = MailBoxUtility.marshalToJSON(this);
+		String responseBody = MailBoxUtil.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 }

@@ -27,7 +27,7 @@ import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponse
 import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -72,7 +72,7 @@ public class ProfileConfigurationService {
 
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
 			profileDTO.copyToEntity(profile);
-			profile.setPguid(MailBoxUtility.getGUID());
+			profile.setPguid(MailBoxUtil.getGUID());
 
 			// persisting the profile entity
 			configDao.persist(profile);

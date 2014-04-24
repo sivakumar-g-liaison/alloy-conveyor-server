@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.enums;
 
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public enum Protocol {
 
@@ -43,7 +43,7 @@ public enum Protocol {
 		Protocol found = null;
 		for (Protocol value : Protocol.values()) {
 
-			if (!MailBoxUtility.isEmpty(code) && code.equals(value.getCode())) {
+			if (!MailBoxUtil.isEmpty(code) && code.equals(value.getCode())) {
 				found = value;
 				break;
 			}
@@ -64,7 +64,7 @@ public enum Protocol {
 		Protocol found = null;
 		for (Protocol value : Protocol.values()) {
 
-			if (!MailBoxUtility.isEmpty(name) && name.equals(value.name())) {
+			if (!MailBoxUtil.isEmpty(name) && name.equals(value.name())) {
 				found = value;
 				break;
 			}

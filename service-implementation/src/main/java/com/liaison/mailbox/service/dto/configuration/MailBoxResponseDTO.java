@@ -10,7 +10,7 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.mailbox.jpa.model.MailBox;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author praveenu
@@ -41,7 +41,7 @@ public class MailBoxResponseDTO {
 	 * @param mailBox
 	 */
 	public void copyToEntity(MailBox mailBox) {
-		mailBox.setPguid(MailBoxUtility.getGUID());
+		mailBox.setPguid(MailBoxUtil.getGUID());
 	}
     
 	/**

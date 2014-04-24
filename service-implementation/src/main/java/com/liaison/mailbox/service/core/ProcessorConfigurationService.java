@@ -91,7 +91,7 @@ import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -153,8 +153,8 @@ public class ProcessorConfigurationService {
 			}
 			
 			// retrieve the service instance id from acl-manifest
-			String serviceInstanceId = MailBoxUtility.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtility.isEmpty(serviceInstanceId)) {
+			String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
 				 LOGGER.error("retrieval of service instance id from acl manifest failed");
 				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
 			}
@@ -164,7 +164,7 @@ public class ProcessorConfigurationService {
 			if (serviceInstance == null) {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceId);
-				serviceInstance.setPguid(MailBoxUtility.getGUID());
+				serviceInstance.setPguid(MailBoxUtil.getGUID());
 				serviceInstanceDAO.persist(serviceInstance);
 			}
 
@@ -199,7 +199,7 @@ public class ProcessorConfigurationService {
 			if (mailboxServiceInstance == null) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
-				msi.setPguid(MailBoxUtility.getGUID());
+				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(mailBox);
 				msiDao.persist(msi);
@@ -269,7 +269,7 @@ public class ProcessorConfigurationService {
 			for (ScheduleProfilesRef profile : scheduleProfilesRef) {
 
 				profileProcessor = new ScheduleProfileProcessor();
-				profileProcessor.setPguid(MailBoxUtility.getGUID());
+				profileProcessor.setPguid(MailBoxUtil.getGUID());
 				profileProcessor.setScheduleProfilesRef(profile);
 				scheduleProfileProcessors.add(profileProcessor);
 			}
@@ -381,12 +381,12 @@ public class ProcessorConfigurationService {
 			JSONObject jsonRequest = new JSONObject(request);
 			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
 
-			HttpPost httpPost = new HttpPost(MailBoxUtility.getEnvironmentProperties().getString("kms-base-url") 
+			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") 
 					+ "upload/truststore"); 
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
-			FileBody trustStore = new FileBody(new File(MailBoxUtility.getEnvironmentProperties().getString("certificateDirectory")));
+			FileBody trustStore = new FileBody(new File(MailBoxUtil.getEnvironmentProperties().getString("certificateDirectory")));
 
 			HttpEntity reqEntity = MultipartEntityBuilder.create()
 					.addPart("request", jsonRequestBody)
@@ -610,7 +610,7 @@ public class ProcessorConfigurationService {
 			if (existingProperties == null || existingProperties.isEmpty()) {
 
 				processorProperty = new ProcessorProperty();
-				processorProperty.setPguid(MailBoxUtility.getGUID());
+				processorProperty.setPguid(MailBoxUtil.getGUID());
 				processorProperty.setProcsrPropName(properties.getName());
 				processorProperty.setProcsrPropValue(properties.getValue());
 
@@ -629,7 +629,7 @@ public class ProcessorConfigurationService {
 					} else {
 						// add new property name and value
 						processorProperty = new ProcessorProperty();
-						processorProperty.setPguid(MailBoxUtility.getGUID());
+						processorProperty.setPguid(MailBoxUtil.getGUID());
 						processorProperty.setProcsrPropName(properties.getName());
 						processorProperty.setProcsrPropValue(properties.getValue());
 
@@ -674,7 +674,7 @@ public class ProcessorConfigurationService {
 		LOGGER.info("Entering into getExecutingProcessors.");
 		try {
 	
-			String listJobsIntervalInHours = MailBoxUtility.getEnvironmentProperties().getString("listJobsIntervalInHours"); 
+			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours"); 
 			Timestamp timeStmp = new Timestamp(new Date().getTime());
 			
 			Calendar cal = Calendar.getInstance();
@@ -687,27 +687,27 @@ public class ProcessorConfigurationService {
 			
 			List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
 			
-			if((!MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) || (MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate))) {
+			if((!MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) || (MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate))) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_DATE_RANGE);
 			}
 			
-			if(!MailBoxUtility.isEmpty(status) && ExecutionState.findByCode(status) == null) {
+			if(!MailBoxUtil.isEmpty(status) && ExecutionState.findByCode(status) == null) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_PROCESSOR_STATUS);
 			}
 			
-			if(!MailBoxUtility.isEmpty(status) && !MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate)) {
+			if(!MailBoxUtil.isEmpty(status) && !MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate)) {
 				listfsmStateVal = procDAO.findProcessorsExecutingByValueAndDate(status, frmDate, toDate);
 			}
 			
-			if (!MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
+			if (!MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
 				listfsmStateVal = procDAO.findProcessorsExecutingByValue(status, timeStmp);
 			}
 			
-			if(!MailBoxUtility.isEmpty(frmDate) && !MailBoxUtility.isEmpty(toDate) && MailBoxUtility.isEmpty(status)) {
+			if(!MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate) && MailBoxUtil.isEmpty(status)) {
 				listfsmStateVal = procDAO.findProcessorsExecutingByDate(frmDate, toDate);
 			}
 			
-			if(MailBoxUtility.isEmpty(status) && MailBoxUtility.isEmpty(frmDate) && MailBoxUtility.isEmpty(toDate)) {
+			if(MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
 				listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
 			}
 			

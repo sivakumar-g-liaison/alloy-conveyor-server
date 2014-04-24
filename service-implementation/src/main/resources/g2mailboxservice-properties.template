@@ -86,7 +86,7 @@ mail.from=g2mailbox-errornotifier@liaison.com
 # FOR JOB MONITORING ADMIN USE CASES - FOR GRACEFULLY INTTERUPTING THE JOB PROCESSING.
 default.job.search.period.in.hours=24
 #Set to 24 hours with the intention to turn of the checks
-check.for.interrupt.signal.frequency.in.sec=2
+check.for.interrupt.signal.frequency.in.sec=86400
 
 #########################################################KMS Configurations########################################################
 kms-base-url=http://10.0.6.101:8989/key-management/

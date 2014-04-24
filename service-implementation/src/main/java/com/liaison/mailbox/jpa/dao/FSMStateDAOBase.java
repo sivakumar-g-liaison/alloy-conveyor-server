@@ -32,7 +32,7 @@ import com.liaison.mailbox.jpa.model.FSMState;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author VNagarajan
@@ -119,9 +119,9 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		FSMState state = find(executionId);
 		
 		FSMStateValue value = new FSMStateValue();
-		value.setPguid(MailBoxUtility.getGUID());
+		value.setPguid(MailBoxUtil.getGUID());
 		value.setValue(processorState.getExecutionState().value());
-		value.setCreatedDate(MailBoxUtility.getTimestamp());
+		value.setCreatedDate(MailBoxUtil.getTimestamp());
 		value.setFsmState(state);
 		
 		dao.persist(value);

@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -56,7 +56,7 @@ public class GetExecutingProcessorResponseDTO implements ResponseBuilder {
 
 	@Override
 	public Response constructResponse() throws Exception {
-		String responseBody = MailBoxUtility.marshalToJSON(this);
+		String responseBody = MailBoxUtil.marshalToJSON(this);
 		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 

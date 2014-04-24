@@ -41,7 +41,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Http remote uploader to perform push operation, also it has support methods for JavaScript.
@@ -103,7 +103,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				
 				FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 				Date lastCheckTime = new Date();
-				String constantInterval = MailBoxUtility.getEnvironmentProperties().getString("fsmEventCheckIntervalInSeconds");
+				String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
 				
 				for (File entry : files) {
 					
@@ -166,7 +166,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException {
 
 		String fileLocation = processMountLocation(getDynamicProperties().getProperty(locationName));
-		if (MailBoxUtility.isEmpty(fileLocation)) {
+		if (MailBoxUtil.isEmpty(fileLocation)) {
 			archiveFile(file.getAbsolutePath(), isError);
 		} else {
 			archiveFile(file, fileLocation);
@@ -177,7 +177,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 
 		// HTTPRequest executed through JavaScript
-		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
 

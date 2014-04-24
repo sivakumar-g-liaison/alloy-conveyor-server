@@ -38,7 +38,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Http remote downloader to perform pull operation, also it has support methods
@@ -65,7 +65,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 		LOGGER.info("Entering in invoke.");
 		// HTTPRequest executed through JavaScript
-		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			

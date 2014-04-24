@@ -35,7 +35,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.MailBoxUtility;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * SFTP remote downloader to perform pull operation, also it has support methods
@@ -105,12 +105,12 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		if (sftpRequest.openChannel()) {
 			
 			String path = getPayloadURI();
-			if (MailBoxUtility.isEmpty(path)) {
+			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given URI {} does not exist.", path);
 				throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
 			}
 			String remotePath = getWriteResponseURI();
-			if (MailBoxUtility.isEmpty(remotePath)) {
+			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI {} does not exist.", remotePath);
 				throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
 			}
@@ -184,7 +184,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		
 		LOGGER.info("Entering in invoke.");
 		// G2SFTP executed through JavaScript
-		if (!MailBoxUtility.isEmpty(configurationInstance.getJavaScriptUri())) {
+		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			
