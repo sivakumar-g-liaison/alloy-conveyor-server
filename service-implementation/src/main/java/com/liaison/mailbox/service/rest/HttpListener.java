@@ -269,7 +269,8 @@ public class HttpListener extends BaseResource {
 			if (authenticationCredentials.length == 2) {
 				
 				String loginId = authenticationCredentials[0];
-				String token = authenticationCredentials[1];
+				// encode the password using base64 bcoz UM will expect a base64 encoded token
+				String token = new String(Base64.encodeBase64(authenticationCredentials[1].getBytes()));
 				// if both username and password is present call UM client to authenticate
 				UserManagementClient UMClient = new UserManagementClient();
 				UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, loginId, token);
