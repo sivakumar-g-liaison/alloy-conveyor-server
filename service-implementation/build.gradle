@@ -201,7 +201,7 @@ dependencies {
 	compile group: "com.liaison.commons.acl", name: "acl-commons-lib", version: "3.0.2-SNAPSHOT", changing: true
 	
 	//Dependency for UM integration
-	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.1-SNAPSHOT", changing: true
+	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.2-SNAPSHOT", changing: true
 	
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
