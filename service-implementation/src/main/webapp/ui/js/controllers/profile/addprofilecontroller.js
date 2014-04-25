@@ -219,6 +219,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
+			plugins: [new ngGridFlexibleHeightPlugin()],
 			totalServerItems:'totalServerItems'
         };
         

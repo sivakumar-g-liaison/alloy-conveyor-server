@@ -14,16 +14,20 @@
   -webkit-user-select: none;
   -o-user-select: none;
   user-select: none;
+  overflow-x: hidden;
 }
 .ngViewport {
   overflow: auto;
   min-height: 20px;
+
+  height: auto !important;
 }
 .ngViewport:focus {
   outline: none;
 }
 .ngCanvas {
   position: relative;
+  width: 100% !important;
 }
 .ngVerticalBar {
   position: absolute;
@@ -58,6 +62,11 @@
   z-index: 1;
   background-color: #eaeaea;
   border-bottom: 1px solid #d4d4d4;
+  height: auto !important;
+}
+
+.ngTopPanel .ngVerticalBar {
+    height: auto !important;
 }
 .ngSortButtonDown {
   position: absolute;
@@ -121,6 +130,12 @@
   position: absolute;
   background-color: transparent;
 }
+
+.ngRowCountPicker select {
+    margin-left: 3px;
+    margin-top: 3px;
+}
+
 .ngHeaderText {
   padding: 5px;
   -moz-box-sizing: border-box;
@@ -319,7 +334,8 @@
 }
 .ngRow {
   position: absolute;
-  border-bottom: 1px solid #d4d4d4;
+  /*border-bottom: 1px solid #d4d4d4;*/
+  width: 100% !important;
 }
 .ngRow.odd {
   background-color: #fdfdfd;
@@ -436,4 +452,35 @@
 }
 .ngFooterTotalItems {
   padding: 2px;
+}
+
+.modalGrid {
+    border-style: solid;
+    border-width: 1px;
+
+}
+
+.gridStyle {
+    border: 1px solid gray;
+    border-radius: 3px;
+
+    /* width: none !important; */
+    /* min-height: 425px; */
+    height: auto !important;;
+}
+
+.ngGrid {
+    background-color: rgb(253, 253, 253);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/** better position ngGrid cell contents **/
+.ngCell div {
+    margin-top: 0px;
+    margin-left: 0px;
 }

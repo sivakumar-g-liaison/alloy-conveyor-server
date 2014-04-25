@@ -240,6 +240,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             canSelectRows: false,
             enablePaging: false,
             enableRowSelection: false,
+			enableColumnResize : true,
+			plugins: [new ngGridFlexibleHeightPlugin()],
             showFooter: false,
             rowHeight: 80,
             columnDefs: [{

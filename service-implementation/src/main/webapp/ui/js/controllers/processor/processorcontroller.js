@@ -576,6 +576,8 @@ var rest = myApp.controller(
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 80,
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "name",
                     width: "50%",
@@ -881,6 +883,8 @@ var rest = myApp.controller(
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 80,
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "folderURI",
                     width: "33%",
@@ -956,6 +960,8 @@ var rest = myApp.controller(
                 enablePaging: false,
                 showFooter: false,
                 rowHeight: 100,
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "credentialURI",
                     width: "20%",
@@ -1117,7 +1123,9 @@ var rest = myApp.controller(
                 displaySelectionCheckbox: false,
                 pagingOptions: $scope.pagingOptions,
                 filterOptions: $scope.filterOptions,
-                totalServerItems: 'totalServerItems'
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
+                totalServerItems: 'totalServerItems',
             };
             $scope.setRemotePropData = function (reqHeaderArray, value) {
                 if (value === 'otherRequestHeader') {

@@ -284,6 +284,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
+			enableColumnResize : true,
+			plugins: [new ngGridFlexibleHeightPlugin()],
             totalServerItems: 'totalServerItems',
         };
 
