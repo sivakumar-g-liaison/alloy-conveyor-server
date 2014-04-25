@@ -4,6 +4,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         //Remove if not needed
         $scope.isMailBoxEdit = false;
 
+		$scope.addProcessorBtnValue = 'Add Processors';
 		if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
 			$rootScope.pipelineId = $location.search().pipeLineId;
 		}
@@ -75,6 +76,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         $scope.mailBox.guid = $scope.mailBoxId;
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                         $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
+						data.getMailBoxResponse.mailBox.processors.length > 0 ? $scope.addProcessorBtnValue = 'List Processors' 
+						: $scope.addProcessorBtnValue = 'Add Processors';
                         (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                             data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
