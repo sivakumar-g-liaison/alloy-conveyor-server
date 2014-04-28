@@ -2520,7 +2520,7 @@ var rest = myApp.controller(
                     // Public Key guid 
                     //var pkGuid = 'testdata';
                     pkGuid = pkGuid.toString();
-                    if ($scope.processor.isSelfSigned === "0" || $scope.processor.isSelfSigned == 0) {
+                    if ($scope.certificateModal.isGlobalTrustore === "0") {
                         console.log('creating self signed trust store');
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
