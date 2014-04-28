@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Date;
 
@@ -25,7 +26,11 @@ import org.apache.commons.io.FileUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
+
 import com.google.gson.JsonParseException;
+import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -77,13 +82,17 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws JSONException 
 	 * @throws JsonParseException 
 	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	public void executeRequest(String executionId,MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			SymmetricAlgorithmException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException {
+			SymmetricAlgorithmException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
 		HTTPRequest request = null;
 		ByteArrayOutputStream responseStream = null;

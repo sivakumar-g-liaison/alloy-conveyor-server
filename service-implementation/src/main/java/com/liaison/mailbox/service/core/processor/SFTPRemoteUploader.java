@@ -14,16 +14,23 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
+import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
@@ -68,12 +75,19 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws JsonParseException
 	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws JSONException 
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyStoreException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
+	 * @throws CertificateEncodingException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
 
@@ -95,10 +109,17 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws com.liaison.commons.exception.LiaisonException 
 	 * @throws JSONException 
 	 * @throws JsonParseException 
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyStoreException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
+	 * @throws CertificateEncodingException 
 	 * 
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException {
+			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
 		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
 		sftpRequest.connect();

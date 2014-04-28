@@ -221,7 +221,7 @@ public class MailBoxUtil {
 		
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = MailBoxUtil.unmarshalFromJSON(aclManifestJson, ACLManifest.class);
+		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
 		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
 		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");

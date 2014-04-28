@@ -18,12 +18,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
@@ -32,6 +35,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -81,6 +85,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	 * @throws NoSuchAlgorithmException
 	 * @throws CertificateException
 	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
 	 */
 	@Test
 	public void testRemoteDownloader() throws JsonParseException,
@@ -88,7 +96,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 			JAXBException, IOException, com.google.gson.JsonParseException,
 			URISyntaxException, MailBoxServicesException,
 			SymmetricAlgorithmException, KeyStoreException,
-			NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException {
+			NoSuchAlgorithmException, CertificateException, com.liaison.commons.exception.LiaisonException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
 		Processor processor = new Processor();
 		processor.setProcsrName("Processor");

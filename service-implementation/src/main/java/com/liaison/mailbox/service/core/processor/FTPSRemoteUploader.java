@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Date;
 
@@ -23,10 +24,13 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
+import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
@@ -91,12 +95,16 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws KeyStoreException 
 	 * @throws CertificateException 
 	 * @throws NoSuchAlgorithmException 
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
 	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -120,10 +128,14 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws CertificateException 
 	 * @throws NoSuchAlgorithmException 
 	 * @throws JsonParseException 
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
 	 * 
 	 */
 	protected void executeRequest(String executionId, MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
+			URISyntaxException, JAXBException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		

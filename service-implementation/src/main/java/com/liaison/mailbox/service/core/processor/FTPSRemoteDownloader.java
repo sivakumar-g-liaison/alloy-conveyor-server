@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 import javax.xml.bind.JAXBException;
@@ -24,10 +25,13 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
+import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
@@ -44,9 +48,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author praveenu
  * 
  */
-public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
+		MailBoxProcessor {
 
-	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteDownloader.class);
+	private static final Logger LOGGER = LogManager
+			.getLogger(FTPSRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteDownloader() {
@@ -57,13 +63,16 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
-		
+	public void invoke(String executionId, MailboxFSM fsm) throws Exception {
+
 		LOGGER.info("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+			fsm.handleEvent(fsm
+					.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+			JavaScriptEngineUtil.executeJavaScript(
+					configurationInstance.getJavaScriptUri(), "init", this,
+					LOGGER);
 
 		} else {
 			// FTPSRequest executed through Java
@@ -81,17 +90,28 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws JSONException 
-	 * @throws KeyStoreException 
-	 * @throws CertificateException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JSONException
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws NoSuchAlgorithmException
+	 * @throws BootstrapingFailedException
+	 * @throws OperatorCreationException
+	 * @throws CMSException
+	 * @throws UnrecoverableKeyException
 	 * @throws MailBoxConfigurationServicesException
 	 * 
 	 */
 	@Override
-	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
+	public G2FTPSClient getClientWithInjectedConfiguration()
+			throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException, JsonParseException,
+			SymmetricAlgorithmException,
+			com.liaison.commons.exception.LiaisonException,
+			NoSuchAlgorithmException, CertificateException, KeyStoreException,
+			JSONException, UnrecoverableKeyException,
+			OperatorCreationException, CMSException,
+			BootstrapingFailedException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
 		return ftpsRequest;
@@ -109,23 +129,33 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws JsonParseException 
-	 * @throws JSONException 
-	 * @throws KeyStoreException 
-	 * @throws CertificateException 
-	 * @throws NoSuchAlgorithmException 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JsonParseException
+	 * @throws JSONException
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws NoSuchAlgorithmException
+	 * @throws CMSException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 * @throws BootstrapingFailedException
 	 * 
 	 */
 
-	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, SymmetricAlgorithmException, JsonParseException, com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException {
+	protected void executeRequest() throws MailBoxServicesException,
+			LiaisonException, IOException, FS2Exception, URISyntaxException,
+			JAXBException, SymmetricAlgorithmException, JsonParseException,
+			com.liaison.commons.exception.LiaisonException,
+			NoSuchAlgorithmException, CertificateException, KeyStoreException,
+			JSONException, UnrecoverableKeyException,
+			OperatorCreationException, CMSException,
+			BootstrapingFailedException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
-		
+
 		ftpsRequest.enableSessionReuse(true);
 		ftpsRequest.connect();
-		ftpsRequest.login();		
+		ftpsRequest.login();
 		ftpsRequest.enableDataChannelEncryption();
 		if (getRemoteProcessorProperty() != null) {
 
@@ -136,13 +166,15 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		String path = getPayloadURI();
 		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given payload URI is Empty.");
-			throw new MailBoxServicesException("The given payload configuration is Empty.");
+			throw new MailBoxServicesException(
+					"The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(remotePath)) {
 			LOGGER.info("The given remote URI is Empty.");
-			throw new MailBoxServicesException("The given remote configuration is Empty.");
+			throw new MailBoxServicesException(
+					"The given remote configuration is Empty.");
 		}
 
 		ftpsRequest.changeDirectory(path);
@@ -155,13 +187,15 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * 
 	 * @throws IOException
 	 * @throws LiaisonException
-	 * @throws com.liaison.commons.exception.LiaisonException 
+	 * @throws com.liaison.commons.exception.LiaisonException
 	 * @throws SftpException
 	 * 
 	 */
 
-	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException, com.liaison.commons.exception.LiaisonException {
+	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir,
+			String localFileDir) throws IOException, LiaisonException,
+			URISyntaxException, FS2Exception, MailBoxServicesException,
+			com.liaison.commons.exception.LiaisonException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {
@@ -182,16 +216,20 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				String currentFileName = file.getName();
 				if (file.isFile()) {
 					// String remotePath = dirToList + "/" + currentFileName;
-					String localDir = localFileDir + File.separatorChar + currentFileName;
+					String localDir = localFileDir + File.separatorChar
+							+ currentFileName;
 					ftpClient.changeDirectory(dirToList);
 					processResponseLocation(localDir);
-					ftpClient.getFile(currentFileName, new BufferedOutputStream(new FileOutputStream(localDir)));
-					
+					ftpClient.getFile(currentFileName,
+							new BufferedOutputStream(new FileOutputStream(
+									localDir)));
 
 				} else {
 
-					String localDir = localFileDir + File.separatorChar + currentFileName;
-					String remotePath = dirToList + File.separatorChar + currentFileName;
+					String localDir = localFileDir + File.separatorChar
+							+ currentFileName;
+					String remotePath = dirToList + File.separatorChar
+							+ currentFileName;
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
