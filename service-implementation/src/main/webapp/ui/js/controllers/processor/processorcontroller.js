@@ -1496,18 +1496,22 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if(data.getProcessorResponse.processor.credentials.length === 0) {
+								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 								}
 								
+								var editProcessor = false;
 								for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
 									$scope.credType = data.getProcessorResponse.processor.credentials[i].credentialType;
 									
 									if($scope.credType === 'LOGIN_CREDENTIAL') {
 										readSecretFromKM($scope.url_secret_service + data.getProcessorResponse.processor.credentials[i].password, i, data, profData, processorId, blockuiFlag);
+										editProcessor = true;
 										break;
 									}
-									
+								}
+								if(editProcessor === false) {
+									$scope.editProcAfterReadSecret();
 								}
                             }
                         );
@@ -1974,10 +1978,11 @@ var rest = myApp.controller(
                     editRequest.reviseProcessorRequest.processor.status = $scope.status.id;
                     editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.id;
 					
-					if(editRequest.reviseProcessorRequest.processor.credentials.length === 0) {
+					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 						$scope.processorReviseAfterKM();
 					}
 					
+					var reviseProcessor = false;
 					for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
 					
 						$scope.credType = editRequest.reviseProcessorRequest.processor.credentials[i].credentialType;
@@ -1991,8 +1996,13 @@ var rest = myApp.controller(
 							base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
 							$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
 							reviseSecret($scope.secretUrl, base64EncodedSecret, i);
+							reviseProcessor = true;
 							break;
 						}					
+					}
+					
+					if(reviseProcessor === false) {
+						$scope.processorReviseAfterKM();
 					}
 					
                 } else {
@@ -2002,10 +2012,11 @@ var rest = myApp.controller(
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
 					
-					if($scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length === 0) {
+					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 						$scope.processorSaveAfterKM();
 					}
 					
+					var saveProcessor = false;
 					for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
 					
 						$scope.credType = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].credentialType;
@@ -2021,8 +2032,14 @@ var rest = myApp.controller(
 							$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
 							
 							storeSecret($scope.secretUrl, base64EncodedSecret, i);
+							
+							saveProcessor = true;
 							break;
 						}
+					}
+					
+					if(saveProcessor === false) {
+						$scope.processorSaveAfterKM();
 					}
                 }
             };
