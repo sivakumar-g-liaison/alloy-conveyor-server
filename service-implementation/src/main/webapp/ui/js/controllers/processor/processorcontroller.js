@@ -1,15 +1,8 @@
 var rest = myApp.controller(
     'ProcessorCntrlr', ['$rootScope', '$scope', '$timeout',
-        '$filter', '$location', '$log', '$blockUI', '$http',
+        '$filter', '$location', '$log', '$blockUI',
         function ($rootScope, $scope, $timeout, $filter,
-            $location, $log, $blockUI, $http) {
-						
-			var keyStr = "ABCDEFGHIJKLMNOP" +
-               "QRSTUVWXYZabcdef" +
-               "ghijklmnopqrstuv" +
-               "wxyz0123456789+/" +
-               "=";
-
+            $location, $log, $blockUI) {
 			
 			//for loading js from git
 			$scope.constructedGitUrl = "http://" + $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
@@ -1496,22 +1489,22 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
+								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP' || data.getProcessorResponse.processor.credentials.length === 0) {
 									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
-								}
-								
-								var editProcessor = false;
-								for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
-									$scope.credType = data.getProcessorResponse.processor.credentials[i].credentialType;
-									
-									if($scope.credType === 'LOGIN_CREDENTIAL') {
-										readSecretFromKM($scope.url_secret_service + data.getProcessorResponse.processor.credentials[i].password, i, data, profData, processorId, blockuiFlag);
-										editProcessor = true;
-										break;
+								} else {
+									var editProcessor = false;
+									for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
+										$scope.credType = data.getProcessorResponse.processor.credentials[i].credentialType;
+										
+										if($scope.credType === 'LOGIN_CREDENTIAL') {
+											readSecretFromKM($scope.url_secret_service + data.getProcessorResponse.processor.credentials[i].password, i, data, profData, processorId, blockuiFlag);
+											editProcessor = true;
+											break;
+										}
 									}
-								}
-								if(editProcessor === false) {
-									$scope.editProcAfterReadSecret();
+									if(editProcessor === false) {
+										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
+									}
 								}
                             }
                         );
@@ -1980,31 +1973,30 @@ var rest = myApp.controller(
 					
 					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 						$scope.processorReviseAfterKM();
-					}
-					
-					var reviseProcessor = false;
-					for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
-					
-						$scope.credType = editRequest.reviseProcessorRequest.processor.credentials[i].credentialType;
-						$scope.procName = editRequest.reviseProcessorRequest.processor.name;
-						$scope.credUsrName = editRequest.reviseProcessorRequest.processor.credentials[i].userId;
-						$scope.secret = editRequest.reviseProcessorRequest.processor.credentials[i].password;
+					} else {
+						var reviseProcessor = false;
+						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
 						
-						$scope.secretName = '';
-						if($scope.credType === 'LOGIN_CREDENTIAL') {
-							$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
-							base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
-							$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
-							reviseSecret($scope.secretUrl, base64EncodedSecret, i);
-							reviseProcessor = true;
-							break;
-						}					
-					}
+							$scope.credType = editRequest.reviseProcessorRequest.processor.credentials[i].credentialType;
+							$scope.procName = editRequest.reviseProcessorRequest.processor.name;
+							$scope.credUsrName = editRequest.reviseProcessorRequest.processor.credentials[i].userId;
+							$scope.secret = editRequest.reviseProcessorRequest.processor.credentials[i].password;
+							
+							$scope.secretName = '';
+							if($scope.credType === 'LOGIN_CREDENTIAL') {
+								$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
+								base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
+								$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
+								reviseSecret($scope.secretUrl, base64EncodedSecret, i);
+								reviseProcessor = true;
+								break;
+							}					
+						}
 					
-					if(reviseProcessor === false) {
-						$scope.processorReviseAfterKM();
+						if(reviseProcessor === false) {
+							$scope.processorReviseAfterKM();
+						}
 					}
-					
                 } else {
 				
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
@@ -2012,34 +2004,34 @@ var rest = myApp.controller(
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
 					
-					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
+					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP' || $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length === 0) {
 						$scope.processorSaveAfterKM();
-					}
-					
-					var saveProcessor = false;
-					for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
-					
-						$scope.credType = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].credentialType;
-						$scope.procName = addRequest.addProcessorToMailBoxRequest.processor.name;
-						$scope.credUsrName = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].userId;
-						$scope.secret = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].password;
+					} else {
+						var saveProcessor = false;
+						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
 						
-						$scope.secretName = '';
-						if($scope.credType === 'LOGIN_CREDENTIAL') {
-						
-							$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
-							base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
-							$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
+							$scope.credType = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].credentialType;
+							$scope.procName = addRequest.addProcessorToMailBoxRequest.processor.name;
+							$scope.credUsrName = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].userId;
+							$scope.secret = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].password;
 							
-							storeSecret($scope.secretUrl, base64EncodedSecret, i);
+							$scope.secretName = '';
+							if($scope.credType === 'LOGIN_CREDENTIAL') {
 							
-							saveProcessor = true;
-							break;
+								$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
+								base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
+								$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
+								
+								storeSecret($scope.secretUrl, base64EncodedSecret, i);
+								
+								saveProcessor = true;
+								break;
+							}
 						}
-					}
 					
-					if(saveProcessor === false) {
-						$scope.processorSaveAfterKM();
+						if(saveProcessor === false) {
+							$scope.processorSaveAfterKM();
+						}
 					}
                 }
             };
