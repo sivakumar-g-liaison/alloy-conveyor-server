@@ -17,6 +17,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.netflix.karyon.spi.HealthCheckHandler;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class HealthCheck implements HealthCheckHandler {
 
 	private static final Logger logger = LogManager.getLogger(HealthCheck.class);

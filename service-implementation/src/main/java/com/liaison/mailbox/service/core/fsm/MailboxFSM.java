@@ -27,6 +27,11 @@ import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
 import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
 import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 
 	Delegate<ProcessorStateDTO, ExecutionEvents> delegateMiss = null;

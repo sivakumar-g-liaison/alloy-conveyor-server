@@ -16,7 +16,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.MailBoxComponent;
 
-
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({
     @NamedQuery(name=MailBoxComponentDAO.FIND_MAILBOX_COMP_BY_PROFILE,
             query="SELECT mbc FROM MailBoxComponent mbc WHERE mbc.profile = :" + MailBoxComponentDAO.PROFILE)

@@ -28,6 +28,11 @@ import org.apache.logging.log4j.LogManager;
 
 import com.netflix.config.ConfigurationManager;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class EmailNotifier {
 
 	protected static final Logger LOGGER = LogManager.getLogger(EmailNotifier.class);

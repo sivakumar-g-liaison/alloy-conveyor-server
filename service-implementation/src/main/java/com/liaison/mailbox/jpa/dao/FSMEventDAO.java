@@ -15,6 +15,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.FSMEvent;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQuery(name = FSMEventDAO.FIND_INTERRUPT_EVENT,
 		query = "SELECT eventVal FROM FSMEvent eventVal WHERE eventVal.data =:" + FSMEventDAO.EXECUTION_ID)
 

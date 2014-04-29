@@ -18,7 +18,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 /**
  * 
  * 
- * @author praveenu
+ * @author OFS
  */
 @ApiModel(value = "profile")
 public class ProfileDTO {

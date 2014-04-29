@@ -11,6 +11,11 @@ package com.liaison.mailbox.service.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class HTTPStringOutputStream extends OutputStream {
 
 	private StringBuilder content = new StringBuilder();

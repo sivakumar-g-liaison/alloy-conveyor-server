@@ -103,7 +103,7 @@ import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public abstract class AbstractRemoteProcessor {

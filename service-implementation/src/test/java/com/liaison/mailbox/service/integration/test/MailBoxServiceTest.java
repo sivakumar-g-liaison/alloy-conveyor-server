@@ -40,7 +40,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Test class which tests the mailbox functional services.
  * 
- * @author praveenu
+ * @author OFS
  */
 public class MailBoxServiceTest extends BaseServiceTest {
 

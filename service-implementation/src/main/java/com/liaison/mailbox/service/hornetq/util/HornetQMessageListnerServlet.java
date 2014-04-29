@@ -21,11 +21,13 @@ import javax.servlet.http.HttpServlet;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class HornetQMessageListnerServlet extends HttpServlet {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LogManager.getLogger(HornetQMessageListnerServlet.class);
 	private static boolean isInitialized = false;

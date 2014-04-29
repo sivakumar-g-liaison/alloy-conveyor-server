@@ -15,7 +15,7 @@ import com.liaison.mailbox.enums.Messages;
 /**
  * Customized exception for ProcessorManagementFailedException service operations.
  * 
- * @author santoshc
+ * @author OFS
  */
 public class ProcessorManagementFailedException extends Exception {
 

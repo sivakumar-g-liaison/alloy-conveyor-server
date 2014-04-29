@@ -13,7 +13,7 @@ import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public class MailBoxResponseDTO {

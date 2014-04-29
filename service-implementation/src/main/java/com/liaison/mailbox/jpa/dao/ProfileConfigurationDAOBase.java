@@ -20,6 +20,10 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 
+/**
+ * @author OFS
+ * 
+ */
 public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfilesRef> implements ProfileConfigurationDAO,
 		MailBoxDAO {
 

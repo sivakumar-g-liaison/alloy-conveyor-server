@@ -23,7 +23,11 @@ import com.liaison.mailbox.service.util.HornetQJMSUtil;
 
 
 
-
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class HornetQMessageListnerTest {
      
 	/**

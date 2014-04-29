@@ -19,6 +19,10 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.jpa.model.MailBoxComponent;
 
+/**
+ * @author OFS
+ * 
+ */
 public class MailBoxComponentDAOBase extends GenericDAOBase <MailBoxComponent> implements MailBoxComponentDAO,MailBoxDAO {
 
 	public MailBoxComponentDAOBase(){

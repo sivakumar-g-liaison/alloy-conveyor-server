@@ -23,6 +23,8 @@ import com.liaison.commons.jpa.Identifiable;
 
 /**
  * The persistent class for the FSM_TRANSITION_LIST database table.
+ * 
+ *  @author OFS
  */
 @Entity
 @Table(name = "FSM_TRANSITION_LIST")

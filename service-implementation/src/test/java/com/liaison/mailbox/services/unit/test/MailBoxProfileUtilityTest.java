@@ -10,9 +10,6 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
@@ -21,13 +18,17 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.Messages;
 
 /**
  * Unit test cases for mailbox profile operations.
  * 
- * @author praveenu
+ * @author OFS
  */
 public class MailBoxProfileUtilityTest {
 

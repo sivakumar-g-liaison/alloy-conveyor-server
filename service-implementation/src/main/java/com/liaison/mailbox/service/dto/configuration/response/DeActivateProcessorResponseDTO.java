@@ -22,7 +22,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * 
  *
- * @author sivakumarg
+ * @author OFS
  */
 @JsonRootName("deActivateProcessorResponse")
 public class DeActivateProcessorResponseDTO implements ResponseBuilder {

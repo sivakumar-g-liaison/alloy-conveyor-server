@@ -23,6 +23,10 @@ import com.liaison.mailbox.jpa.model.FSMState;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({ @NamedQuery(name = FSMStateDAO.FIND_FSM_STATE_BY_NAME, 
 		query = "SELECT state FROM FSMState state WHERE state.executionId = :" + FSMStateDAO.EXECUTION_ID),
 @NamedQuery(name = FSMStateDAO.FIND_ALL_PROC_EXECUTING,

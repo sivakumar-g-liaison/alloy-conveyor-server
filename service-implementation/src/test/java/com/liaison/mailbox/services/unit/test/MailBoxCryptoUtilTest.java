@@ -15,7 +15,7 @@ import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public class MailBoxCryptoUtilTest {

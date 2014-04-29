@@ -10,6 +10,11 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class FSMExecutionEventResponseDTO {
 	
 	private String guId;

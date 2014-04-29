@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 /**
  * Class which has configuration related operations.
  * 
- * @author praveenu
+ * @author OFS
  */
 
 public class ProfileConfigurationService {

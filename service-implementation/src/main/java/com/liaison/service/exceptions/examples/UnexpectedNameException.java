@@ -13,6 +13,11 @@ package com.liaison.service.exceptions.examples;
 import com.liaison.commons.audit.AuditStandardsRequirement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class UnexpectedNameException extends LiaisonAuditableRuntimeException {
 
 	private static final long serialVersionUID = 1564159737669670209L;

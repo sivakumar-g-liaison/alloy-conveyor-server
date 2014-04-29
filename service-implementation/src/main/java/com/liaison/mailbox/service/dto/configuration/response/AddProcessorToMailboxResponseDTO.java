@@ -10,14 +10,9 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
-import java.io.IOException;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.ResponseBuilder;
@@ -27,7 +22,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * 
  *
- * @author sivakumarg
+ * @author OFS
  */
 
 @JsonRootName("addProcessorToMailBoxResponse")

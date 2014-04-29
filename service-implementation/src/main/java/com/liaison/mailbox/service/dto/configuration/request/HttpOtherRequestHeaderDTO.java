@@ -10,7 +10,7 @@
 package com.liaison.mailbox.service.dto.configuration.request;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public class HttpOtherRequestHeaderDTO {

@@ -50,7 +50,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author
+ * @author OFS
  * 
  */
 public class MailBoxProcessorServiceTest extends BaseServiceTest {

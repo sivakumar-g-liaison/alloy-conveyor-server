@@ -12,6 +12,11 @@ package com.liaison.mailbox.service.dto.ui;
 
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class GetExecutingProcessorDTO {
 	
 	private String executionId;

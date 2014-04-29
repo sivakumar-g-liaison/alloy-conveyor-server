@@ -13,6 +13,11 @@ package com.liaison.mailbox.jpa.model;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+/**
+* The persistent class for the MAILBOX_SERICEINSTANCE database table.
+* 
+* @author OFS
+*/
 @Entity
 @DiscriminatorValue(Processor.TYPE_SWEEPER)
 public class Sweeper extends Processor {

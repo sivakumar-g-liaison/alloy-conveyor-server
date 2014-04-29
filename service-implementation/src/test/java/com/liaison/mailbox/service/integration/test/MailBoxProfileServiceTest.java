@@ -36,7 +36,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Test class which tests the mailbox profile operations.
  * 
- * @author praveenu
+ * @author OFS
  */
 public class MailBoxProfileServiceTest extends BaseServiceTest {
 

@@ -15,6 +15,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.MailboxServiceInstance;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({ @NamedQuery(name = MailboxServiceInstanceDAO.FIND_MBX_SI_GUID, query = "SELECT msi FROM MailboxServiceInstance msi where msi.mailbox.pguid = :"
 		+ MailboxServiceInstanceDAO.GUID_MBX + " AND msi.serviceInstance.pguid = :" + MailboxServiceInstanceDAO.SERVICE_INSTANCE_GUID) })
 

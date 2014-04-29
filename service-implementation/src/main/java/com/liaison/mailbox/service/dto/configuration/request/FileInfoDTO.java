@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * Folder tree model
- * @author praveenu
+ * @author OFS
  * 
  */
 public class FileInfoDTO {

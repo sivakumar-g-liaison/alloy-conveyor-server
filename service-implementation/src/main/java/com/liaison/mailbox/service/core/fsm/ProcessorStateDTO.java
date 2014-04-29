@@ -21,7 +21,7 @@ import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author
+ * @author OFS
  * 
  */
 public class ProcessorStateDTO {

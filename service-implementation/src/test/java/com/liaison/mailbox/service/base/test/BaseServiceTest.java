@@ -38,7 +38,7 @@ import com.liaison.mailbox.service.util.HTTPStringOutputStream;
 /**
  * Base Test class for initial setup and cleanup.
  * 
- * @author easwaripriyak
+ * @author OFS
  * 
  */
 public abstract class BaseServiceTest {
@@ -60,7 +60,7 @@ public abstract class BaseServiceTest {
 			prop.load(is);
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
-		}
+		} 		
 
 	}
 
@@ -71,7 +71,7 @@ public abstract class BaseServiceTest {
 	public void setOutput(HTTPStringOutputStream output) {
 		this.output = output;
 	}
-
+	
 	public String getBASE_URL() {
 		return BASE_URL;
 	}

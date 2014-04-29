@@ -95,7 +95,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
- * @author sivakumarg
+ * @author OFS
  * 
  */
 public class ProcessorConfigurationService {

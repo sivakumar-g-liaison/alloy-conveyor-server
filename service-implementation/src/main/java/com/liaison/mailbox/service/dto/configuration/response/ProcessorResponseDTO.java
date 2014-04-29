@@ -13,7 +13,7 @@ package com.liaison.mailbox.service.dto.configuration.response;
 /**
  * Customized DTO for responses.
  * 
- * @author sivakumarg
+ * @author OFS
  */
 public class ProcessorResponseDTO {
 

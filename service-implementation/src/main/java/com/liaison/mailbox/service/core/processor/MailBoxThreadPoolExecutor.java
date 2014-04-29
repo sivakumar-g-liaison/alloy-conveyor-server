@@ -14,8 +14,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class MailBoxThreadPoolExecutor extends ThreadPoolExecutor{
-
+    
 	public MailBoxThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
 			long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue,boolean allowCoreThreadTimeOut) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);

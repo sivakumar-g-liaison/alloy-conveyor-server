@@ -18,6 +18,11 @@ import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class AddFSMExecutionEventResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;

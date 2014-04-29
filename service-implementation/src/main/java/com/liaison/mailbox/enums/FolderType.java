@@ -12,7 +12,7 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public enum FolderType {

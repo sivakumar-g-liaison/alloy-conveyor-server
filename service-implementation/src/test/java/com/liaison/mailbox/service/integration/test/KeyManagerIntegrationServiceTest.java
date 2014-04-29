@@ -55,7 +55,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Test class to test mailbox configuration service.
  * 
- * @author Rajesh Kumar
+ * @author OFS
  */
 public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 

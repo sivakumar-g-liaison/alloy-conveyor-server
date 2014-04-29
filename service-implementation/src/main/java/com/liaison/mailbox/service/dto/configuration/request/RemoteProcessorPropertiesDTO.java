@@ -14,7 +14,7 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 @JsonRootName("remoteProcessorProperties")

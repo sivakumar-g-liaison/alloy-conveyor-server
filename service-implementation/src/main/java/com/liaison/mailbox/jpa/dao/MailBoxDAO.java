@@ -10,6 +10,10 @@
 
 package com.liaison.mailbox.jpa.dao;
 
+/**
+ * @author OFS
+ * 
+ */
 public interface MailBoxDAO {
 	
 	 public static final String PERSISTENCE_UNIT_NAME = "mailbox-pu";

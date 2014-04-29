@@ -31,7 +31,7 @@ import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
  *  
- * @author sivakumarg
+ * @author OFS
  *
  */
 public final class JavaScriptEngineUtil {

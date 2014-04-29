@@ -19,6 +19,8 @@ import org.apache.logging.log4j.LogManager;
 
 /**
  * Simple class to encapsulate logging of timestamps.
+ * 
+ * @author OFS
  */
 public class TimestampLogger
 {

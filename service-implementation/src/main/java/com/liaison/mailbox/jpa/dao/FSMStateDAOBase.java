@@ -35,8 +35,8 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author VNagarajan
- *
+ * @author OFS
+ * 
  */
 public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStateDAO {
 	

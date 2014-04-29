@@ -26,6 +26,7 @@ import com.liaison.commons.jpa.Identifiable;
 /**
  * The persistent class for the SCHEDULE_PROFILE_PROCESSORS database table.
  * 
+ * @author OFS
  */
 @Entity
 @Table(name = "SCHED_PROCESSOR")

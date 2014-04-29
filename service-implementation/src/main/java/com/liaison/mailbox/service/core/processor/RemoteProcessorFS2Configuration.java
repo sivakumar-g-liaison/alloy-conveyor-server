@@ -21,6 +21,11 @@ import com.liaison.fs2.api.FS2Configuration;
 import com.liaison.fs2.api.FS2DefaultConfiguration;
 import com.netflix.config.ConfigurationManager;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class RemoteProcessorFS2Configuration extends FS2DefaultConfiguration implements FS2Configuration {
 	public final static Properties properties = new Properties();
    

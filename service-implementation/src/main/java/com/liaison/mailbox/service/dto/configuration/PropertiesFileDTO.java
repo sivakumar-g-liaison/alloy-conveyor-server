@@ -11,11 +11,16 @@
 /**
  * 
  * 
- * @author santoshc
+ * @author OFS
  */
 
 package com.liaison.mailbox.service.dto.configuration;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class PropertiesFileDTO {
 	
 	private String trustStoreId;

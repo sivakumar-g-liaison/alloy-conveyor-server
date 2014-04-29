@@ -48,7 +48,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * SFTP remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
  * 
- * @author praveenu
+ * @author OFS
  */
 public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
@@ -127,13 +127,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
-				LOGGER.info("The given URI {} does not exist.", path);
-				throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+				LOGGER.info("The given payload URI is Empty.");
+				throw new MailBoxServicesException("The given payload configuration is Empty.");
 			}
 			String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI {} does not exist.", remotePath);
-				throw new MailBoxServicesException("The given remote URI '" + remotePath + "' does not exist.");
+				LOGGER.info("The given remote URI is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.");
 			}
 
 			downloadDirectory(sftpRequest, path, remotePath);

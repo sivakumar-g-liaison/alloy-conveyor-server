@@ -52,7 +52,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public class RemoteProcessorTest extends BaseServiceTest {

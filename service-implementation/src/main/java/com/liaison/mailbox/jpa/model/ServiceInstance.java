@@ -24,6 +24,7 @@ import com.liaison.commons.jpa.Identifiable;
 /**
 * The persistent class for the MAILBOX_SERICEINSTANCE database table.
 * 
+* @author OFS
 */
 @Entity
 @Table(name = "SERVICE_INSTANCE")

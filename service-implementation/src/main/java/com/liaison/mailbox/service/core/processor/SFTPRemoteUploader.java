@@ -49,7 +49,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * SFTP remote uploader to perform push operation, also it has support methods
  * for JavaScript.
  * 
- * @author praveenu
+ * @author OFS
  */
 public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
 

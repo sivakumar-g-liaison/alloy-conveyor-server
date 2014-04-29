@@ -11,7 +11,7 @@
 /**
  * 
  * 
- * @author santoshc
+ * @author OFS
  */
 
 package com.liaison.mailbox.service.dto.configuration.response;
@@ -26,6 +26,11 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertiesFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 @JsonRootName("getPropertiesValueResponseDTO")
 public class GetPropertiesValueResponseDTO implements ResponseBuilder {
 	private ResponseDTO response;

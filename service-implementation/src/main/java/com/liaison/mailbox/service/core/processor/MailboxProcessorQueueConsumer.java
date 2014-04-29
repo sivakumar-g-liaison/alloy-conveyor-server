@@ -15,6 +15,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class MailboxProcessorQueueConsumer {
 	
 	private final static int THREAD_COUNT = 5;	

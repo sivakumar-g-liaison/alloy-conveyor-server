@@ -14,6 +14,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.core.MailBoxService;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 class ProcessorInvoker implements Runnable {
 	
 	private String request = null;

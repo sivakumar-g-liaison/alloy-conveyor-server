@@ -35,6 +35,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 /**
  * The persistent class for the PROCESSORS database table.
  * 
+ *  @author OFS
  */
 @Entity
 @Table(name = "PROCESSOR")

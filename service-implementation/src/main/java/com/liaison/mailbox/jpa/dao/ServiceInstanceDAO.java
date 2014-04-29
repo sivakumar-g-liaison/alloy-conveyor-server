@@ -15,6 +15,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.ServiceInstance;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({ @NamedQuery(name = ServiceInstanceDAO.FIND_BY_SERVICE_INSTANCEID, query = "SELECT sii FROM ServiceInstance sii WHERE sii.name = :"
 		+ ServiceInstanceDAO.INTANXE_ID) })
 public interface ServiceInstanceDAO extends GenericDAO<ServiceInstance> {

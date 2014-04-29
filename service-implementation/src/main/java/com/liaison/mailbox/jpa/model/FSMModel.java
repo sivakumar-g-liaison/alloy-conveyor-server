@@ -10,6 +10,11 @@
 
 package com.liaison.mailbox.jpa.model;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class FSMModel {
 	
 	

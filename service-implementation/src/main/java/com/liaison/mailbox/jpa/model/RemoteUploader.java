@@ -13,6 +13,10 @@ package com.liaison.mailbox.jpa.model;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+/**
+ * 
+ *  @author OFS
+ */
 @Entity
 @DiscriminatorValue(Processor.TYPE_REMOTEUPLOADER)
 public class RemoteUploader extends Processor {

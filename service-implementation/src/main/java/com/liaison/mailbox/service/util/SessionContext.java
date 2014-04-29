@@ -18,7 +18,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpRequest;
 
-
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class SessionContext
 {
 	protected static final String PIPELINE_ID_TOKEN = "PipelineId";

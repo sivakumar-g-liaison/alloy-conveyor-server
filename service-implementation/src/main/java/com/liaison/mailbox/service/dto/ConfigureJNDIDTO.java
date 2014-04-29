@@ -12,6 +12,11 @@ package com.liaison.mailbox.service.dto;
 
 import java.util.List;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class ConfigureJNDIDTO {
 
 	private String initialContextFactory;

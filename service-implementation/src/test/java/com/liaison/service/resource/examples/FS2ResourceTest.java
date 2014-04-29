@@ -18,6 +18,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class FS2ResourceTest {
 	
 	public static final int LISTEN_PORT_DEFAULT = 8989;

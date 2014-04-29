@@ -22,6 +22,8 @@ import com.liaison.commons.jpa.Identifiable;
 
 /**
  * The persistent class for the FSM_EVENT database table.
+ * 
+ *  @author OFS
  */
 @Entity
 @Table(name = "FSM_EVENT")

@@ -27,6 +27,7 @@ import com.liaison.commons.jpa.Identifiable;
 /**
  * The persistent class for the MAILBOXES database table.
  * 
+ *  @author OFS
  */
 @Entity
 @Table(name = "MAILBOX")

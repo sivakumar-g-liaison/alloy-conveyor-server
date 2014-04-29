@@ -20,6 +20,11 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class BaseResource {
 	private static final Logger logger = LogManager.getLogger(BaseResource.class);
 	protected void auditAttempt(String message){

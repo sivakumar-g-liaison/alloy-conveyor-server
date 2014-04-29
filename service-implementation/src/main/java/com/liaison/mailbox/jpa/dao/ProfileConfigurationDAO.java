@@ -18,6 +18,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({
 		@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"
 				+ ProfileConfigurationDAO.PROF_NAME),

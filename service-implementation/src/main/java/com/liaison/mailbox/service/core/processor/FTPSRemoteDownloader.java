@@ -45,7 +45,7 @@ import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements

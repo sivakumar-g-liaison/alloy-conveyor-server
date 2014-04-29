@@ -12,6 +12,10 @@ package com.liaison.mailbox.enums;
 
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * @author OFS
+ * 
+ */
 public enum MailBoxStatus {
 
 	ACTIVE("active"),

@@ -35,7 +35,7 @@ import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
- * @author praveenu
+ * @author OFS
  * 
  */
 public class DirectorySweeperTest extends BaseServiceTest {

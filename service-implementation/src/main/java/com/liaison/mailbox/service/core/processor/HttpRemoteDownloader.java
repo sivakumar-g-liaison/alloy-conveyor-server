@@ -48,7 +48,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * Http remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
  * 
- * @author praveenu
+ * @author OFS
  */
 public class HttpRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 

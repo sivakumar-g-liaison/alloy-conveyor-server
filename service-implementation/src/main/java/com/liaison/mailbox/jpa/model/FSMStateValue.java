@@ -27,6 +27,8 @@ import com.liaison.commons.jpa.Identifiable;
 
 /**
  * The persistent class for the FSM_STATE_VALUE database table.
+ * 
+ *  @author OFS
  */
 @Entity
 @Table(name = "FSM_STATE_VALUE")

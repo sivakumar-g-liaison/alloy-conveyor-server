@@ -16,6 +16,10 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.jpa.model.ParallelProcessor;
 
+/**
+ * @author OFS
+ * 
+ */
 public class ParallelProcessorDAOBase extends GenericDAOBase<ParallelProcessor> implements ParallelProcessorDAO, MailBoxDAO {
 
 	public ParallelProcessorDAOBase() {

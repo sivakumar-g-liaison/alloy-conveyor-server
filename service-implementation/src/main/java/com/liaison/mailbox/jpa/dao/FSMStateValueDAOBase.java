@@ -20,6 +20,10 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 
+/**
+ * @author OFS
+ * 
+ */
 public class FSMStateValueDAOBase extends GenericDAOBase<FSMStateValue> implements FSMStateValueDAO, MailBoxDAO {
 
 	public FSMStateValueDAOBase() {

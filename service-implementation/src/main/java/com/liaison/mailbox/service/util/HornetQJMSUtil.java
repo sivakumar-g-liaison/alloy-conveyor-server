@@ -28,6 +28,11 @@ import javax.naming.NamingException;
 
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class HornetQJMSUtil {
 
 	public static final String QUEUECONFAC =

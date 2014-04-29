@@ -65,6 +65,8 @@ import com.netflix.servo.monitor.Monitors;
 
 /**
  * G2 HTTP Gateway.
+ * 
+ * @author OFS
  */
 @Path("process")
 @Consumes(MediaType.WILDCARD)

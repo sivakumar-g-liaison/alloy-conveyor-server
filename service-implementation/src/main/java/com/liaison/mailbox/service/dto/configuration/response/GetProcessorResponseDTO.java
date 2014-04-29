@@ -23,7 +23,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * 
  *
- * @author sivakumarg
+ * @author OFS
  */
 @JsonRootName("getProcessorResponse")
 public class GetProcessorResponseDTO implements ResponseBuilder {

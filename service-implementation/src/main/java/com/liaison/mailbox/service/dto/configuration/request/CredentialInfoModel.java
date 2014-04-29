@@ -12,7 +12,11 @@ package com.liaison.mailbox.service.dto.configuration.request;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
-
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class CredentialInfoModel {
 
 	private String username;

@@ -26,6 +26,10 @@ import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * @author OFS
+ * 
+ */
 public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> implements ProcessorConfigurationDAO, MailBoxDAO {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProcessorConfigurationDAOBase.class);

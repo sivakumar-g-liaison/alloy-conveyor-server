@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.jpa.dao;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.NamedQueries;
@@ -19,6 +18,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.MailBox;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({
 		@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,
 				query = "SELECT mbx FROM MailBox mbx"

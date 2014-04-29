@@ -22,6 +22,7 @@ import com.liaison.commons.jpa.Identifiable;
 /**
  * The persistent class for the PROCESSOR_SEMAPHORE database table
  *
+ * @author OFS
  */
 @Entity
 @Table(name = "PROCESSOR_SEMAPHORE")

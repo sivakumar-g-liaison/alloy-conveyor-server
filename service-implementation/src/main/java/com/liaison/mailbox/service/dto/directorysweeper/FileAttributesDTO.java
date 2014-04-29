@@ -10,6 +10,11 @@
 
 package com.liaison.mailbox.service.dto.directorysweeper;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class FileAttributesDTO {
 
 	private String guid;

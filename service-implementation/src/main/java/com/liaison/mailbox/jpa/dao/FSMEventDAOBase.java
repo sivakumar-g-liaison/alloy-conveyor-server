@@ -21,6 +21,10 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.jpa.model.FSMEvent;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * @author OFS
+ * 
+ */
 public class FSMEventDAOBase extends  GenericDAOBase<FSMEvent> implements FSMEventDAO, MailBoxDAO {
 
 	public FSMEventDAOBase() {

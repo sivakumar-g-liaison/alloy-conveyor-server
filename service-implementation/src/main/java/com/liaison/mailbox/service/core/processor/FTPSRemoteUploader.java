@@ -50,7 +50,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  ** FTPS remote uploader to perform pull operation, also it has support methods
  * for JavaScript.
  * 
- * @author praveenu
+ * @author OFS
  * 
  */
 public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {

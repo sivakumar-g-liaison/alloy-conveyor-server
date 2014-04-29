@@ -22,6 +22,11 @@ import org.testng.annotations.Test;
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class JavaScriptEngineUtilTest {
 	
 	/**

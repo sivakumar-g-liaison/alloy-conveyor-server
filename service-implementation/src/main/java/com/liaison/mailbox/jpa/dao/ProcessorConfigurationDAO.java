@@ -18,6 +18,10 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.Processor;
 
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({
 		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,
 				query = "select processor from Processor processor"

@@ -26,6 +26,7 @@ import com.liaison.commons.jpa.Identifiable;
 /**
  * The persistent class for the FOLDERS database table.
  * 
+ *  @author OFS
  */
 @Entity
 @Table(name = "FOLDER")

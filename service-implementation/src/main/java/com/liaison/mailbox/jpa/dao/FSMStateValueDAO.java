@@ -17,7 +17,10 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 
 
-
+/**
+ * @author OFS
+ * 
+ */
 @NamedQueries({
     @NamedQuery(name=FSMStateValueDAO.FIND_FSM_STATE_VALUE_BY_NAME,
             query="SELECT val FROM FSMStateValue val WHERE val.value = :" + FSMStateValueDAO.NAME)

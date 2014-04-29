@@ -13,7 +13,7 @@ package com.liaison.mailbox.service.rest;
 /**
  * This is the gateway processors state monitoring and interrupt.
  * 
- * @author santoshc
+ * @author OFS
  */
 
 import java.io.InputStream;

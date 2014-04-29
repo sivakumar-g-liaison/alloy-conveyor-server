@@ -31,6 +31,11 @@ import org.apache.logging.log4j.LogManager;
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public class HornetQMessageListner implements MessageListener {
 	
 	private static final Logger logger = LogManager.getLogger(HornetQMessageListner.class);
