@@ -49,7 +49,11 @@ import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
@@ -74,6 +78,8 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.FS2Exception;
+import com.liaison.keymanage.grammar.KeyServiceResponse;
+import com.liaison.keymanage.grammar.KeySet;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -708,9 +714,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws IOException
+	 * @throws JAXBException 
 	 */
 	private InputStream fetchTrustStore(String trustStoreId)
-			throws LiaisonException, JSONException, IOException {
+			throws LiaisonException, JSONException, IOException, JAXBException {
 
 		InputStream is = null;
 
@@ -729,13 +736,9 @@ public abstract class AbstractRemoteProcessor {
 
 		if (jsonResponse != null) {
 
-			String base64EncodedStr = new JSONObject(jsonResponse)
-					.getJSONObject("dataTransferObject").getString(
-							"currentPublicKey");
-
-			byte[] trustStoreBytes = Base64.decodeBase64(base64EncodedStr
-					.getBytes());
-			is = new ByteArrayInputStream(trustStoreBytes);
+			 KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse,KeyServiceResponse.class);
+		     KeySet keySet = (KeySet) mkr.getDataTransferObject();
+			 is =  new ByteArrayInputStream(keySet.getCurrentPublicKey().getBytes());
 		}
 
 		return is;
@@ -756,14 +759,14 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws UnrecoverableKeyException
 	 * @throws CertificateEncodingException
 	 * @throws BootstrapingFailedException
+	 * @throws JAXBException 
 	 */
 	private byte[] fetchSSHPrivateKey(String keypairPguid)
 			throws LiaisonException, JSONException, IOException,
 			CertificateEncodingException, UnrecoverableKeyException,
 			OperatorCreationException, KeyStoreException,
-			NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
+			NoSuchAlgorithmException, CMSException, BootstrapingFailedException, JAXBException {
 
-		// InputStream is = null;
 		byte[] privateKeyBytes = null;
 
 		String url = MailBoxUtil.getEnvironmentProperties().getString(
@@ -773,23 +776,21 @@ public abstract class AbstractRemoteProcessor {
 		// To be fetched from DataBase
 		url = url + keypairPguid;
 
-		Map<String, String> headerMap = new HashMap<String, String>();
 		// get acl manifest response from ACL
 		String unsignedData = keypairPguid;
 		String signedData = signRequestData(unsignedData);
-		String aclManifestFromACL = getACLManifestFromACLClient(unsignedData,
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData,
 				signedData);
-		headerMap.put("acl-manifest", aclManifestFromACL);
-		headerMap.put("Content-Type", "application/json");
+		// setting the request headers in the request to key manager from acl manifest response
+		Map <String, String> headerMap = getRequestHeaders(aclManifestFromACL);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER,
 				url, headerMap);
 
 		if (jsonResponse != null) {
-
-			String base64EncodedStr = new JSONObject(jsonResponse)
-					.getJSONObject("dataTransferObject").getString(
-							"currentPrivateKey");
-			privateKeyBytes = base64EncodedStr.getBytes();
+			
+			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse,KeyServiceResponse.class);
+		    KeySet keySet = (KeySet) mkr.getDataTransferObject();
+		    privateKeyBytes =  keySet.getCurrentPrivateKey().getBytes();
 		}
 
 		return privateKeyBytes;
@@ -1118,14 +1119,13 @@ public abstract class AbstractRemoteProcessor {
 		String passwordFromKMS = null;
 		if ((loginCredential != null)) {
 
-			Map<String, String> headerMap = new HashMap<String, String>();
 			// get acl manifest response from ACL
 			String unsignedData = loginCredential.getCredsPassword();
 			String signedData = signRequestData(unsignedData);
-			String aclManifestFromACL = getACLManifestFromACLClient(
+			ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(
 					unsignedData, signedData);
-			headerMap.put("Content-Type", "application/json");
-			headerMap.put("acl-manifest", aclManifestFromACL);
+			// setting the request headers in the request to key manager from acl manifest response
+			Map <String, String> headerMap = getRequestHeaders(aclManifestFromACL);
 			String url = MailBoxUtil.getEnvironmentProperties().getString(
 					"kms-base-url")
 					+ "secret/" + loginCredential.getCredsPassword();
@@ -1239,14 +1239,13 @@ public abstract class AbstractRemoteProcessor {
 		String passwordFromKMS = null;
 		if ((loginCredential != null)) {
 
-			Map<String, String> headerMap = new HashMap<String, String>();
 			// get acl manifest response from ACL
 			String unsignedData = loginCredential.getCredsPassword();
 			String signedData = signRequestData(unsignedData);
-			String aclManifestFromACL = getACLManifestFromACLClient(
+			ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(
 					unsignedData, signedData);
-			headerMap.put("Content-Type", "application/json");
-			headerMap.put("acl-manifest", aclManifestFromACL);
+			// setting the request headers in the request to key manager from acl manifest response
+			Map <String, String> headerMap = getRequestHeaders(aclManifestFromACL);
 			String url = MailBoxUtil.getEnvironmentProperties().getString(
 					"kms-base-url")
 					+ "secret/" + loginCredential.getCredsPassword();
@@ -1736,7 +1735,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return String aclManifest
 	 * @throws IOException
 	 */
-	private String getACLManifestFromACLClient(String unsignedData,
+	private ACLManifestResponse getACLManifestFromACLClient(String unsignedData,
 			String signedData) throws IOException {
 		ACLManifestResponse aclManifestResponse = null;
 		ACLClient aclClient = new ACLClient();
@@ -1753,7 +1752,52 @@ public abstract class AbstractRemoteProcessor {
 		// get aclManifest response through ACLClient
 		aclManifestResponse = aclClient.getACLManifest(unsignedData,
 				signedData, publicKeyGuid, manifestRequest);
-		String aclManifest = aclManifestResponse.getAclManifest();
-		return aclManifest;
+		return aclManifestResponse;
 	}
+	
+	/**
+	 * Method to set the request header for the requests to key manager
+	 * 
+	 * @param aclManifestResponse
+	 * @return requestHeaders in a Map object
+	 */
+	private Map <String, String> getRequestHeaders(ACLManifestResponse aclManifestFromACL) {
+		
+		LOGGER.info("setting request headers from acl manifest response to key manager request");
+		Map<String, String> headerMap = new HashMap<String, String>();
+		String aclManifest = (aclManifestFromACL != null)? aclManifestFromACL.getAclManifest():null;
+		String signedACLManifest = (aclManifestFromACL != null)? aclManifestFromACL.getSignature():null;
+		String aclSignerPublicKey = (aclManifestFromACL != null)?aclManifestFromACL.getPublicKeyGuid():null;
+		headerMap.put("acl-manifest", aclManifest);
+		headerMap.put("acl-signature", signedACLManifest);
+		headerMap.put("acl_signer_public_key_guid", aclSignerPublicKey);
+		headerMap.put("Content-Type", "application/json");
+		return headerMap;
+	}
+	
+	/**
+     * 
+     * @param serializedJson
+     * @param clazz
+     * 
+     * @return json
+     * 
+     * @throws JAXBException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
+    private   <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
+    JsonMappingException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+        AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+        AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(
+        primary, secondary);
+        // make deserializer use JAXB annotations (only)
+        mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+        T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
+        return ummarshaledObject;
+    }
+
 }
