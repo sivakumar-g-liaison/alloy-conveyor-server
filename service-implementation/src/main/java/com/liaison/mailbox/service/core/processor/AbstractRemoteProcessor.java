@@ -1632,13 +1632,10 @@ public abstract class AbstractRemoteProcessor {
 		LOGGER.info("Constructing the acl manifest request with default values");
 		// Construct Envelope
 		EnvelopeDTO envelope = new EnvelopeDTO();
-		envelope.setGlobalId("963258741");
-		envelope.setParentId("7888");
-		envelope.setId("564");
-
+				
 		// Construct Domain
 		ManifestRequestDomain domain = new ManifestRequestDomain();
-		domain.setName("BOEING");
+		domain.setName("SERVICE_BROKER");
 		domain.setType("ORGANIZATION");
 		List<String> roles = new ArrayList<String>();
 		roles.add("MailboxAdmin");
@@ -1649,7 +1646,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct NestedServiceDependency
 		NestedServiceDependencyContraint dependencyConstraint = new NestedServiceDependencyContraint();
-		dependencyConstraint.setServiceName("MAILBOX");
+		dependencyConstraint.setServiceName("KEYMANAGER");
 		dependencyConstraint.setPrimaryId(configurationInstance
 				.getServiceInstance().getName());
 
