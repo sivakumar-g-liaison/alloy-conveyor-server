@@ -53,7 +53,6 @@ gdl*
 /build
 */build
 install/
-tools/
 /bin
 */bin
 service-framework/bin/
