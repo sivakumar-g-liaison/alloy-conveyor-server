@@ -85,4 +85,11 @@ public interface MailBoxConstants {
 	// Type of Truststore
 	public final static String GLOBAL = "GLOBAL";
 	public final static String SELFSIGNED = "SELFSIGNED";
+	
+	// Added to acl Manifest Request construction
+	public final static String DOMAIN_NAME = "SERVICE_BROKER";
+	public final static String DOMAIN_TYPE = "ORGANIZATION";
+	public final static String PLATFORM_NAME = "SERVICE_BROKER";
+	public final static String SERVICE_NAME = "KEYMANAGER";
+	public final static String ROLE_NAME = "MailboxAdmin";
 }

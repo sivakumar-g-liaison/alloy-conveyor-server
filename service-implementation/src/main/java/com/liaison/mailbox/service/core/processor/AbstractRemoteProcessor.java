@@ -1635,10 +1635,10 @@ public abstract class AbstractRemoteProcessor {
 				
 		// Construct Domain
 		ManifestRequestDomain domain = new ManifestRequestDomain();
-		domain.setName("SERVICE_BROKER");
-		domain.setType("ORGANIZATION");
+		domain.setName(MailBoxConstants.DOMAIN_NAME);
+		domain.setType(MailBoxConstants.DOMAIN_TYPE);
 		List<String> roles = new ArrayList<String>();
-		roles.add("MailboxAdmin");
+		roles.add(MailBoxConstants.ROLE_NAME);
 		domain.setRoles(roles);
 
 		List<ManifestRequestDomain> domains = new ArrayList<ManifestRequestDomain>();
@@ -1646,7 +1646,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct NestedServiceDependency
 		NestedServiceDependencyContraint dependencyConstraint = new NestedServiceDependencyContraint();
-		dependencyConstraint.setServiceName("KEYMANAGER");
+		dependencyConstraint.setServiceName(MailBoxConstants.SERVICE_NAME);
 		dependencyConstraint.setPrimaryId(configurationInstance
 				.getServiceInstance().getName());
 
@@ -1655,7 +1655,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct Platform
 		ManifestRequestPlatform platform = new ManifestRequestPlatform();
-		platform.setName("SERVICE_BROKER");
+		platform.setName(MailBoxConstants.PLATFORM_NAME);
 		platform.setConstraintList(constraintList);
 		platform.setDomains(domains);
 
