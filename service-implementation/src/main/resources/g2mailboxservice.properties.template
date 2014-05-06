@@ -35,7 +35,7 @@ com.liaison.persistenceUnitName=mailbox-pu
 
 #Process can execute JS. The JS file should always be pulled from GITLAB. But if in case it is required to pull JS from local file system. 
 #That path should be configured here.MCC might be using this.
-processor.javascript.root.directory=/opt/apps/mailbox/js/
+processor.javascript.root.directory=/app/mailbox/js/
 
 #G2 JS Engine Configurations
 scripting.compile.cache.max.size=0
@@ -43,7 +43,7 @@ scripting.compile.cache.expire.timeout=10
 scripting.compile.cache.expire.timeunit=MINUTES
 
 # Properties to read JS file from  git lab
-com.liaison.gitlab.script.server.host=10.0.2.67
+com.liaison.gitlab.script.server.host=lsvlGITRPT01d
 com.liaison.gitlab.script.server.port=80
 com.liaison.gitlab.script.server.user=
 com.liaison.gitlab.script.server.password=
@@ -54,21 +54,21 @@ com.liaison.gitlab.script.branch.name=master
 triggered.profile.processor.queue.name=/queue/mailboxProcessorQueue
 
 #Generic Mount Location - FOR CONFIGURATION PATTERN REPLACEMENT
-MOUNT_POINT=/opt
+MOUNT_POINT=/app/mailbox/
 
 #Directory sweeper will create a FS2 entry with no backing payload in this location
-mount-point=/opt/apps/mailbox/remotefiles/
+mount-point=/app/mailbox/fs2mount/
 #Flag controlling the wipeout of the fs store during restart. MUST be always false
 delete-existing-data=false
 #Added for directory sweeper
-g2.queueing.server.url=jnp://10.0.24.76:1099
+g2.queueing.server.url=jnp://10.146.16.148:5446
 directory.sweeper.queue.name=/queue/G2Queue
 queueConnectionFactory=/ConnectionFactory
 # Directory sweeper configuration to check files are modified with in the given time limit in SECONDS
 last.modified.tolerance = 3
 
 #ssh key implementation - temp privatekey file path that will be used while running a processor. The file downloaded will be deleted after  processor execution.
-ssh.private.key.temp.location =/opt/apps/mailbox/privatekey/
+ssh.private.key.temp.location =/app/mailbox/tempprivatekey/
 
 # MAIL SERVER CONFIGURATIONS
 mail.host=smtpout.liaison.com
@@ -88,50 +88,47 @@ default.job.search.period.in.hours=24
 #Set to 24 hours with the intention to turn of the checks
 check.for.interrupt.signal.frequency.in.sec=86400
 
-#########################################################KMS Configurations########################################################
-kms-base-url=http://10.0.6.101:8989/key-management/
-certificateDirectory=/opt/apps/mailbox/certificates/server.keystore
-mailbox.global.truststore.id=75D511420A0006340665134DFA242B47
-mailbox.global.trustgroup.id=75D5112D0A0006340665134D334351D5
-
-
 # Async HTTP will store payloads in this dir
 # This dir should never be swept.
-com.liaison.mailbox.http.async.payload.dir=/opt/apps/mailbox/httpasyncpayloads
+com.liaison.mailbox.http.async.payload.dir=/app/mailbox/httpasyncpayloads
 # Service Broker Sync interface info
-com.liaison.servicebroker.sync.uri=http://dev01-g2-sb01:8989/service-broker-v1.0.0/process/sync
+com.liaison.servicebroker.sync.uri=http://10.146.16.141:8989/service-broker-v1.0.0/process/sync
 # This is 10meg
 com.liaison.servicebroker.sync.max.request.size=10485760
 # This is 50meg
 com.liaison.servicebroker.async.max.request.size=52428800
 
+#########################################################KMS Configurations########################################################
+kms-base-url=http://10.146.16.147:8989/key-management/
+certificateDirectory=/app/mailbox/certificates/server.keystore
+mailbox.global.truststore.id=D275AC670A9205E714236BDF98BE05AB
+mailbox.global.trustgroup.id=D275AC520A9205E714236BDFCC8E53C2
+
 #########################################################ACL FILTER Configurations########################################################
 # Override acl filter check
-liaison.acl.filter.skipACLFilter=false
+liaison.acl.filter.skipACLFilter=true
 liaison.acl.filter.skipACLSignatureCheck=true
-signatureverifier.publickey.url=http://10.0.6.101:8989/key-management/export/public/
+signatureverifier.publickey.url=http://10.146.16.143:8989/key-management/export/public/
 
 #retrieving serviceinstance id from acl manifest
-use.dummy.manifest.as.backup=true
+use.dummy.manifest.as.backup=false
 acl.constraint.service.name=Mailbox
 
 #acl-manifest json string
 dummy.acl.manifest.json=eyJlbnZlbG9wZSI6eyJjcmVhdGVkRGF0ZSI6IjIwMTQtMDQtMjNUMTY6MDc6MTgtMDQwMCIsImdsb2JhbElkIjoiIiwicGFyZW50SWQiOiIiLCJwcm9jZXNzSWQiOiIifSwicGxhdGZvcm0iOlt7InBsYXRmb3JtTmFtZSI6IlNFUlZJQ0VfQlJPS0VSIiwicm9sZUJhc2VkQWNjZXNzQ29udHJvbCI6W3siZG9tYWluTmFtZSI6IkJPRUlORyIsImRvbWFpblR5cGUiOiJPUkdBTklaQVRJT04iLCJyb2xlIjpbIk1haWxib3hBZG1pbiJdLCJwcml2aWxlZ2UiOlt7InJlc291cmNlIjoicHJvY2VzcyIsInJlc291cmNlVHlwZSI6IlJlc3RSZXNvdXJjZSIsInJlc291cmNlQ29udGV4dCI6IioiLCJwZXJtaXNzaW9uIjpbeyJ2YWx1ZSI6IioiLCJwZXJtaXNzaW9uVHlwZSI6IldISVRFTElTVCJ9XX0seyJyZXNvdXJjZSI6InYxL21haWxib3giLCJyZXNvdXJjZVR5cGUiOiJSZXN0UmVzb3VyY2UiLCJyZXNvdXJjZUNvbnRleHQiOiIqIiwicGVybWlzc2lvbiI6W3sidmFsdWUiOiIqIiwicGVybWlzc2lvblR5cGUiOiJXSElURUxJU1QifSx7InZhbHVlIjoiZGVhY3RpdmF0ZU1haWxCb3giLCJwZXJtaXNzaW9uVHlwZSI6IldISVRFTElTVCJ9XX0seyJyZXNvdXJjZSI6InYxL21haWxib3giLCJyZXNvdXJjZVR5cGUiOiJSZXN0UmVzb3VyY2UiLCJyZXNvdXJjZUNvbnRleHQiOiIqIiwicGVybWlzc2lvbiI6W3sidmFsdWUiOiJzZWFyY2hNYWlsQm94IiwicGVybWlzc2lvblR5cGUiOiJXSElURUxJU1QifV19LHsicmVzb3VyY2UiOiJ2MS9tYWlsYm94IiwicmVzb3VyY2VUeXBlIjoiUmVzdFJlc291cmNlIiwicmVzb3VyY2VDb250ZXh0IjoiKiIsInBlcm1pc3Npb24iOlt7InZhbHVlIjoic2VhcmNoTWFpbEJveCIsInBlcm1pc3Npb25UeXBlIjoiV0hJVEVMSVNUIn1dfV19XSwibmVzdGVkU2VydmljZURlcGVuZGVuY3lDb250cmFpbnQiOlt7InNlcnZpY2VOYW1lIjoiTWFpbGJveCIsInByaW1hcnlJZCI6IjkwMzJBNDkxMEEwQTUyOTgwQTBFQzY3NkRCMzNBMTAyIiwibmVzdGVkU2VydmljZUlkIjpbXSwibmVzdGVkU2VydmljZURlcGVuZGVuY3kiOltdfV19XX0=
 
-#UserManagement authentication URL
-usermanagement.url.authenticate = http://10.0.24.76:8080/usermanagement/rest/v1/usermanagement/authenticate
 
 #BOOTSTRAP PROPERTIES
-bootstrap.server.url=sftp://10.0.24.40:22
-bootstrap.server.username=g2testusr
+bootstrap.server.url=sftp://10.146.16.139:22
+bootstrap.server.username=lsvlmbox01d
 bootstrap.client.enablehostchecking=false
-bootstrap.client.knownhost.filepath=/opt/apps/acl/keystore/Bootstrap/known_hosts
-bootstrap.client.privatekey.filepath=/opt/apps/acl/keystore/Bootstrap/opensslkeypair.pem
+bootstrap.client.knownhost.filepath=/app/ssh-keys/bootstrap/known_hosts
+bootstrap.client.privatekey.filepath=/app/ssh-keys/bootstrap/mbxbootstrapprikey.pem
 bootstrap.client.privatekey.passphrase=passmein
-bootstrap.remote.keypair.passphrase.filepath=testBootstrap/ecnrytedpwd.file
-bootstrap.remote.keypair.filepath=testBootstrap/signandverifykeystore.jks
+bootstrap.remote.keypair.passphrase.filepath=mbx-bootstrap/mbxsignkeypwd.file
+bootstrap.remote.keypair.filepath=mbx-bootstrap/signandverifykeystore.jks
 
 #ACL Integration
-mailbox.signer.public.key.guid = 45FFBC320A006EB406655C484FD31C2C
+mailbox.signer.public.key.guid = CD5990860A9270E0142300DCB508D8CD
 #ACL verify and  getManifest URL
-acl.url.getACLManifest = http://10.0.24.76:8080/accessmanagement/rest/v1/accessmanagement/verifyAndGetManifest
+acl.url.getACLManifest = http://10.146.16.143:8989/accessmanagement/rest/v1/accessmanagement/verifyAndGetManifest
