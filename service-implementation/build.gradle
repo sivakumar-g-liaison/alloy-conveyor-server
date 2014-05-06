@@ -108,6 +108,7 @@ war {
     rootSpec.exclude "*wadl*"
 }
 
+war.dependsOn('configureTomcat')
 
 
 dependencies {

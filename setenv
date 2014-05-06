@@ -169,7 +169,7 @@ export PATH=$BUILD_PATH:$_ROOT/install/db:$_ORIGINAL_PATH
 # include the buildbundle project in your tools path
 if [[ ! -d "$_ROOT/tools/buildbundle" ]]; then
     cd tools
-    git clone http://gitlab.hs.com/g2/buildbundle.git
+    git clone http://gitlab-g2.liaison.tech/g2/buildbundle.git
     cd ..
 fi
 
