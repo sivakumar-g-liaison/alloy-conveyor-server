@@ -1536,6 +1536,7 @@ public abstract class AbstractRemoteProcessor {
 			throws MailBoxServicesException, SymmetricAlgorithmException {
 
 		if (configurationInstance.getCredentials() != null) {
+			
 
 			for (Credential credential : configurationInstance.getCredentials()) {
 				CredentialType foundCredentailType = CredentialType
@@ -1608,16 +1609,18 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-		if (sshKeyPairCredential.getCredsUri() != null) {
-			String fileLocation = MailBoxUtil.getEnvironmentProperties()
-					.getString("ssh.private.key.temp.location")
-					+ sshKeyPairCredential.getCredsUri() + ".txt";
-			File privateKeyFile = new File(fileLocation);
-			if (privateKeyFile.exists())
-				privateKeyFile.delete();
-			LOGGER.info("privateKey downloaded from keyManager removed from local file system");
-			return;
-		}
+		if (null != sshKeyPairCredential) {
+			if (sshKeyPairCredential.getCredsUri() != null) {
+				String fileLocation = MailBoxUtil.getEnvironmentProperties()
+						.getString("ssh.private.key.temp.location")
+						+ sshKeyPairCredential.getCredsUri() + ".txt";
+				File privateKeyFile = new File(fileLocation);
+				if (privateKeyFile.exists())
+					privateKeyFile.delete();
+				LOGGER.info("privateKey downloaded from keyManager removed from local file system");
+				return;
+			}
+		}	
 
 		LOGGER.info("Trigerring - The private key file path not configured.");
 	}
