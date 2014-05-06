@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -26,6 +25,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 
 /**
@@ -34,7 +36,8 @@ import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
  *
  */
 public class HornetQJMSUtil {
-
+    
+	private static final Logger logger = LoggerFactory.getLogger(HornetQJMSUtil.class);
 	public static final String QUEUECONFAC =
 			"/ConnectionFactory";
 
@@ -147,6 +150,7 @@ public class HornetQJMSUtil {
 				try {
 					queueConnection.close();
 				} catch (JMSException ee) {
+					logger.error("Could not close the connection while sends a message to g2Queue ." +ee);
 				}
 			}
 			throw e;
@@ -167,6 +171,7 @@ public class HornetQJMSUtil {
 				try {
 					queueConnection.close();
 				} catch (JMSException e) {
+					logger.error("Could not close the connection while sends a message ." +e);
 				}
 			}
 		}
@@ -207,6 +212,7 @@ public class HornetQJMSUtil {
 				try {
 					queueConnection.close();
 				} catch (JMSException ee) {
+					logger.error("Could not close the connection while sends a messages to g2Queue ." +ee);
 				}
 			}
 			throw e;
@@ -233,6 +239,7 @@ public class HornetQJMSUtil {
 				try {
 					queueConnection.close();
 				} catch (JMSException e) {
+					logger.error("Could not close the connection while sends a messages ." +e);
 				}
 			}
 		}
@@ -266,6 +273,7 @@ public class HornetQJMSUtil {
 				try {
 					queueConnection.close();
 				} catch (JMSException ee) {
+					logger.error("Could not close the connection while receive a messages from g2Queue ." +ee);
 				}
 			}
 			throw e;
@@ -285,6 +293,7 @@ public class HornetQJMSUtil {
 				try {
 					queueConnection.close();
 				} catch (JMSException e) {
+					logger.error("Could not close the connection while receive a messages ." +e);
 				}
 			}
 		}
@@ -298,7 +307,6 @@ public class HornetQJMSUtil {
 		jndidto.setUrlPackagePrefixes("org.jboss.naming");
 
 		initializeConext(jndidto);
-		List<String> messages = new ArrayList<String>();
 		for (int i = 1; i < 500; i++)
 		sendMessage("" + i, g2QueueName);
 		Thread.sleep(1000*10);

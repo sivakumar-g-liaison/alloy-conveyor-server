@@ -14,8 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.FolderType;
@@ -88,11 +88,10 @@ public class GenericValidator {
 			for (Method m : dto.getClass().getMethods()) {
 
 				// Checks the mandatory data
-				if (m.isAnnotationPresent(Mandatory.class)) {
-					if (!isMandatoryDataAvailable(m, dto)) {
+				if (m.isAnnotationPresent(Mandatory.class)
+				    &&	!isMandatoryDataAvailable(m, dto)) {
 						isValidationPassed = false;
 						isMandatoryCheckPassed = false;
-					}
 				}
 
 				// Checks the available data is valid or not
@@ -188,28 +187,23 @@ public class GenericValidator {
 	 */
 	private boolean enumValidation(DataValidation annotationDetails, Object value) {
 
-		if (MailBoxConstants.MBX_STATUS.equals(annotationDetails.type())) {
-			if (MailBoxStatus.findByName(String.valueOf(value)) == null) {
-				errorMessage.append(annotationDetails.errorMessage());
-				return false;
-			}
-		} else if (MailBoxConstants.PROCESSOR_TYPE.equals(annotationDetails.type())) {
-			if (ProcessorType.findByName(String.valueOf(value)) == null) {
-				errorMessage.append(annotationDetails.errorMessage());
-				return false;
-			}
-		} else if (MailBoxConstants.FOLDER_TYPE.equals(annotationDetails.type())) {
-			if (FolderType.findByName(String.valueOf(value)) == null) {
-				errorMessage.append(annotationDetails.errorMessage());
-				return false;
-			}
-		} else if (MailBoxConstants.PROCESSOR_PROTOCOL.equals(annotationDetails.type())) {
-			if (Protocol.findByName(String.valueOf(value)) == null) {
-				errorMessage.append(annotationDetails.errorMessage());
-				return false;
-			}
+		if (MailBoxConstants.MBX_STATUS.equals(annotationDetails.type()) 
+				&&	MailBoxStatus.findByName(String.valueOf(value)) == null) {
+					errorMessage.append(annotationDetails.errorMessage());
+					return false;
+		} else if (MailBoxConstants.PROCESSOR_TYPE.equals(annotationDetails.type())
+				&&  ProcessorType.findByName(String.valueOf(value)) == null) {
+				    errorMessage.append(annotationDetails.errorMessage());
+					return false;
+		} else if (MailBoxConstants.FOLDER_TYPE.equals(annotationDetails.type())
+				&&	FolderType.findByName(String.valueOf(value)) == null) {
+					errorMessage.append(annotationDetails.errorMessage());
+					return false;
+		} else if (MailBoxConstants.PROCESSOR_PROTOCOL.equals(annotationDetails.type())
+				&&	Protocol.findByName(String.valueOf(value)) == null) {
+					errorMessage.append(annotationDetails.errorMessage());
+					return false;
 		}
-
 		return true;
 	}
 }

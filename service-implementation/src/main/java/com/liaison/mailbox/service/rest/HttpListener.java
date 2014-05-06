@@ -346,13 +346,22 @@ public class HttpListener extends BaseResource {
 		{
 			if (outputStream != null)
 			{
-				try { outputStream.flush(); } catch (IOException e) { /* ignore */ }
-				try { outputStream.close(); } catch (IOException e) { /* ignore */ }
+				try { outputStream.flush(); 
+				} catch (IOException e) { 
+					logger.error("Could not flush the output stream while store payload file", e);
+				}
+				try { outputStream.close(); 
+				} catch (IOException e) { 
+					logger.error("Could not close the output stream while store payload file", e);
+				}
 			}
 
 			if (inputStream != null)
 			{
-				try { inputStream.close(); } catch (IOException e) { /* ignore */ }
+				try { inputStream.close(); 
+				} catch (IOException e) { 
+					logger.error("Could not close the input stream while store payload file", e);
+			    }
 			}
 		}
 	}
@@ -421,12 +430,8 @@ public class HttpListener extends BaseResource {
 		File payloadFile = new File(payloadFileName);
 		File payloadDir = payloadFile.getParentFile();
 
-		if (!payloadDir.exists())
-		{
-			if (!payloadDir.mkdirs())
-			{
-				throw new RuntimeException(String.format("Failed to create payload directory '%s'", payloadDir.getAbsolutePath()));
-			}
+		if (!payloadDir.exists() && !payloadDir.mkdirs()) {
+			throw new RuntimeException(String.format("Failed to create payload directory '%s'", payloadDir.getAbsolutePath()));
 		}
 	}
     
@@ -471,7 +476,7 @@ public class HttpListener extends BaseResource {
 	{
 		DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
 		String providerURL = config.getString(CONFIGURATION_QUEUE_PROVIDER_URL);
-		String queueName = config.getString(CONFIGURATION_QUEUE_NAME);;
+		String queueName = config.getString(CONFIGURATION_QUEUE_NAME);
 
 		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
 		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
