@@ -57,7 +57,7 @@ public class FSMTest extends BaseServiceTest {
         //STEP5:TRIGGER PROCESSING EVENT
         System.out.println("PICKED UP FROM THE QUEUE.");
         fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED ) );
-        System.out.println("PROCESSOR RUNNING...");;//ACTUAL PROCESSOR WORK WILL HAPPEN HERE
+        System.out.println("PROCESSOR RUNNING...");//ACTUAL PROCESSOR WORK WILL HAPPEN HERE
         //STEP 6: TRIGGER EVENT FOR SUCCESS OR FAILURE BASED ON PROCESSING RESULT
         fsm.handleEvent( fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED ) );
         

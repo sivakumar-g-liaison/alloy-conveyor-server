@@ -1249,7 +1249,7 @@ public abstract class AbstractRemoteProcessor {
 					.getHTTPResponseInString(LOGGER, url, headerMap);
 
 			if (base64EncodedPassword == null || base64EncodedPassword == "") {
-				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);				
+				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
 			} else {
 				String decodeLevel1 = new String(
 						Base64.decodeBase64(base64EncodedPassword));
@@ -1605,17 +1605,15 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-		if (null != sshKeyPairCredential) {
-			if (sshKeyPairCredential.getCredsUri() != null) {
-				String fileLocation = MailBoxUtil.getEnvironmentProperties()
-						.getString("ssh.private.key.temp.location")
-						+ sshKeyPairCredential.getCredsUri() + ".txt";
-				File privateKeyFile = new File(fileLocation);
-				if (privateKeyFile.exists())
-					privateKeyFile.delete();
-				LOGGER.info("privateKey downloaded from keyManager removed from local file system");
-				return;
-			}
+		if (null != sshKeyPairCredential && sshKeyPairCredential.getCredsUri() != null) {
+			String fileLocation = MailBoxUtil.getEnvironmentProperties()
+					.getString("ssh.private.key.temp.location")
+					+ sshKeyPairCredential.getCredsUri() + ".txt";
+			File privateKeyFile = new File(fileLocation);
+			if (privateKeyFile.exists())
+				privateKeyFile.delete();
+			LOGGER.info("privateKey downloaded from keyManager removed from local file system");
+			return;
 		}	
 
 		LOGGER.info("Trigerring - The private key file path not configured.");
