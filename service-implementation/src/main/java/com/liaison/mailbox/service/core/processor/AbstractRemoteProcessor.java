@@ -55,7 +55,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import com.google.gson.JsonParseException;
 import com.liaison.accessmanagement.service.client.ACLClient;
@@ -655,14 +654,13 @@ public abstract class AbstractRemoteProcessor {
 		// Set the basic auth header for http request
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-		if ((loginCredential != null)) {
-			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
-					&& !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
+		if ((loginCredential != null)
+			 && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
+			 && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
 				String password = MailBoxCryptoUtil.doPasswordEncryption(
 						loginCredential.getCredsPassword(), 2);
 				request.setAuthenticationHandler(new BasicAuthenticationHandler(
 						loginCredential.getCredsUsername(), password));
-			}
 		}
 
 		// Configure keystore for HTTPS request
@@ -874,12 +872,12 @@ public abstract class AbstractRemoteProcessor {
 								.getName())) {
 							files.add(file);
 						}
-					} else if (file.isDirectory()) { // get all files from inner
+					} else if (file.isDirectory()
+							   && !MailBoxConstants.PROCESSED_FOLDER.equals(file
+										.getName())) { // get all files from inner
 														// directory.
-						if (!MailBoxConstants.PROCESSED_FOLDER.equals(file
-								.getName())) {
-							listFiles(file.getAbsolutePath(), files);
-						}
+						listFiles(file.getAbsolutePath(), files);
+						
 					}
 				}
 			}
@@ -1087,7 +1085,6 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws UnrecoverableKeyException
 	 * @throws BootstrapingFailedException
 	 */
-	@SuppressWarnings("unused")
 	protected G2FTPSClient getFTPSClient(Logger logger)
 			throws LiaisonException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, URISyntaxException,
@@ -1132,14 +1129,14 @@ public abstract class AbstractRemoteProcessor {
 			String base64EncodedPassword = HTTPClientUtil
 					.getHTTPResponseInString(LOGGER, url, headerMap);
 
-			if (base64EncodedPassword != null || base64EncodedPassword != "") {
+			if (base64EncodedPassword == null || base64EncodedPassword == "") {				
+				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);				
+			} else {
 				String decodeLevel1 = new String(
 						Base64.decodeBase64(base64EncodedPassword));
 				String base64DecodedPassword = new String(
 						Base64.decodeBase64(decodeLevel1));
 				passwordFromKMS = base64DecodedPassword;
-			} else {
-				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
 			}
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
@@ -1211,7 +1208,6 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws CertificateEncodingException
 	 * @throws BootstrapingFailedException
 	 */
-	@SuppressWarnings("unused")
 	protected G2SFTPClient getSFTPClient(Logger logger)
 			throws JsonParseException, JsonMappingException, JAXBException,
 			IOException, LiaisonException, URISyntaxException,
@@ -1252,14 +1248,14 @@ public abstract class AbstractRemoteProcessor {
 			String base64EncodedPassword = HTTPClientUtil
 					.getHTTPResponseInString(LOGGER, url, headerMap);
 
-			if (base64EncodedPassword != null || base64EncodedPassword != "") {
+			if (base64EncodedPassword == null || base64EncodedPassword == "") {
+				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);				
+			} else {
 				String decodeLevel1 = new String(
 						Base64.decodeBase64(base64EncodedPassword));
 				String base64DecodedPassword = new String(
 						Base64.decodeBase64(decodeLevel1));
 				passwordFromKMS = base64DecodedPassword;
-			} else {
-				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
 			}
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
