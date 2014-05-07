@@ -21,9 +21,9 @@ com.liaison.DB_MINPOOLSIZE=2
 com.liaison.DB_MAXPOOLSIZE=100
 com.liaison.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
 com.liaison.DB_DESCRIPTION=G2 Mailbox UI UCP in Tomcat (DEV)
-com.liaison.DB_VALIDATECONNECTIONONBORROW=true
-com.liaison.DB_ABANDONEDCONNECTIONTIMEOUT=10
-com.liaison.DB_MAXCONNECTIONREUSETIME=3000
+#com.liaison.DB_VALIDATECONNECTIONONBORROW=true
+#com.liaison.DB_ABANDONEDCONNECTIONTIMEOUT=10
+#com.liaison.DB_MAXCONNECTIONREUSETIME=3000
 
 # property of our db connection initialization query
 com.liaison.initializationQuery=SELECT * FROM DUAL
@@ -61,7 +61,7 @@ mount-point=/app/mailbox/fs2mount/
 #Flag controlling the wipeout of the fs store during restart. MUST be always false
 delete-existing-data=false
 #Added for directory sweeper
-g2.queueing.server.url=jnp://10.146.16.148:5446
+g2.queueing.server.url=jnp://10.146.20.40:5446
 directory.sweeper.queue.name=/queue/G2Queue
 queueConnectionFactory=/ConnectionFactory
 # Directory sweeper configuration to check files are modified with in the given time limit in SECONDS
