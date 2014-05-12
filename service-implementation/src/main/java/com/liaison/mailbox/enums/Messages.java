@@ -62,7 +62,7 @@ public enum Messages {
 
 	// TRIGGER PROFILE USECASE
 	PROFILE_TRIGGERED_SUCCESSFULLY("Processors matching profile %s triggered successfully."),
-	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile."),
+	NO_PROC_CONFIG_PROFILE("There are no processors configured for this profile or the only processor configured is already running."),
 	TRG_PROF_FAILURE("Error triggering the profile %s ."),
 	FOLDERS_CONFIGURATION_INVALID("Folders configured for processors, but they are missing folder type and folder uri."),
 	CREDENTIAL_CONFIGURATION_INVALID("Credential configured for processors, but they are missing Credetial type and Credetial uri."),
@@ -106,7 +106,7 @@ public enum Messages {
 	SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Manifest does not contain the Service Instance Id for mailbox."),
 	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),
 
-	READ_SECRET_FAILED("Read secret from KMS failed.");
+	READ_SECRET_FAILED("Key manager failed to retrieve stored secret");
 
 	private String value;
 

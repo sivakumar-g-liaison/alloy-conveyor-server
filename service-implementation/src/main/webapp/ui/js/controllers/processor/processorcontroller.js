@@ -26,6 +26,10 @@ var rest = myApp.controller(
 			$scope.sftpDefaultPort = '22';
 			$scope.ftpDefaultPort = '21';
 			$scope.ftpsDefaultPort = '989';
+			
+			//check directory path in choose file
+			$scope.isDirectoryPath = true;
+			
             // To be Populated
             $scope.mailBoxId;
             var block = $rootScope.block;
@@ -160,7 +164,10 @@ var rest = myApp.controller(
                     "sshKeyPairPassphrase":'',
                     "sshKeyPairConfirmPassphrase":''
                 };
-                $scope.sshKeys = [];
+                $scope.sshKeys = {
+                    "privatekey":'',
+                    "publickey":''
+                };
                 $scope.processor.remoteProcessorProperties = {
                     otherRequestHeader: []
                 };
@@ -1461,7 +1468,7 @@ var rest = myApp.controller(
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
 							block.unblockUI();
-							showSaveMessage('Read secret failed', 'error');
+							showSaveMessage('Key manager failed to retrieve the stored secret', 'error');
 							return;
 						} 
 					}
@@ -1489,7 +1496,7 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP' || data.getProcessorResponse.processor.credentials.length === 0) {
+								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 								} else {
 									var editProcessor = false;
@@ -2004,7 +2011,7 @@ var rest = myApp.controller(
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
 					
-					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP' || $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length === 0) {
+					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 						$scope.processorSaveAfterKM();
 					} else {
 						var saveProcessor = false;
@@ -2040,7 +2047,6 @@ var rest = myApp.controller(
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
-						console.log('review secret status and data = ' + data + ', '+ status);
 						if (status === 200) {
 							editRequest.reviseProcessorRequest.processor.credentials[a].password = data;
 							$scope.processorReviseAfterKM();
@@ -2053,14 +2059,14 @@ var rest = myApp.controller(
 										$scope.processorReviseAfterKM();
 									} else {
 										block.unblockUI();
-										showSaveMessage("Error while revising secret", 'error');
+										showSaveMessage("Key manager failed to revise stored secret", 'error');
 										return;
 									}
 								}, {'Content-Type': 'application/octet-stream'}
 							);
 						} else {
 							block.unblockUI();
-							showSaveMessage("Error while revising secret", 'error');
+							showSaveMessage("Key manager failed to revise stored secret", 'error');
 							return;
 						}
 					}, {'Content-Type': 'application/octet-stream'}
@@ -2076,7 +2082,7 @@ var rest = myApp.controller(
 							$scope.processorSaveAfterKM();
 						} else {
 							block.unblockUI();
-							showSaveMessage("Error while adding secret", 'error');
+							showSaveMessage("Key manager failed to add stored secret", 'error');
 							return;
 						}
 					}, {'Content-Type': 'application/octet-stream'}
@@ -2160,7 +2166,9 @@ var rest = myApp.controller(
                     $scope.disableSSHKeys = true;
                     $scope.disableCertificates = true;
                     formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
-
+                     // To reset the values in the file browser window
+                    $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
+                    $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
             };
             
             // Close the modal
@@ -2556,6 +2564,7 @@ var rest = myApp.controller(
                         if (status === 200) {
                             $scope.certificateModal.trustStoreGroupId = trustStoreGroupId;
                             $scope.addCertificateDetails();
+                            $scope.resetCredentialModal();
                         } else {
                             block.unblockUI();
                            /* var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
@@ -2643,7 +2652,7 @@ var rest = myApp.controller(
                 $scope.$apply(function ($scope) {
                     // Turn the FileList object into an Array
                     for (var i = 0; i < element.files.length; i++) {
-                        $scope.sshKeys.push(element.files[i]);
+                         $scope.sshKeys.privatekey = element.files[i];
                     }
                     console.log('sshKeys:', $scope.sshKeys);
                     $scope.sshkeyModal.sshPrivateKeyURI = element.files[0].name;
@@ -2657,7 +2666,7 @@ var rest = myApp.controller(
                 $scope.$apply(function ($scope) {
                     // Turn the FileList object into an Array
                     for (var i = 0; i < element.files.length; i++) {
-                        $scope.sshKeys.push(element.files[i]);
+                       $scope.sshKeys.publickey = element.files[i];
                     }
                     console.log('sshKeys:', $scope.sshKeys);
                     $scope.sshkeyModal.sshPublicKeyURI = element.files[0].name;
@@ -2688,9 +2697,8 @@ var rest = myApp.controller(
                 $scope.sshKeyObj.dataTransferObject['custodianPassphrase'] = $scope.sshkeyModal.sshKeyPairPassphrase;
                 fd.append("json", angular.toJson($scope.sshKeyObj));
                 console.log(angular.toJson($scope.sshKeyObj));
-                for (var i in $scope.sshKeys) {
-                    fd.append($scope.sshKeys[i].name, $scope.sshKeys[i]);
-                }
+                fd.append($scope.sshKeys.privatekey.name, $scope.sshKeys.privatekey);
+                fd.append($scope.sshKeys.publickey.name, $scope.sshKeys.publickey);
                 var xhr = new XMLHttpRequest();
                 xhr.addEventListener("load", sshkeyUploadComplete, false);
                 xhr.addEventListener("error", sshkeyUploadFailed, false);
@@ -2699,6 +2707,9 @@ var rest = myApp.controller(
                 xhr.send(fd);
             };
               function sshkeyUploadComplete(evt) {
+                // To reset the values in the file browser window
+                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
+                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
                 /* This event is raised when the server send back a response */
                 if (evt.target.status === 201) {
                     console.log('ssh key uploaded successfully');
@@ -2709,6 +2720,7 @@ var rest = myApp.controller(
                     pkGuid = pkGuid.toString();
                     $scope.sshkeyModal.sshKeyPairPguid = pkGuid;
                     $scope.addSSHKeyDetails();
+                    $scope.resetCredentialModal();
 
                } else {
                     block.unblockUI();
@@ -2719,6 +2731,9 @@ var rest = myApp.controller(
             }
             
              function sshkeyUploadFailed(evt) {
+                // To reset the values in the file browser window
+                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
+                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
                 block.unblockUI();
                 /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
                 showSaveMessage('SSH KeyPair Uploading Failed', 'error');
@@ -2726,8 +2741,11 @@ var rest = myApp.controller(
             }
 
             function sshkeyUploadCanceled(evt) {
+                // To reset the values in the file browser window
+                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
+                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
                 block.unblockUI();
-               /* var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
+                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
                 showSaveMessage('SSH KeyPair Uploading Failed', 'error');
                 return;
             }
@@ -2742,18 +2760,16 @@ var rest = myApp.controller(
                     var credObj =  $scope.processorCredProperties[i];
                     if(credObj.credentialType == 'SSH_KEYPAIR') {
                         $scope.sshkeyModal.sshKeyPairPguid = credObj.idpURI;
-                        $scope.sshkeyModal.sshKeyPairPassphrase = credObj.password;
-                        $scope.sshkeyModal.sshKeyPairConfirmPassphrase = credObj.password;
+                        $scope.sshkeyModal.sshKeyPairPassphrase = '';
+                        $scope.sshkeyModal.sshKeyPairConfirmPassphrase = '';
                         if(credObj.idpType == 'PRIVATE') {
-                             $scope.sshkeyModal.sshPrivateKeyURI = credObj.credentialURI; 
+                             $scope.sshkeyModal.sshPrivateKeyURI = ''; 
                         } else {
-                             $scope.sshkeyModal.sshPublicKeyURI = credObj.credentialURI;
-                        }
-                                                    
-                        
+                             $scope.sshkeyModal.sshPublicKeyURI = '';
+                        }                                                                        
                     }
                     if (credObj.credentialType == 'TRUSTSTORE_CERT') {
-                        $scope.certificateModal.certificateURI = credObj.credentialURI;
+                        $scope.certificateModal.certificateURI = '';
                         $scope.certificateModal.trustStoreGroupId = credObj.idpURI;
                         $scope.certificateModal.isGlobalTrustore = (credObj.idpType == 'GLOBAL')?"1":"0";
                     }
@@ -2877,5 +2893,15 @@ var rest = myApp.controller(
   				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '#FA787E';
   			  }
            }
+		   
+		   //whenever selection change in choose a file
+			$scope.$watch('currentNode.roleName', function () {
+				var path = $scope.currentNode.roleName;
+				if(path.split('/').pop().split('.').length > 1) {
+					$scope.isDirectoryPath = false;
+				} else {
+					$scope.isDirectoryPath = true;
+				}
+			});
         }
     ]);
