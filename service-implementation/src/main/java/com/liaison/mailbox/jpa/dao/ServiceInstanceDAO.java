@@ -9,6 +9,11 @@
  */
 package com.liaison.mailbox.jpa.dao;
 
+/**
+* The dao class for the SERICEINSTANCE database table.
+* 
+* @author OFS
+*/
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 

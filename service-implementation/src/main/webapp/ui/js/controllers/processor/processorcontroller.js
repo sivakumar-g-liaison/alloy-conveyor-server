@@ -1465,7 +1465,7 @@ var rest = myApp.controller(
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
 							block.unblockUI();
-							showSaveMessage('Read secret failed', 'error');
+							showSaveMessage('Key manager failed to retrieve the stored secret', 'error');
 							return;
 						} 
 					}
@@ -1493,7 +1493,7 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP' || data.getProcessorResponse.processor.credentials.length === 0) {
+								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 								} else {
 									var editProcessor = false;
@@ -2008,7 +2008,7 @@ var rest = myApp.controller(
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
 					
-					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP' || $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length === 0) {
+					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
 						$scope.processorSaveAfterKM();
 					} else {
 						var saveProcessor = false;
@@ -2044,7 +2044,6 @@ var rest = myApp.controller(
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
-						console.log('review secret status and data = ' + data + ', '+ status);
 						if (status === 200) {
 							editRequest.reviseProcessorRequest.processor.credentials[a].password = data;
 							$scope.processorReviseAfterKM();
@@ -2057,14 +2056,14 @@ var rest = myApp.controller(
 										$scope.processorReviseAfterKM();
 									} else {
 										block.unblockUI();
-										showSaveMessage("Error while revising secret", 'error');
+										showSaveMessage("Key manager failed to revise stored secret", 'error');
 										return;
 									}
 								}, {'Content-Type': 'application/octet-stream'}
 							);
 						} else {
 							block.unblockUI();
-							showSaveMessage("Error while revising secret", 'error');
+							showSaveMessage("Key manager failed to revise stored secret", 'error');
 							return;
 						}
 					}, {'Content-Type': 'application/octet-stream'}
@@ -2080,7 +2079,7 @@ var rest = myApp.controller(
 							$scope.processorSaveAfterKM();
 						} else {
 							block.unblockUI();
-							showSaveMessage("Error while adding secret", 'error');
+							showSaveMessage("Key manager failed to add stored secret", 'error');
 							return;
 						}
 					}, {'Content-Type': 'application/octet-stream'}
