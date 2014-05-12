@@ -26,6 +26,10 @@ var rest = myApp.controller(
 			$scope.sftpDefaultPort = '22';
 			$scope.ftpDefaultPort = '21';
 			$scope.ftpsDefaultPort = '989';
+			
+			//check directory path in choose file
+			$scope.isDirectoryPath = true;
+			
             // To be Populated
             $scope.mailBoxId;
             var block = $rootScope.block;
@@ -2877,5 +2881,15 @@ var rest = myApp.controller(
   				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '#FA787E';
   			  }
            }
+		   
+		   //whenever selection change in choose a file
+			$scope.$watch('currentNode.roleName', function () {
+				var path = $scope.currentNode.roleName;
+				if(path.split('/').pop().split('.').length > 1) {
+					$scope.isDirectoryPath = false;
+				} else {
+					$scope.isDirectoryPath = true;
+				}
+			});
         }
     ]);

@@ -72,7 +72,21 @@
     /*This class is added to align the button glyphicon-plus-sign in gridOptionsForProcessor grid*/
  	div .alignButton {
 		margin-left: 15px;
-	}		
+	}
+	div[data-tree-model] li .selected {
+	  background-color: #aaddff;
+	  font-weight: bold;
+	  padding: 1px 5px;
+	 }
+	 div[data-tree-model] li .collapsed {
+	  padding: 1px 10px;
+	  background-repeat: no-repeat;
+	}
+
+	div[data-tree-model] li .expanded {
+	  padding: 1px 10px;
+	  background-repeat: no-repeat;
+	}	
 </style>
 
 <div class="container fade-in">
@@ -227,7 +241,8 @@
                         </div>
 
                         <div class="modal-footer">
-                            <button id="mbx-procsr-modal-choose" type="button" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">Choose</button>
+                            <button id="mbx-procsr-modal-choose" type="button" ng-disabled = "isDirectoryPath" class="btn btn-default" data-dismiss="modal" ng-click="modal.uri=currentNode.roleName">Choose</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         </div>
                     </div>
                 </div>
