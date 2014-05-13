@@ -1068,7 +1068,6 @@ var rest = myApp.controller(
             $scope.setPagingData = function (data, page, pageSize) {
                 if (data === null || data.length <= 0) {
                     $scope.message = 'No results found.';
-                    $scope.openMessage();
                 }
                 var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
                 $scope.processorList = pagedData;
@@ -2427,18 +2426,30 @@ var rest = myApp.controller(
                 _editor.getSession().setUseWorker(false);
             };
 			
-			var enableAndFocusEditor = function() {
+            var enableAndFocusEditor = function() {
 				if (editor) {
 					editor.focus();
 					var session = editor.getSession();
 					//Get the number of lines
 					var count = session.getLength();
 					//Go to end of the last line
+					
+					if((typeof(editor.getValue()) === 'undefined') || (editor.getValue() === "")) {
+						editor.setValue(" "); 
+						editor.remove(" "); 
+                        editor.moveCursorTo(0,0);
+                    } else {
+						editor.setValue(editor.getValue(),0);
+					}
+					
 					editor.gotoLine(session.getLine(count-1).length);
                 }
             };
 			
             $scope.isModal = function (row) {
+            	
+            	editor.setValue('');
+            	
                 rowObj = row;
 				$timeout(enableAndFocusEditor,500);
 				
@@ -2898,11 +2909,13 @@ var rest = myApp.controller(
 		   
 		   //whenever selection change in choose a file
 			$scope.$watch('currentNode.roleName', function () {
-				var path = $scope.currentNode.roleName;
-				if(path.split('/').pop().split('.').length > 1) {
-					$scope.isDirectoryPath = false;
-				} else {
-					$scope.isDirectoryPath = true;
+				if(typeof ($scope.currentNode) !== 'undefined') {
+					var path = $scope.currentNode.roleName;
+					if(path.split('/').pop().split('.').length > 1) {
+						$scope.isDirectoryPath = false;
+					} else {
+						$scope.isDirectoryPath = true;
+					}
 				}
 			});
         }
