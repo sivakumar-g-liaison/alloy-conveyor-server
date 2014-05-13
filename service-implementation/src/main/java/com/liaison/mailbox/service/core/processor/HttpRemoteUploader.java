@@ -160,6 +160,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				if (failedStatus) {
 					throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
 				}
+			} else {
+				LOGGER.info("The given HTTP Uploader payload URI is Empty.");
+				throw new MailBoxServicesException("The given payload configuration is Empty.");
 			}
 		}
 	}

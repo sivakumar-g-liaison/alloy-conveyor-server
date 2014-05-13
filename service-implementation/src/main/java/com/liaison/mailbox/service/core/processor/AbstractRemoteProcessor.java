@@ -113,8 +113,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public abstract class AbstractRemoteProcessor {
 
-	private static final Logger LOGGER = LogManager
-			.getLogger(AbstractRemoteProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteProcessor.class);
 
 	private static final ProcessorConfigurationDAO PROCESSOR_DAO = new ProcessorConfigurationDAOBase();
 
@@ -138,14 +137,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public RemoteProcessorPropertiesDTO getRemoteProcessorProperties()
-			throws JsonParseException, JsonMappingException, JAXBException,
-			IOException {
+	public RemoteProcessorPropertiesDTO getRemoteProcessorProperties() throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		if (null == remoteProcessorProperties) {
-			remoteProcessorProperties = MailBoxUtil.unmarshalFromJSON(
-					configurationInstance.getProcsrProperties(),
-					RemoteProcessorPropertiesDTO.class);
+			remoteProcessorProperties = MailBoxUtil.unmarshalFromJSON(configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
 		}
 
 		return remoteProcessorProperties;
@@ -158,8 +153,7 @@ public abstract class AbstractRemoteProcessor {
 	 */
 	public Object getClient() {
 
-		Protocol foundProtocolType = Protocol.findByCode(configurationInstance
-				.getProcsrProtocol());
+		Protocol foundProtocolType = Protocol.findByCode(configurationInstance.getProcsrProtocol());
 
 		switch (foundProtocolType) {
 
@@ -185,14 +179,11 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
 	 */
-	public CredentialDTO[] getProcessorCredentials()
-			throws MailBoxConfigurationServicesException,
-			SymmetricAlgorithmException {
+	public CredentialDTO[] getProcessorCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException {
 
 		CredentialDTO[] credentialArray = null;
 
-		if (configurationInstance.getCredentials() != null
-				&& !configurationInstance.getCredentials().isEmpty()) {
+		if (configurationInstance.getCredentials() != null && !configurationInstance.getCredentials().isEmpty()) {
 
 			List<CredentialDTO> credentialsList = new ArrayList<>();
 			CredentialDTO credentialDTO = null;
@@ -204,10 +195,7 @@ public abstract class AbstractRemoteProcessor {
 			}
 
 			if (credentialsList.size() > 0) {
-				credentialArray = Arrays
-						.copyOf(credentialsList.toArray(),
-								credentialsList.toArray().length,
-								CredentialDTO[].class);
+				credentialArray = Arrays.copyOf(credentialsList.toArray(), credentialsList.toArray().length, CredentialDTO[].class);
 			}
 		}
 
@@ -221,13 +209,11 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
 	 */
-	public FolderDTO[] getProcessorFolders()
-			throws MailBoxConfigurationServicesException {
+	public FolderDTO[] getProcessorFolders() throws MailBoxConfigurationServicesException {
 
 		FolderDTO[] folderArray = null;
 
-		if (configurationInstance.getFolders() != null
-				&& !configurationInstance.getFolders().isEmpty()) {
+		if (configurationInstance.getFolders() != null && !configurationInstance.getFolders().isEmpty()) {
 
 			List<FolderDTO> foldersDTO = new ArrayList<>();
 			FolderDTO folderDTO = null;
@@ -239,8 +225,7 @@ public abstract class AbstractRemoteProcessor {
 			}
 
 			if (!foldersDTO.isEmpty()) {
-				folderArray = Arrays.copyOf(foldersDTO.toArray(),
-						foldersDTO.toArray().length, FolderDTO[].class);
+				folderArray = Arrays.copyOf(foldersDTO.toArray(), foldersDTO.toArray().length, FolderDTO[].class);
 			}
 		}
 
@@ -255,8 +240,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxServicesException
 	 * @throws IOException
 	 */
-	public File[] getProcessorPayload() throws MailBoxServicesException,
-			IOException {
+	public File[] getProcessorPayload() throws MailBoxServicesException, IOException {
 
 		File[] files = null;
 
@@ -264,12 +248,10 @@ public abstract class AbstractRemoteProcessor {
 
 			for (Folder folder : configurationInstance.getFolders()) {
 
-				FolderType foundFolderType = FolderType.findByCode(folder
-						.getFldrType());
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(
-							Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 
 					LOGGER.debug("Started reading the payload files");
@@ -277,8 +259,7 @@ public abstract class AbstractRemoteProcessor {
 					listFiles(processMountLocation(folder.getFldrUri()), result);
 
 					if (!result.isEmpty()) {
-						files = Arrays.copyOf(result.toArray(),
-								result.toArray().length, File[].class);
+						files = Arrays.copyOf(result.toArray(), result.toArray().length, File[].class);
 						LOGGER.debug("Completed reading the payload files");
 					}
 				}
@@ -294,18 +275,15 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
 	 */
-	protected String getPayloadURI() throws MailBoxServicesException,
-			IOException {
+	protected String getPayloadURI() throws MailBoxServicesException, IOException {
 
 		if (configurationInstance.getFolders() != null) {
 
 			for (Folder folder : configurationInstance.getFolders()) {
 
-				FolderType foundFolderType = FolderType.findByCode(folder
-						.getFldrType());
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(
-							Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 					return processMountLocation(folder.getFldrUri());
 				}
@@ -333,18 +311,15 @@ public abstract class AbstractRemoteProcessor {
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public String getWriteResponseURI() throws MailBoxServicesException,
-			IOException {
+	public String getWriteResponseURI() throws MailBoxServicesException, IOException {
 
 		if (configurationInstance.getFolders() != null) {
 
 			for (Folder folder : configurationInstance.getFolders()) {
 
-				FolderType foundFolderType = FolderType.findByCode(folder
-						.getFldrType());
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(
-							Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
 				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return processMountLocation(folder.getFldrUri());
 				}
@@ -366,12 +341,9 @@ public abstract class AbstractRemoteProcessor {
 		} else {
 
 			mailBoxProperties = new Properties();
-			if (null != configurationInstance.getMailbox()
-					.getMailboxProperties()) {
-				for (MailBoxProperty property : configurationInstance
-						.getMailbox().getMailboxProperties()) {
-					mailBoxProperties.setProperty(property.getMbxPropName(),
-							property.getMbxPropValue());
+			if (null != configurationInstance.getMailbox().getMailboxProperties()) {
+				for (MailBoxProperty property : configurationInstance.getMailbox().getMailboxProperties()) {
+					mailBoxProperties.setProperty(property.getMbxPropName(), property.getMbxPropValue());
 				}
 			}
 			return mailBoxProperties;
@@ -386,24 +358,19 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
 	 */
-	protected Credential getCredential() throws MailBoxServicesException,
-			SymmetricAlgorithmException {
+	protected Credential getCredential() throws MailBoxServicesException, SymmetricAlgorithmException {
 
 		if (configurationInstance.getCredentials() != null) {
 
 			for (Credential credential : configurationInstance.getCredentials()) {
 
-				CredentialType foundCredentailType = CredentialType
-						.findByCode(credential.getCredsType());
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (null == foundCredentailType) {
-					throw new MailBoxServicesException(
-							Messages.CREDENTIAL_CONFIGURATION_INVALID);
-				} else if (CredentialType.TRUSTSTORE_CERT
-						.equals(foundCredentailType)) {
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+				} else if (CredentialType.TRUSTSTORE_CERT.equals(foundCredentailType)) {
 					return credential;
 
-				} else if (CredentialType.SSH_KEYPAIR
-						.equals(foundCredentailType)) {
+				} else if (CredentialType.SSH_KEYPAIR.equals(foundCredentailType)) {
 					return credential;
 				}
 			}
@@ -419,21 +386,17 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
 	 */
-	protected Credential getUserCredential() throws MailBoxServicesException,
-			SymmetricAlgorithmException {
+	protected Credential getUserCredential() throws MailBoxServicesException, SymmetricAlgorithmException {
 
 		if (configurationInstance.getCredentials() != null) {
 
 			for (Credential credential : configurationInstance.getCredentials()) {
 
-				CredentialType foundCredentailType = CredentialType
-						.findByCode(credential.getCredsType());
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 
 				if (null == foundCredentailType) {
-					throw new MailBoxServicesException(
-							Messages.CREDENTIAL_CONFIGURATION_INVALID);
-				} else if (CredentialType.LOGIN_CREDENTIAL
-						.equals(foundCredentailType)) {
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+				} else if (CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)) {
 					return credential;
 				}
 			}
@@ -449,12 +412,10 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxServicesException
 	 * @throws URISyntaxException
 	 */
-	protected String[] getUserCredetial(String credentialURI)
-			throws URISyntaxException, MailBoxServicesException {
+	protected String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException {
 
 		if (MailBoxUtil.isEmpty(credentialURI)) {
-			throw new MailBoxServicesException(
-					Messages.CREDENTIAL_CONFIGURATION_INVALID);
+			throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
 		}
 		URI uri = new URI(credentialURI);
 		String[] userData = null;
@@ -473,15 +434,12 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
-	public void writeResponseToMailBox(ByteArrayOutputStream response)
-			throws URISyntaxException, IOException, FS2Exception,
-			MailBoxServicesException {
+	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 		String processorName = MailBoxConstants.PROCESSOR;
 		if (configurationInstance.getProcsrName() != null) {
-			processorName = configurationInstance.getProcsrName().replaceAll(
-					" ", "");
+			processorName = configurationInstance.getProcsrName().replaceAll(" ", "");
 		}
 		String fileName = processorName + System.nanoTime();
 
@@ -497,16 +455,14 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
-	public void writeFileResponseToMailBox(ByteArrayOutputStream response,
-			String filename) throws URISyntaxException, IOException,
-			FS2Exception, MailBoxServicesException {
+	public void writeFileResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception,
+			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 		String responseLocation = getWriteResponseURI();
 
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(
-					Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
 		}
 
 		File directory = new File(responseLocation);
@@ -514,8 +470,7 @@ public abstract class AbstractRemoteProcessor {
 			Files.createDirectories(directory.toPath());
 		}
 
-		File file = new File(directory.getAbsolutePath() + File.separatorChar
-				+ filename);
+		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
 
 		Files.write(file.toPath(), response.toByteArray());
 
@@ -534,10 +489,8 @@ public abstract class AbstractRemoteProcessor {
 
 		if (null != configurationInstance.getDynamicProperties()) {
 
-			for (ProcessorProperty property : configurationInstance
-					.getDynamicProperties()) {
-				properties.setProperty(property.getProcsrPropName(),
-						property.getProcsrPropValue());
+			for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {
+				properties.setProperty(property.getProcsrPropName(), property.getProcsrPropValue());
 			}
 		}
 		return properties;
@@ -552,17 +505,11 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonParseException
 	 * 
 	 */
-	public void addUpdateDynamicProperty(String dynamicProperties)
-			throws JsonParseException, JsonMappingException, JAXBException,
-			IOException {
+	public void addUpdateDynamicProperty(String dynamicProperties) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		ProcessorConfigurationService service = new ProcessorConfigurationService();
-		DynamicPropertiesDTO dynamicPropertiesDTO = JAXBUtility
-				.unmarshalFromJSON(dynamicProperties,
-						DynamicPropertiesDTO.class);
-		service.addOrUpdateProcessorProperties(
-				String.valueOf(configurationInstance.getPrimaryKey()),
-				dynamicPropertiesDTO);
+		DynamicPropertiesDTO dynamicPropertiesDTO = JAXBUtility.unmarshalFromJSON(dynamicProperties, DynamicPropertiesDTO.class);
+		service.addOrUpdateProcessorProperties(String.valueOf(configurationInstance.getPrimaryKey()), dynamicPropertiesDTO);
 
 	}
 
@@ -578,8 +525,7 @@ public abstract class AbstractRemoteProcessor {
 	 *            The text to be decrypted
 	 * @return decrypted data as String
 	 */
-	public String getDecryptedString(String encryptedValue)
-			throws SymmetricAlgorithmException {
+	public String getDecryptedString(String encryptedValue) throws SymmetricAlgorithmException {
 		return MailBoxCryptoUtil.doPasswordEncryption(encryptedValue, 2);
 	}
 
@@ -604,13 +550,9 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws UnrecoverableKeyException
 	 * @throws BootstrapingFailedException
 	 */
-	public Object getClientWithInjectedConfiguration()
-			throws JsonParseException, JsonMappingException, JAXBException,
-			IOException, LiaisonException, URISyntaxException,
-			MailBoxServicesException, SymmetricAlgorithmException,
-			KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			JSONException, com.liaison.commons.exception.LiaisonException,
-			CMSException, UnrecoverableKeyException, OperatorCreationException,
+	public Object getClientWithInjectedConfiguration() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			JSONException, com.liaison.commons.exception.LiaisonException, CMSException, UnrecoverableKeyException, OperatorCreationException,
 			BootstrapingFailedException {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
@@ -640,8 +582,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Set the Other header to HttpRequest
 		if (properties.getOtherRequestHeader() != null) {
-			for (HttpOtherRequestHeaderDTO header : properties
-					.getOtherRequestHeader()) {
+			for (HttpOtherRequestHeaderDTO header : properties.getOtherRequestHeader()) {
 				request.addHeader(header.getName(), header.getValue());
 			}
 		}
@@ -654,35 +595,26 @@ public abstract class AbstractRemoteProcessor {
 		// Set the basic auth header for http request
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-		if ((loginCredential != null)
-			 && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
-			 && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
-				String password = MailBoxCryptoUtil.doPasswordEncryption(
-						loginCredential.getCredsPassword(), 2);
-				request.setAuthenticationHandler(new BasicAuthenticationHandler(
-						loginCredential.getCredsUsername(), password));
+		if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
+			String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), password));
 		}
 
 		// Configure keystore for HTTPS request
 		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
 
-			KeyStore trustStore = KeyStore.getInstance(KeyStore
-					.getDefaultType());
+			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
 
 			if (trustStoreCredential != null) {
 				// If no certificate is configured then use default global
 				// trustoreid
-				String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential
-						.getCredsIdpUri())) ? (MailBoxUtil
-						.getEnvironmentProperties()
-						.getString("mailbox.global.trustgroup.id"))
-						: trustStoreCredential.getCredsIdpUri();
+				String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri())) ? (MailBoxUtil.getEnvironmentProperties()
+						.getString("mailbox.global.trustgroup.id")) : trustStoreCredential.getCredsIdpUri();
 				InputStream instream = fetchTrustStore(trustStoreID);
 
 				if (instream == null) {
-					throw new MailBoxServicesException(
-							Messages.CERTIFICATE_RETRIEVE_FAILED);
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
 				}
 
 				try {
@@ -712,15 +644,13 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws IOException
-	 * @throws JAXBException 
+	 * @throws JAXBException
 	 */
-	private InputStream fetchTrustStore(String trustStoreId)
-			throws LiaisonException, JSONException, IOException, JAXBException {
+	private InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException {
 
 		InputStream is = null;
 
-		String url = MailBoxUtil.getEnvironmentProperties().getString(
-				"kms-base-url");
+		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/truststore/current/";
 
 		// To be fetched from DataBase
@@ -729,14 +659,13 @@ public abstract class AbstractRemoteProcessor {
 		Map<String, String> headerMap = new HashMap<String, String>();
 		headerMap.put("Content-Type", "application/json");
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
-		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER,
-				url, headerMap);
+		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
 
-			 KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse,KeyServiceResponse.class);
-		     KeySet keySet = (KeySet) mkr.getDataTransferObject();
-			 is =  new ByteArrayInputStream(keySet.getCurrentPublicKey().getBytes());
+			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse, KeyServiceResponse.class);
+			KeySet keySet = (KeySet) mkr.getDataTransferObject();
+			is = new ByteArrayInputStream(keySet.getCurrentPublicKey().getBytes());
 		}
 
 		return is;
@@ -757,18 +686,15 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws UnrecoverableKeyException
 	 * @throws CertificateEncodingException
 	 * @throws BootstrapingFailedException
-	 * @throws JAXBException 
+	 * @throws JAXBException
 	 */
-	private byte[] fetchSSHPrivateKey(String keypairPguid)
-			throws LiaisonException, JSONException, IOException,
-			CertificateEncodingException, UnrecoverableKeyException,
-			OperatorCreationException, KeyStoreException,
-			NoSuchAlgorithmException, CMSException, BootstrapingFailedException, JAXBException {
+	private byte[] fetchSSHPrivateKey(String keypairPguid) throws LiaisonException, JSONException, IOException, CertificateEncodingException,
+			UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException,
+			JAXBException {
 
 		byte[] privateKeyBytes = null;
 
-		String url = MailBoxUtil.getEnvironmentProperties().getString(
-				"kms-base-url");
+		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/group/keypair/current/";
 
 		// To be fetched from DataBase
@@ -777,18 +703,17 @@ public abstract class AbstractRemoteProcessor {
 		// get acl manifest response from ACL
 		String unsignedData = keypairPguid;
 		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData,
-				signedData);
-		// setting the request headers in the request to key manager from acl manifest response
-		Map <String, String> headerMap = getRequestHeaders(aclManifestFromACL);
-		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER,
-				url, headerMap);
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);
+		// setting the request headers in the request to key manager from acl
+		// manifest response
+		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
+		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
-			
-			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse,KeyServiceResponse.class);
-		    KeySet keySet = (KeySet) mkr.getDataTransferObject();
-		    privateKeyBytes =  keySet.getCurrentPrivateKey().getBytes();
+
+			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse, KeyServiceResponse.class);
+			KeySet keySet = (KeySet) mkr.getDataTransferObject();
+			privateKeyBytes = keySet.getCurrentPrivateKey().getBytes();
 		}
 
 		return privateKeyBytes;
@@ -801,8 +726,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * 
 	 */
-	protected String getJavaScriptString(String URI) throws IOException,
-			URISyntaxException {
+	protected String getJavaScriptString(String URI) throws IOException, URISyntaxException {
 
 		File file = new File(URI);
 		if (file.isFile()) { // Added because of this
@@ -812,11 +736,9 @@ public abstract class AbstractRemoteProcessor {
 		} else {
 
 			StringBuffer buffer = new StringBuffer();
-			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths
-					.get(URI))) {
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(URI))) {
 				for (Path entry : stream) {
-					String content = FileUtils.readFileToString(entry.toFile(),
-							"UTF-8");
+					String content = FileUtils.readFileToString(entry.toFile(), "UTF-8");
 					buffer.append(content);
 				}
 			} catch (IOException e) {
@@ -835,13 +757,11 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * 
 	 */
-	private void listFiles(String path, List<File> files)
-			throws MailBoxServicesException {
+	private void listFiles(String path, List<File> files) throws MailBoxServicesException {
 
 		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path
-					+ "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
 		}
 
 		// Modified to support both file and directory.
@@ -852,32 +772,31 @@ public abstract class AbstractRemoteProcessor {
 				files.add(location);
 			} else {
 				LOGGER.info("The given file {} does not exist.", path);
-				throw new MailBoxServicesException("The given file '" + path
-						+ "' does not exist.");
+				throw new MailBoxServicesException("The given file '" + path + "' does not exist.");
 			}
 
 		} else {
 
 			if (!location.exists()) {
 				LOGGER.info("The given directory {} does not exist.", path);
-				throw new MailBoxServicesException("The given directory '"
-						+ path + "' does not exist.");
+				throw new MailBoxServicesException("The given directory '" + path + "' does not exist.");
 			} else {
 
 				// get all the files from a directory
 				for (File file : location.listFiles()) {
 
 					if (file.isFile()) {
-						if (!MailBoxConstants.META_FILE_NAME.equals(file
-								.getName())) {
+						if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
 							files.add(file);
 						}
-					} else if (file.isDirectory()
-							   && !MailBoxConstants.PROCESSED_FOLDER.equals(file
-										.getName())) { // get all files from inner
-														// directory.
+					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) { // get
+																													// all
+																													// files
+																													// from
+																													// inner
+																													// directory.
 						listFiles(file.getAbsolutePath(), files);
-						
+
 					}
 				}
 			}
@@ -890,16 +809,14 @@ public abstract class AbstractRemoteProcessor {
 	 * @return Object which implements DirectoryStream.Filter interface and that
 	 *         accepts directories only.
 	 */
-	public DirectoryStream.Filter<Path> defineFilter(
-			final boolean listDirectoryOnly) {
+	public DirectoryStream.Filter<Path> defineFilter(final boolean listDirectoryOnly) {
 
 		DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
 
 			@Override
 			public boolean accept(Path entry) throws IOException {
 
-				return listDirectoryOnly ? Files.isDirectory(entry) : Files
-						.isRegularFile(entry);
+				return listDirectoryOnly ? Files.isDirectory(entry) : Files.isRegularFile(entry);
 			}
 		};
 
@@ -913,12 +830,10 @@ public abstract class AbstractRemoteProcessor {
 	 *            The source location
 	 * @throws IOException
 	 */
-	public void archiveFile(String filePath, boolean isError)
-			throws IOException {
+	public void archiveFile(String filePath, boolean isError) throws IOException {
 
 		File file = new File(filePath);
-		String targetFolder = (isError) ? MailBoxConstants.ERROR_FOLDER
-				: MailBoxConstants.PROCESSED_FOLDER;
+		String targetFolder = (isError) ? MailBoxConstants.ERROR_FOLDER : MailBoxConstants.PROCESSED_FOLDER;
 		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating target(processed/error) folder");
@@ -936,8 +851,7 @@ public abstract class AbstractRemoteProcessor {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFiles(File[] files, boolean isError)
-			throws IOException {
+	protected void archiveFiles(File[] files, boolean isError) throws IOException {
 		for (File file : files) {
 			archiveFile(file.getAbsolutePath(), isError);
 		}
@@ -952,8 +866,7 @@ public abstract class AbstractRemoteProcessor {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFile(File file, String processedFileLcoation)
-			throws IOException {
+	protected void archiveFile(File file, String processedFileLcoation) throws IOException {
 
 		Path oldPath = null;
 		Path newPath = null;
@@ -975,8 +888,7 @@ public abstract class AbstractRemoteProcessor {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFiles(File[] files, String processedFileLcoation)
-			throws IOException {
+	protected void archiveFiles(File[] files, String processedFileLcoation) throws IOException {
 
 		for (File file : files) {
 			archiveFile(file, processedFileLcoation);
@@ -1003,19 +915,15 @@ public abstract class AbstractRemoteProcessor {
 	 * @return true if it can be added false otherwise
 	 * @throws MailBoxServicesException
 	 */
-	protected Boolean validateAdditionalGroupFile(
-			List<FileAttributesDTO> fileGroup, FileAttributesDTO fileAttribute)
-			throws MailBoxServicesException {
+	protected Boolean validateAdditionalGroupFile(List<FileAttributesDTO> fileGroup, FileAttributesDTO fileAttribute) throws MailBoxServicesException {
 
 		long maxPayloadSize = 0;
 		long maxNoOfFiles = 0;
 
 		try {
 
-			String payloadSize = getDynamicProperties().getProperty(
-					MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
-			String maxFile = getDynamicProperties().getProperty(
-					MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
+			String payloadSize = getDynamicProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
+			String maxFile = getDynamicProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
 			if (!MailBoxUtil.isEmpty(payloadSize)) {
 				maxPayloadSize = Long.parseLong(payloadSize);
 			}
@@ -1024,8 +932,7 @@ public abstract class AbstractRemoteProcessor {
 			}
 
 		} catch (NumberFormatException e) {
-			throw new MailBoxServicesException(
-					"The given threshold size is not a valid one.");
+			throw new MailBoxServicesException("The given threshold size is not a valid one.");
 		}
 
 		if (maxPayloadSize == 0) {
@@ -1039,8 +946,7 @@ public abstract class AbstractRemoteProcessor {
 			return false;
 		}
 
-		if (maxPayloadSize <= (getGroupFileSize(fileGroup) + fileAttribute
-				.getSize())) {
+		if (maxPayloadSize <= (getGroupFileSize(fileGroup) + fileAttribute.getSize())) {
 			return false;
 		}
 		return true;
@@ -1113,31 +1019,9 @@ public abstract class AbstractRemoteProcessor {
 		 * For FTPS, SFTP, and FTP processors credential password will be
 		 * getting from KM
 		 */
-		String passwordFromKMS = null;
 		if ((loginCredential != null)) {
 
-			// get acl manifest response from ACL
-			String unsignedData = loginCredential.getCredsPassword();
-			String signedData = signRequestData(unsignedData);
-			ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(
-					unsignedData, signedData);
-			// setting the request headers in the request to key manager from acl manifest response
-			Map <String, String> headerMap = getRequestHeaders(aclManifestFromACL);
-			String url = MailBoxUtil.getEnvironmentProperties().getString(
-					"kms-base-url")
-					+ "secret/" + loginCredential.getCredsPassword();
-			String base64EncodedPassword = HTTPClientUtil
-					.getHTTPResponseInString(LOGGER, url, headerMap);
-
-			if (base64EncodedPassword == null || base64EncodedPassword == "") {				
-				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);				
-			} else {
-				String decodeLevel1 = new String(
-						Base64.decodeBase64(base64EncodedPassword));
-				String base64DecodedPassword = new String(
-						Base64.decodeBase64(decodeLevel1));
-				passwordFromKMS = base64DecodedPassword;
-			}
+			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword()); 
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
 					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
@@ -1208,18 +1092,13 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws CertificateEncodingException
 	 * @throws BootstrapingFailedException
 	 */
-	protected G2SFTPClient getSFTPClient(Logger logger)
-			throws JsonParseException, JsonMappingException, JAXBException,
-			IOException, LiaisonException, URISyntaxException,
-			MailBoxServicesException, SymmetricAlgorithmException,
-			com.liaison.commons.exception.LiaisonException, JSONException,
-			CertificateEncodingException, UnrecoverableKeyException,
-			OperatorCreationException, KeyStoreException,
-			NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
+	protected G2SFTPClient getSFTPClient(Logger logger) throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
+			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException,
+			CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException,
+			BootstrapingFailedException {
 
 		RemoteProcessorPropertiesDTO properties = MailBoxUtil
-				.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
-						RemoteProcessorPropertiesDTO.class);
+				.unmarshalFromJSON(configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
 
 		G2SFTPClient sftpRequest = new G2SFTPClient();
 		sftpRequest.setURI(properties.getUrl());
@@ -1232,31 +1111,9 @@ public abstract class AbstractRemoteProcessor {
 
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-		String passwordFromKMS = null;
 		if ((loginCredential != null)) {
 
-			// get acl manifest response from ACL
-			String unsignedData = loginCredential.getCredsPassword();
-			String signedData = signRequestData(unsignedData);
-			ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(
-					unsignedData, signedData);
-			// setting the request headers in the request to key manager from acl manifest response
-			Map <String, String> headerMap = getRequestHeaders(aclManifestFromACL);
-			String url = MailBoxUtil.getEnvironmentProperties().getString(
-					"kms-base-url")
-					+ "secret/" + loginCredential.getCredsPassword();
-			String base64EncodedPassword = HTTPClientUtil
-					.getHTTPResponseInString(LOGGER, url, headerMap);
-
-			if (base64EncodedPassword == null || base64EncodedPassword == "") {
-				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
-			} else {
-				String decodeLevel1 = new String(
-						Base64.decodeBase64(base64EncodedPassword));
-				String base64DecodedPassword = new String(
-						Base64.decodeBase64(decodeLevel1));
-				passwordFromKMS = base64DecodedPassword;
-			}
+			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword());
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
 				sftpRequest.setUser(loginCredential.getCredsUsername());
@@ -1276,21 +1133,17 @@ public abstract class AbstractRemoteProcessor {
 			if (MailBoxUtil.isEmpty(sshKeyPairCredential.getCredsIdpUri())) {
 
 				LOGGER.info("Credential requires file path");
-				throw new MailBoxServicesException(
-						"Credential requires file path");
+				throw new MailBoxServicesException("Credential requires file path");
 			}
 
-			byte[] privateKeyStream = fetchSSHPrivateKey(sshKeyPairCredential
-					.getCredsIdpUri());
+			byte[] privateKeyStream = fetchSSHPrivateKey(sshKeyPairCredential.getCredsIdpUri());
 
 			if (privateKeyStream == null) {
-				throw new MailBoxServicesException(
-						Messages.SSHKEY_RETRIEVE_FAILED);
+				throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED);
 			}
 
-			String privateKeyPath = MailBoxUtil.getEnvironmentProperties()
-					.getString("ssh.private.key.temp.location")
-					+ sshKeyPairCredential.getCredsUri() + ".txt";
+			String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
+					+ ".txt";
 			// write to a file
 			FileOutputStream out = new FileOutputStream(privateKeyPath);
 			out.write(privateKeyStream);
@@ -1303,13 +1156,10 @@ public abstract class AbstractRemoteProcessor {
 		return sftpRequest;
 	}
 
-	protected RemoteProcessorPropertiesDTO getRemoteProcessorProperty()
-			throws JsonParseException, JsonMappingException, JAXBException,
-			IOException {
+	protected RemoteProcessorPropertiesDTO getRemoteProcessorProperty() throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		RemoteProcessorPropertiesDTO properties = MailBoxUtil
-				.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
-						RemoteProcessorPropertiesDTO.class);
+				.unmarshalFromJSON(configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
 		return properties;
 	}
 
@@ -1321,32 +1171,26 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 */
-	protected CredentialInfoModel getLoginCredentials()
-			throws URISyntaxException, MailBoxServicesException,
-			SymmetricAlgorithmException {
+	protected CredentialInfoModel getLoginCredentials() throws URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException {
 
 		Credential userCredential = getUserCredential();
 		CredentialInfoModel model = null;
 		if (userCredential != null) {
 			model = new CredentialInfoModel();
 
-			if (!MailBoxUtil.isEmpty(userCredential.getCredsUsername())
-					&& !MailBoxUtil.isEmpty(userCredential.getCredsPassword())) {
+			if (!MailBoxUtil.isEmpty(userCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(userCredential.getCredsPassword())) {
 
 				model.setUsername(userCredential.getCredsUsername());
 				model.setPassword(userCredential.getCredsPassword());
 
 			} else if (!MailBoxUtil.isEmpty(userCredential.getCredsIdpUri())) {
 
-				String[] cred = getUserCredetial(userCredential
-						.getCredsIdpUri());
+				String[] cred = getUserCredetial(userCredential.getCredsIdpUri());
 				if (cred != null) {
 
-					if (MailBoxUtil.isEmpty(cred[0])
-							|| MailBoxUtil.isEmpty(cred[1])) {
+					if (MailBoxUtil.isEmpty(cred[0]) || MailBoxUtil.isEmpty(cred[1])) {
 						LOGGER.info("Credential idpuri requires username & password");
-						throw new MailBoxServicesException(
-								"Credential IDPURI requires username & password");
+						throw new MailBoxServicesException("Credential IDPURI requires username & password");
 					}
 					model.setUsername(cred[0]);
 					model.setPassword(cred[1]);
@@ -1368,9 +1212,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 */
-	protected CredentialInfoModel getKeyStoreCredential()
-			throws URISyntaxException, MailBoxServicesException,
-			SymmetricAlgorithmException {
+	protected CredentialInfoModel getKeyStoreCredential() throws URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException {
 
 		Credential credential = getCredential();
 		CredentialInfoModel model = null;
@@ -1390,8 +1232,7 @@ public abstract class AbstractRemoteProcessor {
 
 			} else {
 				LOGGER.info("Credentials not configured for TrustStore/keystore");
-				throw new MailBoxServicesException(
-						"Credentials not configured TrustStore/keystore");
+				throw new MailBoxServicesException("Credentials not configured TrustStore/keystore");
 			}
 		}
 		return model;
@@ -1409,16 +1250,14 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 */
-	protected void writeSFTPSResponseToMailBox(ByteArrayOutputStream response,
-			String filename) throws URISyntaxException, IOException,
-			FS2Exception, MailBoxServicesException {
+	protected void writeSFTPSResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception,
+			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 
 		String responseLocation = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(
-					Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
 		}
 
 		File directory = new File(responseLocation);
@@ -1429,8 +1268,7 @@ public abstract class AbstractRemoteProcessor {
 		if (MailBoxUtil.isEmpty(filename)) {
 
 			LOGGER.info("The given URI {} does not exist.", filename);
-			throw new MailBoxServicesException("The given URI '" + filename
-					+ "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + filename + "' does not exist.");
 		}
 		File file = new File(filename);
 		Files.write(file.toPath(), response.toByteArray());
@@ -1451,14 +1289,9 @@ public abstract class AbstractRemoteProcessor {
 
 		String processedFolderPath = null;
 
-		if (folderPath != null
-				&& folderPath.toUpperCase().contains(
-						MailBoxConstants.MOUNT_LOCATION)) {
-			String mountLocationValue = MailBoxUtil.getEnvironmentProperties()
-					.getString("MOUNT_POINT");
-			processedFolderPath = folderPath
-					.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN,
-							mountLocationValue);
+		if (folderPath != null && folderPath.toUpperCase().contains(MailBoxConstants.MOUNT_LOCATION)) {
+			String mountLocationValue = MailBoxUtil.getEnvironmentProperties().getString("MOUNT_POINT");
+			processedFolderPath = folderPath.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN, mountLocationValue);
 		} else {
 			return folderPath;
 		}
@@ -1480,13 +1313,10 @@ public abstract class AbstractRemoteProcessor {
 	 *            The notification type(TEXT/HTML).
 	 */
 
-	public void sendEmail(List<String> toEmailAddrList, String subject,
-			String emailBody, String type) {
+	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
 
-		List<String> configuredEmailAddress = configurationInstance
-				.getEmailAddress();
-		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty())
-				&& (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
+		List<String> configuredEmailAddress = configurationInstance.getEmailAddress();
+		if ((configuredEmailAddress == null || configuredEmailAddress.isEmpty()) && (toEmailAddrList == null || toEmailAddrList.isEmpty())) {
 			LOGGER.info("There is no email address configured for this mailbox.");
 		}
 
@@ -1513,11 +1343,9 @@ public abstract class AbstractRemoteProcessor {
 	 * @param type
 	 *            The notification type(TEXT/HTML).
 	 */
-	public void sendEmail(List<String> toEmailAddrList, String subject,
-			Exception exc, String type) {
+	public void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
 
-		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc),
-				type);
+		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
 	}
 
 	/**
@@ -1528,28 +1356,20 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
 	 */
-	protected Credential getCredentialOfSpecificType(CredentialType type)
-			throws MailBoxServicesException, SymmetricAlgorithmException {
+	protected Credential getCredentialOfSpecificType(CredentialType type) throws MailBoxServicesException, SymmetricAlgorithmException {
 
 		if (configurationInstance.getCredentials() != null) {
-			
 
 			for (Credential credential : configurationInstance.getCredentials()) {
-				CredentialType foundCredentailType = CredentialType
-						.findByCode(credential.getCredsType());
+				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (credential.getCredsType() == null) {
-					throw new MailBoxServicesException(
-							Messages.CREDENTIAL_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
 				} else if (foundCredentailType.equals(type)) {
 
-					if (credential.getCredsType().equalsIgnoreCase(
-							MailBoxConstants.SSH_KEYPAIR)
-							&& credential.getCredsIdpType().equalsIgnoreCase(
-									"PRIVATE")) {
+					if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && credential.getCredsIdpType().equalsIgnoreCase("PRIVATE")) {
 						return credential;
 					}
-					if (!credential.getCredsIdpType().equalsIgnoreCase(
-							MailBoxConstants.SSH_KEYPAIR))
+					if (!credential.getCredsIdpType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR))
 						return credential;
 				}
 			}
@@ -1567,15 +1387,13 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 */
-	protected void processResponseLocation(String fileName)
-			throws URISyntaxException, IOException, MailBoxServicesException {
+	protected void processResponseLocation(String fileName) throws URISyntaxException, IOException, MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 
 		String responseLocation = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(
-					Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
 		}
 
 		File directory = new File(responseLocation);
@@ -1586,8 +1404,7 @@ public abstract class AbstractRemoteProcessor {
 		if (MailBoxUtil.isEmpty(fileName)) {
 
 			LOGGER.info("The given URI {} does not exist.", fileName);
-			throw new MailBoxServicesException("The given URI '" + fileName
-					+ "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + fileName + "' does not exist.");
 		}
 	}
 
@@ -1600,21 +1417,19 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxServicesException
 	 */
-	protected void removePrivateKey() throws IOException,
-			MailBoxServicesException, SymmetricAlgorithmException {
+	protected void removePrivateKey() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
 
 		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
 		if (null != sshKeyPairCredential && sshKeyPairCredential.getCredsUri() != null) {
-			String fileLocation = MailBoxUtil.getEnvironmentProperties()
-					.getString("ssh.private.key.temp.location")
-					+ sshKeyPairCredential.getCredsUri() + ".txt";
+			String fileLocation = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
+					+ ".txt";
 			File privateKeyFile = new File(fileLocation);
 			if (privateKeyFile.exists())
 				privateKeyFile.delete();
 			LOGGER.info("privateKey downloaded from keyManager removed from local file system");
 			return;
-		}	
+		}
 
 		LOGGER.info("Trigerring - The private key file path not configured.");
 	}
@@ -1625,11 +1440,11 @@ public abstract class AbstractRemoteProcessor {
 	 * @return ManifestRequestDTO
 	 */
 	private ManifestRequestDTO constructACLManifestRequest() {
-		
+
 		LOGGER.info("Constructing the acl manifest request with default values");
 		// Construct Envelope
 		EnvelopeDTO envelope = new EnvelopeDTO();
-				
+
 		// Construct Domain
 		ManifestRequestDomain domain = new ManifestRequestDomain();
 		domain.setName(MailBoxConstants.DOMAIN_NAME);
@@ -1644,8 +1459,7 @@ public abstract class AbstractRemoteProcessor {
 		// Construct NestedServiceDependency
 		NestedServiceDependencyContraint dependencyConstraint = new NestedServiceDependencyContraint();
 		dependencyConstraint.setServiceName(MailBoxConstants.SERVICE_NAME);
-		dependencyConstraint.setPrimaryId(configurationInstance
-				.getServiceInstance().getName());
+		dependencyConstraint.setPrimaryId(configurationInstance.getServiceInstance().getName());
 
 		List<NestedServiceDependencyContraint> constraintList = new ArrayList<NestedServiceDependencyContraint>();
 		constraintList.add(dependencyConstraint);
@@ -1686,11 +1500,8 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws UnrecoverableKeyException
 	 * @throws BootstrapingFailedException
 	 */
-	private String signRequestData(String unsignedData)
-			throws CertificateEncodingException, OperatorCreationException,
-			CMSException, IOException, KeyStoreException,
-			UnrecoverableKeyException, NoSuchAlgorithmException,
-			BootstrapingFailedException {
+	private String signRequestData(String unsignedData) throws CertificateEncodingException, OperatorCreationException, CMSException, IOException,
+			KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, BootstrapingFailedException {
 
 		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
 			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
@@ -1699,23 +1510,19 @@ public abstract class AbstractRemoteProcessor {
 		KeyStore ks = null;
 		// read keystore from Bootstrap
 		// BootstrapRemoteKeystore.bootstrap();
-		password = BootstrapRemoteKeystore
-				.getDecryptedRemoteKeypairPassphrase().toCharArray();
+		password = BootstrapRemoteKeystore.getDecryptedRemoteKeypairPassphrase().toCharArray();
 		LOGGER.debug("Loading keystore from Bootstrap");
 		ks = BootstrapRemoteKeystore.getRemoteKeyStore();
 
-		X509Certificate originalSignerCert = KeyStoreUtil
-				.getX509Certificate(ks);
-		PrivateKey privateKey = (PrivateKey) ks.getKey(
-				KeyStoreUtil.getKeyAlias(ks), password);
+		X509Certificate originalSignerCert = KeyStoreUtil.getX509Certificate(ks);
+		PrivateKey privateKey = (PrivateKey) ks.getKey(KeyStoreUtil.getKeyAlias(ks), password);
 		List<X509Certificate> listOfOriginalSignerCerts = new ArrayList<>();
 		listOfOriginalSignerCerts.add(originalSignerCert);
 
 		// FOR SIGNING
 		DigitalSignature sig = new DigitalSignature();
 		byte[] MESSAGE_TO_SIGN = unsignedData.getBytes();
-		byte[] singedData = sig.sign(new ByteArrayInputStream(MESSAGE_TO_SIGN),
-				originalSignerCert, privateKey);
+		byte[] singedData = sig.sign(new ByteArrayInputStream(MESSAGE_TO_SIGN), originalSignerCert, privateKey);
 
 		return Base64.encodeBase64String(singedData);
 
@@ -1729,8 +1536,7 @@ public abstract class AbstractRemoteProcessor {
 	 * @return String aclManifest
 	 * @throws IOException
 	 */
-	private ACLManifestResponse getACLManifestFromACLClient(String unsignedData,
-			String signedData) throws IOException {
+	private ACLManifestResponse getACLManifestFromACLClient(String unsignedData, String signedData) throws IOException {
 		ACLManifestResponse aclManifestResponse = null;
 		ACLClient aclClient = new ACLClient();
 
@@ -1740,58 +1546,76 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Read public key guid used to sign the unsigned data from properies file");
 		// read the public key guid from properties file
-		String publicKeyGuid = MailBoxUtil.getEnvironmentProperties()
-				.getString("mailbox.signer.public.key.guid");
+		String publicKeyGuid = MailBoxUtil.getEnvironmentProperties().getString("mailbox.signer.public.key.guid");
 		LOGGER.info("Retrieving acl manifest form ACL using ACLClient.");
 		// get aclManifest response through ACLClient
-		aclManifestResponse = aclClient.getACLManifest(unsignedData,
-				signedData, publicKeyGuid, manifestRequest);
+		aclManifestResponse = aclClient.getACLManifest(unsignedData, signedData, publicKeyGuid, manifestRequest);
 		return aclManifestResponse;
 	}
-	
+
 	/**
 	 * Method to set the request header for the requests to key manager
 	 * 
 	 * @param aclManifestResponse
 	 * @return requestHeaders in a Map object
 	 */
-	private Map <String, String> getRequestHeaders(ACLManifestResponse aclManifestFromACL) {
-		
+	private Map<String, String> getRequestHeaders(ACLManifestResponse aclManifestFromACL) {
+
 		LOGGER.info("setting request headers from acl manifest response to key manager request");
 		Map<String, String> headerMap = new HashMap<String, String>();
-		String aclManifest = (aclManifestFromACL != null)? aclManifestFromACL.getAclManifest():null;
-		String signedACLManifest = (aclManifestFromACL != null)? aclManifestFromACL.getSignature():null;
-		String aclSignerPublicKey = (aclManifestFromACL != null)?aclManifestFromACL.getPublicKeyGuid():null;
+		String aclManifest = (aclManifestFromACL != null) ? aclManifestFromACL.getAclManifest() : null;
+		String signedACLManifest = (aclManifestFromACL != null) ? aclManifestFromACL.getSignature() : null;
+		String aclSignerPublicKey = (aclManifestFromACL != null) ? aclManifestFromACL.getPublicKeyGuid() : null;
 		headerMap.put("acl-manifest", aclManifest);
 		headerMap.put("acl-signature", signedACLManifest);
 		headerMap.put("acl_signer_public_key_guid", aclSignerPublicKey);
 		headerMap.put("Content-Type", "application/json");
 		return headerMap;
 	}
-	
+
 	/**
-     * 
-     * @param serializedJson
-     * @param clazz
-     * 
-     * @return json
-     * 
-     * @throws JAXBException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     */
-    private   <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
-    JsonMappingException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-        AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-        AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(
-        primary, secondary);
-        // make deserializer use JAXB annotations (only)
-        mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
-        T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
-        return ummarshaledObject;
-    }
+	 * 
+	 * @param serializedJson
+	 * @param clazz
+	 * 
+	 * @return json
+	 * 
+	 * @throws JAXBException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	private <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+		// make deserializer use JAXB annotations (only)
+		mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
+		return ummarshaledObject;
+	}
+
+	String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
+			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException {
+
+		// get acl manifest response from ACL
+		String unsignedData = guid;
+		String signedData = signRequestData(unsignedData);
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);
+		// setting the request headers in the request to key manager from acl
+		// manifest response
+		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
+		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
+		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+
+		if (base64EncodedPassword == null || base64EncodedPassword == "") {
+			throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
+		} else {
+			String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
+			String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));
+			return base64DecodedPassword;
+		}
+	}
 
 }
