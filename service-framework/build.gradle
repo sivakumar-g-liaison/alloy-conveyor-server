@@ -63,7 +63,7 @@ dependencies {
     // Liaison code
        //gradle dependencies
 
-	//commons-lib dependencies
-	compile 'com.liaison:commons-lib:2.0.0'
+	// commons-lib dependencies
+	compile 'com.liaison:commons-lib:2.+'
 }
 
