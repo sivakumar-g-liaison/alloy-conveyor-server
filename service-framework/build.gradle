@@ -61,7 +61,9 @@ dependencies {
     compile 'com.oracle:ojdbc6:11g-11.2.0.3.0'
     compile 'com.oracle:ucp:11g-11.2.0.3.0'
     // Liaison code
-   compile group: "com.liaison", name: "commons-lib", version: "1.0.7-SNAPSHOT", changing: true
+       //gradle dependencies
 
+	//commons-lib dependencies
+	compile 'com.liaison:commons-lib:2.0.0'
 }
 
