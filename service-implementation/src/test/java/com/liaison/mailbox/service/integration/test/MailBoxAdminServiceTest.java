@@ -195,7 +195,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		
 		GetExecutingProcessorResponseDTO getResponseDTO = null;
 		String url = getBASE_URL() + "/processoradmin/processor/execution"+"?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+"&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "";
-		//url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -228,7 +227,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		
 		GetExecutingProcessorResponseDTO getResponseDTO = null;
 		String url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=QUEUED";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -239,7 +237,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=PROCESSING";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -250,7 +247,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=FAILED";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -261,7 +257,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=COMPLETED";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -272,7 +267,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=HANDED_OVER_TO_JS";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -283,7 +277,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=GRACEFULLY_INTERRUPTED";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -294,7 +287,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=SKIPPED_SINCE_ALREADY_RUNNING";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -356,7 +348,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		// ToDate is empty
 		
 		String url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -369,7 +360,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		// FromDate is empty
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -402,7 +392,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		
 		GetExecutingProcessorResponseDTO getResponseDTO = null;
 		String url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=INVALID";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -413,7 +402,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=QUEUED";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -424,7 +412,6 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 		
 		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=&status=QUEUED";
-		url = url.replaceAll(" ","%20");
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
