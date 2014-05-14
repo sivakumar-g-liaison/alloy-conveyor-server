@@ -11,7 +11,9 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import com.liaison.mailbox.jpa.model.FSMEvent;
+import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * 
@@ -21,9 +23,11 @@ import com.wordnik.swagger.annotations.ApiModel;
 @ApiModel(value = "fsmEvent")
 public class FSMEventDTO {
 
+	@ApiModelProperty( value = "Execution ID", required = true)
 	private String executionID;
 	private String value;
 	
+	@Mandatory(errorMessage = "Execution ID is mandatory.")
 	public String getExecutionID() {
 		return executionID;
 	}

@@ -37,7 +37,7 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -131,7 +131,7 @@ public class MailboxAdminResource extends BaseResource {
 	@ApiOperation(value = "Interrupt processors",
 	notes = "interrupt running processor",
 	position = 22,
-	response = com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO.class)
+	response = com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO.class)
 	@Path("/processor/execution")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ public class MailboxAdminResource extends BaseResource {
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, InterruptExecutionEventRequestDTO.class);
 
-			AddFSMExecutionEventResponseDTO serviceResponse = null;
+			InterruptExecutionEventResponseDTO serviceResponse = null;
 			ProcessorConfigurationService processor = new ProcessorConfigurationService();
 
 			// creates new execution event
