@@ -80,7 +80,7 @@ import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddFSMExecutionEventResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
@@ -749,10 +749,10 @@ public class ProcessorConfigurationService {
 	 * @throws MailBoxConfigurationServicesException 
 	 * 
 	 */
-	public AddFSMExecutionEventResponseDTO interruptRunningProcessor( InterruptExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
+	public InterruptExecutionEventResponseDTO interruptRunningProcessor( InterruptExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
 		
 		LOGGER.info("Entering into interrupt processor.");
-		AddFSMExecutionEventResponseDTO serviceResponse = new AddFSMExecutionEventResponseDTO();
+		InterruptExecutionEventResponseDTO serviceResponse = new InterruptExecutionEventResponseDTO();
 
 		try {
 
@@ -778,6 +778,13 @@ public class ProcessorConfigurationService {
 
 			return serviceResponse;
 		} catch (ProcessorManagementFailedException e) {
+
+			LOGGER.error(Messages.RECEIVED_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_OPERATION_FAILED, INTERRUPT_SIGNAL, Messages.FAILURE, e
+					.getMessage()));
+
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
 
 			LOGGER.error(Messages.RECEIVED_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_OPERATION_FAILED, INTERRUPT_SIGNAL, Messages.FAILURE, e

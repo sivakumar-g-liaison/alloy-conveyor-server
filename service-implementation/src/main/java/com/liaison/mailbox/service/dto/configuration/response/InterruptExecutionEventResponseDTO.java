@@ -23,7 +23,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  *
  */
-public class AddFSMExecutionEventResponseDTO implements ResponseBuilder {
+public class InterruptExecutionEventResponseDTO implements ResponseBuilder {
 
 	private ResponseDTO response;
 	
