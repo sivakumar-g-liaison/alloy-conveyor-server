@@ -116,8 +116,9 @@ dependencies {
 
     // resolve fs2 in nexus
     compile group: "com.liaison", name: "fs2", version: "0.0.3-SNAPSHOT", changing: true
-
-
+	
+    //gradle dependencies
+	compile 'com.liaison:commons-lib:2.0.0'
 
     // inherited from NetFlix Karyon
     //compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
@@ -201,7 +202,7 @@ dependencies {
 	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.2-SNAPSHOT", changing: true
 	
 	//Dependency for ACL client Integration
-	compile group: "com.liaison.commons.accessmanagement", name: "accessmanagement-client", version: "1.0.0-SNAPSHOT", changing: true 
+	compile group: "com.liaison.commons.accessmanagement", name: "accessmanagement-client", version: "1.0.0-SNAPSHOT", changing: true
 	
 	// Dependency for KeyManager
 	compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.1-SNAPSHOT', classifier: 'grammar', changing: true
