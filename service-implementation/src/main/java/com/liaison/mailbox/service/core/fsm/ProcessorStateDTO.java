@@ -140,7 +140,7 @@ public class ProcessorStateDTO {
 		entity.setProcessorType(this.getProcessorType().getCode());
 		entity.setMailboxId(this.getMailboxId());
 		entity.setProfileName(this.getProfileName());
-		entity.setStateNotes(this.getStateNotes());
+		entity.setStateNotes(this.getExecutionState().notes());
 		
 		//Constructing FSMStateValue
 		FSMStateValue value = new FSMStateValue();
