@@ -148,7 +148,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Initialize authentication
     // *****
     $rootScope.authService = AuthService;
-	$rootScope.pipelineId = null;
+	$rootScope.pipelineId = '';
+	
+	// service instance id 
+	$rootScope.serviceInstanceId = '';
 	
 	//getting values from java properties file
 	$rootScope.javaProperties = {
@@ -229,15 +232,15 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 	/*
 	* Pipeline Id code
 	*/
-	$rootScope.appendPipelineIDAddMBox = function() {
-		return "#/mailbox/addMailBox?pipeLineId=" + $rootScope.pipelineId;
+	$rootScope.appendQueryParamAddMBox = function() {
+		return "#/mailbox/addMailBox?pipeLineId=" + $rootScope.pipelineId + "&sid=" + $rootScope.serviceInstanceId;
 	};
 	
-	$rootScope.appendPipelineIDManage = function() {
-		return "#/profiles/addProfiles?pipeLineId=" + $rootScope.pipelineId;
+	$rootScope.appendQueryParamManage = function() {
+		return "#/profiles/addProfiles?pipeLineId=" + $rootScope.pipelineId + "&sid=" + $rootScope.serviceInstanceId;
 	};
 	
-	$rootScope.appendPipelineIDTrigger = function() {
-		return "#/profiles/trigger?pipeLineId=" + $rootScope.pipelineId;
+	$rootScope.appendQueryParamTrigger = function() {
+		return "#/profiles/trigger?pipeLineId=" + $rootScope.pipelineId + "&sid=" + $rootScope.serviceInstanceId;
 	};
 });
