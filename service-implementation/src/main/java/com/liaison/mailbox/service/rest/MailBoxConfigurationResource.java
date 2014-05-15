@@ -38,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
@@ -62,6 +63,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -119,7 +121,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "createMailBox")
-	public Response createMailBox(@Context HttpServletRequest request) {
+	public Response createMailBox(@Context HttpServletRequest request, @QueryParam(value = "sid") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to create a mailbox
 		auditAttempt("createMailBox");
@@ -137,16 +139,21 @@ public class MailBoxConfigurationResource extends BaseResource {
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
 			
 			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
+			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
+			
+			// check if service instance id is available in query param if not throw an exception
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+			}
 			
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// creates new mailbox
-			serviceResponse = mailbox.createMailBox(serviceRequest, decodedManifestJson);
+			serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "createMailBox");
@@ -191,7 +198,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	})
 	@AccessDescriptor(accessMethod = "reviseMailBox")
 	public Response reviseMailBox(@Context HttpServletRequest request, 
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value = "sid") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to revise a mailbox
 		auditAttempt("reviseMailBox");
@@ -212,12 +219,17 @@ public class MailBoxConfigurationResource extends BaseResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
 			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
+			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
+			
+			// check if service instance id is available in query param if not throw an exception
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+			}
 					
 			// updates existing mailbox
-			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, decodedManifestJson);
+			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "reviseMailBox");
@@ -317,7 +329,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	})
 	@AccessDescriptor(accessMethod = "readMailBox")
 	public Response readMailBox(@Context HttpServletRequest request, @PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
-			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint) {
+			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint, @QueryParam(value = "sid") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to read mailbox
 		auditAttempt("readMailBox");
@@ -332,11 +344,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			
 			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
+			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
 			
-			serviceResponse = mailbox.getMailBox(guid, addConstraint, decodedManifestJson);
+			// check if service instance id is available in query param if not throw an exception
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+			}
+			
+			serviceResponse = mailbox.getMailBox(guid, addConstraint, serviceInstanceId);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "readMailBox");
@@ -591,7 +608,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	})
 	@AccessDescriptor(accessMethod = "createProcessor")
 	public Response createProcessor(@Context HttpServletRequest request,
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value= "sid") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to createProcessor
 		auditAttempt("createProcessor");
@@ -613,11 +630,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			
 			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
+			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
 			
-			serviceResponse = mailbox.createProcessor(guid, serviceRequest, decodedManifestJson);
+			// check if service instance id is available in query param if not throw an exception
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+			}		
+			
+			serviceResponse = mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 
 			//Audit LOG
 			doAudit(serviceResponse.getResponse(), "createProcessor");

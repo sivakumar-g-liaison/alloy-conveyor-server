@@ -8,6 +8,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
 		$rootScope.pipelineId = $location.search().pipeLineId;
         $scope.title = "MailBox Profiles"; // title
+        
+        $rootScope.serviceInstanceId = $location.search().sid;
 
         // Search Details
         $scope.mailBoxName = null;
@@ -147,7 +149,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
         // Navigate to mailbox screen for edit operation
         $scope.edit = function (row) {
-            $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid).search('pipeLineId', $rootScope.pipelineId);
+            $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid).search('pipeLineId', $rootScope.pipelineId).search('sid', $rootScope.serviceInstanceId);
         };
 
         $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {

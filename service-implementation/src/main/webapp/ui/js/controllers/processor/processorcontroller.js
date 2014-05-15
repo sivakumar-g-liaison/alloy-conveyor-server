@@ -13,6 +13,12 @@ var rest = myApp.controller(
 				$rootScope.pipelineId = $location.search().pipeLineId;
 			}
 			$scope.pipeId = $location.search().pipeLineId; 
+			
+			// setting serviceinstanceid 
+			if ($rootScope.serviceInstanceId === null || $rootScope.serviceInstanceId === '') {
+				$rootScope.serviceInstanceId = $location.search().sid;
+			}
+			$scope.sid = $location.search().sid;
 		
 			$scope.disablePipeLineId = false;
     	
@@ -1051,7 +1057,7 @@ var rest = myApp.controller(
                 currentPage: 1
             };
             $scope.readAllProcessors = function () {
-                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?addServiceInstanceIdConstraint=' + true, //Get mail box Data
+                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?addServiceInstanceIdConstraint=' + true + '&sid=' + $scope.sid, //Get mail box Data
                     function (data) {
                         $scope.getPagedDataAsync(data,
                             $scope.pagingOptions.pageSize,
@@ -1810,7 +1816,7 @@ var rest = myApp.controller(
             $scope.doCancel = function () {			
 				$scope.closeModalView(); 
 				$location.$$search = {};
-				$location.path('/mailbox/getMailBox');
+				$location.path('/mailbox/getMailBox').search('pipeLineId', $scope.pipeId).search('sid', $scope.sid);
             };
 	        $scope.closeModalView = function () {
                  $('#cancelAction').modal('hide')
@@ -1819,7 +1825,7 @@ var rest = myApp.controller(
 				$scope.backToMailboxeModalView(); 
 				var redirectToId = $location.search().mailBoxId;
 				$location.$$search = {};
-				$location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId);
+				$location.path('/mailbox/addMailBox').search('mailBoxId', redirectToId).search('pipeLineId', $scope.pipeId).search('sid', $scope.sid);
             };
 			$scope.backToMailboxeModalView = function () {
                  $('#backToMailboxAction').modal('hide')
@@ -2118,7 +2124,7 @@ var rest = myApp.controller(
 			
 			$scope.processorSaveAfterKM = function() {
 				$log.info($filter('json')(addRequest));
-				$scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor', $filter('json')(addRequest),
+				$scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor' + '?sid=' + $scope.sid, $filter('json')(addRequest),
 					function (data, status) {
 						if (status === 200) {
 							//$scope.readOnlyProcessors = true;

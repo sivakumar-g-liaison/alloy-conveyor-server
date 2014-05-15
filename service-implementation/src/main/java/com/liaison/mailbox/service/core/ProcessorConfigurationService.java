@@ -123,7 +123,7 @@ public class ProcessorConfigurationService {
 	 * @throws SymmetricAlgorithmException
 	 * @throws JSONException
 	 */
-	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest, String aclManifestJson)
+	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException {
 
 		LOGGER.info("call receive to insert the processor ::{}", serviceRequest.getProcessor());
@@ -153,11 +153,11 @@ public class ProcessorConfigurationService {
 			}
 			
 			// retrieve the service instance id from acl-manifest
-			String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+			/*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
 				 LOGGER.error("retrieval of service instance id from acl manifest failed");
 				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-			}
+			}*/
 				
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);

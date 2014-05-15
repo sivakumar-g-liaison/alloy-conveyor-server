@@ -8,9 +8,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
 			$rootScope.pipelineId = $location.search().pipeLineId;
 		}
-		
 		//for pipeLineId
 		$scope.pipeId = $location.search().pipeLineId; 
+		
+		// setting serviceinstanceid 
+		if ($rootScope.serviceInstanceId === null || $rootScope.serviceInstanceId === '') {
+			$rootScope.serviceInstanceId = $location.search().sid;
+		}
+		$scope.sid = $location.search().sid;
+		
 
         //Model for Add MB
         addRequest = $scope.addRequest = {
@@ -69,7 +75,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 //$scope.sharedService.setProperty('test');
 
                 block.blockUI();
-                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false, //Get mail box Data
+                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $scope.sid, //Get mail box Data
                     function (data) {
 
                         block.unblockUI();
@@ -135,7 +141,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 $log.info($filter('json')(editReq));
 
-                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId, $filter('json')(editReq),
+                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" +$scope.sid, $filter('json')(editReq),
                     function (data, status) {
                         
                 	    block.unblockUI();
@@ -143,7 +149,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId).search('sid',$scope.sid);
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
                             } else {
@@ -160,7 +166,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.addRequest.addMailBoxRequest.mailBox.status =$scope.status.id;
                 $log.info($filter('json')(addRequest));
 
-                $scope.restService.post($scope.base_url, $filter('json')(addRequest),
+                $scope.restService.post($scope.base_url + '?sid=' + $scope.sid, $filter('json')(addRequest),
                     function (data, status) {
 
                         block.unblockUI();
@@ -173,7 +179,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         	if (data.addMailBoxResponse.response.status === 'success') {
 								if (fromAddProcsr) {
 									$location.$$search = {};
-									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId);
+									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId).search('sid', $scope.sid);
 								} else {
 									showSaveMessage(data.addMailBoxResponse.response.message, 'success');
 									$scope.isMailBoxEdit = true;
@@ -195,7 +201,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.doCancel = function () {        	
     	    $scope.closeModalView(); 
             $location.$$search = {};
-            $location.path('/mailbox/getMailBox');
+            $location.path('/mailbox/getMailBox').search('pipeLineId', $scope.pipeId).search('sid', $scope.sid);
         };
         
         $scope.closeModalView = function () {

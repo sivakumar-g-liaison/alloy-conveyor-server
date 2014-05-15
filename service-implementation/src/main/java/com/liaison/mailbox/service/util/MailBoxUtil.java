@@ -171,7 +171,7 @@ public class MailBoxUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	private static NestedServiceDependencyContraint  getDependencyConstraintFromACLManifest(ACLManifest aclManifestDTO) throws IOException {
+	/*private static NestedServiceDependencyContraint  getDependencyConstraintFromACLManifest(ACLManifest aclManifestDTO) throws IOException {
 		
 		//retrieve the very first platform object from acl manifest json
 		Platform platform = aclManifestDTO.getPlatform().get(0);
@@ -186,7 +186,7 @@ public class MailBoxUtil {
 		}
 		return null;
 
-	}
+	}*/
 	
 	
 	/**
@@ -197,7 +197,7 @@ public class MailBoxUtil {
 	 * @throws IOException 
 	 * @throws JAXBException 
 	 */
-	public static String getPrimaryServiceInstanceIdFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
+	/*public static String getPrimaryServiceInstanceIdFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
 		
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
@@ -207,7 +207,7 @@ public class MailBoxUtil {
 		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
 		String primaryServiceInstanceId  = (dependencyConstraint != null)?dependencyConstraint.getPrimaryId():null;
 		return primaryServiceInstanceId;
-	}
+	}*/
 	
 	/**
 	 * Method to retrieve the list of secondary service instance ids from the given acl manifest dto
@@ -217,7 +217,7 @@ public class MailBoxUtil {
 	 * @throws IOException 
 	 * @throws JAXBException 
 	 */
-	public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
+	/*public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
 		
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
@@ -228,7 +228,7 @@ public class MailBoxUtil {
 		List<String> secondayServiceInstanceIDs = (dependencyConstraint != null)?dependencyConstraint.getNestedServiceId():null;
 		return secondayServiceInstanceIDs;
 		
-	}
+	}*/
 	
 	/**
 	 * Method to retrieve the base64 decoded acl manifest json
@@ -238,7 +238,7 @@ public class MailBoxUtil {
 	 * @throws IOException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
+	/*public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
 		
 		String decodedManifestJson = null;
 		
@@ -271,6 +271,6 @@ public class MailBoxUtil {
 		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
 		LOGGER.info("acl manifest decoded successfully");
 		return decodedManifestJson;
-	}
+	}*/
 
 }

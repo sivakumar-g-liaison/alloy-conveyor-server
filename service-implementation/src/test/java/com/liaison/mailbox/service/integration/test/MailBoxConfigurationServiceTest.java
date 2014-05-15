@@ -11,6 +11,8 @@
 package com.liaison.mailbox.service.integration.test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -33,10 +35,17 @@ import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -638,4 +647,137 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
 	}
+	
+	/**
+	 * Method to search mailbox with mailbox name and profile name.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testSearchMailBox() throws JsonParseException, JsonMappingException,
+		   JAXBException, IOException, LiaisonException {
+		
+		// Adding the mailbox
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
+		
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
+		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
+		
+		//Add profile 
+		String profileName = "TestProfile" + System.nanoTime();
+		ProfileDTO profile = new ProfileDTO();
+		profile.setName(profileName);
+		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
+		profileRequstDTO.setProfile(profile);
+		
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
+		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+		
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/processor/createprocessor.json");
+		AddProcessorToMailboxRequestDTO addProcessorDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddProcessorToMailboxRequestDTO.class);
+		
+		//Linked the mailbox and profile to processor
+		ProcessorDTO proDTO = new ProcessorDTO();
+		proDTO = addProcessorDTO.getProcessor();
+		proDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
+		List<String> profiles = new ArrayList<>();
+		profiles.add(profileName);
+		proDTO.setLinkedProfiles(profiles);
+		addProcessorDTO.setProcessor(proDTO);
+		
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
+		
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+		
+		//search mailbox by mailbox name
+		String url = getBASE_URL() + "/?name=" + requestDTO.getMailBox().getName();
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, searchResponceDTO.getResponse().getStatus());
+		
+		//search mailbox by profile name
+		url = getBASE_URL() + "/?name=&profile=" + profileName;
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, searchResponceDTO.getResponse().getStatus());
+	}
+	
+	/**
+	 * Method to search mailbox with empty mailbox name.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testSearchMailBox_MailboxNameIsEmpty_ShouldFail() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException {
+		
+		String url = getBASE_URL() + "/?name=";
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
+	}
+	
+	/**
+	 * Method to search mailbox with empty profile name.
+	 * 
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testSearchMailBox_ProfileNameIsEmpty_ShouldFail() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException {
+		
+		String url = getBASE_URL() + "/?name=&profile=";
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
+		Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
+			
+	}
+	
 }
