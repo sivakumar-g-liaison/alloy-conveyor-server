@@ -19,15 +19,15 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public enum ExecutionState {
 
-	READY("READY","The Processor is Read to be picked up"),
-	PROCESSING("PROCESSING","The processr is currently in progress"),
+	READY("READY","The Processor is ready"),
+	PROCESSING("PROCESSING","The processor is currently in progress"),
 	FAILED("FAILED","Processor execution failed"),
-	COMPLETED("COMPLETED","Processor execution comleted"),
+	COMPLETED("COMPLETED","Processor execution completed"),
 	QUEUED("QUEUED","Processor is queued for execution"),
 	STAGED("STAGED","File is staged"),
 	HANDED_OVER_TO_JS("HANDED_OVER_TO_JS","Processer Execution Handed over to JS"),
-	GRACEFULLY_INTERRUPTED("GRACEFULLY_INTERRUPTED","Processor is gracefully INtterupted based on an Iterrupt Request"),
-	SKIPPED_SINCE_ALREADY_RUNNING("SKIPPED_SINCE_ALREADY_RUNNING","Processor is already running so skipped execution now");
+	GRACEFULLY_INTERRUPTED("GRACEFULLY_INTERRUPTED","Processor is gracefully Interrupted"),
+	SKIPPED_SINCE_ALREADY_RUNNING("SKIPPED_SINCE_ALREADY_RUNNING","Processor is already running so skipped execution");
 
 	private String value;
 	private String notes;
