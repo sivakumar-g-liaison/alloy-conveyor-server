@@ -135,5 +135,5 @@ mailbox.signer.public.key.guid = CD5990860A9270E0142300DCB508D8CD
 #ACL verify and  getManifest URL
 acl.url.getACLManifest = http://10.146.16.143:8989/accessmanagement/rest/v1/accessmanagement/verifyAndGetManifest
 
-#Maibox guid prefix
-maibox.pguid.display.prefix = 
+#Maibox guid prefix to be used by http synch/asych listner invocation
+maibox.pguid.display.prefix = Add this to your http listener asynch/synch calls as a query param: mailboxId=

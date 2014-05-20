@@ -170,6 +170,7 @@ public class HttpListener extends BaseResource {
 			}
 			SessionContext sessionContext = createSessionContext(request);
 			sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
+			logger.debug("Pipeline id is set in session context");
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
@@ -182,8 +183,8 @@ public class HttpListener extends BaseResource {
 		} catch (Exception e) {
 			logger.error("Error processing sync message", e);
 			e.printStackTrace();
-			restResponse = Response.serverError()
-					.status(Status.INTERNAL_SERVER_ERROR).build();
+			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+			
 			// Audit LOG the failure
 			auditFailure("handleSync");
 		}
@@ -262,8 +263,7 @@ public class HttpListener extends BaseResource {
 		} catch (Exception e) {
 			logger.error("Error processing async message", e);
 			e.printStackTrace();
-			restResponse = Response.serverError()
-					.status(Status.INTERNAL_SERVER_ERROR).build();
+			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 			// Audit LOG the failure
 			auditFailure("handleAsync");
 		}
@@ -542,6 +542,7 @@ public class HttpListener extends BaseResource {
 	 */
 	protected HttpResponse forwardRequest(SessionContext sessionContext,HttpServletRequest request)
 			throws JAXBException, Exception {
+		logger.info("Starting to forward request...");
 		HttpClient httpClient = createHttpClient();
 		HttpPost httpRequest = createHttpRequest(request);
 		sessionContext.copyTo(httpRequest);
@@ -569,7 +570,7 @@ public class HttpListener extends BaseResource {
 	 */
 	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
 		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
-
+		logger.info("Forward request to:"+serviceBrokerSyncUri);
 		// retrieve httplistener pipelineid from mailbox and append it to
 		// serviceBroker URI
 		//String pipelineId = retrievePipelineId(mailboxPguid);
@@ -787,7 +788,7 @@ public class HttpListener extends BaseResource {
 				break;
 			}
 		}
-
+        logger.info("PIPELINE ID is set to be"+pipelineId);
 		return pipelineId;
 	}
 
