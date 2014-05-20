@@ -17,7 +17,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		}
 		$scope.sid = $location.search().sid;
 		
-
+        $scope.showMailboxGuid = false;
         //Model for Add MB
         addRequest = $scope.addRequest = {
             addMailBoxRequest: {
@@ -39,6 +39,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             shardKey: "",
             properties: []
         };
+        // applying boolean value for httplistenerauthcheck
+        $scope.booleanValues = [
+            'false',
+            'true'
+        ];
 
         $scope.enumstats = [{"name":"Active","id":"ACTIVE"},
             {"name":"Inactive","id":"INACTIVE"}];
@@ -53,18 +58,26 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.status = $scope.enumstats[0];
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
-
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"}];
+            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name": "HTTP Listener Auth Check Required", "id":"httplistenerauthcheckrequired"}];
 
-        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}];
-        //Data from server
-        $scope.mailBoxProperties = [{
+        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name": "HTTP Listener Auth Check Required", "id":"httplistenerauthcheckrequired"}];
+        
+        $scope.allMandatoryProperties = [{"name":"HTTP Listener PipelineId","id":"httplistenerpipelineid"}];
+        $scope.mandatoryProperties = [
+          {
+          name: 'HTTP Listener PipelineId',
+          value: $scope.pipeId,
+          allowAdd: false,
+          isMandatory: true
+        },{
             name: '',
             value: '',
-            allowAdd: true
+            allowAdd: true,
+            isMandatory: false
         }];
-
+        //Data from server
+        $scope.mailBoxProperties = $scope.mandatoryProperties;
         // Loads the details initially if edit
         $scope.load = function () {
 
@@ -72,6 +85,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 $scope.isMailBoxEdit = true;
                 $scope.mailBoxId = $location.search().mailBoxId;
+                $scope.showMailboxGuid = true;
+                $scope.mandatoryProperties = [];
+                $scope.mailBoxProperties = [];
                 //$scope.sharedService.setProperty('test');
 
                 block.blockUI();
@@ -89,26 +105,44 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
                         $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                         for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
-						   
+                        					                          
                             var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
                                 data.getMailBoxResponse.mailBox.properties[i].name);
 
-                            if (indexOfElement !== -1) {
+                                if (indexOfElement !== -1) {
                                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
                             }
+                            var index =  getIndexOfId($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name);
+                            var indexMandatory = getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name);
+                             var propertyValue = data.getMailBoxResponse.mailBox.properties[i].value;
+                             if (data.getMailBoxResponse.mailBox.properties[i].name === 'httplistenerauthcheckrequired') {
+                                propertyValue = (data.getMailBoxResponse.mailBox.properties[i].value === 'true')?$scope.booleanValues[1]:$scope.booleanValues[0];
+                             }
+                             // if both index and index mandatory are -1 then it is a dynamic property added by user
+                             if (index == -1 && indexMandatory == -1) {
+                                 $scope.mandatoryProperties.push({
+                                    name: data.getMailBoxResponse.mailBox.properties[i].name,
+                                    value: propertyValue,
+                                    allowAdd: false,
+                                    isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
+                                });
+                             } else {
+                                 $scope.mandatoryProperties.push({
+                                    name: $scope.getNameValue(data.getMailBoxResponse.mailBox.properties[i].name),
+                                    value: propertyValue,
+                                    allowAdd: false,
+                                    isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
+                                });
+                             }
 
-                            $scope.mailBoxProperties.push({
-                                name: (indexOfElement == -1)?data.getMailBoxResponse.mailBox.properties[i].name:
-                                    getName($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name),
-                                value: data.getMailBoxResponse.mailBox.properties[i].value,
-                                allowAdd: false
-                            });
-                        };
-                        $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
+                        }
+                        $scope.mandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
                             name: '',
                             value: '',
-                            allowAdd: true
+                            allowAdd: true,
+                            isMandatory: false
                         });
+                        $scope.mailBoxProperties = $scope.mandatoryProperties;
                     }
                 );
             }
@@ -121,18 +155,38 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         	block.blockUI();
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
             var len = $scope.mailBoxProperties.length;
+            var mandatoryArray = [];
 
             for (var i = 0; i < len - 1; i++) {
+               var index = $scope.getIndex($scope.mailBoxProperties[i].name);
+               var name = (index === -1) ? $scope.mailBoxProperties[i].name : $scope.getIdValue($scope.mailBoxProperties[i].name);
+               var value = $scope.mailBoxProperties[i].value;
+               
+               if (name === 'httplistenerpipelineid') {
+                     $scope.mailBox.properties.push({
+                        name: name,
+                        value: $scope.pipeId
+                    });
+               }
+                var index = getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
+                var indexMandatory = getIndex($scope.allMandatoryProperties, $scope.mailBoxProperties[i].name);
+                if (index == -1 && indexMandatory == -1) {
 
-                var index =  getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
-                
-                $scope.mailBox.properties.push({
-                    name: (index === -1)?$scope.mailBoxProperties[i].name:getId($scope.allStaticProperties, $scope.mailBoxProperties[i].name),
-                    value: $scope.mailBoxProperties[i].value
+                    $scope.mailBox.properties.push({
+                        name:$scope.mailBoxProperties[i].name,
+                        value:$scope.mailBoxProperties[i].value
+                  });
+                } else {
+                  // push only the static properties as the mandatory and dynamic properties are already pushed  
+                  if (indexMandatory == -1 && index != -1) {
+                    $scope.mailBox.properties.push({
+                        name:name,
+                        value:value
 
-                });
+                    });
+                  }      
+                }
             }
-
             if ($scope.isMailBoxEdit) {
 
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;
@@ -174,6 +228,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                         	if(data.addMailBoxResponse.mailBox !== null) {
                             	$scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
+                                $scope.showMailboxGuid = true;
                         	}
 
                         	if (data.addMailBoxResponse.response.status === 'success') {
@@ -252,12 +307,12 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             rowHeight: 80,
             columnDefs: [{
                 field: "name",
-                width: 525,
+                width: 550,
                 displayName: "Property Name",
                 cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" />'
             }, {
                 field: "value",
-                width: 525,
+                width: 500,
                 displayName: "Property Value",
                 enableCellEdit: false,
                 enableCellSelection: true,
@@ -266,7 +321,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                    <div class="alignDiv" ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                             <div ng-switch-when="emailnotificationids">\n\
-           										 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+                                            </div>\n\
+                                            <div ng-switch-when="httplistenerauthcheckrequired">\n\
+                                                <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=\'false\'" ng-options="property for property in booleanValues"></select>\n\
+                                            </div>\n\
+                                            <div ng-switch-when="httplistenerpipelineid">\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" required ng-init="COL_FIELD='+$scope.pipeId+'" style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-default>\n\
                                                 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
@@ -274,11 +335,17 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                           </div>\n\
                                     </div>\n\
                                    <div ng-switch-when="emailnotificationids">\n\
-           								 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
+           								 <textarea class="form-control" ng-model="COL_FIELD" name="emailnotificationids" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
             								 <span class="help-block-custom" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
            						   </div>\n\
+                                   <div ng-switch-when="httplistenerauthcheckrequired">\n\
+                                        <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
+                                   </div>\n\
+                                   <div ng-switch-when="httplistenerpipelineid">\n\
+                                        <textarea class="form-control" ng-model="COL_FIELD" required style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
+                                   </div>\n\
                                    <div ng-switch-default>\n\
                                         <textarea class="form-control" ng-model="COL_FIELD"  required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
@@ -291,7 +358,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 sortable: false,
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                     '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                    '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
+                    '<div ng-switch-when="false">' +
+                        '<div ng-switch on="row.getProperty(\'isMandatory\')">' +
+                            '<div ng-switch-when="true">-NA-</div>' +
+                            '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
+                        '</div>'+
                     '</div>'
 
             }]
@@ -360,7 +431,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             gridData.push({
                 name: attrName,
                 value: row.getProperty('value'),
-                allowAdd: false
+                allowAdd: false,
+                isMandatory: false
             });
 
             if (indexOfSelectedElement != -1) {
@@ -371,7 +443,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             gridData.push({
                 name: '',
                 value: '',
-                allowAdd: true
+                allowAdd: true,
+                isMandatory: true
             });
 
             valueSelectedinSelectionBox.value = '';
@@ -393,16 +466,39 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
             if (row.getProperty('name') === '') {
                 return '';
-            }   var val = getId(objArray, row.getProperty('name'));
+            }  
+            var mandatoryVal = getId($scope.allMandatoryProperties, row.getProperty('name'));
+            if (mandatoryVal.length > 0) {
+                return mandatoryVal;
+            }
+            var val = getId(objArray, row.getProperty('name'));
             if (val.length > 0) {
                 return val;
             }
 
             return "Dor%^7#@"
         };
-        /*$scope.displayAllTableValues = function(){               
-         $scope.tableValues=$scope.mailBoxProperties;
-         };*/
-
+        
+         $scope.getNameValue = function (id) {
+            var mandatoryVal = getName($scope.allMandatoryProperties, id);
+            if (mandatoryVal.length > 0) {
+                return mandatoryVal;
+            }
+            return getName($scope.allStaticProperties, id);
+        };
+         $scope.getIdValue = function (name) {
+            var mandatoryVal = getId($scope.allMandatoryProperties, name);
+            if (mandatoryVal.length > 0) {
+                return mandatoryVal;
+            }
+            return getId($scope.allStaticProperties, name);
+        };
+         $scope.getIndex = function (name) {
+            var mandatoryVal = getIndex($scope.allMandatoryProperties, name);
+            if (mandatoryVal !== -1) {
+                return mandatoryVal;
+            }
+            return getId($scope.allStaticProperties, name);
+        };
     }
 ]);
