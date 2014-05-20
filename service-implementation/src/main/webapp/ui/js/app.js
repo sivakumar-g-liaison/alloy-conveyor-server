@@ -160,7 +160,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 		gitlabHost: "",
 		gitlabPort: "",
 		gitlabProjectName: "",
-		gitlabBranchName: ""
+		gitlabBranchName: "",
+		mailboxPguidDisplayPrefix:""
 	};
 	$rootScope.restService.get($rootScope.base_url + '/getPropertyFileValues',
 		function (data, status) {
@@ -171,6 +172,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 				$rootScope.javaProperties.gitlabPort = data.getPropertiesValueResponseDTO.properties.gitlabPort;
 				$rootScope.javaProperties.gitlabProjectName = data.getPropertiesValueResponseDTO.properties.gitlabProjectName;
 				$rootScope.javaProperties.gitlabBranchName = data.getPropertiesValueResponseDTO.properties.gitlabBranchName;
+				$rootScope.javaProperties.mailboxPguidDisplayPrefix = data.getPropertiesValueResponseDTO.properties.mailboxPguidDisplayPrefix;
 			} else {
 				return;
 			}

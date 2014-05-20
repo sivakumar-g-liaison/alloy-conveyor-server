@@ -56,6 +56,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         var fromAddProcsr = false;
 
         $scope.status = $scope.enumstats[0];
+        
+        $scope.mailboxPguidDisplayContent = '';
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
@@ -86,6 +88,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.isMailBoxEdit = true;
                 $scope.mailBoxId = $location.search().mailBoxId;
                 $scope.showMailboxGuid = true;
+                $scope.mailboxPguidDisplayContent = ($rootScope.javaProperties.mailboxPguidDisplayPrefix != null && $rootScope.javaProperties.mailboxPguidDisplayPrefix != '')?
+                                                     $rootScope.javaProperties.mailboxPguidDisplayPrefix + $scope.mailBoxId: $scope.mailBoxId;
                 $scope.mandatoryProperties = [];
                 $scope.mailBoxProperties = [];
                 //$scope.sharedService.setProperty('test');
@@ -229,6 +233,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         	if(data.addMailBoxResponse.mailBox !== null) {
                             	$scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
                                 $scope.showMailboxGuid = true;
+                                $scope.mailboxPguidDisplayContent = ($rootScope.javaProperties.mailboxPguidDisplayPrefix != null && $rootScope.javaProperties.mailboxPguidDisplayPrefix != '')?
+                                                     $rootScope.javaProperties.mailboxPguidDisplayPrefix + $scope.mailBoxId: $scope.mailBoxId;
                         	}
 
                         	if (data.addMailBoxResponse.response.status === 'success') {

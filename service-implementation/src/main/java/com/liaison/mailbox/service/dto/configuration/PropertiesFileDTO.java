@@ -31,6 +31,7 @@ public class PropertiesFileDTO {
 	private String gitlabBranchName;
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
+	private String mailboxPguidDisplayPrefix;
 	
 	public String getFsmEventCheckIntervalInSeconds() {
 		return fsmEventCheckIntervalInSeconds;
@@ -80,5 +81,11 @@ public class PropertiesFileDTO {
 	}
 	public void setListJobsIntervalInHours(String listJobsIntervalInHours) {
 		this.listJobsIntervalInHours = listJobsIntervalInHours;
+	}
+	public String getMailboxPguidDisplayPrefix() {
+		return mailboxPguidDisplayPrefix;
+	}
+	public void setMailboxPguidDisplayPrefix(String mailboxPguidDisplayPrefix) {
+		this.mailboxPguidDisplayPrefix = mailboxPguidDisplayPrefix;
 	}
 }

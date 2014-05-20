@@ -486,6 +486,7 @@ public class MailBoxConfigurationService {
 			String gitlabBranchName = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.gitlab.script.branch.name");
 			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours");
 			String fsmEventCheckIntervalInSeconds = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
+			String mailboxPguidDisplayPrefix = MailBoxUtil.getEnvironmentProperties().getString("maibox.pguid.display.prefix");
 			
 			dto.setTrustStoreId(globalTrustStoreId);
 			dto.setTrustStoreGroupId(globalTrustStoreGroupId);
@@ -495,6 +496,7 @@ public class MailBoxConfigurationService {
 			dto.setGitlabProjectName(gitlabProjectName);
 			dto.setListJobsIntervalInHours(listJobsIntervalInHours);
 			dto.setFsmEventCheckIntervalInSeconds(fsmEventCheckIntervalInSeconds);
+			dto.setMailboxPguidDisplayPrefix(mailboxPguidDisplayPrefix);
 			
 			serviceResponse.setProperties(dto);
 			
