@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBException;
 import oracle.jdbc.proxy.annotation.Post;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -118,24 +119,24 @@ public class HttpListener extends BaseResource {
 	@POST
 	@Path("sync/{token1}")
 	public Response handleSyncOneToken(@Context HttpServletRequest request,
-			@Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+									   @Context HttpServletResponse response,
+									   @QueryParam(value = "mailboxId") String mailboxPguid) {
 		return handleSync(request, mailboxPguid);
 	}
 
 	@POST
 	@Path("sync/{token1}/{token2}")
 	public Response handleSyncTwoTokens(@Context HttpServletRequest request,
-			@Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+										@Context HttpServletResponse response,
+										@QueryParam(value = "mailboxId") String mailboxPguid) {
 		return handleSync(request, mailboxPguid);
 	}
 
 	@POST
 	@Path("sync/{token1}/{token2}/{token3}")
 	public Response handleSyncThreeTokens(@Context HttpServletRequest request,
-			@Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+										  @Context HttpServletResponse response,
+										  @QueryParam(value = "mailboxId") String mailboxPguid) {
 		return handleSync(request, mailboxPguid);
 	}
 
@@ -149,7 +150,7 @@ public class HttpListener extends BaseResource {
 	@POST
 	@Path("sync")
 	public Response handleSync(@Context HttpServletRequest request,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+							   @QueryParam(value = "mailboxId") String mailboxPguid) {
 		// Audit LOG the Attempt to handleSync
 		auditAttempt("handleSync");
 
@@ -159,17 +160,20 @@ public class HttpListener extends BaseResource {
 		logger.info("Starting sync processing");
 		try {
 			validateRequestSize(request);
+			if(StringUtils.isEmpty(mailboxPguid)){
+				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
+			}
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
 			if (isAuthenticationCheckRequired(mailboxPguid)) {
 				authenticateRequestor(request);
 			}
 			SessionContext sessionContext = createSessionContext(request);
+			sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
-			HttpResponse httpResponse = forwardRequest(sessionContext, request,
-					mailboxPguid);
+			HttpResponse httpResponse = forwardRequest(sessionContext, request);
 			ResponseBuilder builder = Response.ok();
 			copyResponseInfo(httpResponse, builder);
 			// Audit LOG the success
@@ -189,24 +193,24 @@ public class HttpListener extends BaseResource {
 	@POST
 	@Path("async/{token1}")
 	public Response handleAsyncOneToken(@Context HttpServletRequest request,
-			@Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+										@Context HttpServletResponse response,
+										@QueryParam(value = "mailboxId") String mailboxPguid) {
 		return handleAsync(request, mailboxPguid);
 	}
 
 	@POST
 	@Path("async/{token1}/{token2}")
 	public Response handleAsyncTwoTokens(@Context HttpServletRequest request,
-			@Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+										 @Context HttpServletResponse response,
+										 @QueryParam(value = "mailboxId") String mailboxPguid) {
 		return handleAsync(request, mailboxPguid);
 	}
 
 	@POST
 	@Path("async/{token1}/{token2}/{token3}")
 	public Response handleAsyncThreeTokens(@Context HttpServletRequest request,
-			@Context HttpServletResponse response,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+										   @Context HttpServletResponse response,
+										   @QueryParam(value = "mailboxId") String mailboxPguid) {
 		return handleAsync(request, mailboxPguid);
 	}
 
@@ -220,7 +224,7 @@ public class HttpListener extends BaseResource {
 	@Post
 	@Path("async")
 	public Response handleAsync(@Context HttpServletRequest request,
-			@QueryParam(value = "mailboxId") String mailboxPguid) {
+								@QueryParam(value = "mailboxId") String mailboxPguid) {
 		// Audit LOG the Attempt to handleAsync
 		auditAttempt("handleAsync");
 		Response restResponse = null;
@@ -229,12 +233,17 @@ public class HttpListener extends BaseResource {
 		logger.info("Starting async processing");
 		try {
 			validateRequestSize(request);
+			
+			if(StringUtils.isEmpty(mailboxPguid)){
+				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
+			}
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
 			if (isAuthenticationCheckRequired(mailboxPguid)) {
 				authenticateRequestor(request);
 			}
 			SessionContext sessionContext = createSessionContext(request);
+			sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
@@ -531,11 +540,10 @@ public class HttpListener extends BaseResource {
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	protected HttpResponse forwardRequest(SessionContext sessionContext,
-			HttpServletRequest request, String mailboxPguid)
+	protected HttpResponse forwardRequest(SessionContext sessionContext,HttpServletRequest request)
 			throws JAXBException, Exception {
 		HttpClient httpClient = createHttpClient();
-		HttpPost httpRequest = createHttpRequest(request, mailboxPguid);
+		HttpPost httpRequest = createHttpRequest(request);
 		sessionContext.copyTo(httpRequest);
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
 		return httpResponse;
@@ -559,14 +567,13 @@ public class HttpListener extends BaseResource {
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	protected HttpPost createHttpRequest(HttpServletRequest request,
-			String mailboxPguid) throws JAXBException, Exception {
+	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
 		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
 
 		// retrieve httplistener pipelineid from mailbox and append it to
 		// serviceBroker URI
-		String pipelineId = retrievePipelineId(mailboxPguid);
-		serviceBrokerSyncUri = serviceBrokerSyncUri + "/" + pipelineId;
+		//String pipelineId = retrievePipelineId(mailboxPguid);
+		//serviceBrokerSyncUri = serviceBrokerSyncUri + "/" + pipelineId;
 		HttpPost post = new HttpPost(serviceBrokerSyncUri);
 
 		// Set the payload.
@@ -718,11 +725,14 @@ public class HttpListener extends BaseResource {
 	protected boolean isAuthenticationCheckRequired(String mailboxPguid)
 			throws Exception {
 
-		boolean isAuthCheckRequired = false;
+		boolean isAuthCheckRequired = true;
 		List<PropertyDTO> properties = retrieveMailboxProperties(mailboxPguid);
+		logger.info("Verifying if httplistenerauthcheckrequired is configured in the mailbox ");
 		for (PropertyDTO property : properties) {
 			if (property.getName().equals(HTTP_LISTENER_AUTHENTICATION_CHECK)) {
 				isAuthCheckRequired = Boolean.parseBoolean(property.getValue());
+				logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be "+property.getValue());
+	
 				break;
 			}
 		}
@@ -748,8 +758,7 @@ public class HttpListener extends BaseResource {
 			Exception, SymmetricAlgorithmException {
 		
 		MailBoxConfigurationService mbxService = new MailBoxConfigurationService();
-		GetMailBoxResponseDTO responseDTO = mbxService.getMailBox(mailboxPguid,
-				false, null);
+		GetMailBoxResponseDTO responseDTO = mbxService.getMailBox(mailboxPguid,	false, null);
 		MailBoxDTO mailbox = responseDTO.getMailBox();
 		return mailbox.getProperties();
 	}

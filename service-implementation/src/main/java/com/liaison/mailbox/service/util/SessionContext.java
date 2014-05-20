@@ -131,11 +131,11 @@ public class SessionContext
 
 			if ((parts != null) && (parts.length == 2))
 			{
-				if (parts[0].equalsIgnoreCase(PIPELINE_ID_TOKEN))
+				/*if (parts[0].equalsIgnoreCase(PIPELINE_ID_TOKEN))
 				{
 					setPipelineId(parts[1]);
-				}
-				else if (parts[0].equalsIgnoreCase(DOCUMENT_PROTOCOL_TOKEN))
+				}*/
+				if (parts[0].equalsIgnoreCase(DOCUMENT_PROTOCOL_TOKEN))
 				{
 					setDocumentProtocol(parts[1]);
 				}
