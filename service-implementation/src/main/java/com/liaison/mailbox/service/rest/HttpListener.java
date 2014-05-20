@@ -168,8 +168,8 @@ public class HttpListener extends BaseResource {
 			if (isAuthenticationCheckRequired(mailboxPguid)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request);
-			sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
+			SessionContext sessionContext = createSessionContext(request,mailboxPguid);
+			
 			logger.debug("Pipeline id is set in session context");
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
@@ -243,8 +243,7 @@ public class HttpListener extends BaseResource {
 			if (isAuthenticationCheckRequired(mailboxPguid)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request);
-			sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
+			SessionContext sessionContext = createSessionContext(request,mailboxPguid);			
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
@@ -340,10 +339,16 @@ public class HttpListener extends BaseResource {
 	 * @param request
 	 *            the HttpServletRequest
 	 * @return SessionContext
+	 * @throws Exception 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	protected SessionContext createSessionContext(HttpServletRequest request) {
+	protected SessionContext createSessionContext(HttpServletRequest request,String mailboxPguid) throws JsonParseException, JsonMappingException, JAXBException, Exception {		
 		SessionContext sessionContext = new SessionContext();
 		sessionContext.copyFrom(request);
+		sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
+		sessionContext.setMailboxId(mailboxPguid);
 		return sessionContext;
 	}
 
@@ -788,7 +793,7 @@ public class HttpListener extends BaseResource {
 				break;
 			}
 		}
-        logger.info("PIPELINE ID is set to be"+pipelineId);
+        logger.info("PIPELINE ID is set to be :"+pipelineId);
 		return pipelineId;
 	}
 

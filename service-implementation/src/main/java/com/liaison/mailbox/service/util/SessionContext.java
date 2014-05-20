@@ -43,6 +43,7 @@ public class SessionContext
 	protected static final String GATEWAY_PIPELINE_ID_HEADER = GATEWAY_HEADER_PREFIX + "PipelineId";
 	protected static final String GATEWAY_DOCUMENT_PROTOCOL_HEADER = GATEWAY_HEADER_PREFIX + "DocumentProtocol";
 	protected static final String GATEWAY_DOCUMENT_TYPE_HEADER = GATEWAY_HEADER_PREFIX + "DocumentType";
+	protected static final String GATEWAY_ID = GATEWAY_HEADER_PREFIX + "mailboxid";
 
 	protected String _requestorIPAddress = null;
 	protected int _requestorPort = 0;
@@ -59,6 +60,8 @@ public class SessionContext
 	protected String _documentType = null;
 	protected String _payloadUri = null;
 	protected int _contentLength = 0;
+	protected String _mailboxId = null;
+	
 
 	protected ArrayList<Header> _headers = null;
 
@@ -195,6 +198,7 @@ public class SessionContext
 		addNonNullHeaders(request, GATEWAY_PIPELINE_ID_HEADER,        getPipelineId());
 		addNonNullHeaders(request, GATEWAY_DOCUMENT_PROTOCOL_HEADER,  getDocumentProtocol());
 		addNonNullHeaders(request, GATEWAY_DOCUMENT_TYPE_HEADER,      getDocumentType());
+		addNonNullHeaders(request, GATEWAY_ID,      getMailboxId());
 
 		copyHeadersToOutgoingRequest(request);
 	}
@@ -260,6 +264,14 @@ public class SessionContext
 
 	public void setPayloadUri (String payloadUri) { _payloadUri = payloadUri; }
 	public String getPayloadUri () { return _payloadUri; }
+	
+	public String getMailboxId() {
+		return _mailboxId;
+	}
+
+	public void setMailboxId(String _mailboxId) {
+		this._mailboxId = _mailboxId;
+	}
 
 
 	public void addHeader (String name, Enumeration<String> values)
