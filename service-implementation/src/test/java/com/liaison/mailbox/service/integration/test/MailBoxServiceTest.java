@@ -9,10 +9,6 @@
  */
 package com.liaison.mailbox.service.integration.test;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.Assert;
-
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
@@ -22,6 +18,9 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
@@ -69,8 +68,9 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	@Test
 	public void testTriggerProfile() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
-
-		// Add the Mailbox
+        
+		// Add the Mailbox		
+		String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
 
@@ -78,7 +78,9 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addMailBoxResponse"));
 
@@ -113,7 +115,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		
 		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
-		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 
@@ -123,15 +125,85 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		Assert.assertEquals(true, getResponseStatus(jsonResponse, "addProcessorToMailBoxResponse").equals(SUCCESS));
 
 		// Trigger the profile
-		/*String triggerProfile = "/triggerProfile" + "?name=" + profileName;
+		String triggerProfile = "/triggerProfile" + "?name=" + profileName;
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(SUCCESS));*/
-
+		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(SUCCESS));
 	}
+	
+	/**
+	 * Method to test trigger profile with profile as null.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	@Test
+	public void testTriggerProfile_ProfileIsNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+	         JAXBException, IOException {
+		
+		String triggerProfile = "/triggerProfile" + "?name=" +null;
+		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
+		request.execute();
 
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		
+		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(FAILURE));		
+	}
+	
+	/**
+	 * Method to test trigger profile with profile as invalid.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	@Test
+	public void testTriggerProfile_ProfileIsInvalid() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException {
+		
+		String triggerProfile = "/triggerProfile" + "?name=" + System.currentTimeMillis()+"INVALID_PROFILE";
+		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(FAILURE));		
+	}
+	
+	/**
+	 * Method to test trigger profile with profile as empty.
+	 * 
+	 * @throws LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	@Test
+	public void testTriggerProfile_ProfileIsEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException {
+		
+		String triggerProfile = "/triggerProfile" + "?name=";
+		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(FAILURE));		
+	}	
 }

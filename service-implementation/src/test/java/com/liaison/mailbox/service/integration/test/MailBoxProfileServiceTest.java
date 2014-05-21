@@ -31,6 +31,7 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -151,7 +152,115 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = addProfile(System.nanoTime() + "#$%^%&@");
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
 	}
+	
+	/**
+	 * Method to test readProfile.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testReadProfile() throws JsonGenerationException, JsonMappingException,
+	        JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+		
+		//add profile
+	    AddProfileResponseDTO profileResponseDTO = addProfile("once" + System.currentTimeMillis());
+	    Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+		
+	   //Read Profile
+		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.GET, null, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+	    
+		GetProfileResponseDTO getProfileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProfileResponseDTO.class);
+		Assert.assertNotNull(getProfileResponseDTO, null);
+		Assert.assertEquals(SUCCESS, getProfileResponseDTO.getResponse().getStatus());
+	}
+	
+	/**
+	 * Method to test search profile With valid profile name.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testSearchProfile() throws JsonGenerationException, JsonMappingException,
+            JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+		
+		//add profile
+		ProfileDTO profile = new ProfileDTO();
+		profile.setName("once" + System.currentTimeMillis());
+		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
+		profileRequstDTO.setProfile(profile);
+
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
+		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+		 Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+		 
+	    //searchProfile.
+	    GetProfileResponseDTO getProfileResponseDTO = searchProfile(profileRequstDTO.getProfile().getName());
+	    Assert.assertNotNull(getProfileResponseDTO, null);
+	    Assert.assertEquals(SUCCESS, getProfileResponseDTO.getResponse().getStatus());
+	}
+	
+	/**
+	 * Method to test search profile with profile name as null.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testSearchProfile_WithNullasProfileName() throws JsonGenerationException, JsonMappingException,
+			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		GetProfileResponseDTO getProfileResponseDTO = searchProfile(null);
+	    Assert.assertEquals(FAILURE, getProfileResponseDTO.getResponse().getStatus());
+	}
     
+	/**
+	 * Method to test search profile with invalid profile name.
+	 * 
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws LiaisonException
+	 */
+	@Test
+	public void testSearchProfile_InvalidProfileName() throws JsonGenerationException, JsonMappingException,
+			JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		GetProfileResponseDTO getProfileResponseDTO = searchProfile(System.nanoTime() + "INVALID_PROFILE_NAME");
+	    Assert.assertEquals(FAILURE, getProfileResponseDTO.getResponse().getStatus());
+	}
+	
 	/**
 	 * Method to constructs profile.
 	 * 
@@ -183,6 +292,25 @@ public class MailBoxProfileServiceTest extends BaseServiceTest {
 		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
 
 		return profileResponseDTO;
+	}
+	
+	/**
+	 * Method to Retrieve profile by given name.
+	 * @return GetProfileResponseDTO
+	 * @throws Exception
+	 */
+	private GetProfileResponseDTO searchProfile(String profileName) throws JsonGenerationException, JsonMappingException,
+            JsonParseException, MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+		
+	    String url = getBASE_URL() + "/findprofile" + "?name=" + profileName;
+		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		GetProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProfileResponseDTO.class);
+
+		return profileResponseDTO;		
 	}
 
 }

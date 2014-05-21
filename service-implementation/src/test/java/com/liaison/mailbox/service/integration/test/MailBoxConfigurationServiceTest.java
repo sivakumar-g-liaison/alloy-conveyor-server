@@ -59,6 +59,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	private String jsonResponse;
 	private String jsonRequest;
 	private HTTPRequest request;
+	private String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 
 	/**
 	 * @throws java.lang.Exception
@@ -90,7 +91,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 		
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -99,7 +102,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
-		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() +"/"+responseDTO.getMailBox().getGuid()+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -144,7 +147,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -153,7 +158,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
-		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -198,7 +203,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -207,7 +214,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Deactivate the mailbox
-		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
 		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
 		request.execute();
 
@@ -216,7 +223,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "deactivateMailBoxResponse"));
 
 		// Get the mailbox
-		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -245,7 +252,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -260,7 +269,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		reviseRequestDTO.setMailBox(mbxDTO);
 		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
-		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+	    url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
 
@@ -269,7 +278,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseStatus(jsonResponse, "reviseMailBoxResponse"));
 
 		// Get the mailbox
-		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -315,7 +324,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mailBox);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -324,7 +335,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
-		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -358,7 +369,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mailBox);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -367,7 +380,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 
 		// Get the mailbox
-		String url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
+		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -400,7 +413,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(null);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -426,7 +441,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 			JAXBException, IOException, LiaisonException {
 
 		// Get the mailbox
-		String url = getBASE_URL() + "/" + "3434";
+		String url = getBASE_URL() + "/" + "3434"+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -459,7 +474,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		reviseRequestDTO.setMailBox(null);
 		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
-		String url = getBASE_URL() + "/" + "fasdfasdfdas";
+		String url = getBASE_URL() + "/" + "fasdfasdfdas" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
 
@@ -488,7 +503,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		reviseRequestDTO.setMailBox(constructDummyMailBoxDTO(System.currentTimeMillis(), true));
 		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
-		String url = getBASE_URL() + "/" + "3432432";
+		String url = getBASE_URL() + "/" + "3432432" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
 
@@ -521,7 +536,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
-		String url = getBASE_URL() + "/" + "123456";
+		String url = getBASE_URL() + "/" + "123456" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
 
@@ -553,7 +568,6 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "deactivateMailBoxResponse"));
-
 	}
     
 	/**
@@ -576,7 +590,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		reviseRequestDTO.setMailBox(null);
 		jsonRequest = MailBoxUtil.marshalToJSON(reviseRequestDTO);
 
-		String url = getBASE_URL() + "/" + "3432432";
+		String url = getBASE_URL() + "/" + "3432432" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
 		request.execute();
 
@@ -607,7 +621,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(dto);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -639,7 +655,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(dto);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -669,7 +687,9 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 		
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL(), HTTP_METHOD.POST, jsonRequest, logger);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -684,7 +704,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
 		profileRequstDTO.setProfile(profile);
 		
-		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);		
 		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
@@ -707,7 +727,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 		
-		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor";
+		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 
@@ -719,7 +739,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 		
 		//search mailbox by mailbox name
-		String url = getBASE_URL() + "/?name=" + requestDTO.getMailBox().getName();
+		url = getBASE_URL() + "/?name=" + requestDTO.getMailBox().getName();
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
