@@ -83,7 +83,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
     //FOR USE WITH PYTHON
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
-    $rootScope.base_url = 'rest/v1/mailbox';
+    $rootScope.base_url = '../rest/v1/mailbox';
     $rootScope.url_upload_key = '../key-management/upload/public';
     $rootScope.url_ssh_upload_key = '../key-management/upload/keypair';
     $rootScope.url_link_key_store = '../key-management/update/truststore/';
