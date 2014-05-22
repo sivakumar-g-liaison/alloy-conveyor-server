@@ -5,17 +5,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.isMailBoxEdit = false;
 
 		$scope.addProcessorBtnValue = 'Add Processors';
-		if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
-			$rootScope.pipelineId = $location.search().pipeLineId;
-		}
-		//for pipeLineId
-		$scope.pipeId = $location.search().pipeLineId; 
-		
-		// setting serviceinstanceid 
-		if ($rootScope.serviceInstanceId === null || $rootScope.serviceInstanceId === '') {
-			$rootScope.serviceInstanceId = $location.search().sid;
-		}
-		$scope.sid = $location.search().sid;
 		
         $scope.showMailboxGuid = false;
         //Model for Add MB
@@ -69,7 +58,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.mandatoryProperties = [
           {
           name: 'HTTP Listener PipelineId',
-          value: $scope.pipeId,
+          value: $rootScope.pipelineId,
           allowAdd: false,
           isMandatory: true
         },{
@@ -95,7 +84,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 //$scope.sharedService.setProperty('test');
 
                 block.blockUI();
-                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $scope.sid, //Get mail box Data
+                $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data) {
 
                         block.unblockUI();
@@ -169,7 +158,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                if (name === 'httplistenerpipelineid') {
                      $scope.mailBox.properties.push({
                         name: name,
-                        value: $scope.pipeId
+                        value: $rootScope.pipelineId
                     });
                }
                 var index = getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
@@ -199,7 +188,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 $log.info($filter('json')(editReq));
 
-                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" +$scope.sid, $filter('json')(editReq),
+                $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" +$rootScope.serviceInstanceId, $filter('json')(editReq),
                     function (data, status) {
                         
                 	    block.unblockUI();
@@ -207,7 +196,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId).search('sid',$scope.sid);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
                             } else {
@@ -224,7 +213,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.addRequest.addMailBoxRequest.mailBox.status =$scope.status.id;
                 $log.info($filter('json')(addRequest));
 
-                $scope.restService.post($scope.base_url + '?sid=' + $scope.sid, $filter('json')(addRequest),
+                $scope.restService.post($scope.base_url + '?sid=' + $rootScope.serviceInstanceId, $filter('json')(addRequest),
                     function (data, status) {
 
                         block.unblockUI();
@@ -240,7 +229,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         	if (data.addMailBoxResponse.response.status === 'success') {
 								if (fromAddProcsr) {
 									$location.$$search = {};
-									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('pipeLineId', $scope.pipeId).search('sid', $scope.sid);
+									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
 								} else {
 									showSaveMessage(data.addMailBoxResponse.response.message, 'success');
 									$scope.isMailBoxEdit = true;
@@ -262,7 +251,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.doCancel = function () {        	
     	    $scope.closeModalView(); 
             $location.$$search = {};
-            $location.path('/mailbox/getMailBox').search('pipeLineId', $scope.pipeId).search('sid', $scope.sid);
+            $location.path('/mailbox/getMailBox');
         };
         
         $scope.closeModalView = function () {
@@ -327,16 +316,16 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                    <div class="alignDiv" ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                             <div ng-switch-when="emailnotificationids">\n\
-           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-when="httplistenerauthcheckrequired">\n\
                                                 <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=\'false\'" ng-options="property for property in booleanValues"></select>\n\
                                             </div>\n\
                                             <div ng-switch-when="httplistenerpipelineid">\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" required ng-init="COL_FIELD='+$scope.pipeId+'" style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" required ng-init="COL_FIELD='+$rootScope.pipelineId+'" style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-default>\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" style="width:94%;height:45px" placeholder="required"/>\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\

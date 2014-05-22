@@ -1,13 +1,6 @@
 var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', '$location', '$log',
     function ($rootScope,$scope, $filter, $location, $log) {
 	
-		if($rootScope.pipelineId === null || $rootScope.pipelineId === '') {
-			$rootScope.pipelineId = $location.search().pipeLineId;
-		}
-		
-		//for pipeLineId
-		$scope.pipeId = $location.search().pipeLineId; 
-
         var url = $scope.base_url + "/profile";
 
         addRequest = $scope.addRequest = {

@@ -22,7 +22,7 @@ var directives = angular.module('myApp.directives', []);
 myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     function ($routeProvider, $locationProvider, $httpProvider) {
         // TODO use html5 *no hash) where possible
-        // $locationProvider.html5Mode(true);
+        //$locationProvider.html5Mode(true);
         $routeProvider.when('/', {
             templateUrl: 'partials/home.html'
         });
@@ -84,10 +84,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     //FOR USE WITH PYTHON
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.base_url = '../rest/v1/mailbox';
+
     $rootScope.url_upload_key = '../key-management/upload/public';
     $rootScope.url_ssh_upload_key = '../key-management/upload/keypair';
     $rootScope.url_link_key_store = '../key-management/update/truststore/';
-	
 	$rootScope.url_secret_service = '../key-management/secret/';
 	
 	$rootScope.block = $blockUI.createBlockUI();
@@ -148,10 +148,10 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // Initialize authentication
     // *****
     $rootScope.authService = AuthService;
-	$rootScope.pipelineId = '';
-	
-	// service instance id 
-	$rootScope.serviceInstanceId = '';
+	// pipeline id
+    $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipelineId");
+	// service instance id
+	$rootScope.serviceInstanceId = getParameterByName($location.absUrl(), "sid");
 	
 	//getting values from java properties file
 	$rootScope.javaProperties = {
@@ -235,14 +235,21 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 	* Pipeline Id code
 	*/
 	$rootScope.appendQueryParamAddMBox = function() {
-		return "#/mailbox/addMailBox?pipeLineId=" + $rootScope.pipelineId + "&sid=" + $rootScope.serviceInstanceId;
+		return "#/mailbox/addMailBox";
 	};
 	
 	$rootScope.appendQueryParamManage = function() {
-		return "#/profiles/addProfiles?pipeLineId=" + $rootScope.pipelineId + "&sid=" + $rootScope.serviceInstanceId;
+		return "#/profiles/addProfiles";
 	};
 	
 	$rootScope.appendQueryParamTrigger = function() {
-		return "#/profiles/trigger?pipeLineId=" + $rootScope.pipelineId + "&sid=" + $rootScope.serviceInstanceId;
+		return "#/profiles/trigger";
 	};
 });
+
+function getParameterByName(url, name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(url);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
