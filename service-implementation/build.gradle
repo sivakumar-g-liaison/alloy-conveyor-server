@@ -89,10 +89,10 @@ war {
     }
 
     // copy webapp
-    // from('src/main/webapp/ui') {
-    //    include '**/**'
-    //    into '/'
-    //}
+     from('src/main/webapp/ui') {
+        include 'WEB-INF/**','META-INF/**'
+        into '/'
+    }
 
     // exclude the JPA configs, handled above
     //rootSpec.exclude 'META-INF/**'

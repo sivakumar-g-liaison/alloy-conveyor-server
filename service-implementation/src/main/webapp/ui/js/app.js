@@ -149,7 +149,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
     $rootScope.authService = AuthService;
 	// pipeline id
-    $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipelineId");
+    $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");
 	// service instance id
 	$rootScope.serviceInstanceId = getParameterByName($location.absUrl(), "sid");
 	
