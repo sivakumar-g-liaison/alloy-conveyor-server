@@ -199,7 +199,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
         $scope.gridOptions = {
             columnDefs: [{
                 field: 'name',
-                displayName: 'ProfileName',
+                displayName: 'Profile Name',
 
             }],
             data: 'profiles',

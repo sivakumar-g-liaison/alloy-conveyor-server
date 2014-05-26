@@ -255,7 +255,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                 }, {
                     field: 'description',
                     width: '37%',
-                    displayName: 'Desc'
+                    displayName: 'Description'
                 }, {
                     field: 'status',
                     width: '23%',

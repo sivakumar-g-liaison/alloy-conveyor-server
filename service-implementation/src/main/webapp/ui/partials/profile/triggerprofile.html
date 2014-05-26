@@ -25,6 +25,7 @@
 				</div>
 				
 			</div>
+			</br>
 			<div class="row">
 				<div class="col-md-5">
 					<label for="name"> Shard Key </label> <input id="mbx-trigger-profile-shardKey" type="text" name="shardKey" ng-pattern="userInputPattern"
@@ -39,9 +40,10 @@
 					<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
 				</div>
 			</div>
+			</br>
 			<div class="row">
 				<div class="col-md-5">
-					<label for="prof"> Profiles </label> <select id="mbx-trigger-profile-prof" name="prof" ng-model="profile"
+					<label for="prof"> Profiles * </label> <select id="mbx-trigger-profile-prof" name="prof" ng-model="profile"
 						ng-options="prof.name for prof in profiles" class="form-control" required>
 						<option value="">-- select--</option>
 					</select>
