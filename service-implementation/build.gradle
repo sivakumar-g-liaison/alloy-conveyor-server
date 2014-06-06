@@ -9,8 +9,9 @@ import oracle.jdbc.OracleDriver
 apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply plugin: 'flyway'
-
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
+apply plugin: 'rebel' 
+
 
 // set base name (impacts war name and context path)
 project.war.baseName = 'g2mailboxservice'
@@ -209,11 +210,57 @@ dependencies {
 
 }
 
+idea {
+    module {
+        //if you prefer different output folders
+        inheritOutputDirs = false
+        outputDir = file('build/classes/main')
+        testOutputDir = file('build/classes/test')
+
+        //if you prefer different SDK than that inherited from IDEA project
+        jdkName = '1.7'
+
+        //if you love browsing Javadoc
+        downloadJavadoc = true
+
+        //and hate reading sources :)
+        downloadSources = true
+    }
+}
+
+def installRootPath = "${rootDir}/install"
+def tomcatInstallPath = "${installRootPath}/tomcat"
+// https://github.com/zeroturnaround/gradle-jrebel-plugin
+rebel {
+    alwaysGenerate = true
+    rebelXmlDirectory = "${projectDir}/src/main/resources"
+    if (project.hasProperty('showRebel')) {
+        showGenerated = true
+    }
+    classpath {
+        omitDefaultClassesDir = true
+        omitDefaultResourcesDir = true
+        resource {
+          directory = "build/classes/main"
+          excludes = ["com/liaison/mailbox/jpa/model/*"]
+        }
+        resource {
+          directory = "build/resources/main"
+          excludes = ["META-INF/*"]
+        }
+    }
+    web {
+        omitDefault = true
+        resource {
+          directory = "src/main/webapp/ui"
+          target = "/ui"
+        }
+    }    
+}
+
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
 // http://cargo.codehaus.org/
 // https://github.com/bmuschko/gradle-cargo-plugin
-def installRootPath = "${rootDir}/install"
-def tomcatInstallPath = "${installRootPath}/tomcat"
 def tomcatEnvironmentsInstallPath = "${installRootPath}/tomcat-environments"
 cargo {
     containerId = 'tomcat7x'

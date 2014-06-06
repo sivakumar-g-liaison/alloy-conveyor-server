@@ -28,6 +28,7 @@ buildscript {
 
 allprojects {
     apply plugin: 'eclipse' //provides tasks for eclipse. If you don't use eclipse, simply don't use these tasks :)
+    apply plugin: 'idea' 
 	
     group = 'com.liaison.nucleus'
     repositories { 

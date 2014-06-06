@@ -131,7 +131,7 @@ set URL_JDK=%ARTIFACT_REPO_URL%/thirdparty/com/oracle/java/jdk-%_PLATFORM%-%JDK_
 for /F "tokens=1,2,3" %%A IN ('java -version 2^>^&1 ^| find "java version ""1.7."') DO set MY_JDK_VERSION=%%~C
 if ""%MY_JDK_VERSION%"" == """" set MY_JDK_VERSION="NONE"
 set MY_JDK_VERSION=%MY_JDK_VERSION:""=%
-for /F "tokens=1,2*" %%A IN ('reg query "HKEY_LOCAL_MACHINE\Software\JavaSoft\Java Development Kit\%MY_JDK_VERSION%" ^/v JavaHome ^| find "JavaHome"') DO set REG_JAVA_HOME=%%~C
+for /F "tokens=1,2*" %%A IN ('reg query "HKEY_LOCAL_MACHINE\Software\JavaSoft\Java Development Kit\%MY_JDK_VERSION%" ^/v JavaHome 2^> nul ^| find "JavaHome"') DO set REG_JAVA_HOME=%%~C
 set MY_JDK_MAJOR=%MY_JDK_VERSION:~2,-5%
 set MY_JDK_GOOD_ENOUGH=false
 if "%MY_JDK_VERSION%" == "%JAVA_FULL_VERSION%" set MY_JDK_GOOD_ENOUGH=true
@@ -192,6 +192,41 @@ if /I ""%REMEMBER%""==""y"" (
 
 :: Use cascading rules of thumb to locate JDK home
 :: First check local to the project
+if exist ""%JAVA_HOME%\bin\java.exe""  (
+    goto APPLY_JCE_POLICY
+)
+:: Parse JAVA_HOME from PATH, in the case where JAVA_HOME is set but wrong
+:: http://stackoverflow.com/questions/5471556/pretty-print-windows-path-variable-how-to-split-on-in-cmd-shell
+setlocal DisableDelayedExpansion
+set "var=%PATH%"
+set "var=%var:"=""%"
+set "var=%var:^=^^%"
+set "var=%var:&=^&%"
+set "var=%var:|=^|%"
+set "var=%var:<=^<%"
+set "var=%var:>=^>%"
+set "var=%var:;=^;^;%"
+set var=%var:""="%
+set "var=%var:"=""%"
+set "var=%var:;;="";""%"
+set "var=%var:^;^;=;%"
+set "var=%var:""="%"
+set "var=%var:"=""%"
+set "var=%var:"";""=";"%"
+set "var=%var:"""="%"
+setlocal EnableDelayedExpansion
+for %%a in ("!var!") do (
+    endlocal
+    for /F "tokens=1 delims=\" %%M IN ('echo == %%~a ^| find "jdk-%%JAVA_FULL_VERSION%%"') DO (
+        set JAVA_HOME=%%~a
+        set JAVA_HOME=%JAVA_HOME~0,-4%
+    )
+    set JAVA_HOME=%JAVA_HOME%
+    setlocal EnableDelayedExpansion
+)
+if exist ""%JAVA_HOME%\bin\java.exe""  (
+    goto APPLY_JCE_POLICY
+)
 if exist ""%TOOLS_JDK_HOME%\bin\java.exe""  (
     set JAVA_HOME=%TOOLS_JDK_HOME%
     goto APPLY_JCE_POLICY
