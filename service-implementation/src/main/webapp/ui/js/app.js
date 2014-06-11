@@ -84,11 +84,11 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     //FOR USE WITH PYTHON
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.base_url = '../rest/v1/mailbox';
-    $rootScope.kms.base_url='/kms/key-management';
-    $rootScope.url_upload_key = $rootScope.kms.base_url+'/upload/public';
-    $rootScope.url_ssh_upload_key = $rootScope.kms.base_url+'/upload/keypair';
-    $rootScope.url_link_key_store = $rootScope.kms.base_url+'/update/truststore/';
-	$rootScope.url_secret_service = $rootScope.kms.base_url+'/secret/';
+    $rootScope.kms_base_url='/kms/key-management';
+    $rootScope.url_upload_key = $rootScope.kms_base_url+'/upload/public';
+    $rootScope.url_ssh_upload_key = $rootScope.kms_base_url+'/upload/keypair';
+    $rootScope.url_link_key_store = $rootScope.kms_base_url+'/update/truststore/';
+	$rootScope.url_secret_service = $rootScope.kms_base_url+'/secret/';
 	
 	$rootScope.block = $blockUI.createBlockUI();
 	
