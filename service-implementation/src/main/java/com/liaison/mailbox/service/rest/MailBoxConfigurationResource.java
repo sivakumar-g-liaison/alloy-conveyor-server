@@ -49,6 +49,7 @@ import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDT
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
@@ -60,6 +61,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValue
 import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
@@ -531,7 +533,72 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 
 	}
+	
+	/**
+	 * REST method to update a profile
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * @return Response Object
+	 */
+	@PUT
+	@ApiOperation(value = "Update profile", 
+	notes = "Update an existing profile",
+	position = 7, 
+	response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
+	@Path("/profile")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiImplicitParams({@ApiImplicitParam(name="request", value="Update an existing profile", required=true, 
+	dataType="com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType="body" )})
+	@ApiResponses({
+		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+	})
+	@AccessDescriptor(accessMethod = "updateProfile")
+	public Response updateProfile(@Context HttpServletRequest request) {
 
+		// Audit LOG the Attempt to createProfile
+		auditAttempt("updateProfile");
+
+		serviceCallCounter.addAndGet(1);
+		Response returnResponse;
+		InputStream requestStream;
+		ReviseProfileRequestDTO serviceRequest;
+
+		try {
+
+			requestStream = request.getInputStream();
+			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+
+			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
+
+			ReviseProfileResponseDTO serviceResponse = null;
+			ProfileConfigurationService profile = new ProfileConfigurationService();
+
+			// creates new profile
+			serviceResponse = profile.updateProfile(serviceRequest);
+		
+			//Audit LOG
+			doAudit(serviceResponse.getResponse(), "updateProfile");
+
+			// populate the response body
+			return serviceResponse.constructResponse();
+		} catch (Exception e) {
+
+			int f = failureCounter.addAndGet(1);
+			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
+			LOG.error(errMsg, e);
+
+			// should be throwing out of domain scope and into framework using
+			// above code
+			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		}
+		// Audit LOG the failure
+		auditFailure("updateProfile");
+		return returnResponse;
+
+	}
+	
 	/**
 	 * REST method to retrieve all profiles.
 	 * 
@@ -540,7 +607,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@GET
 	@ApiOperation(value = "List Profiles",
 	notes = "returns detail information of all the profiles",
-	position = 7,
+	position = 8,
 	response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -596,7 +663,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@POST
 	@ApiOperation(value = "Create Processor",
 	notes = "create a new processor",
-	position = 8,
+	position = 9,
 	response = com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO.class)
 	@Path("/{id}/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -676,7 +743,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@DELETE
 	@ApiOperation(value = "Remove Processor",
 	notes = "remove processor details",
-	position = 9,
+	position = 10,
 	response = com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO.class)
 	@Path("/{mailboxid}/processor/{processorid}")	
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -737,7 +804,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@GET
 	@ApiOperation(value = "Processor Details",
 	notes = "returns detail information of a valid processor",
-	position = 10,
+	position = 11,
 	response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -799,7 +866,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@PUT
 	@ApiOperation(value = "Update Processor",
 	notes = "revise details of valid processor",
-	position = 11,
+	position = 12,
 	response = com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO.class)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -868,7 +935,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@GET
 	@ApiOperation(value = "Search Enterprise",
 	notes = "search a mailbox using given query parameters",
-	position = 12,
+	position = 13,
 	response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
@@ -923,7 +990,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return The Response Object
 	 */
 	@GET
-	@ApiOperation(value = "List File", notes = "return list of files", position = 13)
+	@ApiOperation(value = "List File", notes = "return list of files", position = 14)
 	@Path("/listFile")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
@@ -978,7 +1045,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@POST
 	@ApiOperation(value = "Server Listener",
 	notes = "listener for http server",
-	position = 14,
+	position = 15,
 	response = com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO.class)
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1118,7 +1185,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return The Response Object.
 	 */
 	@POST
-	@ApiOperation(value = "Authorization", notes = "authorization header", position = 17)
+	@ApiOperation(value = "Authorization", notes = "authorization header", position = 16)
 	@Path("/basicauth")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1167,7 +1234,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@GET
 	@ApiOperation(value = "Find Profile",
 	notes = "search a profile using given profile name",
-	position = 18,
+	position = 17,
 	response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
 	@Path("/findprofile")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -1216,7 +1283,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "List Certificates", notes = "returns list of certificates", position = 19)
+	@ApiOperation(value = "List Certificates", notes = "returns list of certificates", position = 18)
 	@Path("/listCertificates")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
@@ -1266,7 +1333,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@GET
 	@ApiOperation(value = "Property File",
 	notes = "returns property file values",
-	position = 20,
+	position = 19,
 	response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
 	@Path("/getPropertyFileValues")
 	@Produces(MediaType.APPLICATION_JSON)
