@@ -316,7 +316,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                    <div class="alignDiv" ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                             <div ng-switch-when="emailnotificationids">\n\
-           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-when="httplistenerauthcheckrequired">\n\
                                                 <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=\'false\'" ng-options="property for property in booleanValues"></select>\n\
@@ -325,7 +325,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                                 <textarea class="form-control" ng-model="COL_FIELD" required ng-init="COL_FIELD='+$rootScope.pipelineId+'" style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-default>\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\

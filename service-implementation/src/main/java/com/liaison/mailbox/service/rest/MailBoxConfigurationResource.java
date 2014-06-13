@@ -554,11 +554,11 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-	@AccessDescriptor(accessMethod = "updateProfile")
-	public Response updateProfile(@Context HttpServletRequest request) {
+	@AccessDescriptor(accessMethod = "reviseProfile")
+	public Response reviseProfile(@Context HttpServletRequest request) {
 
 		// Audit LOG the Attempt to createProfile
-		auditAttempt("updateProfile");
+		auditAttempt("reviseProfile");
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
@@ -579,7 +579,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			serviceResponse = profile.updateProfile(serviceRequest);
 		
 			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "updateProfile");
+			doAudit(serviceResponse.getResponse(), "reviseProfile");
 
 			// populate the response body
 			return serviceResponse.constructResponse();
@@ -594,7 +594,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
 		}
 		// Audit LOG the failure
-		auditFailure("updateProfile");
+		auditFailure("reviseProfile");
 		return returnResponse;
 
 	}

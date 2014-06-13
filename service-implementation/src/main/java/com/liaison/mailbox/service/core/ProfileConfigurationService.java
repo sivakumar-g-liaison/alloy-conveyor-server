@@ -125,26 +125,26 @@ public class ProfileConfigurationService {
 			if(retreivedProfile == null) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL);
 			}
+			
+			if(!(retreivedProfile.getSchProfName().equals(profileDTO.getName()))) {
 				
-			if (configDao.findProfileByName(profileDTO.getName()) != null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS);
-			}else {
-				
-				retreivedProfile.setSchProfName(profileDTO.getName());
-				profileDTO.copyToEntity(retreivedProfile);
-
-				// update the profile entity
-				configDao.merge(retreivedProfile);
-
-				// response message construction
-				serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
-				serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(retreivedProfile.getPrimaryKey())));
-
-				LOG.info("Exiting from profile updation.");
-
+				if (configDao.findProfileByName(profileDTO.getName()) != null) {
+					throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS);
+				}
 			}
-			
-			
+				
+			retreivedProfile.setSchProfName(profileDTO.getName());
+			profileDTO.copyToEntity(retreivedProfile);
+
+			// update the profile entity
+			configDao.merge(retreivedProfile);
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
+			serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(retreivedProfile.getPrimaryKey())));
+
+			LOG.info("Exiting from profile updation.");
+
 			return serviceResponse;
 		
 		} catch (MailBoxConfigurationServicesException e) {
