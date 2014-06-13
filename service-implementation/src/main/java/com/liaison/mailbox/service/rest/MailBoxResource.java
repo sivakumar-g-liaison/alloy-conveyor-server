@@ -76,7 +76,7 @@ public class MailBoxResource extends BaseResource {
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-	@AccessDescriptor(accessMethod = "triggerProfile")
+	@AccessDescriptor(skipFilter=true)
 	public Response triggerProfile(@QueryParam(value = "name") String profileName,
 			@QueryParam(value = "excludeMailbox") String mailboxNamePattern,
 			@QueryParam(value = "shardKey") String shardKey) {
