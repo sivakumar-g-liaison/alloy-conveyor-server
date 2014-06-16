@@ -1,3 +1,9 @@
+<style>
+	.customHide{
+		display: none;
+	}
+</style>
+
 <div class="container fade-in">
 
 	<div class="form-row">
@@ -19,10 +25,10 @@
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
-                	<span id="mbx-search-nameInvalid-pattern" class="help-block-custom" ng-show="formSearchMbx.name.$error.pattern">Invalid MailBox Name.</span>
-                	<span id="mbx-search-nameInvalid-minlength" class="custom-info-block" ng-show="formSearchMbx.name.$error.minlength">
+                	<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchMbx.name.$error.pattern}" ng-show="formSearchMbx.name.$error.pattern">Invalid MailBox Name.</span>
+                	<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchMbx.name.$error.minlength}" ng-show="formSearchMbx.name.$error.minlength">
                 	<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
-		 			<span id="mbx-search-nameInvalid-maxlength" class="custom-info-block" ng-show="formSearchMbx.name.$error.maxlength">
+		 			<span id="mbx-search-nameInvalid-maxlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchMbx.name.$error.maxlength}" ng-show="formSearchMbx.name.$error.maxlength">
 					<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                 </div>
 			</div>

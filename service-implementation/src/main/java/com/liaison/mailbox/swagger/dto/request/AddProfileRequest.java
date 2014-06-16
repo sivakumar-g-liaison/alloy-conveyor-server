@@ -19,11 +19,11 @@ public class AddProfileRequest {
 	
 	private AddProfileRequestDTO addProfileRequest;
 
-	protected AddProfileRequestDTO getAddProfileRequest() {
+	public AddProfileRequestDTO getAddProfileRequest() {
 		return addProfileRequest;
 	}
 
-	protected void setAddProfileRequest(AddProfileRequestDTO addProfileRequest) {
+	public void setAddProfileRequest(AddProfileRequestDTO addProfileRequest) {
 		this.addProfileRequest = addProfileRequest;
 	}
 	

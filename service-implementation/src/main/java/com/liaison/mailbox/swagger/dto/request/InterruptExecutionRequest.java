@@ -20,11 +20,11 @@ public class InterruptExecutionRequest {
 	
 	private InterruptExecutionEventRequestDTO interruptExecutionEventRequest;
 
-	protected InterruptExecutionEventRequestDTO getInterruptExecutionEventRequest() {
+	public InterruptExecutionEventRequestDTO getInterruptExecutionEventRequest() {
 		return interruptExecutionEventRequest;
 	}
 
-	protected void setInterruptExecutionEventRequest(
+	public void setInterruptExecutionEventRequest(
 			InterruptExecutionEventRequestDTO interruptExecutionEventRequest) {
 		this.interruptExecutionEventRequest = interruptExecutionEventRequest;
 	}

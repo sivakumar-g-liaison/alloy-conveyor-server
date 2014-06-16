@@ -136,14 +136,14 @@ textarea {
 }
 
 .help-block-custom {
-    display: block;
+    display: block !important;
     margin-top: 5px;
     margin-bottom: 10px;
     color: #FF0000;
 }
 
 .custom-info-block {
-    display: block;
+    display: block !important;
     margin-top: 5px;
     margin-bottom: 10px;
     color: #3a87ad;

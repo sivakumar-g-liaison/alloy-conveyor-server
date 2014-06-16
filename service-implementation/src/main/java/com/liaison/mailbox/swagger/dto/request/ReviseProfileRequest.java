@@ -7,26 +7,26 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-
 package com.liaison.mailbox.swagger.dto.request;
 
-import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
+
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;;
 
 /**
- * 
  * @author OFS
+ *
  */
-public class ReviseMailBoxRequest {
-	
-	private ReviseMailBoxRequestDTO reviseMailBoxRequest;
 
-	public ReviseMailBoxRequestDTO getReviseMailBoxRequest() {
-		return reviseMailBoxRequest;
+public class ReviseProfileRequest {
+
+	private ReviseProfileRequestDTO reviseProfileRequest;
+
+	public ReviseProfileRequestDTO getReviseProfileRequest() {
+		return reviseProfileRequest;
 	}
 
-	public void setReviseMailBoxRequest(
-			ReviseMailBoxRequestDTO reviseMailBoxRequest) {
-		this.reviseMailBoxRequest = reviseMailBoxRequest;
+	public void setReviseProfileRequest(ReviseProfileRequestDTO reviseProfileRequest) {
+		this.reviseProfileRequest = reviseProfileRequest;
 	}
-	
+
 }

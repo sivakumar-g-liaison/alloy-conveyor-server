@@ -17,14 +17,14 @@ import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDT
  */
 public class AddMailBoxRequest {
 	
-	private AddMailboxRequestDTO addMailboxRequest;
+	private AddMailboxRequestDTO addMailBoxRequest;
 
-	protected AddMailboxRequestDTO getAddMailboxRequest() {
-		return addMailboxRequest;
+	public AddMailboxRequestDTO getAddMailBoxRequest() {
+		return addMailBoxRequest;
 	}
 
-	protected void setAddMailboxRequest(AddMailboxRequestDTO addMailboxRequest) {
-		this.addMailboxRequest = addMailboxRequest;
+	public void setAddMailBoxRequest(AddMailboxRequestDTO addMailBoxRequest) {
+		this.addMailBoxRequest = addMailBoxRequest;
 	}
-	
+
 }

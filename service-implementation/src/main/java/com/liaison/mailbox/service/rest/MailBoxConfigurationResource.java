@@ -78,7 +78,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-
 /**
  * This is the gateway for the mailbox configuration services.
  * 
@@ -111,7 +110,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Create Enterprise",
+	@ApiOperation(value = "Create Mailbox",
 	notes = "create a new mailbox",
 	position = 1,
 	response = com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO.class)
@@ -123,7 +122,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "createMailBox")
-	public Response createMailBox(@Context HttpServletRequest request, @QueryParam(value = "sid") String serviceInstanceId) {
+	public Response createMailBox(@Context HttpServletRequest request, @QueryParam(value = "sid") @ApiParam(name="sid", required=true, value="Service instance id")  String serviceInstanceId) {
 
 		// Audit LOG the Attempt to create a mailbox
 		auditAttempt("createMailBox");
@@ -186,7 +185,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@PUT
-	@ApiOperation(value = "Update Enterprise",
+	@ApiOperation(value = "Update Mailbox",
 	notes = "update details of existing mailbox",
 	position = 2,
 	response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
@@ -200,7 +199,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	})
 	@AccessDescriptor(accessMethod = "reviseMailBox")
 	public Response reviseMailBox(@Context HttpServletRequest request, 
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value = "sid") String serviceInstanceId) {
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value = "sid")  @ApiParam(name="sid", required=true, value="Service instance id") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to revise a mailbox
 		auditAttempt("reviseMailBox");
@@ -262,7 +261,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@DELETE
-	@ApiOperation(value = "Delete Enterprise",
+	@ApiOperation(value = "Delete Mailbox",
 	notes = "delete a mailbox",
 	position = 3,
 	response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
@@ -319,7 +318,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "Enterprise Details",
+	@ApiOperation(value = "Mailbox Details",
 	notes = "returns details of a valid mailbox",
 	position = 4,
 	response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
@@ -331,7 +330,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	})
 	@AccessDescriptor(accessMethod = "readMailBox")
 	public Response readMailBox(@Context HttpServletRequest request, @PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
-			@QueryParam(value = "addServiceInstanceIdConstraint") boolean addConstraint, @QueryParam(value = "sid") String serviceInstanceId) {
+			@QueryParam(value = "addServiceInstanceIdConstraint") @ApiParam(name="addServiceInstanceIdConstraint", required=true, value="Service instance id constraint") boolean addConstraint, @QueryParam(value = "sid") @ApiParam(name="sid", required=true, value="Service instance id")  String serviceInstanceId) {
 
 		// Audit LOG the Attempt to read mailbox
 		auditAttempt("readMailBox");
@@ -675,7 +674,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	})
 	@AccessDescriptor(accessMethod = "createProcessor")
 	public Response createProcessor(@Context HttpServletRequest request,
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value= "sid") String serviceInstanceId) {
+			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value= "sid")  @ApiParam(name="sid", required=true, value="Service instance id") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to createProcessor
 		auditAttempt("createProcessor");
@@ -933,7 +932,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return The Response
 	 */
 	@GET
-	@ApiOperation(value = "Search Enterprise",
+	@ApiOperation(value = "Search Mailbox",
 	notes = "search a mailbox using given query parameters",
 	position = 13,
 	response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
@@ -942,8 +941,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "searchMailBox")
-	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") String mbxName,
-			@QueryParam(value = "profile") String profileName, @QueryParam(value = "hitCounter") String hitCounter) {
+	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") @ApiParam(name="name", required=false, value="Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
+			@QueryParam(value = "profile") @ApiParam(name="profile", required=false, value="Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") String hitCounter) {
 		
 		//Audit LOG the Attempt to searchMailBox
 		auditAttempt("searchMailBox");
@@ -1044,7 +1043,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@POST
 	@ApiOperation(value = "Server Listener",
-	notes = "listener for http server",
+	notes = "Listener for http server. This method requires folder (location) and file name as header fields.",
 	position = 15,
 	response = com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO.class)
 	@Path("/serverlistener")
@@ -1185,7 +1184,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return The Response Object.
 	 */
 	@POST
-	@ApiOperation(value = "Authorization", notes = "authorization header", position = 16)
+	@ApiOperation(value = "Authorization", notes = "Authorization header. This method requires authorization header field", position = 16)
 	@Path("/basicauth")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -1243,7 +1242,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "findProfiles")
-	public Response findProfiles(@QueryParam(value = "name") String profileName) {
+	public Response findProfiles(@QueryParam(value = "name") @ApiParam(name="name", required=true, value="Name of the profile to be searched.") String profileName) {
 
 		// Audit LOG the Attempt to findProfiles
 		auditAttempt("findProfiles");
