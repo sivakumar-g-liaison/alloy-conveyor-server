@@ -87,6 +87,9 @@
 	  padding: 1px 10px;
 	  background-repeat: no-repeat;
 	}	
+    .customHide{
+		display: none;
+	}
 </style>
 
 <div class="container fade-in">
@@ -138,11 +141,11 @@
                         </label>
                         <input id="mbx-procsr-name" type="text" ng-model="processor.name" required name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" />
                         <div ng-show="formAddPrcsr.name.$dirty && formAddPrcsr.name.$invalid">
-                            <span id="mbx-procsr-nameInvalid-pattern" class="help-block-custom" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
-                            <span id="mbx-procsr-nameInvalid-required" class="help-block-custom" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
-                            <span id="mbx-procsr-nameInvalid-minlength" class="custom-info-block" ng-show="formAddPrcsr.name.$error.minlength">
+                            <span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.name.$error.pattern}" ng-show="formAddPrcsr.name.$error.pattern">Invalid Processor Name.</span>
+                            <span id="mbx-procsr-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.name.$error.required}" ng-show="formAddPrcsr.name.$error.required">Processor Name is mandatory.</span>
+                            <span id="mbx-procsr-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block': formAddPrcsr.name.$error.minlength }" ng-show="formAddPrcsr.name.$error.minlength">
                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be shorter than {{minimumLength}} characters.</span>
-                            <span id="mbx-procsr-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddPrcsr.name.$error.maxlength">
+                            <span id="mbx-procsr-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.name.$error.maxlength}" ng-show="formAddPrcsr.name.$error.maxlength">
                              <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Processor Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
 
                         </div>
@@ -154,9 +157,9 @@
                             Description
                         </label>
                         <textarea id="mbx-procsr-description" width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
-                        <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                            <span id="mbx-procsr-descriptionInvalid-pattern" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
-                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="custom-info-block" ng-show="formAddPrcsr.description.$error.maxlength">
+                        <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                            <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
+                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
                              <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
                         </div>
                     </div>
@@ -347,18 +350,18 @@
                             Passphrase
                         </label>
                         <input id="mbx-procsr-sshkeypair-passphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairPassphrase" name="sshkeypassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
-                        <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                             <span id="mbx-sshKeyPairPassphrase-mandatory" class="custom-info-block" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
-                        </div>
+                        <!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                             <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
+                        </div> -->
                         </div>
                         <div class="col-md-5 col-sm-5 adjustPaddingRight">
                              <label>
                             Confirm Passphrase
                             </label>
                             <input id="mbx-procsr-sshkeypair-confirmpassphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairConfirmPassphrase" name="sshkeyconfirmpassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
-                            <div class="help-block-custom" ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                                 <span id="mbx-sshKeyPairPassphrase-mandatory" class="custom-info-block" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
-                            </div>
+                            <!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+                                 <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
+                            </div>-->
                         </div>
                          <div class = "col-md-1 cod-sm-1 removePaddingLeft">
                             <button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary" style="margin-top:25px;" ng-click="uploadSSHKey()">Upload</button>

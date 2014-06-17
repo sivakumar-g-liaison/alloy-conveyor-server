@@ -23,7 +23,7 @@ angular.module(
                                 \n\
                                 <input type="password"  ng-show=showconfirmpassword ng-change="validate()" ng-model="repeatepassword" ng-input="repeatepassword" class="textboxingrid"  placeholder="confirm password"/>\n\
                                 \n\
-            					<span class="custom-info-block" ng-show=showerrormessage><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Password cannot be longer than 63 characters.</span>\n\
+            					<span class="customHide" ng-class="{\'custom-info-block\':showerrormessage}" ng-show=showerrormessage><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Password cannot be longer than 63 characters.</span>\n\
                                  </div>',
                 link: function (scope) {
 				/*The event is triggered in processorController to clear password and error message in UI*/

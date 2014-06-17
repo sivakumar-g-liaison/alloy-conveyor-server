@@ -689,7 +689,7 @@ var rest = myApp.controller(
 				                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
 				                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
 				                            <div ng-show="formAddPrcsr.httpVersion.$dirty || formAddPrcsr.httpVersion.$invalid">\n\
-				                                <span class="help-block-custom" ng-show=formAddPrcsr.httpVersion.$error.pattern>Version should be 1.1</span>\n\
+				                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.httpVersion.$error.pattern}" ng-show=formAddPrcsr.httpVersion.$error.pattern>Version should be 1.1</span>\n\
 				                            </div>\n\
 			                            </div>\n\
                           			    <div ng-switch-default>\n\
@@ -704,14 +704,14 @@ var rest = myApp.controller(
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.propUrl.$dirty || formAddPrcsr.propUrl.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.propUrl.$error.pattern>Enter valid URL</span>\n\
+                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.propUrl.$error.pattern}" ng-show=formAddPrcsr.propUrl.$error.pattern>Enter valid URL</span>\n\
                             </div></div>\n\
                         <div ng-switch-when="socketTimeout">\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="socketTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.socketTimeout.$dirty || formAddPrcsr.socketTimeout.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.socketTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
+                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.socketTimeout.$error.pattern}" ng-show=formAddPrcsr.socketTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="connectionTimeout">\n\
@@ -719,7 +719,7 @@ var rest = myApp.controller(
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.connectionTimeout.$dirty || formAddPrcsr.connectionTimeout.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.connectionTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
+                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.connectionTimeout.$error.pattern}" ng-show=formAddPrcsr.connectionTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="retryAttempts">\n\
@@ -727,7 +727,7 @@ var rest = myApp.controller(
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
                             <div ng-show="formAddPrcsr.retryAttempts.$dirty || formAddPrcsr.retryAttempts.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.retryAttempts.$error.pattern>Must be a numeric value (0-4).</span>\n\
+                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.retryAttempts.$error.pattern}" ng-show=formAddPrcsr.retryAttempts.$error.pattern>Must be a numeric value (0-4).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="port">\n\
@@ -738,7 +738,7 @@ var rest = myApp.controller(
                             </div>\n\
                             </div><div ng-switch-default>\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" style="width:90%;height: 45px" ng-pattern="' + $scope.inputPatternForPort + '" />\n\<div ng-show="formAddPrcsr.port.$dirty || formAddPrcsr.port.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
+                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.port.$error.pattern}" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
                             </div>\n\
                             </div></div>\n\
 							<div ng-switch on="isPortDisabled">\n\
@@ -750,13 +750,13 @@ var rest = myApp.controller(
                         <div ng-switch-when="payloadsizethreshold">\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name ="payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
                                 <div ng-show="formAddPrcsr.payloadSizeThreshold.$dirty || formAddPrcsr.payloadSizeThreshold.$invalid">\n\
-                                    <span class="help-block-custom" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern>Enter valid number</span>\n\
+                                    <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.payloadSizeThreshold.$error.pattern}" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern>Enter valid number</span>\n\
                                 </div>\n\
                         </div>\n\
                         <div ng-switch-when="numoffilesthreshold">\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="numoffilesthreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
                                 <div ng-show="formAddPrcsr.numoffilesthreshold.$dirty || formAddPrcsr.numoffilesthreshold.$invalid">\n\
-                                    <span class="help-block-custom" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern>Enter valid number</span>\n\
+                                    <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.numoffilesthreshold.$error.pattern}" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern>Enter valid number</span>\n\
             					</div>\n\
                         </div>\n\
                     </div>'
@@ -891,19 +891,19 @@ var rest = myApp.controller(
                         '<div ng-switch on="getFolderId(allStaticPropertiesForProcessorFolder, row)">\n\
                         <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" required  placeholder="required" name="folderuripayload" ng-pattern="' + $scope.inputPatternForFolderURI + '" ng-maxLength=250 />\n\
                                 <div ng-show="formAddPrcsr.folderuripayload.$dirty && formAddPrcsr.folderuripayload.$invalid">\n\
-                                    <span class="help-block-custom" ng-show=formAddPrcsr.folderuripayload.$error.pattern>Invalid Folder URI.</span>\n\
-                                    <span class="custom-info-block" ng-show=formAddPrcsr.folderuripayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                                    <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderuripayload.$error.pattern}" ng-show=formAddPrcsr.folderuripayload.$error.pattern>Invalid Folder URI.</span>\n\
+                                    <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderuripayload.$error.maxlength}" ng-show=formAddPrcsr.folderuripayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                            </div></div>\n\
                         <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" required  placeholder="required" name="folderuriresponse" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
                             <div ng-show="formAddPrcsr.folderuriresponse.$dirty && formAddPrcsr.folderuriresponse.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.folderuriresponse.$error.pattern>Invalid Folder URI.</span>\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
+                                <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderuriresponse.$error.pattern}" ng-show=formAddPrcsr.folderuriresponse.$error.pattern>Invalid Folder URI.</span>\n\
+                                <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderuriresponse.$error.maxlength}" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea   class="form-control" name="folderuridefault" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" placeholder="required" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
                     <div ng-show="formAddPrcsr.folderuridefault.$dirty && formAddPrcsr.folderuridefault.$invalid">\n\
-                             <span class="help-block-custom" ng-show=formAddPrcsr.folderuridefault.$error.pattern>Invalid Folder URI.</span>\n\
-                             <span class="custom-info-block" ng-show=formAddPrcsr.folderuridefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                             <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderuridefault.$error.pattern}" ng-show=formAddPrcsr.folderuridefault.$error.pattern>Invalid Folder URI.</span>\n\
+                             <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderuridefault.$error.maxlength}" ng-show=formAddPrcsr.folderuridefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                         </div></div></div>'
                 }, {
                     field: "folderType",
@@ -921,19 +921,19 @@ var rest = myApp.controller(
                         '<div ng-switch on="getFolderId(allStaticPropertiesForProcessorFolder, row)">\n\
                         <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                                 <div ng-show="formAddPrcsr.descriptionpayload.$dirty && formAddPrcsr.descriptionpayload.$invalid">\n\
-                                    <span class="help-block-custom" ng-show=formAddPrcsr.descriptionpayload.$error.pattern>Invalid Description.</span>\n\
-                                    <span class="custom-info-block" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                                    <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.descriptionpayload.$error.pattern}" ng-show=formAddPrcsr.descriptionpayload.$error.pattern>Invalid Description.</span>\n\
+                                    <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionpayload.$error.maxlength}" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                            </div></div>\n\
                         <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
                             <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.descriptionresponse.$error.pattern>Invalid Description.</span>\n\
-                                <span class="custom-info-block" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
+                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.descriptionresponse.$error.pattern}" ng-show=formAddPrcsr.descriptionresponse.$error.pattern>Invalid Description.</span>\n\
+                                <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionresponse.$error.maxlength}" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
                         '<textarea   class="form-control" name="descriptiondefault" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250/>\n\
                     <div ng-show="formAddPrcsr.descriptiondefault.$dirty && formAddPrcsr.descriptiondefault.$invalid">\n\
-                        <span class="help-block-custom" ng-show=formAddPrcsr.descriptiondefault.$error.pattern>Invalid Description.</span>\n\
-                        <span class="custom-info-block" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
+                        <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.descriptiondefault.$error.pattern}" ng-show=formAddPrcsr.descriptiondefault.$error.pattern>Invalid Description.</span>\n\
+                        <span class="customHide" ng-class = "{\'custom-info-block\':formAddPrcsr.descriptiondefault.$error.maxlength}" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                         </div></div></div>'
                 }, {
                     field: "allowAdd",

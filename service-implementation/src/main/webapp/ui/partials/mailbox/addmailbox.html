@@ -16,6 +16,9 @@
     
     height: 300px
   }
+  .customHide{
+		display: none;
+	}
 </style>
 
 <div class="container fade-in">
@@ -37,11 +40,11 @@
             <input type="text" class="form-control" id="name" ng-model="mailBox.name" required="" name="name"
                    ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.name.$dirty && formAddMbx.name.$invalid">
-                <span id="mbx-add-nameInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
-                <span id="mbx-add-nameInvalid-required" class="help-block-custom" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
-                <span id="mbx-add-nameInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.name.$error.minlength">
+                <span id="mbx-add-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom': formAddMbx.name.$error.pattern}" ng-show="formAddMbx.name.$error.pattern">Invalid Mailbox Name.</span>
+                <span id="mbx-add-nameInvalid-required" class="customHide" ng-class= "{'help-block-custom': formAddMbx.name.$error.required}" ng-show="formAddMbx.name.$error.required">Mailbox Name is mandatory.</span>
+                <span id="mbx-add-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block': formAddMbx.name.$error.minlength}"ng-show="formAddMbx.name.$error.minlength">
                 <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be shorter than {{minimumLength}} characters.</span>
-		        <span id="mbx-add-nameInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.name.$error.maxlength">
+		        <span id="mbx-add-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block': formAddMbx.name.$error.maxlength}" ng-show="formAddMbx.name.$error.maxlength">
 		       <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
 
@@ -69,10 +72,10 @@
             <input class="form-control" type="text" id="key" ng-model="mailBox.shardKey" name="key" ng-pattern="userInputPattern"
                    ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.key.$dirty && formAddMbx.key.$invalid">
-                <span id="mbx-add-keyInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
-            <span id="mbx-add-keyInvalid-minlength" class="custom-info-block" ng-show="formAddMbx.key.$error.minlength">
+                <span id="mbx-add-keyInvalid-pattern" class="customHide" ng-class="{'help-block-custom' : formAddMbx.key.$error.pattern }" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
+            <span id="mbx-add-keyInvalid-minlength" class="customHide" ng-class = "{'custom-info-block : formAddMbx.key.$error.minlength '}" ng-show="formAddMbx.key.$error.minlength">
             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be shorter than {{minimumLength}} characters.</span>
-		    <span id="mbx-add-keyInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.key.$error.maxlength">
+		    <span id="mbx-add-keyInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.key.$error.maxlength }" ng-show="formAddMbx.key.$error.maxlength">
 		    <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
             </div>
           
@@ -88,8 +91,8 @@
               <textarea class="form-control" ng-model="mailBox.description" id="description" rows="2" name="description"
                         ng-pattern="userInputDescriptionPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
-                  <span id="mbx-add-descInvalid-pattern" class="help-block-custom" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
-          		  <span id="mbx-add-descInvalid-maxlength" class="custom-info-block" ng-show="formAddMbx.description.$error.maxlength">
+                  <span id="mbx-add-descInvalid-pattern" class="customHide" ng-class = "{'help-block-custom' : formAddMbx.description.$error.pattern}" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
+          		  <span id="mbx-add-descInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.description.$error.maxlength}" ng-show="formAddMbx.description.$error.maxlength">
           		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
               </div>
               <br>
