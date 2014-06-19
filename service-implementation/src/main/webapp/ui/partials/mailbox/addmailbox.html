@@ -73,7 +73,7 @@
                    ng-minLength=5 ng-maxLength=80 />
             <div ng-show="formAddMbx.key.$dirty && formAddMbx.key.$invalid">
                 <span id="mbx-add-keyInvalid-pattern" class="customHide" ng-class="{'help-block-custom' : formAddMbx.key.$error.pattern }" ng-show="formAddMbx.key.$error.pattern">Invalid Shard Key.</span>
-            <span id="mbx-add-keyInvalid-minlength" class="customHide" ng-class = "{'custom-info-block : formAddMbx.key.$error.minlength '}" ng-show="formAddMbx.key.$error.minlength">
+            <span id="mbx-add-keyInvalid-minlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.key.$error.minlength }" ng-show="formAddMbx.key.$error.minlength">
             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be shorter than {{minimumLength}} characters.</span>
 		    <span id="mbx-add-keyInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.key.$error.maxlength }" ng-show="formAddMbx.key.$error.maxlength">
 		    <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Shard Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
@@ -119,7 +119,7 @@
     <button id="mbx-add-save" class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid">
       Save
     </button>
-    <button id="mbx-add-procsr" class="btn btn-primary" ng-click="addProcessor()" ng-disabled="formAddMbx.$invalid">
+    <button id="mbx-add-procsr" class="btn btn-primary" ng-click="navigateToProcessorScreen()" ng-disabled="(!isProcessorsAvailable && !isMailBoxSaved && !isMailBoxEdit) || (formAddMbx.$invalid)">
       {{addProcessorBtnValue}}
     </button>
   </div></div>
@@ -137,6 +137,25 @@
 			<div class="modal-footer">
 				<button class="btn btn-primary" data-dismiss="modal" ng-click="doCancel()">Confirm</button>
 				<button class="btn btn-primary cancel" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal-custom" id="saveMailboxConfirmationModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+						<h4 class="modal-title">Confirmation</h4>
+				</button>
+			</div>
+			<div class="modal-body">
+				All unsaved changes will be lost. Do you want to save Mailbox and proceed?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" data-dismiss="modal" ng-click="addProcessor()">Save</button>
+				<button class="btn btn-primary cancel" data-dismiss="modal" ng-click="closeMailboxConfirmationModal()">Cancel</button>
 			</div>
 		</div>
 	</div>

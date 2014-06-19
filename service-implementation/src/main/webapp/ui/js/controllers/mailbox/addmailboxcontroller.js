@@ -1,10 +1,13 @@
-var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$blockUI',
-    function ($rootScope, $scope, $filter, $location, $log, $blockUI) {
+var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$modal', '$blockUI',
+    function ($rootScope, $scope, $filter, $location, $log, $modal, $blockUI) {
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
 
 		$scope.addProcessorBtnValue = 'Add Processors';
+		
+		$scope.isProcessorsAvailable = false;
+		$scope.isMailBoxSaved = false;
 		
         $scope.showMailboxGuid = false;
         //Model for Add MB
@@ -91,8 +94,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         $scope.mailBox.guid = $scope.mailBoxId;
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                         $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-						data.getMailBoxResponse.mailBox.processors.length > 0 ? $scope.addProcessorBtnValue = 'List Processors' 
-						: $scope.addProcessorBtnValue = 'Add Processors';
+						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
+							
+							$scope.addProcessorBtnValue = 'List Processors';
+							$scope.isProcessorsAvailable = true;
+						}	else {
+							$scope.addProcessorBtnValue = 'Add Processors';
+							$scope.isProcessorsAvailable = false;
+						}
                         (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                             data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
@@ -193,7 +202,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         
                 	    block.unblockUI();
                         if (status === 200) {
-
+                             $scope.isMailBoxSaved = true;
                             if (fromAddProcsr) {
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
@@ -227,6 +236,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         	}
 
                         	if (data.addMailBoxResponse.response.status === 'success') {
+                        		$scope.isMailBoxSaved = true;
 								if (fromAddProcsr) {
 									$location.$$search = {};
 									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
@@ -258,18 +268,35 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             $('#cancelAction').modal('hide')
         };
         
-        $scope.addProcessor = function () {
+        // Method to display dialog window for saving mailbox before going to processor screen
+        $scope.navigateToProcessorScreen = function() {
+           	if ($scope.formAddMbx.$dirty && !$scope.isMailBoxSaved) {
+                $('#saveMailboxConfirmationModal').modal('show');
+            } else {
+                $location.$$search = {};
+            	$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+            }
+        }
+        
+        // method to close mailbox saving confirmation dialog
+        $scope.closeMailboxConfirmationModal = function() {
+       	 $('#saveMailboxConfirmationModal').modal('hide');
+            $location.$$search = {};
+            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+           
+       }
 
+        $scope.addProcessor = function () {
             fromAddProcsr = true;
             $scope.saveForm();
         };
 
         $scope.saveMailbox = function () {
-
             fromAddProcsr = false;
             $scope.saveForm();
         };
-
+        
+       
         // Property grid
 
         $scope.valueSelectedinSelectionBox = {
