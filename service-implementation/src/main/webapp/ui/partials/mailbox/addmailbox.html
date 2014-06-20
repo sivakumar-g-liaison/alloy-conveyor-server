@@ -89,7 +89,7 @@
               </label>
 
               <textarea class="form-control" ng-model="mailBox.description" id="description" rows="2" name="description"
-                        ng-pattern="userInputDescriptionPattern" ng-maxLength=1024>          </textarea>
+                        ng-pattern="userInputPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
                   <span id="mbx-add-descInvalid-pattern" class="customHide" ng-class = "{'help-block-custom' : formAddMbx.description.$error.pattern}" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
           		  <span id="mbx-add-descInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.description.$error.maxlength}" ng-show="formAddMbx.description.$error.maxlength">
@@ -108,7 +108,7 @@
    </div>
   </div>
   <div class = "form-group">
-  <textarea class="form-control" ng-model="mailboxPguidDisplayContent" ng-show = "showMailboxGuid" ng-disabled = "true" id="mailbox_pguid" rows="1" name="mailboxpguid"/>
+  <textarea class="form-control" ng-model="mailboxPguidDisplayContent" ng-show = "showMailboxGuid" readonly = "readonly" id="mailbox_pguid" rows="1" name="mailboxpguid"/>
   </div>
   </form>
   

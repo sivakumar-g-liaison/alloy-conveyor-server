@@ -156,7 +156,7 @@
                         <label>
                             Description
                         </label>
-                        <textarea id="mbx-procsr-description" width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputDescriptionPattern" ng-maxLength=512 class="form-control"></textarea>
+                        <textarea id="mbx-procsr-description" width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxLength=512 class="form-control"></textarea>
                         <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
                             <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">

@@ -919,18 +919,18 @@ var rest = myApp.controller(
                     cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
                         '<div class="alignDiv" ng-switch-when="false">' +
                         '<div ng-switch on="getFolderId(allStaticPropertiesForProcessorFolder, row)">\n\
-                        <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
+                        <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
                                 <div ng-show="formAddPrcsr.descriptionpayload.$dirty && formAddPrcsr.descriptionpayload.$invalid">\n\
                                     <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.descriptionpayload.$error.pattern}" ng-show=formAddPrcsr.descriptionpayload.$error.pattern>Invalid Description.</span>\n\
                                     <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionpayload.$error.maxlength}" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
                            </div></div>\n\
-                        <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250 />\n\
+                        <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
                             <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
                                 <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.descriptionresponse.$error.pattern}" ng-show=formAddPrcsr.descriptionresponse.$error.pattern>Invalid Description.</span>\n\
                                 <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionresponse.$error.maxlength}" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
                         </div></div>' +
                         '<div ng-switch-when="true">' +
-                        '<textarea   class="form-control" name="descriptiondefault" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputDescriptionPattern + '" ng-maxLength=250/>\n\
+                        '<textarea   class="form-control" name="descriptiondefault" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250/>\n\
                     <div ng-show="formAddPrcsr.descriptiondefault.$dirty && formAddPrcsr.descriptiondefault.$invalid">\n\
                         <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.descriptiondefault.$error.pattern}" ng-show=formAddPrcsr.descriptiondefault.$error.pattern>Invalid Description.</span>\n\
                         <span class="customHide" ng-class = "{\'custom-info-block\':formAddPrcsr.descriptiondefault.$error.maxlength}" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
