@@ -40,7 +40,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -51,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.StreamUtil;
@@ -149,6 +149,7 @@ public class HttpListener extends BaseResource {
 	 */
 	@POST
 	@Path("sync")
+	@AccessDescriptor(skipFilter=true)
 	public Response handleSync(@Context HttpServletRequest request,
 							   @QueryParam(value = "mailboxId") String mailboxPguid) {
 		// Audit LOG the Attempt to handleSync
@@ -224,6 +225,7 @@ public class HttpListener extends BaseResource {
 	 */
 	@Post
 	@Path("async")
+	@AccessDescriptor(skipFilter=true)
 	public Response handleAsync(@Context HttpServletRequest request,
 								@QueryParam(value = "mailboxId") String mailboxPguid) {
 		// Audit LOG the Attempt to handleAsync
