@@ -48,6 +48,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponses;
 import com.wordnik.swagger.annotations.ApiResponse;
 
@@ -87,8 +88,8 @@ public class MailboxAdminResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "getExecutingProcessors")
-	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") String status,
-			@QueryParam(value = "frmDate") String frmDate, @QueryParam(value = "toDate") String toDate, @QueryParam(value = "hitCounter") String hitCounter) {
+	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "get list of executing processors with the status specified") @ApiParam(name="status", required=false, value="status") String status,
+			@QueryParam(value = "frmDate") @ApiParam(name="frmDate", required=false, value="get list of executing processors from the date specified ") String frmDate, @QueryParam(value = "toDate") @ApiParam(name="toDate", required=false, value="get list of executing processors to the date specified") String toDate, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") String hitCounter) {
 
 		// Audit LOG the Attempt to getExecutingProcessors
 		auditAttempt("getExecutingProcessors");

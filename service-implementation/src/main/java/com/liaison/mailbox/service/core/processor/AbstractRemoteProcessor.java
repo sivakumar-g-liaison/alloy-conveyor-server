@@ -1438,8 +1438,9 @@ public abstract class AbstractRemoteProcessor {
 	 * Method used to construct the ACLManifestRequest
 	 * 
 	 * @return ManifestRequestDTO
+	 * @throws IOException 
 	 */
-	private ManifestRequestDTO constructACLManifestRequest() {
+	private ManifestRequestDTO constructACLManifestRequest() throws IOException {
 
 		LOGGER.info("Constructing the acl manifest request with default values");
 		// Construct Envelope
@@ -1447,10 +1448,10 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct Domain
 		ManifestRequestDomain domain = new ManifestRequestDomain();
-		domain.setName(MailBoxConstants.DOMAIN_NAME);
-		domain.setType(MailBoxConstants.DOMAIN_TYPE);
+		domain.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.domain.name"));
+		domain.setType(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.domain.type"));
 		List<String> roles = new ArrayList<String>();
-		roles.add(MailBoxConstants.ROLE_NAME);
+		roles.add(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.role.name"));
 		domain.setRoles(roles);
 
 		List<ManifestRequestDomain> domains = new ArrayList<ManifestRequestDomain>();
@@ -1458,7 +1459,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct NestedServiceDependency
 		NestedServiceDependencyContraint dependencyConstraint = new NestedServiceDependencyContraint();
-		dependencyConstraint.setServiceName(MailBoxConstants.SERVICE_NAME);
+		dependencyConstraint.setServiceName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.service.name"));
 		dependencyConstraint.setPrimaryId(configurationInstance.getServiceInstance().getName());
 
 		List<NestedServiceDependencyContraint> constraintList = new ArrayList<NestedServiceDependencyContraint>();
@@ -1466,7 +1467,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct Platform
 		ManifestRequestPlatform platform = new ManifestRequestPlatform();
-		platform.setName(MailBoxConstants.PLATFORM_NAME);
+		platform.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.platform.name"));
 		platform.setConstraintList(constraintList);
 		platform.setDomains(domains);
 

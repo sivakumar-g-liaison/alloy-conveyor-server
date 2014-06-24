@@ -1,10 +1,13 @@
-var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$blockUI',
-    function ($rootScope, $scope, $filter, $location, $log, $blockUI) {
+var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$modal', '$blockUI',
+    function ($rootScope, $scope, $filter, $location, $log, $modal, $blockUI) {
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
 
 		$scope.addProcessorBtnValue = 'Add Processors';
+		
+		$scope.isProcessorsAvailable = false;
+		$scope.isMailBoxSaved = false;
 		
         $scope.showMailboxGuid = false;
         //Model for Add MB
@@ -91,8 +94,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         $scope.mailBox.guid = $scope.mailBoxId;
                         $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                         $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-						data.getMailBoxResponse.mailBox.processors.length > 0 ? $scope.addProcessorBtnValue = 'List Processors' 
-						: $scope.addProcessorBtnValue = 'Add Processors';
+						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
+							
+							$scope.addProcessorBtnValue = 'List Processors';
+							$scope.isProcessorsAvailable = true;
+						}	else {
+							$scope.addProcessorBtnValue = 'Add Processors';
+							$scope.isProcessorsAvailable = false;
+						}
                         (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                             data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
@@ -193,7 +202,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         
                 	    block.unblockUI();
                         if (status === 200) {
-
+                             $scope.isMailBoxSaved = true;
                             if (fromAddProcsr) {
                                 $location.$$search = {};
                                 $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
@@ -227,6 +236,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         	}
 
                         	if (data.addMailBoxResponse.response.status === 'success') {
+                        		$scope.isMailBoxSaved = true;
 								if (fromAddProcsr) {
 									$location.$$search = {};
 									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
@@ -258,18 +268,35 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             $('#cancelAction').modal('hide')
         };
         
-        $scope.addProcessor = function () {
+        // Method to display dialog window for saving mailbox before going to processor screen
+        $scope.navigateToProcessorScreen = function() {
+           	if ($scope.formAddMbx.$dirty && !$scope.isMailBoxSaved) {
+                $('#saveMailboxConfirmationModal').modal('show');
+            } else {
+                $location.$$search = {};
+            	$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+            }
+        }
+        
+        // method to close mailbox saving confirmation dialog
+        $scope.closeMailboxConfirmationModal = function() {
+       	 $('#saveMailboxConfirmationModal').modal('hide');
+            $location.$$search = {};
+            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+           
+       }
 
+        $scope.addProcessor = function () {
             fromAddProcsr = true;
             $scope.saveForm();
         };
 
         $scope.saveMailbox = function () {
-
             fromAddProcsr = false;
             $scope.saveForm();
         };
-
+        
+       
         // Property grid
 
         $scope.valueSelectedinSelectionBox = {
@@ -316,7 +343,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                    <div class="alignDiv" ng-switch-when="">\n\
                                          <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
                                             <div ng-switch-when="emailnotificationids">\n\
-           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
+           										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-when="httplistenerauthcheckrequired">\n\
                                                 <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=\'false\'" ng-options="property for property in booleanValues"></select>\n\
@@ -325,14 +352,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                                 <textarea class="form-control" ng-model="COL_FIELD" required ng-init="COL_FIELD='+$rootScope.pipelineId+'" style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
                                             </div>\n\
                                             <div ng-switch-default>\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
+                                                <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
                                           </div>\n\
                                     </div>\n\
                                    <div ng-switch-when="emailnotificationids">\n\
            								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="emailnotificationids" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
-            								 <span class="help-block-custom" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
+            								 <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.pattern}" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
            						   </div>\n\
                                    <div ng-switch-when="httplistenerauthcheckrequired">\n\

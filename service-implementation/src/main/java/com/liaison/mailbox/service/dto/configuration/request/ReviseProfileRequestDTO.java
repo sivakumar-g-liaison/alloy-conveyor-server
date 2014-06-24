@@ -7,24 +7,28 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.swagger.dto.request;
+package com.liaison.mailbox.service.dto.configuration.request;
 
-import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
+import org.codehaus.jackson.map.annotate.JsonRootName;
+
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
  * @author OFS
  *
  */
-public class AddProfileRequest {
-	
-	private AddProfileRequestDTO addProfileRequest;
 
-	public AddProfileRequestDTO getAddProfileRequest() {
-		return addProfileRequest;
+@JsonRootName("reviseProfileRequest")
+public class ReviseProfileRequestDTO {
+
+	private ProfileDTO profile;
+
+	public ProfileDTO getProfile() {
+		return profile;
 	}
 
-	public void setAddProfileRequest(AddProfileRequestDTO addProfileRequest) {
-		this.addProfileRequest = addProfileRequest;
+	public void setProfile(ProfileDTO profile) {
+		this.profile = profile;
 	}
 	
 }

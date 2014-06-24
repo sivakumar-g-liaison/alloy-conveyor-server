@@ -130,11 +130,11 @@
   position: absolute;
   background-color: transparent;
 }
-
-.ngRowCountPicker select {
+/*commented out to resolve page alignment issue in grid*/
+/*.ngRowCountPicker select {
     margin-left: 3px;
     margin-top: 3px;
-}
+}*/
 
 .ngHeaderText {
   padding: 5px;

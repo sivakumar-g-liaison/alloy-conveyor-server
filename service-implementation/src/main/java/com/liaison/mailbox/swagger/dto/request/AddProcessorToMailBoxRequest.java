@@ -20,11 +20,11 @@ public class AddProcessorToMailBoxRequest {
 	
 	private AddProcessorToMailboxRequestDTO addProcessorToMailBoxRequest;
 
-	protected AddProcessorToMailboxRequestDTO getAddProcessorToMailBoxRequest() {
+	public AddProcessorToMailboxRequestDTO getAddProcessorToMailBoxRequest() {
 		return addProcessorToMailBoxRequest;
 	}
 
-	protected void setAddProcessorToMailBoxRequest(
+	public void setAddProcessorToMailBoxRequest(
 			AddProcessorToMailboxRequestDTO addProcessorToMailBoxRequest) {
 		this.addProcessorToMailBoxRequest = addProcessorToMailBoxRequest;
 	}

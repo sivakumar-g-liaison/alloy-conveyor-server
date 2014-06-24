@@ -32,6 +32,7 @@ import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
@@ -76,10 +77,10 @@ public class MailBoxResource extends BaseResource {
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-	@AccessDescriptor(accessMethod = "triggerProfile")
-	public Response triggerProfile(@QueryParam(value = "name") String profileName,
-			@QueryParam(value = "excludeMailbox") String mailboxNamePattern,
-			@QueryParam(value = "shardKey") String shardKey) {
+	@AccessDescriptor(skipFilter=true)
+	public Response triggerProfile(@QueryParam(value = "name") @ApiParam(name="name", required=true, value="The name of the profile to be triggered") String profileName,
+			@QueryParam(value = "excludeMailbox") @ApiParam(name="excludeMailbox", required=false, value="The name of the mailbox to be excluded. The given mailbox is not included in the trigger profile process.") String mailboxNamePattern,
+			@QueryParam(value = "shardKey") @ApiParam(name="name", required=false, value="shared Key") String shardKey) {
 
 		//Audit LOG the Attempt to triggerProfile
 		auditAttempt("triggerProfile");

@@ -20,11 +20,11 @@ public class ReviseProcessorRequest {
 
 	private ReviseProcessorRequestDTO reviseProcessorRequest;
 
-	protected ReviseProcessorRequestDTO getReviseProcessorRequest() {
+	public ReviseProcessorRequestDTO getReviseProcessorRequest() {
 		return reviseProcessorRequest;
 	}
 
-	protected void setReviseProcessorRequest(
+	public void setReviseProcessorRequest(
 			ReviseProcessorRequestDTO reviseProcessorRequest) {
 		this.reviseProcessorRequest = reviseProcessorRequest;
 	}

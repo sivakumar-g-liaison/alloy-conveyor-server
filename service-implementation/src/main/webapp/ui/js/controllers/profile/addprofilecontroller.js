@@ -13,6 +13,13 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             id: "",
             name: ""
         };
+        
+        reviseRequest = $scope.reviseRequest = {
+                reviseProfileRequest: {
+                    profile: {}
+                }
+        };
+        
         // Search Profiles based on profile Name
         $scope.profileName = null;
                
@@ -205,6 +212,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             data: 'profiles',
             //rowTemplate: customRowTemplate,
             enablePaging: true,
+            enableCellEditOnFocus: true,
             showFooter: true,
             canSelectRows: true,
             multiSelect: false,
@@ -213,9 +221,38 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
 			plugins: [new ngGridFlexibleHeightPlugin()],
-			totalServerItems:'totalServerItems'
+			totalServerItems:'totalServerItems',
+			afterSelectionChange: function (row) {
+				if(row.selected == true) {
+					$scope.selectedProfileName = row.entity.name;
+					$scope.selectedProfileId = row.entity.id;
+				}
+			}
         };
-        
+       
+      //Event is triggered on blur after cell is edited
+		$scope.$on('ngGridEventEndCellEdit', function(edittedCellData) {
+			//Check if 
+			if(edittedCellData.targetScope.row.entity.name != $scope.selectedProfileName && 
+				edittedCellData.targetScope.row.entity.id == $scope.selectedProfileId) {
+				
+				$scope.reviseRequest.reviseProfileRequest.profile = edittedCellData.targetScope.row.entity;
+				$scope.restService.put($rootScope.base_url + "/profile", $filter('json')(reviseRequest), "")
+					 .success(function (data, status) {
+						if (data.reviseProfileResponse.response.status == 'failure') {
+							showSaveMessage(data.reviseProfileResponse.response.message, 'error');
+							$scope.loadProfiles();
+						}else {
+							showSaveMessage("Profile is updated succesfully", 'success');
+							$scope.loadProfiles();
+						}
+					 }).error(function (data, status) {
+						showSaveMessage('Failed to update Profile.' + data, 'error');
+						$scope.loadProfiles();
+					});
+			}
+		});
+		
        // To clear profile name in add profile div while clicking on cancel
         $scope.doCancel = function() {
             $scope.triggerForm.$setPristine();

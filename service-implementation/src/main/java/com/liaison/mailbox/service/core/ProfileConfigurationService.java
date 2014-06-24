@@ -13,8 +13,9 @@ package com.liaison.mailbox.service.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
@@ -23,8 +24,10 @@ import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -94,7 +97,67 @@ public class ProfileConfigurationService {
 		}
 
 	}
+	
+	/**
+	 * Updates Profile.
+	 * 
+	 * @param request
+	 *            The request DTO.
+	 * @return The responseDTO.
+	 */
+	public ReviseProfileResponseDTO updateProfile (ReviseProfileRequestDTO request) throws MailBoxConfigurationServicesException {
 
+		LOG.info("Entering into profile updation.");
+		ReviseProfileResponseDTO serviceResponse = new ReviseProfileResponseDTO();
+
+		try {
+
+			ProfileDTO profileDTO = request.getProfile();
+			if (profileDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+			}
+
+			validator.validate(profileDTO);
+
+			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+			
+			ScheduleProfilesRef retreivedProfile = configDao.find(ScheduleProfilesRef.class, profileDTO.getId());
+			if(retreivedProfile == null) {
+				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL);
+			}
+			
+			if(!(retreivedProfile.getSchProfName().equals(profileDTO.getName()))) {
+				
+				if (configDao.findProfileByName(profileDTO.getName()) != null) {
+					throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS);
+				}
+			}
+				
+			retreivedProfile.setSchProfName(profileDTO.getName());
+			profileDTO.copyToEntity(retreivedProfile);
+
+			// update the profile entity
+			configDao.merge(retreivedProfile);
+
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
+			serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(retreivedProfile.getPrimaryKey())));
+
+			LOG.info("Exiting from profile updation.");
+
+			return serviceResponse;
+		
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
+					.getMessage()));
+
+			return serviceResponse;
+		}
+
+	}
+	
 	/**
 	 * Retrieves all profiles.
 	 * 
