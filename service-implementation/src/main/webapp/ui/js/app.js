@@ -94,7 +94,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 	
     $rootScope.restService = RESTService;
     // validation of user input pattern
-    $rootScope.userInputPattern = /^[a-zA-Z0-9\-:_.\s]+$/;
+    $rootScope.userInputPattern = /^[a-zA-Z0-9\-:_.,\s]+$/;
     //$rootScope.inputPatternForCredentialsURI =/^(ftp|ftps|sftp|http|https):\/\/([A-Za-z0-9_.]+:[A-Za-z0-9_*#@!.]+)?@[A-Za-z0-9_.]+([\/[A-Za-z0-9_]*]*)(.[a-z]*?)/
     $rootScope.inputPatternForFolderURI = /^[a-zA-Z0-9_\\\/!@#\$%^&()--+=\/{}.,;'~` ]+$/;
     $rootScope.inputPatternForURL = /^(ftp|ftps|sftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
