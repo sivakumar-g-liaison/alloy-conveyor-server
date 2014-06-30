@@ -1,4 +1,12 @@
-/** * Copyright Liaison Technologies, Inc. All rights reserved. * * This software is the confidential and proprietary information of * Liaison Technologies, Inc. ("Confidential Information").  You shall  * not disclose such Confidential Information and shall use it only in * accordance with the terms of the license agreement you entered into * with Liaison Technologies. */package com.liaison.service.resource.examples;import org.apache.http.HttpResponse;import org.apache.http.client.HttpClient;import org.apache.http.client.methods.HttpGet;import org.apache.http.conn.HttpHostConnectException;import org.apache.http.impl.client.DefaultHttpClient;import org.testng.Assert;import org.testng.annotations.Test;/** *  * @author OFS * */
+/**
+ * Copyright 2014 Liaison Technologies, Inc.
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+package com.liaison.service.resource.examples;import org.apache.http.HttpResponse;import org.apache.http.client.HttpClient;import org.apache.http.client.methods.HttpGet;import org.apache.http.conn.HttpHostConnectException;import org.apache.http.impl.client.DefaultHttpClient;import org.testng.Assert;import org.testng.annotations.Test;/** *  * @author OFS * */
 public class HelloWorldResourceTest {
 	
     

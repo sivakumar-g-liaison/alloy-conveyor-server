@@ -8,6 +8,15 @@
 #STEP5: Create the folder curllogs at /opt/apps/mailbox
 #STEP6: Once triggered you will find the logs at /opt/apps/mailbox/triggerProfileSchedulerlogs/
 #!/bin/bash
+#
+# Copyright 2014 Liaison Technologies, Inc.
+# This software is the confidential and proprietary information of
+# Liaison Technologies, Inc. ("Confidential Information").  You shall
+# not disclose such Confidential Information and shall use it only in
+# accordance with the terms of the license agreement you entered into
+# with Liaison Technologies.
+#
+
 profileName=$1"x"
 DATE=$(date +"%Y-%m-%d-%H%M%s")
 #if [ $profileName == "x" ];

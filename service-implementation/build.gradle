@@ -11,6 +11,7 @@ apply plugin: 'cargo'
 apply plugin: 'flyway'
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
 apply plugin: 'rebel' 
+apply plugin: 'license'
 
 
 // set base name (impacts war name and context path)
@@ -19,6 +20,13 @@ project.war.baseName = 'g2mailboxservice'
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
+
+license {
+	header rootProject.file('codequality/HEADER')
+	ext.year = Calendar.getInstance().get(Calendar.YEAR)
+	skipExistingHeaders true
+	strictCheck true
+}
 
 test {
     // TODO temp exclusion of j2ep

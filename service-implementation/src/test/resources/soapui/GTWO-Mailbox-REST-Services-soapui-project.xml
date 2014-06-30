@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
 <con:soapui-project activeEnvironment="Default" name="GTWO Mailbox REST Services" resourceRoot="" soapui-version="4.6.0" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" wadlVersion="http://wadl.dev.java.net/2009/02" name="GTWO Mailbox REST Services" type="rest" basePath="/g2mailboxservice/rest/" definitionUrl="file:/C:/Documents%20and%20Settings/neelimad/Desktop/ss/GTWO%20Mailbox%20REST%20services.wadl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache/><con:endpoints><con:endpoint>http://10.0.24.76:8080</con:endpoint></con:endpoints><con:resource name="v1/mailbox" path="v1/mailbox"><con:settings/><con:parameters/><con:resource name="/{mailboxid}/processor/{processorid}" path="/{mailboxid}/processor/{processorid}"><con:settings/><con:parameters><con:parameter><con:name>processorid</con:name><con:value xsi:nil="true"/><con:style>TEMPLATE</con:style><con:default xsi:nil="true"/></con:parameter><con:parameter><con:name>mailboxid</con:name><con:value xsi:nil="true"/><con:style>TEMPLATE</con:style><con:default xsi:nil="true"/></con:parameter></con:parameters><con:method name="DELETE - deleteProcessor" method="DELETE"><con:settings/><con:parameters/><con:representation type="RESPONSE" id=""><con:mediaType>application/json</con:mediaType><con:params/><con:element xsi:nil="true"/><con:description xsi:nil="true"/></con:representation><con:request name="Request 1" mediaType="application/json"><con:settings/><con:endpoint>http://10.0.24.76:8080</con:endpoint><con:request/><con:credentials><con:authType>Global HTTP Settings</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters>
   <con:entry key="processorid" value="E61B09167F005FAF0001C1A69A16F8AA"/>
   <con:entry key="mailboxid" value="E611DB227F005FAF0001C1A63DA2F37A"/>

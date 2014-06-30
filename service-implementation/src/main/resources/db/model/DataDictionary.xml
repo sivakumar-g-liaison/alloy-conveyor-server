@@ -1,4 +1,14 @@
 <?xml version="1.0" ?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
 <?xml-stylesheet type="text/xsl" href="D:\Program Files (x86)\ModelRight\ModelRight 4.0 Professional (site)\Report Files\DataDictionary.xsl"?>
 <!DOCTYPE model SYSTEM "D:\Program Files (x86)\ModelRight\ModelRight 4.0 Professional (site)\Report Files\DataDictionary.dtd">
 <model id="ID1" display-name="Model" timestamp="Mon Nov 11 15:39:03 2013">
