@@ -64,6 +64,6 @@ dependencies {
        //gradle dependencies
 
 	// commons-lib dependencies
-	compile 'com.liaison:commons-lib:2.+'
+	compile 'com.liaison:commons-lib:3.+'
 }
 
