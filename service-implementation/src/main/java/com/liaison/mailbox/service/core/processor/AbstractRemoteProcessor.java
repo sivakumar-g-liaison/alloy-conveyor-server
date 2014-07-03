@@ -665,7 +665,9 @@ public abstract class AbstractRemoteProcessor {
 
 			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse, KeyServiceResponse.class);
 			KeySet keySet = (KeySet) mkr.getDataTransferObject();
-			is = new ByteArrayInputStream(keySet.getCurrentPublicKey().getBytes());
+			//GMB-319
+			//is = new ByteArrayInputStream(keySet.getCurrentPublicKey().getBytes());
+			is = new ByteArrayInputStream(Base64.decodeBase64(keySet.getCurrentPublicKey()));
 		}
 
 		return is;
