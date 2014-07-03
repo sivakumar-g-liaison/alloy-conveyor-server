@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;

@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;

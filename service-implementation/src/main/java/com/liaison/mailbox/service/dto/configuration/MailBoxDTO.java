@@ -19,7 +19,7 @@ import javax.xml.bind.JAXBException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.jpa.model.MailBox;

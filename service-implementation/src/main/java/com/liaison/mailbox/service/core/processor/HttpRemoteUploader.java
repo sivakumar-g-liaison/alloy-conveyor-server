@@ -32,7 +32,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
 import com.liaison.fs2.api.FS2Exception;

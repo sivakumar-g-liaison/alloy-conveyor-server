@@ -20,7 +20,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;

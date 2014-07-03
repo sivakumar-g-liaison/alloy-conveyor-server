@@ -41,7 +41,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
