@@ -138,7 +138,27 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				LOGGER.info("The given remote URI is Empty.");
 				throw new MailBoxServicesException("The given remote configuration is Empty.");
 			}
-			Boolean dirExists = true;
+
+			//GMB-320 - Creates directory to the remote folder
+			for (String directory : remotePath.split(File.separator)) {
+
+				if (directory.isEmpty()) {//For when path starts with /
+					continue;
+				}
+
+				try {
+					sftpRequest.getNative().lstat(directory);
+					LOGGER.info("The remote directory{} already exists.", directory);
+					sftpRequest.changeDirectory(directory);
+				} catch (Exception ex) {
+					sftpRequest.getNative().mkdir(directory);
+					LOGGER.info("The remote directory{} is not exist.So created that.", directory);
+					sftpRequest.changeDirectory(directory);
+				}
+			}
+			//GMB-320
+
+			/*Boolean dirExists = true;
 			try {
 				sftpRequest.getNative().lstat(remotePath);
 			} catch (Exception ex) {
@@ -149,7 +169,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				sftpRequest.getNative().mkdir(new File(remotePath).getName());
 			}
 
-			sftpRequest.changeDirectory(remotePath);
+			sftpRequest.changeDirectory(remotePath);*/
 			uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 		}
@@ -282,4 +302,5 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			executeRequest(executionId, fsm);
 		}
 	}
+	
 }
