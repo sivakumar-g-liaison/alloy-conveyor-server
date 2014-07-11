@@ -645,8 +645,15 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JSONException
 	 * @throws IOException
 	 * @throws JAXBException
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyStoreException 
+	 * @throws OperatorCreationException 
+	 * @throws UnrecoverableKeyException 
+	 * @throws CertificateEncodingException 
 	 */
-	private InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException {
+	private InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
 		InputStream is = null;
 
@@ -656,8 +663,12 @@ public abstract class AbstractRemoteProcessor {
 		// To be fetched from DataBase
 		url = url + trustStoreId;
 
-		Map<String, String> headerMap = new HashMap<String, String>();
-		headerMap.put("Content-Type", "application/json");
+		// get acl manifest response from ACL
+		String unsignedData = trustStoreId;
+		String signedData = signRequestData(unsignedData);
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);
+		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
+
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
