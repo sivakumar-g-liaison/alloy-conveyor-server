@@ -140,11 +140,11 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		testFTPS();
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		
-		ftpsRequest.enableSessionReuse(true);
+		//ftpsRequest.enableSessionReuse(true);
 		ftpsRequest.connect();
 		ftpsRequest.login();
 		
-		ftpsRequest.enableDataChannelEncryption();
+		//ftpsRequest.enableDataChannelEncryption();
 		if (getRemoteProcessorProperty() != null) {
 
 			ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
