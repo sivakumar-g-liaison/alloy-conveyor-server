@@ -353,7 +353,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// Renaming the file at the end of the step when everything is done.
 			move(oldPath, newPath);
-			file.setFs2Path(CoreFS2Utils.genURIFromPath(oldPath.toFile().getAbsolutePath()).toString());
+			//file.setFs2Path(CoreFS2Utils.genURIFromPath(oldPath.toFile().getAbsolutePath()).toString());
+			//GSB-1353- After discussion with Joshua and Sean
+			file.setFs2Path(CoreFS2Utils.genURIFromPath(newPath.toFile().getAbsolutePath()).toString());
 			file.setGuid(MailBoxUtil.getGUID());
 		}
 
