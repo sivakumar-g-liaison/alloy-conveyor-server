@@ -34,7 +34,7 @@ import com.liaison.commons.util.client.http.HTTPResponse;
  */
 
 public final class HTTPClientUtil {
-	
+
 	/**
 	 * Download the given HTTP URL web content and return the web content in text format.
 	 * 
@@ -44,10 +44,10 @@ public final class HTTPClientUtil {
 	 * @throws LiaisonException
 	 */
 	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers) throws MalformedURLException, LiaisonException {
-		
+
 		String clientContent = null;
-		URL url = new URL(httpURL);		
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,logger);
+		URL url = new URL(httpURL);
+		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
 		OutputStream output = new HTTPStringOutputStream();
 		request.setOutputStream(output);
 		setHeaders(request, headers);
@@ -58,7 +58,7 @@ public final class HTTPClientUtil {
 		}
 		return clientContent;
 	}
-	
+
 	/**
 	 * Download the given HTTP URL web content and write the web content in file. 
 	 * 
@@ -70,11 +70,11 @@ public final class HTTPClientUtil {
 	 * @throws LiaisonException
 	 */
 	public static File getHTTPResponseInFile(Logger logger, String httpURL, String filePath, Map<String, String> headers) throws MalformedURLException, FileNotFoundException, LiaisonException {
-		
-		URL url = new URL(httpURL);		
+
+		URL url = new URL(httpURL);
 		File file = new File(filePath);
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET,url,logger);
-		FileOutputStream output = new FileOutputStream(file);			
+		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
+		FileOutputStream output = new FileOutputStream(file);
 		request.setOutputStream(output);
 		setHeaders(request, headers);
 		HTTPResponse reponse = request.execute();
@@ -83,9 +83,9 @@ public final class HTTPClientUtil {
 		}
 		return null;
 	}
-	
+
 	private static void setHeaders(HTTPRequest request, Map<String, String> headers) {
-		
+
 		if (headers != null && !headers.isEmpty()) {
 			for (String key : headers.keySet()) {
 				request.addHeader(key, headers.get(key));

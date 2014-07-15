@@ -105,7 +105,7 @@ public abstract class BaseServiceTest {
 			throws MalformedURLException, FileNotFoundException, LiaisonException {
 
 		URL url = new URL(URL);
-		HTTPRequest request = new HTTPRequest(method, url, logger);
+		HTTPRequest request = new HTTPRequest(method, url);
 		request.setSocketTimeout(60000);
 		request.addHeader("Content-Type", "application/json");
 		output = new HTTPStringOutputStream();

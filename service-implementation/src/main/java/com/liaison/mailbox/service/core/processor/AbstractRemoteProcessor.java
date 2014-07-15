@@ -84,7 +84,6 @@ import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Credential;
@@ -144,32 +143,6 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		return remoteProcessorProperties;
-	}
-
-	/**
-	 * This will return a HTTP,HTTPS or FTPS client based on the processor type.
-	 * 
-	 * @return The Object based on processor type.
-	 */
-	public Object getClient() {
-
-		Protocol foundProtocolType = Protocol.findByCode(configurationInstance.getProcsrProtocol());
-
-		switch (foundProtocolType) {
-
-		case FTP:
-			return new G2FTPSClient();
-		case FTPS:
-			return new G2FTPSClient();
-		case SFTP:
-			return new G2SFTPClient();
-		case HTTP:
-			return new HTTPRequest(null, LOGGER);
-		case HTTPS:
-			return new HTTPRequest(null, LOGGER);
-		default:
-			return null;
-		}
 	}
 
 	/**
@@ -557,7 +530,7 @@ public abstract class AbstractRemoteProcessor {
 
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
 		// Create HTTPRequest and set the properties
-		HTTPRequest request = new HTTPRequest(null, LOGGER);
+		HTTPRequest request = new HTTPRequest(null);
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = getRemoteProcessorProperties();
@@ -1604,7 +1577,7 @@ public abstract class AbstractRemoteProcessor {
 		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
 		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
 		// make deserializer use JAXB annotations (only)
-		mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
 		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
 		return ummarshaledObject;
 	}

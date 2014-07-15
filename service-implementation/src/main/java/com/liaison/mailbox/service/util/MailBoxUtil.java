@@ -13,12 +13,9 @@ package com.liaison.mailbox.service.util;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
-import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -31,15 +28,9 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.liaison.commons.acl.manifest.dto.ACLManifest;
-import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
-import com.liaison.commons.acl.manifest.dto.Platform;
-import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * Utilities for MailBox.

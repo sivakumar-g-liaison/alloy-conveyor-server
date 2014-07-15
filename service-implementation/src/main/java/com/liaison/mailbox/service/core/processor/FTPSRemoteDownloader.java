@@ -48,11 +48,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  * 
  */
-public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
-		MailBoxProcessor {
+public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
-	private static final Logger LOGGER = LogManager
-			.getLogger(FTPSRemoteDownloader.class);
+	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
 	private FTPSRemoteDownloader() {
@@ -68,11 +66,8 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 		LOGGER.info("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
-			fsm.handleEvent(fsm
-					.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptEngineUtil.executeJavaScript(
-					configurationInstance.getJavaScriptUri(), "init", this,
-					LOGGER);
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this, LOGGER);
 
 		} else {
 			// FTPSRequest executed through Java
@@ -103,14 +98,10 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * 
 	 */
 	@Override
-	public G2FTPSClient getClientWithInjectedConfiguration()
-			throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException,
-			SymmetricAlgorithmException,
-			com.liaison.commons.exception.LiaisonException,
-			NoSuchAlgorithmException, CertificateException, KeyStoreException,
-			JSONException, UnrecoverableKeyException,
-			OperatorCreationException, CMSException,
+	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException,
+			com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException,
+			KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException,
 			BootstrapingFailedException {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
@@ -141,14 +132,10 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * @throws BootstrapingFailedException
 	 * 
 	 */
-
-	protected void executeRequest() throws MailBoxServicesException,
-			LiaisonException, IOException, FS2Exception, URISyntaxException,
-			JAXBException, SymmetricAlgorithmException, JsonParseException,
-			com.liaison.commons.exception.LiaisonException,
-			NoSuchAlgorithmException, CertificateException, KeyStoreException,
-			JSONException, UnrecoverableKeyException,
-			OperatorCreationException, CMSException,
+	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
+			URISyntaxException, JAXBException, SymmetricAlgorithmException, JsonParseException,
+			com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException,
+			KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException,
 			BootstrapingFailedException {
 
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
@@ -157,8 +144,8 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 		ftpsRequest.connect();
 		ftpsRequest.login();
 		ftpsRequest.enableDataChannelEncryption();
-		if (getRemoteProcessorProperty() != null) {
 
+		if (getRemoteProcessorProperty() != null) {
 			ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
 			ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
 		}
@@ -189,10 +176,8 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 	 * @throws SftpException
 	 * 
 	 */
-
-	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir,
-			String localFileDir) throws IOException, LiaisonException,
-			URISyntaxException, FS2Exception, MailBoxServicesException,
+	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
+			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException,
 			com.liaison.commons.exception.LiaisonException {
 
 		String dirToList = "";
@@ -219,7 +204,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 					ftpClient.changeDirectory(dirToList);
 					processResponseLocation(localDir);
 
-					try {//GSB-1337,GSB-1336
+					try {// GSB-1337,GSB-1336
 
 						fos = new FileOutputStream(localDir);
 						bos = new BufferedOutputStream(fos);
