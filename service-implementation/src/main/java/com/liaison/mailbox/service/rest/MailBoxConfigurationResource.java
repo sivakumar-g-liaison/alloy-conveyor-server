@@ -941,20 +941,18 @@ public class MailBoxConfigurationResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "searchMailBox")
-	public Response searchMailBox(@Context HttpServletRequest request, @QueryParam(value = "name") @ApiParam(name="name", required=false, value="Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
-			@QueryParam(value = "profile") @ApiParam(name="profile", required=false, value="Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") String hitCounter) {
+	public Response searchMailBox(@Context HttpServletRequest request,
+			@QueryParam(value = "name") @ApiParam(name="name", required=false, value="Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
+			@QueryParam(value = "profile") @ApiParam(name="profile", required=false, value="Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName,
+			@QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") String hitCounter) {
 		
 		//Audit LOG the Attempt to searchMailBox
 		auditAttempt("searchMailBox");
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
-		
-		try {
 
-			requestStream = request.getInputStream();
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+		try {
 
 			// search the mailbox from the given details
 			SearchMailBoxResponseDTO serviceResponse = null;

@@ -444,9 +444,7 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-
 		Files.write(file.toPath(), response.toByteArray());
-
 		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
 	}
 
@@ -483,7 +481,6 @@ public abstract class AbstractRemoteProcessor {
 		ProcessorConfigurationService service = new ProcessorConfigurationService();
 		DynamicPropertiesDTO dynamicPropertiesDTO = JAXBUtility.unmarshalFromJSON(dynamicProperties, DynamicPropertiesDTO.class);
 		service.addOrUpdateProcessorProperties(String.valueOf(configurationInstance.getPrimaryKey()), dynamicPropertiesDTO);
-
 	}
 
 	public Object getCertificate() {
