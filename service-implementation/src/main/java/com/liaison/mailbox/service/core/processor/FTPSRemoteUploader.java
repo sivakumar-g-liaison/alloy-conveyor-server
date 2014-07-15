@@ -137,7 +137,6 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	protected void executeRequest(String executionId, MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
-		testFTPS();
 		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
 		
 		//ftpsRequest.enableSessionReuse(true);
@@ -271,46 +270,5 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 			throw new MailBoxServicesException("The given payload configuration '" + localDir + "' does not exist.");
 		}
 	}
-	
-	public void testFTPS() {
 
-		try {
-			
-			LOGGER.info("Entering into test ftps method.");
-			
-			G2FTPSClient ftpsClient = new G2FTPSClient();
-			ftpsClient.setDiagnosticLogger(LOGGER);
-			ftpsClient.setCommandLogger(LOGGER);
-			ftpsClient.setURI("ftps://10.146.16.12:21");
-			ftpsClient.setUser("ftps0708");
-			ftpsClient.setPassword("Password#01");
-			ftpsClient.setTrustManagerKeyStore("/data/http/files/test.jks");
-			ftpsClient.setTrustManagerKeyStorePassword("Password#01");
-	
-			if (ftpsClient.connect()) {
-				System.out.println(ftpsClient.login());
-				System.out.println("connected successfully.");
-				System.out.println(ftpsClient.currentWorkingDirectory());
-				ftpsClient.setPassive(true);
-				ftpsClient.changeDirectory("/inbox");
-				/*for (FTPFile s : ftpsClient.getNative().listFiles()) {
-					if (s.isFile()) {
-						ftpsClient.getFile(s.getName(), new BufferedOutputStream(new FileOutputStream("/data/http/files/down" + s.getName())));
-					}
-				}*/
-	
-				File f = new File("/data/http/files/up/GEM_UI_SCREENS.doc");
-				FileInputStream ip = new FileInputStream(f);
-				System.out.println(ftpsClient.putFile("test_tweak.doc", ip));
-				ip.close();
-				//ftpsClient.deleteFile("test4.txt");
-			}
-	
-			ftpsClient.disconnect();
-			LOGGER.info("Stops test ftps method.");
-		} catch (Exception e) {
-			LOGGER.info("Error in test ftps method.");
-			e.printStackTrace();
-		}
-	}
 }

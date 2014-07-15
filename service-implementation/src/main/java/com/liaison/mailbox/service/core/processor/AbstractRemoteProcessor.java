@@ -1063,8 +1063,7 @@ public abstract class AbstractRemoteProcessor {
 				InputStream instream = fetchTrustStore(trustStoreID);
 
 				if (instream == null) {
-					throw new MailBoxServicesException(
-							Messages.CERTIFICATE_RETRIEVE_FAILED);
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
 				}
 
 				try {
