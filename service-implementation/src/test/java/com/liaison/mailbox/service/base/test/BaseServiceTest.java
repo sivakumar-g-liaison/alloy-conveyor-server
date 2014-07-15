@@ -106,6 +106,7 @@ public abstract class BaseServiceTest {
 
 		URL url = new URL(URL);
 		HTTPRequest request = new HTTPRequest(method, url);
+		request.setLogger(logger);
 		request.setSocketTimeout(60000);
 		request.addHeader("Content-Type", "application/json");
 		output = new HTTPStringOutputStream();

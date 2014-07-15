@@ -48,6 +48,7 @@ public final class HTTPClientUtil {
 		String clientContent = null;
 		URL url = new URL(httpURL);
 		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
+		request.setLogger(logger);
 		OutputStream output = new HTTPStringOutputStream();
 		request.setOutputStream(output);
 		setHeaders(request, headers);
@@ -74,6 +75,7 @@ public final class HTTPClientUtil {
 		URL url = new URL(httpURL);
 		File file = new File(filePath);
 		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
+		request.setLogger(logger);
 		FileOutputStream output = new FileOutputStream(file);
 		request.setOutputStream(output);
 		setHeaders(request, headers);

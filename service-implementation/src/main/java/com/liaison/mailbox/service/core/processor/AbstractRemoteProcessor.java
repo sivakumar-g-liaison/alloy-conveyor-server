@@ -528,6 +528,7 @@ public abstract class AbstractRemoteProcessor {
 		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
 		// Create HTTPRequest and set the properties
 		HTTPRequest request = new HTTPRequest(null);
+		request.setLogger(LOGGER);
 
 		// Convert the json string to DTO
 		RemoteProcessorPropertiesDTO properties = getRemoteProcessorProperties();
