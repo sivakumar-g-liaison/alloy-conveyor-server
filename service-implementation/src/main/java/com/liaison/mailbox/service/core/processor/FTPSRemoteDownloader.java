@@ -166,15 +166,13 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 		String path = getPayloadURI();
 		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given payload URI is Empty.");
-			throw new MailBoxServicesException(
-					"The given payload configuration is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.");
 		}
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(remotePath)) {
 			LOGGER.info("The given remote URI is Empty.");
-			throw new MailBoxServicesException(
-					"The given remote configuration is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.");
 		}
 
 		ftpsRequest.changeDirectory(path);
@@ -202,34 +200,38 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements
 			dirToList += currentDir;
 		}
 		FTPFile[] files = ftpClient.getNative().listFiles(dirToList);
+		BufferedOutputStream bos = null;
+		FileOutputStream fos = null;
 
 		if (files != null) {
 
 			for (FTPFile file : files) {
 
-				// File file = new File(fileName);
-
 				if (file.getName().equals(".") || file.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
 				}
+
 				String currentFileName = file.getName();
 				if (file.isFile()) {
-					// String remotePath = dirToList + "/" + currentFileName;
-					String localDir = localFileDir + File.separatorChar
-							+ currentFileName;
+
+					String localDir = localFileDir + File.separatorChar + currentFileName;
 					ftpClient.changeDirectory(dirToList);
 					processResponseLocation(localDir);
-					ftpClient.getFile(currentFileName,
-							new BufferedOutputStream(new FileOutputStream(
-									localDir)));
 
+					try {//GSB-1337,GSB-1336
+
+						fos = new FileOutputStream(localDir);
+						bos = new BufferedOutputStream(fos);
+						ftpClient.getFile(currentFileName, bos);
+					} finally {
+						bos.close();
+						fos.close();
+					}
 				} else {
 
-					String localDir = localFileDir + File.separatorChar
-							+ currentFileName;
-					String remotePath = dirToList + File.separatorChar
-							+ currentFileName;
+					String localDir = localFileDir + File.separatorChar + currentFileName;
+					String remotePath = dirToList + File.separatorChar + currentFileName;
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
