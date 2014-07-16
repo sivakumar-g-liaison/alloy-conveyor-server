@@ -39,9 +39,10 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String MBOX_NAME = "mbox_name";
 	public static final String GET_MBX = "findMailBoxes";
 	public static final String SCHD_PROF_NAME = "schd_name";
+	public static final String TENANCY_KEY = "tenancy_key";
 
-	public Set<MailBox> find(String mbxName, String profName);
+	public Set<MailBox> find(String mbxName, String profName, String tenancyKey);
 
-	public Set<MailBox> findByName(String mbxName);
+	public Set<MailBox> findByName(String mbxName, String tenancyKey);
 	
 }

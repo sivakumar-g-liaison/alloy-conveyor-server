@@ -13,9 +13,11 @@ package com.liaison.mailbox.service.util;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -28,9 +30,15 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.liaison.commons.acl.manifest.dto.ACLManifest;
+import com.liaison.commons.acl.manifest.dto.Platform;
+import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
+import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
  * Utilities for MailBox.
@@ -222,6 +230,31 @@ public class MailBoxUtil {
 	}*/
 	
 	/**
+	 * Method to get the tenancy key from acl manifest Json
+	 * 
+	 * @param String - aclManifestJson
+	 * @return
+	 * @throws IOException
+	 */
+	public static String  getTenancyKeyFromACLManifest(String aclManifestJson) throws IOException {
+		
+		LOGGER.info("deserializing the acl manifest DTO from manifest json");
+		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false);
+		LOGGER.info("acl Manifest DTO deserialized successfully");
+		
+		//retrieve the very first platform object from acl manifest json
+		Platform platform = aclManifestDTO.getPlatform().get(0);
+		
+		// retrieve the domain name from the very first RBAC available in platform
+		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
+		LOGGER.info("Retrieving tenancy key from acl manifest");
+		String domainName = (roleBasedAccessControls != null)? roleBasedAccessControls.get(0).getDomainName():null;
+		LOGGER.info("Tenancy key retrieved is {}", domainName);
+		return domainName;
+
+	}
+	
+	/**
 	 * Method to retrieve the base64 decoded acl manifest json
 	 * 
 	 * @param manifestJson
@@ -229,7 +262,7 @@ public class MailBoxUtil {
 	 * @throws IOException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	/*public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
+	public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
 		
 		String decodedManifestJson = null;
 		
@@ -262,6 +295,6 @@ public class MailBoxUtil {
 		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
 		LOGGER.info("acl manifest decoded successfully");
 		return decodedManifestJson;
-	}*/
+	}
 
 }

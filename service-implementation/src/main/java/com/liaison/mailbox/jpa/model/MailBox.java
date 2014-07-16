@@ -44,7 +44,9 @@ public class MailBox implements Identifiable {
 	private List<MailBoxProperty> mailboxProperties;
 	private List<Processor> mailboxProcessors;
 	private List<MailboxServiceInstance> mailboxServiceInstances;
+	private String tenancyKey;
 	
+
 	public MailBox() {
 	}
 	
@@ -138,6 +140,15 @@ public class MailBox implements Identifiable {
 
 	public void setMailboxServiceInstances(List<MailboxServiceInstance> mailboxServiceInstances) {
 		this.mailboxServiceInstances = mailboxServiceInstances;
+	}
+	
+	@Column(name = "TENANCY_KEY", nullable = false, length = 32)
+	public String getTenancyKey() {
+		return tenancyKey;
+	}
+
+	public void setTenancyKey(String tenancyKey) {
+		this.tenancyKey = tenancyKey;
 	}
 
 	@Override

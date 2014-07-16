@@ -102,15 +102,16 @@ public enum Messages {
 	READ_JAVA_PROPERTIES_SUCCESSFULLY("%s properties read successfully."),
 	READ_JAVA_PROPERTIES_FAILED("%s properties read failed."),
 	
-	//retrieving service instance id from acl manifest
-	/*SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Manifest does not contain the Service Instance Id for mailbox."),
-	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),*/
+	//retrieving tenancy key from acl manifest
+	TENANCY_KEY_RETRIEVAL_FAILED("Manifest does not contain the Tenancy Key for mailbox."),
+	TENANCY_KEY_MISMATCH("Tenancy Key present Manifest does not match the Tenancy Key of mailbox."),
+	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),
 
 	READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
 	
 	//retrieving service instance id from query parameter
 	SERVICE_INSTANCE_ID_NOT_AVAILABLE("Service Instance ID is not available as query parameter.");
-
+	
 	private String value;
 
 	// some caching to provide a better search algorithm

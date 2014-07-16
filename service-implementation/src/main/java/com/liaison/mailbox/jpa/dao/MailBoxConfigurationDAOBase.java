@@ -40,7 +40,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> find(String mbxName, String profName) {
+	public Set<MailBox> find(String mbxName, String profName, String tenancyKey) {
 
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
@@ -52,13 +52,15 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) like :" + TENANCY_KEY )
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
 					.append(" order by mbx.mbxName");
-
+ 
 			List<?> object = em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+					.setParameter(TENANCY_KEY, (tenancyKey == null) ? "" : tenancyKey.toLowerCase())
 					.getResultList();
 			Iterator<?> iter = object.iterator();
 
@@ -81,7 +83,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> findByName(String mbxName) {
+	public Set<MailBox> findByName(String mbxName, String tenancyKey) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
@@ -89,10 +91,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 
 			StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME);
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) like :" + TENANCY_KEY);
 					
 			List<?> object = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
+					.setParameter(TENANCY_KEY, tenancyKey.toLowerCase())
 					.getResultList();
 
 			Iterator<?> iter = object.iterator();

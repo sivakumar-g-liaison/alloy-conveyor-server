@@ -60,6 +60,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 	private String jsonRequest;
 	private HTTPRequest request;
 	private String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
+	private String aclManifest = "eyAgDQogICAiZW52ZWxvcGUiOnsgIA0KICAgICAgImNyZWF0ZWREYXRlIjoiMjAxNC0wNC0yM1QxNjowNzoxOC0wNDAwIiwNCiAgICAgICJnbG9iYWxJZCI6IiIsDQogICAgICAicGFyZW50SWQiOiIiLA0KICAgICAgInByb2Nlc3NJZCI6IiINCiAgIH0sDQogICAicGxhdGZvcm0iOlsgIA0KICAgICAgeyAgDQogICAgICAgICAicGxhdGZvcm1OYW1lIjoiU0VSVklDRV9CUk9LRVIiLA0KICAgICAgICAgInJvbGVCYXNlZEFjY2Vzc0NvbnRyb2wiOlsgIA0KICAgICAgICAgICAgeyAgDQogICAgICAgICAgICAgICAiZG9tYWluTmFtZSI6IlNFUlZJQ0VfQlJPS0VSIiwNCiAgICAgICAgICAgICAgICJkb21haW5UeXBlIjoiU09BX1NFUlZJQ0UiLA0KICAgICAgICAgICAgICAgInJvbGUiOlsgIA0KICAgICAgICAgICAgICAgICAgIk1haWxib3hBZG1pbiINCiAgICAgICAgICAgICAgIF0sDQogICAgICAgICAgICAgICAicHJpdmlsZWdlIjpbICANCiAgICAgICAgICAgICAgICAgIHsgIA0KICAgICAgICAgICAgICAgICAgICAgInJlc291cmNlIjoicHJvY2VzcyIsDQogICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VUeXBlIjoiUmVzdFJlc291cmNlIiwNCiAgICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZUNvbnRleHQiOiIqIiwNCiAgICAgICAgICAgICAgICAgICAgICJwZXJtaXNzaW9uIjpbICANCiAgICAgICAgICAgICAgICAgICAgICAgIHsgIA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgInZhbHVlIjoiKiIsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAicGVybWlzc2lvblR5cGUiOiJXSElURUxJU1QiDQogICAgICAgICAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICAgICAgICAgICBdDQogICAgICAgICAgICAgICAgICB9LA0KICAgICAgICAgICAgICAgICAgeyAgDQogICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2UiOiJ2MS9tYWlsYm94IiwNCiAgICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZVR5cGUiOiJSZXN0UmVzb3VyY2UiLA0KICAgICAgICAgICAgICAgICAgICAgInJlc291cmNlQ29udGV4dCI6IioiLA0KICAgICAgICAgICAgICAgICAgICAgInBlcm1pc3Npb24iOlsgIA0KICAgICAgICAgICAgICAgICAgICAgICAgeyAgDQogICAgICAgICAgICAgICAgICAgICAgICAgICAidmFsdWUiOiIqIiwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICJwZXJtaXNzaW9uVHlwZSI6IldISVRFTElTVCINCiAgICAgICAgICAgICAgICAgICAgICAgIH0sDQogICAgICAgICAgICAgICAgICAgICAgICB7ICANCiAgICAgICAgICAgICAgICAgICAgICAgICAgICJ2YWx1ZSI6ImRlYWN0aXZhdGVNYWlsQm94IiwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICJwZXJtaXNzaW9uVHlwZSI6IldISVRFTElTVCINCiAgICAgICAgICAgICAgICAgICAgICAgIH0NCiAgICAgICAgICAgICAgICAgICAgIF0NCiAgICAgICAgICAgICAgICAgIH0sDQogICAgICAgICAgICAgICAgICB7ICANCiAgICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZSI6InYxL21haWxib3giLA0KICAgICAgICAgICAgICAgICAgICAgInJlc291cmNlVHlwZSI6IlJlc3RSZXNvdXJjZSIsDQogICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VDb250ZXh0IjoiKiIsDQogICAgICAgICAgICAgICAgICAgICAicGVybWlzc2lvbiI6WyAgDQogICAgICAgICAgICAgICAgICAgICAgICB7ICANCiAgICAgICAgICAgICAgICAgICAgICAgICAgICJ2YWx1ZSI6InNlYXJjaE1haWxCb3giLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgInBlcm1pc3Npb25UeXBlIjoiV0hJVEVMSVNUIg0KICAgICAgICAgICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgICAgICAgICAgXQ0KICAgICAgICAgICAgICAgICAgfSwNCiAgICAgICAgICAgICAgICAgIHsgIA0KICAgICAgICAgICAgICAgICAgICAgInJlc291cmNlIjoidjEvbWFpbGJveCIsDQogICAgICAgICAgICAgICAgICAgICAicmVzb3VyY2VUeXBlIjoiUmVzdFJlc291cmNlIiwNCiAgICAgICAgICAgICAgICAgICAgICJyZXNvdXJjZUNvbnRleHQiOiIqIiwNCiAgICAgICAgICAgICAgICAgICAgICJwZXJtaXNzaW9uIjpbICANCiAgICAgICAgICAgICAgICAgICAgICAgIHsgIA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgInZhbHVlIjoic2VhcmNoTWFpbEJveCIsDQogICAgICAgICAgICAgICAgICAgICAgICAgICAicGVybWlzc2lvblR5cGUiOiJXSElURUxJU1QiDQogICAgICAgICAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICAgICAgICAgICBdDQogICAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICAgICBdDQogICAgICAgICAgICB9DQogICAgICAgICBdLA0KICAgICAgICAgIm5lc3RlZFNlcnZpY2VEZXBlbmRlbmN5Q29udHJhaW50IjpbICANCiAgICAgICAgICAgIHsgIA0KICAgICAgICAgICAgICAgInNlcnZpY2VOYW1lIjoiTWFpbGJveCIsDQogICAgICAgICAgICAgICAicHJpbWFyeUlkIjoiOTAzMkE0OTEwQTBBNTI5ODBBMEVDNjc2REIzM0ExMDIiLA0KICAgICAgICAgICAgICAgIm5lc3RlZFNlcnZpY2VJZCI6WyAgDQoNCiAgICAgICAgICAgICAgIF0sDQogICAgICAgICAgICAgICAibmVzdGVkU2VydmljZURlcGVuZGVuY3kiOlsgIA0KDQogICAgICAgICAgICAgICBdDQogICAgICAgICAgICB9DQogICAgICAgICBdDQogICAgICB9DQogICBdDQp9DQo=";
 
 	/**
 	 * @throws java.lang.Exception
@@ -104,6 +105,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Get the mailbox
 		url = getBASE_URL() +"/"+responseDTO.getMailBox().getGuid()+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -150,6 +152,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -160,6 +163,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Get the mailbox
 		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -206,6 +210,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -216,6 +221,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Deactivate the mailbox
 		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid();
 		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -256,6 +262,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
+		request.addHeader("acl-manifest", aclManifest);
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
@@ -271,6 +278,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 	    url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -280,6 +288,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Get the mailbox
 		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -327,6 +336,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -337,6 +347,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Get the mailbox
 		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -372,6 +383,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -382,6 +394,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Get the mailbox
 		url = getBASE_URL() + "/" + responseDTO.getMailBox().getGuid()+ "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -416,6 +429,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -443,6 +457,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Get the mailbox
 		String url = getBASE_URL() + "/" + "3434"+"?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -476,6 +491,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String url = getBASE_URL() + "/" + "fasdfasdfdas" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -505,6 +521,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String url = getBASE_URL() + "/" + "3432432" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -538,6 +555,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String url = getBASE_URL() + "/" + "123456" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -563,6 +581,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		// Deactivate the mailbox
 		String url = getBASE_URL() + "/" + "123456";
 		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -592,6 +611,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 
 		String url = getBASE_URL() + "/" + "3432432" + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.PUT, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
@@ -624,6 +644,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -658,6 +679,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -690,6 +712,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -741,6 +764,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		//search mailbox by mailbox name
 		url = getBASE_URL() + "/?name=" + requestDTO.getMailBox().getName();
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -771,6 +795,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "/?name=";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -792,6 +817,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		
 		String url = getBASE_URL() + "/?name=&profile=";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
+		request.addHeader("acl-manifest", aclManifest);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
