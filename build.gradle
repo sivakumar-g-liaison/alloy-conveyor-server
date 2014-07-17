@@ -137,6 +137,9 @@ project(':karyon-admin-web') {
         compile 'com.netflix.pytheas:pytheas-core:1.11'
         testCompile 'org.testng:testng:6.8'
 
+//little hack for development
+        compile fileTree(dir: '../libs', include: '*.jar')
+
         runtime 'org.freemarker:freemarker:2.3.19'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
     }

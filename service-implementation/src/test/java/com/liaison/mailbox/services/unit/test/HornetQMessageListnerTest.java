@@ -18,8 +18,7 @@ import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
-import com.liaison.mailbox.service.util.HornetQJMSUtil;
+import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 
 
 
@@ -38,24 +37,9 @@ public class HornetQMessageListnerTest {
 	 * @throws Exception
 	 */
 	 public void postToQueue() throws NamingException, JMSException,Exception{
-		 
-		HornetQJMSUtil util = new HornetQJMSUtil();
-	    String propertyFileName = "g2mailboxservice-dev.properties";
-		String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-		InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-		Properties properties = new Properties();
-		properties.load(is);
-		String providerURL = properties.getProperty("g2.queueing.server.url");
-		String queueName =properties.getProperty("triggered.profile.processor.queue.name");
 
-		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
-		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-		jndidto.setProviderURL(providerURL);
-		jndidto.setQueueName(queueName);
-		jndidto.setUrlPackagePrefixes("org.jboss.naming");
 		for(int i=0;i<2;i++){
-			jndidto.setMessage("mynewID"+i);
-			util.postMessage(jndidto);
+            ProcessorQueue.getInstance().pushMessages("mynewID"+i);
 		}
            System.out.println("Done posting");		 
 	 }

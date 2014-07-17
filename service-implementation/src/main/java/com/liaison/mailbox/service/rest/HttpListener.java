@@ -33,6 +33,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import oracle.jdbc.proxy.annotation.Post;
 
 import org.apache.commons.codec.binary.Base64;
@@ -58,11 +59,9 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
-import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
-import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.SessionContext;
 import com.liaison.usermanagement.service.client.UserManagementClient;
@@ -522,20 +521,10 @@ public class HttpListener extends BaseResource {
 		postToQueue(workTicket);
 	}
 
+
 	protected void postToQueue(String message) throws Exception {
-		DecryptableConfiguration config = LiaisonConfigurationFactory
-				.getConfiguration();
-		String providerURL = config.getString(CONFIGURATION_QUEUE_PROVIDER_URL);
-		String queueName = config.getString(CONFIGURATION_QUEUE_NAME);
+        SweeperQueue.getInstance().pushMessages(message);
 
-		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
-		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-		jndidto.setProviderURL(providerURL);
-		jndidto.setQueueName(queueName);
-		jndidto.setUrlPackagePrefixes("org.jboss.naming");
-		jndidto.setMessage(message);
-
-		HornetQJMSUtil.postMessage(jndidto);
 	}
 
 	/**
