@@ -277,6 +277,8 @@ public class MailBoxUtil {
 		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
 		LOGGER.info("Retrieving tenancy key from acl manifest");
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
+				// TODO: once guid is available in domain, need to make changes to use guid instead of name 
+				//also need  to do changes to match latest ACLManifest structure.
 				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
 				tenancyKeys.add(tenancyKey);
