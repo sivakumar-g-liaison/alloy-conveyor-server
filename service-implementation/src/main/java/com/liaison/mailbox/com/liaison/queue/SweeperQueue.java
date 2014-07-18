@@ -1,6 +1,7 @@
 package com.liaison.mailbox.com.liaison.queue;
 
-import com.liaison.commons.com.liaison.commons.messagbus.jms.HornetQRecoveringClientPool;
+
+import com.liaison.commons.messagbus.jms.HornetQRecoveringClientPool;
 
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
