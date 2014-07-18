@@ -10,6 +10,35 @@ com.netflix.karyon.health.check.handler.classname=com.liaison.mailbox.service.he
 # Comment this property if you need eureka integration and populate eureka-client.properties with your environment details.
 com.netflix.karyon.eureka.disable=true
 
+
+com.liaison.jms.queuename.sweeper=G2Queue
+com.liaison.jms.hostname.sweeper=10.146.16.148
+com.liaison.jms.port.sweeper=5049
+#-1 is infinite
+com.liaison.jms.receive.attempts.sweeper=-1
+#com.liaison.jms.receive.timeout.sweeper
+#-1 is infinite
+com.liaison.jms.send.attempts.sweeper=-1
+#com.liaison.jms.send.timeout.sweeper
+#com.liaison.jms.client.count.sweeper
+#com.liaison.jms.init.attempts.sweeper
+#com.liaison.jms.init.timeout.sweeper
+#com.liaison.jms.queue.member.reset.interval.millis.sweeper
+
+com.liaison.jms.queuename.processor=mailboxProcessorQueue
+com.liaison.jms.hostname.processor=10.146.16.148
+com.liaison.jms.port.processor=5049
+#-1 is infinite
+com.liaison.jms.receive.attempts.processor=-1
+#com.liaison.jms.receive.timeout.processor
+#-1 is infinite
+com.liaison.jms.send.attempts.processor
+#com.liaison.jms.send.timeout.processor
+#com.liaison.jms.client.count.processor
+#com.liaison.jms.init.attempts.processor
+#com.liaison.jms.init.timeout.processor
+#com.liaison.jms.queue.member.reset.interval.millis.processor
+
 ########################################################DATABASE CONFIGURATIONS############################################################
 
 # database connectivity properties
