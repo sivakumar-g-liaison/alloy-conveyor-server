@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +39,7 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
@@ -236,7 +238,7 @@ public class MailBoxUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String  getTenancyKeyFromACLManifest(String aclManifestJson) throws IOException {
+	/*public static String  getTenancyKeyFromACLManifest(String aclManifestJson) throws IOException {
 		
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
 		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false);
@@ -252,6 +254,47 @@ public class MailBoxUtil {
 		LOGGER.info("Tenancy key retrieved is {}", domainName);
 		return domainName;
 
+	}*/
+	
+	/**
+	 * Method to get all tenancy keys from acl manifest Json
+	 * 
+	 * @param String - aclManifestJson
+	 * @return list of tenancy keys
+	 * @throws IOException
+	 */
+	public static List <TenancyKeyDTO>  getTenancyKeysFromACLManifest(String aclManifestJson) throws IOException {
+		
+		LOGGER.info("deserializing the acl manifest DTO from manifest json");
+		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false,false);
+		LOGGER.info("acl Manifest DTO deserialized successfully");
+		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
+		
+		//retrieve the very first platform object from acl manifest json
+		Platform platform = aclManifestDTO.getPlatform().get(0);	
+		
+		// retrieve all domains present in platform
+		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
+		LOGGER.info("Retrieving tenancy key from acl manifest");
+		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
+				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
+				tenancyKey.setName(rbac.getDomainName());
+				tenancyKeys.add(tenancyKey);
+		
+		}
+		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
+		return tenancyKeys;
+
+	}
+	
+	public static List <String> getTenancyKeyGuidsFromTenancyKeys (List <TenancyKeyDTO> tenancyKeys) {
+		
+		List<String> tenancyKeyGuids = new ArrayList<String>();
+		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
+			tenancyKeyGuids.add(tenancyKey.getName().toLowerCase());
+		}
+		return tenancyKeyGuids;
+		
 	}
 	
 	/**

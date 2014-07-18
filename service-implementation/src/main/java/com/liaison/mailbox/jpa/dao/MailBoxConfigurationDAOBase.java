@@ -40,7 +40,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> find(String mbxName, String profName, String tenancyKey) {
+	public Set<MailBox> find(String mbxName, String profName, List <String> tenancyKeys) {
 
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
@@ -52,17 +52,33 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) like :" + TENANCY_KEY )
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys) + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
 					.append(" order by mbx.mbxName");
- 
+			
 			List<?> object = em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
-					.setParameter(TENANCY_KEY, (tenancyKey == null) ? "" : tenancyKey.toLowerCase())
 					.getResultList();
 			Iterator<?> iter = object.iterator();
+			
+			/*StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
+					.append(" inner join mbx.mailboxProcessors prcsr")
+					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
+					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (:"+ TENANCY_KEYS + ")")
+					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
+					.append(" order by mbx.mbxName");
+			
+			List<?> object = em
+					.createQuery(query.toString())
+					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
+					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+					.setParameter(TENANCY_KEYS, tenancyKeys)
+					.getResultList();
+			Iterator<?> iter = object.iterator();*/
 
 			while (iter.hasNext()) {
 				mailBoxes.add((MailBox) iter.next());
@@ -83,7 +99,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> findByName(String mbxName, String tenancyKey) {
+	public Set<MailBox> findByName(String mbxName, List<String> tenancyKeys) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
@@ -92,12 +108,18 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) like :" + TENANCY_KEY);
-					
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys) + ")");
 			List<?> object = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
-					.setParameter(TENANCY_KEY, tenancyKey.toLowerCase())
 					.getResultList();
+			
+			/*StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (:" + TENANCY_KEYS + ")");
+			List<?> object = entityManager.createQuery(query.toString())
+					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
+					.setParameter(TENANCY_KEYS, tenancyKeys)
+					.getResultList();*/
 
 			Iterator<?> iter = object.iterator();
 			while (iter.hasNext()) {

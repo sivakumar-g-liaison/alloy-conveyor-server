@@ -48,6 +48,7 @@ public class GenericValidatorTest {
 		MailBoxDTO dto = new MailBoxDTO();
 		dto.setName("Test");
 		dto.setStatus("sss");
+		dto.setTenancyKey("Tenancykey");
 		validator.validate(dto);
 	}
     
@@ -99,7 +100,7 @@ public class GenericValidatorTest {
 		MailBoxDTO dto = new MailBoxDTO();
 		dto.setName("MBXNAME");
 		dto.setStatus("INACTIVE");
-
+		dto.setTenancyKey("TENANCY_KEY");
 		Assert.assertEquals(true, validator.validate(dto));
 	}
     

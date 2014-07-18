@@ -46,6 +46,7 @@ public class MailBoxDTO {
 	@ApiModelProperty( value = "Mailbox status", required = true)
 	private String status;
 	private String shardKey;
+	private String tenancyKey;
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -93,6 +94,15 @@ public class MailBoxDTO {
 		this.shardKey = shardKey;
 	}
 	
+	@Mandatory(errorMessage = "MailBox Tenancy Key is mandatory.")
+	public String getTenancyKey() {
+		return tenancyKey;
+	}
+
+	public void setTenancyKey(String tenancyKey) {
+		this.tenancyKey = tenancyKey;
+	}
+	
 	public List<PropertyDTO> getProperties() {
 
 		if (null == properties) {
@@ -129,6 +139,7 @@ public class MailBoxDTO {
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
+		mailBox.setTenancyKey(this.getTenancyKey());
 		
 
 		MailBoxProperty property = null;
@@ -171,6 +182,7 @@ public class MailBoxDTO {
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
+		this.setTenancyKey(mailBox.getTenancyKey());
 
 
 		PropertyDTO propertyDTO = null;

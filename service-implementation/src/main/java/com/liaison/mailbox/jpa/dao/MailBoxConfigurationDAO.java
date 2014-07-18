@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.jpa.dao;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.NamedQueries;
@@ -39,10 +40,10 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String MBOX_NAME = "mbox_name";
 	public static final String GET_MBX = "findMailBoxes";
 	public static final String SCHD_PROF_NAME = "schd_name";
-	public static final String TENANCY_KEY = "tenancy_key";
+	public static final String TENANCY_KEYS = "tenancy_keys";
+	
+	public Set<MailBox> find(String mbxName, String profName, List <String> tenancyKeys);
 
-	public Set<MailBox> find(String mbxName, String profName, String tenancyKey);
-
-	public Set<MailBox> findByName(String mbxName, String tenancyKey);
+	public Set<MailBox> findByName(String mbxName, List <String> tenancyKeys);
 	
 }

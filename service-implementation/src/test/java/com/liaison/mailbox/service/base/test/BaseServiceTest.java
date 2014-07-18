@@ -168,6 +168,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setName("MBX_TEST" + uniqueValue);
 			mailBoxDTO.setDescription("MBX_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_SHARD_KEY" + uniqueValue);
+			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
 
 			property.setName("MBX_SIZE");
@@ -179,7 +180,8 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
-
+			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
+			
 			property.setName("MBX_REV_SIZE");
 			property.setValue("1024");
 

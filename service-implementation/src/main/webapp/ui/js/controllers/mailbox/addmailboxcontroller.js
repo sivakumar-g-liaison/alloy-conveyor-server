@@ -1,5 +1,5 @@
-var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$modal', '$blockUI',
-    function ($rootScope, $scope, $filter, $location, $log, $modal, $blockUI) {
+var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$modal', '$blockUI', '$http',
+    function ($rootScope, $scope, $filter, $location, $log, $modal, $blockUI, $http) {
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
@@ -29,6 +29,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             description: "",
             status: "",
             shardKey: "",
+            tenancyKey: "",
             properties: []
         };
         // applying boolean value for httplistenerauthcheck
@@ -105,6 +106,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                         (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                             data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                         $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
+                        $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
                         $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                         for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
                         					                          
@@ -521,6 +523,43 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 return mandatoryVal;
             }
             return getId($scope.allStaticProperties, name);
+        };
+        
+        // Type ahead method to retrieve all domains in tenancy keys
+       $scope.getTenancyKeys = function (val) {
+             var tenancyKeys = [];
+                       
+           	/*$scope.restService.get($scope.base_url + '/tenancyKeys' ,
+                     function (data, status) {
+                         if (status === 200) {
+
+                        	 if (data.getTenancyKeysResponse.response.status === 'success') {
+                                  angular.forEach(data.getTenancyKeysResponse.tenancyKeys, function (item) {
+                                    tenancyKeys.push(item);
+                                  });
+                                 console.log("tenancyKeys"+tenancyKeys); 
+                        		
+                             } else {
+                                 showSaveMessage(data.getTenancyKeysResponse.response.message, 'error');
+                                
+                             }
+
+                         } else {
+                             showSaveMessage("Error while retrieving tenancykeys", 'error');
+                             
+                         }
+                         return tenancyKeys;
+        	 });*/
+             return $http.get($rootScope.base_url + "/tenancyKeys", {
+               
+            }).then(function (res) {
+                    var tenancyKeys = [];
+                    angular.forEach(res.data.getTenancyKeysResponse.tenancyKeys, function (item) {
+                        tenancyKeys.push(item);
+                    });
+                    return tenancyKeys;
+                });
+               
         };
     }
 ]);
