@@ -32,7 +32,7 @@ com.liaison.jms.port.processor=5049
 com.liaison.jms.receive.attempts.processor=-1
 #com.liaison.jms.receive.timeout.processor
 #-1 is infinite
-com.liaison.jms.send.attempts.processor
+com.liaison.jms.send.attempts.processor=-1
 #com.liaison.jms.send.timeout.processor
 #com.liaison.jms.client.count.processor
 #com.liaison.jms.init.attempts.processor
