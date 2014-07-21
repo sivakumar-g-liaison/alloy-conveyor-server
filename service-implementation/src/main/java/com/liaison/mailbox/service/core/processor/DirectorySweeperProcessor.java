@@ -25,6 +25,7 @@ import java.util.List;
 import javax.script.ScriptException;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -45,14 +46,12 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileGroupDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
-import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -277,29 +276,19 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		return fileGroups;
 	}
 
-	/**
+
+
+
+
+    /**
 	 * Method to post meta data to rest service/ queue.
 	 * 
 	 * @param input
 	 *            The input message to queue.
-	 * @param restUrl
-	 *            The url of the rest service if it is rest.
-	 * @param isRest
-	 *            true if it is to post rest service
-	 * @throws Exception
 	 */
-	private void postToQueue(String input) throws Exception {
+	private void postToQueue(String input)   {
+        SweeperQueue.getInstance().pushMessages(input);
 
-		String providerURL = MailBoxUtil.getEnvironmentProperties().getString("g2.queueing.server.url");
-		String queueName = MailBoxUtil.getEnvironmentProperties().getString("directory.sweeper.queue.name");
-
-		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
-		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-		jndidto.setProviderURL(providerURL);
-		jndidto.setQueueName(queueName);
-		jndidto.setUrlPackagePrefixes("org.jboss.naming");
-		jndidto.setMessage(input);
-		HornetQJMSUtil.postMessage(jndidto);
 
 	}
 

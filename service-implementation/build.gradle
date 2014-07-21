@@ -147,9 +147,9 @@ dependencies {
     //compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
 
     // for hornetq jms
-    compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
-    compile "org.hornetq:hornetq-server:2.3.11.Final"
-    compile "jboss:jnp-client:4.0.2"
+//    compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
+//   compile "org.hornetq:hornetq-server:2.3.11.Final"
+//    compile "jboss:jnp-client:4.0.2"
 
     // for G2Javascript engine
     compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.4-SNAPSHOT', changing: true
@@ -193,6 +193,7 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
     //compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
 
+    compile 'com.liaison.commons:lib_message_bus:1.+'
 
     // inherited from NetFlix Karyon (TODO integrate with main UI)
     compile project(':karyon-admin-web')
