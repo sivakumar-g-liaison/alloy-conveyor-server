@@ -155,7 +155,9 @@ project(':service-framework') {
     }
 }
 
-// fs2
+
+
+
 allprojects {
     //repositories { mavenCentral() }
     configurations.all {
@@ -163,6 +165,15 @@ allprojects {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.name == 'commons-io') {
                 details.useTarget "commons-io:commons-io:2.4"
+            }
+        }
+
+        //SLF override
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.name == 'slf4j-simple') {
+                //prefer 'slf4j-log4j2' over 'slf4j-simple', because
+                //it's required that only one logger.jar be present for deterministic behavior of slf4j
+                details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-rc1"
             }
         }
 
