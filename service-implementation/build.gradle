@@ -351,18 +351,24 @@ task configureTomcat(dependsOn: ['stageTomcat', 'setDevProperties'], group:'DEV/
     //TODO replace tokens would be a nicer but heavier weight way of doing this.
     logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
     copy {
-        from ("${tomcatEnvironmentsInstallPath}/common") { include '**/*.*' }
-        into tomcatInstallPath
-    }
-    copy {
-        from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  { include '**/*.*' }
-        into tomcatInstallPath
-    }
-    copy {
-        from ("${projectDir}/build/resources/main")  {
-            include '*.json', '*.properties', 'log4j2.xml'
+        from ("${tomcatEnvironmentsInstallPath}/common") {
+            include '**/*.*'
         }
-        into "${tomcatInstallPath}/lib"
+        into tomcatInstallPath
+    }
+    copy {
+        from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  {
+            include '**/*.*'
+        }
+        into tomcatInstallPath
+    }
+    // using ANT copy task to be able to force overwrite
+    ant.copy(toDir: "${tomcatInstallPath}/lib", overwrite:true) {
+        fileset(dir: "${projectDir}/build/resources/main") {
+            include (name: '*.json')
+            include (name: '*.properties')
+            include (name: 'log4j2*.xml')
+        }
     }
 }
 
