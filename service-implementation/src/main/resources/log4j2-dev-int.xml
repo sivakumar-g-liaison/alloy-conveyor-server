@@ -17,17 +17,17 @@
             <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
         </Console>
 
+        <File name="FilteredFile" fileName="/tmp/filtered.log" append="false">
+            <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+        </File>
+
+
 
         <File name="FullLogFile" fileName="/tmp/full.log" append="true">
             <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
         </File>
 
-        <File name="FileSyslogLogFile" fileName="/tmp/filesyslog.log" append="true" >
-            <AuditStatementRFC5424JSONLayout appName="ESB" enterpriseNumber="99999" facility="LOCAL0" id="App" messageID="Audit" newline="true" />
-            <filters>
-                <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
-            </filters>
-        </File>
 
     </appenders>
 
@@ -42,7 +42,7 @@
             <appender-ref ref="Console" />
 
             <!--  logs syslog formatted audit messages to local file (not for production) -->
-            <appender-ref ref="FileSyslogLogFile" />
+            <appender-ref ref="FilteredFile" />
 
         </root>
     </loggers>
