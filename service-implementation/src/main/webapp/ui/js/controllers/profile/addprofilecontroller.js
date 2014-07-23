@@ -8,18 +8,25 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
                 profile: {}
             }
         };
-
+	
         $scope.profile = {
             id: "",
             name: ""
         };
         
+		$scope.reviseProfile = {
+            id: "",
+            name: ""
+        };
+		
         reviseRequest = $scope.reviseRequest = {
                 reviseProfileRequest: {
                     profile: {}
                 }
         };
         
+		//to get model form object
+		$scope.form = {};
         // Search Profiles based on profile Name
         $scope.profileName = null;
                
@@ -208,11 +215,18 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
                 field: 'name',
                 displayName: 'Profile Name',
 
-            }],
+            },
+			{ // Customized column
+                    displayName: 'Action',
+                    width: '10%',
+                    sortable: false,
+                    cellTemplate: '<button class="btn btn-default btn-xs" ng-click="openEditModal(row.entity)">\n\
+									<i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>'
+             }],
             data: 'profiles',
             //rowTemplate: customRowTemplate,
             enablePaging: true,
-            enableCellEditOnFocus: true,
+            enableCellEditOnFocus: false,
             showFooter: true,
             canSelectRows: true,
             multiSelect: false,
@@ -222,36 +236,45 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             filterOptions: $scope.filterOptions,
 			plugins: [new ngGridFlexibleHeightPlugin()],
 			totalServerItems:'totalServerItems',
-			afterSelectionChange: function (row) {
-				if(row.selected == true) {
-					$scope.selectedProfileName = row.entity.name;
-					$scope.selectedProfileId = row.entity.id;
-				}
-			}
         };
-       
-      //Event is triggered on blur after cell is edited
-		$scope.$on('ngGridEventEndCellEdit', function(edittedCellData) {
-			//Check if 
-			if(edittedCellData.targetScope.row.entity.name != $scope.selectedProfileName && 
-				edittedCellData.targetScope.row.entity.id == $scope.selectedProfileId) {
-				
-				$scope.reviseRequest.reviseProfileRequest.profile = edittedCellData.targetScope.row.entity;
+		//open edit model for revising profile
+		$scope.openEditModal = function(entity) {
+			$scope.editEntity = entity;
+			$scope.reviseProfile = angular.copy($scope.editEntity);
+			$('#profileReviseModal').modal('show');
+		};
+		
+		$scope.cancelRevise = function() {
+			$('#profileReviseModal').modal('hide');
+			$scope.form.reviseProfileForm.$setPristine();
+			$scope.reviseProfile.name = '';
+		};
+		
+		//method for revising profile
+		$scope.editSave = function() {
+			if($scope.editEntity && $scope.editEntity.name != $scope.reviseProfile.name && $scope.editEntity.id == $scope.reviseProfile.id) {
+
+				$scope.reviseRequest.reviseProfileRequest.profile = $scope.reviseProfile;
 				$scope.restService.put($rootScope.base_url + "/profile", $filter('json')(reviseRequest), "")
 					 .success(function (data, status) {
 						if (data.reviseProfileResponse.response.status == 'failure') {
 							showSaveMessage(data.reviseProfileResponse.response.message, 'error');
 							$scope.loadProfiles();
+							$scope.cancelRevise();
 						}else {
-							showSaveMessage("Profile is updated succesfully", 'success');
+							showSaveMessage("Profile is updated successfully", 'success');
 							$scope.loadProfiles();
+							$scope.cancelRevise();
 						}
 					 }).error(function (data, status) {
 						showSaveMessage('Failed to update Profile.' + data, 'error');
 						$scope.loadProfiles();
+						$scope.cancelRevise();
 					});
+			}else {
+				showSaveMessage('No changes made to save.');
 			}
-		});
+		};
 		
        // To clear profile name in add profile div while clicking on cancel
         $scope.doCancel = function() {

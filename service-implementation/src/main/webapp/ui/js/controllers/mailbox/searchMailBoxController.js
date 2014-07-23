@@ -236,11 +236,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Customized column in the grid.
         $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
         <div ng-switch-when="INACTIVE" style="cursor: default;"><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
-        <i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button>\n\
+        <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
         <button class="btn btn-default btn-xs" ng-disabled="true">\n\
         <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
         <div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
-        <i class="glyphicon glyphicon glyphicon-pencil glyphicon-white"></i></button>\n\
+        <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
         <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
         <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
 

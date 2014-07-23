@@ -10,51 +10,51 @@
 		<br />
 	</div>
    <div class="form-inline">
-    <div class="form-row">
+	   <div class="form-row">
 		<h4>Add Profile</h4>
 	</div>
 	 <form name="triggerForm" novalidate="">
 				
-                    <div class="row">
-                       <div class="col-md-6">
-                          
-                            <label for="profilename">Name *</label>
-                            <input id="mbx-profile-name" type="text" name="profilename" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
-                            ng-minLength=5 ng-maxLength=80 class="form-control" />
-                            <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">
-                                <span id="mbx-profile-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom': triggerForm.profilename.$error.pattern}" ng-show="triggerForm.profilename.$error.pattern">Invalid Profile Name.</span>
-                                <span id="mbx-profile-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom':triggerForm.profilename.$error.required}" ng-show="triggerForm.profilename.$error.required">Profile Name is mandatory.</span>
-                                <span id="mbx-profile-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block':triggerForm.profilename.$error.minlength}" ng-show="triggerForm.profilename.$error.minlength">
-                                <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be shorter than {{minimumLength}} characters.</span>
-                                <span id="mbx-profile-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block': triggerForm.profilename.$error.maxlength }" ng-show="triggerForm.profilename.$error.maxlength">
-                                <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
-                            </div>
-                       </div>
-                        <br>
-                        <div class = "col-md-6">
-                           
-                            <div class="row">
-                            <button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click='insert()'>
-                            Add</button>
-                             <button id="mbx-profile-cancel" class="btn btn-primary" ng-click="doCancel()">
-                            Reset
-                            </button>
-                            </div>
-                        </div>
-                    </div>
-               
+	                   <div class="row">
+	                      <div class="col-md-6">
+	                         
+	                           <label for="profilename">Name *</label>
+	                           <input id="mbx-profile-name" type="text" name="profilename" ng-model="profile.name" required ng-trim="true" ng-pattern="userInputPattern"
+	                           ng-minLength=5 ng-maxLength=80 class="form-control" />
+	                           <div  ng-show="triggerForm.profilename.$dirty && triggerForm.profilename.$invalid">
+	                               <span id="mbx-profile-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom': triggerForm.profilename.$error.pattern}" ng-show="triggerForm.profilename.$error.pattern">Invalid Profile Name.</span>
+	                               <span id="mbx-profile-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom':triggerForm.profilename.$error.required}" ng-show="triggerForm.profilename.$error.required">Profile Name is mandatory.</span>
+	                               <span id="mbx-profile-nameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block':triggerForm.profilename.$error.minlength}" ng-show="triggerForm.profilename.$error.minlength">
+	                               <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be shorter than {{minimumLength}} characters.</span>
+	                               <span id="mbx-profile-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block': triggerForm.profilename.$error.maxlength }" ng-show="triggerForm.profilename.$error.maxlength">
+	                               <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+	                           </div>
+	                      </div>
+	                       <br>
+	                       <div class = "col-md-6">
+	                          
+	                           <div class="row">
+	                           <button id="submit" ng-disabled="triggerForm.$invalid" class="btn btn-primary" ng-click='insert()'>
+	                           Add</button>
+	                            <button id="mbx-profile-cancel" class="btn btn-primary" ng-click="doCancel()">
+	                           Reset
+	                           </button>
+	                           </div>
+	                       </div>
+	                   </div>
+	              
 
 	<br/>
-    <div class="form-row">
+	   <div class="form-row">
 		<h4>Search Profile</h4>
-
-    </div>
-  
-        
-         <div class="row">
-           <div class="col-md-6">
-                    <label for="name"> Profile Name </label> 
-                    <input type="text" id="profilename" ng-model="profileName" ng-trim="false"
+	
+	   </div>
+	 
+	       
+	        <div class="row">
+	          <div class="col-md-6">
+	                   <label for="name"> Profile Name </label> 
+	                   <input type="text" id="profilename" ng-model="profileName" ng-trim="false"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 					<div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
 						<span id="mbx-profile-profilenameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':triggerForm.name.$error.pattern}" ng-show="triggerForm.name.$error.pattern">Invalid Profile Name.</span>
@@ -63,22 +63,60 @@
 						<span id="mbx-profile-profilenameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':triggerForm.name.$error.maxlength}" ng-show="triggerForm.name.$error.maxlength">
 						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
 					</div>
-                <progress ng-show=showprogressbar> </progress>
+	               <progress ng-show=showprogressbar> </progress>
 		   </div>
-               
-         </div>  
- 
-            <div class = "form-group">
-				<br>
-                <div class="alert alert-info" ng-show="info">
-              		No results found.
-                </div>
-                <div class="gridStyle" ng-grid="gridOptions"></div>
-            </div>
-            <br>
-              
-                 </form>
-            </div>
+	              
+	        </div>  
 	
-     
+	           <div class = "form-group">
+				<br>
+	               <div class="alert alert-info" ng-show="info">
+	             		No results found.
+	               </div>
+	               <div class="gridStyle" ng-grid="gridOptions"></div>
+				    </form>
+					<!-- profile revise modal -->
+					<form id="profileUpdateModalForm" name="form.reviseProfileForm"
+						novalidate>
+						<div class="modal-custom fade" id="profileReviseModal">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<button class="close" data-dismiss="modal" aria-hidden="true"
+											id="close-btn-update-modal" ng-click="cancelRevise()">&times;</button>
+										<h4 class="modal-title" id="profileCreateModalHeaderText">Profile - Update</h4>
+									</div>
+									<div class="modal-body">
+										<div class="row">
+											<div class="form-group" style="width:100%">
+												<div class="control-label" id="profileNameUpdateModel">
+													<label id="profileNameUpdateLabel"> Profile Name*</label>
+												</div>
+												<input type="text" id="reviseProfilename" ng-model="reviseProfile.name" ng-trim="false"
+												name="reviseName" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control" required/>
+												<div ng-show="form.reviseProfileForm.reviseName.$dirty && form.reviseProfileForm.reviseName.$invalid">
+													<span id="mbx-revise-profile-profilename-required" class="customHide" ng-class = "{'help-block-custom':form.reviseProfileForm.reviseName.$error.required}" ng-show="form.reviseProfileForm.reviseName.$error.required">Profile Name is required.</span>
+													<span id="mbx-revise-profile-profilenameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':form.reviseProfileForm.reviseName.$error.pattern}" ng-show="form.reviseProfileForm.reviseName.$error.pattern">Invalid Profile Name.</span>
+													<span id="mbx-revise-profile-profilenameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block':form.reviseProfileForm.reviseName.$error.minlength}" ng-show="form.reviseProfileForm.reviseName.$error.minlength">
+													<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
+													<span id="mbx-revise-profile-profilenameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':form.reviseProfileForm.reviseName.$error.maxlength}" ng-show="form.reviseProfileForm.reviseName.$error.maxlength">
+													<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<a class="btn btn-default" id="reviseProfileModalCancelBtn"
+											ng-click="cancelRevise()" data-dismiss="modal" tabindex=3>Cancel</a>
+										<a class="btn btn-primary" id="reviseProfileModalSaveBtn"
+											ng-click="editSave(editEntity)" tabindex=4
+											ng-disabled="form.reviseProfileForm.$invalid">Save</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+	          </div>
+        	 <br>	
+      </div>
 </div>
