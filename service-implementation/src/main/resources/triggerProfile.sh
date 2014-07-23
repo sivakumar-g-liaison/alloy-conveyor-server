@@ -5,7 +5,7 @@
 #        This sample schedules the cron to trigger profile one in 5 mins.
 #STEP3: Save and Quit:wq
 #STEP4: crontab -l - verify your configuration listed
-#STEP5: Create the folder curllogs at /opt/apps/mailbox
+#STEP5: Create the folder triggerProfileSchedulerlogs at /opt/apps/mailbox
 #STEP6: Once triggered you will find the logs at /opt/apps/mailbox/triggerProfileSchedulerlogs/
 #!/bin/bash
 #
@@ -28,5 +28,5 @@ profileName=$1
 excludeName=$2
 echo "Input profile name is:"$profileName
 echo "Exclusion List:"$excludeName
-curl -d "" -H "Content-Type:application/json" -o /opt/apps/mailbox/triggerProfileSchedulerlogs/logs_$DATE.txt   http://10.0.24.76:8080/g2mailboxservice/rest/mailbox/triggerProfile?name=$profileName&excludeMailbox=$excludeName
+curl -d "" -H "Content-Type:application/json" -o /app/mailbox/triggerProfileSchedulerlogs/logs_$DATE.txt   http://10.146.18.25:8989/g2mailboxservice/rest/v1/mailbox/triggerProfile?name=$profileName&excludeMailbox=$excludeName
 exit 0
