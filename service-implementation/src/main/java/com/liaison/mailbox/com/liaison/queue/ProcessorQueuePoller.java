@@ -45,13 +45,16 @@ public class ProcessorQueuePoller  {
     private static boolean started = false;
 
     public static synchronized void startPolling() {
+        logger.debug("startPolling");
         if (started) {
             return;
         }
         final Runnable messageProcessor = new Runnable() {
             public void run() {
+                logger.debug("Polling message Process");
                 String message = ProcessorQueue.getInstance().popMessage();
                 if (message != null) {
+                    logger.debug("Polling message found {}", message);
                     MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
                     try {
                         qconsumer.invokeProcessor(message);
