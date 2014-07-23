@@ -29,7 +29,7 @@
 	<!--  Commented by senthilvel-->
 	<!--  This declaration part is deprecated by HelloworldComponent's initialize() -->
     <!-- Framework initialization servlet, please do not modify -->
-    <!--servlet>
+    <servlet>
     <servlet-name>InitializationServlet</servlet-name>
         <servlet-class>com.liaison.framework.bootstrap.InitializationServlet</servlet-class>
 		<load-on-startup>0</load-on-startup>
@@ -38,7 +38,7 @@
     <servlet-mapping>
         <servlet-name>InitializationServlet</servlet-name>
         <url-pattern>/init</url-pattern>
-    </servlet-mapping --> 
+    </servlet-mapping>
 	
 	<!-- Added by senthilvel for AsyncServlet Injection -->
 	<servlet>
@@ -48,7 +48,7 @@
 		<param-name>threadpoolsize</param-name>
 		<param-value>100</param-value>
 	</init-param>
-        <load-on-startup>0</load-on-startup>
+        <load-on-startup>1</load-on-startup>
     </servlet>
     
     <servlet-mapping>
@@ -56,18 +56,7 @@
         <url-pattern>/async</url-pattern>
     </servlet-mapping>
 
-    
-    <servlet>
-        <servlet-name>HornetQMessageListnerServlet</servlet-name>
-        <servlet-class>com.liaison.mailbox.service.hornetq.util.HornetQMessageListnerServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>HornetQMessageListnerServlet</servlet-name>
-        <url-pattern>/hqinit</url-pattern>
-    </servlet-mapping>
 
-    <!-- Framework-defined dynamic services support, please do not modify -->
 
 	
 	<!-- Framework-defined dynamic services support, please do not modify -->
