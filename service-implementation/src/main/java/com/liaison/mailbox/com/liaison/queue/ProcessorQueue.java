@@ -1,11 +1,11 @@
 package com.liaison.mailbox.com.liaison.queue;
 
-import com.liaison.commons.messagbus.jms.HornetQRecoveringClientPool;
+import com.liaison.commons.messagbus.jms.HornetQRecoveringCoreClientPool;
 
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class ProcessorQueue extends HornetQRecoveringClientPool {
+public class ProcessorQueue extends HornetQRecoveringCoreClientPool {
 
     public static final String QUEUE_NAME = "processor";
     private static ProcessorQueue ourInstance = new ProcessorQueue();
@@ -17,4 +17,5 @@ public class ProcessorQueue extends HornetQRecoveringClientPool {
     private ProcessorQueue() {
          super(QUEUE_NAME);
     }
+
 }
