@@ -34,6 +34,7 @@ public class RemoteProcessorPropertiesDTO {
 	private boolean binary;
 	private int retryInterval;
 	private String pipeLineID;
+	private String httpListenerPipeLineId;
 	private List<HttpOtherRequestHeaderDTO> otherRequestHeader;
 
 	public String getHttpVersion() {
@@ -155,4 +156,16 @@ public class RemoteProcessorPropertiesDTO {
 	public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
 	}
+
+	public String getHttpListenerPipeLineId() {
+		return httpListenerPipeLineId;
+	}
+
+	public void setHttpListenerPipeLineId(String httpListenerPipeLineId) {
+		this.httpListenerPipeLineId = httpListenerPipeLineId;
+	}
+	
+	
+	
+	
 }

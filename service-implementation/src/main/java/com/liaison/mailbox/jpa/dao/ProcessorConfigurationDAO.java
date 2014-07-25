@@ -51,6 +51,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String SHARD_KEY = "shard_key";
 	public static final String PGUID = "pguid";
 	public static final String SERV_INST_ID = "proc_serv_inst_id";
+	public static final String PROCESSOR_TYPE = "processor_type";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -87,5 +88,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processor
 	 */
 	public List<Processor> findProcessorByMbx(String mbxGuid);
+	
+	/**
+	 * Retrieves list of all processors of specific type from given mailbox guid
+	 * 
+	 * @param type the processor type
+	 * @param mbxGuid the mailbox guid
+	 * @return list of processors
+	 */
+	public List <Processor> findProcessorByTypeAndMbx(String type, String mbxGuid);
 
 }

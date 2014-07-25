@@ -16,8 +16,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -43,6 +45,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
@@ -792,5 +795,52 @@ public class ProcessorConfigurationService {
 
 			return serviceResponse;
 		}
+	}
+	
+	/**
+	 * Method to retrieve the properties of HTTPListner of type Sync/Async
+	 * 
+	 * @param mailboxGuid
+	 * @param httpListenerType
+	 * @return a Map containing the HttpListenerSpecific Properties
+	 */
+	public Map <String, String> getHttpListenerProperties(String mailboxGuid, String httpListenerType) {
+		
+		Map <String, String>httpListenerProperties = new HashMap <String, String>();
+		
+		// retrieve the list of processors of specific type
+		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+		List <Processor> processors = config.findProcessorByTypeAndMbx(httpListenerType, mailboxGuid);
+		
+		try {
+			
+			for (Processor processor : processors) {
+				
+				ProcessorDTO processorDTO = new ProcessorDTO();
+				processorDTO.copyFromEntity(processor);
+				// retrieving the httplistener pipeline id from remote processor properties
+				String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
+				if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
+
+				//retrieving httplistener authenctication check required property from dynamic properties of processor
+				for (PropertyDTO propertyDTO : processorDTO.getDynamicProperties()) {	
+					
+					if (propertyDTO.getName().equals(MailBoxConstants.HTTPLISTENER_AUTH_CHECK)) {
+						httpListenerProperties.put(propertyDTO.getName(), propertyDTO.getValue());
+					}
+				}
+			}
+						
+			
+		} catch (JAXBException
+				| IOException | MailBoxConfigurationServicesException
+				| SymmetricAlgorithmException e) {
+			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
+			return null;
+		}
+		
+		
+		return httpListenerProperties;
+		
 	}
 }

@@ -208,4 +208,51 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 
+	/**
+	 * Retrieves list of all processors of specific type from given mailbox guid
+	 * 
+	 * @param type the processor type
+	 * @param mbxGuid the mailbox guid
+	 * @return list of processors
+	 */
+	@Override
+	public List<Processor> findProcessorByTypeAndMbx(String type, String mbxGuid) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("Fetching the processor count starts.");
+
+			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+					.append(" inner join processor.mailbox mbx")
+					.append(" where mbx.pguid = :" + PGUID)
+					.append(" and processor.type = :" + PROCESSOR_TYPE );
+
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(PGUID, mbxGuid)
+					.setParameter(PROCESSOR_TYPE, (type == null)? "" : type.toLowerCase())
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
+
 }

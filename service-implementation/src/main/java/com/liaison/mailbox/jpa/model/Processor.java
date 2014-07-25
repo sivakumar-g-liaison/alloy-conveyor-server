@@ -48,6 +48,8 @@ public class Processor implements Identifiable {
 	public static final String TYPE_REMOTEDOWNLOADER = "remotedownloader";
 	public static final String TYPE_REMOTEUPLOADER = "remoteuploader";
 	public static final String TYPE_SWEEPER = "sweeper";
+	public static final String HTTP_ASYNC = "httpasync";
+	public static final String HTTP_SYNC = "httpsync";
 
 	private String pguid;
 	private String javaScriptUri;
@@ -298,11 +300,14 @@ public class Processor implements Identifiable {
 	public static Processor processorInstanceFactory(ProcessorType processorType) {
 
 		Processor processor = null;
-
 		if (ProcessorType.REMOTEDOWNLOADER.equals(processorType)) {
 			processor = new RemoteDownloader();
 		} else if (ProcessorType.REMOTEUPLOADER.equals(processorType)) {
 			processor = new RemoteUploader();
+		} else if (ProcessorType.HTTPASYNC.equals(processorType)) {
+			processor = new HTTPAsyncProcessor();
+		} else if (ProcessorType.HTTPSYNC.equals(processorType)) {
+			processor = new HTTPSyncProcessor();
 		} else {
 			processor = new Sweeper();
 		}

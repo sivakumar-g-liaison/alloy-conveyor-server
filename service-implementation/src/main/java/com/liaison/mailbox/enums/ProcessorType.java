@@ -20,8 +20,10 @@ public enum ProcessorType {
 
 	REMOTEDOWNLOADER("remotedownloader"),
 	REMOTEUPLOADER("remoteuploader"),
+	HTTPASYNC("httpasync"),
+	HTTPSYNC("httpsync"),
 	SWEEPER("sweeper");
-
+	
 	private final String code;
 
 	private ProcessorType(String code) {
