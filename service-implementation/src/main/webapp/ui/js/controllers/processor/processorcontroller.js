@@ -29,44 +29,53 @@ var rest = myApp.controller(
             var block = $rootScope.block;
 			
             // Function to modify the static properties to have additional properties of "binary"
-            // and "passive" for FTP & FTPS protocols.
+            // and "passive" for FTP protocols.Incase of FTPS protocols  Passive is mandatory and binary is static property.
             $scope.modifyStaticPropertiesBasedOnProtocol = function () {
-                if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS") {
-                    /*issue: Binary and passive is added twice for FTP protocol.Hence condition is checked before adding the values. */
-				var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
-				var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
-                if (indexOfBinary === -1 && indexOfPassive === -1){
-                    $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-                        "name": "Binary",
-                        "id": "binary"
-                    }, {
-                        "name": "Passive",
-                        "id": "passive"
-                    });
-                }
-				var indexOfBinaryForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'binary');
-				var indexOfPassiveForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'passive');	
-				if (indexOfBinaryForAllStaticProperties === -1 && indexOfPassiveForAllStaticProperties === -1){
-                    $scope.allStaticProperties.push({
-                        "name": "Binary",
-                        "id": "binary"
-                    }, {
-                        "name": "Passive",
-                        "id": "passive"
-                    });
-                 }   
-                } else {
-                    // Remove binary and passive properties from the array allStaticPropertiesThatAreNotAssignedValuesYet
-                    var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
-                    if (indexOfBinary !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfBinary, 1);
-                    var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
-                    if (indexOfPassive !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPassive, 1);
-                    // Remove binary and passive properties from the array allStaticProperties
-                    indexOfBinary = getIndexOfId($scope.allStaticProperties, 'binary');
-                    if (indexOfBinary !== -1) $scope.allStaticProperties.splice(indexOfBinary, 1);
-                    indexOfPassive = getIndexOfId($scope.allStaticProperties, 'passive');
-                    if (indexOfPassive !== -1) $scope.allStaticProperties.splice(indexOfPassive, 1);
-                }
+					
+					if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS") {
+						/*issue: Binary and passive is added twice for FTP protocol.Hence condition is checked before adding the values. */
+					var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
+					var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
+					if (indexOfBinary === -1){
+						$scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
+							"name": "Binary",
+							"id": "binary"
+						});
+					}
+					//Only for FTP passive is static property and it is mandatory for FTPS
+					if($scope.processor.protocol === 'FTP' && indexOfPassive === -1) {
+						  $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
+							"name": "Passive",
+							"id": "passive"
+						});
+					}
+					var indexOfBinaryForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'binary');
+					var indexOfPassiveForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'passive');	
+					if (indexOfBinaryForAllStaticProperties === -1){
+						$scope.allStaticProperties.push({
+							"name": "Binary",
+							"id": "binary"
+						});
+					 }
+					 //Only for FTP passive property is tatic property and it is mandatory for FTPS
+					if($scope.processor.protocol === 'FTP' && indexOfPassiveForAllStaticProperties === -1) {
+					  $scope.allStaticProperties.push({
+						"name": "Passive",
+						"id": "passive"
+					  });
+					}
+				}else {
+					// Remove binary and passive properties from the array allStaticPropertiesThatAreNotAssignedValuesYet
+					var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
+					if (indexOfBinary !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfBinary, 1);
+					var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
+					if (indexOfPassive !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPassive, 1);
+					// Remove binary and passive properties from the array allStaticProperties
+					indexOfBinary = getIndexOfId($scope.allStaticProperties, 'binary');
+					if (indexOfBinary !== -1) $scope.allStaticProperties.splice(indexOfBinary, 1);
+					indexOfPassive = getIndexOfId($scope.allStaticProperties, 'passive');
+					if (indexOfPassive !== -1) $scope.allStaticProperties.splice(indexOfPassive, 1);
+			}
             };
             // Function to modify the static properties to have additional properties specific for Directory Sweeper.
             $scope.modifyStaticPropertiesBasedOnProcessorType = function () {
@@ -554,9 +563,10 @@ var rest = myApp.controller(
 			
 				if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
 					return "httpMandatoryProperty";
-				}
-				if ($scope.processor.protocol === 'FTP' || $scope.processor.protocol === 'FTPS') {
+				}else if ($scope.processor.protocol === 'FTP') {
 					return "ftpMandatoryProperty";
+				}else if ($scope.processor.protocol === 'FTPS') {
+					return "ftpsMandatoryProperty";
 				}
 				return "sftpmandatoryProperty";
 				
@@ -651,7 +661,10 @@ var rest = myApp.controller(
                                       <div ng-switch-when="ftpMandatoryProperty">\n\
                                       	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                                       </div>\n\
-                                		<div ng-switch-default>\n\
+									  <div ng-switch-when="ftpsMandatoryProperty">\n\
+                                      	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=true" ng-options="property for property in booleanValues" ng-disabled="true"></select>\n\
+                                      </div>\n\
+									  <div ng-switch-default>\n\
                                             <textarea   class="form-control" ng-model="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
                                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
@@ -1216,17 +1229,32 @@ var rest = myApp.controller(
 				$scope.setFolderData();
 				$scope.isPortDisabled = false;
 				var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
+				
+				//for ftps protocol add passive as mandatory property
+				var indexOfPassive = getIndexOfId($scope.allMandatoryFtpProperties, "passive");
+				if($scope.processor.protocol === 'FTPS') {
+					if(indexOfPassive === -1 ) {
+						 $scope.allMandatoryFtpProperties.push({
+							"name": "Passive",
+							"id": "passive"
+						});
+					 }
+				}else {
+					if(indexOfPassive !== -1) {
+						$scope.allMandatoryFtpProperties.splice(indexOfPassive , 1);
+					}
+				}
 				var otherReqIndex = -1;
 				var i = 0;
 				for (var prop in json_data) {
 					var allowPort = false;
 					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
-				
 					if ((json_data[prop] !== 0 || allowPort) && json_data[prop] !== false && json_data[prop] !== null && json_data[prop] !== '') {
 						i++;
 						if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
 							otherReqIndex = i;
 						}
+						
 						var propertyValue = null;
 						if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
 							 if (prop === 'otherRequestHeader' || prop === 'httpVerb' || prop === 'contentType') {
@@ -1311,7 +1339,7 @@ var rest = myApp.controller(
 						$scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
 					} else if ($scope.processor.protocol === 'SWEEPER') {
 						$scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1);
-					} else {
+					}else {
 						$scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
 					}
 					$scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
@@ -1319,6 +1347,7 @@ var rest = myApp.controller(
 						"id": "otherRequestHeader"
 					});
 				}
+				
 				for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
 					// To get id as property value for the dynamic properties which are displayed as static properties
 					var dynamicPropertyIndex = getIndexOfId($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
@@ -1452,6 +1481,8 @@ var rest = myApp.controller(
 				});
 				  // To Properly set the sshkey modal and certificate modal values
 				$scope.processCredentialDetails();
+				
+				
 			}
 			
 			function readSecretFromKM(url, a, data, profData, procsrId, blockuiFlag) {
@@ -1870,6 +1901,13 @@ var rest = myApp.controller(
                             value: value
                         });
                     }
+					
+					if((name === 'passive') && ($scope.processor.type !== 'FTPS')) {
+						 mandatoryArray.push({
+                            name: name,
+                            value: value
+                        });
+					}
                     if (name === 'pipeLineID') {
                         mandatoryArray.push({
                             name: name,
@@ -2213,7 +2251,31 @@ var rest = myApp.controller(
                     if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
                     var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
                     if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
-                    $scope.processorProperties = $scope.ftpMandatoryProperties;
+                    $scope.processorProperties = angular.copy($scope.ftpMandatoryProperties);
+					var indexOfPassiveForFTPS = getIndexOfId($scope.allMandatoryFtpProperties, "passive");
+					// passive property is mandatory for ftps protocol
+					if($scope.processor.protocol === 'FTPS') {
+						 if(indexOfPassiveForFTPS === -1 ) {
+							 $scope.allMandatoryFtpProperties.push({
+								"name": "Passive",
+								"id": "passive"
+							});
+						 }
+						var indexOfPassive = getIndexOfId($scope.processorProperties, 'passive');
+						if(indexOfPassive === -1) {
+							$scope.processorProperties.splice(getIndexOfId($scope.processorProperties,""),0,{
+							name: 'Passive',
+							value: '',
+							allowAdd: false,
+							isMandatory: true
+							});
+						}
+					}else {
+						//splice the passive property for FTP protocol
+						if(indexOfPassiveForFTPS !== -1) {
+							 $scope.allMandatoryFtpProperties.splice(indexOfPassiveForFTPS , 1);
+						}
+					}
                     $scope.portRequired = true;
                     $scope.setFolderData();
 					$scope.defaultPortValue();
@@ -2335,6 +2397,7 @@ var rest = myApp.controller(
                     allowAdd: true,
                     isMandatory: false
                 }];
+				
                 $scope.httpMandatoryProperties = [{
                     name: 'URL',
                     value: '',
