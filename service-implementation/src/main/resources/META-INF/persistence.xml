@@ -20,6 +20,8 @@
 		<class>com.liaison.mailbox.jpa.model.RemoteDownloader</class>
 		<class>com.liaison.mailbox.jpa.model.RemoteUploader</class>
 		<class>com.liaison.mailbox.jpa.model.Sweeper</class>
+		<class>com.liaison.mailbox.jpa.model.HTTPAsyncProcessor</class>
+		<class>com.liaison.mailbox.jpa.model.HTTPSyncProcessor</class>
 		<class>com.liaison.mailbox.jpa.model.Credential</class>
 		<class>com.liaison.mailbox.jpa.model.Folder</class>
 		<class>com.liaison.mailbox.jpa.model.MailBox</class>
