@@ -121,31 +121,6 @@ var rest = myApp.controller(
                         "id": "errorfilelocation"
                     }];
                 }  
-                
-               /* else {
-                    // Remove the static properties specific to processor Type SWEEPER from array allStaticPropertiesThatAreNotAssignedValuesYet
-                    var indexOfFileRenameFormat = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'filerenameformat');
-                    if (indexOfFileRenameFormat !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfFileRenameFormat, 1);
-                    var indexOfPayloadThreshold = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'payloadsizethreshold');
-                    if (indexOfPayloadThreshold !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPayloadThreshold, 1);
-                    var indexOfSweepedFileLocation = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'sweepedfilelocation');
-                    if (indexOfSweepedFileLocation !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfSweepedFileLocation, 1);
-                    var indexOfNumberOfFilesThreshold = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'numoffilesthreshold');
-                    if (indexOfNumberOfFilesThreshold !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfNumberOfFilesThreshold, 1);
-                }
-                
-                if ($scope.procsrType.id === "HTTPSYNC" || $scope.procsrType.id === "HTTPASYNC") {
-                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [];
-                	 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-                		"name": "HTTP Listener Auth Check Required",
-                		"id":"httplistenerauthcheckrequired"
-                	});
-                } else {
-                        $scope.resetStaticAndMandatoryProps();
-                	// Remove the static properties specific to processor Type SWEEPER from array allStaticPropertiesThatAreNotAssignedValuesYet
-                	  var indexOfHTTPListenerAuthCheck = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'httplistenerauthcheckrequired');
-                      if (indexOfHTTPListenerAuthCheck !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfHTTPListenerAuthCheck, 1);
-                }*/
             };
             $scope.loadOrigin = function () {
 				
@@ -727,7 +702,7 @@ var rest = myApp.controller(
                             <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                         </div>\n\
                         <div ng-switch-when="httplistenerauthcheckrequired">\n\
-                    		<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
+                    		<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                     	</div>\n\
                         <div ng-switch-when="binary">\n\
                               <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
@@ -1193,7 +1168,8 @@ var rest = myApp.controller(
             }, true);
             $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row.getProperty(\'guid\'),true)"><i class="glyphicon glyphicon-wrench"></i></button>';
             $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
-            $scope.manageType = '<div ng-switch on="row.getProperty(\'type\')"><div ng-switch-when="REMOTEDOWNLOADER">Remote Downloader</div><div ng-switch-when="REMOTEUPLOADER">Remote Uploader</div><div ng-switch-when="SWEEPER">Directory Sweeper</div></div>';
+            $scope.manageType = '<div ng-switch on="row.getProperty(\'type\')"><div ng-switch-when="REMOTEDOWNLOADER">Remote Downloader</div><div ng-switch-when="REMOTEUPLOADER">Remote Uploader</div>\n\
+            <div ng-switch-when="SWEEPER">Directory Sweeper</div><div ng-switch-when="HTTPASYNC">HTTP Async Processor</div><div ng-switch-when="HTTPSYNC">HTTP Sync Processor</div></div>';
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
                     field: 'name',
@@ -1318,8 +1294,9 @@ var rest = myApp.controller(
 				$scope.httpMandatoryProperties = [];
 				$scope.ftpMandatoryProperties = [];
 				$scope.sweeperMandatoryProperties = [];
-				/*$scope.modifyStaticPropertiesBasedOnProtocol();
-				$scope.modifyStaticPropertiesBasedOnProcessorType();*/
+                $scope.httpListenerMandatoryProperties = [];
+				$scope.modifyStaticPropertiesBasedOnProtocol();
+				$scope.modifyStaticPropertiesBasedOnProcessorType();
 				$scope.setFolderData();
 				$scope.isPortDisabled = false;
 				var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
@@ -1466,22 +1443,12 @@ var rest = myApp.controller(
 					var dynamicPropertyIndex = getIndexOfId($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
 					var dynamicPropertyName = (dynamicPropertyIndex === -1) ? data.getProcessorResponse.processor.dynamicProperties[i].name : getName($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
 					if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-						/*if (data.getProcessorResponse.processor.dynamicProperties[i].name == 'Port') {
-							$scope.httpMandatoryProperties.push({
-								name: dynamicPropertyName,
-								value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-								allowAdd: false,
-								isMandatory: true
-							});
-							if (data.getProcessorResponse.processor.dynamicProperties[i].value !== '') $scope.isPortDisabled = true;
-						} else {*/
-							$scope.httpMandatoryProperties.push({
-								name: dynamicPropertyName,
-								value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-								allowAdd: false,
-								isMandatory: false
-							});
-						//}
+                        $scope.httpMandatoryProperties.push({
+                            name: dynamicPropertyName,
+                            value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+                            allowAdd: false,
+                            isMandatory: false
+                        });
 						
 					} else if ($scope.processor.protocol === 'SWEEPER') {
 						$scope.sweeperMandatoryProperties.push({
@@ -1491,12 +1458,15 @@ var rest = myApp.controller(
 							isMandatory: false
 						});
 					} else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
-                        $scope.httpListenerMandatoryProperties.push({
-							name: dynamicPropertyName,
-							value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-							allowAdd: false,
-							isMandatory: false
-						});
+                        if (data.getProcessorResponse.processor.dynamicProperties[i].name === 'httplistenerauthcheckrequired' && data.getProcessorResponse.processor.dynamicProperties[i].value != "false") {
+                            var propertyValue = Boolean(data.getProcessorResponse.processor.dynamicProperties[i].value);
+                            $scope.httpListenerMandatoryProperties.push({
+                                name: dynamicPropertyName,
+                                value: propertyValue,
+                                allowAdd: false,
+                                isMandatory: false
+                            });
+                        } 
                     }else {
 						$scope.ftpMandatoryProperties.push({
 							name: dynamicPropertyName,
@@ -1511,7 +1481,7 @@ var rest = myApp.controller(
 					}
 					// To remove already value assigned properties from array allStaticPropertiesThatAreNotAssignedValuesYet
 					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, data.getProcessorResponse.processor.dynamicProperties[i].name);
-					if (indexOfElement !== -1) {
+					if (indexOfElement !== -1 && data.getProcessorResponse.processor.dynamicProperties[i].value !== "false") {
 						$scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
 					}
 				}
@@ -2058,6 +2028,8 @@ var rest = myApp.controller(
                         indexMandatory = getIndex($scope.allMandatoryHttpProperties, $scope.processorProperties[i].name);
                     } else if ($scope.processor.protocol === 'SWEEPER') {
                         indexMandatory = getIndex($scope.allMandatorySweeperProperties, $scope.processorProperties[i].name);
+                    } else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
+                        indexMandatory = getIndex($scope.allMandatoryHttpListenerProperties, $scope.processorProperties[i].name);
                     } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
                     if (index === -1 && indexMandatory === -1) {
                         // To set proper id for dynamic properties which are displayed as static properties

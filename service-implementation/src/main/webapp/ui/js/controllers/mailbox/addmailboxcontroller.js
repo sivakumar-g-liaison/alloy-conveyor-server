@@ -32,12 +32,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             tenancyKey: "",
             properties: []
         };
-        // applying boolean value for httplistenerauthcheck
-        $scope.booleanValues = [
-            'false',
-            'true'
-        ];
-
         $scope.enumstats = [{"name":"Active","id":"ACTIVE"},
             {"name":"Inactive","id":"INACTIVE"}];
         
@@ -54,25 +48,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name": "HTTP Listener Auth Check Required", "id":"httplistenerauthcheckrequired"}];
+            {"name":"Email Notification Ids","id":"emailnotificationids"}];
 
-        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name": "HTTP Listener Auth Check Required", "id":"httplistenerauthcheckrequired"}];
-        
-        $scope.allMandatoryProperties = [{"name":"HTTP Listener PipelineId","id":"httplistenerpipelineid"}];
-        $scope.mandatoryProperties = [
-          {
-          name: 'HTTP Listener PipelineId',
-          value: $rootScope.pipelineId,
-          allowAdd: false,
-          isMandatory: true
-        },{
+        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}];
+		//Data from server
+        $scope.mailBoxProperties = [{
             name: '',
             value: '',
-            allowAdd: true,
-            isMandatory: false
+            allowAdd: true
         }];
-        //Data from server
-        $scope.mailBoxProperties = $scope.mandatoryProperties;
         // Loads the details initially if edit
         $scope.load = function () {
 
@@ -83,10 +67,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.showMailboxGuid = true;
                 $scope.mailboxPguidDisplayContent = ($rootScope.javaProperties.mailboxPguidDisplayPrefix != null && $rootScope.javaProperties.mailboxPguidDisplayPrefix != '')?
                                                      $rootScope.javaProperties.mailboxPguidDisplayPrefix + $scope.mailBoxId: $scope.mailBoxId;
-                $scope.mandatoryProperties = [];
-                $scope.mailBoxProperties = [];
-                //$scope.sharedService.setProperty('test');
-
+              
                 block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data) {
@@ -116,37 +97,18 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 if (indexOfElement !== -1) {
                                 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
                             }
-                            var index =  getIndexOfId($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name);
-                            var indexMandatory = getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name);
-                             var propertyValue = data.getMailBoxResponse.mailBox.properties[i].value;
-                             if (data.getMailBoxResponse.mailBox.properties[i].name === 'httplistenerauthcheckrequired') {
-                                propertyValue = (data.getMailBoxResponse.mailBox.properties[i].value === 'true')?$scope.booleanValues[1]:$scope.booleanValues[0];
-                             }
-                             // if both index and index mandatory are -1 then it is a dynamic property added by user
-                             if (index == -1 && indexMandatory == -1) {
-                                 $scope.mandatoryProperties.push({
-                                    name: data.getMailBoxResponse.mailBox.properties[i].name,
-                                    value: propertyValue,
-                                    allowAdd: false,
-                                    isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
-                                });
-                             } else {
-                                 $scope.mandatoryProperties.push({
-                                    name: $scope.getNameValue(data.getMailBoxResponse.mailBox.properties[i].name),
-                                    value: propertyValue,
-                                    allowAdd: false,
-                                    isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
-                                });
-                             }
-
+                            $scope.mailBoxProperties.push({
+                                name: (indexOfElement == -1)?data.getMailBoxResponse.mailBox.properties[i].name:
+                                    getName($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name),
+                                value: data.getMailBoxResponse.mailBox.properties[i].value,
+                                allowAdd: false
+                            });
                         }
-                        $scope.mandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
+                        $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
                             name: '',
                             value: '',
-                            allowAdd: true,
-                            isMandatory: false
+                            allowAdd: true
                         });
-                        $scope.mailBoxProperties = $scope.mandatoryProperties;
                     }
                 );
             }
@@ -159,37 +121,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         	block.blockUI();
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
             var len = $scope.mailBoxProperties.length;
-            var mandatoryArray = [];
 
             for (var i = 0; i < len - 1; i++) {
-               var index = $scope.getIndex($scope.mailBoxProperties[i].name);
-               var name = (index === -1) ? $scope.mailBoxProperties[i].name : $scope.getIdValue($scope.mailBoxProperties[i].name);
-               var value = $scope.mailBoxProperties[i].value;
-               
-               if (name === 'httplistenerpipelineid') {
-                     $scope.mailBox.properties.push({
-                        name: name,
-                        value: $rootScope.pipelineId
-                    });
-               }
-                var index = getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
-                var indexMandatory = getIndex($scope.allMandatoryProperties, $scope.mailBoxProperties[i].name);
-                if (index == -1 && indexMandatory == -1) {
+                var index =  getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
+                
+                $scope.mailBox.properties.push({
+                    name: (index === -1)?$scope.mailBoxProperties[i].name:getId($scope.allStaticProperties, $scope.mailBoxProperties[i].name),
+                    value: $scope.mailBoxProperties[i].value
 
-                    $scope.mailBox.properties.push({
-                        name:$scope.mailBoxProperties[i].name,
-                        value:$scope.mailBoxProperties[i].value
-                  });
-                } else {
-                  // push only the static properties as the mandatory and dynamic properties are already pushed  
-                  if (indexMandatory == -1 && index != -1) {
-                    $scope.mailBox.properties.push({
-                        name:name,
-                        value:value
-
-                    });
-                  }      
-                }
+                });
             }
             if ($scope.isMailBoxEdit) {
 
@@ -347,12 +287,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                             <div ng-switch-when="emailnotificationids">\n\
            										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
-                                            <div ng-switch-when="httplistenerauthcheckrequired">\n\
-                                                <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=\'false\'" ng-options="property for property in booleanValues"></select>\n\
-                                            </div>\n\
-                                            <div ng-switch-when="httplistenerpipelineid">\n\
-                                                <textarea class="form-control" ng-model="COL_FIELD" required ng-init="COL_FIELD='+$rootScope.pipelineId+'" style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
-                                            </div>\n\
                                             <div ng-switch-default>\n\
                                                 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
@@ -364,12 +298,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             								 <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.pattern}" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
            						   </div>\n\
-                                   <div ng-switch-when="httplistenerauthcheckrequired">\n\
-                                        <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                                   </div>\n\
-                                   <div ng-switch-when="httplistenerpipelineid">\n\
-                                        <textarea class="form-control" ng-model="COL_FIELD" required style="width:94%;height:45px" ng-disabled="true" placeholder="required"/>\n\
-                                   </div>\n\
                                    <div ng-switch-default>\n\
                                         <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
@@ -382,11 +310,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 sortable: false,
                 cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
                     '<div ng-switch-when="true"><button ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                    '<div ng-switch-when="false">' +
-                        '<div ng-switch on="row.getProperty(\'isMandatory\')">' +
-                            '<div ng-switch-when="true">-NA-</div>' +
-                            '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
-                        '</div>'+
+					'<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,mailBoxProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                     '</div>'
 
             }]
@@ -455,8 +379,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             gridData.push({
                 name: attrName,
                 value: row.getProperty('value'),
-                allowAdd: false,
-                isMandatory: false
+                allowAdd: false
             });
 
             if (indexOfSelectedElement != -1) {
@@ -467,8 +390,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             gridData.push({
                 name: '',
                 value: '',
-                allowAdd: true,
-                isMandatory: true
+                allowAdd: true
             });
 
             valueSelectedinSelectionBox.value = '';
@@ -490,10 +412,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
             if (row.getProperty('name') === '') {
                 return '';
-            }  
-            var mandatoryVal = getId($scope.allMandatoryProperties, row.getProperty('name'));
-            if (mandatoryVal.length > 0) {
-                return mandatoryVal;
             }
             var val = getId(objArray, row.getProperty('name'));
             if (val.length > 0) {
@@ -501,28 +419,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             }
 
             return "Dor%^7#@"
-        };
-        
-         $scope.getNameValue = function (id) {
-            var mandatoryVal = getName($scope.allMandatoryProperties, id);
-            if (mandatoryVal.length > 0) {
-                return mandatoryVal;
-            }
-            return getName($scope.allStaticProperties, id);
-        };
-         $scope.getIdValue = function (name) {
-            var mandatoryVal = getId($scope.allMandatoryProperties, name);
-            if (mandatoryVal.length > 0) {
-                return mandatoryVal;
-            }
-            return getId($scope.allStaticProperties, name);
-        };
-         $scope.getIndex = function (name) {
-            var mandatoryVal = getIndex($scope.allMandatoryProperties, name);
-            if (mandatoryVal !== -1) {
-                return mandatoryVal;
-            }
-            return getId($scope.allStaticProperties, name);
         };
         
         // Type ahead method to retrieve all domains in tenancy keys

@@ -228,7 +228,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
 					.append(" where mbx.pguid = :" + PGUID)
-					.append(" and processor.type = :" + PROCESSOR_TYPE );
+					.append(" and TYPE(processor) = :" + PROCESSOR_TYPE );
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PGUID, mbxGuid)
