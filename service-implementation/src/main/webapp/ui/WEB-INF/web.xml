@@ -12,11 +12,11 @@
     <listener>
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
-    
+
     <listener>
         <listener-class>com.netflix.adminresources.MyGuiceServletConfig</listener-class>
     </listener>
-    
+
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -25,7 +25,7 @@
         <filter-name>guiceFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    
+
 	<!--  Commented by senthilvel-->
 	<!--  This declaration part is deprecated by HelloworldComponent's initialize() -->
     <!-- Framework initialization servlet, please do not modify -->
@@ -34,12 +34,12 @@
         <servlet-class>com.liaison.framework.bootstrap.InitializationServlet</servlet-class>
 		<load-on-startup>0</load-on-startup>
     </servlet>
-	
+
     <servlet-mapping>
         <servlet-name>InitializationServlet</servlet-name>
         <url-pattern>/init</url-pattern>
     </servlet-mapping>
-	
+
 	<!-- Added by senthilvel for AsyncServlet Injection -->
 	<servlet>
         <servlet-name>AsyncServlet</servlet-name>
@@ -50,7 +50,7 @@
 	</init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    
+
     <servlet-mapping>
         <servlet-name>AsyncServlet</servlet-name>
         <url-pattern>/async</url-pattern>
@@ -58,7 +58,7 @@
 
 
 
-	
+
 	<!-- Framework-defined dynamic services support, please do not modify -->
 
     <servlet>
@@ -78,7 +78,7 @@
         </servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.liaison.mailbox.service;com.wordnik.swagger.jersey.listing;com.liaison.service.resources.acl</param-value>              
+            <param-value>com.liaison.mailbox.service;com.wordnik.swagger.jersey.listing;com.liaison.service.resources.acl</param-value>
 
         </init-param>
         <init-param>
@@ -86,7 +86,7 @@
             <param-value>true</param-value>
         </init-param>
         <!-- ACL -->
-          <init-param>            
+          <init-param>
             <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
             <param-value>com.liaison.commons.acl.resource.filter.ValidationFilterFactory</param-value>
         </init-param>
@@ -127,7 +127,7 @@
     End:  Servlet implementation configuration
     =========================================================================
     -->
-   
+
 
 	<!--Swagger config -->
 	<servlet>
@@ -140,7 +140,7 @@
 	  <init-param>
 	    <param-name>swagger.api.basepath</param-name>
 	    <!-- change localhost to production server name -->
-	    <param-value>http://10.0.24.76:8080/g2mailboxservice/rest</param-value>
+	    <param-value>/g2mailboxservice/rest</param-value>
 	  </init-param>
 	  <load-on-startup>2</load-on-startup>
 	</servlet>
@@ -149,13 +149,13 @@
         <servlet-class>com.liaison.service.core.SwaggerBootstrap</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
-	
-	<!--  
+
+	<!--
     ==============================================================================
-       Enable only for development when using python to make calls to tomcat  and 
+       Enable only for development when using python to make calls to tomcat  and
        make sure containes (tomcat) provides the jar required for this
-    ============================================================================== 
-     
+    ==============================================================================
+
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -164,7 +164,7 @@
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping> -->
-  
+
 
 
 </web-app>
