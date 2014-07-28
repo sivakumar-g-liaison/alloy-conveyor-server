@@ -804,7 +804,7 @@ public class ProcessorConfigurationService {
 	 * @param httpListenerType
 	 * @return a Map containing the HttpListenerSpecific Properties
 	 */
-	public Map <String, String> getHttpListenerProperties(String mailboxGuid, String httpListenerType) {
+	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) {
 		
 		Map <String, String>httpListenerProperties = new HashMap <String, String>();
 		

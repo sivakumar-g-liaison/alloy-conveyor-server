@@ -159,10 +159,10 @@ public class HttpListener extends BaseResource {
 			}
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(mailboxPguid, ProcessorType.HTTPSYNC.getCode())) {
+			if (isAuthenticationCheckRequired(mailboxPguid, ProcessorType.HTTPSYNC)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request,mailboxPguid, ProcessorType.HTTPSYNC.getCode());
+			SessionContext sessionContext = createSessionContext(request,mailboxPguid, ProcessorType.HTTPSYNC);
 			
 			logger.debug("Pipeline id is set in session context");
 			assignGlobalProcessId(sessionContext);
@@ -235,10 +235,10 @@ public class HttpListener extends BaseResource {
 			}
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(mailboxPguid, ProcessorType.HTTPASYNC.getCode())) {
+			if (isAuthenticationCheckRequired(mailboxPguid, ProcessorType.HTTPASYNC)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request,mailboxPguid, ProcessorType.HTTPASYNC.getCode());			
+			SessionContext sessionContext = createSessionContext(request,mailboxPguid, ProcessorType.HTTPASYNC);			
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
@@ -335,7 +335,7 @@ public class HttpListener extends BaseResource {
 	 *            the HttpServletRequest
 	 * @return SessionContext
 	 */
-	protected SessionContext createSessionContext(HttpServletRequest request,String mailboxPguid, String processorType) {		
+	protected SessionContext createSessionContext(HttpServletRequest request,String mailboxPguid, ProcessorType processorType) {		
 		SessionContext sessionContext = new SessionContext();
 		sessionContext.copyFrom(request);
 		sessionContext.setPipelineId(retrievePipelineId(mailboxPguid, processorType));
@@ -716,7 +716,7 @@ public class HttpListener extends BaseResource {
 	 * @return
 	 * @throws Exception
 	 */
-	protected boolean isAuthenticationCheckRequired(String mailboxPguid, String processorType) {
+	protected boolean isAuthenticationCheckRequired(String mailboxPguid, ProcessorType processorType) {
 
 		boolean isAuthCheckRequired = true;
 		Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, processorType);
@@ -733,7 +733,7 @@ public class HttpListener extends BaseResource {
 	 * @param isSync boolean specifying
 	 * @return
 	 */
-	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, String processorType) {
+	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) {
 		
 		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
 		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
@@ -750,7 +750,7 @@ public class HttpListener extends BaseResource {
 	 * 
 	 * 
 	 */
-	private String retrievePipelineId(String mailboxPguid, String processorType) {
+	private String retrievePipelineId(String mailboxPguid, ProcessorType processorType) {
 
 		String pipelineId = null;
 		Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, processorType);

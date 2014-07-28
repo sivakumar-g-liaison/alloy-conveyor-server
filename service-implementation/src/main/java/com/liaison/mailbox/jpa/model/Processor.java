@@ -48,8 +48,8 @@ public class Processor implements Identifiable {
 	public static final String TYPE_REMOTEDOWNLOADER = "remotedownloader";
 	public static final String TYPE_REMOTEUPLOADER = "remoteuploader";
 	public static final String TYPE_SWEEPER = "sweeper";
-	public static final String HTTP_ASYNC = "httpasync";
-	public static final String HTTP_SYNC = "httpsync";
+	public static final String HTTP_ASYNC = "httpasyncprocessor";
+	public static final String HTTP_SYNC = "httpsyncprocessor";
 
 	private String pguid;
 	private String javaScriptUri;

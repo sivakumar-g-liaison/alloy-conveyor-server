@@ -23,6 +23,7 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -216,7 +217,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * @return list of processors
 	 */
 	@Override
-	public List<Processor> findProcessorByTypeAndMbx(String type, String mbxGuid) {
+	public List<Processor> findProcessorByTypeAndMbx(ProcessorType type, String mbxGuid) {
 		
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
@@ -229,10 +230,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					.append(" inner join processor.mailbox mbx")
 					.append(" where mbx.pguid = :" + PGUID)
 					.append(" and TYPE(processor) = :" + PROCESSOR_TYPE );
-
+			Class <?> processorType = getProcessorClass(type);
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PGUID, mbxGuid)
-					.setParameter(PROCESSOR_TYPE, (type == null)? "" : type.toLowerCase())
+					.setParameter(PROCESSOR_TYPE, processorType)
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -254,5 +255,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return processors;
 	}
-
+	
+	private Class<?> getProcessorClass(ProcessorType processorType) {
+		return Processor.processorInstanceFactory(processorType).getClass();
+	}
+	
 }
