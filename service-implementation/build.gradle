@@ -397,9 +397,7 @@ task enhance  << {
             verbose     : true,
             api : "JPA",
             persistenceUnit : "mailbox-pu",
-            failonerror : true) {
-                fileset( dir : "$buildDir/classes/main/com/liaison/mailbox/jpa/model/" ) { }
-            }
+            failonerror : true) 
 }
 classes.dependsOn('enhance')
 
