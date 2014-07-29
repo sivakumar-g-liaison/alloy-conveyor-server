@@ -72,12 +72,16 @@ scripting.compile.cache.expire.timeout=10
 scripting.compile.cache.expire.timeunit=MINUTES
 
 # Properties to read JS file from  git lab
-com.liaison.gitlab.script.server.host=lsvlGITRPT01d
+com.liaison.gitlab.script.server.host=lsvlGITRPT01d.liaison.dev
 com.liaison.gitlab.script.server.port=80
 com.liaison.gitlab.script.server.user=
 com.liaison.gitlab.script.server.password=
 com.liaison.gitlab.script.project.name=g2/commons-scripting
 com.liaison.gitlab.script.branch.name=master
+
+# Script Execution Values
+scripting.thread.execution.timeout = 5
+scripting.thread.execution.timeunit = MINUTES
 
 #queue to which all processors of a triggered profile is queued.
 triggered.profile.processor.queue.name=/queue/mailboxProcessorQueue
