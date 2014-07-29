@@ -24,6 +24,8 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.jpa.model.HTTPAsyncProcessor;
+import com.liaison.mailbox.jpa.model.HTTPSyncProcessor;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -257,7 +259,18 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 	
 	private Class<?> getProcessorClass(ProcessorType processorType) {
-		return Processor.processorInstanceFactory(processorType).getClass();
+		
+		Class <?> processorClass = null;
+		switch(processorType.getCode()) {
+		
+		case "httpsyncprocessor":
+			processorClass = HTTPSyncProcessor.class;
+			break;
+		case "httpasyncprocessor":
+			processorClass = HTTPAsyncProcessor.class;
+			break;		
+		}
+		return processorClass;
 	}
 	
 }
