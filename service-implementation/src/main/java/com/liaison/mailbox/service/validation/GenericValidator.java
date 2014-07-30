@@ -34,7 +34,7 @@ public class GenericValidator {
 
 	private final static Logger LOGGER = LogManager.getLogger(GenericValidator.class);
 
-	private StringBuffer errorMessage;
+	private StringBuilder errorMessage;
 
 	public GenericValidator() {
 		super();
@@ -50,11 +50,11 @@ public class GenericValidator {
 	 */
 	public boolean validate(Object dto) throws MailBoxConfigurationServicesException {
 
-		LOGGER.info("Entering into validate method.");
+		LOGGER.debug("Entering into validate method.");
 
 		try {
 
-			errorMessage = new StringBuffer();
+			errorMessage = new StringBuilder();
 			if (!doValidate(dto)) {
 				throw new MailBoxConfigurationServicesException(Messages.ERROR_MSG.value() + errorMessage.toString());
 			}

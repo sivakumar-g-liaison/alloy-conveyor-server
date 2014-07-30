@@ -68,7 +68,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		
-		LOGGER.info("Entering in invoke.");
+		LOGGER.debug("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));

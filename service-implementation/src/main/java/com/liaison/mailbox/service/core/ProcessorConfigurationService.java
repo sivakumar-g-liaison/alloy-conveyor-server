@@ -108,7 +108,6 @@ public class ProcessorConfigurationService {
 	private static String INTERRUPT_SIGNAL = "Interrupt Signal";
 	private static String EXECUTING_PROCESSORS = "Executing Processors";
 
-	private static final GenericValidator validator = new GenericValidator();
 
 	/**
 	 * Creates processor for the mailbox.
@@ -126,7 +125,7 @@ public class ProcessorConfigurationService {
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException {
 
-		LOGGER.info("call receive to insert the processor ::{}", serviceRequest.getProcessor());
+		LOGGER.debug("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
 
 		try {
@@ -139,7 +138,8 @@ public class ProcessorConfigurationService {
 			if (processorDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
-
+			
+			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
 			if (null != processorDTO.getFolders()) {
 				for (FolderDTO folderDTO : processorDTO.getFolders()) {
@@ -207,7 +207,7 @@ public class ProcessorConfigurationService {
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(new ProcessorResponseDTO(String.valueOf(processor.getPrimaryKey())));
-			LOGGER.info("Exit from create processor.");
+			LOGGER.debug("Exit from create processor.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -332,7 +332,7 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.info("Entering into get processor.");
+			LOGGER.debug("Entering into get processor.");
 			LOGGER.info("The retrieve guid is {} ", processorGuid);
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
@@ -350,7 +350,7 @@ public class ProcessorConfigurationService {
 
 			serviceResponse.setProcessor(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
-			LOGGER.info("Exit from get mailbox.");
+			LOGGER.debug("Exit from get mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -413,7 +413,7 @@ public class ProcessorConfigurationService {
 
 				serviceResponse.setTrustStore(dto);
 				serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, TRUSTSTORE, Messages.SUCCESS));
-				LOGGER.info("Exit from get mailbox.");
+				LOGGER.debug("Exit from get mailbox.");
 				return serviceResponse;
 
 			} else throw new MailBoxConfigurationServicesException(Messages.SELFSIGNED_TRUSTSTORE_CREATION_FAILED);
@@ -441,7 +441,7 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.info("Entering into get processor.");
+			LOGGER.debug("Entering into get processor.");
 			LOGGER.info("Deactivate guid is {} ", processorGuid);
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
@@ -460,7 +460,7 @@ public class ProcessorConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setProcessor(new ProcessorResponseDTO(processorGuid));
-			LOGGER.info("Exit from deactivate mailbox.");
+			LOGGER.debug("Exit from deactivate mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -492,7 +492,7 @@ public class ProcessorConfigurationService {
 	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
 
-		LOGGER.info("Entering into revising processor.");
+		LOGGER.debug("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
 		ReviseProcessorResponseDTO serviceResponse = new ReviseProcessorResponseDTO();
 
@@ -510,7 +510,8 @@ public class ProcessorConfigurationService {
 			if (processorDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
-
+			
+			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
 			if (null != processorDTO.getFolders()) {
 				for (FolderDTO folderDTO : processorDTO.getFolders()) {
@@ -578,7 +579,7 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 
-		LOGGER.info("Exit from revise processor.");
+		LOGGER.debug("Exit from revise processor.");
 
 		return serviceResponse;
 	}
@@ -671,7 +672,7 @@ public class ProcessorConfigurationService {
 	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) throws IOException {
 		
 		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
-		LOGGER.info("Entering into getExecutingProcessors.");
+		LOGGER.debug("Entering into getExecutingProcessors.");
 		try {
 	
 			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours"); 
@@ -728,7 +729,7 @@ public class ProcessorConfigurationService {
 				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, EXECUTING_PROCESSORS, Messages.SUCCESS));
 			}
 			
-			LOGGER.info("Exit from getExecutingProcessors.");
+			LOGGER.debug("Exit from getExecutingProcessors.");
 			return serviceResponse;
 			
 		} catch(ProcessorManagementFailedException e) {
@@ -751,7 +752,7 @@ public class ProcessorConfigurationService {
 	 */
 	public InterruptExecutionEventResponseDTO interruptRunningProcessor( InterruptExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
 		
-		LOGGER.info("Entering into interrupt processor.");
+		LOGGER.debug("Entering into interrupt processor.");
 		InterruptExecutionEventResponseDTO serviceResponse = new InterruptExecutionEventResponseDTO();
 
 		try {
@@ -760,7 +761,8 @@ public class ProcessorConfigurationService {
 			if (fsmEventDTO == null) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_REQUEST);
 			}
-
+			
+			GenericValidator validator = new GenericValidator();
 			validator.validate(fsmEventDTO);
 
 			MailboxFSM fsm = new MailboxFSM();
@@ -774,7 +776,7 @@ public class ProcessorConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_SUCCESSFULLY, INTERRUPT_SIGNAL, Messages.SUCCESS));
 
-			LOGGER.info("Exiting from interrupt processor.");
+			LOGGER.debug("Exiting from interrupt processor.");
 
 			return serviceResponse;
 		} catch (ProcessorManagementFailedException e) {

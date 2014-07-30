@@ -14,6 +14,9 @@ import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServlet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.SwaggerConfig;
 
@@ -27,6 +30,8 @@ public class SwaggerBootstrap extends HttpServlet {
 	 *
 	 */
 	private static final long serialVersionUID = 1212764286594977168L;
+	
+	private static final Logger logger = LogManager.getLogger(SwaggerBootstrap.class);
 
 	static {
 
@@ -40,7 +45,7 @@ public class SwaggerBootstrap extends HttpServlet {
 			try {
 				ip = InetAddress.getLocalHost();
 			} catch (UnknownHostException e) {
-				e.printStackTrace();
+				logger.error("unknown host", e);
 			}
 			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice/rest");
 
@@ -52,7 +57,7 @@ public class SwaggerBootstrap extends HttpServlet {
 			try {
 				ip = InetAddress.getLocalHost();
 			} catch (UnknownHostException e) {
-				e.printStackTrace();
+				logger.error("unknown host", e);
 			}
 
 			if (!basePathParts[2].equals("localhost:8989")) {

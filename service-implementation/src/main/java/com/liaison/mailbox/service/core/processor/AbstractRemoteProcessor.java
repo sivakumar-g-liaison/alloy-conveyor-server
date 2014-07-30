@@ -719,7 +719,7 @@ public abstract class AbstractRemoteProcessor {
 			return content;
 		} else {
 
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(URI))) {
 				for (Path entry : stream) {
 					String content = FileUtils.readFileToString(entry.toFile(), "UTF-8");

@@ -474,7 +474,7 @@ flyway {
         'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
     ]
     //if (project.dbDevSampleData == 'true') {
-    //    System.out.println(':flyway: Including dev sample data.')
+    //    logger.info(":flyway: Including dev sample data.")
     //    locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
     //}
 }

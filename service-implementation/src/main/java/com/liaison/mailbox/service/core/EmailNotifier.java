@@ -108,7 +108,7 @@ public class EmailNotifier {
 				}
 			}
 			message.setSubject(subject);
-			final String completeMessage = new StringBuffer().append(body).append("\n\n").append(NOTE).toString();
+			final String completeMessage = new StringBuilder().append(body).append("\n\n").append(NOTE).toString();
 			message.setText(completeMessage);
 			Transport.send(message);
 
@@ -133,16 +133,11 @@ public class EmailNotifier {
 			// message.setFrom( new InternetAddress(aFromEmailAddr) );
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(aToEmailAddr));
 			message.setSubject(aSubject);
-			final String completeMessage = new StringBuffer().append(aBody).append("\n\n").append(NOTE).toString();
+			final String completeMessage = new StringBuilder().append(aBody).append("\n\n").append(NOTE).toString();
 			message.setText(completeMessage);
 			Transport.send(message);
 		} catch (MessagingException ex) {
 			System.err.println("Cannot send email. " + ex);
 		}
-	}
-
-	public static void main(String args[]) {
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(" sub title ", "testing....");
 	}
 }

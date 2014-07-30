@@ -68,7 +68,6 @@ public class MailBoxConfigurationService {
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationService.class);
 	private static final String MAILBOX = "Mailbox";
 
-	private static final GenericValidator validator = new GenericValidator();
 
 	/**
 	 * Creates Mail Box.
@@ -83,7 +82,7 @@ public class MailBoxConfigurationService {
 	 */
 	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String serviceInstanceId) throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException{
 
-		LOG.info("Entering into create mailbox.");
+		LOG.debug("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
 		try {
 
@@ -93,6 +92,7 @@ public class MailBoxConfigurationService {
 			}
 
 			// validation
+			GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
 				validator.validate(property);
@@ -116,7 +116,7 @@ public class MailBoxConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
 			serviceResponse.setMailBox(new MailBoxResponseDTO(String.valueOf(mailBox.getPrimaryKey())));
-			LOG.info("Exit from create mailbox.");
+			LOG.debug("Exit from create mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -183,7 +183,7 @@ public class MailBoxConfigurationService {
 	public GetMailBoxResponseDTO getMailBox(String guid, boolean addConstraint, String serviceInstanceId) throws JsonParseException, JsonMappingException, JAXBException,
 		IOException, SymmetricAlgorithmException {
 
-		LOG.info("Entering into get mailbox.");
+		LOG.debug("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);
 		
 		GetMailBoxResponseDTO serviceResponse = new GetMailBoxResponseDTO();
@@ -219,7 +219,7 @@ public class MailBoxConfigurationService {
 
 			serviceResponse.setMailBox(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
-			LOG.info("Exit from get mailbox.");
+			LOG.debug("Exit from get mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -245,7 +245,7 @@ public class MailBoxConfigurationService {
 	 */
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid, String serviceInstanceId) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
-		LOG.info("Entering into revise mailbox.The revise request is for {} ", guid);
+		LOG.debug("Entering into revise mailbox.The revise request is for {} ", guid);
 
 		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();
 
@@ -257,6 +257,7 @@ public class MailBoxConfigurationService {
 			}
 
 			// Validation
+			GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
 			for (PropertyDTO property : mailboxDTO.getProperties()) {
 				validator.validate(property);
@@ -314,7 +315,7 @@ public class MailBoxConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
 			serviceResponse.setMailBox(new MailBoxResponseDTO(String.valueOf(retrievedMailBox.getPrimaryKey())));
-			LOG.info("Exit from revise mailbox.");
+			LOG.debug("Exit from revise mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -335,7 +336,7 @@ public class MailBoxConfigurationService {
 	 */
 	public DeActivateMailBoxResponseDTO deactivateMailBox(String guid) {
 
-		LOG.info("Entering into deactivate mailbox.");
+		LOG.debug("Entering into deactivate mailbox.");
 		DeActivateMailBoxResponseDTO serviceResponse = new DeActivateMailBoxResponseDTO();
 		try {
 
@@ -354,7 +355,7 @@ public class MailBoxConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			serviceResponse.setMailBox(new MailBoxResponseDTO(guid));
-			LOG.info("Exit from deactivate mailbox.");
+			LOG.debug("Exit from deactivate mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
@@ -383,7 +384,7 @@ public class MailBoxConfigurationService {
 	 */
 	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String profName) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
-		LOG.info("Entering into search mailbox.");
+		LOG.debug("Entering into search mailbox.");
 
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
 
@@ -424,7 +425,7 @@ public class MailBoxConfigurationService {
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
 			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
-			LOG.info("Exit from search mailbox.");
+			LOG.debug("Exit from search mailbox.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {

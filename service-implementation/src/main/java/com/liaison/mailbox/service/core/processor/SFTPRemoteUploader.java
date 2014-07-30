@@ -288,7 +288,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		
-		LOGGER.info("Entering in invoke.");
+		LOGGER.debug("Entering in invoke.");
 		// SFTPRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 

@@ -16,6 +16,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -28,6 +30,8 @@ import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
  *
  */
 public class JavaScriptEngineUtilTest {
+	
+	private static final Logger logger = LogManager.getLogger(JavaScriptEngineUtilTest.class);
 	
 	/**
 	 * Method to test execute JavaScript.
@@ -58,7 +62,7 @@ public class JavaScriptEngineUtilTest {
 	    scriptExecutor.setScriptContext(scriptContext);
 	    
 	    Object returnValue = scriptExecutor.executeInContext(scriptContext, "sandbox-tests.js", myUri, "testHappyPathWithArgs", "Test");
-        System.out.println("returnValue "+returnValue);
+	    logger.debug("returnValue "+returnValue);
 	    // did my function call throw?
 	    Exception expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get("sandbox-tests.js" + ":" + "testHappyPathWithArgs");
 	    if (null != expectedException) {

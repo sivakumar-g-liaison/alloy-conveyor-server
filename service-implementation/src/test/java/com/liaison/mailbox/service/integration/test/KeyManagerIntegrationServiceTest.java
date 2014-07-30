@@ -106,7 +106,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
                
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
-        System.out.println(response.getStatusLine());
+        logger.debug(response.getStatusLine());
 	}
 	
 	/**
@@ -139,7 +139,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
                
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
-        System.out.println(response.getStatusLine());
+        logger.debug(response.getStatusLine());
 	}
 	
 	/**
@@ -168,7 +168,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
         httpPut.setEntity(new StringEntity(jsonRequest));
         
         HttpResponse response = httpclient.execute(httpPut);
-        System.out.println(response.getStatusLine());
+        logger.debug(response.getStatusLine());
 	}
 	
 	/**
@@ -192,7 +192,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		request.execute();
 
 		jsonResponse = getOutput().toString();
-		System.out.println(jsonResponse);
+		logger.debug(jsonResponse);
 	}
 	
 		/**
@@ -237,7 +237,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			request.execute();
 			
 			jsonResponse = getOutput().toString();
-			System.out.println(jsonResponse);
+			logger.debug(jsonResponse);
 		}
 		
 		/**
@@ -282,7 +282,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			sftpRequest.setDiagnosticLogger(logger);
 			sftpRequest.setCommandLogger(logger);
 			boolean value = sftpRequest.connect();
-			if(value) System.out.println("true sftp connected successfully");
+			if(value) logger.debug("true sftp connected successfully");
 			
 		}
 		
@@ -328,7 +328,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			sftpRequest.setDiagnosticLogger(logger);
 			sftpRequest.setCommandLogger(logger);
 			boolean value = sftpRequest.connect();
-			if(value) System.out.println("true sftp connected successfully");
+			if(value) logger.debug("true sftp connected successfully");
 			sftpRequest.disconnect();
 			
 		}

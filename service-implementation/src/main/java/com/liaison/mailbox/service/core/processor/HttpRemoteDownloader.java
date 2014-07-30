@@ -67,7 +67,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 
-		LOGGER.info("Entering in invoke.");
+		LOGGER.debug("Entering in invoke.");
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 
@@ -125,7 +125,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			files = getProcessorPayload();
 			if (null != files) {
 
-				StringBuffer buffer = new StringBuffer();
+				StringBuilder buffer = new StringBuilder();
 				for (File entry : files) {
 					String content = FileUtils.readFileToString(entry, "UTF-8");
 					buffer.append(content);

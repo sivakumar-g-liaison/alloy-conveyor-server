@@ -17,6 +17,9 @@ import java.util.Properties;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 
@@ -29,6 +32,8 @@ import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
  */
 public class HornetQMessageListnerTest {
      
+	
+	private static final Logger logger = LogManager.getLogger(HornetQMessageListnerTest.class);
 	/**
 	 * Method construts ConfigureJNDIDTO.
 	 * 
@@ -41,7 +46,7 @@ public class HornetQMessageListnerTest {
 		for(int i=0;i<2;i++){
             ProcessorQueue.getInstance().pushMessages("mynewID"+i);
 		}
-           System.out.println("Done posting");		 
+		logger.debug("Done posting");		 
 	 }
      
      /**
@@ -59,7 +64,7 @@ public class HornetQMessageListnerTest {
 			};
 			
 			Thread.sleep(30000);
-			System.out.println("Back from sleep");
+			logger.debug("Back from sleep");
 			
 			for(int i=0;i<10;i++){
 				qconsumer.invokeProcessor("MyIdisNewId"+i);
