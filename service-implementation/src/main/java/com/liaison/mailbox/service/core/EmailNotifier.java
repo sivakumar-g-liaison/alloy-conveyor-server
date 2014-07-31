@@ -63,14 +63,14 @@ public class EmailNotifier {
 			// ArrayList<String>(Arrays.asList(StringUtils.split(MAILSERVER_CONFIG.getProperty("recievers"),
 			// ",")));
 		} catch (IOException ex) {
-			System.err.println("Cannot open and load mail server properties file.");
+		    LOGGER.error("Cannot open and load mail server properties file.");
 		} finally {
 			try {
 				if (input != null) {
 					input.close();
 				}
 			} catch (IOException ex) {
-				System.err.println("Cannot close mail server properties file.");
+			    LOGGER.error("Cannot close mail server properties file.");
 			}
 		}
 	}
@@ -113,7 +113,7 @@ public class EmailNotifier {
 			Transport.send(message);
 
 		} catch (MessagingException ex) {
-			System.err.println("Cannot send email. " + ex);
+		    LOGGER.error("Cannot send email. " + ex);
 		}
 	}
 
@@ -137,7 +137,7 @@ public class EmailNotifier {
 			message.setText(completeMessage);
 			Transport.send(message);
 		} catch (MessagingException ex) {
-			System.err.println("Cannot send email. " + ex);
+		    LOGGER.error("Cannot send email. " + ex);
 		}
 	}
 }

@@ -16,6 +16,8 @@ import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -25,13 +27,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-
 /**
  * Utilities for MailBox.
  * 
@@ -40,7 +39,7 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
-	private static final Logger LOGGER = LoggerFactory.getLogger(MailBoxUtil.class);
+	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final String REQUEST_HEADER = "Request Header";
 	private static final String PROPERTIES_FILE = "Properties file";
 

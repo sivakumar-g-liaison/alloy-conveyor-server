@@ -46,7 +46,7 @@ public class InitializationServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
         ProcessorQueuePoller.startPolling();
-    	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initilize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+    	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
     }
 
 }

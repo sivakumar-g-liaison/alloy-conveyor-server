@@ -165,6 +165,11 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				throw new MailBoxServicesException("The given payload configuration is Empty.");
 			}
 		}
+		
+		// close the response stream
+		if (null != responseStream) {
+		    responseStream.close();
+		}
 	}
 
 	/**

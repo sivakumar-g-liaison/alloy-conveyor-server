@@ -194,7 +194,12 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					String localDir = localFileDir + File.separatorChar + root.getName();
 					sftpRequest.changeDirectory(dirToList);
 					processResponseLocation(localDir);
-					sftpRequest.getFile(root.getName(), new BufferedOutputStream(new FileOutputStream(localDir)));
+					try (FileOutputStream fos = new FileOutputStream(localDir);
+		                 BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+					     sftpRequest.getFile(root.getName(), bos);
+					}
+					
+					
 				}
 			}
 		}

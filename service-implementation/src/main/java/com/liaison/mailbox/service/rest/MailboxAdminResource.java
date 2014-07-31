@@ -149,12 +149,10 @@ public class MailboxAdminResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		InterruptExecutionEventRequestDTO serviceRequest;
 
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, InterruptExecutionEventRequestDTO.class);
