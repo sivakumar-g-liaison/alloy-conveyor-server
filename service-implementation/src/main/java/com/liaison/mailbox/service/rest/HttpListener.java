@@ -604,23 +604,26 @@ public class HttpListener extends BaseResource {
 		}
 
 		if (iContentLength > 0) {
-			InputStream responseInputStream = httpResponse.getEntity()
-					.getContent();
-			Header contentType = httpResponse
-					.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+		    
+		    try (InputStream responseInputStream = httpResponse.getEntity()
+                    .getContent()) {
+		          Header contentType = httpResponse
+		                    .getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
-			if (responseInputStream != null) {
-				builder.entity(responseInputStream);
-			}
+		            if (responseInputStream != null) {
+		                builder.entity(responseInputStream);
+		            }
 
-			if (contentType != null) {
-				builder.header(contentType.getName(), contentType.getValue());
-			}
+		            if (contentType != null) {
+		                builder.header(contentType.getName(), contentType.getValue());
+		            }
 
-			if (contentLength != null) {
-				builder.header(contentLength.getName(),
-						contentLength.getValue());
-			}
+		            if (contentLength != null) {
+		                builder.header(contentLength.getName(),
+		                        contentLength.getValue());
+		            }
+		    }		
+
 		}
 
 		copyResponseHeaders(httpResponse, builder);

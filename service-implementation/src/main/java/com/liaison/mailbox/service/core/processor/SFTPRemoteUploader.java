@@ -248,11 +248,11 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 				} else {
 
-					// upload the file
-					sftpRequest.changeDirectory(remoteParentDir);
-					InputStream inputStream = new FileInputStream(item);
-					replyCode = sftpRequest.putFile(item.getName(), inputStream);
-					inputStream.close();
+				    // upload the file
+				    try (InputStream inputStream = new FileInputStream(item)) {
+				        sftpRequest.changeDirectory(remoteParentDir);
+	                    replyCode = sftpRequest.putFile(item.getName(), inputStream);
+				    }
 				}
 				// archiveFile(item.getAbsolutePath());
 

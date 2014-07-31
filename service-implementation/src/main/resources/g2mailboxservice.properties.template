@@ -136,6 +136,7 @@ kms-base-url=http://10.146.16.147:8989/key-management/
 certificateDirectory=/app/mailbox/certificates/server.keystore
 mailbox.global.truststore.id=D275AC670A9205E714236BDF98BE05AB
 mailbox.global.trustgroup.id=D275AC520A9205E714236BDFCC8E53C2
+kms.connection.timout.interval=60000
 
 #########################################################ACL FILTER Configurations########################################################
 # Override acl filter check

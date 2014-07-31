@@ -215,12 +215,11 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					continue;
 				}
 				if (item.isFile()) {
-
-					// upload file
-					ftpsRequest.changeDirectory(remoteParentDir);
-					InputStream inputStream = new FileInputStream(item);
-					replyCode = ftpsRequest.putFile(item.getName(), inputStream);
-					inputStream.close();
+				    // upload file
+				    try (InputStream inputStream = new FileInputStream(item)) {
+				        ftpsRequest.changeDirectory(remoteParentDir);                    
+	                    replyCode = ftpsRequest.putFile(item.getName(), inputStream);
+				    } 					
 
 				} else {
 

@@ -210,8 +210,8 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 						bos = new BufferedOutputStream(fos);
 						ftpClient.getFile(currentFileName, bos);
 					} finally {
-						bos.close();
-						fos.close();
+					    if (bos != null) bos.close();
+					    if (fos != null) fos.close();
 					}
 				} else {
 
