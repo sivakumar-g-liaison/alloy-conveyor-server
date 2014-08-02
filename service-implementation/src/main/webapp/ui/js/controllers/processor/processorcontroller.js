@@ -2242,6 +2242,14 @@ var rest = myApp.controller(
                   // function to clear the credential details if protocol is changed
                 $scope.resetProcessorCredentialDetails();
                 $scope.resetCredentialModal();
+                
+                //GMB-201
+                if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
+					$scope.disableCertificates = false;
+     			} else {
+					$scope.disableCertificates = true;
+ 				}
+                $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
             };
             $scope.resetProtocol = function (model) {
                 console.log(model);
