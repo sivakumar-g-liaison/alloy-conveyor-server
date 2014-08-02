@@ -701,7 +701,7 @@ var rest = myApp.controller(
 				                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="httpVersion" ng-pattern="' + $scope.httpVersionPattern + '" required style="width:90%;height: 45px" placeholder="required" />\n\
 				                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
 				                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-				                            <div ng-show="formAddPrcsr.httpVersion.$dirty || formAddPrcsr.httpVersion.$invalid">\n\
+				                            <div ng-show="(formAddPrcsr.httpVersion.$dirty && formAddPrcsr.httpVersion.$invalid) || (formAddPrcsr.httpVersion.$invalid)">\n\
 				                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.httpVersion.$error.pattern}" ng-show=formAddPrcsr.httpVersion.$error.pattern>Version should be 1.1</span>\n\
 				                            </div>\n\
 			                            </div>\n\
@@ -716,14 +716,14 @@ var rest = myApp.controller(
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="propUrl" ng-pattern="' + $scope.inputPatternForURL + '" required style="width:90%;height: 45px" placeholder="required" ng-change = "OnChangeUrl(row)"/>\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="formAddPrcsr.propUrl.$dirty || formAddPrcsr.propUrl.$invalid">\n\
+                            <div ng-show="(formAddPrcsr.propUrl.$dirty && formAddPrcsr.propUrl.$invalid) || (formAddPrcsr.propUrl.$invalid)">\n\
                                 <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.propUrl.$error.pattern}" ng-show=formAddPrcsr.propUrl.$error.pattern>Enter valid URL</span>\n\
                             </div></div>\n\
                         <div ng-switch-when="socketTimeout">\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="socketTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="formAddPrcsr.socketTimeout.$dirty || formAddPrcsr.socketTimeout.$invalid">\n\
+                            <div ng-show="(formAddPrcsr.socketTimeout.$dirty && formAddPrcsr.socketTimeout.$invalid) || (formAddPrcsr.socketTimeout.$invalid)">\n\
                                 <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.socketTimeout.$error.pattern}" ng-show=formAddPrcsr.socketTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
                             </div>\n\
                         </div>\n\
@@ -731,7 +731,7 @@ var rest = myApp.controller(
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="connectionTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="formAddPrcsr.connectionTimeout.$dirty || formAddPrcsr.connectionTimeout.$invalid">\n\
+                            <div ng-show="(formAddPrcsr.connectionTimeout.$dirty && formAddPrcsr.connectionTimeout.$invalid) || (formAddPrcsr.connectionTimeout.$invalid)">\n\
                                 <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.connectionTimeout.$error.pattern}" ng-show=formAddPrcsr.connectionTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
                             </div>\n\
                         </div>\n\
@@ -739,18 +739,18 @@ var rest = myApp.controller(
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="retryAttempts" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.retryAttemptsPattern + '" />\n\
                             <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
                             <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="formAddPrcsr.retryAttempts.$dirty || formAddPrcsr.retryAttempts.$invalid">\n\
+                            <div ng-show="(formAddPrcsr.retryAttempts.$dirty && formAddPrcsr.retryAttempts.$invalid) || (formAddPrcsr.retryAttempts.$invalid)">\n\
                                 <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.retryAttempts.$error.pattern}" ng-show=formAddPrcsr.retryAttempts.$error.pattern>Must be a numeric value (0-4).</span>\n\
                             </div>\n\
                         </div>\n\
                         <div ng-switch-when="port">\n\
                         <div class="alignDiv" ng-switch on="portRequired">\n\
                         <div ng-switch-when="true"><textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.inputPatternForPort + '" />\n\
-                            <div ng-show="formAddPrcsr.port.$dirty || formAddPrcsr.port.$invalid">\n\
+                            <div ng-show="(formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid) && (formAddPrcsr.port.$invalid)">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
                             </div>\n\
                             </div><div ng-switch-default>\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" style="width:90%;height: 45px" ng-pattern="' + $scope.inputPatternForPort + '" />\n\<div ng-show="formAddPrcsr.port.$dirty || formAddPrcsr.port.$invalid">\n\
+                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" style="width:90%;height: 45px" ng-pattern="' + $scope.inputPatternForPort + '" />\n\<div ng-show="(formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid) || (formAddPrcsr.port.$invalid)">\n\
                                 <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.port.$error.pattern}" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
                             </div>\n\
                             </div></div>\n\
@@ -762,13 +762,13 @@ var rest = myApp.controller(
 						</div>\n\
                         <div ng-switch-when="payloadsizethreshold">\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name ="payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                <div ng-show="formAddPrcsr.payloadSizeThreshold.$dirty || formAddPrcsr.payloadSizeThreshold.$invalid">\n\
+                                <div ng-show="(formAddPrcsr.payloadSizeThreshold.$dirty && formAddPrcsr.payloadSizeThreshold.$invalid) || (formAddPrcsr.payloadSizeThreshold.$invalid)">\n\
                                     <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.payloadSizeThreshold.$error.pattern}" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern>Enter valid number</span>\n\
                                 </div>\n\
                         </div>\n\
                         <div ng-switch-when="numoffilesthreshold">\n\
                             <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="numoffilesthreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                <div ng-show="formAddPrcsr.numoffilesthreshold.$dirty || formAddPrcsr.numoffilesthreshold.$invalid">\n\
+                                <div ng-show="(formAddPrcsr.numoffilesthreshold.$dirty && formAddPrcsr.numoffilesthreshold.$invalid) || (formAddPrcsr.numoffilesthreshold.$invalid)">\n\
                                     <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.numoffilesthreshold.$error.pattern}" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern>Enter valid number</span>\n\
             					</div>\n\
                         </div>\n\
