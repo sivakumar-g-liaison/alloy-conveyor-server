@@ -96,4 +96,5 @@ public interface MailBoxConstants {
 	// retrieval of httplistener specific properties
 	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
 	public static final String HTTPLISTENER_PIPELINEID = "httplistenerpipelineid";
+	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httplistenerpayload";
 }

@@ -11,6 +11,7 @@
 package com.liaison.mailbox.jpa.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -229,13 +230,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.info("Fetching the processor count starts.");
 
 			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
-					.append(" inner join processor.mailbox mbx")
-					.append(" where mbx.pguid = :" + PGUID)
-					.append(" and TYPE(processor) = :" + PROCESSOR_TYPE );
+					.append(" inner join processor.mailbox")
+					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
+					.append(" and mailbox.pguid = :" + PGUID);
 			Class <?> processorType = getProcessorClass(type);
 			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(PGUID, mbxGuid)
 					.setParameter(PROCESSOR_TYPE, processorType)
+					.setParameter(PGUID, mbxGuid)
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();

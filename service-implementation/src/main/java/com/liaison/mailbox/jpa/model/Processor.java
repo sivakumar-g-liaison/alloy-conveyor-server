@@ -304,9 +304,9 @@ public class Processor implements Identifiable {
 			processor = new RemoteDownloader();
 		} else if (ProcessorType.REMOTEUPLOADER.equals(processorType)) {
 			processor = new RemoteUploader();
-		} else if (ProcessorType.HTTPASYNC.equals(processorType)) {
+		} else if (ProcessorType.HTTPASYNCPROCESSOR.equals(processorType)) {
 			processor = new HTTPAsyncProcessor();
-		} else if (ProcessorType.HTTPSYNC.equals(processorType)) {
+		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(processorType)) {
 			processor = new HTTPSyncProcessor();
 		} else {
 			processor = new Sweeper();

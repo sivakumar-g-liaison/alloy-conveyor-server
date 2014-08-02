@@ -85,7 +85,7 @@ var rest = myApp.controller(
                         "name": "Number of File Threshold",
                         "id": "numoffilesthreshold"
                     });
-                } else if ($scope.procsrType.id === "HTTPSYNC" || $scope.procsrType.id === "HTTPASYNC") {
+                } else if ($scope.procsrType.id === "HTTPSYNCPROCESSOR" || $scope.procsrType.id === "HTTPASYNCPROCESSOR") {
                      $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [];
                 	 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
                 		"name": "HTTP Listener Auth Check Required",
@@ -216,12 +216,12 @@ var rest = myApp.controller(
                     "id": "SWEEPER",
                     "type": "Other"
                 }, {
-                	"name": "HTTP Async",
-                	"id": "HTTPASYNC",
+                	"name": "HTTP Async Processor",
+                	"id": "HTTPASYNCPROCESSOR",
                 	"type": "Server"              	
                 }, {
-                	"name": "HTTP Sync",
-                	"id": "HTTPSYNC",
+                	"name": "HTTP Sync Processor",
+                	"id": "HTTPSYNCPROCESSOR",
                 	"type": "Server"
                 }];
                 $scope.procsrType = $scope.enumprocsrtype[0];
@@ -1169,7 +1169,7 @@ var rest = myApp.controller(
             $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row.getProperty(\'guid\'),true)"><i class="glyphicon glyphicon-wrench"></i></button>';
             $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
             $scope.manageType = '<div ng-switch on="row.getProperty(\'type\')"><div ng-switch-when="REMOTEDOWNLOADER">Remote Downloader</div><div ng-switch-when="REMOTEUPLOADER">Remote Uploader</div>\n\
-            <div ng-switch-when="SWEEPER">Directory Sweeper</div><div ng-switch-when="HTTPASYNC">HTTP Async Processor</div><div ng-switch-when="HTTPSYNC">HTTP Sync Processor</div></div>';
+            <div ng-switch-when="SWEEPER">Directory Sweeper</div><div ng-switch-when="HTTPASYNCPROCESSOR">HTTP Async Processor</div><div ng-switch-when="HTTPSYNCPROCESSOR">HTTP Sync Processor</div></div>';
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
                     field: 'name',
@@ -1279,6 +1279,12 @@ var rest = myApp.controller(
 				} else {
 					$scope.portRequired = false;
 				}
+                
+                if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
+                    $scope.isProcessorTypeHTTPListener = true;
+                } else {
+                    $scope.isProcessorTypeHTTPListener = false;
+                }
 				
 				//GMB 221
 				if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
@@ -1363,7 +1369,7 @@ var rest = myApp.controller(
 							});
 							 }
 																	
-						} else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
+						} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                              if (prop === 'otherRequestHeader') {
 								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
 								
@@ -1428,7 +1434,7 @@ var rest = myApp.controller(
 						$scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
 					} else if ($scope.processor.protocol === 'SWEEPER') {
 						$scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1);
-					} else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
+					} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                         $scope.httpListenerMandatoryProperties.splice(otherReqIndex - 1, 1);
                     }else {
 						$scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
@@ -1457,7 +1463,7 @@ var rest = myApp.controller(
 							allowAdd: false,
 							isMandatory: false
 						});
-					} else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
+					} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                         if (data.getProcessorResponse.processor.dynamicProperties[i].name === 'httplistenerauthcheckrequired' && data.getProcessorResponse.processor.dynamicProperties[i].value != "false") {
                             var propertyValue = Boolean(data.getProcessorResponse.processor.dynamicProperties[i].value);
                             $scope.httpListenerMandatoryProperties.push({
@@ -1503,7 +1509,7 @@ var rest = myApp.controller(
 					$scope.processorProperties = $scope.sweeperMandatoryProperties;
 					$scope.disablePipeLineId = true;
 
-				} else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
+				} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
 					$scope.httpListenerMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
 						name: '',
 						value: '',
@@ -1527,7 +1533,7 @@ var rest = myApp.controller(
 						folderURI: data.getProcessorResponse.processor.folders[i].folderURI,
 						folderType: $scope.getFolderTypeDuringProcessorEdit(data.getProcessorResponse.processor.folders[i].folderType),
 						folderDesc: data.getProcessorResponse.processor.folders[i].folderDesc,
-						isMandatory: ($scope.processor.protocol === 'SWEEPER' && data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION') ? true : false,
+						isMandatory: (($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') && data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION') ? true : false,
 						allowAdd: false
 					});
 					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,
@@ -1542,7 +1548,7 @@ var rest = myApp.controller(
 					folderURI: '',
 					folderType: '',
 					folderDesc: '',
-					allowAdd: (data.getProcessorResponse.processor.type === 'SWEEPER') ? 'false' : 'true'
+					allowAdd: (data.getProcessorResponse.processor.type === 'SWEEPER' || data.getProcessorResponse.processor.type === 'HTTPASYNCPROCESSOR' || data.getProcessorResponse.processor.type === 'HTTPSYNCPROCESSOR') ? 'false' : 'true'
 				});
 				
 				$scope.processorCredProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
@@ -2028,7 +2034,7 @@ var rest = myApp.controller(
                         indexMandatory = getIndex($scope.allMandatoryHttpProperties, $scope.processorProperties[i].name);
                     } else if ($scope.processor.protocol === 'SWEEPER') {
                         indexMandatory = getIndex($scope.allMandatorySweeperProperties, $scope.processorProperties[i].name);
-                    } else if ($scope.processor.protocol === 'HTTPSYNC' || $scope.processor.protocol === 'HTTPASYNC') {
+                    } else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                         indexMandatory = getIndex($scope.allMandatoryHttpListenerProperties, $scope.processorProperties[i].name);
                     } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
                     if (index === -1 && indexMandatory === -1) {
@@ -2315,10 +2321,10 @@ var rest = myApp.controller(
 							$scope.disablePipeLineId = true;
                        }
                     }
-                }  else if (model.id === 'HTTPSYNC') {
+                }  else if (model.id === 'HTTPSYNCPROCESSOR') {
                 	  $scope.isProcessorTypeSweeper = false;
                       $scope.isProcessorTypeHTTPListener = true;
-                      $scope.processor.protocol = "HTTPSYNC";
+                      $scope.processor.protocol = "HTTPSYNCPROCESSOR";
                       $scope.setFolderData();
                       $scope.processorProperties = $scope.httpListenerMandatoryProperties;
   					for(i = 0; i < $scope.processorProperties.length; i++) {
@@ -2328,10 +2334,10 @@ var rest = myApp.controller(
   							
                          }
                       }
-                }	else if (model.id === 'HTTPASYNC') {
+                }	else if (model.id === 'HTTPASYNCPROCESSOR') {
 	              	  $scope.isProcessorTypeSweeper = false;
                       $scope.isProcessorTypeHTTPListener = true;
-	                  $scope.processor.protocol = "HTTPASYNC";
+	                  $scope.processor.protocol = "HTTPASYNCPROCESSOR";
 	                  $scope.setFolderData();
 	                  $scope.processorProperties = $scope.httpListenerMandatoryProperties;
 						for(i = 0; i < $scope.processorProperties.length; i++) {
@@ -2387,7 +2393,7 @@ var rest = myApp.controller(
                 } else if ($scope.processor.protocol === "SWEEPER") {
                     $scope.processorProperties = $scope.sweeperMandatoryProperties;
                     $scope.setFolderData();
-                } else if ($scope.processor.protocol === "HTTPSYNC" || $scope.processor.protocol === "HTTPASYNC") {
+                } else if ($scope.processor.protocol === "HTTPSYNCPROCESSOR" || $scope.processor.protocol === "HTTPASYNCPROCESSOR") {
                 	  $scope.processorProperties = $scope.httpListenerMandatoryProperties;
                       $scope.setFolderData();
                 } else {
@@ -2411,7 +2417,7 @@ var rest = myApp.controller(
                 $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
             };
             $scope.setFolderData = function () {
-                if ($scope.procsrType.id === "SWEEPER") {
+                if ($scope.procsrType.id === "SWEEPER" || $scope.procsrType.id === "HTTPASYNCPROCESSOR") {
                     $scope.processorFolderProperties = [{
                         folderURI: '',
                         folderType: 'Payload Location',
@@ -2434,7 +2440,7 @@ var rest = myApp.controller(
 						"name": "Local Target Location",
 						"id": "RESPONSE_LOCATION"
 					}];
-                } else {
+                } else if ($scope.procsrType.id === "REMOTEUPLOADER") {
 					$scope.processorFolderProperties = [{
 							folderURI: '',
 							folderType: '',
@@ -2449,6 +2455,9 @@ var rest = myApp.controller(
 						"name": "Remote Target Location",
 						"id": "RESPONSE_LOCATION"
 					}];
+				} else {
+					$scope.processorFolderProperties = [];
+					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [];
 				}
             };
             $scope.resetStaticAndMandatoryProps = function () {

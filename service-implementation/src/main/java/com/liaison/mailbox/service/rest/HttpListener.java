@@ -52,6 +52,7 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
@@ -157,12 +158,15 @@ public class HttpListener extends BaseResource {
 			if(StringUtils.isEmpty(mailboxPguid)){
 				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 			}
+			
+			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(mailboxPguid, ProcessorType.HTTPSYNC)) {
+			logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
+			if (isAuthenticationCheckRequired(httpListenerProperties)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request,mailboxPguid, ProcessorType.HTTPSYNC);
+			SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);
 			
 			logger.debug("Pipeline id is set in session context");
 			assignGlobalProcessId(sessionContext);
@@ -216,7 +220,7 @@ public class HttpListener extends BaseResource {
 	 *            The HttpServletRequest
 	 * @return The Response Object
 	 */
-	@Post
+	@POST
 	@Path("async")
 	@AccessDescriptor(skipFilter=true)
 	public Response handleAsync(@Context HttpServletRequest request,
@@ -233,16 +237,18 @@ public class HttpListener extends BaseResource {
 			if(StringUtils.isEmpty(mailboxPguid)){
 				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 			}
+			
+			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(mailboxPguid, ProcessorType.HTTPASYNC)) {
+			if (isAuthenticationCheckRequired(httpListenerProperties)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request,mailboxPguid, ProcessorType.HTTPASYNC);			
+			SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);			
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
-			storePayload(request, sessionContext);
+			storePayload(request, sessionContext, httpListenerProperties);
 			createWorkTicket(request, sessionContext);
 
 			// Audit LOG the success
@@ -335,10 +341,10 @@ public class HttpListener extends BaseResource {
 	 *            the HttpServletRequest
 	 * @return SessionContext
 	 */
-	protected SessionContext createSessionContext(HttpServletRequest request,String mailboxPguid, ProcessorType processorType) {		
+	protected SessionContext createSessionContext(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {		
 		SessionContext sessionContext = new SessionContext();
 		sessionContext.copyFrom(request);
-		sessionContext.setPipelineId(retrievePipelineId(mailboxPguid, processorType));
+		sessionContext.setPipelineId(retrievePipelineId(httpListenerProperties));
 		sessionContext.setMailboxId(mailboxPguid);
 		return sessionContext;
 	}
@@ -366,8 +372,9 @@ public class HttpListener extends BaseResource {
 	 * @throws IOException
 	 */
 	protected void storePayload(HttpServletRequest request,
-			SessionContext sessionContext) throws IOException {
-		String payloadFileName = createPayloadFileName(sessionContext);
+			SessionContext sessionContext, Map <String, String> httpListenerProperties) throws IOException {
+
+		String payloadFileName = createPayloadFileName(sessionContext, httpListenerProperties);
 		sessionContext.setPayloadUri(createPayloadUri(payloadFileName));
 		ensurePayloadDirExists(payloadFileName);
 
@@ -414,9 +421,9 @@ public class HttpListener extends BaseResource {
 	 * @param sessionContext
 	 * @return payloadFileName
 	 */
-	protected String createPayloadFileName(SessionContext sessionContext) {
+	protected String createPayloadFileName(SessionContext sessionContext, Map <String, String> httpListenerProperties) {
 		StringBuilder payloadFileName = new StringBuilder();
-		String payloadDirectory = getHttpAsyncPayloadDirectory();
+		String payloadDirectory = getHttpAsyncPayloadDirectory(retrieveAsyncPayloadLocation(httpListenerProperties));
 
 		payloadFileName.append(payloadDirectory);
 		payloadFileName.append(File.separatorChar);
@@ -478,11 +485,12 @@ public class HttpListener extends BaseResource {
 	 * 
 	 * @return payloadDirectory
 	 */
-	protected String getHttpAsyncPayloadDirectory() {
+	protected String getHttpAsyncPayloadDirectory(String payloadURI) {
 		DecryptableConfiguration config = LiaisonConfigurationFactory
 				.getConfiguration();
-		String payloadDirectory = config
-				.getString(CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR);
+		// read payload location from properties file if it is not configured in the httplistenerProperties
+		String payloadDirectory = (StringUtil.isNullOrEmptyAfterTrim(payloadURI))?config
+				.getString(CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR):payloadURI;
 
 		if (payloadDirectory == null) {
 			throw new RuntimeException(
@@ -710,17 +718,15 @@ public class HttpListener extends BaseResource {
 
 	/**
 	 * Method to retrieve the mailbox from the pguid and return the value of
-	 * Mailbox propery "Http Listner Auth Check Required "
+	 * HTTPListener propery "Http Listner Auth Check Required "
 	 * 
 	 * @param mailboxpguid
 	 * @return
 	 * @throws Exception
 	 */
-	protected boolean isAuthenticationCheckRequired(String mailboxPguid, ProcessorType processorType) {
+	protected boolean isAuthenticationCheckRequired(Map <String, String> httpListenerProperties) {
 
 		boolean isAuthCheckRequired = true;
-		Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, processorType);
-		logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
 		isAuthCheckRequired = Boolean.parseBoolean(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
 		logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}", httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
 		return isAuthCheckRequired;
@@ -750,14 +756,19 @@ public class HttpListener extends BaseResource {
 	 * 
 	 * 
 	 */
-	private String retrievePipelineId(String mailboxPguid, ProcessorType processorType) {
+	private String retrievePipelineId(Map <String, String> httpListenerProperties) {
 
 		String pipelineId = null;
-		Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, processorType);
-		logger.info("retrieving the pipeline id configured in httplistener of mailbox {}", mailboxPguid);
 		pipelineId = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
 		logger.info("PIPELINE ID is set to be :"+pipelineId);
 		return pipelineId;
+	}
+	
+	private String retrieveAsyncPayloadLocation (Map <String, String> httpListenerProperties) {
+		String payloadLocation = null;
+		payloadLocation = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION);
+		logger.info("Payload Location is set to be :"+payloadLocation);
+		return payloadLocation;
 	}
 
 }
