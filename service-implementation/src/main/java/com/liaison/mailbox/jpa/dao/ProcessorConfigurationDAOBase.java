@@ -11,6 +11,7 @@
 package com.liaison.mailbox.jpa.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,6 +24,9 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.jpa.model.HTTPAsyncProcessor;
+import com.liaison.mailbox.jpa.model.HTTPSyncProcessor;
 import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -208,4 +212,66 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 
+	/**
+	 * Retrieves list of all processors of specific type from given mailbox guid
+	 * 
+	 * @param type the processor type
+	 * @param mbxGuid the mailbox guid
+	 * @return list of processors
+	 */
+	@Override
+	public List<Processor> findProcessorByTypeAndMbx(ProcessorType type, String mbxGuid) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("Fetching the processor count starts.");
+
+			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+					.append(" inner join processor.mailbox")
+					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
+					.append(" and mailbox.pguid = :" + PGUID);
+			Class <?> processorType = getProcessorClass(type);
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(PROCESSOR_TYPE, processorType)
+					.setParameter(PGUID, mbxGuid)
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
+	
+	private Class<?> getProcessorClass(ProcessorType processorType) {
+		
+		Class <?> processorClass = null;
+		switch(processorType.getCode()) {
+		
+		case "httpsyncprocessor":
+			processorClass = HTTPSyncProcessor.class;
+			break;
+		case "httpasyncprocessor":
+			processorClass = HTTPAsyncProcessor.class;
+			break;		
+		}
+		return processorClass;
+	}
+	
 }

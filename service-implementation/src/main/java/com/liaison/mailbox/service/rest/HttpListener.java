@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,21 +47,18 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
-import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
-import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.SessionContext;
@@ -106,9 +103,6 @@ public class HttpListener extends BaseResource {
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
 
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
-	
-	private static final String HTTP_LISTENER_AUTHENTICATION_CHECK = "httplistenerauthcheckrequired";
-	private static final String HTTP_LISTENER_PIPELINEID = "httplistenerpipelineid";
 
 	public HttpListener() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
@@ -164,12 +158,15 @@ public class HttpListener extends BaseResource {
 			if(StringUtils.isEmpty(mailboxPguid)){
 				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 			}
+			
+			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(mailboxPguid)) {
+			logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
+			if (isAuthenticationCheckRequired(httpListenerProperties)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request,mailboxPguid);
+			SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);
 			
 			logger.debug("Pipeline id is set in session context");
 			assignGlobalProcessId(sessionContext);
@@ -223,7 +220,7 @@ public class HttpListener extends BaseResource {
 	 *            The HttpServletRequest
 	 * @return The Response Object
 	 */
-	@Post
+	@POST
 	@Path("async")
 	@AccessDescriptor(skipFilter=true)
 	public Response handleAsync(@Context HttpServletRequest request,
@@ -240,16 +237,18 @@ public class HttpListener extends BaseResource {
 			if(StringUtils.isEmpty(mailboxPguid)){
 				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 			}
+			
+			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(mailboxPguid)) {
+			if (isAuthenticationCheckRequired(httpListenerProperties)) {
 				authenticateRequestor(request);
 			}
-			SessionContext sessionContext = createSessionContext(request,mailboxPguid);			
+			SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);			
 			assignGlobalProcessId(sessionContext);
 			assignTimestamp(sessionContext);
 
-			storePayload(request, sessionContext);
+			storePayload(request, sessionContext, httpListenerProperties);
 			createWorkTicket(request, sessionContext);
 
 			// Audit LOG the success
@@ -341,15 +340,11 @@ public class HttpListener extends BaseResource {
 	 * @param request
 	 *            the HttpServletRequest
 	 * @return SessionContext
-	 * @throws Exception 
-	 * @throws JAXBException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
 	 */
-	protected SessionContext createSessionContext(HttpServletRequest request,String mailboxPguid) throws JsonParseException, JsonMappingException, JAXBException, Exception {		
+	protected SessionContext createSessionContext(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {		
 		SessionContext sessionContext = new SessionContext();
 		sessionContext.copyFrom(request);
-		sessionContext.setPipelineId(retrievePipelineId(mailboxPguid));
+		sessionContext.setPipelineId(retrievePipelineId(httpListenerProperties));
 		sessionContext.setMailboxId(mailboxPguid);
 		return sessionContext;
 	}
@@ -377,8 +372,9 @@ public class HttpListener extends BaseResource {
 	 * @throws IOException
 	 */
 	protected void storePayload(HttpServletRequest request,
-			SessionContext sessionContext) throws IOException {
-		String payloadFileName = createPayloadFileName(sessionContext);
+			SessionContext sessionContext, Map <String, String> httpListenerProperties) throws IOException {
+
+		String payloadFileName = createPayloadFileName(sessionContext, httpListenerProperties);
 		sessionContext.setPayloadUri(createPayloadUri(payloadFileName));
 		ensurePayloadDirExists(payloadFileName);
 
@@ -425,9 +421,9 @@ public class HttpListener extends BaseResource {
 	 * @param sessionContext
 	 * @return payloadFileName
 	 */
-	protected String createPayloadFileName(SessionContext sessionContext) {
+	protected String createPayloadFileName(SessionContext sessionContext, Map <String, String> httpListenerProperties) {
 		StringBuilder payloadFileName = new StringBuilder();
-		String payloadDirectory = getHttpAsyncPayloadDirectory();
+		String payloadDirectory = getHttpAsyncPayloadDirectory(retrieveAsyncPayloadLocation(httpListenerProperties));
 
 		payloadFileName.append(payloadDirectory);
 		payloadFileName.append(File.separatorChar);
@@ -489,11 +485,12 @@ public class HttpListener extends BaseResource {
 	 * 
 	 * @return payloadDirectory
 	 */
-	protected String getHttpAsyncPayloadDirectory() {
+	protected String getHttpAsyncPayloadDirectory(String payloadURI) {
 		DecryptableConfiguration config = LiaisonConfigurationFactory
 				.getConfiguration();
-		String payloadDirectory = config
-				.getString(CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR);
+		// read payload location from properties file if it is not configured in the httplistenerProperties
+		String payloadDirectory = (StringUtil.isNullOrEmptyAfterTrim(payloadURI))?config
+				.getString(CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR):payloadURI;
 
 		if (payloadDirectory == null) {
 			throw new RuntimeException(
@@ -578,10 +575,7 @@ public class HttpListener extends BaseResource {
 	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
 		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
 		logger.info("Forward request to:"+serviceBrokerSyncUri);
-		// retrieve httplistener pipelineid from mailbox and append it to
-		// serviceBroker URI
-		//String pipelineId = retrievePipelineId(mailboxPguid);
-		//serviceBrokerSyncUri = serviceBrokerSyncUri + "/" + pipelineId;
+		
 		HttpPost post = new HttpPost(serviceBrokerSyncUri);
 
 		// Set the payload.
@@ -724,79 +718,57 @@ public class HttpListener extends BaseResource {
 
 	/**
 	 * Method to retrieve the mailbox from the pguid and return the value of
-	 * Mailbox propery "Http Listner Auth Check Required "
+	 * HTTPListener propery "Http Listner Auth Check Required "
 	 * 
 	 * @param mailboxpguid
 	 * @return
 	 * @throws Exception
 	 */
-	protected boolean isAuthenticationCheckRequired(String mailboxPguid)
-			throws Exception {
+	protected boolean isAuthenticationCheckRequired(Map <String, String> httpListenerProperties) {
 
 		boolean isAuthCheckRequired = true;
-		List<PropertyDTO> properties = retrieveMailboxProperties(mailboxPguid);
-		logger.info("Verifying if httplistenerauthcheckrequired is configured in the mailbox ");
-		for (PropertyDTO property : properties) {
-			if (property.getName().equals(HTTP_LISTENER_AUTHENTICATION_CHECK)) {
-				isAuthCheckRequired = Boolean.parseBoolean(property.getValue());
-				logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be "+property.getValue());
-	
-				break;
-			}
-		}
-
+		isAuthCheckRequired = Boolean.parseBoolean(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
+		logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}", httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
 		return isAuthCheckRequired;
 	}
 	
 	/**
-	 * Method to retrieve the mailbox properties from the pguid and return the list of
-	 * Mailbox properties"
+	 * Method to retrieve http listener properties of processor of specific type by given mailboxGuid 
 	 * 
-	 * @param mailboxpguid
+	 * @param mailboxGuid mailbox Pguid
+	 * @param isSync boolean specifying
 	 * @return
-	 * @throws Exception
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JAXBException
-	 * @throws SymmetricAlgorithmException
-	 * 
 	 */
-	private List<PropertyDTO> retrieveMailboxProperties(String mailboxPguid)
-			throws JsonParseException, JsonMappingException, JAXBException,
-			Exception, SymmetricAlgorithmException {
+	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) {
 		
-		MailBoxConfigurationService mbxService = new MailBoxConfigurationService();
-		GetMailBoxResponseDTO responseDTO = mbxService.getMailBox(mailboxPguid,	false, null, null);
-		MailBoxDTO mailbox = responseDTO.getMailBox();
-		return mailbox.getProperties();
+		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
+		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
+		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
 	}
 	
+	
 	/**
-	 * Method to retrieve the mailbox properties from the pguid and return the list of
-	 * Mailbox properties"
+	 * retrieve the pipeline id configured in httplistener of mailbox
 	 * 
 	 * @param mailboxpguid
-	 * @return
-	 * @throws Exception
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JAXBException
+	 * @Param isSync boolean
+	 * @return String pipeline id
+	 * 
 	 * 
 	 */
-	private String retrievePipelineId(String mailboxPguid)
-			throws JsonParseException, JsonMappingException, JAXBException,
-			Exception {
+	private String retrievePipelineId(Map <String, String> httpListenerProperties) {
 
 		String pipelineId = null;
-		List<PropertyDTO> properties = retrieveMailboxProperties(mailboxPguid);
-		for (PropertyDTO property : properties) {
-			if (property.getName().equals(HTTP_LISTENER_PIPELINEID)) {
-				pipelineId = property.getValue();
-				break;
-			}
-		}
-        logger.info("PIPELINE ID is set to be :"+pipelineId);
+		pipelineId = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
+		logger.info("PIPELINE ID is set to be :"+pipelineId);
 		return pipelineId;
+	}
+	
+	private String retrieveAsyncPayloadLocation (Map <String, String> httpListenerProperties) {
+		String payloadLocation = null;
+		payloadLocation = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION);
+		logger.info("Payload Location is set to be :"+payloadLocation);
+		return payloadLocation;
 	}
 
 }

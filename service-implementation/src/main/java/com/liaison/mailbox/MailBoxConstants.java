@@ -92,4 +92,9 @@ public interface MailBoxConstants {
 	public final static String PLATFORM_NAME = "SERVICE_BROKER";
 	public final static String SERVICE_NAME = "KEYMANAGER";
 	public final static String ROLE_NAME = "MailboxAdmin";
+	
+	// retrieval of httplistener specific properties
+	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
+	public static final String HTTPLISTENER_PIPELINEID = "httplistenerpipelineid";
+	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httplistenerpayload";
 }

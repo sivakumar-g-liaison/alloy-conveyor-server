@@ -23,7 +23,9 @@ public enum Protocol {
 	SFTP("sftp"),
 	HTTP("http"),
 	HTTPS("https"),
-	SWEEPER("sweeper");
+	SWEEPER("sweeper"),
+	HTTPSYNCPROCESSOR("httpsyncprocessor"),
+	HTTPASYNCPROCESSOR("httpasyncprocessor");
 
 	private final String code;
 
