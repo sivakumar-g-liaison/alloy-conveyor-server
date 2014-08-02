@@ -1467,10 +1467,12 @@ var rest = myApp.controller(
                     }else {
 						$scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
 					}
-					$scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-						"name": "OtherRequest Header",
-						"id": "otherRequestHeader"
-					});
+					 if ($scope.processor.protocol !== 'HTTPSYNCPROCESSOR' && $scope.processor.protocol !== 'HTTPASYNCPROCESSOR') {
+	                        $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
+	                            "name": "OtherRequest Header",
+	                            "id": "otherRequestHeader"
+	                        });
+	                 }
 				}
 				
 				for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
@@ -2111,7 +2113,7 @@ var rest = myApp.controller(
                 var lenFolderProps = $scope.processorFolderProperties.length;
 				
 				//Removed empty folder row for sweeper
-				if ($scope.processor.protocol === 'SWEEPER') lenFolderProps = 2;
+				if ($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') lenFolderProps = 2;
 				
                 for (var i = 0; i < lenFolderProps - 1; i++) {
                     $scope.processor.folders.push({
@@ -2409,6 +2411,14 @@ var rest = myApp.controller(
                   // function to clear the credential details if protocol is changed
                 $scope.resetProcessorCredentialDetails();
                 $scope.resetCredentialModal();
+                
+                //GMB-201
+                if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
+					$scope.disableCertificates = false;
+     			} else {
+					$scope.disableCertificates = true;
+ 				}
+                $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
             };
             $scope.resetProtocol = function (model) {
                 console.log(model);

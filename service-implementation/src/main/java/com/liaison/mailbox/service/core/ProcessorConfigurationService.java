@@ -832,7 +832,7 @@ public class ProcessorConfigurationService {
 					// retrieving folder properties from HTTPAsync
 					for (FolderDTO folder : processorDTO.getFolders()) {
 						
-						if (folder.getFolderType().equals(FolderType.PAYLOAD_LOCATION.getCode())) {
+						if ((folder.getFolderType().toLowerCase()).equals(FolderType.PAYLOAD_LOCATION.getCode())) {
 							httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION, folder.getFolderURI());
 						}
 					}

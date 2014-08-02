@@ -238,7 +238,7 @@ public class HttpListener extends BaseResource {
 				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 			}
 			
-			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
 			// authentication should happen only if the property
 			// "Http Listner Auth Check Required" is true
 			if (isAuthenticationCheckRequired(httpListenerProperties)) {
@@ -478,6 +478,15 @@ public class HttpListener extends BaseResource {
 					"Failed to create payload directory '%s'",
 					payloadDir.getAbsolutePath()));
 		}
+		
+		if (!(payloadDir.isDirectory() && payloadDir.canWrite())) {
+			throw new RuntimeException(
+					"HTTP Async payload directory configuration ('"
+							+ CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR
+							+ "') value ('"
+							+ payloadDir
+							+ "') is invalid (not a directory or not writeable).");
+		}
 	}
 
 	/**
@@ -498,18 +507,6 @@ public class HttpListener extends BaseResource {
 							+ CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR
 							+ "'), cannot process async");
 		}
-
-		File fPayloadDirectory = new File(payloadDirectory);
-
-		if (!(fPayloadDirectory.isDirectory() && fPayloadDirectory.canWrite())) {
-			throw new RuntimeException(
-					"HTTP Async payload directory configuration ('"
-							+ CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR
-							+ "') value ('"
-							+ payloadDirectory
-							+ "') is invalid (not a directory or not writeable).");
-		}
-
 		return payloadDirectory;
 	}
 
