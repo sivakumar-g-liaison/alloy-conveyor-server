@@ -223,7 +223,7 @@ public class MailBoxService {
 			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
 			processorDAO.merge(processor);
 			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
-			e.printStackTrace();
+			LOG.error("Processor execution failed", e);
 			
 		}
 		catch (Exception e){
@@ -232,7 +232,7 @@ public class MailBoxService {
 			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
 			processorDAO.merge(processor);
 			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
-			e.printStackTrace();
+			LOG.error("Processor execution failed", e);
 		}
 		
 	}

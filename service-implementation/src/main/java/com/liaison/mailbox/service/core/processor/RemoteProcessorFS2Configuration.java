@@ -33,8 +33,9 @@ public class RemoteProcessorFS2Configuration extends FS2DefaultConfiguration imp
 		Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
 		String propertyFileName = "g2mailboxservice-" + env + ".properties";
 		String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-		InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-		properties.load(is);
+		try (InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"))) {
+		    properties.load(is);
+		}	
 		String mount = String.valueOf(properties.get("mount-point"));
 		File defaultMount = new File(mount);
 		defaultMount = new File(defaultMount, "fs2");

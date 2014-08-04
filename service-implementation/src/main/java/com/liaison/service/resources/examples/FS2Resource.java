@@ -11,6 +11,7 @@
 package com.liaison.service.resources.examples;
 
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
@@ -155,7 +156,7 @@ public class FS2Resource {
             return is;
         } catch(Exception e) {
             throw new RuntimeException(e);
-        }
+        } 
     }
 
     /**
@@ -219,9 +220,6 @@ public class FS2Resource {
     // Allows fetch of resource via GET
     public InputStream getResource(@QueryParam(value = "uri") String requestedURI) { 
         try {
-
-
-
             // build URI, supporting both absolute and relative URI
             URI u = null;
             if (FS2.exists(new URI(requestedURI))) {
@@ -256,7 +254,7 @@ public class FS2Resource {
     public Response uploadFile(@Context HttpHeaders headers, final MimeMultipart parts) {
 
         FS2MetaSnapshot object = null;
-
+        InputStream part = null;
         try {
 
             /*
@@ -301,7 +299,7 @@ public class FS2Resource {
              */
 
             // payload
-            InputStream part = bp.getInputStream();
+            part = bp.getInputStream();
             FS2.writePayloadFromStream(object.getURI(), part);
 
             // meta
@@ -325,6 +323,13 @@ public class FS2Resource {
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e)
                     .build();
+        } finally {
+            try {
+                if (null != part) part.close();  
+            } catch (IOException e) {
+                logger.error("could not close stream while uploading a file", e);
+            }
+            
         }
     }
 

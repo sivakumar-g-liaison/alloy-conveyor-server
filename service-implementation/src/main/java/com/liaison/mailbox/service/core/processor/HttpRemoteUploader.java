@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -95,10 +96,8 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			SymmetricAlgorithmException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
 		HTTPRequest request = null;
-		ByteArrayOutputStream responseStream = null;
 		HTTPResponse response = null;
 		boolean failedStatus = false;
-		String content = null;
 
 		RemoteProcessorPropertiesDTO remoteProcessorProperties = getRemoteProcessorProperties();
 
@@ -128,33 +127,33 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 							return;
 						}
 					}
+		
+					try (InputStream contentStream = FileUtils.openInputStream(entry); ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
+					    
+					    request = (HTTPRequest) getClientWithInjectedConfiguration();
+	                    request.setOutputStream(responseStream);
+					    
+					    request.inputData(contentStream, remoteProcessorProperties.getContentType());
+	                    
+	                    response = request.execute();
+	                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
+	                    if (response.getStatusCode() != 200) {
 
-					request = (HTTPRequest) getClientWithInjectedConfiguration();
-					responseStream = new ByteArrayOutputStream(4096);
-					request.setOutputStream(responseStream);
-					
-					content = FileUtils.readFileToString(entry, "UTF-8");
-					if (content.length() > 0) {
-						request.inputData(content);
+	                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
+	                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+
+	                        failedStatus = true;
+	                        delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
+	                        //continue;
+
+	                    } else {
+
+	                        if (null != entry) {
+	                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
+	                        }
+	                    }
 					}
 					
-					response = request.execute();
-					LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
-					if (response.getStatusCode() != 200) {
-
-						LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-						LOGGER.info("Execution failure for ",entry.getAbsolutePath());
-
-						failedStatus = true;
-						delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
-						//continue;
-
-					} else {
-
-						if (null != entry) {
-							delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
-						}
-					}
 				}
 
 				if (failedStatus) {
@@ -165,6 +164,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				throw new MailBoxServicesException("The given payload configuration is Empty.");
 			}
 		}
+		
 	}
 
 	/**

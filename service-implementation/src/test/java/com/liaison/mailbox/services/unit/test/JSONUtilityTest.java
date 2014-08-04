@@ -12,12 +12,16 @@ package com.liaison.mailbox.services.unit.test;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
+
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
+
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -29,6 +33,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public class JSONUtilityTest extends BaseServiceTest {
 
+	private static final Logger logger = LogManager.getLogger(JSONUtilityTest.class);
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -63,13 +68,13 @@ public class JSONUtilityTest extends BaseServiceTest {
 		request.setExecutionId("Test");
 		request.setProcessorId("testsfsdf");
 		
-		System.out.println(MailBoxUtil.marshalToJSON(request));
+		logger.debug(MailBoxUtil.marshalToJSON(request));
 		
 		String s = "{\"triggerProcessorRequest\":{\"executionId\":\"Test\",\"processorId\":\"testsfsdf\"}}";
 		TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(s, TriggerProcessorRequestDTO.class);
 		
-		System.out.println(dto.getExecutionId());
-		System.out.println(dto.getProcessorId());
+		logger.debug(dto.getExecutionId());
+		logger.debug(dto.getProcessorId());
 		
 
 	}

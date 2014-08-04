@@ -68,7 +68,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		
-		LOGGER.info("Entering in invoke.");
+		LOGGER.debug("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -215,12 +215,11 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 					continue;
 				}
 				if (item.isFile()) {
-
-					// upload file
-					ftpsRequest.changeDirectory(remoteParentDir);
-					InputStream inputStream = new FileInputStream(item);
-					replyCode = ftpsRequest.putFile(item.getName(), inputStream);
-					inputStream.close();
+				    // upload file
+				    try (InputStream inputStream = new FileInputStream(item)) {
+				        ftpsRequest.changeDirectory(remoteParentDir);                    
+	                    replyCode = ftpsRequest.putFile(item.getName(), inputStream);
+				    } 					
 
 				} else {
 

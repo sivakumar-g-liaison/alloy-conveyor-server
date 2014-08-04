@@ -63,14 +63,14 @@ public class EmailNotifier {
 			// ArrayList<String>(Arrays.asList(StringUtils.split(MAILSERVER_CONFIG.getProperty("recievers"),
 			// ",")));
 		} catch (IOException ex) {
-			System.err.println("Cannot open and load mail server properties file.");
+		    LOGGER.error("Cannot open and load mail server properties file.");
 		} finally {
 			try {
 				if (input != null) {
 					input.close();
 				}
 			} catch (IOException ex) {
-				System.err.println("Cannot close mail server properties file.");
+			    LOGGER.error("Cannot close mail server properties file.");
 			}
 		}
 	}
@@ -108,12 +108,12 @@ public class EmailNotifier {
 				}
 			}
 			message.setSubject(subject);
-			final String completeMessage = new StringBuffer().append(body).append("\n\n").append(NOTE).toString();
+			final String completeMessage = new StringBuilder().append(body).append("\n\n").append(NOTE).toString();
 			message.setText(completeMessage);
 			Transport.send(message);
 
 		} catch (MessagingException ex) {
-			System.err.println("Cannot send email. " + ex);
+		    LOGGER.error("Cannot send email. " + ex);
 		}
 	}
 
@@ -133,16 +133,11 @@ public class EmailNotifier {
 			// message.setFrom( new InternetAddress(aFromEmailAddr) );
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(aToEmailAddr));
 			message.setSubject(aSubject);
-			final String completeMessage = new StringBuffer().append(aBody).append("\n\n").append(NOTE).toString();
+			final String completeMessage = new StringBuilder().append(aBody).append("\n\n").append(NOTE).toString();
 			message.setText(completeMessage);
 			Transport.send(message);
 		} catch (MessagingException ex) {
-			System.err.println("Cannot send email. " + ex);
+		    LOGGER.error("Cannot send email. " + ex);
 		}
-	}
-
-	public static void main(String args[]) {
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(" sub title ", "testing....");
 	}
 }

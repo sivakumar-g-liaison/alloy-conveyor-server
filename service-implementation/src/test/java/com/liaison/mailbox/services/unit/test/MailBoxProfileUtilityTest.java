@@ -14,6 +14,8 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
@@ -34,6 +36,8 @@ public class MailBoxProfileUtilityTest {
 
 	private String data;
 	private JSONObject jsonMaiboxProfile;
+	
+	private static final Logger logger = LogManager.getLogger(MailBoxProfileUtilityTest.class);
 
 	@BeforeMethod
 	public void setUp() throws JSONException {
@@ -78,6 +82,6 @@ public class MailBoxProfileUtilityTest {
 	@Test
 	public void stringFormatTest() {
 		String data = String.format(Messages.CREATE_OPERATION_FAILED.value(), "test");
-		System.out.println(data);
+		logger.debug(data);
 	}
 }

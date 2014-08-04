@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.services.unit.test;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
@@ -31,6 +34,8 @@ public class FSMTest extends BaseServiceTest {
      * @throws InterruptedException
      */
 	
+	private static final Logger logger = LogManager.getLogger(FSMTest.class);
+	
 	public void testFSM() throws InterruptedException{
         //STEP 1: BUILD THIS AS SOON AS YOU GET A PROCESSOR FROM DB AFTER TRIGGERING A PROFILE. FILL AS MUCH AS YOU CAN IN stateDefination BUT MUST HAVE EXECUTION ID,PROCESSOR ID and PROFILE NAME 
 		ProcessorStateDTO initialProcessorState = new ProcessorStateDTO("GENERATED_EXECUTION_UDID_1","PROCESSOR_ID_FROM_DB",ExecutionState.QUEUED);
@@ -39,7 +44,7 @@ public class FSMTest extends BaseServiceTest {
 		MailboxFSM fsm = new MailboxFSM();	
 		
 		//STEP 3: DO THE FOLLOWING AFTER POSTING TO THE QUEUE- THIS WILL SET THE STATE OF THE EXECUTION TO QUEUED
-		System.out.println("POSTING TO THE QUEUE...");
+		logger.debug("POSTING TO THE QUEUE...");
         fsm.addState(initialProcessorState);
         
         //AFTER CONSUMING FROM THE QUEUE
@@ -50,18 +55,17 @@ public class FSMTest extends BaseServiceTest {
         try {
 			fsm.addDefaultStateTransitionRules(initialProcessorState);
 		} catch (MailBoxFSMSetupException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("error while adding default tranisition rules", e);
 		}
         
         //STEP5:TRIGGER PROCESSING EVENT
-        System.out.println("PICKED UP FROM THE QUEUE.");
+        logger.debug("PICKED UP FROM THE QUEUE.");
         fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED ) );
-        System.out.println("PROCESSOR RUNNING...");//ACTUAL PROCESSOR WORK WILL HAPPEN HERE
+        logger.debug("PROCESSOR RUNNING...");//ACTUAL PROCESSOR WORK WILL HAPPEN HERE
         //STEP 6: TRIGGER EVENT FOR SUCCESS OR FAILURE BASED ON PROCESSING RESULT
         fsm.handleEvent( fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED ) );
         
-        System.out.println("----------------------------------------------------------------------");
+        logger.debug("----------------------------------------------------------------------");
         
          
 	}

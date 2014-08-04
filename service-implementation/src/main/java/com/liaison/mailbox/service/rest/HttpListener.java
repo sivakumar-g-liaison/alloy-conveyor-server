@@ -53,7 +53,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
@@ -83,8 +83,7 @@ import com.netflix.servo.monitor.Monitors;
 @Produces(MediaType.WILDCARD)
 public class HttpListener extends BaseResource {
 
-	private static final Logger logger = LogManager
-			.getLogger(HttpListener.class);
+	private static final Logger logger = LogManager.getLogger(HttpListener.class);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
@@ -157,7 +156,7 @@ public class HttpListener extends BaseResource {
 		Response restResponse = null;
 		serviceCallCounter.incrementAndGet();
 
-		logger.info("Starting sync processing");
+		logger.debug("Starting sync processing");
 		try {
 			validateRequestSize(request);
 			if(StringUtils.isEmpty(mailboxPguid)){
@@ -182,7 +181,6 @@ public class HttpListener extends BaseResource {
 			restResponse = builder.build();
 		} catch (Exception e) {
 			logger.error("Error processing sync message", e);
-			e.printStackTrace();
 			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 			
 			// Audit LOG the failure
@@ -222,7 +220,7 @@ public class HttpListener extends BaseResource {
 	 *            The HttpServletRequest
 	 * @return The Response Object
 	 */
-	@Post
+	@POST
 	@Path("async")
 	@AccessDescriptor(skipFilter=true)
 	public Response handleAsync(@Context HttpServletRequest request,
@@ -232,7 +230,7 @@ public class HttpListener extends BaseResource {
 		Response restResponse = null;
 		serviceCallCounter.incrementAndGet();
 
-		logger.info("Starting async processing");
+		logger.debug("Starting async processing");
 		try {
 			validateRequestSize(request);
 			
@@ -262,7 +260,6 @@ public class HttpListener extends BaseResource {
 							sessionContext.getGlobalProcessId())).build();
 		} catch (Exception e) {
 			logger.error("Error processing async message", e);
-			e.printStackTrace();
 			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 			// Audit LOG the failure
 			auditFailure("handleAsync");
@@ -607,23 +604,26 @@ public class HttpListener extends BaseResource {
 		}
 
 		if (iContentLength > 0) {
-			InputStream responseInputStream = httpResponse.getEntity()
-					.getContent();
-			Header contentType = httpResponse
-					.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+		    
+		    try (InputStream responseInputStream = httpResponse.getEntity()
+                    .getContent()) {
+		          Header contentType = httpResponse
+		                    .getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
-			if (responseInputStream != null) {
-				builder.entity(responseInputStream);
-			}
+		            if (responseInputStream != null) {
+		                builder.entity(responseInputStream);
+		            }
 
-			if (contentType != null) {
-				builder.header(contentType.getName(), contentType.getValue());
-			}
+		            if (contentType != null) {
+		                builder.header(contentType.getName(), contentType.getValue());
+		            }
 
-			if (contentLength != null) {
-				builder.header(contentLength.getName(),
-						contentLength.getValue());
-			}
+		            if (contentLength != null) {
+		                builder.header(contentLength.getName(),
+		                        contentLength.getValue());
+		            }
+		    }		
+
 		}
 
 		copyResponseHeaders(httpResponse, builder);
