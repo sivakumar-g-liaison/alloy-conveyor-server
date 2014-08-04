@@ -10,12 +10,15 @@
 
 package com.liaison.mailbox.services.util.unit.test;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -28,6 +31,8 @@ import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
  *
  */
 public class JavaScriptEngineUtilTest {
+	
+	private static final Logger logger = LogManager.getLogger(JavaScriptEngineUtilTest.class);
 	
 	/**
 	 * Method to test execute JavaScript.
@@ -52,13 +57,18 @@ public class JavaScriptEngineUtilTest {
 		
 		
 		 if (scriptContext == null) {
-		     
-			 scriptContext = new JavascriptScriptContext(new InputStreamReader(System.in), new PrintWriter(System.out), new PrintWriter(System.err));
+		     try (InputStreamReader reader = new InputStreamReader(System.in); PrintWriter outputWriter = new PrintWriter(System.out); 
+		             PrintWriter errorWriter = new PrintWriter(System.err)) {
+		         scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
+		     } catch (IOException e) {
+		         logger.error("could not close streams while executing the javascript", e);
+		     }
+			 
 		 }
 	    scriptExecutor.setScriptContext(scriptContext);
 	    
 	    Object returnValue = scriptExecutor.executeInContext(scriptContext, "sandbox-tests.js", myUri, "testHappyPathWithArgs", "Test");
-        System.out.println("returnValue "+returnValue);
+	    logger.debug("returnValue "+returnValue);
 	    // did my function call throw?
 	    Exception expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get("sandbox-tests.js" + ":" + "testHappyPathWithArgs");
 	    if (null != expectedException) {

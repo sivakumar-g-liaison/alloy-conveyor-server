@@ -9,6 +9,7 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -57,7 +58,7 @@ public final class JavaScriptEngineUtil {
      * @throws LiaisonException
      */
 	protected Object executeJavaScriptMethod(String scriptPath, String methodName, Object... parameters) 
-			throws NoSuchMethodException, MalformedURLException, ScriptException, LiaisonException {
+			throws NoSuchMethodException, MalformedURLException, ScriptException, LiaisonException, IOException {
 		
 		return getScriptEngineInvocable(scriptPath).invokeFunction(methodName, parameters);
 	}
@@ -90,7 +91,7 @@ public final class JavaScriptEngineUtil {
 	 * @throws LiaisonException
 	 */
 	protected Invocable getScriptEngineInvocable(String scriptPath) 
-		throws ScriptException, MalformedURLException, LiaisonException {
+		throws ScriptException, MalformedURLException, LiaisonException, IOException {
 		
 		ScriptEngine engine = getScriptEngine();
 		String script = getScriptContent(scriptPath);		
@@ -99,7 +100,7 @@ public final class JavaScriptEngineUtil {
 	}
 	
 	private String getScriptContent(String scriptPath) 
-		throws MalformedURLException, LiaisonException {
+		throws MalformedURLException, LiaisonException, IOException {
 		
 		String response = null;
 	
@@ -163,7 +164,11 @@ public final class JavaScriptEngineUtil {
 					
 		if (scriptContext == null) {
 		     
-			scriptContext = new JavascriptScriptContext(new InputStreamReader(System.in), new PrintWriter(System.out), new PrintWriter(System.err));
+		    try (InputStreamReader reader = new InputStreamReader(System.in); PrintWriter outputWriter = new PrintWriter(System.out);
+		            PrintWriter errorWriter = new PrintWriter(System.err)) {
+		        scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
+		    }
+			
 		}
 	    scriptExecutor.setScriptContext(scriptContext);
 	    

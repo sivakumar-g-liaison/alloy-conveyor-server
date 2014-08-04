@@ -89,7 +89,7 @@ public class MailBoxResource extends BaseResource {
 
 		try {
 
-			LOG.info("Entering into trigger profile resource.");
+			LOG.debug("Entering into trigger profile resource.");
 			MailBoxService service = new MailBoxService();
 			TriggerProfileResponseDTO serviceResponse = service.triggerProfile(profileName, mailboxNamePattern, shardKey);
 
@@ -99,7 +99,6 @@ public class MailBoxResource extends BaseResource {
 			returnResponse = serviceResponse.constructResponse();
 		} catch (Exception e) {
 
-			e.printStackTrace();
 			int f = failureCounter.addAndGet(1);
 			String errMsg = "MailboxResource failure number: " + f + "\n" + e;
 			LOG.error(errMsg, e);

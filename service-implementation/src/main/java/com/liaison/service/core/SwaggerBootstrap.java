@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -14,19 +14,24 @@ import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServlet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.SwaggerConfig;
 
 /**
  * @author OFS
- *
+ * 
  */
 public class SwaggerBootstrap extends HttpServlet {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1212764286594977168L;
+	
+	private static final Logger logger = LogManager.getLogger(SwaggerBootstrap.class);
 
 	static {
 
@@ -34,20 +39,32 @@ public class SwaggerBootstrap extends HttpServlet {
 		String basePath = config.getBasePath();
 		String[] basePathParts = null;
 
-		basePathParts = basePath.split("/");
+		if (null == basePath) {
 
-		InetAddress ip = null;
+			InetAddress ip = null;
+			try {
+				ip = InetAddress.getLocalHost();
+			} catch (UnknownHostException e) {
+				logger.error("unknown host", e);
+			}
+			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice/rest");
 
-		try {
-			ip = InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-
-		if(!basePathParts[2].equals("localhost:8080")) {
-			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8080/g2mailboxservice/rest");
 		} else {
-			config.setBasePath("http://localhost:8080/g2mailboxservice/rest");
+
+			basePathParts = basePath.split("/");
+
+			InetAddress ip = null;
+			try {
+				ip = InetAddress.getLocalHost();
+			} catch (UnknownHostException e) {
+				logger.error("unknown host", e);
+			}
+
+			if (!basePathParts[2].equals("localhost:8989")) {
+				config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice/rest");
+			} else {
+				config.setBasePath("http://localhost:8989/g2mailboxservice/rest");
+			}
 		}
 
 		ConfigFactory.setConfig(config);

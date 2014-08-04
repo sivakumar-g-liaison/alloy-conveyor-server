@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,21 +44,24 @@ public final class HTTPClientUtil {
 	 * @throws MalformedURLException
 	 * @throws LiaisonException
 	 */
-	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers) throws MalformedURLException, LiaisonException {
+	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers) throws MalformedURLException, LiaisonException, IOException {
 
-		String clientContent = null;
-		URL url = new URL(httpURL);
-		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
-		request.setLogger(logger);
-		OutputStream output = new HTTPStringOutputStream();
-		request.setOutputStream(output);
-		setHeaders(request, headers);
-		request.setConnectionTimeout(60000);
-		HTTPResponse reponse = request.execute();
-		if (reponse.getStatusCode() == 200) {
-			clientContent = output.toString();
-		}
-		return clientContent;
+	    try (OutputStream output = new HTTPStringOutputStream()) {
+	        
+	        String clientContent = null;
+	        URL url = new URL(httpURL);
+	        HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
+	        request.setLogger(logger);      
+	        request.setOutputStream(output);
+	        setHeaders(request, headers);
+	        int connectionTimeout = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString("kms.connection.timout.interval"));
+	        request.setConnectionTimeout(connectionTimeout);
+	        HTTPResponse reponse = request.execute();
+	        if (reponse.getStatusCode() == 200) {
+	            clientContent = output.toString();
+	        }
+	        return clientContent;
+	    } 
 	}
 
 	/**
@@ -66,23 +70,23 @@ public final class HTTPClientUtil {
 	 * @param httpURL - web content URL. The URL protocol should be in http protocol.
 	 * @param filePath - destination file path
 	 * @return File - Created new file object
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
 	 * @throws LiaisonException
+	 * @throws IOException 
 	 */
-	public static File getHTTPResponseInFile(Logger logger, String httpURL, String filePath, Map<String, String> headers) throws MalformedURLException, FileNotFoundException, LiaisonException {
+	public static File getHTTPResponseInFile(Logger logger, String httpURL, String filePath, Map<String, String> headers) throws LiaisonException, IOException {
 
 		URL url = new URL(httpURL);
 		File file = new File(filePath);
 		HTTPRequest request = new HTTPRequest(HTTP_METHOD.GET, url);
 		request.setLogger(logger);
-		FileOutputStream output = new FileOutputStream(file);
-		request.setOutputStream(output);
-		setHeaders(request, headers);
-		HTTPResponse reponse = request.execute();
-		if (reponse.getStatusCode() == 200) {
-			return file;
-		}
+		try (FileOutputStream output = new FileOutputStream(file)) {
+		    request.setOutputStream(output);
+	        setHeaders(request, headers);
+	        HTTPResponse reponse = request.execute();
+	        if (reponse.getStatusCode() == 200) {
+	            return file;
+	        }
+		}	
 		return null;
 	}
 

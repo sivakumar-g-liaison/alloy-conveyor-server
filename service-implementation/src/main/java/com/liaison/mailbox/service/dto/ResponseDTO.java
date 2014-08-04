@@ -55,14 +55,4 @@ public class ResponseDTO {
 		message = message.concat(addMessage);
 	}
 
-	public static void main(String[] args) {
-
-		ResponseDTO dto = new ResponseDTO();
-
-		dto.message = "test";
-		System.out.println(dto.getMessage());
-		dto.setAdditionalMessage("oops");
-		System.out.println(dto.getMessage());
-
-	}
 }

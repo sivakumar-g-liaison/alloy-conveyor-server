@@ -194,7 +194,12 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					String localDir = localFileDir + File.separatorChar + root.getName();
 					sftpRequest.changeDirectory(dirToList);
 					processResponseLocation(localDir);
-					sftpRequest.getFile(root.getName(), new BufferedOutputStream(new FileOutputStream(localDir)));
+					try (FileOutputStream fos = new FileOutputStream(localDir);
+		                 BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+					     sftpRequest.getFile(root.getName(), bos);
+					}
+					
+					
 				}
 			}
 		}
@@ -203,7 +208,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
 		
-		LOGGER.info("Entering in invoke.");
+		LOGGER.debug("Entering in invoke.");
 		// G2SFTP executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 

@@ -446,6 +446,9 @@ public abstract class AbstractRemoteProcessor {
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
 		Files.write(file.toPath(), response.toByteArray());
 		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
+		if (response != null) {
+		    response.close();
+		}
 	}
 
 	/**
@@ -593,10 +596,14 @@ public abstract class AbstractRemoteProcessor {
 					trustStore.load(instream, null);
 
 				} finally {
-
-					if (null != instream)
-						instream.close();
-				}
+				    try {
+				        if (null != instream) {
+	                        instream.close();
+	                    } 
+				    } catch (IOException e) {
+				        LOGGER.error("Cannot close stream while fetching trustore from key manager.");
+				    }
+			    }	
 
 				request.truststore(trustStore);
 			}
@@ -719,7 +726,7 @@ public abstract class AbstractRemoteProcessor {
 			return content;
 		} else {
 
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(URI))) {
 				for (Path entry : stream) {
 					String content = FileUtils.readFileToString(entry.toFile(), "UTF-8");
@@ -1042,8 +1049,13 @@ public abstract class AbstractRemoteProcessor {
 					trustStore.load(instream, null);
 
 				} finally {
-					if (null != instream)
-						instream.close();
+				    try {
+                        if (null != instream) {
+                            instream.close();
+                        } 
+                    } catch (IOException e) {
+                        LOGGER.error("Cannot close stream while fetching trustore from key manager.");
+                    }
 				}
 
 				ftpsRequest.setTrustStore(trustStore);
@@ -1128,9 +1140,9 @@ public abstract class AbstractRemoteProcessor {
 			String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
 					+ ".txt";
 			// write to a file
-			FileOutputStream out = new FileOutputStream(privateKeyPath);
-			out.write(privateKeyStream);
-			out.close();
+			try (FileOutputStream out = new FileOutputStream(privateKeyPath)) {
+			    out.write(privateKeyStream);
+			}			
 			sftpRequest.setPrivateKeyPath(privateKeyPath);
 			// sftpRequest.setPassphrase(sshKeyPairCredential.getCredsPassword());
 
@@ -1256,6 +1268,9 @@ public abstract class AbstractRemoteProcessor {
 		File file = new File(filename);
 		Files.write(file.toPath(), response.toByteArray());
 		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
+		// close the stream
+		if (response != null) response.close();
+		
 	}
 
 	/**
@@ -1506,8 +1521,10 @@ public abstract class AbstractRemoteProcessor {
 		// FOR SIGNING
 		DigitalSignature sig = new DigitalSignature();
 		byte[] MESSAGE_TO_SIGN = unsignedData.getBytes();
-		byte[] singedData = sig.sign(new ByteArrayInputStream(MESSAGE_TO_SIGN), originalSignerCert, privateKey);
-
+		byte[] singedData = null;
+		try (ByteArrayInputStream bis = new ByteArrayInputStream(MESSAGE_TO_SIGN)) {
+		    singedData = sig.sign(bis, originalSignerCert, privateKey);
+		}
 		return Base64.encodeBase64String(singedData);
 
 	}

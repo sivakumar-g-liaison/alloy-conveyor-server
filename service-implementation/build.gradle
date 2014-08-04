@@ -73,18 +73,7 @@ configurations {
 
 allprojects {
     repositories { mavenCentral() }
-    configurations.all {
-        // This is an incubating gradle language feature (as of 1.5) allowing, in this
-        // case, for FOO.pom to be swapped for any sub-dependencies of BAR.pom.
-        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.name == 'log4j') {
-                //prefer 'slf4j-log4j2' over 'slf4j-simple', because
-                //it's required that only one logger.jar be present for deterministic behavior of slf4j
-                details.useTarget "org.apache.logging.log4j:log4j:2.0-beta9"
-            }
-        }
 
-    }
 }
 
 war {
@@ -147,9 +136,9 @@ dependencies {
     //compile 'com.sun.jersey.contribs:jersey-multipart:1.17.1'
 
     // for hornetq jms
-    compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
-    compile "org.hornetq:hornetq-server:2.3.11.Final"
-    compile "jboss:jnp-client:4.0.2"
+//    compile "org.hornetq:hornetq-jms-client:2.3.11.Final"
+//   compile "org.hornetq:hornetq-server:2.3.11.Final"
+//    compile "jboss:jnp-client:4.0.2"
 
     // for G2Javascript engine
     compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.4-SNAPSHOT', changing: true
@@ -193,6 +182,7 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
     //compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
 
+    compile 'com.liaison.commons:lib_message_bus:2.+'
 
     // inherited from NetFlix Karyon (TODO integrate with main UI)
     compile project(':karyon-admin-web')
@@ -208,7 +198,7 @@ dependencies {
     jdbc "com.oracle:ojdbc6:${oracleVersion}"
 	
 	//Dependency for UM integration
-	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.2-SNAPSHOT", changing: true
+	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.3-SNAPSHOT", changing: true
 	
 	//Dependency for ACL client Integration
 	compile group: "com.liaison.commons.accessmanagement", name: "accessmanagement-client", version: "1.1.1-SNAPSHOT", changing: true
@@ -361,18 +351,24 @@ task configureTomcat(dependsOn: ['stageTomcat', 'setDevProperties'], group:'DEV/
     //TODO replace tokens would be a nicer but heavier weight way of doing this.
     logger.info "Copying configuring tomcat for environment: ${deployEnvironment}"
     copy {
-        from ("${tomcatEnvironmentsInstallPath}/common") { include '**/*.*' }
-        into tomcatInstallPath
-    }
-    copy {
-        from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  { include '**/*.*' }
-        into tomcatInstallPath
-    }
-    copy {
-        from ("${projectDir}/build/resources/main")  {
-            include '*.json', '*.properties', 'log4j2.xml'
+        from ("${tomcatEnvironmentsInstallPath}/common") {
+            include '**/*.*'
         }
-        into "${tomcatInstallPath}/lib"
+        into tomcatInstallPath
+    }
+    copy {
+        from ("${tomcatEnvironmentsInstallPath}/${deployEnvironment}")  {
+            include '**/*.*'
+        }
+        into tomcatInstallPath
+    }
+    // using ANT copy task to be able to force overwrite
+    ant.copy(toDir: "${tomcatInstallPath}/lib", overwrite:true) {
+        fileset(dir: "${projectDir}/build/resources/main") {
+            include (name: '*.json')
+            include (name: '*.properties')
+            include (name: 'log4j2*.xml')
+        }
     }
 }
 
@@ -402,6 +398,7 @@ task enhance  << {
             api : "JPA",
             persistenceUnit : "mailbox-pu",
             failonerror : true)
+
 }
 classes.dependsOn('enhance')
 
@@ -478,7 +475,7 @@ flyway {
         'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
     ]
     //if (project.dbDevSampleData == 'true') {
-    //    System.out.println(':flyway: Including dev sample data.')
+    //    logger.info(":flyway: Including dev sample data.")
     //    locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
     //}
 }

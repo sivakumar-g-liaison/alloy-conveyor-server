@@ -70,9 +70,8 @@ subprojects {
 
     // TODO should move dependencies to subprojects?
     dependencies {
-        def log4j2Version = '2.0-beta9';		
+        def log4j2Version = '2.0-rc1';
         
-        compile 'org.slf4j:slf4j-api:1.7.5'	
         compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
 
         compile 'com.google.guava:guava:11.0.2'
@@ -137,6 +136,9 @@ project(':karyon-admin-web') {
         compile 'com.netflix.pytheas:pytheas-core:1.11'
         testCompile 'org.testng:testng:6.8'
 
+//little hack for development
+//        compile fileTree(dir: '../libs', include: '*.jar')
+
         runtime 'org.freemarker:freemarker:2.3.19'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
     }
@@ -153,7 +155,9 @@ project(':service-framework') {
     }
 }
 
-// fs2
+
+
+
 allprojects {
     //repositories { mavenCentral() }
     configurations.all {
@@ -161,6 +165,15 @@ allprojects {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.name == 'commons-io') {
                 details.useTarget "commons-io:commons-io:2.4"
+            }
+        }
+
+        //SLF override
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.name == 'slf4j-simple') {
+                //prefer 'slf4j-log4j2' over 'slf4j-simple', because
+                //it's required that only one logger.jar be present for deterministic behavior of slf4j
+                details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-rc1"
             }
         }
 

@@ -33,8 +33,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
-import oracle.jdbc.proxy.annotation.Post;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -56,10 +54,9 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.dto.ConfigureJNDIDTO;
-import com.liaison.mailbox.service.util.HornetQJMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.SessionContext;
 import com.liaison.usermanagement.service.client.UserManagementClient;
@@ -81,8 +78,7 @@ import com.netflix.servo.monitor.Monitors;
 @Produces(MediaType.WILDCARD)
 public class HttpListener extends BaseResource {
 
-	private static final Logger logger = LogManager
-			.getLogger(HttpListener.class);
+	private static final Logger logger = LogManager.getLogger(HttpListener.class);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
@@ -152,7 +148,7 @@ public class HttpListener extends BaseResource {
 		Response restResponse = null;
 		serviceCallCounter.incrementAndGet();
 
-		logger.info("Starting sync processing");
+		logger.debug("Starting sync processing");
 		try {
 			validateRequestSize(request);
 			if(StringUtils.isEmpty(mailboxPguid)){
@@ -180,7 +176,6 @@ public class HttpListener extends BaseResource {
 			restResponse = builder.build();
 		} catch (Exception e) {
 			logger.error("Error processing sync message", e);
-			e.printStackTrace();
 			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 			
 			// Audit LOG the failure
@@ -230,7 +225,7 @@ public class HttpListener extends BaseResource {
 		Response restResponse = null;
 		serviceCallCounter.incrementAndGet();
 
-		logger.info("Starting async processing");
+		logger.debug("Starting async processing");
 		try {
 			validateRequestSize(request);
 			
@@ -262,7 +257,6 @@ public class HttpListener extends BaseResource {
 							sessionContext.getGlobalProcessId())).build();
 		} catch (Exception e) {
 			logger.error("Error processing async message", e);
-			e.printStackTrace();
 			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 			// Audit LOG the failure
 			auditFailure("handleAsync");
@@ -516,20 +510,10 @@ public class HttpListener extends BaseResource {
 		postToQueue(workTicket);
 	}
 
+
 	protected void postToQueue(String message) throws Exception {
-		DecryptableConfiguration config = LiaisonConfigurationFactory
-				.getConfiguration();
-		String providerURL = config.getString(CONFIGURATION_QUEUE_PROVIDER_URL);
-		String queueName = config.getString(CONFIGURATION_QUEUE_NAME);
+        SweeperQueue.getInstance().pushMessages(message);
 
-		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
-		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-		jndidto.setProviderURL(providerURL);
-		jndidto.setQueueName(queueName);
-		jndidto.setUrlPackagePrefixes("org.jboss.naming");
-		jndidto.setMessage(message);
-
-		HornetQJMSUtil.postMessage(jndidto);
 	}
 
 	/**
@@ -609,23 +593,26 @@ public class HttpListener extends BaseResource {
 		}
 
 		if (iContentLength > 0) {
-			InputStream responseInputStream = httpResponse.getEntity()
-					.getContent();
-			Header contentType = httpResponse
-					.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+		    
+		    try (InputStream responseInputStream = httpResponse.getEntity()
+                    .getContent()) {
+		          Header contentType = httpResponse
+		                    .getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
-			if (responseInputStream != null) {
-				builder.entity(responseInputStream);
-			}
+		            if (responseInputStream != null) {
+		                builder.entity(responseInputStream);
+		            }
 
-			if (contentType != null) {
-				builder.header(contentType.getName(), contentType.getValue());
-			}
+		            if (contentType != null) {
+		                builder.header(contentType.getName(), contentType.getValue());
+		            }
 
-			if (contentLength != null) {
-				builder.header(contentLength.getName(),
-						contentLength.getValue());
-			}
+		            if (contentLength != null) {
+		                builder.header(contentLength.getName(),
+		                        contentLength.getValue());
+		            }
+		    }		
+
 		}
 
 		copyResponseHeaders(httpResponse, builder);

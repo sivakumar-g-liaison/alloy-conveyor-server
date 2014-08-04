@@ -11,9 +11,9 @@
 -->
 <configuration status="DEBUG" packages="com.liaison.commons.audit.log4j2" verbose="false">
   <appenders>
-    <Console name="Console" target="SYSTEM_OUT" >
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg %throwable{full}%n"/>
-    </Console>
+      <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
+          <PatternLayout pattern="LOG4J2 BASE: %highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+      </Console>
     <!-- Note, please configure audit-syslog-server in your /etc/hosts -->
     <AuditSyslogAppender name="AuditSysLog"  host="audit-syslog-server" port="514"
             protocol="UDP" appName="Mailbox" includeMDC="true"

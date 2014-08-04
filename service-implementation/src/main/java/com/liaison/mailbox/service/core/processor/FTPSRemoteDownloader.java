@@ -63,7 +63,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	@Override
 	public void invoke(String executionId, MailboxFSM fsm) throws Exception {
 
-		LOGGER.info("Entering in invoke.");
+		LOGGER.debug("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -210,8 +210,8 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 						bos = new BufferedOutputStream(fos);
 						ftpClient.getFile(currentFileName, bos);
 					} finally {
-						bos.close();
-						fos.close();
+					    if (bos != null) bos.close();
+					    if (fos != null) fos.close();
 					}
 				} else {
 

@@ -27,14 +27,12 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  */
 public class GenericValidatorTest {
 
-	private GenericValidator validator;
-
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@BeforeMethod
 	public void setUp() throws Exception {
-		validator = new GenericValidator();
+		
 	}
     
 	/**
@@ -49,6 +47,7 @@ public class GenericValidatorTest {
 		dto.setName("Test");
 		dto.setStatus("sss");
 		dto.setTenancyKey("Tenancykey");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -62,6 +61,7 @@ public class GenericValidatorTest {
 
 		MailBoxDTO dto = new MailBoxDTO();
 		dto.setStatus("sss");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -76,6 +76,7 @@ public class GenericValidatorTest {
 
 		MailBoxDTO dto = new MailBoxDTO();
 		dto.setName("Test");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -86,6 +87,7 @@ public class GenericValidatorTest {
 	 */
 	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testValidateMailBox_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
+		GenericValidator validator = new GenericValidator();
 		validator.validate(null);
 	}
     
@@ -101,6 +103,8 @@ public class GenericValidatorTest {
 		dto.setName("MBXNAME");
 		dto.setStatus("INACTIVE");
 		dto.setTenancyKey("TENANCY_KEY");
+		
+		GenericValidator validator = new GenericValidator();
 		Assert.assertEquals(true, validator.validate(dto));
 	}
     
@@ -116,6 +120,7 @@ public class GenericValidatorTest {
 		ProfileDTO profile = new ProfileDTO();
 		profile.setName("oncein5mins");
 
+		GenericValidator validator = new GenericValidator();
 		Assert.assertEquals(true, validator.validate(profile));
 	}
     
@@ -129,6 +134,7 @@ public class GenericValidatorTest {
 	public void testProfile_WithoutName_ShouldThrowException() throws MailBoxConfigurationServicesException {
 
 		ProfileDTO profile = new ProfileDTO();
+		GenericValidator validator = new GenericValidator();
 		validator.validate(profile);
 	}
     
@@ -140,6 +146,7 @@ public class GenericValidatorTest {
 
 	@Test(expectedExceptions = MailBoxConfigurationServicesException.class)
 	public void testProfile_Null_ShouldThrowException() throws MailBoxConfigurationServicesException {
+		GenericValidator validator = new GenericValidator();
 		validator.validate(null);
 	}
     /**
@@ -155,6 +162,7 @@ public class GenericValidatorTest {
 		dto.setStatus("ACTIVE");
 		dto.setProtocol("HTTP");
 		dto.setLinkedMailboxId("DUMMYID");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -171,6 +179,7 @@ public class GenericValidatorTest {
 		dto.setType(" ");
 		dto.setStatus(" ");
 		// dto.setLinkedProfileId(" ");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -187,6 +196,7 @@ public class GenericValidatorTest {
 		dto.setType("sdsd");
 		dto.setStatus("dsddd");
 		// dto.setLinkedProfileId("ASDERER1425SDSD");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -200,6 +210,7 @@ public class GenericValidatorTest {
 
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("SWEEPER");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -213,6 +224,7 @@ public class GenericValidatorTest {
 
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setStatus("ACTIVE");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -227,6 +239,7 @@ public class GenericValidatorTest {
 		FolderDTO dto = new FolderDTO();
 		dto.setFolderType("PAYLOAD_LOCATION");
 		dto.setFolderURI("/SAMPLE");
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
     
@@ -241,6 +254,7 @@ public class GenericValidatorTest {
 		FolderDTO dto = new FolderDTO();
 		dto.setFolderType("payload_location");
 		dto.setFolderURI(null);
+		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
 

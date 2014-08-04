@@ -60,6 +60,8 @@ public abstract class BaseServiceTest {
 			prop.load(is);
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
+			// close the stream
+			is.close();
 		} 		
 
 	}
@@ -97,12 +99,11 @@ public abstract class BaseServiceTest {
 	 * @param logger
 	 *            The logger
 	 * @return HTTPRequest The HTTPRequest instance for the given URL and method
-	 * @throws MalformedURLException
-	 * @throws FileNotFoundException
 	 * @throws LiaisonException
+	 * @throws IOException 
 	 */
 	public HTTPRequest constructHTTPRequest(String URL, HTTP_METHOD method, String input, Logger logger)
-			throws MalformedURLException, FileNotFoundException, LiaisonException {
+			throws LiaisonException, IOException {
 
 		URL url = new URL(URL);
 		HTTPRequest request = new HTTPRequest(method, url);
@@ -114,6 +115,7 @@ public abstract class BaseServiceTest {
 		if (input != null) {
 			request.inputData(new HTTPStringData(input));
 		}
+		output.close();
 		return request;
 	}
 

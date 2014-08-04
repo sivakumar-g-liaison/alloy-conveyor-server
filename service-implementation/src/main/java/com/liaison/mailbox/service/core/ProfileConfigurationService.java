@@ -44,7 +44,6 @@ public class ProfileConfigurationService {
 	private static final Logger LOG = LogManager.getLogger(ProfileConfigurationService.class);
 	private static final String PROFILE = "Profile";
 
-	private final GenericValidator validator = new GenericValidator();
 
 	/**
 	 * Creates Profile.
@@ -55,7 +54,7 @@ public class ProfileConfigurationService {
 	 */
 	public AddProfileResponseDTO createProfile(AddProfileRequestDTO request) {
 
-		LOG.info("Entering into profile creation.");
+		LOG.debug("Entering into profile creation.");
 		AddProfileResponseDTO serviceResponse = new AddProfileResponseDTO();
 
 		try {
@@ -64,7 +63,8 @@ public class ProfileConfigurationService {
 			if (profileDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
-
+			
+			GenericValidator validator = new GenericValidator();
 			validator.validate(profileDTO);
 
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
@@ -84,7 +84,7 @@ public class ProfileConfigurationService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(profile.getPrimaryKey())));
 
-			LOG.info("Exiting from profile creation.");
+			LOG.debug("Exiting from profile creation.");
 
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
@@ -107,7 +107,7 @@ public class ProfileConfigurationService {
 	 */
 	public ReviseProfileResponseDTO updateProfile (ReviseProfileRequestDTO request) throws MailBoxConfigurationServicesException {
 
-		LOG.info("Entering into profile updation.");
+		LOG.debug("Entering into profile updation.");
 		ReviseProfileResponseDTO serviceResponse = new ReviseProfileResponseDTO();
 
 		try {
@@ -116,7 +116,8 @@ public class ProfileConfigurationService {
 			if (profileDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
 			}
-
+			
+			GenericValidator validator = new GenericValidator();
 			validator.validate(profileDTO);
 
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
@@ -143,7 +144,7 @@ public class ProfileConfigurationService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfile(new ProfileResponseDTO(String.valueOf(retreivedProfile.getPrimaryKey())));
 
-			LOG.info("Exiting from profile updation.");
+			LOG.debug("Exiting from profile updation.");
 
 			return serviceResponse;
 		
@@ -165,7 +166,7 @@ public class ProfileConfigurationService {
 	 */
 	public GetProfileResponseDTO getProfiles() {
 
-		LOG.info("Entering into get all profiles.");
+		LOG.debug("Entering into get all profiles.");
 		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
 
 		try {
@@ -190,7 +191,7 @@ public class ProfileConfigurationService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfiles(profilesDTO);
 
-			LOG.info("Exiting from get all profiles operation.");
+			LOG.debug("Exiting from get all profiles operation.");
 
 			return serviceResponse;
 		} catch (Exception e) {
@@ -212,7 +213,7 @@ public class ProfileConfigurationService {
 	
 	public GetProfileResponseDTO searchProfiles(String profName) {
 		
-		LOG.info("Entering into search profiles by name.");
+		LOG.debug("Entering into search profiles by name.");
 		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
 		
 		try {
@@ -234,7 +235,7 @@ public class ProfileConfigurationService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfiles(profilesDTO);
 
-			LOG.info("Exiting from searching profiles operation.");
+			LOG.debug("Exiting from searching profiles operation.");
 
 			return serviceResponse;
 			

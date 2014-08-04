@@ -129,12 +129,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		AddMailboxRequestDTO serviceRequest;
 	
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
@@ -206,12 +204,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		ReviseMailBoxRequestDTO serviceRequest;
 		
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseMailBoxRequestDTO.class);
@@ -501,12 +497,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		AddProfileRequestDTO serviceRequest;
 
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
@@ -566,12 +560,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		ReviseProfileRequestDTO serviceRequest;
 
-		try {
-
-			requestStream = request.getInputStream();
+		try (InputStream requestStream = request.getInputStream()) {
+		    
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
@@ -686,12 +678,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		AddProcessorToMailboxRequestDTO serviceRequest;
 		
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
@@ -890,12 +880,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 		ReviseProcessorRequestDTO serviceRequest;
 
-		try {
-
-			requestStream = request.getInputStream();
+		try (InputStream requestStream = request.getInputStream())  {
+	
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
@@ -1068,11 +1056,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			HTTPServerListenerService service = new HTTPServerListenerService();
@@ -1116,11 +1102,10 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
-		InputStream requestStream;
 
-		try {
+		try (InputStream requestStream = request.getInputStream()) {
 
-			requestStream = request.getInputStream();
+			
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			LOG.info("The directory sweeper meta data json : " + new JSONObject(requestString).toString(2));

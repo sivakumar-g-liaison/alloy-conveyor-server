@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<configuration status="DEBUG" packages="com.liaison.common.log4j2.plugins,com.liaison.commons.log4j2,net.logstash.logging.log4j2.core.layout,com.liaison.commons.audit.log4j2" verbose="true    ">
+
+    <appenders>
+
+        <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+        </Console>
+
+        <File name="FilteredFile" fileName="/tmp/filtered.log" append="false">
+            <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+        </File>
+
+
+
+        <File name="FullLogFile" fileName="/tmp/full.log" append="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+        </File>
+
+
+    </appenders>
+
+    <loggers>
+        <root level="DEBUG">
+
+
+            <!-- dump to log -->
+            <appender-ref ref="FullLogFile" />
+
+            <!-- logs to console (not necessarily for production) -->
+            <appender-ref ref="Console" />
+
+            <!--  logs syslog formatted audit messages to local file (not for production) -->
+            <appender-ref ref="FilteredFile" />
+
+        </root>
+    </loggers>
+</configuration>

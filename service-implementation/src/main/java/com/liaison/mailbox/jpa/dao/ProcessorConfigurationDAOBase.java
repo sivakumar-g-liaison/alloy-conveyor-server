@@ -138,7 +138,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			LOG.info("find processor by mbx and service instacne starts.");
 
-			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
 					.append(" where mbx.pguid = :" + PGUID)
 					.append(" and processor.pguid in (select prcsr.pguid from Processor prcsr")
@@ -184,7 +184,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			LOG.info("Fetching the processor count starts.");
 
-			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
 					.append(" where mbx.pguid = :" + PGUID);
 
