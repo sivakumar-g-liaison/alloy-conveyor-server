@@ -160,7 +160,7 @@ public class MailBoxService {
 		
 		try {
 			
-			LOG.info("#####################----PROCESSOR EXECUTION BLOCK---############################################");
+			LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 			
 			TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, TriggerProcessorRequestDTO.class);
 
@@ -200,8 +200,6 @@ public class MailBoxService {
 				}
 				
 			    LOG.info("The Processer type is {}", processor.getProcessorType());
-				// To Maintain the running processor ids in a separate table in DB
-				ProcessorSemaphore.addToProcessorExecutionList(processor.getPguid());
 				processor.setProcsrExecutionStatus(ExecutionState.PROCESSING.value());
 				processorDAO.merge(processor);
 		        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
@@ -211,11 +209,7 @@ public class MailBoxService {
 		        processor.setProcsrExecutionStatus(ExecutionState.COMPLETED.value());
 			    processorDAO.merge(processor);
 		        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-
-				// Remove the processor from Database
-				ProcessorSemaphore.removeExecutedProcessor(processor.getPguid());
-			
-			LOG.info("#################################################################");
+		        LOG.info("#################################################################");
 			
 		} catch (MailBoxServicesException e){
 			

@@ -70,46 +70,56 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
               
                 block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
-                    function (data) {
-
+                    function (data, status) {
+                		
                         block.unblockUI();
-                        $scope.mailBox.guid = $scope.mailBoxId;
-                        $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
-                        $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
-							
-							$scope.addProcessorBtnValue = 'List Processors';
-							$scope.isProcessorsAvailable = true;
-						}	else {
-							$scope.addProcessorBtnValue = 'Add Processors';
-							$scope.isProcessorsAvailable = false;
-						}
-                        (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
-                            data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
-                        $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
-                        $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
-                        $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
-                        for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
-                        					                          
-                            var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
-                                data.getMailBoxResponse.mailBox.properties[i].name);
+                        if (status === 200) {
+                        	
+                        	if (data.getMailBoxResponse.response.status === 'success') {
+                                $scope.mailBox.guid = $scope.mailBoxId;
+                                $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
+                                $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
+        						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
+        							
+        							$scope.addProcessorBtnValue = 'List Processors';
+        							$scope.isProcessorsAvailable = true;
+        						}	else {
+        							$scope.addProcessorBtnValue = 'Add Processors';
+        							$scope.isProcessorsAvailable = false;
+        						}
+                                (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
+                                    data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
+                                $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
+                                $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
+                                $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
+                                for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
+                                					                          
+                                    var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
+                                        data.getMailBoxResponse.mailBox.properties[i].name);
 
-                                if (indexOfElement !== -1) {
-                                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-                            }
-                            $scope.mailBoxProperties.push({
-                                name: (indexOfElement == -1)?data.getMailBoxResponse.mailBox.properties[i].name:
-                                    getName($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name),
-                                value: data.getMailBoxResponse.mailBox.properties[i].value,
-                                allowAdd: false
-                            });
+                                        if (indexOfElement !== -1) {
+                                        $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                                    }
+                                    $scope.mailBoxProperties.push({
+                                        name: (indexOfElement == -1)?data.getMailBoxResponse.mailBox.properties[i].name:
+                                            getName($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name),
+                                        value: data.getMailBoxResponse.mailBox.properties[i].value,
+                                        allowAdd: false
+                                    });
+                                }
+                                $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
+                                    name: '',
+                                    value: '',
+                                    allowAdd: true
+                                });
+                            } else {
+                        		showSaveMessage(data.getMailBoxResponse.response.message, 'error');
+                        	}
+                        	
+                        } else {
+                        	showSaveMessage("Error While loading Mailbox", 'error');
                         }
-                        $scope.mailBoxProperties.push({ //Adding now so that the add new option always shows below the available properties
-                            name: '',
-                            value: '',
-                            allowAdd: true
-                        });
-                    }
+                	}    
                 );
             }
         };
