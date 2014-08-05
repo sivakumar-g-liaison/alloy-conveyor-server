@@ -755,8 +755,7 @@ public class HttpListener extends BaseResource {
 			Exception, SymmetricAlgorithmException {
 		
 		MailBoxConfigurationService mbxService = new MailBoxConfigurationService();
-		GetMailBoxResponseDTO responseDTO = mbxService.getMailBox(mailboxPguid,	false, null);
-		MailBoxDTO mailbox = responseDTO.getMailBox();
+		MailBoxDTO mailbox = mbxService.retrieveMailboxDetails(mailboxPguid, false, null);
 		return mailbox.getProperties();
 	}
 	

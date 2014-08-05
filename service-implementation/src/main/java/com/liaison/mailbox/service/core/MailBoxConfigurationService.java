@@ -200,33 +200,8 @@ public class MailBoxConfigurationService {
             if (MailBoxUtil.isEmpty(serviceInstanceId)) {
                 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
             }
-			// Getting mailbox
-			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			MailBox mailBox = configDao.find(MailBox.class, guid);
-
-			if (mailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
-			}
 			
-			// retrieve the service instance id from acl manifest
-			/*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				 LOG.error("retrieval of service instance id from acl manifest failed");
-				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-			}*/
-
-			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
-			if (addConstraint) {
-				List<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(mailBox.getPguid(), serviceInstanceId);
-				mailBox.setMailboxProcessors(filteredProcessor);
-			} else {
-				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid());
-				mailBox.setMailboxProcessors(processors);
-			}
-
-			MailBoxDTO dto = new MailBoxDTO();
-			dto.copyFromEntity(mailBox);
-
+			MailBoxDTO dto = retrieveMailboxDetails(guid, addConstraint, serviceInstanceId);
 			serviceResponse.setMailBox(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			LOG.debug("Exit from get mailbox.");
@@ -527,5 +502,36 @@ public class MailBoxConfigurationService {
 			return serviceResponse;
 		}
 		
+	}
+	
+	public MailBoxDTO retrieveMailboxDetails(String guid, boolean addConstraint, String serviceInstanceId) throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+	 // Getting mailbox
+        MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+        MailBox mailBox = configDao.find(MailBox.class, guid);
+
+        if (mailBox == null) {
+            throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
+        }
+        
+        // retrieve the service instance id from acl manifest
+        /*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
+        if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+             LOG.error("retrieval of service instance id from acl manifest failed");
+             throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
+        }*/
+
+        ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
+        if (addConstraint) {
+            List<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(mailBox.getPguid(), serviceInstanceId);
+            mailBox.setMailboxProcessors(filteredProcessor);
+        } else {
+            List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid());
+            mailBox.setMailboxProcessors(processors);
+        }
+
+        MailBoxDTO dto = new MailBoxDTO();
+        dto.copyFromEntity(mailBox);
+        
+        return dto;
 	}
 }

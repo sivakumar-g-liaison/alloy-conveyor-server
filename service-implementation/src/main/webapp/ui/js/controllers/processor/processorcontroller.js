@@ -746,7 +746,7 @@ var rest = myApp.controller(
                         <div ng-switch-when="port">\n\
                         <div class="alignDiv" ng-switch on="portRequired">\n\
                         <div ng-switch-when="true"><textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.inputPatternForPort + '" />\n\
-                            <div ng-show="(formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid) && (formAddPrcsr.port.$invalid)">\n\
+                            <div ng-show="(formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid) || (formAddPrcsr.port.$invalid)">\n\
                                 <span class="help-block-custom" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
                             </div>\n\
                             </div><div ng-switch-default>\n\
@@ -1522,7 +1522,7 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
+								if(data.getProcessorResponse.processor.protocol === 'HTTPS' || data.getProcessorResponse.processor.protocol === 'HTTP') {
 									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 								} else {
 									var editProcessor = false;
