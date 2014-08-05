@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
 
 /**
@@ -42,6 +43,7 @@ public class EmailNotifier {
 
 	// private static List<String> RECEIVERS;
 	private static Properties MAILSERVER_CONFIG = new Properties();
+	private static Session mailSession = null;
 
 	static {
 		fetchConfig();
@@ -93,41 +95,42 @@ public class EmailNotifier {
 	public void sendEmail(List<String> toEmailAddrList, String subject, String body, String type) {
 
 		try {
+		    Session session = getMailSession(MailBoxUtil.getEnvProperties());
+            MimeMessage message = new MimeMessage(session);
 
-			Session session = Session.getDefaultInstance(MAILSERVER_CONFIG, null);
-			MimeMessage message = new MimeMessage(session);
+            // the "from" address may be set in code, or set in the
+            // config file under "mail.from" ; here, the latter style is used
+            message.addHeader("Content-Type", type);
+            message.setFrom(new InternetAddress(MAILSERVER_CONFIG.getProperty("mail.from")));
 
-			// the "from" address may be set in code, or set in the
-			// config file under "mail.from" ; here, the latter style is used
-			message.addHeader("Content-Type", type);
-			message.setFrom(new InternetAddress(MAILSERVER_CONFIG.getProperty("mail.from")));
+            if ((toEmailAddrList != null) && (toEmailAddrList.size() > 0)) {
+                for (String toEmailAddr : toEmailAddrList) {
+                    message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmailAddr));
+                }
+            }
+            message.setSubject(subject);
+            final String completeMessage = new StringBuilder().append(body).append("\n\n").append(NOTE).toString();
+            message.setText(completeMessage);
+            Transport.send(message);
 
-			if ((toEmailAddrList != null) && (toEmailAddrList.size() > 0)) {
-				for (String toEmailAddr : toEmailAddrList) {
-					message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmailAddr));
-				}
-			}
-			message.setSubject(subject);
-			final String completeMessage = new StringBuilder().append(body).append("\n\n").append(NOTE).toString();
-			message.setText(completeMessage);
-			Transport.send(message);
-
-		} catch (MessagingException ex) {
-		    LOGGER.error("Cannot send email. " + ex);
-		}
+        } catch (MessagingException | IOException ex ) {
+            System.err.println("Cannot send email. " + ex);
+        }
 	}
 
 	/**
 	 * Send a single email.
 	 */
 	public void sendEmail(String aFromEmailAddr, String aToEmailAddr, String aSubject, String aBody) {
-
-		// Here, no Authenticator argument is used (it is null).
-		// Authenticators are used to prompt the user for user
-		// name and password.
-		Session session = Session.getDefaultInstance(MAILSERVER_CONFIG, null);
-		MimeMessage message = new MimeMessage(session);
+		
 		try {
+		    
+	        // Here, no Authenticator argument is used (it is null).
+	        // Authenticators are used to prompt the user for user
+	        // name and password.
+		    Session session = getMailSession(MailBoxUtil.getEnvProperties());
+	        MimeMessage message = new MimeMessage(session);
+	        
 			// the "from" address may be set in code, or set in the
 			// config file under "mail.from" ; here, the latter style is used
 			// message.setFrom( new InternetAddress(aFromEmailAddr) );
@@ -136,8 +139,17 @@ public class EmailNotifier {
 			final String completeMessage = new StringBuilder().append(aBody).append("\n\n").append(NOTE).toString();
 			message.setText(completeMessage);
 			Transport.send(message);
-		} catch (MessagingException ex) {
+		} catch (MessagingException | IOException ex) {
 		    LOGGER.error("Cannot send email. " + ex);
 		}
 	}
+	
+    private Session getMailSession(Properties sessionProperties){
+        if(mailSession == null){
+            mailSession = Session.getInstance(sessionProperties);
+        }
+        return mailSession;
+
+
+    }
 }

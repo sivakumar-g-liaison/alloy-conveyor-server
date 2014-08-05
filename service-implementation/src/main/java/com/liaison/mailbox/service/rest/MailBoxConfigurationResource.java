@@ -142,11 +142,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 			String manifestJson = request.getHeader("acl-manifest");
 			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
 			
-			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-			}
-			
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -219,12 +214,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
 			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
-			
-			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-			}
-					
+								
 			// updates existing mailbox
 			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId);
 
@@ -344,11 +334,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
 			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
-			
-			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-			}
 			
 			serviceResponse = mailbox.getMailBox(guid, addConstraint, serviceInstanceId);
 
@@ -689,11 +674,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 			/*LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
 			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
-			
-			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-			}		
 			
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 

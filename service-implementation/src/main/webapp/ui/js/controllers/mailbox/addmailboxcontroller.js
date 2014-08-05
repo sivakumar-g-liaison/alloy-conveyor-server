@@ -88,64 +88,74 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
-                    function (data) {
+                    function (data, status) {
 
                         block.unblockUI();
-                        $scope.mailBox.guid = $scope.mailBoxId;
-                        $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
-                        $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
-							
-							$scope.addProcessorBtnValue = 'List Processors';
-							$scope.isProcessorsAvailable = true;
-						}	else {
-							$scope.addProcessorBtnValue = 'Add Processors';
-							$scope.isProcessorsAvailable = false;
-						}
-                        (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
-                            data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
-                        $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
-                        $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
-                        for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
-                        					                          
-                            var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
-                                data.getMailBoxResponse.mailBox.properties[i].name);
+                        
+                        if (status === 200) {
+                             if (data.getMailBoxResponse.response.status === 'success') {
+                                                        	 $scope.mailBox.guid = $scope.mailBoxId;
+                             $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
+                             $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
+     						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
+     							
+     							$scope.addProcessorBtnValue = 'List Processors';
+     							$scope.isProcessorsAvailable = true;
+     						}	else {
+     							$scope.addProcessorBtnValue = 'Add Processors';
+     							$scope.isProcessorsAvailable = false;
+     						}
+                             (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
+                                 data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
+                             $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
+                             $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
+                             for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
+                             					                          
+                                 var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
+                                     data.getMailBoxResponse.mailBox.properties[i].name);
 
-                                if (indexOfElement !== -1) {
-                                $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-                            }
-                            var index =  getIndexOfId($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name);
-                            var indexMandatory = getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name);
-                             var propertyValue = data.getMailBoxResponse.mailBox.properties[i].value;
-                             if (data.getMailBoxResponse.mailBox.properties[i].name === 'httplistenerauthcheckrequired') {
-                                propertyValue = (data.getMailBoxResponse.mailBox.properties[i].value === 'true')?$scope.booleanValues[1]:$scope.booleanValues[0];
+                                     if (indexOfElement !== -1) {
+                                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
+                                 }
+                                 var index =  getIndexOfId($scope.allStaticProperties, data.getMailBoxResponse.mailBox.properties[i].name);
+                                 var indexMandatory = getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name);
+                                  var propertyValue = data.getMailBoxResponse.mailBox.properties[i].value;
+                                  if (data.getMailBoxResponse.mailBox.properties[i].name === 'httplistenerauthcheckrequired') {
+                                     propertyValue = (data.getMailBoxResponse.mailBox.properties[i].value === 'true')?$scope.booleanValues[1]:$scope.booleanValues[0];
+                                  }
+                                  // if both index and index mandatory are -1 then it is a dynamic property added by user
+                                  if (index == -1 && indexMandatory == -1) {
+                                      $scope.mandatoryProperties.push({
+                                         name: data.getMailBoxResponse.mailBox.properties[i].name,
+                                         value: propertyValue,
+                                         allowAdd: false,
+                                         isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
+                                     });
+                                  } else {
+                                      $scope.mandatoryProperties.push({
+                                         name: $scope.getNameValue(data.getMailBoxResponse.mailBox.properties[i].name),
+                                         value: propertyValue,
+                                         allowAdd: false,
+                                         isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
+                                     });
+                                  }
+
                              }
-                             // if both index and index mandatory are -1 then it is a dynamic property added by user
-                             if (index == -1 && indexMandatory == -1) {
-                                 $scope.mandatoryProperties.push({
-                                    name: data.getMailBoxResponse.mailBox.properties[i].name,
-                                    value: propertyValue,
-                                    allowAdd: false,
-                                    isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
-                                });
+                             
+                             $scope.mandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
+                                 name: '',
+                                 value: '',
+                                 allowAdd: true,
+                                 isMandatory: false
+                             });
+                             $scope.mailBoxProperties = $scope.mandatoryProperties;
                              } else {
-                                 $scope.mandatoryProperties.push({
-                                    name: $scope.getNameValue(data.getMailBoxResponse.mailBox.properties[i].name),
-                                    value: propertyValue,
-                                    allowAdd: false,
-                                    isMandatory: (getIndexOfId($scope.allMandatoryProperties, data.getMailBoxResponse.mailBox.properties[i].name) === -1) ? false : true
-                                });
+                                showSaveMessage(data.getMailBoxResponse.response.message, 'error');
                              }
-
+                        } else {
+                        	 showSaveMessage("Error While loading Mailbox", 'error');
                         }
-                        $scope.mandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
-                            name: '',
-                            value: '',
-                            allowAdd: true,
-                            isMandatory: false
-                        });
-                        $scope.mailBoxProperties = $scope.mandatoryProperties;
-                    }
+                    } 
                 );
             }
         };

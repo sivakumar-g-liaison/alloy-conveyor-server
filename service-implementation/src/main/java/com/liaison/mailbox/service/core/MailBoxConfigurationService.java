@@ -84,8 +84,14 @@ public class MailBoxConfigurationService {
 
 		LOG.debug("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
+	
 		try {
-
+		    
+		    // check if service instance id is available in query param if not throw an exception
+	        if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+	            throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+	        }
+	        
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
@@ -190,6 +196,10 @@ public class MailBoxConfigurationService {
 		
 		try {
 
+		    // check if service instance id is available in query param if not throw an exception
+            if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+                throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+            }
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = configDao.find(MailBox.class, guid);
@@ -251,6 +261,11 @@ public class MailBoxConfigurationService {
 
 		try {
 
+		    // check if service instance id is available in query param if not throw an exception
+	        if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+	            throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+	        }
+	        
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);

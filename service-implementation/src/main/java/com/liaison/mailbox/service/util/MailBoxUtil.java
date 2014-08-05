@@ -10,9 +10,12 @@
 
 package com.liaison.mailbox.service.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
@@ -31,6 +34,8 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.framework.util.ServiceUtils;
+import com.netflix.config.ConfigurationManager;
 /**
  * Utilities for MailBox.
  * 
@@ -42,6 +47,8 @@ public class MailBoxUtil {
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final String REQUEST_HEADER = "Request Header";
 	private static final String PROPERTIES_FILE = "Properties file";
+	private static final Object lock = new Object();
+	private static final Properties properties = new Properties();
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -129,19 +136,24 @@ public class MailBoxUtil {
 
 	public static DecryptableConfiguration getEnvironmentProperties() throws IOException {
 		
-		DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-		/*
-		if (properties.isEmpty()) {
-
-			Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
-			String propertyFileName = "g2mailboxservice-" + env + ".properties";			
-			String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-			InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-			properties.load(is);
-		}*/
-
-		return configuration;
+		return LiaisonConfigurationFactory.getConfiguration();
 	}
+	
+	public static Properties getEnvProperties() throws IOException {
+        
+        synchronized (lock) {
+
+            if (properties.isEmpty()) {
+                Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
+                String propertyFileName = "g2mailboxservice-" + env + ".properties";
+                String props = ServiceUtils.readFileFromClassPath(propertyFileName);
+                InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
+                properties.load(is);
+            }
+    
+            return properties;
+        }
+    }
 	
 	/**
 	 * Method to get the current timestmp to insert into database.

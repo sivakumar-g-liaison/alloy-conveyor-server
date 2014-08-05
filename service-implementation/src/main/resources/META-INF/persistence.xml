@@ -28,7 +28,6 @@
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
-		<class>com.liaison.mailbox.jpa.model.ParallelProcessor</class>
 		<class>com.liaison.mailbox.jpa.model.FSMEvent</class>
 		<class>com.liaison.mailbox.jpa.model.FSMModel</class>
 		<class>com.liaison.mailbox.jpa.model.FSMState</class>

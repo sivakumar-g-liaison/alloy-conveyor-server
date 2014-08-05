@@ -130,6 +130,10 @@ public class ProcessorConfigurationService {
 
 		try {
 
+	          // check if service instance id is available in query param if not throw an exception
+            if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+                throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+            }       
 			if (!mailBoxGuid.equals(serviceRequest.getProcessor().getLinkedMailboxId())) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
 			}
