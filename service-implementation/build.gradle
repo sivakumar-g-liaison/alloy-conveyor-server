@@ -116,7 +116,7 @@ dependencies {
 
 
     // resolve fs2 in nexus
-    compile group: "com.liaison", name: "fs2", version: "0.0.3-SNAPSHOT", changing: true
+    compile group: "com.liaison", name: "fs2", version: "0.0.4", changing: true
 
     // inherited from NetFlix Karyon
     //compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"
@@ -129,7 +129,7 @@ dependencies {
     // TODO - See that we also depend on "jersey-bundle" inherently
     // TODO - due to NetFlix... using the bundle is not advised... (remove)
 
-    compile group: "com.liaison", name: "fsm", version: "0.0.2-SNAPSHOT", changing: true
+    compile group: "com.liaison", name: "fsm", version: "1.0.2", changing: true
     // for http mime
     compile "org.apache.httpcomponents:httpmime:4.3.1"
     compile 'javax.mail:mail:1.4.6'
@@ -141,7 +141,7 @@ dependencies {
 //    compile "jboss:jnp-client:4.0.2"
 
     // for G2Javascript engine
-    compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.0.4-SNAPSHOT', changing: true
+    compile group: 'com.liaison.commons', name: 'commons-scripting', version: '1.1.1', changing: true
 
     //Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
    //compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
@@ -198,13 +198,13 @@ dependencies {
     jdbc "com.oracle:ojdbc6:${oracleVersion}"
 	
 	//Dependency for UM integration
-	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.4-SNAPSHOT", changing: true
+	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.+", changing: true
 	
 	//Dependency for ACL client Integration
-	compile group: "com.liaison.commons.accessmanagement", name: "accessmanagement-client", version: "1.1.2-SNAPSHOT", changing: true
+	compile group: "com.liaison.commons.accessmanagement", name: "accessmanagement-client", version: "1.+", changing: true
 	
 	// Dependency for KeyManager
-	compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.1-SNAPSHOT', classifier: 'grammar', changing: true
+	compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.4', classifier: 'grammar', changing: true
 	
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
