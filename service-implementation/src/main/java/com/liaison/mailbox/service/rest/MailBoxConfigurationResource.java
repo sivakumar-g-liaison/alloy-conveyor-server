@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -31,14 +31,23 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
+import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
+import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
+import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
@@ -50,16 +59,12 @@ import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
@@ -78,6 +83,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+
 /**
  * This is the gateway for the mailbox configuration services.
  * 
@@ -85,7 +91,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @Path("v1/mailbox")
 @Api(value = "v1/mailbox", description = "Gateway for the mailbox configuration services.")
-public class MailBoxConfigurationResource extends BaseResource {
+public class MailBoxConfigurationResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
 
@@ -94,8 +100,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	
 
 	public MailBoxConfigurationResource() throws IOException {
 
@@ -111,63 +115,62 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@POST
 	@ApiOperation(value = "Create Mailbox",
-	notes = "create a new mailbox",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO.class)
+			notes = "create a new mailbox",
+			position = 1,
+			response = com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new mailbox", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.AddMailBoxRequest", paramType = "body") })
+			dataType = "com.liaison.mailbox.swagger.dto.request.AddMailBoxRequest", paramType = "body") })
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "createMailBox")
-	public Response createMailBox(@Context HttpServletRequest request, @QueryParam(value = "sid") @ApiParam(name="sid", required=true, value="Service instance id")  String serviceInstanceId) {
+	public Response createMailBox(
+			@Context final HttpServletRequest request,
+			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") final String serviceInstanceId) {
 
-		// Audit LOG the Attempt to create a mailbox
-		auditAttempt("createMailBox");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		AddMailboxRequestDTO serviceRequest;
-	
-		try (InputStream requestStream = request.getInputStream()) {
+				serviceCallCounter.addAndGet(1);
 
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					AddMailboxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							AddMailboxRequestDTO.class);
 
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
-			
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-					
-			// add the new profile details
-			AddMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+					// creates new mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.createMailBox(serviceRequest, serviceInstanceId, decodedManifestJson);
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (MailBoxConfigurationServicesException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to create a mailbox. " + e.getMessage());
+				}
 
-			// creates new mailbox
-			serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId, decodedManifestJson);
+			}
+		};
+		worker.actionLabel = "MailBoxConfigurationResource.createMailBox()";
 
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "createMailBox");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e + e.getMessage();
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		// Audit LOG the failure
-		auditFailure("createMailBox");
-		return returnResponse;
-
 	}
 
 	/**
@@ -179,63 +182,66 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@PUT
 	@ApiOperation(value = "Update Mailbox",
-	notes = "update details of existing mailbox",
-	position = 2,
-	response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
+			notes = "update details of existing mailbox",
+			position = 2,
+			response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
 	@Path("/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update existing mailbox", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body") })
+			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body") })
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "reviseMailBox")
-	public Response reviseMailBox(@Context HttpServletRequest request, 
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value = "sid")  @ApiParam(name="sid", required=true, value="Service instance id") String serviceInstanceId) {
+	public Response reviseMailBox(
+			@Context final HttpServletRequest request,
+			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
 
-		// Audit LOG the Attempt to revise a mailbox
-		auditAttempt("reviseMailBox");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		ReviseMailBoxRequestDTO serviceRequest;
-		
-		try (InputStream requestStream = request.getInputStream()) {
+				serviceCallCounter.addAndGet(1);
 
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					ReviseMailBoxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							ReviseMailBoxRequestDTO.class);
 
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseMailBoxRequestDTO.class);
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
 
-			ReviseMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					// updates existing mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId,
+							decodedManifestJson);
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (MailBoxConfigurationServicesException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to revise a mailbox. " + e.getMessage());
+				}
 
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-				
-			// updates existing mailbox
-			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, decodedManifestJson);
+			}
+		};
+		worker.actionLabel = "MailBoxConfigurationResource.reviseMailBox()";
 
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "reviseMailBox");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		// Audit LOG the failure
-		auditFailure("reviseMailBox");
-		return returnResponse;
 	}
 
 	/**
@@ -248,56 +254,56 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@DELETE
 	@ApiOperation(value = "Delete Mailbox",
-	notes = "delete a mailbox",
-	position = 3,
-	response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
+			notes = "delete a mailbox",
+			position = 3,
+			response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "deactivateMailBox")
-	public Response deactivateMailBox(@Context HttpServletRequest request,
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid) {
+	public Response deactivateMailBox(@Context final HttpServletRequest request,
+			@PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") final String guid) {
 
-		// Audit LOG the Attempt to deactivate a mailbox
-		auditAttempt("deactivateMailBox");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
+				serviceCallCounter.addAndGet(1);
 
+				try {
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+
+					// deactivates existing mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.deactivateMailBox(guid, decodedManifestJson);
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (MailBoxConfigurationServicesException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to revise a mailbox. " + e.getMessage());
+				}
+
+			}
+		};
+		worker.actionLabel = "MailBoxConfigurationResource.deactivateMailBox()";
+
+		// hand the delegate to the framework for calling
 		try {
-
-			DeActivateMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-
-			// deactivates existing mailbox
-			serviceResponse = mailbox.deactivateMailBox(guid, decodedManifestJson);
-
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "deactivateMailBox");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		// Audit LOG the failure
-		auditFailure("deactivateMailBox");
-		return returnResponse;
 
 	}
 
@@ -310,55 +316,62 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "Mailbox Details",
-	notes = "returns details of a valid mailbox",
-	position = 4,
-	response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
+			notes = "returns details of a valid mailbox",
+			position = 4,
+			response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "readMailBox")
-	public Response readMailBox(@Context HttpServletRequest request, @PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, 
-			@QueryParam(value = "addServiceInstanceIdConstraint") @ApiParam(name="addServiceInstanceIdConstraint", required=true, value="Service instance id constraint") boolean addConstraint, @QueryParam(value = "sid") @ApiParam(name="sid", required=true, value="Service instance id")  String serviceInstanceId) {
+	public Response readMailBox(
+			@Context final HttpServletRequest request,
+			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+			@QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint,
+			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
 
-		// Audit LOG the Attempt to read mailbox
-		auditAttempt("readMailBox");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
+				serviceCallCounter.addAndGet(1);
 
+				try {
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+
+					// deactivates existing mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.getMailBox(guid, addConstraint, serviceInstanceId, decodedManifestJson);
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (MailBoxConfigurationServicesException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
+				} catch (SymmetricAlgorithmException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
+				}
+
+			}
+		};
+		worker.actionLabel = "MailBoxConfigurationResource.readMailBox()";
+
+		// hand the delegate to the framework for calling
 		try {
-
-			// add the new profile details
-			GetMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-			
-			serviceResponse = mailbox.getMailBox(guid, addConstraint, serviceInstanceId, decodedManifestJson);
-
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "readMailBox");
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("readMailBox");
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		return returnResponse;
 
 	}
 
@@ -369,8 +382,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * 
 	 * @Consumes(MediaType.APPLICATION_JSON)
 	 * 
-	 * @Produces(MediaType.APPLICATION_JSON) public Response
-	 * getMailBoxByGuidAndServiceInstId(@PathParam(value = "id") String guid,
+	 * @Produces(MediaType.APPLICATION_JSON) public Response getMailBoxByGuidAndServiceInstId(@PathParam(value = "id")
+	 * String guid,
 	 * 
 	 * @PathParam(value = "sid") Integer serviceInstId) {
 	 * 
@@ -380,21 +393,17 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * 
 	 * try {
 	 * 
-	 * // add the new profile details GetMailBoxResponseDTO serviceResponse =
-	 * null; MailBoxConfigurationService mailbox = new
-	 * MailBoxConfigurationService(); serviceResponse =
-	 * mailbox.getMailBoxByGuidAndServiceInstId(guid, serviceInstId);
+	 * // add the new profile details GetMailBoxResponseDTO serviceResponse = null; MailBoxConfigurationService mailbox
+	 * = new MailBoxConfigurationService(); serviceResponse = mailbox.getMailBoxByGuidAndServiceInstId(guid,
+	 * serviceInstId);
 	 * 
-	 * returnResponse = serviceResponse.constructResponse(); } catch (Exception
-	 * e) {
+	 * returnResponse = serviceResponse.constructResponse(); } catch (Exception e) {
 	 * 
-	 * int f = failureCounter.addAndGet(1); String errMsg =
-	 * "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-	 * LOG.error(errMsg, e);
+	 * int f = failureCounter.addAndGet(1); String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" +
+	 * e; LOG.error(errMsg, e);
 	 * 
-	 * // should be throwing out of domain scope and into framework using //
-	 * above code returnResponse = Response.status(500).header("Content-Type",
-	 * MediaType.TEXT_PLAIN).entity(errMsg).build(); }
+	 * // should be throwing out of domain scope and into framework using // above code returnResponse =
+	 * Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build(); }
 	 * 
 	 * return returnResponse;
 	 * 
@@ -409,14 +418,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "Upload TrustStore",
-	notes = "upload Self Signed TrustStore",
-	position = 5,
-	response = com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO.class)
+			notes = "upload Self Signed TrustStore",
+			position = 5,
+			response = com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO.class)
 	@Path("/uploadSelfSigned")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "uploadSelfSignedTrustStore")
 	public Response uploadSelfSignedTrustStore() {
@@ -434,7 +443,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService processor = new ProcessorConfigurationService();
 			serviceResponse = processor.uploadSelfSignedTrustStore();
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "uploadSelfSignedTrustStore");
 
 			returnResponse = serviceResponse.constructResponse();
@@ -463,16 +472,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@POST
 	@ApiOperation(value = "Create Profile",
-	notes = "create a new profile",
-	position = 6,
-	response = com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO.class)
+			notes = "create a new profile",
+			position = 6,
+			response = com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO.class)
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new profile", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body") })
+			dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body") })
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "createProfile")
 	public Response createProfile(@Context HttpServletRequest request) {
@@ -496,7 +505,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// creates new profile
 			serviceResponse = profile.createProfile(serviceRequest);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "createProfile");
 
 			// populate the response body
@@ -516,7 +525,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 
 	}
-	
+
 	/**
 	 * REST method to update a profile
 	 * 
@@ -525,17 +534,17 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 * @return Response Object
 	 */
 	@PUT
-	@ApiOperation(value = "Update profile", 
-	notes = "Update an existing profile",
-	position = 7, 
-	response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
+	@ApiOperation(value = "Update profile",
+			notes = "Update an existing profile",
+			position = 7,
+			response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({@ApiImplicitParam(name="request", value="Update an existing profile", required=true, 
-	dataType="com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType="body" )})
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update an existing profile", required = true,
+			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType = "body") })
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "reviseProfile")
 	public Response reviseProfile(@Context HttpServletRequest request) {
@@ -548,7 +557,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		ReviseProfileRequestDTO serviceRequest;
 
 		try (InputStream requestStream = request.getInputStream()) {
-		    
+
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
@@ -558,8 +567,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			// creates new profile
 			serviceResponse = profile.updateProfile(serviceRequest);
-		
-			//Audit LOG
+
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "reviseProfile");
 
 			// populate the response body
@@ -579,7 +588,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 
 	}
-	
+
 	/**
 	 * REST method to retrieve all profiles.
 	 * 
@@ -587,14 +596,14 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "List Profiles",
-	notes = "returns detail information of all the profiles",
-	position = 8,
-	response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
+			notes = "returns detail information of all the profiles",
+			position = 8,
+			response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
 	@Path("/profile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "readProfiles")
 	public Response readProfiles() {
@@ -611,7 +620,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.getProfiles();
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "readProfiles");
 
 			returnResponse = serviceResponse.constructResponse();
@@ -643,20 +652,22 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@POST
 	@ApiOperation(value = "Create Processor",
-	notes = "create a new processor",
-	position = 9,
-	response = com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO.class)
+			notes = "create a new processor",
+			position = 9,
+			response = com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO.class)
 	@Path("/{id}/processor")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new processor", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.AddProcessorToMailBoxRequest", paramType = "body") })
+			dataType = "com.liaison.mailbox.swagger.dto.request.AddProcessorToMailBoxRequest", paramType = "body") })
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "createProcessor")
-	public Response createProcessor(@Context HttpServletRequest request,
-			@PathParam(value = "id") @ApiParam(name="id", required=true, value="mailbox guid") String guid, @QueryParam(value= "sid")  @ApiParam(name="sid", required=true, value="Service instance id") String serviceInstanceId) {
+	public Response createProcessor(
+			@Context HttpServletRequest request,
+			@PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
 
 		// Audit LOG the Attempt to createProcessor
 		auditAttempt("createProcessor");
@@ -664,7 +675,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		serviceCallCounter.addAndGet(1);
 		Response returnResponse;
 		AddProcessorToMailboxRequestDTO serviceRequest;
-		
+
 		try (InputStream requestStream = request.getInputStream()) {
 
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
@@ -674,15 +685,17 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			
+
 			// retrieving acl manifest from header
-			/*LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
-						
+			/*
+			 * LOG.info("Retrieving acl manifest json from request header"); String manifestJson =
+			 * request.getHeader("acl-manifest"); String decodedManifestJson =
+			 * MailBoxUtil.getDecodedManifestJson(manifestJson);
+			 */
+
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "createProcessor");
 
 			// populate the response body
@@ -716,19 +729,19 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@DELETE
 	@ApiOperation(value = "Remove Processor",
-	notes = "remove processor details",
-	position = 10,
-	response = com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO.class)
-	@Path("/{mailboxid}/processor/{processorid}")	
+			notes = "remove processor details",
+			position = 10,
+			response = com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO.class)
+	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "deleteProcessor")
 	public Response deleteProcessor(
-			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid, 
-			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id") String guid) {
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") String guid) {
 
 		// Audit LOG the Attempt to deleteProcessor
 		auditAttempt("deleteProcessor");
@@ -744,7 +757,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// Deactivating processor
 			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "deleteProcessor");
 
 			// Constructing response
@@ -777,19 +790,19 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "Processor Details",
-	notes = "returns detail information of a valid processor",
-	position = 11,
-	response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
+			notes = "returns detail information of a valid processor",
+			position = 11,
+			response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "getProcessor")
 	public Response getProcessor(
-			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid, 
-			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id")  String guid) {
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") String guid) {
 
 		// Audit LOG the Attempt to getProcessor
 		auditAttempt("getProcessor");
@@ -803,8 +816,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 			// Gets processor details.
 			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
-			
-			//Audit LOG
+
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "getProcessor");
 
 			// constructs response.
@@ -839,21 +852,22 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@PUT
 	@ApiOperation(value = "Update Processor",
-	notes = "revise details of valid processor",
-	position = 12,
-	response = com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO.class)
+			notes = "revise details of valid processor",
+			position = 12,
+			response = com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO.class)
 	@Path("/{mailboxid}/processor/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update  processor", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProcessorRequest", paramType = "body") })
+			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProcessorRequest", paramType = "body") })
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "reviseProcessor")
-	public Response reviseProcessor(@Context HttpServletRequest request, 
-			@PathParam(value = "mailboxid")  @ApiParam(name="mailboxid", required=true, value="mailbox guid") String mailboxguid,
-			@PathParam(value = "processorid") @ApiParam(name="processorid", required=true, value="processor id") String guid) {
+	public Response reviseProcessor(
+			@Context HttpServletRequest request,
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") String guid) {
 
 		// Audit LOG the Attempt to reviseProcessor
 		auditAttempt("reviseProcessor");
@@ -862,8 +876,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 		ReviseProcessorRequestDTO serviceRequest;
 
-		try (InputStream requestStream = request.getInputStream())  {
-	
+		try (InputStream requestStream = request.getInputStream()) {
+
 			String requestString = new String(StreamUtil.streamToBytes(requestStream));
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
@@ -873,7 +887,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// updates existing processor
 			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "reviseProcessor");
 
 			// constructs response
@@ -895,8 +909,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 	}
 
 	/**
-	 * Rest method to search the mailbox based on the given query parameters. If
-	 * both are empty it returns all mailboxes.
+	 * Rest method to search the mailbox based on the given query parameters. If both are empty it returns all
+	 * mailboxes.
 	 * 
 	 * @param mbxName
 	 *            The mailbox name should be searched
@@ -906,20 +920,21 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "Search Mailbox",
-	notes = "search a mailbox using given query parameters",
-	position = 13,
-	response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
+			notes = "search a mailbox using given query parameters",
+			position = 13,
+			response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "searchMailBox")
-	public Response searchMailBox(@Context HttpServletRequest request,
-			@QueryParam(value = "name") @ApiParam(name="name", required=false, value="Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
-			@QueryParam(value = "profile") @ApiParam(name="profile", required=false, value="Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName,
-			@QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") String hitCounter) {
-		
-		//Audit LOG the Attempt to searchMailBox
+	public Response searchMailBox(
+			@Context HttpServletRequest request,
+			@QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
+			@QueryParam(value = "profile") @ApiParam(name = "profile", required = false, value = "Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName,
+			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") String hitCounter) {
+
+		// Audit LOG the Attempt to searchMailBox
 		auditAttempt("searchMailBox");
 
 		serviceCallCounter.addAndGet(1);
@@ -930,16 +945,16 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// search the mailbox from the given details
 			SearchMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-			
+
 			// retrieving acl manifest from header
 			LOG.info("Retrieving acl manifest json from request header");
 			String manifestJson = request.getHeader("acl-manifest");
 			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-			
+
 			serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson);
 			serviceResponse.setHitCounter(hitCounter);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "searchMailBox");
 
 			returnResponse = serviceResponse.constructResponse();
@@ -958,7 +973,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 
 	}
-    
+
 	/**
 	 * REST method to retrieve a list of files from mailbox.
 	 * 
@@ -969,7 +984,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/listFile")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "getFileList")
 	public Response getFileList() {
@@ -981,7 +996,8 @@ public class MailBoxConfigurationResource extends BaseResource {
 		Response returnResponse;
 
 		try {
-			String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString("processor.javascript.root.directory");
+			String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString(
+					"processor.javascript.root.directory");
 			File file = new File(jsFileLocation);
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
@@ -1005,30 +1021,31 @@ public class MailBoxConfigurationResource extends BaseResource {
 		auditFailure("getFileList");
 		return returnResponse;
 	}
-    
+
 	/**
 	 * Rest method to retrieve server listener response.
 	 * 
 	 * @param request
-	 *        HttpServletRequest, injected with context annotation
+	 *            HttpServletRequest, injected with context annotation
 	 * @param folder
-	 *           folder of the mailbox 
+	 *            folder of the mailbox
 	 * @param filename
 	 *            filename of the mailbox
 	 * @return The Response
 	 */
 	@POST
 	@ApiOperation(value = "Server Listener",
-	notes = "Listener for http server. This method requires folder (location) and file name as header fields.",
-	position = 15,
-	response = com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO.class)
+			notes = "Listener for http server. This method requires folder (location) and file name as header fields.",
+			position = 15,
+			response = com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO.class)
 	@Path("/serverlistener")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "httpServerListener")
-	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
+	public Response httpServerListener(@Context HttpServletRequest request,
+			@HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
 			@HeaderParam(MailBoxConstants.FILE_NAME_HEADER) String filename) {
 
 		// Audit LOG the Attempt to httpServerListener
@@ -1044,7 +1061,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			HTTPServerListenerService service = new HTTPServerListenerService();
 			ServerListenerResponseDTO serviceResponse = service.serverListener(requestString, folder, filename);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "httpServerListener");
 
 			returnResponse = serviceResponse.constructResponse();
@@ -1062,98 +1079,86 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-    
+
 	/**
 	 * Rest method will test directory sweeper.
 	 * 
 	 * @param request
-	 *        HttpServletRequest, injected with context annotation
+	 *            HttpServletRequest, injected with context annotation
 	 * @return The Response Object.
-	 *//*
-	@POST
-	@ApiOperation(value = "Sweeper", notes = "directory sweeper", position = 15)
-	@Path("/sweeper")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response testSweeper(@Context HttpServletRequest request) {
-
-		// Audit LOG the Attempt to testSweeper
-		auditAttempt("testSweeper");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			LOG.info("The directory sweeper meta data json : " + new JSONObject(requestString).toString(2));
-			// Audit LOG the success
-			auditSuccess("testSweeper");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(Messages.SUCCESS.value()).build();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("testSweeper");
-		}
-		return returnResponse;
-	}
-    
-	*//**
+	 */
+	/*
+	 * @POST
+	 * 
+	 * @ApiOperation(value = "Sweeper", notes = "directory sweeper", position = 15)
+	 * 
+	 * @Path("/sweeper")
+	 * 
+	 * @Consumes(MediaType.APPLICATION_JSON)
+	 * 
+	 * @Produces(MediaType.APPLICATION_JSON) public Response testSweeper(@Context HttpServletRequest request) {
+	 * 
+	 * // Audit LOG the Attempt to testSweeper auditAttempt("testSweeper");
+	 * 
+	 * serviceCallCounter.addAndGet(1); Response returnResponse;
+	 * 
+	 * try (InputStream requestStream = request.getInputStream()) {
+	 * 
+	 * 
+	 * String requestString = new String(StreamUtil.streamToBytes(requestStream));
+	 * 
+	 * LOG.info("The directory sweeper meta data json : " + new JSONObject(requestString).toString(2)); // Audit LOG the
+	 * success auditSuccess("testSweeper"); returnResponse = Response.status(500).header("Content-Type",
+	 * MediaType.TEXT_PLAIN).entity(Messages.SUCCESS.value()).build();
+	 * 
+	 * } catch (Exception e) {
+	 * 
+	 * int f = failureCounter.addAndGet(1); String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" +
+	 * e; LOG.error(errMsg, e);
+	 * 
+	 * // should be throwing out of domain scope and into framework using // above code returnResponse =
+	 * Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build(); // Audit LOG the
+	 * failure auditFailure("testSweeper"); } return returnResponse; }
+	 *//**
 	 * Rest method will test directory sweeper.
 	 * 
 	 * @param request
-	 *        HttpServletRequest, injected with context annotation
+	 *            HttpServletRequest, injected with context annotation
 	 * @return The Response Object.
-	 *//*
-	@POST
-	@ApiOperation(value = "Test", notes = "test response", position = 16)
-	@Path("/test")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response test(@Context HttpServletRequest request) {
+	 */
+	/*
+	 * @POST
+	 * 
+	 * @ApiOperation(value = "Test", notes = "test response", position = 16)
+	 * 
+	 * @Path("/test")
+	 * 
+	 * @Consumes(MediaType.APPLICATION_JSON)
+	 * 
+	 * @Produces(MediaType.APPLICATION_JSON) public Response test(@Context HttpServletRequest request) {
+	 * 
+	 * // Audit LOG the Attempt to test auditAttempt("test"); serviceCallCounter.addAndGet(1);
+	 * 
+	 * Response returnResponse; try {
+	 * 
+	 * LOG.info("The directory sweeper meta data json "); // Audit LOG the success auditSuccess("test"); returnResponse
+	 * = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry").build();
+	 * 
+	 * } catch (Exception e) {
+	 * 
+	 * int f = failureCounter.addAndGet(1); String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" +
+	 * e; LOG.error(errMsg, e);
+	 * 
+	 * // should be throwing out of domain scope and into framework using // above code returnResponse =
+	 * Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build(); // Audit LOG the
+	 * failure auditFailure("test"); } return returnResponse; }
+	 */
 
-		// Audit LOG the Attempt to test
-		auditAttempt("test");
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-		try {
-
-			LOG.info("The directory sweeper meta data json ");
-			// Audit LOG the success
-			auditSuccess("test");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry").build();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("test");
-		}
-		return returnResponse;
-	}*/
-    
 	/**
 	 * Rest method to retrieve the Authorization header.
 	 * 
 	 * @param request
-	 *        HttpServletRequest, injected with context annotation
+	 *            HttpServletRequest, injected with context annotation
 	 * @return The Response Object.
 	 */
 	@POST
@@ -1162,7 +1167,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "basicauth")
 	public Response httpServerListener(@Context HttpServletRequest request, @HeaderParam("Authorization") String auth) {
@@ -1205,17 +1210,18 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "Find Profile",
-	notes = "search a profile using given profile name",
-	position = 17,
-	response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
+			notes = "search a profile using given profile name",
+			position = 17,
+			response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
 	@Path("/findprofile")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "findProfiles")
-	public Response findProfiles(@QueryParam(value = "name") @ApiParam(name="name", required=true, value="Name of the profile to be searched.") String profileName) {
+	public Response findProfiles(
+			@QueryParam(value = "name") @ApiParam(name = "name", required = true, value = "Name of the profile to be searched.") String profileName) {
 
 		// Audit LOG the Attempt to findProfiles
 		auditAttempt("findProfiles");
@@ -1229,7 +1235,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
 			serviceResponse = mailbox.searchProfiles(profileName);
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "findProfiles");
 
 			returnResponse = serviceResponse.constructResponse();
@@ -1248,7 +1254,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-    
+
 	/**
 	 * REST method to retrieve list of certificates.
 	 * 
@@ -1259,7 +1265,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 	@Path("/listCertificates")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "getCertificatesList")
 	public Response getCertificatesList() {
@@ -1296,7 +1302,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 		return returnResponse;
 	}
 
-	
 	/**
 	 * REST method to retrieve property file values.
 	 * 
@@ -1304,13 +1309,13 @@ public class MailBoxConfigurationResource extends BaseResource {
 	 */
 	@GET
 	@ApiOperation(value = "Property File",
-	notes = "returns property file values",
-	position = 19,
-	response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
+			notes = "returns property file values",
+			position = 19,
+			response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
 	@Path("/getPropertyFileValues")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "getPropertyFileValues")
 	public Response getPropertyFileValues() {
@@ -1327,9 +1332,9 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			serviceResponse = mailbox.getValuesFromPropertiesFile();
 
-			//Audit LOG
+			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "getjavaPropertyFileValues");
-			
+
 			returnResponse = serviceResponse.constructResponse();
 
 		} catch (Exception e) {
@@ -1343,5 +1348,25 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 	}
-		
+
+	@Override
+	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+	}
+
+	@Override
+	protected void beginMetricsCollection() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void endMetricsCollection(boolean success) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

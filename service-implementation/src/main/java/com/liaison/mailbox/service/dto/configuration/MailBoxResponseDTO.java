@@ -2,12 +2,14 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
 package com.liaison.mailbox.service.dto.configuration;
+
+import java.io.Serializable;
 
 import com.liaison.mailbox.jpa.model.MailBox;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -16,8 +18,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  * 
  */
-public class MailBoxResponseDTO {
+public class MailBoxResponseDTO implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 	private String guid;
 
 	public MailBoxResponseDTO() { // Added for Deserialization
@@ -34,7 +40,7 @@ public class MailBoxResponseDTO {
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
-    
+
 	/**
 	 * Copies the guid from utility to mailbox.
 	 * 
@@ -43,7 +49,7 @@ public class MailBoxResponseDTO {
 	public void copyToEntity(MailBox mailBox) {
 		mailBox.setPguid(MailBoxUtil.getGUID());
 	}
-    
+
 	/**
 	 * Copies the pguid from mailbox to dto.
 	 * 

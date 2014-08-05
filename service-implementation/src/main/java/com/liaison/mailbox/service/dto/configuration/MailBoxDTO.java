@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,13 +38,17 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * @author veerasamyn
  */
 @ApiModel(value = "mailbox")
-public class MailBoxDTO {
+public class MailBoxDTO implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 	private String guid;
-	@ApiModelProperty( value = "Mailbox name", required = true)
+	@ApiModelProperty(value = "Mailbox name", required = true)
 	private String name;
 	private String description;
-	@ApiModelProperty( value = "Mailbox status", required = true)
+	@ApiModelProperty(value = "Mailbox status", required = true)
 	private String status;
 	private String shardKey;
 	private String tenancyKey;
@@ -93,7 +98,7 @@ public class MailBoxDTO {
 	public void setShardKey(String shardKey) {
 		this.shardKey = shardKey;
 	}
-	
+
 	@Mandatory(errorMessage = "MailBox Tenancy Key is mandatory.")
 	public String getTenancyKey() {
 		return tenancyKey;
@@ -102,7 +107,7 @@ public class MailBoxDTO {
 	public void setTenancyKey(String tenancyKey) {
 		this.tenancyKey = tenancyKey;
 	}
-	
+
 	public List<PropertyDTO> getProperties() {
 
 		if (null == properties) {
@@ -140,7 +145,6 @@ public class MailBoxDTO {
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
 		mailBox.setTenancyKey(this.getTenancyKey());
-		
 
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
@@ -171,7 +175,8 @@ public class MailBoxDTO {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public void copyFromEntity(MailBox mailBox) throws JsonParseException, JsonMappingException, JAXBException, IOException,
+	public void copyFromEntity(MailBox mailBox) throws JsonParseException, JsonMappingException, JAXBException,
+			IOException,
 			MailBoxConfigurationServicesException, SymmetricAlgorithmException {
 
 		this.setGuid(mailBox.getPguid());
@@ -183,7 +188,6 @@ public class MailBoxDTO {
 
 		this.setShardKey(mailBox.getShardKey());
 		this.setTenancyKey(mailBox.getTenancyKey());
-
 
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

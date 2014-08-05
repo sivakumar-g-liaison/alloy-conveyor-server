@@ -10,7 +10,7 @@ apply plugin: 'jetty'
 apply plugin: 'cargo'
 apply plugin: 'flyway'
 apply from: file("$rootDir/gradle/bundler/framework.gradle")
-apply plugin: 'rebel' 
+apply plugin: 'rebel'
 apply plugin: 'license'
 
 
@@ -196,19 +196,22 @@ dependencies {
             "org.codehaus.cargo:cargo-ant:$cargoVersion"
     // ************************************* end cargo *********************************************
     jdbc "com.oracle:ojdbc6:${oracleVersion}"
-	
+
 	//Dependency for UM integration
 	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "1.0.3-SNAPSHOT", changing: true
-	
+
 	//Dependency for ACL client Integration
 	compile group: "com.liaison.commons.accessmanagement", name: "accessmanagement-client", version: "1.1.1-SNAPSHOT", changing: true
-	
+
 	// Dependency for KeyManager
 	compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.1-SNAPSHOT', classifier: 'grammar', changing: true
-	
+
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
 
+	compile ("com.liaison.commons.spectrum.client:spectrum-client:1.0.5-SNAPSHOT") {
+    	exclude group: "com.google.collections", module: "google-collections"
+  	}
 }
 
 idea {
@@ -256,7 +259,7 @@ rebel {
           directory = "src/main/webapp/ui"
           target = "/ui"
         }
-    }    
+    }
 }
 
 // Cargo is a thin wrapper that allows you to manipulate Java EE containers in a standard way.
