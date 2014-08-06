@@ -20,7 +20,7 @@ var rest = myApp.controller(
 			//GMB-155
 			$scope.sftpDefaultPort = '22';
 			$scope.ftpDefaultPort = '21';
-			$scope.ftpsDefaultPort = '989';
+			$scope.ftpsDefaultPort = '21';
 			
 			//check directory path in choose file
 			$scope.isDirectoryPath = true;
