@@ -44,7 +44,7 @@ Thumbs.db
 .gradle/
 gradle-app.setting
 .m2
-init.gradle
+#init.gradle
 gdl*
 
 # Build output directies
@@ -103,4 +103,3 @@ service-implementation/src/main/webapp/ui/nbproject/
 *.wer1
 /service-implementation/src/main/resources/db/~work/
 /service-implementation/src/main/resources/db/~provision.*
-
