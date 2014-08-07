@@ -41,8 +41,8 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  *
  */
-@Path("v1/mailbox/triggerProfile")
-@Api(value = "v1/mailbox/triggerProfile", description = "Trigger profile services")
+@Path("mailbox/triggerProfile")
+@Api(value = "mailbox/triggerProfile", description = "Trigger profile services")
 public class MailBoxResource extends BaseResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);

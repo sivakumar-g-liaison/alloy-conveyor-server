@@ -1658,7 +1658,7 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
+								if(data.getProcessorResponse.processor.protocol === 'HTTPS' || data.getProcessorResponse.processor.protocol == 'HTTP') {
 									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 								} else {
 									var editProcessor = false;
@@ -1685,7 +1685,6 @@ var rest = myApp.controller(
                     function (data) {
                         $scope.allProfiles = data.getProfileResponse.profiles;
                         $scope.loadBrowseData();
-                        $scope.loadCertificateData();
                     }
                 );
             };
@@ -1697,17 +1696,7 @@ var rest = myApp.controller(
                         $scope.modal.roleList = $scope.roleList;
                     }
                 );
-            };
-            $scope.loadCertificateData = function () {
-                $scope.restService.get($scope.base_url + '/listCertificates', //Get mail box Data
-                    function (data) {
-                        $scope.certificates = data.ArrayList;
-                        $log.info($scope.certificates);
-                        $scope.certificateModal.certificates = $scope.certificates;
-                    }
-                );
-            };
-            
+            };            
            
             $scope.initialLoad();
            

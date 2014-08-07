@@ -30,8 +30,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.util.StreamUtil;
@@ -49,11 +49,11 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponses;
 import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("v1/mailbox/processoradmin")
-@Api(value = "v1/mailbox/processoradmin", description = "Administration of processor services")
+@Path("mailbox/processoradmin")
+@Api(value = "mailbox/processoradmin", description = "Administration of processor services")
 public class MailboxAdminResource extends BaseResource {
 	
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
