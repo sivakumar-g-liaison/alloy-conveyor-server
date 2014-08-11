@@ -38,7 +38,6 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.HTTPServerListenerService;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
@@ -65,7 +64,6 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileRespo
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;

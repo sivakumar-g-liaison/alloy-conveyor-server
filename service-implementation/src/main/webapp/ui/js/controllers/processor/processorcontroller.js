@@ -1522,9 +1522,6 @@ var rest = myApp.controller(
                                 
 								$log.info($filter('json')(profData));
 								
-								if(data.getProcessorResponse.processor.protocol === 'HTTPS' || data.getProcessorResponse.processor.protocol === 'HTTP') {
-									$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
-								} else {
 									var editProcessor = false;
 									for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
 										$scope.credType = data.getProcessorResponse.processor.credentials[i].credentialType;
@@ -1538,7 +1535,6 @@ var rest = myApp.controller(
 									if(editProcessor === false) {
 										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 									}
-								}
                             }
                         );
                     }
@@ -2011,9 +2007,6 @@ var rest = myApp.controller(
                     editRequest.reviseProcessorRequest.processor.status = $scope.status.id;
                     editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.id;
 					
-					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
-						$scope.processorReviseAfterKM();
-					} else {
 						var reviseProcessor = false;
 						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
 						
@@ -2036,7 +2029,6 @@ var rest = myApp.controller(
 						if(reviseProcessor === false) {
 							$scope.processorReviseAfterKM();
 						}
-					}
                 } else {
 				
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
@@ -2044,9 +2036,6 @@ var rest = myApp.controller(
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
 					
-					if($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') {
-						$scope.processorSaveAfterKM();
-					} else {
 						var saveProcessor = false;
 						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
 						
@@ -2072,7 +2061,6 @@ var rest = myApp.controller(
 						if(saveProcessor === false) {
 							$scope.processorSaveAfterKM();
 						}
-					}
                 }
             };
 			

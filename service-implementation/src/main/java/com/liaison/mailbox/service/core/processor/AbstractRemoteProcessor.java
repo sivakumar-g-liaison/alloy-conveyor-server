@@ -570,8 +570,9 @@ public abstract class AbstractRemoteProcessor {
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
 		if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
-			String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
-			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), password));
+			//String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
+			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword());
+			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), passwordFromKMS));
 		}
 
 		// Configure keystore for HTTPS request

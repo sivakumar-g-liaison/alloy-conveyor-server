@@ -14,17 +14,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
 
-import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
