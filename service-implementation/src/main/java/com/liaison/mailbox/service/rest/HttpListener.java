@@ -175,9 +175,9 @@ public class HttpListener extends BaseResource {
 			ResponseBuilder builder = Response.ok();
 			responseInputStream = httpResponse.getEntity().getContent();
 			copyResponseInfo(httpResponse, builder, responseInputStream);
-			// Audit LOG the success
-			auditSuccess("handleSync");
 			restResponse = builder.build();
+			// Audit LOG the success
+            auditSuccess("handleSync");
 		} catch (Exception e) {
 			logger.error("Error processing sync message", e);
 			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
@@ -185,14 +185,14 @@ public class HttpListener extends BaseResource {
 			// Audit LOG the failure
 			auditFailure("handleSync");
 		} finally {
-		    if (null != responseInputStream) {
+		   /* if (null != responseInputStream) {
 		        try {
 		            responseInputStream.close();
 		        } catch (IOException e) {
 		            logger.error("could not close response stream");
 		        }
 		       
-		    }
+		    }*/
 		}
 		return restResponse;
 	}
