@@ -151,6 +151,7 @@ public class HttpListener extends BaseResource {
 		auditAttempt("handleSync");
 
 		Response restResponse = null;
+		InputStream responseInputStream = null;
 		serviceCallCounter.incrementAndGet();
 
 		logger.debug("Starting sync processing");
@@ -172,7 +173,8 @@ public class HttpListener extends BaseResource {
 
 			HttpResponse httpResponse = forwardRequest(sessionContext, request);
 			ResponseBuilder builder = Response.ok();
-			copyResponseInfo(httpResponse, builder);
+			responseInputStream = httpResponse.getEntity().getContent();
+			copyResponseInfo(httpResponse, builder, responseInputStream);
 			// Audit LOG the success
 			auditSuccess("handleSync");
 			restResponse = builder.build();
@@ -182,6 +184,15 @@ public class HttpListener extends BaseResource {
 			
 			// Audit LOG the failure
 			auditFailure("handleSync");
+		} finally {
+		    if (null != responseInputStream) {
+		        try {
+		            responseInputStream.close();
+		        } catch (IOException e) {
+		            logger.error("could not close response stream");
+		        }
+		       
+		    }
 		}
 		return restResponse;
 	}
@@ -586,7 +597,7 @@ public class HttpListener extends BaseResource {
 	 * @throws IOException
 	 */
 	protected void copyResponseInfo(HttpResponse httpResponse,
-			ResponseBuilder builder) throws IllegalStateException, IOException {
+			ResponseBuilder builder, InputStream responseInputStream) throws IllegalStateException, IOException {
 		Header contentLength = httpResponse
 				.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
 		int iContentLength = 0;
@@ -600,30 +611,29 @@ public class HttpListener extends BaseResource {
 			logger.debug("Response from Service Broker did not contain a content length header");
 		}
 
-		if (iContentLength > 0) {
-		    
-		    try (InputStream responseInputStream = httpResponse.getEntity()
-                    .getContent()) {
-		          Header contentType = httpResponse
-		                    .getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+	    if (iContentLength > 0) {
+            
+            responseInputStream = httpResponse.getEntity().getContent();
+            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
-		            if (responseInputStream != null) {
-		                builder.entity(responseInputStream);
-		            }
+            if (responseInputStream != null) {
+                builder.entity(responseInputStream);
+            }
 
-		            if (contentType != null) {
-		                builder.header(contentType.getName(), contentType.getValue());
-		            }
+            if (contentType != null) {
+                builder.header(contentType.getName(), contentType.getValue());
+            }
 
-		            if (contentLength != null) {
-		                builder.header(contentLength.getName(),
-		                        contentLength.getValue());
-		            }
-		    }		
+            if (contentLength != null) {
+                builder.header(contentLength.getName(),
+                        contentLength.getValue());
+            }
+            
 
-		}
+        }
 
-		copyResponseHeaders(httpResponse, builder);
+        copyResponseHeaders(httpResponse, builder);	    
+	
 	}
 
 	/**
