@@ -4,4 +4,4 @@
 # ==================================================================
 
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=g2mailboxservice"
-export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=qa"
+export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=qa-stage"
