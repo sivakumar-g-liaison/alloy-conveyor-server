@@ -570,7 +570,6 @@ public abstract class AbstractRemoteProcessor {
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
 		if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
-			//String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
 			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword());
 			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), passwordFromKMS));
 		}
@@ -1016,9 +1015,6 @@ public abstract class AbstractRemoteProcessor {
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
 					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
-				// String password =
-				// MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(),
-				// 2);
 				ftpsRequest.setUser(loginCredential.getCredsUsername());
 				ftpsRequest.setPassword(passwordFromKMS);
 			}
@@ -1115,9 +1111,6 @@ public abstract class AbstractRemoteProcessor {
 
 			}
 			if (!MailBoxUtil.isEmpty(passwordFromKMS)) {
-				// String password =
-				// MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(),
-				// 2);
 				sftpRequest.setPassword(passwordFromKMS);
 			}
 		}
@@ -1144,7 +1137,6 @@ public abstract class AbstractRemoteProcessor {
 			    out.write(privateKeyStream);
 			}			
 			sftpRequest.setPrivateKeyPath(privateKeyPath);
-			// sftpRequest.setPassphrase(sshKeyPairCredential.getCredsPassword());
 
 		}
 
@@ -1596,7 +1588,7 @@ public abstract class AbstractRemoteProcessor {
 		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
 		return ummarshaledObject;
 	}
-	
+    
 	/**
      * 
      * @param serializedJson
@@ -1619,7 +1611,7 @@ public abstract class AbstractRemoteProcessor {
         T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
         return ummarshaledObject;
     }
-
+    
 	String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException {
 

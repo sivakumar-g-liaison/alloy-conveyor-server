@@ -226,31 +226,7 @@ public class MailBoxService {
 			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			LOG.error("Processor execution failed", e);
 		}
-		
 	}
-//
-//	/**
-//	 * The method gets the ConfigureJNDIDTO.
-//	 *
-//	 * @return ConfigureJNDIDTO
-//	 * @throws NamingException
-//	 * @throws JMSException
-//	 * @throws IOException
-//	 */
-//	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
-//
-//		MailBoxUtil.getEnvironmentProperties();
-//		String providerURL = MailBoxUtil.getEnvironmentProperties().getString("g2.queueing.server.url");
-//		String queueName = MailBoxUtil.getEnvironmentProperties().getString("triggered.profile.processor.queue.name");
-//
-//
-//		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
-//		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-//		jndidto.setProviderURL(providerURL);
-//		jndidto.setQueueName(queueName);
-//		jndidto.setUrlPackagePrefixes("org.jboss.naming");
-//		return jndidto;
-//	}
 
 	/**
 	 * Sent notifications for trigger system failure.

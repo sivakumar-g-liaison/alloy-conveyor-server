@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.com.liaison.queue;
 
 import java.util.concurrent.Executors;
@@ -54,11 +64,11 @@ public class ProcessorQueuePoller  {
                 logger.debug("Polling message Process");
                 String message = ProcessorQueue.getInstance().popMessage();
                 if (message != null) {
-                    logger.debug("Polling message found {}", message);
-                    MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
+                    logger.debug("Polling message found {}", message);                    
                     try {
+                    	MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
                         qconsumer.invokeProcessor(message);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         logger.error("Recovering from processing error", e);
                     }
                 }

@@ -156,20 +156,6 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					sftpRequest.changeDirectory(directory);
 				}
 			}
-			//GMB-320
-
-			/*Boolean dirExists = true;
-			try {
-				sftpRequest.getNative().lstat(remotePath);
-			} catch (Exception ex) {
-				dirExists = false;
-			}
-			if (!dirExists) {
-				// create directory on the server
-				sftpRequest.getNative().mkdir(new File(remotePath).getName());
-			}
-
-			sftpRequest.changeDirectory(remotePath);*/
 			uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 		}

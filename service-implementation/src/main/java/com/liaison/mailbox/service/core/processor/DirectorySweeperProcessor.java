@@ -25,14 +25,13 @@ import java.util.List;
 import javax.script.ScriptException;
 import javax.xml.bind.JAXBException;
 
-import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.liaison.fs2.api.CoreFS2Utils;
 import com.liaison.fs2.api.FS2Exception;
@@ -42,6 +41,7 @@ import com.liaison.fs2.api.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -49,7 +49,6 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileGroupDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
@@ -112,7 +111,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		}
 
 		List<FileAttributesDTO> files = (inProgressFiles.isEmpty())
-				? sweepDirectory(inputLocation, false, false, null, fileRenameFormat, timeLimit)
+				? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
 				: validateInprogressFiles(inProgressFiles, timeLimit);
 
 		if (files.isEmpty()) {
@@ -174,7 +173,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws JAXBException
 	 */
 	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
-			SweepConditions sweepConditions, String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
+		    String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException {
 
 		Path rootPath = Paths.get(root);
@@ -342,7 +341,6 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// Renaming the file at the end of the step when everything is done.
 			move(oldPath, newPath);
-			//file.setFs2Path(CoreFS2Utils.genURIFromPath(oldPath.toFile().getAbsolutePath()).toString());
 			//GSB-1353- After discussion with Joshua and Sean
 			file.setFs2Path(CoreFS2Utils.genURIFromPath(newPath.toFile().getAbsolutePath()).toString());
 			file.setGuid(MailBoxUtil.getGUID());

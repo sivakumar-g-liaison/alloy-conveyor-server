@@ -185,14 +185,7 @@ public class HttpListener extends BaseResource {
 			// Audit LOG the failure
 			auditFailure("handleSync");
 		} finally {
-		   /* if (null != responseInputStream) {
-		        try {
-		            responseInputStream.close();
-		        } catch (IOException e) {
-		            logger.error("could not close response stream");
-		        }
-		       
-		    }*/
+			// TODO The responseInputStream has to be closed properly.
 		}
 		return restResponse;
 	}
@@ -572,10 +565,6 @@ public class HttpListener extends BaseResource {
 	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
 		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
 		logger.info("Forward request to:"+serviceBrokerSyncUri);
-		// retrieve httplistener pipelineid from mailbox and append it to
-		// serviceBroker URI
-		//String pipelineId = retrievePipelineId(mailboxPguid);
-		//serviceBrokerSyncUri = serviceBrokerSyncUri + "/" + pipelineId;
 		HttpPost post = new HttpPost(serviceBrokerSyncUri);
 
 		// Set the payload.

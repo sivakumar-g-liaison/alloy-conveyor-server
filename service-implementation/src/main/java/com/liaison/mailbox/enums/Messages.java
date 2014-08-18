@@ -71,7 +71,7 @@ public enum Messages {
 	HTTP_REQUEST_FAILED("HTTP request failed."),
 	RESPONSE_LOCATION_NOT_CONFIGURED("The response location is not configured or empty."),
 	PAYLOAD_LOCATION_NOT_CONFIGURED("The payload location is not configured or empty."),
-	INVALID_DIRECTORY("The given directory does not available in the system."),
+	INVALID_DIRECTORY("The given directory is not available in the system."),
 
 	PROCESSOR_EXECUTION_SUCCESSFULLY("Processor %s execution successfully."),
 	PROCESSOR_EXECUTION_FAILED("Error execution in the processor %s."),
@@ -101,10 +101,6 @@ public enum Messages {
 	//getting java properties
 	READ_JAVA_PROPERTIES_SUCCESSFULLY("%s properties read successfully."),
 	READ_JAVA_PROPERTIES_FAILED("%s properties read failed."),
-	
-	//retrieving service instance id from acl manifest
-	/*SERVICE_INSTANCE_ID_RETRIEVAL_FAILED("Manifest does not contain the Service Instance Id for mailbox."),
-	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),*/
 
 	READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
 	

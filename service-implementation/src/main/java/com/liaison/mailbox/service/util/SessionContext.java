@@ -107,22 +107,9 @@ public class SessionContext
 		{
 			String headerName = headerNames.nextElement();
 
-//			if ((headerName != null) && isHeaderToCopy(headerName))
-//			{
 				addHeader(headerName, request.getHeaders(headerName));
-//			}
 		}
 	}
-
-//	protected boolean isHeaderToCopy (String headerName)
-//	{
-//		if (headerName.equalsIgnoreCase(HTTP_HEADER_BASIC_AUTH))
-//		{
-//			return false;
-//		}
-//
-//		return true;
-//	}
 
 	protected void extractPipelineIdTokens (HttpServletRequest request)
 	{
@@ -134,10 +121,6 @@ public class SessionContext
 
 			if ((parts != null) && (parts.length == 2))
 			{
-				/*if (parts[0].equalsIgnoreCase(PIPELINE_ID_TOKEN))
-				{
-					setPipelineId(parts[1]);
-				}*/
 				if (parts[0].equalsIgnoreCase(DOCUMENT_PROTOCOL_TOKEN))
 				{
 					setDocumentProtocol(parts[1]);

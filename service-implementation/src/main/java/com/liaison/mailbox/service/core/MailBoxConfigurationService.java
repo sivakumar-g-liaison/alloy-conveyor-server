@@ -108,10 +108,6 @@ public class MailBoxConfigurationService {
 			mailboxDTO.copyToEntity(mailBox);
 			mailBox.setPguid(MailBoxUtil.getGUID());
 			
-			/*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-			}*/
 			//creating a link between mailbox and service instance table
 			createMailboxServiceInstanceIdLink(serviceInstanceId, mailBox);
 
@@ -271,16 +267,7 @@ public class MailBoxConfigurationService {
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
 			configDao.merge(retrievedMailBox);
-			
-			// retrieve the service instance id from acl manifest
-			/*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				 LOG.error("retrieval of service instance id from acl manifest failed");
-				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-			}*/
-			
-			//creating a link between mailbox and service instance table
-//			createMailboxServiceInstanceIdLink(c, retrievedMailBox);
+		
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {
@@ -513,13 +500,6 @@ public class MailBoxConfigurationService {
             throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
         }
         
-        // retrieve the service instance id from acl manifest
-        /*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-        if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-             LOG.error("retrieval of service instance id from acl manifest failed");
-             throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-        }*/
-
         ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
         if (addConstraint) {
             List<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(mailBox.getPguid(), serviceInstanceId);

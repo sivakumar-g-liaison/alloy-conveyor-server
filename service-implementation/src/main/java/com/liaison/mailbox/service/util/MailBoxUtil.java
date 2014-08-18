@@ -19,8 +19,8 @@ import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -45,8 +45,6 @@ public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final String REQUEST_HEADER = "Request Header";
-	private static final String PROPERTIES_FILE = "Properties file";
 	private static final Object lock = new Object();
 	private static final Properties properties = new Properties();
 
@@ -165,114 +163,5 @@ public class MailBoxUtil {
 		Date d = new Date();
 		return new Timestamp(d.getTime());
 	}
-	
-	/**
-	 * Method to get the dependency constraint corresponding to the service name configured in properties file
-	 * 
-	 * @param aclManifestDTO
-	 * @return
-	 * @throws IOException
-	 */
-	/*private static NestedServiceDependencyContraint  getDependencyConstraintFromACLManifest(ACLManifest aclManifestDTO) throws IOException {
-		
-		//retrieve the very first platform object from acl manifest json
-		Platform platform = aclManifestDTO.getPlatform().get(0);
-		
-		// retrieve the dependency constraint having service name as per the configuration in properties file
-		List <NestedServiceDependencyContraint> dependencyConstraints = (platform != null)? platform.getNestedServiceDependencyContraint():null;
-		for (NestedServiceDependencyContraint dependencyConstraint : dependencyConstraints) {
-			
-			if (dependencyConstraint.getServiceName().equalsIgnoreCase(getEnvironmentProperties().getString("acl.constraint.service.name"))) {
-				return dependencyConstraint;
-			}
-		}
-		return null;
-
-	}*/
-	
-	
-	/**
-	 * Method to retrieve the primary service instance id from the given acl manifest dto
-	 * 
-	 * @param  String aclManifestJson
-	 * @return String primary Service instance id
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 */
-	/*public static String getPrimaryServiceInstanceIdFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
-		
-		// retrieve the service instance id from acl manifest
-		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
-		LOGGER.info("acl Manifest DTO deserialized successfully");
-		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
-		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
-		String primaryServiceInstanceId  = (dependencyConstraint != null)?dependencyConstraint.getPrimaryId():null;
-		return primaryServiceInstanceId;
-	}*/
-	
-	/**
-	 * Method to retrieve the list of secondary service instance ids from the given acl manifest dto
-	 * 
-	 * @param String aclManifestJson
-	 * @return
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 */
-	/*public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
-		
-		// retrieve the service instance id from acl manifest
-		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
-		LOGGER.info("acl Manifest DTO deserialized successfully");
-		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
-		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
-		List<String> secondayServiceInstanceIDs = (dependencyConstraint != null)?dependencyConstraint.getNestedServiceId():null;
-		return secondayServiceInstanceIDs;
-		
-	}*/
-	
-	/**
-	 * Method to retrieve the base64 decoded acl manifest json
-	 * 
-	 * @param manifestJson
-	 * @return
-	 * @throws IOException
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	/*public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
-		
-		String decodedManifestJson = null;
-		
-		// if manifest is available in the header then use acl-manifest in the header irrespective of
-		// the property "use.dummy.manifest" configured in properties file
-		if (!MailBoxUtil.isEmpty(manifestJson)) {
-			LOGGER.info("acl manifest available in the header");
-		} else {
-			// check the value of property "use.dummy.manifest"
-			// if it is true use dummy manifest else throw an error due to the 
-			// non-availability of manifest in header
-			if ((MailBoxUtil.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
-				
-				LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-				manifestJson = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");
-				if (MailBoxUtil.isEmpty(manifestJson)) {
-					LOGGER.error("dummy acl manifest is not available in the properties file");
-					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE);
-				}
-	
-			} else {
-				LOGGER.error("acl manifest is not available in the request header");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER);
-			}
-			
-		}
-	
-		// decode the manifest using base64
-		LOGGER.info("decoding the acl manifest");
-		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
-		LOGGER.info("acl manifest decoded successfully");
-		return decodedManifestJson;
-	}*/
 
 }

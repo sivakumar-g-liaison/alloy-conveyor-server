@@ -109,27 +109,4 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		return mailBoxes;
 	}
 
-	/**
-	 * Generate "in" clause string from the list.
-	 *
-	 * @param sids list of service instance ids
-	 * @return String
-	 */
-	private String collectionToSqlString(List<String> sids) {
-
-		if (null == sids || sids.isEmpty()) {
-			return null;
-		}
-
-		StringBuilder s = new StringBuilder();
-		for (String str : sids) {
-			if (s.length() > 0) {
-				s.append(", ");
-			}
-			s.append(str);
-		}
-
-		return s.toString().replaceAll("(\\w+)", "\'$1\'");
-	}
-
 }

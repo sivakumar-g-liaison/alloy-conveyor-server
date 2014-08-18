@@ -84,7 +84,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, null, fileRenameFormat, 0);
+		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFilename());
@@ -123,7 +123,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, null, fileRenameFormat, 0);
+		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		target.toFile().setReadable(true);
 		target.toFile().setWritable(true);
 		Files.delete(target);
@@ -162,7 +162,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, null, fileRenameFormat, 0);
+		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFilename());
@@ -200,7 +200,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> files = downloader.sweepDirectory(inbox, false, false, null, fileRenameFormat, 0);
+		List<FileAttributesDTO> files = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, files.size());
 		Assert.assertEquals(name, files.get(0).getFilename());

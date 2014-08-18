@@ -135,11 +135,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddMailboxRequestDTO.class);
 			
-			// retrieving acl manifest from header
-			/*LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
-			
 			// add the new profile details
 			AddMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
@@ -207,11 +202,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 
 			ReviseMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-
-			// retrieving acl manifest from header
-			/*LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
 								
 			// updates existing mailbox
 			serviceResponse = mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId);
@@ -328,11 +318,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 			GetMailBoxResponseDTO serviceResponse = null;
 			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 			
-			// retrieving acl manifest from header
-			/*LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
-			
 			serviceResponse = mailbox.getMailBox(guid, addConstraint, serviceInstanceId);
 
 			//Audit LOG
@@ -353,46 +338,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 		}
 		return returnResponse;
 
-	}
-
-	/*
-	 * @GET
-	 * 
-	 * @Path("/{id}/processorSID/{sid}")
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON) public Response
-	 * getMailBoxByGuidAndServiceInstId(@PathParam(value = "id") String guid,
-	 * 
-	 * @PathParam(value = "sid") Integer serviceInstId) {
-	 * 
-	 * serviceCallCounter.addAndGet(1);
-	 * 
-	 * Response returnResponse;
-	 * 
-	 * try {
-	 * 
-	 * // add the new profile details GetMailBoxResponseDTO serviceResponse =
-	 * null; MailBoxConfigurationService mailbox = new
-	 * MailBoxConfigurationService(); serviceResponse =
-	 * mailbox.getMailBoxByGuidAndServiceInstId(guid, serviceInstId);
-	 * 
-	 * returnResponse = serviceResponse.constructResponse(); } catch (Exception
-	 * e) {
-	 * 
-	 * int f = failureCounter.addAndGet(1); String errMsg =
-	 * "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-	 * LOG.error(errMsg, e);
-	 * 
-	 * // should be throwing out of domain scope and into framework using //
-	 * above code returnResponse = Response.status(500).header("Content-Type",
-	 * MediaType.TEXT_PLAIN).entity(errMsg).build(); }
-	 * 
-	 * return returnResponse;
-	 * 
-	 * }
-	 */
+	}	
 
 	/**
 	 * 
@@ -667,11 +613,6 @@ public class MailBoxConfigurationResource extends BaseResource {
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			
-			// retrieving acl manifest from header
-			/*LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);*/
 			
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 
@@ -1049,93 +990,7 @@ public class MailBoxConfigurationResource extends BaseResource {
 			auditFailure("httpServerListener");
 		}
 		return returnResponse;
-	}
-    
-	/**
-	 * Rest method will test directory sweeper.
-	 * 
-	 * @param request
-	 *        HttpServletRequest, injected with context annotation
-	 * @return The Response Object.
-	 *//*
-	@POST
-	@ApiOperation(value = "Sweeper", notes = "directory sweeper", position = 15)
-	@Path("/sweeper")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response testSweeper(@Context HttpServletRequest request) {
-
-		// Audit LOG the Attempt to testSweeper
-		auditAttempt("testSweeper");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			LOG.info("The directory sweeper meta data json : " + new JSONObject(requestString).toString(2));
-			// Audit LOG the success
-			auditSuccess("testSweeper");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(Messages.SUCCESS.value()).build();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("testSweeper");
-		}
-		return returnResponse;
-	}
-    
-	*//**
-	 * Rest method will test directory sweeper.
-	 * 
-	 * @param request
-	 *        HttpServletRequest, injected with context annotation
-	 * @return The Response Object.
-	 *//*
-	@POST
-	@ApiOperation(value = "Test", notes = "test response", position = 16)
-	@Path("/test")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response test(@Context HttpServletRequest request) {
-
-		// Audit LOG the Attempt to test
-		auditAttempt("test");
-		serviceCallCounter.addAndGet(1);
-
-		Response returnResponse;
-		try {
-
-			LOG.info("The directory sweeper meta data json ");
-			// Audit LOG the success
-			auditSuccess("test");
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity("Retry").build();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("test");
-		}
-		return returnResponse;
-	}*/
+	}	    
     
 	/**
 	 * Rest method to retrieve the Authorization header.

@@ -80,11 +80,11 @@ import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
@@ -155,13 +155,6 @@ public class ProcessorConfigurationService {
 					validator.validate(credentialDTO);
 				}
 			}
-			
-			// retrieve the service instance id from acl-manifest
-			/*String serviceInstanceId = MailBoxUtil.getPrimaryServiceInstanceIdFromACLManifest(aclManifestJson);
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				 LOGGER.error("retrieval of service instance id from acl manifest failed");
-				 throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_RETRIEVAL_FAILED);
-			}*/
 				
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
