@@ -144,6 +144,12 @@
 	  </init-param>
 	  <load-on-startup>2</load-on-startup>
 	</servlet>
+	<servlet>
+        <servlet-name>SwaggerBootstrap</servlet-name>
+        <servlet-class>com.liaison.service.core.SwaggerBootstrap</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    
 	<!--
     ==============================================================================
        Enable only for development when using python to make calls to tomcat  and
