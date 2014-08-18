@@ -15,7 +15,6 @@ var rest = myApp.controller(
             $scope.disableCertificates = true;
     	    $scope.portRequired = true;
             $scope.isPortDisabled = false;
-			
 			//GMB-155
 			$scope.sftpDefaultPort = '22';
 			$scope.ftpDefaultPort = '21';
@@ -662,7 +661,8 @@ var rest = myApp.controller(
                                       	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                                       </div>\n\
 									  <div ng-switch-when="ftpsMandatoryProperty">\n\
-                                      	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=true" ng-options="property for property in booleanValues" ng-disabled="true"></select>\n\
+                                        <div ng-switch on = "isEdit"><div ng-switch-when="false"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=true" ng-options="property for property in booleanValues"></select></div>\n\
+                                        <div ng-switch-when="true"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select></div></div>\n\
                                       </div>\n\
 									  <div ng-switch-default>\n\
                                             <textarea   class="form-control" ng-model="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
@@ -1248,8 +1248,10 @@ var rest = myApp.controller(
 				var i = 0;
 				for (var prop in json_data) {
 					var allowPort = false;
+                    var allowFTPSPassive = false;
 					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
-					if ((json_data[prop] !== 0 || allowPort) && json_data[prop] !== false && json_data[prop] !== null && json_data[prop] !== '') {
+                    if (prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') allowFTPSPassive = true;
+					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFTPSPassive) && json_data[prop] !== null && json_data[prop] !== '') {
 						i++;
 						if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
 							otherReqIndex = i;
@@ -2196,7 +2198,33 @@ var rest = myApp.controller(
             $scope.closeDelete = function () {
                 $('#myModal').modal('hide')
             };
-        
+
+            $scope.handleFTPSSpecificProperties = function () {
+                var indexOfPassiveForFTPS = getIndexOfId($scope.allMandatoryFtpProperties, "passive");
+					// passive property is mandatory for ftps protocol
+					if($scope.processor.protocol === 'FTPS') {
+						 if(indexOfPassiveForFTPS === -1 ) {
+							 $scope.allMandatoryFtpProperties.push({
+								"name": "Passive",
+								"id": "passive"
+							});
+						 }
+						var indexOfPassive = getIndexOfId($scope.processorProperties, 'passive');
+						if(indexOfPassive === -1) {
+							$scope.processorProperties.splice(getIndexOfId($scope.processorProperties,""),0,{
+							name: 'Passive',
+							value: true,
+							allowAdd: false,
+							isMandatory: true
+							});
+						}
+					}else {
+						//splice the passive property for FTP protocol
+						if(indexOfPassiveForFTPS !== -1) {
+							 $scope.allMandatoryFtpProperties.splice(indexOfPassiveForFTPS , 1);
+						}
+					}
+            }            
             $scope.resetProcessorType = function (model) {
                 $scope.resetStaticAndMandatoryProps();
                 if (model.id === 'SWEEPER') {
@@ -2216,8 +2244,11 @@ var rest = myApp.controller(
 					}
 					$scope.isProcessorTypeSweeper = false;
 					if($scope.processor.protocol !== 'HTTP' && $scope.processor.protocol !== 'HTTPS') {
-						$scope.processorProperties = $scope.ftpMandatoryProperties;
-					}
+						$scope.processorProperties = angular.copy($scope.ftpMandatoryProperties);
+                        $scope.handleFTPSSpecificProperties();
+					} else {
+                        $scope.processorProperties = $scope.httpMandatoryProperties;
+                    }
                     $scope.setFolderData();
                     var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
                     if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
@@ -2248,30 +2279,7 @@ var rest = myApp.controller(
                     var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
                     if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
                     $scope.processorProperties = angular.copy($scope.ftpMandatoryProperties);
-					var indexOfPassiveForFTPS = getIndexOfId($scope.allMandatoryFtpProperties, "passive");
-					// passive property is mandatory for ftps protocol
-					if($scope.processor.protocol === 'FTPS') {
-						 if(indexOfPassiveForFTPS === -1 ) {
-							 $scope.allMandatoryFtpProperties.push({
-								"name": "Passive",
-								"id": "passive"
-							});
-						 }
-						var indexOfPassive = getIndexOfId($scope.processorProperties, 'passive');
-						if(indexOfPassive === -1) {
-							$scope.processorProperties.splice(getIndexOfId($scope.processorProperties,""),0,{
-							name: 'Passive',
-							value: '',
-							allowAdd: false,
-							isMandatory: true
-							});
-						}
-					}else {
-						//splice the passive property for FTP protocol
-						if(indexOfPassiveForFTPS !== -1) {
-							 $scope.allMandatoryFtpProperties.splice(indexOfPassiveForFTPS , 1);
-						}
-					}
+                    $scope.handleFTPSSpecificProperties();
                     $scope.portRequired = true;
                     $scope.setFolderData();
 					$scope.defaultPortValue();
