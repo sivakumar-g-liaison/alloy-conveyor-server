@@ -182,3 +182,6 @@ mailbox.aclrequest.service.name="KEYMANGER
 
 # for ACL filter
 com.liaison.acl.skipList=com.wordnik.swagger.jersey.listing.ApiListingResource.resourceListing,com.wordnik.swagger.jersey.listing.ApiListingResource.apiDeclaration,com.liaison.service.resources.acl.AclResourceMapResource.getList
+
+#Thread Count for processor
+mailbox.processor.queue.consumer.thread.count=5
