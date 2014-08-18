@@ -5,7 +5,7 @@
 com.netflix.karyon.server.base.packages=com.liaison
 
 # The health check handler for this application.
-com.netflix.karyon.health.check.handler.classname=com.liaison.mailbox.service.heatlh.HealthCheck
+com.netflix.karyon.health.check.handler.classname=com.liaison.mailbox.service.health.HealthCheck
 
 # Comment this property if you need eureka integration and populate eureka-client.properties with your environment details.
 com.netflix.karyon.eureka.disable=true

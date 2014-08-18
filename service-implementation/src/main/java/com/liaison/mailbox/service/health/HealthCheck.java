@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.heatlh;
+package com.liaison.mailbox.service.health;
 
 import javax.annotation.PostConstruct;
 
