@@ -185,3 +185,6 @@ com.liaison.acl.skipList=com.wordnik.swagger.jersey.listing.ApiListingResource.r
 
 #Thread Count for processor
 mailbox.processor.queue.consumer.thread.count=5
+
+# ACL Filter uses mock verifier
+com.liaison.acl.use.mock.verifier=false
