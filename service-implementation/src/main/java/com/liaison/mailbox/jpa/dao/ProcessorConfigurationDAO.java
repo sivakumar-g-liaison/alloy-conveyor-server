@@ -39,11 +39,16 @@ import com.liaison.mailbox.jpa.model.Processor;
 						query = "select count(processor) from Processor processor"
 								+ " inner join processor.mailbox mbx"
 								+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
+		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_TYPE,
+						query = "select processor.processorId, mbx from Processor processor"
+								+" inner join processor.maibox mbx"
+								+" where TYPE(processor) = :" + ProcessorConfigurationDAO.PROCESSOR_TYPE)
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
 	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
 	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
+	public static final String FIND_PROCESSOR_BY_TYPE = "findProcessorByType";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -98,5 +103,15 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processors
 	 */
 	public List <Processor> findProcessorByTypeAndMbx(ProcessorType type, String mbxGuid);
+	
+	
+	/**
+	 * Retrieves list of all processors of specific type from given mailbox guid
+	 * 
+	 * @param type the processor type
+	 * @param mbxGuid the mailbox guid
+	 * @return list of processors
+	 */
+	public List <Processor> findProcessorByType(ProcessorType type);
 
 }

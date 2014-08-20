@@ -34,6 +34,7 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
 import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -473,5 +474,23 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 
 		InterruptExecutionEventResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, InterruptExecutionEventResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDTO.getResponse().getStatus());
+	}
+	
+	
+	@Test
+	public void testMailboxWatchDog() throws LiaisonException, JsonParseException, 
+			JsonMappingException, JAXBException, IOException {
+		// Get the executing processors
+		String url = getBASE_URL() + "/sla";
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, null, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		MailboxSLAResponseDTO mailboxSLAResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, MailboxSLAResponseDTO.class);
+
+		// Assertion
+		Assert.assertEquals(SUCCESS, mailboxSLAResponseDTO.getResponse().getStatus());
 	}
 }

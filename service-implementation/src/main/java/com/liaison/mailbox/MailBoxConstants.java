@@ -97,4 +97,9 @@ public interface MailBoxConstants {
 	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
 	public static final String HTTPLISTENER_PIPELINEID = "httplistenerpipelineid";
 	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httplistenerpayload";
+	
+	// properties used to configure sla rules of an mailbox
+	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
+	public final static String TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX = "timetopickupfilepostedbymailbox";
+	
 }

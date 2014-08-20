@@ -48,9 +48,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"}];
+            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}];
 
-        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}];
+        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}];
 		//Data from server
         $scope.mailBoxProperties = [{
             name: '',
@@ -308,7 +308,18 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             								 <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.pattern}" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
            						   </div>\n\
-                                   <div ng-switch-default>\n\
+                                   <div ng-switch-when="timetopickupfilepostedtomailbox">\n\
+     								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedtomailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+    								 <div ng-show="formAddMbx.timetopickupfilepostedtomailbox.$dirty && formAddMbx.timetopickupfilepostedtomailbox.$invalid">\n\
+     								 	<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedtomailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedtomailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
+     								 </div>\n\
+     							   </div>\n\
+                                   <div ng-switch-when="timetopickupfilepostedbymailbox">\n\
+     								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedbymailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
+     								 	<div ng-show="formAddMbx.timetopickupfilepostedbymailbox.$dirty && formAddMbx.timetopickupfilepostedbymailbox.$invalid">\n\
+     								 		<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
+     								 	</div></div>\n\
+     							  <div ng-switch-default>\n\
                                         <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
                                   </div>'
@@ -360,7 +371,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 			if (row.getProperty('value').length > 512) {
 			   showAlert('Property  Value cannot be longer than 512 characters.', 'information');
                 return;			
-			}            
+			}   
+			
+			// To allow only numeric value
+			if(valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedtomailbox' || valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedbymailbox') {
+				if (!($scope.numberPattern.test(row.getProperty('value')))) {
+					showAlert('Value should be a number.', 'error');
+					return;
+				}
+			}
           
              // To allow only proper mail Id values for property emailnotificationids
             if (valueSelectedinSelectionBox.value.id == 'emailnotificationids') {

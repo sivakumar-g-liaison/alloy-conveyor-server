@@ -310,4 +310,43 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 			}
 		}
 	}
+	
+	/**
+     * Find list of FSMStateValue by given processorId, status, time Interval
+     * 
+     * @param processorId
+     * @param fsmStateValue
+     * @param timeInterval
+     * 
+     * @return The list of FSMStateValue
+     */
+    public List<FSMStateValue> findProcessorsExecutingByProcessorId(String processorId, Timestamp timeInterval) {
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+        try {
+            
+            List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+            
+            List<?> jobsRunning = entityManager
+                                  .createNamedQuery(FIND_ALL_PROC_EXECUTING_BY_PROCESSORID)
+                                  .setParameter(PROCESSOR_ID, processorId)
+                                  .setParameter(INTERVAL_IN_HOURS, timeInterval)
+                                  .getResultList();
+
+            Iterator<?> iter = jobsRunning.iterator();
+            FSMStateValue job;
+            while (iter.hasNext()) {
+                
+                job = (FSMStateValue) iter.next();
+                jobs.add(job);
+            }
+            return jobs;
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+        
+    }
 }

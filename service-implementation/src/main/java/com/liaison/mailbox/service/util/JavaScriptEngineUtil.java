@@ -38,7 +38,7 @@ import com.liaison.mailbox.service.core.processor.DirectorySweeper;
  */
 public final class JavaScriptEngineUtil {
 	
-	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
+	private static final Logger LOGGER = LogManager.getLogger(JavaScriptEngineUtil.class);
 	private static final String SCTIPT_TYPE = "JavaScript";
 	
     //create a script engine manager

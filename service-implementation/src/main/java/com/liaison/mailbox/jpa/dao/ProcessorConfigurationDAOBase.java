@@ -28,6 +28,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.jpa.model.HTTPSyncProcessor;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.Sweeper;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -270,8 +271,50 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		case "httpasyncprocessor":
 			processorClass = HTTPAsyncProcessor.class;
 			break;		
+		case  "sweeper":
+			processorClass = Sweeper.class;
+			break;
 		}
 		return processorClass;
 	}
+	
+	public List <Processor> findProcessorByType(ProcessorType type) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("Fetching the processor count starts.");
+
+			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+					.append(" inner join processor.mailbox")
+					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE);
+			Class <?> processorType = getProcessorClass(type);
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(PROCESSOR_TYPE, processorType)
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
+	
+	
 	
 }

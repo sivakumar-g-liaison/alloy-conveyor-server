@@ -104,13 +104,17 @@ public enum Messages {
 	
 	//retrieving tenancy key from acl manifest
 	TENANCY_KEY_RETRIEVAL_FAILED("Manifest does not contain the Tenancy Key for mailbox."),
-	TENANCY_KEY_MISMATCH("Tenancy Key present Manifest does not match the Tenancy Key of mailbox."),
+	TENANCY_KEY_MISMATCH("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox."),
 	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),
 
 	READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
 	
 	//retrieving service instance id from query parameter
-	SERVICE_INSTANCE_ID_NOT_AVAILABLE("Service Instance ID is not available as query parameter.");
+	SERVICE_INSTANCE_ID_NOT_AVAILABLE("Service Instance ID is not available as query parameter."),
+	
+	// Mailbox Expectation Management
+	MAILBOX_ADHERES_SLA("Mailbox adheres to SLA rules"),
+	MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are ");
 	
 	private String value;
 

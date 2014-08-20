@@ -41,6 +41,11 @@ public class ResponseDTO implements Serializable {
 		this.status = status.value();
 	}
 
+	public ResponseDTO(Messages message, Messages status, String additionalMessage) {
+		this.message = message.value() + additionalMessage;
+		this.status = status.value();
+	}
+
 	public String getMessage() {
 		return message;
 	}

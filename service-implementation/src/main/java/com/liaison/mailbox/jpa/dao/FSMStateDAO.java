@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 		query = "select stateVal from FSMStateValue stateVal"
 				+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
 				+ " inner join sta.executionState staVal"
-				+ " where staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
+				+ " where sta.processorId = 'C3DB7E5AC0A8008C0E970DC2F3C1D784' and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
 @NamedQuery(name = FSMStateDAO.FIND_PROC_EXECUTING_BY_VALUE,
 		query = "select stateVal from FSMStateValue stateVal"
 				+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
@@ -52,7 +52,13 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
                 + " inner join sta.executionState staVal"
                 + " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
                 + " and stateVal.value = :" + FSMStateDAO.BY_VALUE
-                + " group by staVal.fsmState)")
+                + " group by staVal.fsmState)"),
+@NamedQuery(name = FSMStateDAO.FIND_ALL_PROC_EXECUTING_BY_PROCESSORID,
+        query = "select stateVal from FSMStateValue stateVal"
+                + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+                + " inner join sta.executionState staVal"
+                + " where sta.processorId = :" + FSMStateDAO.PROCESSOR_ID 
+                + " and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + ")")
 })
 
 public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorStateDTO, ExecutionEvents> {
@@ -63,10 +69,13 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	public static final String FIND_PROC_EXECUTING_BY_VALUE = "findProcessorsByValue";
 	public static final String FIND_PROC_EXECUTING_BY_DATE = "findProcessorsByDate";
 	public static final String FIND_PROC_EXECUTING_BY_VALUE_AND_DATE = "findProcessorsByValueAndDate";
+	public static final String FIND_ALL_PROC_EXECUTING_BY_PROCESSORID = "findAllProcessorsExecutingByProcessorId";
 	public static final String INTERVAL_IN_HOURS = "interval_in_hours";
 	public static final String BY_VALUE = "by_value";
 	public static final String FROM_DATE = "from_date";
 	public static final String TO_DATE = "to_date";
+	public static final String PROCESSOR_ID = "processor_id";
+	public static final String FSM_STATE_VALUE = "fsm_state_value";
     
 	/**
 	 * Find FSMState by given status value.
@@ -111,5 +120,16 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @return The list of FSMStateValue
 	 */
 	public List<FSMStateValue> findProcessorsExecutingByValueAndDate(String value, String frmDate, String toDate);
+	
+	/**
+	 * Find list of FSMStateValue by given processorId, status, time Interval
+	 * 
+	 * @param processorId
+	 * @param fsmStateValue
+	 * @param timeInterval
+	 * 
+	 * @return The list of FSMStateValue
+	 */
+	public List<FSMStateValue> findProcessorsExecutingByProcessorId(String processorId, Timestamp timeInterval);
 
 }
