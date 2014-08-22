@@ -2,13 +2,15 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
 
 package com.liaison.mailbox.service.dto.configuration;
+
+import javax.ws.rs.core.Response;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.FolderType;
@@ -21,8 +23,8 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * 
- * 
+ *
+ *
  * @author OFS
  */
 
@@ -69,10 +71,10 @@ public class FolderDTO {
 	public void setFolderDesc(String folderDesc) {
 		this.folderDesc = folderDesc;
 	}
-    
+
 	/**
 	 * Copies all data from dto to entity.
-	 * 
+	 *
 	 * @param entity
 	 *        the Folder Entity
 	 * @throws MailBoxConfigurationServicesException
@@ -84,17 +86,17 @@ public class FolderDTO {
 
 		FolderType foundFolderType = FolderType.findByName(this.getFolderType());
 		if (foundFolderType == null) {
-			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Folder");
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Folder", Response.Status.BAD_REQUEST);
 		}
 
 		folder.setFldrType(foundFolderType.getCode());
 		folder.setFldrUri(this.getFolderURI());
 		folder.setPguid(this.getGuId());
 	}
-    
+
 	/**
 	 * Copies all data from Entity to DTO.
-	 * 
+	 *
 	 * @param entity
 	 *          The Folder Entity
 	 * @throws MailBoxConfigurationServicesException
@@ -106,7 +108,7 @@ public class FolderDTO {
 
 		FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 		if (foundFolderType == null) {
-			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Folder");
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Folder", Response.Status.BAD_REQUEST);
 		}
 
 		this.setFolderType(foundFolderType.name());

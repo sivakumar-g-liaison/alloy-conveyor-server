@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
@@ -49,7 +50,7 @@ import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxUtil {
@@ -63,7 +64,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
-	 * 
+	 *
 	 * @param serializedJson
 	 *            The serialized JSON String.
 	 * @param clazz
@@ -98,7 +99,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Utility is used to marshal the Object to JSON.
-	 * 
+	 *
 	 * @param object
 	 * @return
 	 * @throws JAXBException
@@ -127,7 +128,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Method is used to get the unique id from UUIDGen Utility.
-	 * 
+	 *
 	 * @return UUID The 32bit string.
 	 */
 	public static String getGUID() {
@@ -136,7 +137,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Checks the given string is empty or not.
-	 * 
+	 *
 	 * @param str
 	 *            The input String
 	 * @return boolean
@@ -146,12 +147,12 @@ public class MailBoxUtil {
 	}
 
 	public static DecryptableConfiguration getEnvironmentProperties() throws IOException {
-		
+
 		return LiaisonConfigurationFactory.getConfiguration();
 	}
-	
+
 	public static Properties getEnvProperties() throws IOException {
-        
+
         synchronized (lock) {
 
             if (properties.isEmpty()) {
@@ -161,38 +162,38 @@ public class MailBoxUtil {
                 InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
                 properties.load(is);
             }
-    
+
             return properties;
         }
     }
-	
+
 	/**
 	 * Method to get the current timestmp to insert into database.
-	 * 
+	 *
 	 * @return
 	 */
 	public static Timestamp getTimestamp() {
-		
+
 		Date d = new Date();
 		return new Timestamp(d.getTime());
 	}
-	
+
 	/**
 	 * Method to get the dependency constraint corresponding to the service name configured in properties file
-	 * 
+	 *
 	 * @param aclManifestDTO
 	 * @return
 	 * @throws IOException
 	 */
 	/*private static NestedServiceDependencyContraint  getDependencyConstraintFromACLManifest(ACLManifest aclManifestDTO) throws IOException {
-		
+
 		//retrieve the very first platform object from acl manifest json
 		Platform platform = aclManifestDTO.getPlatform().get(0);
-		
+
 		// retrieve the dependency constraint having service name as per the configuration in properties file
 		List <NestedServiceDependencyContraint> dependencyConstraints = (platform != null)? platform.getNestedServiceDependencyContraint():null;
 		for (NestedServiceDependencyContraint dependencyConstraint : dependencyConstraints) {
-			
+
 			if (dependencyConstraint.getServiceName().equalsIgnoreCase(getEnvironmentProperties().getString("acl.constraint.service.name"))) {
 				return dependencyConstraint;
 			}
@@ -200,18 +201,18 @@ public class MailBoxUtil {
 		return null;
 
 	}*/
-	
-	
+
+
 	/**
 	 * Method to retrieve the primary service instance id from the given acl manifest dto
-	 * 
+	 *
 	 * @param  String aclManifestJson
 	 * @return String primary Service instance id
-	 * @throws IOException 
-	 * @throws JAXBException 
+	 * @throws IOException
+	 * @throws JAXBException
 	 */
 	/*public static String getPrimaryServiceInstanceIdFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
-		
+
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
 		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
@@ -221,17 +222,17 @@ public class MailBoxUtil {
 		String primaryServiceInstanceId  = (dependencyConstraint != null)?dependencyConstraint.getPrimaryId():null;
 		return primaryServiceInstanceId;
 	}*/
-	
+
 	/**
 	 * Method to retrieve the list of secondary service instance ids from the given acl manifest dto
-	 * 
+	 *
 	 * @param String aclManifestJson
 	 * @return
-	 * @throws IOException 
-	 * @throws JAXBException 
+	 * @throws IOException
+	 * @throws JAXBException
 	 */
 	/*public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
-		
+
 		// retrieve the service instance id from acl manifest
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
 		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
@@ -240,25 +241,25 @@ public class MailBoxUtil {
 		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
 		List<String> secondayServiceInstanceIDs = (dependencyConstraint != null)?dependencyConstraint.getNestedServiceId():null;
 		return secondayServiceInstanceIDs;
-		
+
 	}*/
-	
+
 	/**
 	 * Method to get the tenancy key from acl manifest Json
-	 * 
+	 *
 	 * @param String - aclManifestJson
 	 * @return
 	 * @throws IOException
 	 */
 	/*public static String  getTenancyKeyFromACLManifest(String aclManifestJson) throws IOException {
-		
+
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
 		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
-		
+
 		//retrieve the very first platform object from acl manifest json
 		Platform platform = aclManifestDTO.getPlatform().get(0);
-		
+
 		// retrieve the domain name from the very first RBAC available in platform
 		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
 		LOGGER.info("Retrieving tenancy key from acl manifest");
@@ -267,86 +268,86 @@ public class MailBoxUtil {
 		return domainName;
 
 	}*/
-	
+
 	/**
 	 * Method to get all tenancy keys from acl manifest Json
-	 * 
+	 *
 	 * @param String - aclManifestJson
 	 * @return list of tenancy keys
 	 * @throws IOException
 	 */
 	public static List <TenancyKeyDTO>  getTenancyKeysFromACLManifest(String aclManifestJson) throws IOException {
-		
+
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
 		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false,false);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
-		
+
 		//retrieve the very first platform object from acl manifest json
-		Platform platform = aclManifestDTO.getPlatform().get(0);	
-		
+		Platform platform = aclManifestDTO.getPlatform().get(0);
+
 		// retrieve all domains present in platform
 		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
 		LOGGER.info("Retrieving tenancy key from acl manifest");
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-				// TODO: once guid is available in domain, need to make changes to use guid instead of name 
+				// TODO: once guid is available in domain, need to make changes to use guid instead of name
 				//also need  to do changes to match latest ACLManifest structure.
 				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
 				tenancyKeys.add(tenancyKey);
-		
+
 		}
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
 
 	}
-	
+
 	public static List <String> getTenancyKeyGuidsFromTenancyKeys (List <TenancyKeyDTO> tenancyKeys) {
-		
+
 		List<String> tenancyKeyGuids = new ArrayList<String>();
 		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
 			tenancyKeyGuids.add(tenancyKey.getName().toLowerCase());
 		}
 		return tenancyKeyGuids;
-		
+
 	}
-	
+
 	/**
 	 * Method to retrieve the base64 decoded acl manifest json
-	 * 
+	 *
 	 * @param manifestJson
 	 * @return
 	 * @throws IOException
 	 * @throws MailBoxConfigurationServicesException
 	 */
 	public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
-		
+
 		String decodedManifestJson = null;
-		
+
 		// if manifest is available in the header then use acl-manifest in the header irrespective of
 		// the property "use.dummy.manifest" configured in properties file
 		if (!MailBoxUtil.isEmpty(manifestJson)) {
 			LOGGER.info("acl manifest available in the header");
 		} else {
 			// check the value of property "use.dummy.manifest"
-			// if it is true use dummy manifest else throw an error due to the 
+			// if it is true use dummy manifest else throw an error due to the
 			// non-availability of manifest in header
 			if ((MailBoxUtil.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
-				
+
 				LOGGER.info("Retrieving the dummy acl manifest json from properties file");
 				manifestJson = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");
 				if (MailBoxUtil.isEmpty(manifestJson)) {
 					LOGGER.error("dummy acl manifest is not available in the properties file");
-					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE);
+					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE, Response.Status.BAD_REQUEST);
 				}
-	
+
 			} else {
 				LOGGER.error("acl manifest is not available in the request header");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER);
+				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER, Response.Status.BAD_REQUEST);
 			}
-			
+
 		}
-	
+
 		// decode the manifest using base64
 		LOGGER.info("decoding the acl manifest");
 		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));

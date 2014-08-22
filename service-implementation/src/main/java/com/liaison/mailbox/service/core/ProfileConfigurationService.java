@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -12,6 +12,8 @@ package com.liaison.mailbox.service.core;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +37,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has configuration related operations.
- * 
+ *
  * @author OFS
  */
 
@@ -47,7 +49,7 @@ public class ProfileConfigurationService {
 
 	/**
 	 * Creates Profile.
-	 * 
+	 *
 	 * @param request
 	 *            The request DTO.
 	 * @return The responseDTO.
@@ -61,16 +63,16 @@ public class ProfileConfigurationService {
 
 			ProfileDTO profileDTO = request.getProfile();
 			if (profileDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
-			
+
 			GenericValidator validator = new GenericValidator();
 			validator.validate(profileDTO);
 
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 
 			if (configDao.findProfileByName(profileDTO.getName()) != null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS);
+				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS, Response.Status.BAD_REQUEST);
 			}
 
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
@@ -97,10 +99,10 @@ public class ProfileConfigurationService {
 		}
 
 	}
-	
+
 	/**
 	 * Updates Profile.
-	 * 
+	 *
 	 * @param request
 	 *            The request DTO.
 	 * @return The responseDTO.
@@ -114,26 +116,26 @@ public class ProfileConfigurationService {
 
 			ProfileDTO profileDTO = request.getProfile();
 			if (profileDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
-			
+
 			GenericValidator validator = new GenericValidator();
 			validator.validate(profileDTO);
 
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
-			
+
 			ScheduleProfilesRef retreivedProfile = configDao.find(ScheduleProfilesRef.class, profileDTO.getId());
 			if(retreivedProfile == null) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
-			
+
 			if(!(retreivedProfile.getSchProfName().equals(profileDTO.getName()))) {
-				
+
 				if (configDao.findProfileByName(profileDTO.getName()) != null) {
-					throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS);
+					throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS, Response.Status.BAD_REQUEST);
 				}
 			}
-				
+
 			retreivedProfile.setSchProfName(profileDTO.getName());
 			profileDTO.copyToEntity(retreivedProfile);
 
@@ -147,7 +149,7 @@ public class ProfileConfigurationService {
 			LOG.debug("Exiting from profile updation.");
 
 			return serviceResponse;
-		
+
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
@@ -158,10 +160,10 @@ public class ProfileConfigurationService {
 		}
 
 	}
-	
+
 	/**
 	 * Retrieves all profiles.
-	 * 
+	 *
 	 * @return The GetProfileResponseDTO.
 	 */
 	public GetProfileResponseDTO getProfiles() {
@@ -179,7 +181,7 @@ public class ProfileConfigurationService {
 				serviceResponse.setProfiles(profilesDTO);
 				return serviceResponse;
 			}
-			
+
 			ProfileDTO profile = null;
 			for (ScheduleProfilesRef prof : profiles) {
 				profile = new ProfileDTO();
@@ -204,24 +206,24 @@ public class ProfileConfigurationService {
 		}
 
 	}
-	
+
 	/**
 	 * Retrieves profiles based on the given profile name.
-	 * 
+	 *
 	 * @return The GetProfileResponseDTO.
 	 */
-	
+
 	public GetProfileResponseDTO searchProfiles(String profName) {
-		
+
 		LOG.debug("Entering into search profiles by name.");
 		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
-		
+
 		try {
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 			List <ScheduleProfilesRef> profiles = configDao.findProfilesByName(profName);
-			
+
 			if (profiles == null || profiles.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE);
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE, Response.Status.BAD_REQUEST);
 			}
 			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
 			ProfileDTO profile = null;
@@ -238,7 +240,7 @@ public class ProfileConfigurationService {
 			LOG.debug("Exiting from searching profiles operation.");
 
 			return serviceResponse;
-			
+
 		}  catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
@@ -248,8 +250,8 @@ public class ProfileConfigurationService {
 			return serviceResponse;
 		}
 
-		
-		
+
+
 	}
 
 }
