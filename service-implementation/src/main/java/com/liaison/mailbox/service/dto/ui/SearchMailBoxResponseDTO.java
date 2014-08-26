@@ -33,6 +33,15 @@ public class SearchMailBoxResponseDTO implements ResponseBuilder {
 	private ResponseDTO response;
 	private List<SearchMailBoxDTO> mailBox;
 	private String hitCounter;
+	private int totalItems;
+	
+	public int getTotalItems() {
+		return totalItems;
+	}
+
+	public void setTotalItems(int totalItems) {
+		this.totalItems = totalItems;
+	}
 
 	public List<SearchMailBoxDTO> getMailBox() {
 

@@ -45,34 +45,8 @@
 	              
 
 	<br/>
-	   <div class="form-row">
-		<h4>Search Profile</h4>
-	
-	   </div>
-	 
-	       
-	        <div class="row">
-	          <div class="col-md-6">
-	                   <label for="name"> Profile Name </label> 
-	                   <input type="text" id="profilename" ng-model="profileName" ng-trim="false"
-					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
-					<div ng-show="triggerForm.name.$dirty && triggerForm.name.$invalid">
-						<span id="mbx-profile-profilenameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':triggerForm.name.$error.pattern}" ng-show="triggerForm.name.$error.pattern">Invalid Profile Name.</span>
-						<span id="mbx-profile-profilenameInvalid-minlength" class="customHide" ng-class = "{'custom-info-block':triggerForm.name.$error.minlength}" ng-show="triggerForm.name.$error.minlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
-						<span id="mbx-profile-profilenameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':triggerForm.name.$error.maxlength}" ng-show="triggerForm.name.$error.maxlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Profile Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
-					</div>
-	               <progress ng-show=showprogressbar> </progress>
-		   </div>
-	              
-	        </div>  
 	
 	           <div class = "form-group">
-				<br>
-	               <div class="alert alert-info" ng-show="info">
-	             		No results found.
-	               </div>
 	               <div class="gridStyle" ng-grid="gridOptions"></div>
 			    </div>
                 <br>				

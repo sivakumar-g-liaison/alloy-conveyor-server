@@ -1,5 +1,5 @@
-var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', '$location', '$log',
-    function ($rootScope,$scope, $filter, $location, $log) {
+var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', '$location', '$log', '$timeout',
+    function ($rootScope,$scope, $filter, $location, $log, $timeout) {
 	
         var url = $scope.base_url + "/profile";
 
@@ -20,9 +20,9 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
         };
 		
         reviseRequest = $scope.reviseRequest = {
-                reviseProfileRequest: {
-                    profile: {}
-                }
+            reviseProfileRequest: {
+                profile: {}
+            }
         };
         
 		//to get model form object
@@ -31,7 +31,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
         $scope.profileName = null;
                
          // To enable "No records found" div
-        $scope.info = false;
+      //  $scope.info = false;
         
         // Modify the value to change the search criteria
         $scope.searchMinCharacterCount = 5;
@@ -62,10 +62,16 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 
         // Grid Setups
         $scope.filterOptions = {
-            filterText: "",
+            filterText: [],
             useExternalFilter: true
         };
-
+		var filterTimeout;
+		
+		$scope.sortInfo = {
+			fields: ['name'],
+			directions: ['asc']
+		};
+		
         //Paging set up
         $scope.totalServerItems = 0;
 
@@ -75,145 +81,102 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             currentPage: 1
         };
 
-        $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
-            setTimeout(function () {
-                $scope.setPagingData(largeLoad, page, pageSize);
-            }, 100);
+        /**
+		 * Get data for paging
+		 * 
+		 * @param url
+		 * @param pageSize
+		 * @param page
+		 * @param searchText
+		 */
+        $scope.getPagedDataAsync = function (url, pageSize, page, filterText, sortInfo) {
+			delete filterText.useExternalFilter;
+			$scope.restService.get(url, 
+				function (data) {
+					if(data) {
+						$scope.profiles = data.getProfileResponse.profiles;
+						$scope.totalServerItems =  data.getProfileResponse.totalItems;
+					} else {
+						$scope.profiles = [];
+						$scope.totalServerItems = 0;
+					}
+				}, {pageSize: pageSize, page: page, filterText: filterText, sortInfo: sortInfo}
+			);
         };
 
         // Loading the profile details
         $scope.loadProfiles = function () {
-
-        $scope.restService.get(url, 
-        	function (data, status) {
-        		if(status === 200) {
-        			$scope.getPagedDataAsync(data.getProfileResponse.profiles, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
-        		} else {
-        			showSaveMessage("Failed to load profiles.", 'error');
-        		}
-        	}
-        );
-
-
+        	$scope.getPagedDataAsync(url, $scope.pagingOptions.pageSize,
+        			$scope.pagingOptions.currentPage, $scope.filterOptions, $scope.sortInfo);
         };
-        $scope.loadProfiles(); //loads the profile
+        
+        $scope.loadProfiles(); //loads the profile initially
+        
+     // Sort listener for Scripts grid
+		$scope.$watch('sortInfo.directions + sortInfo.fields', function (newVal, oldVal) {
+			if (newVal !== oldVal) {
+				 $scope.loadProfiles();
+			}
 
-        // Set the paging data to grid from server object
-        $scope.setPagingData = function (data, page, pageSize) {
-            
-             //To enable No Results found div
-             if (data === null || data.length <= 0) {
-                $scope.message = 'No results found.';
-                $scope.info = true;
-            } else {
-                $scope.info = false;
-            }
-
-            var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
-            $scope.profiles = pagedData;
-            $scope.totalServerItems = data.length;
-            if (!$scope.$$phase) {
-                $scope.$apply();
-            }
-        };
-
+		}, true);
+		
         $scope.$watch('pagingOptions', function (newVal, oldVal) {
             if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
-               // $scope.loadProfiles();
-                if((typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.searchMinCharacterCount)) {
-                     $scope.search();
-                } else {
-                    $scope.loadProfiles();
-                }
-               
+            	$scope.loadProfiles();
             }
 
             if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-               // $scope.loadProfiles();
-                if((typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.            searchMinCharacterCount)) {
-                    $scope.search();
-                } else {
-                    $scope.loadProfiles();
-                }
+            	$scope.loadProfiles();
 				newVal.currentPage = 1;
             }
         }, true);
 
-        $scope.$watch('filterOptions', function (newVal, oldVal) {
-            if (newVal !== oldVal) {
-               // $scope.loadProfiles();
-                if((typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.searchMinCharacterCount)) {
-                     $scope.search();
-                } else {
-                    $scope.loadProfiles();
-                }
-            }
-        }, true);
-        
-        /**
-         * Remove all the data in grid and disable the info message.
-         */
-        $scope.reset = function () {
-
-            $scope.profiles = [];
-            $scope.info = false;
-            $scope.totalServerItems = 0;
-            if (!$scope.$$phase) {
-                $scope.$apply();
-            }
-            // Set the default page to 1
-            if ($scope.pagingOptions.currentPage !== 1) {
-                $scope.pagingOptions.currentPage = 1;
-            }
-        };
-
-         // Search logic for mailbox
-        $scope.search = function () {
-
-            $scope.showprogressbar = true;
-            var profName = "";
-            if (null !== $scope.profileName && $scope.profileName.length >= $scope.searchMinCharacterCount) {
-                profName = $scope.profileName;
-            }
-
-           $scope.restService.get($scope.base_url + "/findprofile" + '?name=' + profName ,
-                function (data, status) {
-                    if (status == 200) {
-                        if (data.getProfileResponse.response.status == 'failure') {
-                        	//Commented out because of inconsistency
-                            //showSaveMessage(data.searchMailBoxResponse.response.message, 'error');
+     // Filter plugin
+        var filterBarPlugin = {
+            init: function (scope, grid) {
+                filterBarPlugin.scope = scope;
+                filterBarPlugin.grid = grid;
+                scope.$watch('columns[0].filterText + columns[1].filterText + columns[2].filterText + columns[3].filterText', function(newVal, oldVal) {
+                    var searchQuery = [];
+                    var colsEmpty= true;
+                    angular.forEach(filterBarPlugin.scope.columns, function(col) {
+                        if (col.visible && col.filterText) {
+                            var filterObj = {};
+                            filterObj.field = col.field;
+                            filterObj.text = col.filterText.toUpperCase();
+                            colsEmpty = false;
+                            searchQuery.push(filterObj);
                         }
-                    } else {
-                    	 showSaveMessage("retrieval of search results failed", 'error');
+                    });
+                    $scope.filterOptions.filterText = searchQuery;
+
+                    if (colsEmpty == false) {
+                        $timeout.cancel(filterTimeout);
+                        filterTimeout = $timeout(function() {
+                            $scope.applyFilter(newVal, oldVal);
+                        }, 1000);
                     }
-                    
-                    $scope.getPagedDataAsync(data.getProfileResponse.profiles, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
-                    
-                    $scope.showprogressbar = false;
-                });
+                    // No timeout needed when the filter texts are cleared
+                    else {
+                        $scope.applyFilter(newVal, oldVal);
+                    }
+                },true);
+            },
+            scope: undefined,
+            grid: undefined
         };
-         // Whenever changes occur in the Profile Name it calls search method
-        $scope.$watch('profileName', function () {
-
-            if (typeof($scope.profileName) !== 'undefined' && $scope.profileName !== null && $scope.profileName.length >= $scope.searchMinCharacterCount) {
-
-                $scope.search();
-                if ($scope.pagingOptions.currentPage !== 1) {
-                    $scope.pagingOptions.currentPage = 1;
-                }
-
-            } else if ($scope.profileName.length == 0) {
-                $scope.reset();
-                $scope.loadProfiles();
-            } else if(typeof($scope.profileName) == 'undefined' || $scope.profileName == null || $scope.profileName.length < $scope.searchMinCharacterCount) {
-                $scope.reset();
-            }
-        });
+		
+        // Apply filtering
+        $scope.applyFilter = function (newVal, oldVal) {
+    		  $scope.pagingOptions.currentPage = 1;
+    		  $scope.loadProfiles();
+    	};
         // Setting the grid details
         $scope.gridOptions = {
             columnDefs: [{
                 field: 'name',
                 displayName: 'Profile Name',
+				headerCellTemplate:'partials/filterInputTypeHeaderTemplate.html'
 
             },
 			{ // Customized column
@@ -226,6 +189,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             data: 'profiles',
             //rowTemplate: customRowTemplate,
             enablePaging: true,
+			headerRowHeight: 70, // give room for filter bar
             enableCellEditOnFocus: false,
             showFooter: true,
             canSelectRows: true,
@@ -234,7 +198,9 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             displaySelectionCheckbox: false,
             pagingOptions: $scope.pagingOptions,
             filterOptions: $scope.filterOptions,
-			plugins: [new ngGridFlexibleHeightPlugin()],
+			plugins: [filterBarPlugin, new ngGridFlexibleHeightPlugin()],
+			sortInfo: $scope.sortInfo,
+			useExternalSorting: true,
 			totalServerItems:'totalServerItems',
         };
 		//open edit model for revising profile

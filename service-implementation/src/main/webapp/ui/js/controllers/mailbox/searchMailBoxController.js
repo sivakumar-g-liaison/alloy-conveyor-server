@@ -41,18 +41,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.$watch('mailBoxName', function () {
 
             if (typeof($scope.mailBoxName) !== 'undefined' && $scope.mailBoxName !== null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
-
+            	
+            	
+            	$scope.pagingOptions.currentPage = 1;
                 $scope.search();
-                if ($scope.pagingOptions.currentPage !== 1) {
-                    $scope.pagingOptions.currentPage = 1;
-                }
 
             } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
 
+            
+            	$scope.pagingOptions.currentPage = 1;
                 $scope.search();
-                if ($scope.pagingOptions.currentPage !== 1) {
-                    $scope.pagingOptions.currentPage = 1;
-                }
             } else {
                 $scope.reset();
             }
@@ -75,12 +73,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             }
         };
 
-        // Grid Setups
-        $scope.filterOptions = {
-            filterText: "",
-            useExternalFilter: true
-        };
-
         // Paging set up
         $scope.totalServerItems = 0;
 
@@ -89,9 +81,13 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             pageSize: 25,
             currentPage: 1
         };
-
+        
+        $scope.sortInfo = {
+			fields: ['name'],
+			directions: ['asc']
+		};
         // Set the paging data to grid from server object
-        $scope.setPagingData = function (data, page, pageSize) {
+        $scope.setPagingData = function (data) {
 
             if (data === null || data.length <= 0) {
                 $scope.message = 'No results found.';
@@ -103,9 +99,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                 $scope.info = false;
             }
 
-            var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
-            $scope.mailboxes = pagedData;
-            $scope.totalServerItems = data.length;
+            $scope.mailboxes = data.mailBox;
+            $scope.totalServerItems = data.totalItems;
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
@@ -149,9 +144,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid);
         };
 
-        $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
+        $scope.getPagedDataAsync = function (largeLoad) {
             setTimeout(function () {
-                $scope.setPagingData(largeLoad.searchMailBoxResponse.mailBox, page, pageSize);
+                $scope.setPagingData(largeLoad.searchMailBoxResponse);
             }, 100);
         };
 
@@ -168,9 +163,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             if (null !== $scope.mailBoxName && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
                 mbxName = $scope.mailBoxName;
             }
-
+            
+            var sortField = "";
+        	var sortDirection = "";
+            if($scope.sortInfo.fields && $scope.sortInfo.directions) {
+            	sortField = String($scope.sortInfo.fields);
+            	sortDirection = String($scope.sortInfo.directions);
+            }
+            
             $scope.hitCounter = $scope.hitCounter + 1;
-            $scope.restService.get($scope.base_url + "/search/" + '?name=' + mbxName + '&profile=' + profName + '&hitCounter=' + $scope.hitCounter/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/,
+            $scope.restService.get($scope.base_url + "/search/" + '?name=' + mbxName + '&profile=' + profName + '&hitCounter=' + $scope.hitCounter + '&page=' + $scope.pagingOptions.currentPage + '&pagesize=' + $scope.pagingOptions.pageSize + '&sortField=' + sortField + '&sortDirection=' + sortDirection/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/,
                 function (data, status) {
                     if (status == 200) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
@@ -189,7 +191,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 					// validated only if proper response is available
                     if (data.searchMailBoxResponse) { 
                     	 if (data.searchMailBoxResponse.hitCounter >= $scope.hitCounter) {
-                             $scope.getPagedDataAsync(data, $scope.pagingOptions.pageSize, $scope.pagingOptions.currentPage);
+                             $scope.getPagedDataAsync(data);
                          }
                     }
                    
@@ -202,13 +204,12 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
             console.info("MailboxName : " + $scope.mailBoxName);
             console.info("ProfileName : " + $scope.profile);
+            $scope.pagingOptions.currentPage = 1;
             if ($scope.profile == null && ($scope.mailBoxName == null || $scope.mailBoxName == "")) {
                 $scope.reset();
             } else {
                 $scope.search();
             }
-
-
 
         };
 
@@ -224,12 +225,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         	if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize && (($scope.mailBoxName !== null && $scope.mailBoxName !== "")  || $scope.profile !== null)) {
                 $scope.search();
                 newVal.currentPage = 1;
-            }
-        }, true);
-
-        $scope.$watch('filterOptions', function (newVal, oldVal) {
-            if (newVal !== oldVal) {
-                $scope.search();
             }
         }, true);
 
@@ -281,13 +276,22 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             multiSelect: false,
             jqueryUITheme: false,
             displaySelectionCheckbox: false,
+            sortInfo: $scope.sortInfo,
+			useExternalSorting: true,
             pagingOptions: $scope.pagingOptions,
-            filterOptions: $scope.filterOptions,
 			enableColumnResize : true,
 			plugins: [new ngGridFlexibleHeightPlugin()],
             totalServerItems: 'totalServerItems',
         };
+        
+     // Sort listener for search account grid
+		$scope.$watch('sortInfo.directions + sortInfo.fields', function (newVal, oldVal) {
+			if (newVal !== oldVal) {
+				$scope.search();
+			}
 
+		}, true);
+		
         // used to move add screen
         $scope.goto = function (hash) {
             $location.path(hash);

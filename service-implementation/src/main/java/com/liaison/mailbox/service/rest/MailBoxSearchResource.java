@@ -93,7 +93,11 @@ public class MailBoxSearchResource extends AuditedResource {
 			@Context HttpServletRequest request,
 			@QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
 			@QueryParam(value = "profile") @ApiParam(name = "profile", required = false, value = "Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName,
-			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") String hitCounter) {
+			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") String hitCounter,
+			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") String page,
+			@QueryParam(value= "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") String pageSize,
+			@QueryParam(value= "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") String sortField,
+			@QueryParam(value= "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") String sortDirection) {
 
 		// Audit LOG the Attempt to searchMailBox
 		auditAttempt("searchMailBox");
@@ -112,7 +116,7 @@ public class MailBoxSearchResource extends AuditedResource {
 			String manifestJson = request.getHeader("acl-manifest");
 			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
 
-			serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson);
+			serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson, page, pageSize, sortField, sortDirection);
 			serviceResponse.setHitCounter(hitCounter);
 
 			// Audit LOG

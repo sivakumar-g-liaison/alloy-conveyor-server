@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.jpa.model.MailBox;
 
 /**
@@ -31,7 +32,47 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	public MailBoxConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
+	
+	/**
+	 * Fetches the count of all MailBoxes from  MAILBOX database table by given mailbox name, profile name and service instance ids.
+	 * 
+	 * @param mbxName
+	 * @param profName
+	 * @return count of mailbox retrieved
+	 */
+	@Override
+	public int getMailboxCountByProtocol(String mbxName, String profName, List <String> tenancyKeys) {
 
+		Long totalItems = null;
+		int count = 0;
+		
+		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
+		try {
+
+			StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
+					.append(" inner join mbx.mailboxProcessors prcsr")
+					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
+					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys) + ")")
+					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
+			
+			totalItems = (Long)em
+					.createQuery(query.toString())
+					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
+					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+					.getSingleResult();
+			
+			count = totalItems.intValue();
+
+		} finally {
+			if (em != null) {
+				em.clear();
+			}
+		}
+		return count;
+	}
+	
 	/**
 	 * Fetches all MailBox from  MAILBOX database table by given mailbox name, profile name and service instance ids.
 	 * 
@@ -40,7 +81,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> find(String mbxName, String profName, List <String> tenancyKeys) {
+	public Set<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int pagingOffset, int pagingCount, String sortField, String sortDirection) {
 
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
@@ -53,13 +94,23 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys) + ")")
-					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
-					.append(" order by mbx.mbxName");
+					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 			
+			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+				
+				sortDirection = sortDirection.toUpperCase();
+				if(sortField.equalsIgnoreCase("name")) 				query.append(" order by mbx.mbxName " + sortDirection);
+				else if(sortField.equalsIgnoreCase("description"))  query.append(" order by mbx.mbxDesc " + sortDirection);
+				else if(sortField.equalsIgnoreCase("status")) 		query.append(" order by mbx.mbxStatus " + sortDirection);
+			}else {
+				query.append(" order by mbx.mbxName");
+			}
 			List<?> object = em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
+					.setFirstResult(pagingOffset)
+					.setMaxResults(pagingCount)
 					.getResultList();
 			Iterator<?> iter = object.iterator();
 			
@@ -91,6 +142,39 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return mailBoxes;
 	}
+	
+	/**
+	 * Fetches the count of all  MailBoxes from  MAILBOX database table by given mailbox name.
+	 * 
+	 * @param mbxName
+	 * @return count of mailboxes retrieved
+	 */
+	@Override
+	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		Long totalItems = null;
+		int count = 0;
+
+		try {
+
+			StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
+					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys) + ")");
+			totalItems = (Long)entityManager.createQuery(query.toString())
+					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
+					.getSingleResult();
+
+			count = totalItems.intValue();
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		
+		return count;
+	}
 
 	/**
 	 * Fetches all  MailBox from  MAILBOX database table by given mailbox name.
@@ -99,28 +183,33 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return list of mailbox
 	 */
 	@Override
-	public Set<MailBox> findByName(String mbxName, List<String> tenancyKeys) {
+	public Set<MailBox> findByName(String mbxName, List<String> tenancyKeys, int pagingOffset, int pagingCount, String sortField, String sortDirection) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		Set<MailBox> mailBoxes = new HashSet<MailBox>();
 
 		try {
 
-			StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
+			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys) + ")");
+			
+			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+				
+				sortDirection = sortDirection.toUpperCase();
+				if(sortField.equalsIgnoreCase("name")) 				query.append(" order by mbx.mbxName " + sortDirection);
+				else if(sortField.equalsIgnoreCase("description"))  query.append(" order by mbx.mbxDesc " + sortDirection);
+				else if(sortField.equalsIgnoreCase("status")) 		query.append(" order by mbx.mbxStatus " + sortDirection);
+			}else {
+				query.append(" order by mbx.mbxName");
+			}
+			
 			List<?> object = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
+					.setFirstResult(pagingOffset)
+					.setMaxResults(pagingCount)
 					.getResultList();
 			
-			/*StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (:" + TENANCY_KEYS + ")");
-			List<?> object = entityManager.createQuery(query.toString())
-					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
-					.setParameter(TENANCY_KEYS, tenancyKeys)
-					.getResultList();*/
-
 			Iterator<?> iter = object.iterator();
 			while (iter.hasNext()) {
 				mailBoxes.add((MailBox) iter.next());

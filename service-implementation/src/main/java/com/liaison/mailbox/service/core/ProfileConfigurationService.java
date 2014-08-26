@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.ProfileOperationDelegate;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
@@ -39,7 +38,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  * @author OFS
  */
 
-public class ProfileConfigurationService {
+public class ProfileConfigurationService extends GridService<ScheduleProfilesRef> {
 
 	private static final Logger LOG = LogManager.getLogger(ProfileConfigurationService.class);
 	private static final String PROFILE = "Profile";
@@ -164,15 +163,16 @@ public class ProfileConfigurationService {
 	 * 
 	 * @return The GetProfileResponseDTO.
 	 */
-	public GetProfileResponseDTO getProfiles() {
+	public GetProfileResponseDTO getProfiles(String page, String pageSize, String sortInfo, String filterText) {
 
 		LOG.debug("Entering into get all profiles.");
 		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
 
 		try {
 
-			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
-			List<ScheduleProfilesRef> profiles = configDao.fetch(new ProfileOperationDelegate());
+			GridResult <ScheduleProfilesRef> result = getGridItems(ScheduleProfilesRef.class, filterText, sortInfo, page, pageSize);
+			List <ScheduleProfilesRef> profiles = result.getResultList();
+
 			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
 			if (profiles == null || profiles.isEmpty()) {
 				serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, PROFILE, Messages.SUCCESS));
@@ -190,7 +190,8 @@ public class ProfileConfigurationService {
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfiles(profilesDTO);
-
+			serviceResponse.setTotalItems(result.getTotalItems());
+			
 			LOG.debug("Exiting from get all profiles operation.");
 
 			return serviceResponse;
@@ -204,52 +205,4 @@ public class ProfileConfigurationService {
 		}
 
 	}
-	
-	/**
-	 * Retrieves profiles based on the given profile name.
-	 * 
-	 * @return The GetProfileResponseDTO.
-	 */
-	
-	public GetProfileResponseDTO searchProfiles(String profName) {
-		
-		LOG.debug("Entering into search profiles by name.");
-		GetProfileResponseDTO serviceResponse = new GetProfileResponseDTO();
-		
-		try {
-			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
-			List <ScheduleProfilesRef> profiles = configDao.findProfilesByName(profName);
-			
-			if (profiles == null || profiles.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE);
-			}
-			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
-			ProfileDTO profile = null;
-			for (ScheduleProfilesRef prof : profiles) {
-				profile = new ProfileDTO();
-				profile.copyFromEntity(prof);
-				profilesDTO.add(profile);
-			}
-
-			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
-			serviceResponse.setProfiles(profilesDTO);
-
-			LOG.debug("Exiting from searching profiles operation.");
-
-			return serviceResponse;
-			
-		}  catch (MailBoxConfigurationServicesException e) {
-
-			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
-					.getMessage()));
-
-			return serviceResponse;
-		}
-
-		
-		
-	}
-
 }

@@ -4,10 +4,11 @@
 myApp.factory('RESTService',
     function ($http, $rootScope) {
         return {
-            get: function (url, callback) {
+            get: function (url, callback, params) {
                 return $http({
                     method: 'GET',
-                    url: url
+                    url: url,
+                    params: params
                 }).
                 success(function (data, status, headers, config) {
 					

@@ -21,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -50,6 +51,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
@@ -217,7 +219,10 @@ public class ProfileConfigurationResource extends AuditedResource {
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "readProfiles")
-	public Response readProfiles() {
+	public Response readProfiles(@ApiParam(value = "Page Number", required = false) @QueryParam(value = "page") final String page,
+            @ApiParam(value = "Page Size", required = false) @QueryParam(value = "pageSize") final String pageSize,
+            @ApiParam(value = "Sorting Information", required = false) @QueryParam(value = "sortInfo") final String sortInfo,
+            @ApiParam(value = "Filter Text", required = false) @QueryParam(value = "filterText") final String filterText) {
 
 		// Audit LOG the Attempt to readProfiles
 		auditAttempt("readProfiles");
@@ -229,7 +234,7 @@ public class ProfileConfigurationResource extends AuditedResource {
 			// add the new profile details
 			GetProfileResponseDTO serviceResponse = null;
 			ProfileConfigurationService mailbox = new ProfileConfigurationService();
-			serviceResponse = mailbox.getProfiles();
+			serviceResponse = mailbox.getProfiles(page, pageSize, sortInfo, filterText);
 
 			// Audit LOG
 			doAudit(serviceResponse.getResponse(), "readProfiles");

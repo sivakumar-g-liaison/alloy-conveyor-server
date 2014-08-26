@@ -37,6 +37,16 @@ public class GetProfileResponseDTO implements ResponseBuilder {
 	private ResponseDTO response;
 
 	private List<ProfileDTO> profiles;
+	
+	private long totalItems = 0L;
+	 
+	public long getTotalItems() {
+		return totalItems;
+	}
+
+	public void setTotalItems(long totalItems) {
+		this.totalItems = totalItems;
+	}
 
 	public ResponseDTO getResponse() {
 		return response;
