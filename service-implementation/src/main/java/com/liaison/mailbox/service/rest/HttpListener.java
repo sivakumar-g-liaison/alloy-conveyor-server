@@ -521,6 +521,7 @@ public class HttpListener extends BaseResource {
 
 
 	protected void postToQueue(String message) throws Exception {
+        logger.debug("HttpListener postToQueue, message: {}", message);
         SweeperQueue.getInstance().pushMessages(message);
 
 	}

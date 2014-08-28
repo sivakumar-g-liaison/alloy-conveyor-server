@@ -286,9 +286,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 *            The input message to queue.
 	 */
 	private void postToQueue(String input)   {
+        LOGGER.debug("DirectorySweeper postToQueue, message: {}", input);
+
         SweeperQueue.getInstance().pushMessages(input);
-
-
 	}
 
 	/**
