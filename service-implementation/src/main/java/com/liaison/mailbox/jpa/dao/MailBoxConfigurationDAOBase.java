@@ -10,10 +10,7 @@
 
 package com.liaison.mailbox.jpa.dao;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
@@ -80,11 +77,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @param profName
 	 * @return list of mailbox
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Set<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int pagingOffset, int pagingCount, String sortField, String sortDirection) {
+	public List<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int pagingOffset, int pagingCount, String sortField, String sortDirection) {
 
-		Set<MailBox> mailBoxes = new HashSet<MailBox>();
-
+		List<MailBox> mailBoxes = null;
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
@@ -99,41 +96,27 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 				
 				sortDirection = sortDirection.toUpperCase();
-				if(sortField.equalsIgnoreCase("name")) 				query.append(" order by mbx.mbxName " + sortDirection);
-				else if(sortField.equalsIgnoreCase("description"))  query.append(" order by mbx.mbxDesc " + sortDirection);
-				else if(sortField.equalsIgnoreCase("status")) 		query.append(" order by mbx.mbxStatus " + sortDirection);
+				switch (sortField.toLowerCase()) {
+					case "name":
+						query.append(" order by mbx.mbxName " + sortDirection);
+						break;
+					case "description":
+						query.append(" order by mbx.mbxDesc " + sortDirection);
+						break;
+					case "status":
+						query.append(" order by mbx.mbxStatus " + sortDirection);
+						break;
+				}
 			}else {
 				query.append(" order by mbx.mbxName");
 			}
-			List<?> object = em
+			mailBoxes = em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.setFirstResult(pagingOffset)
 					.setMaxResults(pagingCount)
 					.getResultList();
-			Iterator<?> iter = object.iterator();
-			
-			/*StringBuffer query = new StringBuffer().append("SELECT mbx FROM MailBox mbx")
-					.append(" inner join mbx.mailboxProcessors prcsr")
-					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
-					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (:"+ TENANCY_KEYS + ")")
-					.append(" and profile.schProfName like :" + SCHD_PROF_NAME)
-					.append(" order by mbx.mbxName");
-			
-			List<?> object = em
-					.createQuery(query.toString())
-					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
-					.setParameter(TENANCY_KEYS, tenancyKeys)
-					.getResultList();
-			Iterator<?> iter = object.iterator();*/
-
-			while (iter.hasNext()) {
-				mailBoxes.add((MailBox) iter.next());
-			}
 
 		} finally {
 			if (em != null) {
@@ -182,11 +165,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @param mbxName
 	 * @return list of mailbox
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Set<MailBox> findByName(String mbxName, List<String> tenancyKeys, int pagingOffset, int pagingCount, String sortField, String sortDirection) {
+	public List<MailBox> findByName(String mbxName, List<String> tenancyKeys, int pagingOffset, int pagingCount, String sortField, String sortDirection) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		Set<MailBox> mailBoxes = new HashSet<MailBox>();
+		List<MailBox> mailboxList = null;
 
 		try {
 
@@ -197,23 +181,26 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 				
 				sortDirection = sortDirection.toUpperCase();
-				if(sortField.equalsIgnoreCase("name")) 				query.append(" order by mbx.mbxName " + sortDirection);
-				else if(sortField.equalsIgnoreCase("description"))  query.append(" order by mbx.mbxDesc " + sortDirection);
-				else if(sortField.equalsIgnoreCase("status")) 		query.append(" order by mbx.mbxStatus " + sortDirection);
+				switch (sortField.toLowerCase()) {
+					case "name":
+						query.append(" order by mbx.mbxName " + sortDirection);
+						break;
+					case "description":
+						query.append(" order by mbx.mbxDesc " + sortDirection);
+						break;
+					case "status":
+						query.append(" order by mbx.mbxStatus " + sortDirection);
+						break;
+				}
 			}else {
 				query.append(" order by mbx.mbxName");
 			}
 			
-			List<?> object = entityManager.createQuery(query.toString())
+			mailboxList = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.setFirstResult(pagingOffset)
 					.setMaxResults(pagingCount)
 					.getResultList();
-			
-			Iterator<?> iter = object.iterator();
-			while (iter.hasNext()) {
-				mailBoxes.add((MailBox) iter.next());
-			}
 
 		} finally {
 			if (entityManager != null) {
@@ -221,7 +208,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			}
 		}
 		
-		return mailBoxes;
+		return mailboxList;
 	}
 
 	/**

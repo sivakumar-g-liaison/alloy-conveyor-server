@@ -14,10 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -476,8 +474,7 @@ public class MailBoxConfigurationService {
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
-			Set<MailBox> mailboxes = new HashSet<>();
-
+			List<MailBox> mailboxes = new ArrayList<MailBox>();
 			// retrieve tenancy key from acl manifest
 			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
 
@@ -493,7 +490,7 @@ public class MailBoxConfigurationService {
 				Map <String, Integer> pageOffsetDetails = getPagingOffsetDetails(page, pageSize, totalCount);
 				int startOffset = pageOffsetDetails.get(PAGING_OFFSET);
 				int count = pageOffsetDetails.get(PAGING_COUNT);
-				Set<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
+				List<MailBox> retrievedMailBoxes = configDao.find(mbxName, profName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 			}
@@ -505,7 +502,7 @@ public class MailBoxConfigurationService {
 				Map <String, Integer> pageOffsetDetails = getPagingOffsetDetails(page, pageSize, totalCount);
 				int startOffset = pageOffsetDetails.get(PAGING_OFFSET);
 				int count = pageOffsetDetails.get(PAGING_COUNT);
-				Set<MailBox> retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
+				List<MailBox> retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 			}

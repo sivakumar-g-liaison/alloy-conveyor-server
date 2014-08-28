@@ -11,7 +11,6 @@
 package com.liaison.mailbox.jpa.dao;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -43,9 +42,9 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String TENANCY_KEYS = "tenancy_keys";
 	
 	public int getMailboxCountByProtocol(String mbxName, String profName, List <String> tenancyKeys);
-	public Set<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
+	public List<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
 
 	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys);
-	public Set<MailBox> findByName(String mbxName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
+	public List<MailBox> findByName(String mbxName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
 	
 }
