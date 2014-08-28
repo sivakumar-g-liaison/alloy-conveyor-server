@@ -229,7 +229,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			LOG.info("Fetching the processor count starts.");
 
-			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox")
 					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
 					.append(" and mailbox.pguid = :" + PGUID);
@@ -286,7 +286,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			LOG.info("Fetching the processor count starts.");
 
-			StringBuffer query = new StringBuffer().append("select processor from Processor processor")
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox")
 					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE);
 			Class <?> processorType = getProcessorClass(type);

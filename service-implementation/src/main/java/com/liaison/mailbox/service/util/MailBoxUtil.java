@@ -22,8 +22,8 @@ import java.util.Properties;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -176,97 +176,6 @@ public class MailBoxUtil {
 		Date d = new Date();
 		return new Timestamp(d.getTime());
 	}
-	
-	/**
-	 * Method to get the dependency constraint corresponding to the service name configured in properties file
-	 * 
-	 * @param aclManifestDTO
-	 * @return
-	 * @throws IOException
-	 */
-	/*private static NestedServiceDependencyContraint  getDependencyConstraintFromACLManifest(ACLManifest aclManifestDTO) throws IOException {
-		
-		//retrieve the very first platform object from acl manifest json
-		Platform platform = aclManifestDTO.getPlatform().get(0);
-		
-		// retrieve the dependency constraint having service name as per the configuration in properties file
-		List <NestedServiceDependencyContraint> dependencyConstraints = (platform != null)? platform.getNestedServiceDependencyContraint():null;
-		for (NestedServiceDependencyContraint dependencyConstraint : dependencyConstraints) {
-			
-			if (dependencyConstraint.getServiceName().equalsIgnoreCase(getEnvironmentProperties().getString("acl.constraint.service.name"))) {
-				return dependencyConstraint;
-			}
-		}
-		return null;
-
-	}*/
-	
-	
-	/**
-	 * Method to retrieve the primary service instance id from the given acl manifest dto
-	 * 
-	 * @param  String aclManifestJson
-	 * @return String primary Service instance id
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 */
-	/*public static String getPrimaryServiceInstanceIdFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
-		
-		// retrieve the service instance id from acl manifest
-		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
-		LOGGER.info("acl Manifest DTO deserialized successfully");
-		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
-		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
-		String primaryServiceInstanceId  = (dependencyConstraint != null)?dependencyConstraint.getPrimaryId():null;
-		return primaryServiceInstanceId;
-	}*/
-	
-	/**
-	 * Method to retrieve the list of secondary service instance ids from the given acl manifest dto
-	 * 
-	 * @param String aclManifestJson
-	 * @return
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 */
-	/*public static List<String> getSecondaryServiceInstanceIdSFromACLManifest(String aclManifestJson) throws IOException, JAXBException {
-		
-		// retrieve the service instance id from acl manifest
-		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifest = ACLUtil.readACLManifest(aclManifestJson,false);
-		LOGGER.info("acl Manifest DTO deserialized successfully");
-		NestedServiceDependencyContraint dependencyConstraint = getDependencyConstraintFromACLManifest(aclManifest);
-		LOGGER.info("Retrieving the service instance id from acl Manifest DTO");
-		List<String> secondayServiceInstanceIDs = (dependencyConstraint != null)?dependencyConstraint.getNestedServiceId():null;
-		return secondayServiceInstanceIDs;
-		
-	}*/
-	
-	/**
-	 * Method to get the tenancy key from acl manifest Json
-	 * 
-	 * @param String - aclManifestJson
-	 * @return
-	 * @throws IOException
-	 */
-	/*public static String  getTenancyKeyFromACLManifest(String aclManifestJson) throws IOException {
-		
-		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false);
-		LOGGER.info("acl Manifest DTO deserialized successfully");
-		
-		//retrieve the very first platform object from acl manifest json
-		Platform platform = aclManifestDTO.getPlatform().get(0);
-		
-		// retrieve the domain name from the very first RBAC available in platform
-		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
-		LOGGER.info("Retrieving tenancy key from acl manifest");
-		String domainName = (roleBasedAccessControls != null)? roleBasedAccessControls.get(0).getDomainName():null;
-		LOGGER.info("Tenancy key retrieved is {}", domainName);
-		return domainName;
-
-	}*/
 	
 	/**
 	 * Method to get all tenancy keys from acl manifest Json

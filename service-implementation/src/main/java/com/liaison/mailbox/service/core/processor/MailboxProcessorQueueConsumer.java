@@ -12,8 +12,10 @@ package com.liaison.mailbox.service.core.processor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -22,19 +24,16 @@ import org.apache.logging.log4j.LogManager;
  */
 public class MailboxProcessorQueueConsumer {
 	
-	private final static int THREAD_COUNT = 5;	
+	private static int threadCount;		
 	private static final Logger logger = LogManager.getLogger(MailboxProcessorQueueConsumer.class);
 	private static MailboxProcessorQueueConsumer qConsumerInstance = null;
 	
 	private MailboxProcessorQueueConsumer() {
 		// defeat instantiation.
 	}
-
 	
-	//ExecutorService execSrvc = Executors.newFixedThreadPool(THREAD_COUNT);
-	//ExecutorService execSrvc = Executors.newCachedThreadPool();
 	private LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<Runnable>();
-	private MailBoxThreadPoolExecutor execSrvc = new MailBoxThreadPoolExecutor(THREAD_COUNT, THREAD_COUNT,60L, TimeUnit.MILLISECONDS,linkedBlockingQueue,true);
+	private MailBoxThreadPoolExecutor execSrvc = new MailBoxThreadPoolExecutor(threadCount, threadCount,60L, TimeUnit.MILLISECONDS,linkedBlockingQueue,true);
 	
 	public void invokeProcessor(String requestJSON) throws InterruptedException {		
 		execSrvc.execute(new ProcessorInvoker(requestJSON));
@@ -53,8 +52,12 @@ public class MailboxProcessorQueueConsumer {
 	/**
 	 * Get MailboxProcessorQueueConsumer Instance.
 	 * @return MailboxProcessorQueueConsumer
+	 * @throws Exception 
+	 * @throws NumberFormatException 
 	 */
-	public static MailboxProcessorQueueConsumer getMailboxProcessorQueueConsumerInstance() {
+	public static MailboxProcessorQueueConsumer getMailboxProcessorQueueConsumerInstance() throws Exception {
+		
+		threadCount = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString("mailbox.processor.queue.consumer.thread.count"));	
 		if (qConsumerInstance == null) {
 			qConsumerInstance = new MailboxProcessorQueueConsumer();
 		}

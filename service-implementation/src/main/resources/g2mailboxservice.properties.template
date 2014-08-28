@@ -5,7 +5,7 @@
 com.netflix.karyon.server.base.packages=com.liaison
 
 # The health check handler for this application.
-com.netflix.karyon.health.check.handler.classname=com.liaison.mailbox.service.heatlh.HealthCheck
+com.netflix.karyon.health.check.handler.classname=com.liaison.mailbox.service.health.HealthCheck
 
 # Comment this property if you need eureka integration and populate eureka-client.properties with your environment details.
 com.netflix.karyon.eureka.disable=true
@@ -181,3 +181,5 @@ mailbox.aclrequest.service.name="KEYMANGER"
 # for ACL filter
 com.liaison.acl.skipList=com.wordnik.swagger.jersey.listing.ApiListingResource.resourceListing,com.wordnik.swagger.jersey.listing.ApiListingResource.apiDeclaration,com.liaison.service.resources.acl.AclResourceMapResource.getList
 
+#Thread Count for processor
+mailbox.processor.queue.consumer.thread.count=5

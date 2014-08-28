@@ -8,7 +8,6 @@
  * with Liaison Technologies.
  */
 
-
 package com.liaison.mailbox.service.dto.configuration.response;
 
 import javax.ws.rs.core.MediaType;

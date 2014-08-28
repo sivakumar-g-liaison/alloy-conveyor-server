@@ -1,3 +1,12 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
@@ -27,6 +36,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 @Path("mailbox/tenancyKeys/")
 @Api(value = "mailbox/tenancyKeys", description = "gateway to retrieve all tenancy keys of acl manifest in request")
 public class MailboxTenancyKeyResource extends BaseResource {

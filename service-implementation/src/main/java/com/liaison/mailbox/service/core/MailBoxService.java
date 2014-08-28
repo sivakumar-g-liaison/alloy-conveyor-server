@@ -14,17 +14,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
 
-import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
@@ -230,29 +228,6 @@ public class MailBoxService {
 		}
 		
 	}
-//
-//	/**
-//	 * The method gets the ConfigureJNDIDTO.
-//	 *
-//	 * @return ConfigureJNDIDTO
-//	 * @throws NamingException
-//	 * @throws JMSException
-//	 * @throws IOException
-//	 */
-//	private ConfigureJNDIDTO getConfigureJNDIDTO()  throws NamingException, JMSException, IOException {
-//
-//		MailBoxUtil.getEnvironmentProperties();
-//		String providerURL = MailBoxUtil.getEnvironmentProperties().getString("g2.queueing.server.url");
-//		String queueName = MailBoxUtil.getEnvironmentProperties().getString("triggered.profile.processor.queue.name");
-//
-//
-//		ConfigureJNDIDTO jndidto = new ConfigureJNDIDTO();
-//		jndidto.setInitialContextFactory("org.jnp.interfaces.NamingContextFactory");
-//		jndidto.setProviderURL(providerURL);
-//		jndidto.setQueueName(queueName);
-//		jndidto.setUrlPackagePrefixes("org.jboss.naming");
-//		return jndidto;
-//	}
 
 	/**
 	 * Sent notifications for trigger system failure.

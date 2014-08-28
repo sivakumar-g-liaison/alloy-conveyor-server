@@ -142,12 +142,6 @@ public class SearchMailBoxDTO {
 			this.getProperties().add(propertyDTO);
 		}
 
-		// Boolean to denote the mailbox has processor or not
-		/*boolean isMbxHasProcessors = false;
-		if (mailBox.getMailboxProcessors() != null && !mailBox.getMailboxProcessors().isEmpty()) {
-			isMbxHasProcessors = true;
-		}*/
-
 		if (MailBoxStatus.ACTIVE.value().equals(mailBox.getMbxStatus()) && !isMbxHasProcessors) {
 			this.setStatus(MailBoxConstants.INCOMPLETE_STATUS);
 		}

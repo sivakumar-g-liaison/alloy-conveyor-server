@@ -570,8 +570,8 @@ public abstract class AbstractRemoteProcessor {
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
 		if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
-			String password = MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(), 2);
-			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), password));
+			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword());
+			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), passwordFromKMS));
 		}
 
 		// Configure keystore for HTTPS request
@@ -654,8 +654,6 @@ public abstract class AbstractRemoteProcessor {
 
 			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse, KeyServiceResponse.class);
 			KeySet keySet = (KeySet) mkr.getDataTransferObject();
-			//GMB-319
-			//is = new ByteArrayInputStream(keySet.getCurrentPublicKey().getBytes());
 			is = new ByteArrayInputStream(Base64.decodeBase64(keySet.getCurrentPublicKey()));
 		}
 
@@ -1016,9 +1014,6 @@ public abstract class AbstractRemoteProcessor {
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
 					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
-				// String password =
-				// MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(),
-				// 2);
 				ftpsRequest.setUser(loginCredential.getCredsUsername());
 				ftpsRequest.setPassword(passwordFromKMS);
 			}
@@ -1115,9 +1110,6 @@ public abstract class AbstractRemoteProcessor {
 
 			}
 			if (!MailBoxUtil.isEmpty(passwordFromKMS)) {
-				// String password =
-				// MailBoxCryptoUtil.doPasswordEncryption(loginCredential.getCredsPassword(),
-				// 2);
 				sftpRequest.setPassword(passwordFromKMS);
 			}
 		}
@@ -1144,7 +1136,6 @@ public abstract class AbstractRemoteProcessor {
 			    out.write(privateKeyStream);
 			}			
 			sftpRequest.setPrivateKeyPath(privateKeyPath);
-			// sftpRequest.setPassphrase(sshKeyPairCredential.getCredsPassword());
 
 		}
 

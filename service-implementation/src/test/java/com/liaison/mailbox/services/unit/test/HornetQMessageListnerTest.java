@@ -10,17 +10,12 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Properties;
-
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 
 
@@ -47,32 +42,6 @@ public class HornetQMessageListnerTest {
             ProcessorQueue.getInstance().pushMessages("mynewID"+i);
 		}
 		logger.debug("Done posting");		 
-	 }
-     
-     /**
-      * Method to test Thread.
-      * 
-      * @throws InterruptedException
-      */
-	/*@Test
-	public void testThreading() throws InterruptedException {
-		 
-    	 MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
-			for(int i=0;i<10;i++){
-				qconsumer.invokeProcessor("MyIdis"+i);
-				
-			};
-			
-			Thread.sleep(30000);
-			logger.debug("Back from sleep");
-			
-			for(int i=0;i<10;i++){
-				qconsumer.invokeProcessor("MyIdisNewId"+i);
-				
-			};
-          while(true);	 
-	 }*/
-	 
-	
+	 }	
 
 }

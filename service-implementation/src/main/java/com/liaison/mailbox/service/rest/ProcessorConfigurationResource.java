@@ -33,8 +33,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.util.StreamUtil;
@@ -125,13 +125,6 @@ public class ProcessorConfigurationResource extends AuditedResource {
 			// add the new profile details
 			AddProcessorToMailboxResponseDTO serviceResponse = null;
 			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-
-			// retrieving acl manifest from header
-			/*
-			 * LOG.info("Retrieving acl manifest json from request header"); String manifestJson =
-			 * request.getHeader("acl-manifest"); String decodedManifestJson =
-			 * MailBoxUtil.getDecodedManifestJson(manifestJson);
-			 */
 
 			serviceResponse = mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 

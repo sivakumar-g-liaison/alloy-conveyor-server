@@ -49,7 +49,6 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.dto.directorysweeper.FileGroupDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.SweepConditions;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.FS2InstanceCreator;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
@@ -112,7 +111,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		}
 
 		List<FileAttributesDTO> files = (inProgressFiles.isEmpty())
-				? sweepDirectory(inputLocation, false, false, null, fileRenameFormat, timeLimit)
+				? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
 				: validateInprogressFiles(inProgressFiles, timeLimit);
 
 		if (files.isEmpty()) {
@@ -174,7 +173,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws JAXBException
 	 */
 	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
-			SweepConditions sweepConditions, String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
+			String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException {
 
 		Path rootPath = Paths.get(root);

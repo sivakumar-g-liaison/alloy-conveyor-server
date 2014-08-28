@@ -147,7 +147,6 @@ public class BaseResource {
 		} else {
 			logger.info(failExitStatement);
 		}
-		// ThreadContext.clear(); // clean slate
 	}
 
 	/**

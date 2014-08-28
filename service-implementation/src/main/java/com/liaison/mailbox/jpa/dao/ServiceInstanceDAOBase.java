@@ -27,29 +27,6 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstance> impl
 	public ServiceInstanceDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-
-	/*@Override
-	@SuppressWarnings("unchecked")
-	public ServiceInstance findByName(String serviceInstanceId) {
-
-		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		try {
-
-			List<ServiceInstance> permissionRefs = entityManager.createNamedQuery(FIND_BY_NAME).setParameter(SERVICE_INSTANCE, serviceInstanceId)
-					.getResultList();
-			Iterator<ServiceInstance> iter = permissionRefs.iterator();
-
-			while (iter.hasNext()) {
-				return iter.next();
-			}
-
-		} finally {
-			if (entityManager != null) {
-				entityManager.clear();
-			}
-		}
-		return null;
-	}*/
 	
 	/**
 	 * Fetches ServiceInstance from SERVICE_INSTANCE database table by given servInsId.
@@ -79,4 +56,3 @@ public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstance> impl
 		return null;
 	}
 }
-

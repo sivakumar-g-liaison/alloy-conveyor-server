@@ -10,9 +10,6 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-
 import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
@@ -21,6 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -40,15 +39,6 @@ public class JSONUtilityTest extends BaseServiceTest {
 	@BeforeMethod
 	public void setUp() throws Exception {
 	}
-
-	/*
-	 * @Test public void jsonTest() throws JsonParseException, JsonMappingException, JAXBException,
-	 * IOException { String data =
-	 * ServiceUtils.readFileFromClassPath("response/mailbox/addmailboxresponse.json");
-	 * AddMailBoxResponseDTO responseDTO = MailBoxUtil.unmarshalFromJSON(data,
-	 * AddMailBoxResponseDTO.class); Assert.assertEquals(SUCCESS,
-	 * responseDTO.getResponse().getStatus()); }
-	 */
 	
     /**
      * Method to test un-marshal from JSON.
@@ -60,9 +50,6 @@ public class JSONUtilityTest extends BaseServiceTest {
      */
 	@Test
 	public void jsonTest() throws JsonParseException, JsonMappingException, JAXBException, IOException {
-
-		//String data = ServiceUtils.readFileFromClassPath("requests/mailbox/revisemailboxrequest.json");
-		//ReviseMailBoxRequestDTO responseDTO = MailBoxUtil.unmarshalFromJSON(data, ReviseMailBoxRequestDTO.class);
 		
 		TriggerProcessorRequestDTO request = new TriggerProcessorRequestDTO("A", "B", "C");
 		request.setExecutionId("Test");

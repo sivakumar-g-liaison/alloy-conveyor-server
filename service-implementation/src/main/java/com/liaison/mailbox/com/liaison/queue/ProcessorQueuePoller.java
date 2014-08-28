@@ -1,15 +1,24 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 package com.liaison.mailbox.com.liaison.queue;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.core.processor.MailboxProcessorQueueConsumer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.sql.Time;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -55,10 +64,11 @@ public class ProcessorQueuePoller  {
                 String message = ProcessorQueue.getInstance().popMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);
-                    MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
+                    
                     try {
+                    	MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
                         qconsumer.invokeProcessor(message);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         logger.error("Recovering from processing error", e);
                     }
                 }
@@ -67,10 +77,5 @@ public class ProcessorQueuePoller  {
        pool.scheduleWithFixedDelay(messageProcessor, INITIAL_DELAY, INTERVAL_DELAY, DELAY_TIME_UNIT);
        started = true;
     }
-
-
-
-
-
-
+    
 }

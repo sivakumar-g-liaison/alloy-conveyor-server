@@ -269,9 +269,6 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			}
 			String privateKeyPath = this.getClass().getResource("/requests/keymanager/opensslkeypair.pem").getPath();
 			String password = "passmein";
-			/*FileOutputStream out = new FileOutputStream(privateKeyPath);
-			out.write(privateKeyBytes);
-			out.close();*/
 			
 			sftpRequest = new G2SFTPClient();
 			sftpRequest.setURI("sftp://10.0.24.40:22");
@@ -324,7 +321,6 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			sftpRequest.setPrivateKeyPath(privateKeyPath);
 			sftpRequest.setStrictHostChecking(false);
 			sftpRequest.setUser("g2testusr");
-			//sftpRequest.setPassphrase(password);
 			sftpRequest.setDiagnosticLogger(logger);
 			sftpRequest.setCommandLogger(logger);
 			boolean value = sftpRequest.connect();

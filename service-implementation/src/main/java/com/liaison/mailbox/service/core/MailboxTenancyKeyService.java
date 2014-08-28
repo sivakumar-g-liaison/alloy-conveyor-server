@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
@@ -29,7 +39,7 @@ public class MailboxTenancyKeyService {
 	 */
 	public GetTenancyKeysResponseDTO getAllTenancyKeysFromACLManifest (String aclManifestJson) {
 		
-		LOG.info("Entering retrieve all tenancy keys");
+		LOG.debug("Entering retrieve all tenancy keys");
 		GetTenancyKeysResponseDTO serviceResponse = new GetTenancyKeysResponseDTO();
 		List<TenancyKeyDTO> tenancyKeys = null;
 		try {
@@ -43,7 +53,7 @@ public class MailboxTenancyKeyService {
 			// constructing the response
 			serviceResponse.setTenancyKeys(tenancyKeys);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, TENANCY_KEYS, Messages.SUCCESS));
-			LOG.info("Exit from retrieve all tenancy keys.");
+			LOG.debug("Exit from retrieve all tenancy keys.");
 			return serviceResponse;
 		} catch (IOException | MailBoxServicesException e ) {
 			

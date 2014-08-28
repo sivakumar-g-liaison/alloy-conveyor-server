@@ -16,7 +16,6 @@
 		<mapping-file>META-INF/orm.xml</mapping-file>
 		<class>com.liaison.mailbox.jpa.model.ServiceInstance</class>
 		<class>com.liaison.mailbox.jpa.model.MailboxServiceInstance</class>
-		<class>com.liaison.mailbox.jpa.model.MailBoxComponent</class>
 		<class>com.liaison.mailbox.jpa.model.RemoteDownloader</class>
 		<class>com.liaison.mailbox.jpa.model.RemoteUploader</class>
 		<class>com.liaison.mailbox.jpa.model.Sweeper</class>
@@ -31,9 +30,7 @@
 		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
 		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
 		<class>com.liaison.mailbox.jpa.model.FSMEvent</class>
-		<class>com.liaison.mailbox.jpa.model.FSMModel</class>
 		<class>com.liaison.mailbox.jpa.model.FSMState</class>
-		<class>com.liaison.mailbox.jpa.model.FSMTransitionList</class>
 		<class>com.liaison.mailbox.jpa.model.FSMStateValue</class>
 		<class>com.liaison.mailbox.jpa.model.FSMTransitionState</class>
 		<properties>

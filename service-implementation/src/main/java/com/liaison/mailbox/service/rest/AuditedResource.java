@@ -30,6 +30,11 @@ import com.netflix.servo.monitor.MonitorConfig;
 import com.netflix.servo.monitor.StatsTimer;
 import com.netflix.servo.stats.StatsConfig;
 
+/**
+ * 
+ * @author OFS
+ *
+ */
 public abstract class AuditedResource extends BaseResource {
 
 	// *************************************************

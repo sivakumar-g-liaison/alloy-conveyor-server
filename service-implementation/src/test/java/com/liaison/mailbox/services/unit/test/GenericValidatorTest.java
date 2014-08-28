@@ -10,9 +10,10 @@
 
 package com.liaison.mailbox.services.unit.test;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -178,7 +179,6 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType(" ");
 		dto.setStatus(" ");
-		// dto.setLinkedProfileId(" ");
 		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}
@@ -195,7 +195,6 @@ public class GenericValidatorTest {
 		ProcessorDTO dto = new ProcessorDTO();
 		dto.setType("sdsd");
 		dto.setStatus("dsddd");
-		// dto.setLinkedProfileId("ASDERER1425SDSD");
 		GenericValidator validator = new GenericValidator();
 		validator.validate(dto);
 	}

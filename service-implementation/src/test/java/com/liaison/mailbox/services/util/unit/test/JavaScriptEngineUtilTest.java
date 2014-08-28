@@ -72,7 +72,7 @@ public class JavaScriptEngineUtilTest {
 	    // did my function call throw?
 	    Exception expectedException = ((Map<String, Exception>)scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS)).get("sandbox-tests.js" + ":" + "testHappyPathWithArgs");
 	    if (null != expectedException) {
-	    	expectedException.printStackTrace();
+	    	logger.error(expectedException.getMessage(), expectedException);
 	    	Assert.assertTrue(false);
 	    }
 	   

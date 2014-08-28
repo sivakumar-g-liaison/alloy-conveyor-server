@@ -30,8 +30,8 @@ import org.apache.logging.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.mailbox.jpa.dao.MailBoxDAO;
 import com.liaison.mailbox.jpa.dao.FilterObject;
+import com.liaison.mailbox.jpa.dao.MailBoxDAO;
 
 /**
  * 
@@ -82,7 +82,7 @@ public abstract class GridService<T> {
 	public GridResult<T> getGridItems(final Class clazz, final String filterText, final String sortInfo,
             final String page, final String pageSize) {
 
-        LOGGER.info("Entering into getGridItems.");
+        LOGGER.debug("Entering into getGridItems.");
         Map<String, List<com.liaison.mailbox.jpa.dao.FilterObject>> searchTextObjectList = new HashMap<>();
         Map<String, Object> sortInfoMap = new HashMap<>();
 
@@ -157,7 +157,7 @@ public abstract class GridService<T> {
             }
 
            
-            LOGGER.info("Exit from getGridItemsWithEnterprise.");
+            LOGGER.debug("Exit from getGridItemsWithEnterprise.");
             return new GridResult<T>(mailboxMgtEntities, count);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -180,7 +180,7 @@ public abstract class GridService<T> {
     private void addSort(final Map<String, Object> sortInfoMap, final CriteriaBuilder criteriaBuilder,
             final CriteriaQuery<T> query, final Root<T> gemRequest) {
 
-        LOGGER.info("Entering into addSort.");
+        LOGGER.debug("Entering into addSort.");
         // Get sort data
         ArrayList<String> fieldsValue = (ArrayList<String>) sortInfoMap.get(SORT_FIELDS);
         ArrayList<String> directionsValue = (ArrayList<String>) sortInfoMap.get(SORT_DIRECTIONS);
@@ -200,7 +200,7 @@ public abstract class GridService<T> {
                 query.orderBy(criteriaBuilder.desc(field));
             }
         }
-        LOGGER.info("Exit from addSort.");
+        LOGGER.debug("Exit from addSort.");
     }
 
     /**
