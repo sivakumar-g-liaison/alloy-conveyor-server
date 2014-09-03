@@ -2804,7 +2804,7 @@ var rest = myApp.controller(
                                 data.getTrustStoreResponse.trustStore.trustStoreGroupId);
                         } else {
                             block.unblockUI();
-                            showSaveMessage(data.getTrustStoreResponse.response.message, 'error');
+                            showSaveMessage('Certificate Uploading Failed', 'error');
                             return;
                         }
                     }

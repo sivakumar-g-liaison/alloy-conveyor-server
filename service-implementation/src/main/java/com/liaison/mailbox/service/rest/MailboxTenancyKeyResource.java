@@ -11,12 +11,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
+import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
+import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
+import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.MailboxTenancyKeyService;
-import com.liaison.mailbox.service.dto.configuration.response.GetTenancyKeysResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -29,7 +36,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 @Path("mailbox/tenancyKeys/")
 @Api(value = "mailbox/tenancyKeys", description = "gateway to retrieve all tenancy keys of acl manifest in request")
-public class MailboxTenancyKeyResource extends BaseResource {
+public class MailboxTenancyKeyResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxTenancyKeyResource.class);
 
@@ -59,47 +66,58 @@ public class MailboxTenancyKeyResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "retrieveTenancyKeys")
-	public Response retrieveTenancyKeys(@Context HttpServletRequest request) {
+	public Response retrieveTenancyKeys(@Context final HttpServletRequest request) {
 		
-		//Audit LOG the Attempt to retrieve tenancykeys
-		auditAttempt("retrieveTenancyKeys");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);				
+				try {
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+					//retrieve TenancyKeys
+					MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
+					return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(decodedManifestJson);					
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+				
+			}
+		};
+		worker.actionLabel = "MailboxTenancyKeyResource.retrieveTenancyKeys()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-	
+		// hand the delegate to the framework for calling
 		try {
-			
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-			
-			GetTenancyKeysResponseDTO serviceResponse = null;
-			MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
-			serviceResponse =  mailboxTenancyKey.getAllTenancyKeysFromACLManifest(decodedManifestJson);
-			
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "createMailBox");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-			
-		} catch (Exception  e) {
-			
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("retrieveTenancyKeys");
-		
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}	
 		
-		// Audit LOG the failure
-		auditFailure("retrieveTenancyKeys");
-		return returnResponse;
+	}
+
+	@Override
+	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+	}
+
+	@Override
+	protected void beginMetricsCollection() {
+		// TODO Auto-generated method stub		
+	}
+
+	@Override
+	protected void endMetricsCollection(boolean success) {
+		// TODO Auto-generated method stub		
 	}
 }

@@ -16,12 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,8 +33,10 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -80,39 +86,45 @@ public class MailBoxFileResource extends AuditedResource {
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "getFileList")
-	public Response getFileList() {
+	public Response getFileList(@Context final HttpServletRequest request) {
+        
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				try {
+					String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString(
+							"processor.javascript.root.directory");
+					File file = new File(jsFileLocation);
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 
-		// Audit LOG the Attempt to getFileList
-		auditAttempt("getFileList");
+					FileInfoDTO info = mailbox.getFileDetail(file);
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
+					List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
+					infos.add(info);
+					String response = MailBoxUtil.marshalToJSON(infos);	
+					return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
+					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}					
+			}
+		};
+		worker.actionLabel = "MailBoxFileResource.getFileList()";
 
+		// hand the delegate to the framework for calling
 		try {
-			String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString(
-					"processor.javascript.root.directory");
-			File file = new File(jsFileLocation);
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-
-			FileInfoDTO info = mailbox.getFileDetail(file);
-
-			List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
-			infos.add(info);
-			String response = MailBoxUtil.marshalToJSON(infos);
-
-			// Audit LOG the success
-			auditSuccess("getFileList");
-			return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxFileResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-		// Audit LOG the failure
-		auditFailure("getFileList");
-		return returnResponse;
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 	}
 	
 	@Override

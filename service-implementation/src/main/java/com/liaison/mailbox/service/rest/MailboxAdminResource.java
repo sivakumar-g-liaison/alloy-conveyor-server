@@ -16,7 +16,7 @@ package com.liaison.mailbox.service.rest;
  * @author OFS
  */
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,15 +29,22 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
-import com.liaison.commons.util.StreamUtil;
+import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
+import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
+import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -54,7 +61,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 @Path("mailbox/processoradmin")
 @Api(value = "mailbox/processoradmin", description = "Administration of processor services")
-public class MailboxAdminResource extends BaseResource {
+public class MailboxAdminResource extends AuditedResource {
 	
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
 
@@ -88,37 +95,42 @@ public class MailboxAdminResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "getExecutingProcessors")
-	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "get list of executing processors with the status specified") @ApiParam(name="status", required=false, value="status") String status,
-			@QueryParam(value = "frmDate") @ApiParam(name="frmDate", required=false, value="get list of executing processors from the date specified ") String frmDate, @QueryParam(value = "toDate") @ApiParam(name="toDate", required=false, value="get list of executing processors to the date specified") String toDate, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") String hitCounter) {
+	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "get list of executing processors with the status specified") @ApiParam(name="status", required=false, value="status") final String status,
+			@QueryParam(value = "frmDate") @ApiParam(name="frmDate", required=false, value="get list of executing processors from the date specified ") final String frmDate, @QueryParam(value = "toDate") @ApiParam(name="toDate", required=false, value="get list of executing processors to the date specified") final String toDate, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") final String hitCounter) {
 
-		// Audit LOG the Attempt to getExecutingProcessors
-		auditAttempt("getExecutingProcessors");
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				try {
+					GetExecutingProcessorResponseDTO serviceResponse = null;
+					ProcessorConfigurationService processor = new ProcessorConfigurationService();
+                    //get the list processors latest state
+					serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
+					serviceResponse.setHitCounter(hitCounter);
+					
+					return serviceResponse;					
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+			}
+		};
+		worker.actionLabel = "MailboxAdminResource.getExecutingProcessors()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
+		// hand the delegate to the framework for calling
 		try {
-			GetExecutingProcessorResponseDTO serviceResponse = null;
-			ProcessorConfigurationService processor = new ProcessorConfigurationService();
-
-			serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
-			serviceResponse.setHitCounter(hitCounter);
-
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "getExecutingProcessors");
-
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxAdminResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("getExecutingProcessors");
-		}
-		return returnResponse;
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 	}
 
 	/**
@@ -142,46 +154,59 @@ public class MailboxAdminResource extends BaseResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "interruptRunningProcessor")
-	public Response interruptRunningProcessor(@Context HttpServletRequest request) {
+	public Response interruptRunningProcessor(@Context final HttpServletRequest request) {
+        
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					InterruptExecutionEventRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, InterruptExecutionEventRequestDTO.class);
+					ProcessorConfigurationService processor = new ProcessorConfigurationService();
+					// creates new execution event
+					return processor.interruptRunningProcessor(serviceRequest);					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+			}
+		};	
+		worker.actionLabel = "MailboxAdminResource.interruptRunningProcessor()";
 
-		// Audit LOG the Attempt to interruptRunningProcessor
-		auditAttempt("interruptRunningProcessor ");
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}	
+    }
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		InterruptExecutionEventRequestDTO serviceRequest;
+	@Override
+	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+	}
 
-		try (InputStream requestStream = request.getInputStream()) {
+	@Override
+	protected void beginMetricsCollection() {
+		// TODO Auto-generated method stub
+		
+	}
 
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, InterruptExecutionEventRequestDTO.class);
-
-			InterruptExecutionEventResponseDTO serviceResponse = null;
-			ProcessorConfigurationService processor = new ProcessorConfigurationService();
-
-			// creates new execution event
-			serviceResponse = processor.interruptRunningProcessor(serviceRequest);
-
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "interruptRunningProcessor");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxAdminResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-		// Audit LOG the failure
-		auditFailure("interruptRunningProcessor");
-		return returnResponse;
-
+	@Override
+	protected void endMetricsCollection(boolean success) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -13,25 +13,28 @@ package com.liaison.mailbox.service.rest;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
-import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -85,38 +88,32 @@ public class MailBoxProfileResource  extends AuditedResource {
 	})
 	@AccessDescriptor(accessMethod = "findProfiles")
 	public Response findProfiles(
-			@QueryParam(value = "name") @ApiParam(name = "name", required = true, value = "Name of the profile to be searched.") String profileName) {
+			@Context final HttpServletRequest request,
+			@QueryParam(value = "name") @ApiParam(name = "name", required = true, value = "Name of the profile to be searched.") final String profileName) {
 
-		// Audit LOG the Attempt to findProfiles
-		auditAttempt("findProfiles");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				LOG.debug("Entering into find profiles resource.");
+				// search profiles by profile Name
+				ProfileConfigurationService mailbox = new ProfileConfigurationService();
+				return mailbox.searchProfiles(profileName);			
+			}
+		};
+		worker.actionLabel = "MailBoxProfileResource.findProfiles()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
+		// hand the delegate to the framework for calling
 		try {
-
-			// add the new profile details
-			GetProfileResponseDTO serviceResponse = null;
-			ProfileConfigurationService mailbox = new ProfileConfigurationService();
-			serviceResponse = mailbox.searchProfiles(profileName);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "findProfiles");
-
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxProfileResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("findProfiles");
-		}
-		return returnResponse;
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 	}
 	
 	@Override

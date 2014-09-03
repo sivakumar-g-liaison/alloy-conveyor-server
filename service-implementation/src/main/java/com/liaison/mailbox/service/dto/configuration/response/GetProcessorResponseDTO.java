@@ -10,15 +10,12 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.io.Serializable;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -26,8 +23,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  */
 @JsonRootName("getProcessorResponse")
-public class GetProcessorResponseDTO implements ResponseBuilder {
+public class GetProcessorResponseDTO implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ResponseDTO response;
 	private ProcessorDTO processor;
 	
@@ -43,18 +44,4 @@ public class GetProcessorResponseDTO implements ResponseBuilder {
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
 	}
-	
-	/**
-	 * Method constructs response.
-	 *
-	 * @throws Exception
-	 * @return Response.
-	 */
-	@Override
-	public Response constructResponse() throws Exception {
-
-		String responseBody = MailBoxUtil.marshalToJSON(this);
-		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-	}
-
 }

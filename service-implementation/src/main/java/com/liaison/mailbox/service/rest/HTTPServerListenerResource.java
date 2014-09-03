@@ -11,7 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +23,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,12 +31,13 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.util.StreamUtil;
+import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.fs2.api.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.core.HTTPServerListenerService;
-import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -91,42 +93,41 @@ public class HTTPServerListenerResource extends AuditedResource {
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "httpServerListener")
-	public Response httpServerListener(@Context HttpServletRequest request,
-			@HeaderParam(MailBoxConstants.FOLDER_HEADER) String folder,
-			@HeaderParam(MailBoxConstants.FILE_NAME_HEADER) String filename) {
+	public Response httpServerListener(@Context final HttpServletRequest request,
+			@HeaderParam(MailBoxConstants.FOLDER_HEADER) final String folder,
+			@HeaderParam(MailBoxConstants.FILE_NAME_HEADER) final String filename) {
 
-		// Audit LOG the Attempt to httpServerListener
-		auditAttempt("httpServerListener");
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					HTTPServerListenerService service = new HTTPServerListenerService();
+					return service.serverListener(requestString, folder, filename);		
+				} catch (IOException | FS2Exception | URISyntaxException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} 		
+			}
+		};
+		worker.actionLabel = "HTTPServerListenerResource.httpServerListener()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			HTTPServerListenerService service = new HTTPServerListenerService();
-			ServerListenerResponseDTO serviceResponse = service.serverListener(requestString, folder, filename);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "httpServerListener");
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "HTTPServerListenerResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("httpServerListener");
-		}
-		return returnResponse;
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 	}
-
 	
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
