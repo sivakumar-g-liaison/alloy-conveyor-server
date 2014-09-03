@@ -12,9 +12,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.mailBoxName = null;
         $scope.profile = null;
 
-        // To enable "No records found" div
-        $scope.info = false;
-
         // Counter to ensure the result is for the given request.
         $scope.hitCounter = 1;
 
@@ -62,7 +59,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.reset = function () {
 
             $scope.mailboxes = [];
-            $scope.info = false;
             $scope.totalServerItems = 0;
             if (!$scope.$$phase) {
                 $scope.$apply();
@@ -89,15 +85,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Set the paging data to grid from server object
         $scope.setPagingData = function (data) {
 
-            if (data === null || data.length <= 0) {
-                $scope.message = 'No results found.';
-                $scope.info = true;
-            } else if ($scope.profile === null && ($scope.mailBoxName === null || $scope.mailBoxName.length === 0)) {
+           if ($scope.profile === null && ($scope.mailBoxName === null || $scope.mailBoxName.length === 0)) {
                 data = [];
-                $scope.info = true;
-            } else {
-                $scope.info = false;
-            }
+            } 
 
             $scope.mailboxes = data.mailBox;
             $scope.totalServerItems = data.totalItems;

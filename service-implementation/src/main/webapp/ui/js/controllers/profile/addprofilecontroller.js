@@ -30,9 +30,6 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
         // Search Profiles based on profile Name
         $scope.profileName = null;
                
-         // To enable "No records found" div
-      //  $scope.info = false;
-        
         // Modify the value to change the search criteria
         $scope.searchMinCharacterCount = 5;
 
