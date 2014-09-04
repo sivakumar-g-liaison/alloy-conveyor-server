@@ -2199,7 +2199,7 @@ var rest = myApp.controller(
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
-						if () {
+					if (status === 200) {
 							editRequest.reviseProcessorRequest.processor.credentials[a].password = data;
 							$scope.processorReviseAfterKM();
 							
