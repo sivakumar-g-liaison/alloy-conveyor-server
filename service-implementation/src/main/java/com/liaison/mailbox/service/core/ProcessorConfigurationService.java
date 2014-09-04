@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.http.HttpEntity;
@@ -102,7 +103,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class ProcessorConfigurationService {
 
@@ -117,7 +118,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Creates processor for the mailbox.
-	 * 
+	 *
 	 * @param serviceRequest
 	 *            The AddProcessorToMailboxRequestDTO
 	 * @return The AddProcessorToMailboxResponseDTO
@@ -135,21 +136,21 @@ public class ProcessorConfigurationService {
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
 
 		try {
-			
+
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
 			}
 
 			if (!mailBoxGuid.equals(serviceRequest.getProcessor().getLinkedMailboxId())) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX, Response.Status.CONFLICT);
 			}
 
 			ProcessorDTO processorDTO = serviceRequest.getProcessor();
 			if (processorDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
-			
+
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
 			if (null != processorDTO.getFolders()) {
@@ -161,8 +162,8 @@ public class ProcessorConfigurationService {
 				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
 					validator.validate(credentialDTO);
 				}
-			}			
-				
+			}
+			
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {
@@ -197,7 +198,7 @@ public class ProcessorConfigurationService {
 			MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
 			MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, processor.getMailbox().getPguid());
 			if (null == mailBox) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, processor.getMailbox().getPguid());
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, processor.getMailbox().getPguid(), Response.Status.BAD_REQUEST);
 			}
 
 			if (mailboxServiceInstance == null) {
@@ -227,7 +228,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Creates link between scheduleProfileref and processor.
-	 * 
+	 *
 	 * @param addRequest
 	 *            The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest
@@ -257,7 +258,7 @@ public class ProcessorConfigurationService {
 
 				scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
 				if (scheduleProfile == null) {
-					throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName);
+					throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName, Response.Status.BAD_REQUEST);
 				}
 
 				scheduleProfilesRef.add(scheduleProfile);
@@ -287,7 +288,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Creates link between mailbox and processor.
-	 * 
+	 *
 	 * @param addRequest
 	 *            The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest
@@ -311,7 +312,7 @@ public class ProcessorConfigurationService {
 		MailBoxConfigurationDAO mailBoxConfigDAO = new MailBoxConfigurationDAOBase();
 		MailBox mailBox = mailBoxConfigDAO.find(MailBox.class, mailBoxId);
 		if (null == mailBox) {
-			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxId);
+			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailBoxId, Response.Status.BAD_REQUEST);
 		}
 		processor.setMailbox(mailBox);
 
@@ -319,7 +320,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Get the Processor details of the mailbox using guid.
-	 * 
+	 *
 	 * @param processorGuid
 	 *            The guid of the Processor.
 	 * @return The responseDTO.
@@ -343,7 +344,7 @@ public class ProcessorConfigurationService {
 			Processor processor = config.find(Processor.class, processorGuid);
 
 			if (processor == null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid);
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
 			}
 
 			// validates the given processor is belongs to given mailbox
@@ -365,10 +366,10 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
-	
+
 	/**
 	 *  Get the TrustStoreResponse.
-	 *  
+	 *
 	 * @return GetTrustStoreResponseDTO
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws ClientProtocolException
@@ -385,8 +386,8 @@ public class ProcessorConfigurationService {
 			JSONObject jsonRequest = new JSONObject(request);
 			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
 
-			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") 
-					+ "upload/truststore"); 
+			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")
+					+ "upload/truststore");
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
@@ -420,7 +421,9 @@ public class ProcessorConfigurationService {
 				LOGGER.debug("Exit from get mailbox.");
 				return serviceResponse;
 
-			} else throw new MailBoxConfigurationServicesException(Messages.SELFSIGNED_TRUSTSTORE_CREATION_FAILED);
+			} else  {
+				throw new MailBoxConfigurationServicesException(Messages.SELFSIGNED_TRUSTSTORE_CREATION_FAILED, Response.Status.BAD_REQUEST);
+			}
 
 		} catch (MailBoxConfigurationServicesException e) {
 
@@ -434,7 +437,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Deactivate the processor using guid.
-	 * 
+	 *
 	 * @param processorGuid
 	 *            The guid of the Processor.
 	 * @return The responseDTO.
@@ -451,7 +454,7 @@ public class ProcessorConfigurationService {
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 			Processor retrievedProcessor = config.find(Processor.class, processorGuid);
 			if (null == retrievedProcessor) {
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid);
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
 			}
 
 			// validates the given processor is belongs to given mailbox
@@ -479,7 +482,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Method revise the processor configuration
-	 * 
+	 *
 	 * @param request
 	 *            The Revise Processor Request DTO
 	 * @param mailBoxId
@@ -503,18 +506,18 @@ public class ProcessorConfigurationService {
 		try {
 
 			if (!mailBoxId.equals(request.getProcessor().getLinkedMailboxId())) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX, Response.Status.CONFLICT);
 			}
 
 			if (!processorId.equals(request.getProcessor().getGuid())) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, PROCESSOR);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, PROCESSOR, Response.Status.CONFLICT);
 			}
 
 			ProcessorDTO processorDTO = request.getProcessor();
 			if (processorDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
-			
+
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
 			if (null != processorDTO.getFolders()) {
@@ -531,19 +534,19 @@ public class ProcessorConfigurationService {
 			// validates the processor type
 			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());
 			if (foundProcessorType == null) {
-				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Processor");
+				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Processor",Response.Status.BAD_REQUEST);
 			}
 
 			// validates the processor status
 			MailBoxStatus foundStatusType = MailBoxStatus.findByName(processorDTO.getStatus());
 			if (foundStatusType == null) {
-				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, PROCESSOR_STATUS);
+				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, PROCESSOR_STATUS, Response.Status.BAD_REQUEST);
 			}
 
 			ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
 			Processor processor = configDao.find(Processor.class, processorDTO.getGuid());
 			if (processor == null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorDTO.getGuid());
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorDTO.getGuid(), Response.Status.BAD_REQUEST);
 			}
 
 			// validates the given processor is belongs to given mailbox
@@ -590,7 +593,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Method for add and update the dynamic processorProperty to Processor entity
-	 * 
+	 *
 	 * @param guid
 	 *            The processor guid
 	 * @param propertyDTO
@@ -651,7 +654,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Validates the given processor is belongs to the given mailbox.
-	 * 
+	 *
 	 * @param mailBoxGuid
 	 *            The guid of the mailbox
 	 * @param processor
@@ -663,99 +666,99 @@ public class ProcessorConfigurationService {
 
 		MailBox mbx = processor.getMailbox();
 		if (!mailBoxGuid.equals(mbx.getPrimaryKey())) {
-			throw new MailBoxConfigurationServicesException(Messages.PROC_DOES_NOT_BELONG_TO_MBX);
+			throw new MailBoxConfigurationServicesException(Messages.PROC_DOES_NOT_BELONG_TO_MBX, Response.Status.BAD_REQUEST);
 		}
 	}
 
 	/**
 	 * Get the executing processors
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) throws IOException {
-		
+
 		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
 		LOGGER.debug("Entering into getExecutingProcessors.");
 		try {
-	
-			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours"); 
+
+			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours");
 			Timestamp timeStmp = new Timestamp(new Date().getTime());
-			
+
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(timeStmp);
 			cal.add(Calendar.HOUR, -Integer.parseInt(listJobsIntervalInHours));
 			timeStmp.setTime(cal.getTime().getTime());
 			timeStmp = new Timestamp(cal.getTime().getTime());
-			
+
 			FSMStateDAO procDAO = new FSMStateDAOBase();
-			
+
 			List<FSMStateValue> listfsmStateVal = new ArrayList<FSMStateValue>();
-			
+
 			if((!MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) || (MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate))) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_DATE_RANGE);
 			}
-			
+
 			if(!MailBoxUtil.isEmpty(status) && ExecutionState.findByCode(status) == null) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_PROCESSOR_STATUS);
 			}
-			
+
 			if(!MailBoxUtil.isEmpty(status) && !MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate)) {
 				listfsmStateVal = procDAO.findProcessorsExecutingByValueAndDate(status, frmDate, toDate);
 			}
-			
+
 			if (!MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
 				listfsmStateVal = procDAO.findProcessorsExecutingByValue(status, timeStmp);
 			}
-			
+
 			if(!MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate) && MailBoxUtil.isEmpty(status)) {
 				listfsmStateVal = procDAO.findProcessorsExecutingByDate(frmDate, toDate);
 			}
-			
+
 			if(MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
 				listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
 			}
-			
+
 			List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
 			GetExecutingProcessorDTO getExecutingDTO = null;
 			for (FSMStateValue fsmv : listfsmStateVal) {
-	
+
 				getExecutingDTO = new GetExecutingProcessorDTO();
 				getExecutingDTO.copyFromEntity(fsmv);
 				getExecutingProcessorDTOList.add(getExecutingDTO);
 			}
-	
+
 			serviceResponse.setExecutingProcessor(getExecutingProcessorDTOList);
-			
+
 			if(getExecutingProcessorDTOList == null || getExecutingProcessorDTOList.isEmpty()) {
 				serviceResponse.setResponse(new ResponseDTO(Messages.NO_PROCESSORS_AVAIL, EXECUTING_PROCESSORS, Messages.SUCCESS));
 			} else {
 				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, EXECUTING_PROCESSORS, Messages.SUCCESS));
 			}
-			
+
 			LOGGER.debug("Exit from getExecutingProcessors.");
 			return serviceResponse;
-			
+
 		} catch(ProcessorManagementFailedException e) {
-			
+
 			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, EXECUTING_PROCESSORS, Messages.FAILURE, e
 					.getMessage()));
 			return serviceResponse;
 		}
-		
+
 	}
 
 	/**
-	 * 
+	 *
 	 * Interrupt the execution of running processor
-	 * 
+	 *
 	 * @param serviceRequest
-	 * @throws MailBoxConfigurationServicesException 
-	 * 
+	 * @throws MailBoxConfigurationServicesException
+	 *
 	 */
 	public InterruptExecutionEventResponseDTO interruptRunningProcessor( InterruptExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
-		
+
 		LOGGER.debug("Entering into interrupt processor.");
 		InterruptExecutionEventResponseDTO serviceResponse = new InterruptExecutionEventResponseDTO();
 
@@ -765,7 +768,7 @@ public class ProcessorConfigurationService {
 			if (fsmEventDTO == null) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_REQUEST);
 			}
-			
+
 			GenericValidator validator = new GenericValidator();
 			validator.validate(fsmEventDTO);
 
@@ -799,29 +802,29 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
-	
+
 	/**
 	 * Method to retrieve the properties of HTTPListner of type Sync/Async
-	 * 
+	 *
 	 * @param mailboxGuid
 	 * @param httpListenerType
 	 * @return a Map containing the HttpListenerSpecific Properties
 	 */
 	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) {
-		
+
 		Map <String, String>httpListenerProperties = new HashMap <String, String>();
-		
+
 		// retrieve the list of processors of specific type
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		List <Processor> processors = config.findProcessorByMbx(mailboxGuid);	
-		
-		
+		List <Processor> processors = config.findProcessorByMbx(mailboxGuid);
+
+
 		try {
-			
+
 			for (Processor processor : processors) {
-							
+
 				ProcessorDTO processorDTO = null;
-				
+
 				if ((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
 					processorDTO = new ProcessorDTO();
 					processorDTO.copyFromEntity(processor);
@@ -831,40 +834,40 @@ public class ProcessorConfigurationService {
 					processorDTO.copyFromEntity(processor);
 					// retrieving folder properties from HTTPAsync
 					for (FolderDTO folder : processorDTO.getFolders()) {
-						
+
 						if ((folder.getFolderType().toLowerCase()).equals(FolderType.PAYLOAD_LOCATION.getCode())) {
 							httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION, folder.getFolderURI());
 						}
 					}
 				}
-				
+
 				if (null != processorDTO) {
-					
+
 					// retrieving the httplistener pipeline id from remote processor properties
 					String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
 					if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
 
 					//retrieving httplistener authenctication check required property from dynamic properties of processor
-					for (PropertyDTO propertyDTO : processorDTO.getDynamicProperties()) {	
-						
+					for (PropertyDTO propertyDTO : processorDTO.getDynamicProperties()) {
+
 						if (propertyDTO.getName().equals(MailBoxConstants.HTTPLISTENER_AUTH_CHECK)) {
 							httpListenerProperties.put(propertyDTO.getName(), propertyDTO.getValue());
 						}
 					}
-										
-				}	
+
+				}
 			}
-						
-			
+
+
 		} catch (JAXBException
 				| IOException | MailBoxConfigurationServicesException
 				| SymmetricAlgorithmException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
 			return null;
 		}
-		
-		
+
+
 		return httpListenerProperties;
-		
+
 	}
 }

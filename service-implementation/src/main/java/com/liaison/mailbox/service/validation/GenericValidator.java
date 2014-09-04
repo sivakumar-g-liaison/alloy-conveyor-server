@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.validation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+
+import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +29,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 
 /**
  * Common validator for all mailbox operations.
- * 
+ *
  * @author veerasamyn
  */
 public class GenericValidator {
@@ -42,7 +44,7 @@ public class GenericValidator {
 
 	/**
 	 * Validate the given object.
-	 * 
+	 *
 	 * @param dto
 	 *            The DTO which has to be validated
 	 * @return true if only validate is passed
@@ -56,10 +58,10 @@ public class GenericValidator {
 
 			errorMessage = new StringBuilder();
 			if (!doValidate(dto)) {
-				throw new MailBoxConfigurationServicesException(Messages.ERROR_MSG.value() + errorMessage.toString());
+				throw new MailBoxConfigurationServicesException(Messages.ERROR_MSG.value() + errorMessage.toString(), Response.Status.BAD_REQUEST);
 			}
 		} catch (Exception e) {
-			throw new MailBoxConfigurationServicesException(e.getMessage());
+			throw new MailBoxConfigurationServicesException(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 
 		return true;
@@ -67,7 +69,7 @@ public class GenericValidator {
 
 	/**
 	 * Validates the all fields using custom annotation.
-	 * 
+	 *
 	 * @param dto
 	 *            The DTO which has to be validated
 	 * @return true if only validation is passed
@@ -79,7 +81,7 @@ public class GenericValidator {
 		boolean isMandatoryCheckPassed = true;
 
 		if (null == dto) {
-			throw new MailBoxConfigurationServicesException(Messages.VALIDATOR_ERROR_MSG);
+			throw new MailBoxConfigurationServicesException(Messages.VALIDATOR_ERROR_MSG, Response.Status.BAD_REQUEST);
 		}
 
 		try {
@@ -101,11 +103,11 @@ public class GenericValidator {
 			}
 
 		} catch (IllegalAccessException e) {
-			throw new MailBoxConfigurationServicesException(e.getMessage());
+			throw new MailBoxConfigurationServicesException(e.getMessage(), Response.Status.BAD_REQUEST);
 		} catch (IllegalArgumentException e) {
-			throw new MailBoxConfigurationServicesException(e.getMessage());
+			throw new MailBoxConfigurationServicesException(e.getMessage(), Response.Status.BAD_REQUEST);
 		} catch (InvocationTargetException e) {
-			throw new MailBoxConfigurationServicesException(e.getMessage());
+			throw new MailBoxConfigurationServicesException(e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 
 		return isValidationPassed;
@@ -113,7 +115,7 @@ public class GenericValidator {
 
 	/**
 	 * Validates mandatory fields.
-	 * 
+	 *
 	 * @param method
 	 *            The method which has Mandatory annotation
 	 * @param dto
@@ -152,7 +154,7 @@ public class GenericValidator {
 
 	/**
 	 * Validates the given is data is valid or not.
-	 * 
+	 *
 	 * @param method
 	 *            The method which has DataValidation annotation
 	 * @param dto
@@ -178,7 +180,7 @@ public class GenericValidator {
 
 	/**
 	 * Validates the given values is avail in the Enum.
-	 * 
+	 *
 	 * @param annotationDetails
 	 *            DataValidation annotation
 	 * @param value
@@ -187,7 +189,7 @@ public class GenericValidator {
 	 */
 	private boolean enumValidation(DataValidation annotationDetails, Object value) {
 
-		if (MailBoxConstants.MBX_STATUS.equals(annotationDetails.type()) 
+		if (MailBoxConstants.MBX_STATUS.equals(annotationDetails.type())
 				&&	MailBoxStatus.findByName(String.valueOf(value)) == null) {
 					errorMessage.append(annotationDetails.errorMessage());
 					return false;

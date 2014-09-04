@@ -2,13 +2,15 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
 
 package com.liaison.mailbox.service.dto.configuration;
+
+import javax.ws.rs.core.Response;
 
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
@@ -24,8 +26,8 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * 
- * 
+ *
+ *
  * @author OFS
  */
 
@@ -40,7 +42,7 @@ public class CredentialDTO {
 	private String password;
 	private String idpType;
 	private String idpURI;
-	
+
 	public String getGuId() {
 		return guId;
 	}
@@ -98,10 +100,10 @@ public class CredentialDTO {
 	public void setIdpURI(String idpURI) {
 		this.idpURI = idpURI;
 	}
-    
+
 	/**
 	 *Copies all data from DTO to entity.
-	 * 
+	 *
 	 * @param entity
 	 *        the Credential Entity
 	 * @throws SymmetricAlgorithmException
@@ -118,21 +120,21 @@ public class CredentialDTO {
 		}
 		CredentialType foundCredentialType = CredentialType.findByName(this.getCredentialType());
 		if (foundCredentialType == null) {
-			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Credential");
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Credential", Response.Status.BAD_REQUEST);
 		}
-		
+
 		credential.setCredsType(foundCredentialType.getCode());
-		
+
 		credential.setCredsIdpType(this.getIdpType());
 		credential.setCredsUri(this.getCredentialURI());
 		credential.setCredsUsername(this.getUserId());
 		credential.setPguid(this.getGuId());
 
 	}
-    
+
 	/**
 	 *Copies all data from entity to DTO.
-	 * 
+	 *
 	 * @param entity
 	 *        the Credential Entity
 	 * @throws SymmetricAlgorithmException
@@ -148,13 +150,13 @@ public class CredentialDTO {
 
 			this.setPassword(credential.getCredsPassword());
 		}
-		
+
 		CredentialType foundCredentialType = CredentialType.findByCode(credential.getCredsType());
 		if (foundCredentialType == null) {
-			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Credential");
+			throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, "Credential", Response.Status.BAD_REQUEST);
 		}
 		this.setCredentialType(foundCredentialType.name());
-		
+
 		this.setIdpType(credential.getCredsIdpType());
 		this.setCredentialURI(credential.getCredsUri());
 		this.setUserId(credential.getCredsUsername());

@@ -44,7 +44,6 @@ import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -60,7 +59,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox configuration services.
- * 
+ *
  * @author veerasamyn
  */
 @Path("mailbox")
@@ -82,7 +81,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 
 	/**
 	 * REST method to initiate mailbox creation.
-	 * 
+	 *
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
 	 * @return Response Object
@@ -127,11 +126,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (MailBoxConfigurationServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to create a mailbox. " + e.getMessage());
 				}
-
 			}
 		};
 		worker.actionLabel = "MailBoxConfigurationResource.createMailBox()";
@@ -149,7 +144,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 
 	/**
 	 * REST method to update existing mailbox.
-	 * 
+	 *
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
 	 * @return Response Object
@@ -198,9 +193,6 @@ public class MailBoxConfigurationResource extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (MailBoxConfigurationServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to revise a mailbox. " + e.getMessage());
 				}
 
 			}
@@ -220,10 +212,10 @@ public class MailBoxConfigurationResource extends AuditedResource {
 
 	/**
 	 * REST method to delete a mailbox.
-	 * 
+	 *
 	 * @param guid
 	 *            The id of the mailbox
-	 * 
+	 *
 	 * @return Response Object
 	 */
 	@DELETE
@@ -260,9 +252,6 @@ public class MailBoxConfigurationResource extends AuditedResource {
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (MailBoxConfigurationServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to revise a mailbox. " + e.getMessage());
 				}
 
 			}
@@ -283,7 +272,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 
 	/**
 	 * REST method to retrieve a mailbox details.
-	 * 
+	 *
 	 * @param guid
 	 *            The id of the mailbox
 	 * @return Response Object
@@ -325,9 +314,6 @@ public class MailBoxConfigurationResource extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (MailBoxConfigurationServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
 				} catch (SymmetricAlgorithmException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
@@ -348,7 +334,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 		}
 
 	}
-	
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

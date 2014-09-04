@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,24 +26,25 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.util.StreamUtil;
+import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -105,49 +105,45 @@ public class ProcessorConfigurationResource extends AuditedResource {
 	})
 	@AccessDescriptor(accessMethod = "createProcessor")
 	public Response createProcessor(
-			@Context HttpServletRequest request,
-			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailboxid") String guid,
-			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
+			@Context final HttpServletRequest request,
+			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailboxid") final String guid,
+			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") final String serviceInstanceId) {
 
-		// Audit LOG the Attempt to createProcessor
-		auditAttempt("createProcessor");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					AddProcessorToMailboxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
+					// create the new Processor
+					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
+					
+				} catch (IOException | JAXBException | JSONException  e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (SymmetricAlgorithmException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
+				} 		
+			}
+		};		
+		worker.actionLabel = "ProcessorConfigurationResource.createProcessor()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		AddProcessorToMailboxRequestDTO serviceRequest;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
-
-			// add the new profile details
-			AddProcessorToMailboxResponseDTO serviceResponse = null;
-			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-
-			serviceResponse = mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "createProcessor");
-
-			// populate the response body
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "processorConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("createProcessor");
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		return returnResponse;
-
 	}
 	
 	/**
@@ -173,42 +169,33 @@ public class ProcessorConfigurationResource extends AuditedResource {
 	})
 	@AccessDescriptor(accessMethod = "deleteProcessor")
 	public Response deleteProcessor(
-			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") String mailboxguid,
-			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") String guid) {
+			@Context final HttpServletRequest request,
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") final String guid) {
 
-		// Audit LOG the Attempt to deleteProcessor
-		auditAttempt("deleteProcessor");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				// Deactivating processor
+				ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+				return mailbox.deactivateProcessor(mailboxguid, guid);
+			}
+		};	
+		worker.actionLabel = "ProcessorConfigurationResource.deleteProcessor()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
+		// hand the delegate to the framework for calling
 		try {
-
-			// add the new profile details
-			DeActivateProcessorResponseDTO serviceResponse = null;
-			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			// Deactivating processor
-			serviceResponse = mailbox.deactivateProcessor(mailboxguid, guid);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "deleteProcessor");
-
-			// Constructing response
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProcessorConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("deleteProcessor");
-		}
-		return returnResponse;
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 
 	}
 	
@@ -234,41 +221,42 @@ public class ProcessorConfigurationResource extends AuditedResource {
 	})
 	@AccessDescriptor(accessMethod = "getProcessor")
 	public Response getProcessor(
-			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") String mailboxguid,
-			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") String guid) {
+			@Context final HttpServletRequest request,
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") final String guid) {
 
-		// Audit LOG the Attempt to getProcessor
-		auditAttempt("getProcessor");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);				
+				try {
+					// Gets processor details.
+					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+					return mailbox.getProcessor(mailboxguid, guid);
+					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (SymmetricAlgorithmException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}	
+				
+			}
+		};
+		worker.actionLabel = "ProcessorConfigurationResource.getProcessor()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
+		// hand the delegate to the framework for calling
 		try {
-
-			GetProcessorResponseDTO serviceResponse = null;
-			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			// Gets processor details.
-			serviceResponse = mailbox.getProcessor(mailboxguid, guid);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "getProcessor");
-
-			// constructs response.
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "Get Processor failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("getProcessor");
-		}
-		return returnResponse;
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 
 	}
 	
@@ -298,47 +286,45 @@ public class ProcessorConfigurationResource extends AuditedResource {
 	})
 	@AccessDescriptor(accessMethod = "reviseProcessor")
 	public Response reviseProcessor(
-			@Context HttpServletRequest request,
-			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") String mailboxguid,
-			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") String guid) {
+			@Context final HttpServletRequest request,
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
+			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") final String guid) {
+     
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);				
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					ReviseProcessorRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
+					// updates existing processor
+					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
+					return mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
+					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (SymmetricAlgorithmException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} 
+				
+			}
+		};
+		worker.actionLabel = "ProcessorConfigurationResource.getProcessor()";
 
-		// Audit LOG the Attempt to reviseProcessor
-		auditAttempt("reviseProcessor");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		ReviseProcessorRequestDTO serviceRequest;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
-
-			ReviseProcessorResponseDTO serviceResponse = null;
-			ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-			// updates existing processor
-			serviceResponse = mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "reviseProcessor");
-
-			// constructs response
-			returnResponse = serviceResponse.constructResponse();
-
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProcessorConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("reviseProcessor");
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		return returnResponse;
 	}
 	
 	@Override

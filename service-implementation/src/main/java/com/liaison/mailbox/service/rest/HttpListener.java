@@ -47,6 +47,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
+import com.liaison.commons.audit.AuditStatement;
+import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
+import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
+import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.commons.util.UUIDGen;
@@ -76,7 +82,7 @@ import com.netflix.servo.monitor.Monitors;
 @Path("process")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.WILDCARD)
-public class HttpListener extends BaseResource {
+public class HttpListener extends AuditedResource {
 
 	private static final Logger logger = LogManager.getLogger(HttpListener.class);
 
@@ -140,48 +146,58 @@ public class HttpListener extends BaseResource {
 	@POST
 	@Path("sync")
 	@AccessDescriptor(skipFilter=true)
-	public Response handleSync(@Context HttpServletRequest request,
-							   @QueryParam(value = "mailboxId") String mailboxPguid) {
-		// Audit LOG the Attempt to handleSync
-		auditAttempt("handleSync");
+	public Response handleSync(@Context final HttpServletRequest request,
+							   @QueryParam(value = "mailboxId") final String mailboxPguid) {
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() throws Exception {
+				
+				serviceCallCounter.incrementAndGet();
+				
+				logger.debug("Starting sync processing");				
+				try {
+					validateRequestSize(request);
+					if(StringUtils.isEmpty(mailboxPguid)){
+						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
+					}
+					
+					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+					// authentication should happen only if the property
+					// "Http Listner Auth Check Required" is true
+					logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
+					if (isAuthenticationCheckRequired(httpListenerProperties)) {
+						authenticateRequestor(request);
+					}
+					SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);
+					
+					logger.debug("Pipeline id is set in session context");
+					assignGlobalProcessId(sessionContext);
+					assignTimestamp(sessionContext);
+					HttpResponse httpResponse = forwardRequest(sessionContext, request);
+					ResponseBuilder builder = Response.ok();
+					copyResponseInfo(httpResponse, builder);	
+					
+					return builder.build();					
+				} catch (IOException | JAXBException e) {
+					logger.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} 		
+				
+			}
+		};
+		worker.actionLabel = "HttpListener.handleSync()";
 
-		Response restResponse = null;
-		serviceCallCounter.incrementAndGet();
-
-		logger.debug("Starting sync processing");
+		// hand the delegate to the framework for calling
 		try {
-			validateRequestSize(request);
-			if(StringUtils.isEmpty(mailboxPguid)){
-				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
-			
-			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
-			// authentication should happen only if the property
-			// "Http Listner Auth Check Required" is true
-			logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
-			if (isAuthenticationCheckRequired(httpListenerProperties)) {
-				authenticateRequestor(request);
-			}
-			SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);
-			
-			logger.debug("Pipeline id is set in session context");
-			assignGlobalProcessId(sessionContext);
-			assignTimestamp(sessionContext);
-
-			HttpResponse httpResponse = forwardRequest(sessionContext, request);
-			ResponseBuilder builder = Response.ok();
-			copyResponseInfo(httpResponse, builder);
-			// Audit LOG the success
-			auditSuccess("handleSync");
-			restResponse = builder.build();
-		} catch (Exception e) {
-			logger.error("Error processing sync message", e);
-			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-			
-			// Audit LOG the failure
-			auditFailure("handleSync");
-		}
-		return restResponse;
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}			
 	}
 
 	@POST
@@ -218,50 +234,61 @@ public class HttpListener extends BaseResource {
 	@POST
 	@Path("async")
 	@AccessDescriptor(skipFilter=true)
-	public Response handleAsync(@Context HttpServletRequest request,
-								@QueryParam(value = "mailboxId") String mailboxPguid) {
-		// Audit LOG the Attempt to handleAsync
-		auditAttempt("handleAsync");
-		Response restResponse = null;
-		serviceCallCounter.incrementAndGet();
+	public Response handleAsync(@Context final HttpServletRequest request,
+								@QueryParam(value = "mailboxId") final String mailboxPguid) {
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() throws Exception {
+				
+				serviceCallCounter.incrementAndGet();
+				
+				logger.debug("Starting async processing");
+				try {
+					validateRequestSize(request);
+					
+					if(StringUtils.isEmpty(mailboxPguid)){
+						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
+					}
+					
+					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
+					// authentication should happen only if the property
+					// "Http Listner Auth Check Required" is true
+					if (isAuthenticationCheckRequired(httpListenerProperties)) {
+						authenticateRequestor(request);
+					}
+					SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);			
+					assignGlobalProcessId(sessionContext);
+					assignTimestamp(sessionContext);
 
-		logger.debug("Starting async processing");
+					storePayload(request, sessionContext, httpListenerProperties);
+					createWorkTicket(request, sessionContext);
+
+					return Response
+							.ok()
+							.status(Status.ACCEPTED)
+							.type(MediaType.TEXT_PLAIN)
+							.entity(String.format(
+									"Payload accepted as process ID '%s'",
+									sessionContext.getGlobalProcessId())).build();					
+				} catch (IOException | JAXBException e) {
+					logger.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+			}
+		};
+		worker.actionLabel = "HttpListener.handleAsync()";
+
+		// hand the delegate to the framework for calling
 		try {
-			validateRequestSize(request);
-			
-			if(StringUtils.isEmpty(mailboxPguid)){
-				throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
-			
-			Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
-			// authentication should happen only if the property
-			// "Http Listner Auth Check Required" is true
-			if (isAuthenticationCheckRequired(httpListenerProperties)) {
-				authenticateRequestor(request);
-			}
-			SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);			
-			assignGlobalProcessId(sessionContext);
-			assignTimestamp(sessionContext);
-
-			storePayload(request, sessionContext, httpListenerProperties);
-			createWorkTicket(request, sessionContext);
-
-			// Audit LOG the success
-			auditSuccess("handleAsync");
-			restResponse = Response
-					.ok()
-					.status(Status.ACCEPTED)
-					.type(MediaType.TEXT_PLAIN)
-					.entity(String.format(
-							"Payload accepted as process ID '%s'",
-							sessionContext.getGlobalProcessId())).build();
-		} catch (Exception e) {
-			logger.error("Error processing async message", e);
-			restResponse = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-			// Audit LOG the failure
-			auditFailure("handleAsync");
-		}
-		return restResponse;
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 	}
 
 	/**
@@ -753,6 +780,26 @@ public class HttpListener extends BaseResource {
 		payloadLocation = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION);
 		logger.info("Payload Location is set to be :"+payloadLocation);
 		return payloadLocation;
+	}
+
+	@Override
+	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		return new DefaultAuditStatement(AuditStatement.Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+	}
+
+	@Override
+	protected void beginMetricsCollection() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void endMetricsCollection(boolean success) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

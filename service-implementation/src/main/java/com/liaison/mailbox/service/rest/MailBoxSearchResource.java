@@ -21,7 +21,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,8 +31,10 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -90,53 +94,52 @@ public class MailBoxSearchResource extends AuditedResource {
 	})
 	@AccessDescriptor(accessMethod = "searchMailBox")
 	public Response searchMailBox(
-			@Context HttpServletRequest request,
-			@QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") String mbxName,
-			@QueryParam(value = "profile") @ApiParam(name = "profile", required = false, value = "Name of the profile to be searched. Either mailbox name or profile name is mandatory.") String profileName,
-			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") String hitCounter,
-			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") String page,
-			@QueryParam(value= "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") String pageSize,
-			@QueryParam(value= "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") String sortField,
-			@QueryParam(value= "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") String sortDirection) {
+			@Context final HttpServletRequest request,
+			@QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") final String mbxName,
+			@QueryParam(value = "profile") @ApiParam(name = "profile", required = false, value = "Name of the profile to be searched. Either mailbox name or profile name is mandatory.") final String profileName,
+			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
+			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+			@QueryParam(value= "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+			@QueryParam(value= "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+			@QueryParam(value= "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection) {		
 
-		// Audit LOG the Attempt to searchMailBox
-		auditAttempt("searchMailBox");
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				try {
+					// search the mailbox from the given details
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					//retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+                    //search the mailbox based on the given query parameters
+					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson, page, pageSize, sortField, sortDirection);
+					serviceResponse.setHitCounter(hitCounter);
+					
+					return serviceResponse;					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+			}
+		};
+		worker.actionLabel = "MailBoxSearchResource.searchMailBox()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
+		// hand the delegate to the framework for calling
 		try {
-
-			// search the mailbox from the given details
-			SearchMailBoxResponseDTO serviceResponse = null;
-			MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-
-			// retrieving acl manifest from header
-			LOG.info("Retrieving acl manifest json from request header");
-			String manifestJson = request.getHeader("acl-manifest");
-			String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
-
-			serviceResponse = mailbox.searchMailBox(mbxName, profileName, decodedManifestJson, page, pageSize, sortField, sortDirection);
-			serviceResponse.setHitCounter(hitCounter);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "searchMailBox");
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailBoxSearchResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("searchMailBox");
-		}
-		return returnResponse;
-
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}	
 	}
 	
 	@Override

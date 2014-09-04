@@ -10,29 +10,26 @@
 
 package com.liaison.mailbox.service.dto.ui;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
-
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
  * @author OFS
  */
 @JsonRootName("getProfileResponse")
-public class GetProfileResponseDTO implements ResponseBuilder {
+public class GetProfileResponseDTO implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private ResponseDTO response;
 
@@ -66,11 +63,5 @@ public class GetProfileResponseDTO implements ResponseBuilder {
 
 	public void setProfiles(List<ProfileDTO> profiles) {
 		this.profiles = profiles;
-	}
-
-	@Override
-	public Response constructResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException {
-		String responseBody = MailBoxUtil.marshalToJSON(this);
-		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 }

@@ -10,17 +10,13 @@
 
 package com.liaison.mailbox.service.dto.ui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
@@ -28,8 +24,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author veerasamyn
  */
 @JsonRootName("searchMailBoxResponse")
-public class SearchMailBoxResponseDTO implements ResponseBuilder {
+public class SearchMailBoxResponseDTO implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ResponseDTO response;
 	private List<SearchMailBoxDTO> mailBox;
 	private String hitCounter;
@@ -69,11 +69,5 @@ public class SearchMailBoxResponseDTO implements ResponseBuilder {
 
 	public void setHitCounter(String hitCounter) {
 		this.hitCounter = hitCounter;
-	}
-
-	@Override
-	public Response constructResponse() throws Exception {
-		String responseBody = MailBoxUtil.marshalToJSON(this);
-		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
 	}
 }

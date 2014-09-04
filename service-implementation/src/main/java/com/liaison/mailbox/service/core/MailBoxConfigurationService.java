@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -61,7 +62,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has mailbox configuration related operations.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxConfigurationService {
@@ -73,7 +74,7 @@ public class MailBoxConfigurationService {
 	private static String PAGING_COUNT = "pagingcount";
 	/**
 	 * Creates Mail Box.
-	 * 
+	 *
 	 * @param request
 	 *            The request DTO.
 	 * @return The responseDTO.
@@ -92,12 +93,12 @@ public class MailBoxConfigurationService {
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
 			}
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 
 			// validation
@@ -143,7 +144,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Create Mailbox ServiceInstance Id.
-	 * 
+	 *
 	 * @param serviceInstanceID
 	 *            The serviceInstanceID of the mailbox
 	 * @param mailbox
@@ -177,13 +178,13 @@ public class MailBoxConfigurationService {
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
 			}
 		} catch (Exception e) {
-			throw new MailBoxConfigurationServicesException("Invalid service instance id.");
+			throw new MailBoxConfigurationServicesException("Invalid service instance id.", Response.Status.BAD_REQUEST);
 		}
 	}
 
 	/**
 	 * Get the mailbox using guid and its processor using service instance id.
-	 * 
+	 *
 	 * @param guid
 	 *            The guid of the mailbox.
 	 * @return The responseDTO.
@@ -205,7 +206,7 @@ public class MailBoxConfigurationService {
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
 			}
 
 			// Getting mailbox
@@ -218,9 +219,8 @@ public class MailBoxConfigurationService {
 			}
 
 			MailBox mailBox = configDao.find(MailBox.class, guid);
-
 			if (mailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
 			}
 
 			// retrieve the actual tenancykey guids from DTO
@@ -262,7 +262,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Method revise the mailbox configurations.
-	 * 
+	 *
 	 * @param guid
 	 *            The mailbox pguid.
 	 * @throws IOException
@@ -282,12 +282,12 @@ public class MailBoxConfigurationService {
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
 			}
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
 			if (mailboxDTO == null) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 
 			// Validation
@@ -298,14 +298,14 @@ public class MailBoxConfigurationService {
 			}
 
 			if (!guid.equals(mailboxDTO.getGuid())) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX, Response.Status.CONFLICT);
 			}
 
 			// Getting the mailbox.
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			MailBox retrievedMailBox = configDao.find(MailBox.class, guid);
 			if (retrievedMailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
 
 			// Removing the child items.
@@ -369,7 +369,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Method revise the mailbox configurations.
-	 * 
+	 *
 	 * @param guid
 	 *            The mailbox pguid.
 	 * @throws IOException
@@ -386,7 +386,7 @@ public class MailBoxConfigurationService {
 
 			MailBox retrievedMailBox = configDao.find(MailBox.class, guid);
 			if (retrievedMailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid);
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
 			}
 
 			// retrieve the tenancy key from acl manifest
@@ -425,13 +425,13 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Searches the mailbox using mailbox name and profile name.
-	 * 
+	 *
 	 * @param mbxName
 	 *            The name of the mailbox
-	 * 
+	 *
 	 * @param profName
 	 *            The name of the profile
-	 * 
+	 *
 	 * @return The SearchMailBoxResponseDTO
 	 * @throws IOException
 	 * @throws JAXBException
@@ -457,7 +457,7 @@ public class MailBoxConfigurationService {
 
 			if (tenancyKeys.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
-				throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED);
+				throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 			}
 			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
 
@@ -485,7 +485,7 @@ public class MailBoxConfigurationService {
 			}
 
 			else if (MailBoxUtil.isEmpty(profName) && MailBoxUtil.isEmpty(mbxName)) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA);
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA, Response.Status.BAD_REQUEST);
 			}
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
@@ -518,7 +518,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Service to list the directory structure for browse component.
-	 * 
+	 *
 	 * @param file
 	 *            The root directory location
 	 * @return The FileInfoDTO
@@ -541,9 +541,9 @@ public class MailBoxConfigurationService {
 	}
 
 	/**
-	 * 
+	 *
 	 * getting values from java properties file
-	 * 
+	 *
 	 * @param trustStore
 	 * @return
 	 * @throws IOException

@@ -10,22 +10,22 @@
 
 package com.liaison.mailbox.service.dto.ui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import com.liaison.mailbox.service.dto.ResponseBuilder;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * 
  * @author OFS
  */
-public class GetExecutingProcessorResponseDTO implements ResponseBuilder {
+public class GetExecutingProcessorResponseDTO implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ResponseDTO response;
 	private List<GetExecutingProcessorDTO> executingProcessors;
 	private String hitCounter;
@@ -53,11 +53,4 @@ public class GetExecutingProcessorResponseDTO implements ResponseBuilder {
 	public void setHitCounter(String hitCounter) {
 		this.hitCounter = hitCounter;
 	}
-
-	@Override
-	public Response constructResponse() throws Exception {
-		String responseBody = MailBoxUtil.marshalToJSON(this);
-		return Response.ok(responseBody).header("Content-Type", MediaType.APPLICATION_JSON).build();
-	}
-
 }

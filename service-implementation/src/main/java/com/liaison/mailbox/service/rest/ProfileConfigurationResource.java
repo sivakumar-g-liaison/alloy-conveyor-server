@@ -11,7 +11,6 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +24,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,15 +34,13 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.util.StreamUtil;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
-import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -99,46 +98,40 @@ public class ProfileConfigurationResource extends AuditedResource {
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "createProfile")
-	public Response createProfile(@Context HttpServletRequest request) {
+	public Response createProfile(@Context final HttpServletRequest request) {
+		
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					AddProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
+					// creates new profile
+					ProfileConfigurationService profile = new ProfileConfigurationService();
+					return profile.createProfile(serviceRequest);
+					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+			}
+		};		
+		worker.actionLabel = "ProfileConfigurationResource.createProfile()";
 
-		// Audit LOG the Attempt to createProfile
-		auditAttempt("createProfile");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		AddProfileRequestDTO serviceRequest;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
-
-			AddProfileResponseDTO serviceResponse = null;
-			ProfileConfigurationService profile = new ProfileConfigurationService();
-
-			// creates new profile
-			serviceResponse = profile.createProfile(serviceRequest);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "createProfile");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-		}
-		// Audit LOG the failure
-		auditFailure("createProfile");
-		return returnResponse;
-
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 	}
 	
 	/**
@@ -161,46 +154,41 @@ public class ProfileConfigurationResource extends AuditedResource {
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "reviseProfile")
-	public Response reviseProfile(@Context HttpServletRequest request) {
+	public Response reviseProfile(@Context final HttpServletRequest request) {
 
-		// Audit LOG the Attempt to createProfile
-		auditAttempt("reviseProfile");
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);
+				
+				String requestString;
+				try{
+					requestString = getRequestBody(request);
+					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
+					// update profile
+					ProfileConfigurationService profile = new ProfileConfigurationService();
+					return profile.updateProfile(serviceRequest);
+					
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
+				
+			}
+		};
+		worker.actionLabel = "ProfileConfigurationResource.updateProfile()";
 
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-		ReviseProfileRequestDTO serviceRequest;
-
-		try (InputStream requestStream = request.getInputStream()) {
-
-			String requestString = new String(StreamUtil.streamToBytes(requestStream));
-
-			serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
-
-			ReviseProfileResponseDTO serviceResponse = null;
-			ProfileConfigurationService profile = new ProfileConfigurationService();
-
-			// creates new profile
-			serviceResponse = profile.updateProfile(serviceRequest);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "reviseProfile");
-
-			// populate the response body
-			return serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		// Audit LOG the failure
-		auditFailure("reviseProfile");
-		return returnResponse;
-
 	}
 	
 	/**
@@ -219,40 +207,35 @@ public class ProfileConfigurationResource extends AuditedResource {
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	@AccessDescriptor(accessMethod = "readProfiles")
-	public Response readProfiles(@ApiParam(value = "Page Number", required = false) @QueryParam(value = "page") final String page,
+	public Response readProfiles(
+			@Context final HttpServletRequest request,
+			@ApiParam(value = "Page Number", required = false) @QueryParam(value = "page") final String page,
             @ApiParam(value = "Page Size", required = false) @QueryParam(value = "pageSize") final String pageSize,
             @ApiParam(value = "Sorting Information", required = false) @QueryParam(value = "sortInfo") final String sortInfo,
             @ApiParam(value = "Filter Text", required = false) @QueryParam(value = "filterText") final String filterText) {
+		
+ 	  // create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);				
+				// read Profiles
+				ProfileConfigurationService profile = new ProfileConfigurationService();
+				return profile.getProfiles(page, pageSize, sortInfo, filterText);
+			}
+		};
+		worker.actionLabel = "ProfileConfigurationResource.readProfiles()";
 
-		// Audit LOG the Attempt to readProfiles
-		auditAttempt("readProfiles");
-
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
+		// hand the delegate to the framework for calling
 		try {
-
-			// add the new profile details
-			GetProfileResponseDTO serviceResponse = null;
-			ProfileConfigurationService mailbox = new ProfileConfigurationService();
-			serviceResponse = mailbox.getProfiles(page, pageSize, sortInfo, filterText);
-
-			// Audit LOG
-			doAudit(serviceResponse.getResponse(), "readProfiles");
-
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "ProfileConfigurationResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-
-			// should be throwing out of domain scope and into framework using
-			// above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			// Audit LOG the failure
-			auditFailure("readProfiles");
-		}
-		return returnResponse;
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}		
 
 	}	
 	

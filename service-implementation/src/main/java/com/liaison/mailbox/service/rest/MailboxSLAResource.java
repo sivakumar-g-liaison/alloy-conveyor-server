@@ -10,15 +10,19 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,10 +30,11 @@ import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.MailboxSLAService;
-import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -80,38 +85,41 @@ public class MailboxSLAResource extends AuditedResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(skipFilter=true)
-	public Response validateMailboxSLA() {
+	public Response validateMailboxSLA(@Context final HttpServletRequest request) {
+        
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+				
+				serviceCallCounter.addAndGet(1);				
+				try {
+					LOG.debug("Entering into SLA Validation");
+					//validate the sla rules of all mailboxes
+					MailboxSLAService service = new MailboxSLAService();
+					
+					return service.validateMailboxSLARules();					
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}
+				
+				
+			}
+		};
+		worker.actionLabel = "MailboxSLAResource.validateMailboxSLA()";
 
-		//Audit LOG the Attempt to triggerProfile
-		auditAttempt("validateMailboxSLA");
-		serviceCallCounter.addAndGet(1);
-		Response returnResponse;
-
+		// hand the delegate to the framework for calling
 		try {
-
-			LOG.debug("Entering into SLA Validation");
-			MailboxSLAService service = new MailboxSLAService();
-			MailboxSLAResponseDTO serviceResponse = service.validateMailboxSLARules();
-
-			//Audit LOG
-			doAudit(serviceResponse.getResponse(), "validateMailboxSLA");
-			
-			returnResponse = serviceResponse.constructResponse();
-		} catch (Exception e) {
-
-			int f = failureCounter.addAndGet(1);
-			String errMsg = "MailboxResource failure number: " + f + "\n" + e;
-			LOG.error(errMsg, e);
-			// should be throwing out of domain scope and into framework using above code
-			returnResponse = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(errMsg).build();
-			//Audit LOG the failure
-			auditFailure("validateMailboxSLA");
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-		return returnResponse;
 
-	}
-	
-	
+	}	
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {

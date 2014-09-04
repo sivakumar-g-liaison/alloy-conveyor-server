@@ -2199,7 +2199,7 @@ var rest = myApp.controller(
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
-						if (status === 200) {
+						if () {
 							editRequest.reviseProcessorRequest.processor.credentials[a].password = data;
 							$scope.processorReviseAfterKM();
 							
@@ -2801,7 +2801,7 @@ var rest = myApp.controller(
                                 data.getTrustStoreResponse.trustStore.trustStoreGroupId);
                         } else {
                             block.unblockUI();
-                            showSaveMessage(data.getTrustStoreResponse.response.message, 'error');
+                            showSaveMessage('Certificate Uploading Failed', 'error');
                             return;
                         }
                     }
