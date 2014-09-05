@@ -88,7 +88,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.url_upload_key = $rootScope.kms_base_url+'/upload/public';
     $rootScope.url_ssh_upload_key = $rootScope.kms_base_url+'/upload/keypair';
     $rootScope.url_link_key_store = $rootScope.kms_base_url+'/update/truststore/';
-	$rootScope.url_secret_service = $rootScope.kms_base_url+'/secret/';
+	//$rootScope.url_secret_service = $rootScope.kms_base_url+'/secret/';
+    $rootScope.url_secret_service = 'http://localhost:8989/usermanagement/rest/secret/';
 	
 	$rootScope.block = $blockUI.createBlockUI();
 	
