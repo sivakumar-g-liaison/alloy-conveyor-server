@@ -654,7 +654,7 @@ public abstract class AbstractRemoteProcessor {
 
 		if (jsonResponse != null) {
 
-			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse, KeyServiceResponse.class);
+			KeyServiceResponse mkr = unmarshalFromKeyManagerJSON(jsonResponse, KeyServiceResponse.class);
 			KeySet keySet = (KeySet) mkr.getDataTransferObject();
 			is = new ByteArrayInputStream(Base64.decodeBase64(keySet.getCurrentPublicKey()));
 		}
@@ -704,7 +704,7 @@ public abstract class AbstractRemoteProcessor {
 
 		if (jsonResponse != null) {
 
-			KeyServiceResponse mkr = unmarshalFromJSON(jsonResponse, KeyServiceResponse.class);
+			KeyServiceResponse mkr = unmarshalFromKeyManagerJSON(jsonResponse, KeyServiceResponse.class);
 			KeySet keySet = (KeySet) mkr.getDataTransferObject();
 			privateKeyBytes = keySet.getCurrentPrivateKey().getBytes();
 		}
@@ -1588,6 +1588,29 @@ public abstract class AbstractRemoteProcessor {
 		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
 		// make deserializer use JAXB annotations (only)
 		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
+		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
+		return ummarshaledObject;
+	}
+	
+	/**
+	 * 
+	 * @param serializedJson
+	 * @param clazz
+	 * 
+	 * @return json
+	 * 
+	 * @throws JAXBException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	private <T> T unmarshalFromKeyManagerJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+		// make deserializer use JAXB annotations (only)
+		mapper.setAnnotationIntrospector(introspector);
 		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
 		return ummarshaledObject;
 	}
