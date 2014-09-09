@@ -642,9 +642,11 @@ public abstract class AbstractRemoteProcessor {
 		url = url + trustStoreId;
 
 		// get acl manifest response from ACL
-		String unsignedData = trustStoreId;
+		/*String unsignedData = trustStoreId;
 		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);*/
+		
+		ACLManifestResponse aclManifestFromACL = null;
 		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
 
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
@@ -690,9 +692,11 @@ public abstract class AbstractRemoteProcessor {
 		url = url + keypairPguid;
 
 		// get acl manifest response from ACL
-		String unsignedData = keypairPguid;
+		/*String unsignedData = keypairPguid;
 		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);*/
+		
+		ACLManifestResponse aclManifestFromACL =  null;
 		// setting the request headers in the request to key manager from acl
 		// manifest response
 		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
@@ -1592,9 +1596,11 @@ public abstract class AbstractRemoteProcessor {
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException {
 
 		// get acl manifest response from ACL
-		String unsignedData = guid;
+		/*String unsignedData = guid;
 		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);
+		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);*/
+		
+		ACLManifestResponse aclManifestFromACL = null;
 		// setting the request headers in the request to key manager from acl
 		// manifest response
 		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
