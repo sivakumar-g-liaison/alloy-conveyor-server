@@ -31,6 +31,18 @@ allprojects {
     apply plugin: 'idea' 
 	
     group = 'com.liaison.nucleus'
+		
+	    // Define the Semantic Version number as the first line of RELEASE_NOTES.md
+	    file("${rootDir}/RELEASE_NOTES.md").withReader {
+	        version = it.readLine()
+	    }
+		// Define version name used in specifying webapp root context
+		if (version.contains('-SNAPSHOT')) {
+			ext.versionName = 'v' + (version.substring(0, version.indexOf('-SNAPSHOT'))) 
+		} else {
+			ext.versionName = "v${version}"		
+		}
+
     repositories { 
         mavenCentral() // maven { url: 'http://jcenter.bintray.com' }
 
