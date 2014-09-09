@@ -12,15 +12,15 @@
        "taskId" : "1234567890",
        "serviceInstanceId" : "servid_test_restp9d",
        "userId" : "userId",
-       "dataTransferObject" : 
+       "dataTransferObject" :
        {
           "@class": "com.liaison.keymanage.grammar.dto.TrustStore",
-  "keyScope": "CUSTOMER",
-  "keyStatus": "ACTIVE",
-  "name": "test_httpclient_store_2",
-  "notificationEmail": "GRamamurthy@liaison.com",
-  "validityDateFrom": "2013-12-19T00:00:00.000Z",
-  "validityDateTo": "2014-12-19T00:00:00.000Z",
-  "containerPassphrase": "Krishh23"
+		  "keyScope": "CUSTOMER",
+		  "keyStatus": "ACTIVE",
+		  "name": "test_httpclient_store_2",
+		  "notificationEmail": "GRamamurthy@liaison.com",
+		  "validityDateFrom": "2013-12-19T00:00:00.000Z",
+		  "validityDateTo": "2014-12-19T00:00:00.000Z",
+		  "containerPassphrase": "passmein"
        }
      }
