@@ -5,7 +5,7 @@
 
 export APP_ENV="qa-stage"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$APP_ENV"
-export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=service-broker"
+export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=g2mailboxservice"
 
 # ==================================================================
 # log overrides
