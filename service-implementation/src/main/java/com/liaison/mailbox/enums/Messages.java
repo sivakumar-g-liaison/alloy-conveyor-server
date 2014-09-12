@@ -114,7 +114,9 @@ public enum Messages {
 	
 	// Mailbox Expectation Management
 	MAILBOX_ADHERES_SLA("Mailbox adheres to SLA rules"),
-	MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are ");
+	MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are "),
+	UPLOADER_NOT_AVAILABLE("Mailbox %s does not contain processor of type uploader"),
+	PROFILE_NOT_CONFIGURED("The profile is not configured.");
 	
 	private String value;
 

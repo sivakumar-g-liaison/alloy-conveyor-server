@@ -63,6 +63,7 @@ buildscript {
 
         // https://github.com/zeroturnaround/gradle-jrebel-plugin
         classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.2'
+		
     }
 }
 

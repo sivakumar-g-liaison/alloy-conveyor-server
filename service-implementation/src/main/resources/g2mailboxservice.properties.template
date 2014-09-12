@@ -183,3 +183,15 @@ com.liaison.acl.skipList=com.wordnik.swagger.jersey.listing.ApiListingResource.r
 
 #Thread Count for processor
 mailbox.processor.queue.consumer.thread.count=5
+#Thread Count for watchdog
+mailbox.watchdog.queue.consumer.thread.count=5
+
+# Spectrum client properties for payloads
+spectrum.client.instanceid=aws
+spectrum.client.serverip.aws=data.spectrumdatacloud.com
+spectrum.client.port.aws=
+spectrum.client.username.aws=jwojcik@liaison.com
+spectrum.client.password.aws=Password1
+spectrum.client.source.aws=G2_Junit
+spectrum.client.spacename.aws=jwojcik
+spectrum.client.definitionname.aws=DODJosh

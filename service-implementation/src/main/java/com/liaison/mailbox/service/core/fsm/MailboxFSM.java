@@ -153,9 +153,31 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 	 */
 	public boolean addDefaultStateTransitionRules(ProcessorStateDTO processorQueued) throws MailBoxFSMSetupException {
 
-		if (!processorQueued.getExecutionState().value().equals(ExecutionState.QUEUED.value())) {
+		if (!processorQueued.getExecutionState().value().equals(ExecutionState.QUEUED.value()) /*&& !(ExecutionState.STAGED.value()).equals(processorQueued.getExecutionState().value())*/) {
 			throw new MailBoxFSMSetupException("The Processor should be in the QUEUED status to use the default rules");
 		}
+		
+		/*if ((ExecutionState.STAGED.value()).equals(processorQueued.getExecutionState().value())) {
+			// Transition Rules - STAGED WHEN ExecutionEvents.FILE_STAGED
+			// is passed on
+			Transition<ProcessorStateDTO, ExecutionEvents> transition = this.createTransition();
+			transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
+			transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.FILE_STAGED));
+			ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.STAGED);
+			transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
+			this.addTransition(transition);
+		}
+		
+		if ((ExecutionState.STAGING_FAILED.value()).equals(processorQueued.getExecutionState().value())) {
+			// Transition Rules - STAGING_FAILED WHEN ExecutionEvents.FILE_STAGING_FAILED
+			// is passed on
+			Transition<ProcessorStateDTO, ExecutionEvents> transition = this.createTransition();
+			transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
+			transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.FILE_STAGING_FAILED));
+			ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.STAGING_FAILED);
+			transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
+			this.addTransition(transition);
+		}*/
 
 		// Transition Rules - QUEUED TO PROCESSING WHEN ExecutionEvents.PROCESSOR_EXECUTION_STARTED
 		// is passed on

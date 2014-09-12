@@ -27,6 +27,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.jpa.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.jpa.model.HTTPSyncProcessor;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.RemoteUploader;
 import com.liaison.mailbox.jpa.model.Sweeper;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -272,6 +273,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			break;		
 		case  "sweeper":
 			processorClass = Sweeper.class;
+			break;
+		case "remoteuploader":
+			processorClass = RemoteUploader.class;
 			break;
 		}
 		return processorClass;

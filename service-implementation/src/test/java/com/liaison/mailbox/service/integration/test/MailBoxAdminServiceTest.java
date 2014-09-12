@@ -477,20 +477,4 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 	}
 	
 	
-	@Test
-	public void testMailboxWatchDog() throws LiaisonException, JsonParseException, 
-			JsonMappingException, JAXBException, IOException {
-		// Get the executing processors
-		String url = getBASE_URL() + "/sla";
-		request = constructHTTPRequest(url, HTTP_METHOD.POST, null, logger);
-		request.execute();
-
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		MailboxSLAResponseDTO mailboxSLAResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, MailboxSLAResponseDTO.class);
-
-		// Assertion
-		Assert.assertEquals(SUCCESS, mailboxSLAResponseDTO.getResponse().getStatus());
-	}
 }
