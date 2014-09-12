@@ -45,6 +45,8 @@
 
 			<!-- datanucleus.connectionPool.maxPoolSize : max size of pool datanucleus.connectionPool.initialPoolSize 
 				: initial size of pool -->
+            <!-- Turn off because it gives a weird user experience when UI is served up across a farm -->
+            <property name="datanucleus.cache.level2.type" value="none"/>
 		</properties>
 	</persistence-unit>
 	
