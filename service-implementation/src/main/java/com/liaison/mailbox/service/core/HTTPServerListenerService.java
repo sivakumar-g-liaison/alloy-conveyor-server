@@ -18,12 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FlexibleStorageSystem;
+import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ServerListenerResponseDTO;

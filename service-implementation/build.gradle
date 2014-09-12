@@ -116,7 +116,7 @@ dependencies {
 
 
     // resolve fs2 in nexus
-    compile group: "com.liaison", name: "fs2", version: "0.0.3-SNAPSHOT", changing: true
+    compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
 
     // inherited from NetFlix Karyon
     //compile "com.netflix.karyon:karyon-extensions:${karyonVersion}"

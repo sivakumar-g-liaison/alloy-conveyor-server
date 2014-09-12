@@ -76,7 +76,7 @@ import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
-import com.liaison.fs2.api.FS2Exception;
+import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
 import com.liaison.keymanage.grammar.KeySet;
 import com.liaison.mailbox.MailBoxConstants;

@@ -23,11 +23,11 @@ import java.security.cert.CertificateException;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
-import org.codehaus.jettison.json.JSONException;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exception.BootstrapingFailedException;
@@ -35,7 +35,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
-import com.liaison.fs2.api.FS2Exception;
+import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;

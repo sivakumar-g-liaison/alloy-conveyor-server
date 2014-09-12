@@ -25,23 +25,24 @@ import java.util.List;
 import javax.script.ScriptException;
 import javax.xml.bind.JAXBException;
 
-import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import com.liaison.fs2.api.CoreFS2Utils;
-import com.liaison.fs2.api.FS2Exception;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2MetaSnapshotImpl;
-import com.liaison.fs2.api.FS2ObjectAlreadyExistsException;
+import com.liaison.fs2.api.FS2Metadata;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FlexibleStorageSystem;
+import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.fs2.api.exceptions.FS2ObjectAlreadyExistsException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -327,16 +328,17 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// Creating meta snapshot
 			FS2 = FS2InstanceCreator.getFS2Instance();
-			metaSnapShot = new FS2MetaSnapshotImpl(CoreFS2Utils.genURIFromPath(newPath.toString()), true, new Date(),
-					"DirectorySweeper", new FS2ObjectHeaders());
-
+			FS2Metadata metadata = new FS2Metadata(CoreFS2Utils.genURIFromPath(newPath.toString()), true, new Date(),
+					"DirectorySweeper", new FS2ObjectHeaders(), null);
+			metaSnapShot = new FS2MetaSnapshotImpl(metadata);
+			
 			// Constructing the fs2 file
 			try {
-				FS2.createObjectEntry(CoreFS2Utils.genURIFromPath(oldPath.toString()), metaSnapShot.toJSON(), null);
+				FS2.createObjectEntry(CoreFS2Utils.genURIFromPath(oldPath.toString()), new FS2ObjectHeaders(), null);
 
 			} catch (FS2ObjectAlreadyExistsException e) {
 				FS2.deleteRecursive(oldPath.toUri());
-				FS2.createObjectEntry(oldPath.toUri(), metaSnapShot.toJSON(), null);
+				FS2.createObjectEntry(oldPath.toUri(), new FS2ObjectHeaders(), null);
 			}
 
 			// Renaming the file at the end of the step when everything is done.
