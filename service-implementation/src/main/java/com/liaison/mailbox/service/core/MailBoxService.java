@@ -102,7 +102,7 @@ public class MailBoxService {
 				addProcessorToFSMState(executionId, processor, profileName);
 			}
 
-            LOG.debug("ABOUT TO get ProcessorQueue Instance");
+            LOG.debug("ABOUT TO get ProcessorQueue Instance {}", messages.toArray(new String[messages.size()]));
             ProcessorQueue.getInstance().pushMessages(messages.toArray(new String[messages.size()]));
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName, Messages.SUCCESS));

@@ -110,6 +110,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED);
 		}
 
+        LOGGER.debug("Is progress list is empty: {}", inProgressFiles.isEmpty());
 		List<FileAttributesDTO> files = (inProgressFiles.isEmpty())
 				? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
 				: validateInprogressFiles(inProgressFiles, timeLimit);
@@ -117,30 +118,34 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		if (files.isEmpty()) {
 			LOGGER.info("There are no files to process.");
 		} else {
-
+            LOGGER.debug("There are {} files to process", files.size());
 			// Read from mailbox property - grouping js location
 			List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
 
 			String sweepedFileLocation = processMountLocation(getDynamicProperties().getProperty(
 					MailBoxConstants.SWEEPED_FILE_LOCATION));
 			if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
+                LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
 
 				// If the given sweeped file location is not available then system will create that.
 				Path path = Paths.get(sweepedFileLocation);
 				if (!Files.isDirectory(path)) {
-					Files.createDirectories(path);
-				}
+                    LOGGER.info("Creating Directories {}", path);
+
+                    Files.createDirectories(path);
+				} else {
+                    LOGGER.info("Not creating, {} Is Directory", path);
+                }
 			}
 
 			// Renaming the file
+            LOGGER.debug("ABOUT TO MARK AS SWEEPED");
 			markAsSweeped(files, fileRenameFormat, sweepedFileLocation);
 
 			if (fileGroups.isEmpty()) {
-				LOGGER.info("The file group is empty.");
+				LOGGER.info("The file group is empty, so NOP");
 			} else {
-
-				for (List<FileAttributesDTO> fileGroup : fileGroups) {
-
+				for (List<FileAttributesDTO> fileGroup : fileGroups) {;
 					String jsonResponse = constructMetaDataJson(fileGroup);
 					LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
 					postToQueue(jsonResponse);
@@ -164,7 +169,6 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 *            The mailbox root directory
 	 * @param includeSubDir
 	 * @param listDirectoryOnly
-	 * @param sweepConditions
 	 * @return List of FileAttributes
 	 * @throws IOException
 	 * @throws URISyntaxException
@@ -176,6 +180,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		    String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException {
 
+        LOGGER.debug("SweepingDirectory: {}", root);
 		Path rootPath = Paths.get(root);
 		if (!Files.isDirectory(rootPath)) {
 			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY);
@@ -184,21 +189,24 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		List<Path> result = new ArrayList<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
 			for (Path file : stream) {
-
+                LOGGER.debug("Sweeping file {}", file.toString());
 				if (!file.getFileName().toString().contains(fileRenameFormat)) {
 
 					if (validateLastModifiedTolerance(timeLimit, file)) {
-						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.getFileName());
-						inProgressFiles.add(file);
+						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.toString());
+
+                        inProgressFiles.add(file);
 						continue;
 					}
 					result.add(file);
 				}
 			}
 		} catch (IOException e) {
-			throw e;
+			throw e; //TODO Code review- what's this catch throw for?
 		}
 
+
+        LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
 		return getFileAttributes(result);
 	}
 
@@ -286,7 +294,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 *            The input message to queue.
 	 */
 	private void postToQueue(String input)   {
-        LOGGER.debug("DirectorySweeper postToQueue, message: {}", input);
+        LOGGER.debug("DirectorySweeper push postToQueue, message: {}", input);
 
         SweeperQueue.getInstance().pushMessages(input);
 	}
@@ -377,12 +385,15 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	private String constructMetaDataJson(List<FileAttributesDTO> files) throws JsonGenerationException,
 	JsonMappingException, IOException, JAXBException {
 
-		FileGroupDTO group = new FileGroupDTO();
-		group.getFileAttributes().addAll(files);
+        LOGGER.debug("Construct MetaData for files size:{}, {}", files.size(), files.toArray());
+        FileGroupDTO group = new FileGroupDTO();
+        group.getFileAttributes().addAll(files);
 
-		String jsonResponse = MailBoxUtil.marshalToJSON(group);
-		return jsonResponse;
-	}
+        String jsonResponse = MailBoxUtil.marshalToJSON(group);
+        LOGGER.debug("Constructed MetaData: {} ", jsonResponse);
+
+        return jsonResponse;
+    }
 
 	/**
 	 * Returns file attributes from java.io.File
@@ -401,18 +412,28 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		FileAttributesDTO attribute = null;
 		BasicFileAttributes attr = null;
 		for (Path path : result) {
-
+            LOGGER.debug("Obtaining file Attributes for path {}", path);
 			attribute = new FileAttributesDTO();
+            LOGGER.debug("FS2 path {}", path.toAbsolutePath().toString());
 			attribute.setFs2Path(path.toAbsolutePath().toString());
+            LOGGER.debug("Pipeline ID {}", getPipeLineID());
 			attribute.setPipeLineID(getPipeLineID());
 
 			attr = Files.readAttributes(path, BasicFileAttributes.class);
+            LOGGER.debug("File attributes{}", attr);
+
+            LOGGER.debug("Time stamp {}", attr.creationTime());
 			attribute.setTimestamp(attr.creationTime().toString());
+            LOGGER.debug("Size stamp {}", attr.size());
 			attribute.setSize(attr.size());
+            LOGGER.debug("Filename {}", path.toFile().getName());
 			attribute.setFilename(path.toFile().getName());
 			fileAttributes.add(attribute);
 		}
-		return fileAttributes;
+
+        LOGGER.debug("FileAttributes size:{}, {}", fileAttributes.size(), fileAttributes.toArray());
+
+        return fileAttributes;
 	}
 
 	/**
