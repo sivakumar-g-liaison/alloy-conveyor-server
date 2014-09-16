@@ -450,6 +450,9 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		long system = System.currentTimeMillis();
 		long lastmo = file.toFile().lastModified();
 
+        LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
+        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
+
 		if (((system - lastmo)/1000) < timelimit) {
 			return true;
 		}
