@@ -26,11 +26,13 @@ import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.jpa.model.RemoteUploader;
 import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
@@ -99,7 +101,10 @@ public class MailBoxService {
 				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
 				message = MailBoxUtil.marshalToJSON(request);
 				messages.add(message);
-				addProcessorToFSMState(executionId, processor, profileName);
+				String slaVerificationStatus = (processor instanceof RemoteUploader)
+											   ? SLAVerificationStatus.SLA_NOT_VERIFIED.getCode()
+											   : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
+				addProcessorToFSMState(executionId, processor, profileName, slaVerificationStatus);
 			}
 
             LOG.debug("ABOUT TO get ProcessorQueue Instance");
@@ -130,9 +135,9 @@ public class MailBoxService {
 	 * @param processor
 	 * @param profileName
 	 */
-	private void addProcessorToFSMState(String executionId, Processor processor, String profileName) {
+	private void addProcessorToFSMState(String executionId, Processor processor, String profileName, String slaVerficationStatus) {
 
-		ProcessorStateDTO state = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, profileName, ExecutionState.QUEUED, null);
+		ProcessorStateDTO state = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, profileName, ExecutionState.QUEUED, null, slaVerficationStatus);
 		MailboxFSM fsm = new MailboxFSM();
 		fsm.addState(state);
 
@@ -177,9 +182,13 @@ public class MailBoxService {
 			LOG.info("The triggered profile name is {}", dto.getProfileName());
 			LOG.info("The execution id is {}", executionId);
 			
+			// determine SLA status
+			String slaVerificationStatus = (processor instanceof RemoteUploader)
+					   ? SLAVerificationStatus.SLA_NOT_VERIFIED.getCode()
+					   : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
 			//Initiate FSM	
 			processor = processorDAO.find(Processor.class, processorId);
-			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, dto.getProfileName(),ExecutionState.QUEUED, null);
+			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, dto.getProfileName(),ExecutionState.QUEUED, null, slaVerificationStatus);
 			fsm.addDefaultStateTransitionRules(processorQueued);
 			
 				if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus())) {

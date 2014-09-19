@@ -3,7 +3,7 @@ package com.liaison.mailbox.service.core.processor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.mailbox.service.core.MailboxSLAService;
+import com.liaison.mailbox.service.core.MailboxSLAWatchDogService;
 
 public class WatchDogInvoker implements Runnable {
 
@@ -15,8 +15,8 @@ public class WatchDogInvoker implements Runnable {
 		this.request=request;
 	}
 	
-	public MailboxSLAService getService(){
-	    return new MailboxSLAService();
+	public MailboxSLAWatchDogService getService(){
+	    return new MailboxSLAWatchDogService();
 	}
 
 	

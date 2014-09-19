@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -269,5 +270,60 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 			throw new MailBoxServicesException("The given payload configuration '" + localDir + "' does not exist.");
 		}
 	}
+	
+	/**
+	 * Method which checks whether files exists in the remote target location of the processor
+	 * 
+	 * @return
+	 * @throws IOException
+	 * @throws UnrecoverableKeyException
+	 * @throws JsonParseException
+	 * @throws NoSuchAlgorithmException
+	 * @throws CertificateException
+	 * @throws KeyStoreException
+	 * @throws OperatorCreationException
+	 * @throws LiaisonException
+	 * @throws JAXBException
+	 * @throws URISyntaxException
+	 * @throws MailBoxServicesException
+	 * @throws SymmetricAlgorithmException
+	 * @throws JSONException
+	 * @throws CMSException
+	 * @throws BootstrapingFailedException
+	 */
+	public boolean checkFileExistence() throws IOException, UnrecoverableKeyException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException,
+										OperatorCreationException, LiaisonException, JAXBException, URISyntaxException, MailBoxServicesException, 
+										SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
+
+		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
+		
+		boolean isFileExists = false;
+		
+		//ftpsRequest.enableSessionReuse(true);
+		ftpsRequest.connect();
+		ftpsRequest.login();
+		
+		//ftpsRequest.enableDataChannelEncryption();
+		if (getRemoteProcessorProperty() != null) {
+		
+			ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
+			ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
+		}
+				
+		String remotePath = getWriteResponseURI();
+		if (MailBoxUtil.isEmpty(remotePath)) {
+			LOGGER.info("The given remote URI is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.");
+		}
+		
+		boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
+		if (dirExists) {
+			ftpsRequest.changeDirectory(remotePath);
+			List <String> files = ftpsRequest.listFiles();
+			isFileExists = (null !=  files && !files.isEmpty());
+		}
+		ftpsRequest.disconnect();
+		return isFileExists;
+		}	
 
 }

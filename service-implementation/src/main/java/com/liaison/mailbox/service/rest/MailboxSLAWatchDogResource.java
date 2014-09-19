@@ -34,7 +34,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.mailbox.service.core.MailboxSLAService;
+import com.liaison.mailbox.service.core.MailboxSLAWatchDogService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -49,11 +49,11 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  *
  */
-@Path("mailbox/sla")
-@Api(value = "mailbox/sla", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
-public class MailboxSLAResource extends AuditedResource {
+@Path("mailbox/mailboxsla")
+@Api(value = "mailbox/mailboxsla", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
+public class MailboxSLAWatchDogResource extends AuditedResource {
 	
-	private static final Logger LOG = LogManager.getLogger(MailBoxFileResource.class);
+	private static final Logger LOG = LogManager.getLogger(MailboxSLAWatchDogResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -63,7 +63,7 @@ public class MailboxSLAResource extends AuditedResource {
 	
 	
 
-	public MailboxSLAResource() {
+	public MailboxSLAWatchDogResource() {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
@@ -94,11 +94,11 @@ public class MailboxSLAResource extends AuditedResource {
 				
 				serviceCallCounter.addAndGet(1);				
 				try {
-					LOG.debug("Entering into SLA Validation");
+					LOG.debug("Entering into Mailbox SLA Validation");
 					//validate the sla rules of all mailboxes
-					MailboxSLAService service = new MailboxSLAService();
+					MailboxSLAWatchDogService service = new MailboxSLAWatchDogService();
 					
-					return service.validateMailboxSLARules();					
+					return service.validateMailboxSLARule();					
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());

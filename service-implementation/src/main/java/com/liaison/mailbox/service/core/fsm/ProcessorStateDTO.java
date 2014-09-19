@@ -34,9 +34,10 @@ public class ProcessorStateDTO {
 	private ExecutionState executionState;
 	private String stateNotes;
 	private String executionId;
+	private String slaVerficationStatus;
 
 	public ProcessorStateDTO(String executionId, String processorId, ExecutionState executionState, String processorName,
-			ProcessorType processorType, String mailboxId, String profileName, String stateNotes) {
+			ProcessorType processorType, String mailboxId, String profileName, String stateNotes, String slaVerificationStatus) {
 
 		this.setExecutionId(executionId);
 		this.setExecutionState(executionState);
@@ -46,6 +47,7 @@ public class ProcessorStateDTO {
 		this.setMailboxId(mailboxId);
 		this.setProfileName(profileName);
 		this.setStateNotes(stateNotes);
+		this.setSlaVerficationStatus(slaVerificationStatus);;
 	}
 	
 	public ProcessorStateDTO(String executionId,String processorId,ExecutionState executionState){
@@ -106,6 +108,14 @@ public class ProcessorStateDTO {
 		return stateNotes;
 	}
 
+	public String getSlaVerficationStatus() {
+		return slaVerficationStatus;
+	}
+
+	public void setSlaVerficationStatus(String slaVerficationStatus) {
+		this.slaVerficationStatus = slaVerficationStatus;
+	}
+
 	public void setStateNotes(String stateNotes) {
 		this.stateNotes = stateNotes;
 	}
@@ -120,7 +130,7 @@ public class ProcessorStateDTO {
 
 	public ProcessorStateDTO createACopyWithNewState(ExecutionState execState) {
 		ProcessorStateDTO newCopy = new ProcessorStateDTO(this.getExecutionId(), this.getProcessorId(), execState,
-				this.getProcessorName(), this.getProcessorType(), this.getMailboxId(), this.getProfileName(), this.getStateNotes());
+				this.getProcessorName(), this.getProcessorType(), this.getMailboxId(), this.getProfileName(), this.getStateNotes(), this.getSlaVerficationStatus());
 		return newCopy;
 	}
     
@@ -141,6 +151,7 @@ public class ProcessorStateDTO {
 		entity.setMailboxId(this.getMailboxId());
 		entity.setProfileName(this.getProfileName());
 		entity.setStateNotes(this.getExecutionState().notes());
+		entity.setSlaVerificationStatus(this.getSlaVerficationStatus());
 		
 		//Constructing FSMStateValue
 		FSMStateValue value = new FSMStateValue();
@@ -163,10 +174,10 @@ public class ProcessorStateDTO {
 	 * @return ProcessorStateDTO
 	 */
 	public static ProcessorStateDTO getProcessorStateInstance(String executionId, Processor processor, String profileName,
-			ExecutionState state, String stateNotes) {
+			ExecutionState state, String stateNotes, String slaVerificationStatus) {
 
 		return new ProcessorStateDTO(executionId, processor.getPguid(), state, processor.getProcsrName(),
-				processor.getProcessorType(), processor.getMailbox().getPguid(), profileName, stateNotes);
+				processor.getProcessorType(), processor.getMailbox().getPguid(), profileName, stateNotes, slaVerificationStatus);
 	}
 	
 	/**

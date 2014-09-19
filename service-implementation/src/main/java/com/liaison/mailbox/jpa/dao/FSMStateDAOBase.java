@@ -28,6 +28,7 @@ import com.liaison.fsm.Event;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.jpa.model.FSMState;
 import com.liaison.mailbox.jpa.model.FSMStateValue;
 import com.liaison.mailbox.service.core.MailBoxService;
@@ -76,7 +77,7 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		ProcessorStateDTO processorState = new ProcessorStateDTO(state.getExecutionId(), state.getProcessorId(),
 				ExecutionState.findByCode(value.getValue()), state.getProcessorName(),
 				ProcessorType.findByCode(state.getProcessorType()), state.getMailboxId(),
-				state.getProfileName(), state.getStateNotes());
+				state.getProfileName(), state.getStateNotes(), state.getSlaVerificationStatus());
 		
 		return processorState;
 		
@@ -349,4 +350,105 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
         }
         
     }
+
+	@Override
+	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(
+			String processorId) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+				
+		try {
+			
+			List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+			
+			List<?> jobsRunning = entityManager
+						 .createNamedQuery(FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR)
+						 .setParameter(PROCESSOR_ID, processorId)
+						 .setParameter(BY_VALUE, ExecutionState.COMPLETED.value())
+						 .getResultList();
+			Iterator<?> iter = jobsRunning.iterator();
+            FSMStateValue job = null;
+            while (iter.hasNext()) {
+                
+                job = (FSMStateValue) iter.next();
+                jobs.add(job);
+            }
+            return jobs;
+			
+		} finally {
+			
+			 if (entityManager != null) {
+				 entityManager.close();
+	         }
+		}
+		
+	}
+
+	@Override
+	public List<FSMState> findNonSLAVerifiedFSMEventsByValue(String processorId, Timestamp processorLastExecution, String value) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		
+		try {
+			
+			List <FSMState> fsmEvents = new ArrayList<FSMState>();
+			
+			List <?> executionStates = entityManager
+									   .createNamedQuery(FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE)
+									   .setParameter(SLA_VERIFICATION_STATUS, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode())
+									   .setParameter(PROCESSOR_ID, processorId)
+									   .setParameter(TO_DATE, processorLastExecution)
+									   .setParameter(BY_VALUE, value)
+									   .getResultList();
+			
+			 Iterator<?> iter = executionStates.iterator();
+			 FSMState fsmEvent;
+			 
+			 while (iter.hasNext()) {
+				 fsmEvent = (FSMState) iter.next();
+				 fsmEvents.add(fsmEvent);
+			 }
+								   
+			return fsmEvents;
+			
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+	}
+
+	@Override
+	public List<FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		
+		try {
+			
+			List <FSMState> fileStagedEvents = new ArrayList<FSMState>();
+			
+			List <?> executionStates = entityManager
+									   .createNamedQuery(FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS)
+									   .setParameter(SLA_VERIFICATION_STATUS, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode())
+									   .setParameter(PROCESSOR_ID, processorId)
+									   .setParameter(TO_DATE, processorLastExecution)
+									   .setParameter(BY_VALUE, ExecutionState.STAGED.value())
+									   .getResultList();
+			
+			 Iterator<?> iter = executionStates.iterator();
+			 FSMState fileStagedEvent;
+			 
+			 while (iter.hasNext()) {
+				fileStagedEvent = (FSMState) iter.next();
+				fileStagedEvents.add(fileStagedEvent);
+			 }
+								   
+			return fileStagedEvents;
+			
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+	}
 }

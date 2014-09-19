@@ -119,7 +119,7 @@ public abstract class AuditedResource extends BaseResource {
 				// invoke the delegate to do the read work for
 				// both get and list type operations
 				serviceResponse = (Serializable) responseObject;
-
+				
 				// populate the response body
 				returnResponse = marshalResponse(200, serializationMediaType, serviceResponse);
 			} else {

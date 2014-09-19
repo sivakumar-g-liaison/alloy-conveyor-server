@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -288,5 +289,28 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 			executeRequest(executionId, fsm);
 		}
 	}
+	
+	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
+		
+		boolean isFileExists = false;
+		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
+		sftpRequest.connect();
+
+		if (sftpRequest.openChannel()) {
+			
+		    String remotePath = getWriteResponseURI();
+			if (MailBoxUtil.isEmpty(remotePath)) {
+				LOGGER.info("The given remote URI is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.");
+			}
+			
+			List <String> files = sftpRequest.listFiles(remotePath);
+			isFileExists = (null != files && !files.isEmpty());	
+		}
+
+		sftpRequest.disconnect();
+		return isFileExists;
+	}
+	
 	
 }

@@ -198,4 +198,9 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 			executeRequest(executionId, fsm);
 		}
 	}
+	
+	protected boolean checkFileExistence() {
+		// TODO: Implementation Logic for file existence
+		return false;
+	}
 }

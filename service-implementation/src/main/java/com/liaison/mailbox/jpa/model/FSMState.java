@@ -43,6 +43,7 @@ public class FSMState implements Identifiable {
 	private String mailboxId;
 	private String profileName;
 	private String stateNotes;
+	private String slaVerificationStatus;
 	
 	List<FSMStateValue> executionState;
 	
@@ -131,6 +132,15 @@ public class FSMState implements Identifiable {
 		this.stateNotes = stateNotes;
 	}
 	
+	@Column(name = "SLA_VERIFICATION_STATUS", nullable = false, length = 128)
+	public String getSlaVerificationStatus() {
+		return slaVerificationStatus;
+	}
+
+	public void setSlaVerificationStatus(String slaVerificationStatus) {
+		this.slaVerificationStatus = slaVerificationStatus;
+	}
+
 	@Override
 	@Transient
 	public Object getPrimaryKey() {

@@ -102,4 +102,10 @@ public interface MailBoxConstants {
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX = "timetopickupfilepostedbymailbox";
 	
+	// sla validation
+	public final static String PROCESSOR_NOT_AVAILABLE = "processor_not_available";
+	public final static String PROFILE_NOT_AVAILABLE = "profile_not_available";
+	public final static String DUMMY_MAILBOX_ID_FOR_FSM_STATE =   "ABCDEFGHIJKLMNOPQRSTUVWXYZ789101";
+	public final static String DUMMY_PROCESSOR_ID_FOR_FSM_STATE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456";
+	
 }

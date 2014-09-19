@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 		query = "select stateVal from FSMStateValue stateVal"
 				+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
 				+ " inner join sta.executionState staVal"
-				+ " where sta.processorId = 'C3DB7E5AC0A8008C0E970DC2F3C1D784' and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
+				+ " where sta.processorId = : " + FSMStateDAO.PROCESSOR_ID + "and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
 @NamedQuery(name = FSMStateDAO.FIND_PROC_EXECUTING_BY_VALUE,
 		query = "select stateVal from FSMStateValue stateVal"
 				+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
@@ -58,7 +58,34 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
                 + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
                 + " inner join sta.executionState staVal"
                 + " where sta.processorId = :" + FSMStateDAO.PROCESSOR_ID 
-                + " and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + ")")
+                + " and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + ")"),
+@NamedQuery(name = FSMStateDAO.FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR,
+        query = "select stateVal from FSMStateValue stateVal"
+                + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+                + " inner join sta.executionState staVal"
+                + " where sta.processorId = :" + FSMStateDAO.PROCESSOR_ID 
+                + " and staVal.value = :" + FSMStateDAO.BY_VALUE + ")"),
+/*@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS, 
+		query = "select state from FSMState state" 
+				+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS 
+				+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
+				+ " and state.executionState IN (select stateVal from FSMStateValue stateVal where stateVal.createdDate < :" +FSMStateDAO.TO_DATE 
+				+ " and stateVal.value = :" + FSMStateDAO.BY_VALUE + ")")*/
+@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE, 
+		query = "select state from FSMState state" 
+				+ " inner join state.executionState stateValue"
+				+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS 
+				+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
+				+ " and stateValue.createdDate <= :" +FSMStateDAO.TO_DATE 
+				+ " and stateValue.value = :" + FSMStateDAO.BY_VALUE),
+@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS, 
+		query = "select state from FSMState state" 
+				+ " inner join state.executionState stateValue"
+				+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS 
+				+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
+				+ " and stateValue.createdDate < :" +FSMStateDAO.TO_DATE 
+				+ " and stateValue.value = :" + FSMStateDAO.BY_VALUE)
+                
 })
 
 public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorStateDTO, ExecutionEvents> {
@@ -70,12 +97,16 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	public static final String FIND_PROC_EXECUTING_BY_DATE = "findProcessorsByDate";
 	public static final String FIND_PROC_EXECUTING_BY_VALUE_AND_DATE = "findProcessorsByValueAndDate";
 	public static final String FIND_ALL_PROC_EXECUTING_BY_PROCESSORID = "findAllProcessorsExecutingByProcessorId";
+	public static final String FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR = "findMostRecentSuccessfulExecutionOfProcessor";
+	public static final String FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE = "findNonSLAVerifiedFSMEventsByValue";
+	public static final String FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS = "findNonSLAVerifiedFileStagedEvents";
 	public static final String INTERVAL_IN_HOURS = "interval_in_hours";
 	public static final String BY_VALUE = "by_value";
 	public static final String FROM_DATE = "from_date";
 	public static final String TO_DATE = "to_date";
 	public static final String PROCESSOR_ID = "processor_id";
 	public static final String FSM_STATE_VALUE = "fsm_state_value";
+	public static final String SLA_VERIFICATION_STATUS = "sla_verification_status";
     
 	/**
 	 * Find FSMState by given status value.
@@ -131,5 +162,31 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @return The list of FSMStateValue
 	 */
 	public List<FSMStateValue> findProcessorsExecutingByProcessorId(String processorId, Timestamp timeInterval);
+	
+	/**
+	 * Find the most recent successful execution of a processor based on given processor Id
+	 * 
+	 * @param processorId
+	 * @return FSMStateValue
+	 */
+	
+	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(String processorId);
+	
+	
+	/**
+	 * Find the non sla verified events by given fsm state value
+	 * 
+	 * @param processorId
+	 * @return list of FSMState
+	 */
+	public List <FSMState> findNonSLAVerifiedFSMEventsByValue(String processorId, Timestamp processorLastExecution, String value);
+	
+	/**
+	 * Find the non sla verified events by given fsm state value
+	 * 
+	 * @param processorId
+	 * @return list of FSMState
+	 */
+	public List <FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution);
 
 }
