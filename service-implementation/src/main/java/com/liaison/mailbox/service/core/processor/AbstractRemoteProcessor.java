@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
@@ -224,7 +225,7 @@ public abstract class AbstractRemoteProcessor {
 				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 
 					LOGGER.debug("Started reading the payload files");
@@ -256,7 +257,7 @@ public abstract class AbstractRemoteProcessor {
 
 				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 					return processMountLocation(folder.getFldrUri());
 				}
@@ -292,7 +293,7 @@ public abstract class AbstractRemoteProcessor {
 
 				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (FolderType.RESPONSE_LOCATION.equals(foundFolderType)) {
 					return processMountLocation(folder.getFldrUri());
 				}
@@ -339,7 +340,7 @@ public abstract class AbstractRemoteProcessor {
 
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (null == foundCredentailType) {
-					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (CredentialType.TRUSTSTORE_CERT.equals(foundCredentailType)) {
 					return credential;
 
@@ -368,7 +369,7 @@ public abstract class AbstractRemoteProcessor {
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 
 				if (null == foundCredentailType) {
-					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (CredentialType.LOGIN_CREDENTIAL.equals(foundCredentailType)) {
 					return credential;
 				}
@@ -388,12 +389,12 @@ public abstract class AbstractRemoteProcessor {
 	protected String[] getUserCredetial(String credentialURI) throws URISyntaxException, MailBoxServicesException {
 
 		if (MailBoxUtil.isEmpty(credentialURI)) {
-			throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+			throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 		}
 		URI uri = new URI(credentialURI);
 		String[] userData = null;
 		if (MailBoxUtil.isEmpty(uri.getRawAuthority())) {
-			throw new MailBoxServicesException(Messages.CREDENTIAL_URI_INVALID);
+			throw new MailBoxServicesException(Messages.CREDENTIAL_URI_INVALID, Response.Status.CONFLICT);
 		}
 		userData = uri.getRawAuthority().split("@")[0].split(":");
 		return userData;
@@ -435,7 +436,7 @@ public abstract class AbstractRemoteProcessor {
 		String responseLocation = getWriteResponseURI();
 
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
 		}
 
 		File directory = new File(responseLocation);
@@ -588,7 +589,7 @@ public abstract class AbstractRemoteProcessor {
 				InputStream instream = fetchTrustStore(trustStoreID);
 
 				if (instream == null) {
-					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
 				}
 
 				try {
@@ -754,7 +755,7 @@ public abstract class AbstractRemoteProcessor {
 
 		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given URI {} does not exist.", path);
-			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + path + "' does not exist.", Response.Status.CONFLICT);
 		}
 
 		// Modified to support both file and directory.
@@ -765,14 +766,14 @@ public abstract class AbstractRemoteProcessor {
 				files.add(location);
 			} else {
 				LOGGER.info("The given file {} does not exist.", path);
-				throw new MailBoxServicesException("The given file '" + path + "' does not exist.");
+				throw new MailBoxServicesException("The given file '" + path + "' does not exist.", Response.Status.CONFLICT);
 			}
 
 		} else {
 
 			if (!location.exists()) {
 				LOGGER.info("The given directory {} does not exist.", path);
-				throw new MailBoxServicesException("The given directory '" + path + "' does not exist.");
+				throw new MailBoxServicesException("The given directory '" + path + "' does not exist.", Response.Status.CONFLICT);
 			} else {
 
 				// get all the files from a directory
@@ -925,7 +926,7 @@ public abstract class AbstractRemoteProcessor {
 			}
 
 		} catch (NumberFormatException e) {
-			throw new MailBoxServicesException("The given threshold size is not a valid one.");
+			throw new MailBoxServicesException("The given threshold size is not a valid one.", Response.Status.CONFLICT);
 		}
 
 		if (maxPayloadSize == 0) {
@@ -1040,7 +1041,7 @@ public abstract class AbstractRemoteProcessor {
 				InputStream instream = fetchTrustStore(trustStoreID);
 
 				if (instream == null) {
-					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED);
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
 				}
 
 				try {
@@ -1124,13 +1125,13 @@ public abstract class AbstractRemoteProcessor {
 			if (MailBoxUtil.isEmpty(sshKeyPairCredential.getCredsIdpUri())) {
 
 				LOGGER.info("Credential requires file path");
-				throw new MailBoxServicesException("Credential requires file path");
+				throw new MailBoxServicesException("Credential requires file path", Response.Status.CONFLICT);
 			}
 
 			byte[] privateKeyStream = fetchSSHPrivateKey(sshKeyPairCredential.getCredsIdpUri());
 
 			if (privateKeyStream == null) {
-				throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED);
+				throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
 			}
 
 			String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
@@ -1180,7 +1181,7 @@ public abstract class AbstractRemoteProcessor {
 
 					if (MailBoxUtil.isEmpty(cred[0]) || MailBoxUtil.isEmpty(cred[1])) {
 						LOGGER.info("Credential idpuri requires username & password");
-						throw new MailBoxServicesException("Credential IDPURI requires username & password");
+						throw new MailBoxServicesException("Credential IDPURI requires username & password", Response.Status.CONFLICT);
 					}
 					model.setUsername(cred[0]);
 					model.setPassword(cred[1]);
@@ -1188,7 +1189,7 @@ public abstract class AbstractRemoteProcessor {
 			} else {
 
 				LOGGER.info("Credentials not configured");
-				throw new MailBoxServicesException("Credentials not configured");
+				throw new MailBoxServicesException("Credentials not configured", Response.Status.CONFLICT);
 			}
 		}
 		return model;
@@ -1222,7 +1223,7 @@ public abstract class AbstractRemoteProcessor {
 
 			} else {
 				LOGGER.info("Credentials not configured for TrustStore/keystore");
-				throw new MailBoxServicesException("Credentials not configured TrustStore/keystore");
+				throw new MailBoxServicesException("Credentials not configured TrustStore/keystore", Response.Status.CONFLICT);
 			}
 		}
 		return model;
@@ -1247,7 +1248,7 @@ public abstract class AbstractRemoteProcessor {
 
 		String responseLocation = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
 		}
 
 		File directory = new File(responseLocation);
@@ -1258,7 +1259,7 @@ public abstract class AbstractRemoteProcessor {
 		if (MailBoxUtil.isEmpty(filename)) {
 
 			LOGGER.info("The given URI {} does not exist.", filename);
-			throw new MailBoxServicesException("The given URI '" + filename + "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + filename + "' does not exist.", Response.Status.CONFLICT);
 		}
 		File file = new File(filename);
 		Files.write(file.toPath(), response.toByteArray());
@@ -1356,7 +1357,7 @@ public abstract class AbstractRemoteProcessor {
 			for (Credential credential : configurationInstance.getCredentials()) {
 				CredentialType foundCredentailType = CredentialType.findByCode(credential.getCredsType());
 				if (credential.getCredsType() == null) {
-					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (foundCredentailType.equals(type)) {
 
 					if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && credential.getCredsIdpType().equalsIgnoreCase("PRIVATE")) {
@@ -1386,7 +1387,7 @@ public abstract class AbstractRemoteProcessor {
 
 		String responseLocation = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
 		}
 
 		File directory = new File(responseLocation);
@@ -1397,7 +1398,7 @@ public abstract class AbstractRemoteProcessor {
 		if (MailBoxUtil.isEmpty(fileName)) {
 
 			LOGGER.info("The given URI {} does not exist.", fileName);
-			throw new MailBoxServicesException("The given URI '" + fileName + "' does not exist.");
+			throw new MailBoxServicesException("The given URI '" + fileName + "' does not exist.", Response.Status.CONFLICT);
 		}
 	}
 
@@ -1631,7 +1632,7 @@ public abstract class AbstractRemoteProcessor {
 		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (base64EncodedPassword == null || base64EncodedPassword == "") {
-			throw new MailBoxServicesException(Messages.READ_SECRET_FAILED);
+			throw new MailBoxServicesException(Messages.READ_SECRET_FAILED, Response.Status.BAD_REQUEST);
 		} else {
 			String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
 			String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));

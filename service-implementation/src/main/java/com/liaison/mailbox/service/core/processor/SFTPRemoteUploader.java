@@ -21,6 +21,7 @@ import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -129,7 +130,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given payload URI is Empty.");
-			throw new MailBoxServicesException("The given payload configuration is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 		}
 
 		if (sftpRequest.openChannel()) {
@@ -137,7 +138,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 			}
 
 			//GMB-320 - Creates directory to the remote folder
@@ -301,7 +302,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 			}
 			
 			List <String> files = sftpRequest.listFiles(remotePath);

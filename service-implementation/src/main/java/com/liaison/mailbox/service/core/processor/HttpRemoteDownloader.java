@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
@@ -157,7 +158,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				    }	                          
 				}
 				if (failedStatus) {
-                    throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
+                    throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
                 }
 			}
 		} else {

@@ -10,6 +10,9 @@
 
 package com.liaison.mailbox.service.exception;
 
+import javax.ws.rs.core.Response;
+
+import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.mailbox.enums.Messages;
 
 /**
@@ -17,37 +20,31 @@ import com.liaison.mailbox.enums.Messages;
  * 
  * @author veerasamyn
  */
-public class MailBoxServicesException extends Exception {
+public class MailBoxServicesException extends LiaisonAuditableRuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 
 	 */
-	public MailBoxServicesException() {
-		// TODO Auto-generated constructor stub
-	}
-
+	
 	/**
 	 * @param message
 	 */
-	public MailBoxServicesException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
+	public MailBoxServicesException(String message, Response.Status status) {
+		super(new Exception(message), status);
 	}
 	
 	
-	public MailBoxServicesException(Messages message) {
-		super(message.value());
-		// TODO Auto-generated constructor stub
+	public MailBoxServicesException(Messages message, Response.Status status) {
+		super(new Exception(message.value()), status);
 	}
 	
 	/**
 	 * @param message
 	 */
-	public MailBoxServicesException(Messages message,String key) {
-		super(String.format(message.value(),key));
-		// TODO Auto-generated constructor stub
+	public MailBoxServicesException(Messages message,String key, Response.Status status) {
+		super(new Exception(String.format(message.value(), key)), status);
 	}
 
 }

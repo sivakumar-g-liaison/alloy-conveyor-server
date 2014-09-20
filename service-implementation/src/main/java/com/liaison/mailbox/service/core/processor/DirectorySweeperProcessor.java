@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.script.ScriptException;
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -108,7 +109,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		// Validation of the necessary properties
 		if (MailBoxUtil.isEmpty(inputLocation)) {
-			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED);
+			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
 		}
 
 		List<FileAttributesDTO> files = (inProgressFiles.isEmpty())
@@ -179,7 +180,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		Path rootPath = Paths.get(root);
 		if (!Files.isDirectory(rootPath)) {
-			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY);
+			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
 		}
 
 		List<Path> result = new ArrayList<>();

@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.core;
 import java.io.IOException;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,7 +49,7 @@ public class MailboxTenancyKeyService {
 			tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.info("Retrieval of Tenancy keys failed");
-				throw new MailBoxServicesException(Messages.READ_OPERATION_FAILED, TENANCY_KEYS);
+				throw new MailBoxServicesException(Messages.READ_OPERATION_FAILED, TENANCY_KEYS, Response.Status.BAD_REQUEST);
 			}
 			
 			// constructing the response

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -72,7 +73,7 @@ public class MailBoxService {
 
 			// validates mandatory value.
 			if (MailBoxUtil.isEmpty(profileName)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Name");
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Profile Name", Response.Status.CONFLICT);
 			}
 			LOG.info("The given profile name is {}", profileName);
 
@@ -80,7 +81,7 @@ public class MailBoxService {
 			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
 			ScheduleProfilesRef profile = profileDAO.findProfileByName(profileName);
 			if (null == profile) {
-				throw new MailBoxServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName);
+				throw new MailBoxServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName, Response.Status.CONFLICT);
 			}
 
 			// finding the matching processors for the given profile
@@ -88,7 +89,7 @@ public class MailBoxService {
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern, shardKey);
 
 			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
-				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE);
+				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);
 			}
 
 			List<String> messages = new ArrayList<String>();
@@ -170,12 +171,12 @@ public class MailBoxService {
 			// validates mandatory value.			
 			processorId = dto.getProcessorId();
 			if (MailBoxUtil.isEmpty(processorId)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id");
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Processor Id", Response.Status.CONFLICT);
 			}
 			
 			executionId = dto.getExecutionId();
 			if (MailBoxUtil.isEmpty(executionId)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Execution Id");
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Execution Id", Response.Status.CONFLICT);
 			}
 			
 			LOG.info("The given processor id is {}", processorId);
@@ -218,7 +219,7 @@ public class MailBoxService {
 		        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
 		        LOG.info("#################################################################");
 			
-		} catch (MailBoxServicesException e){
+		} catch (MailBoxServicesException e) {
 			
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
@@ -227,7 +228,7 @@ public class MailBoxService {
 			LOG.error("Processor execution failed", e);
 			
 		}
-		catch (Exception e){
+		catch (Exception e) {
 			
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());

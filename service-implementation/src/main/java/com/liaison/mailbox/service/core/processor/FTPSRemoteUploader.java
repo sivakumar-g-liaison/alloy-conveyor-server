@@ -21,6 +21,7 @@ import java.security.cert.CertificateException;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -153,13 +154,13 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		String path = getPayloadURI();
 		if (MailBoxUtil.isEmpty(path)) {
 			LOGGER.info("The given payload URI is Empty.");
-			throw new MailBoxServicesException("The given payload configuration is Empty.");
+			throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 		}
 
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(remotePath)) {
 			LOGGER.info("The given remote URI is Empty.");
-			throw new MailBoxServicesException("The given remote configuration is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 		}
 
 		boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
@@ -267,7 +268,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 			}
 		} else {			 
 			LOGGER.info("The given payload URI'" + localDir + "' does not exist.");
-			throw new MailBoxServicesException("The given payload configuration '" + localDir + "' does not exist.");
+			throw new MailBoxServicesException("The given payload configuration '" + localDir + "' does not exist.", Response.Status.CONFLICT);
 		}
 	}
 	
@@ -313,7 +314,7 @@ public class FTPSRemoteUploader extends AbstractRemoteProcessor implements MailB
 		String remotePath = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(remotePath)) {
 			LOGGER.info("The given remote URI is Empty.");
-			throw new MailBoxServicesException("The given remote configuration is Empty.");
+			throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 		}
 		
 		boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);

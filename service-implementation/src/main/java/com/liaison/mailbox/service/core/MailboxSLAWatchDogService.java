@@ -24,6 +24,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
@@ -247,12 +248,12 @@ public class MailboxSLAWatchDogService {
 			// validates mandatory value.			
 			mailboxId = dto.getMailboxId();
 			if (MailBoxUtil.isEmpty(mailboxId)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id");
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id", Response.Status.CONFLICT);
 			}
 			
 			spectrumUrl = dto.getSpectrumUrl();
 			if (MailBoxUtil.isEmpty(spectrumUrl)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL");
+				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL", Response.Status.CONFLICT);
 			}
 			
 			LOG.info("The given mailbox id is {}", mailboxId);
@@ -266,7 +267,7 @@ public class MailboxSLAWatchDogService {
 			
 			if (processor == null) {
 				LOG.error("Processor of type uploader is not available for mailbox {}", mailboxId);
-				throw new MailBoxServicesException(Messages.UPLOADER_NOT_AVAILABLE, mailboxId);
+				throw new MailBoxServicesException(Messages.UPLOADER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
 			
 			//get local payload location from uploader
@@ -274,7 +275,7 @@ public class MailboxSLAWatchDogService {
 			
 			if (null == processorPayloadLocation) {
 				LOG.error("payload location not configured for processor {}", processor.getProcsrName());
-				throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED);
+				throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
 			
 			// check if file Name is available in the payloadTicketRequest if so save the file with the 
@@ -286,7 +287,7 @@ public class MailboxSLAWatchDogService {
 			
 			if (null == profileName) {
 				LOG.error("profile not configured for processor {}", processor.getProcsrName());
-				throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED);
+				throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
 			
 			// write the payload retrieved from spectrum to the configured location of processor
@@ -368,7 +369,7 @@ public class MailboxSLAWatchDogService {
 
 				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
 				if (null == foundFolderType) {
-					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID);
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
 					return processMountLocation(folder.getFldrUri());
 				}
@@ -602,12 +603,12 @@ public class MailboxSLAWatchDogService {
 		
 		// check if file exist in the configured uploader location if it exists then
 		// customer sla violated so send a notification to the customer email	
-		if(uploaderProcessor instanceof FTPSRemoteUploader) {
+		if (uploaderProcessor instanceof FTPSRemoteUploader) {
 			
 			FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
 			isCustomerSLAViolated = ftpsRemoteUploader.checkFileExistence();
 			
-		} else if (uploaderProcessor instanceof SFTPRemoteDownloader) {
+		} else if (uploaderProcessor instanceof SFTPRemoteUploader) {
 			
 			SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
 			isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();		

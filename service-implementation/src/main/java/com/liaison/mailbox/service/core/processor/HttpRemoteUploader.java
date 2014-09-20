@@ -21,6 +21,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Date;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
@@ -157,11 +158,11 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				}
 
 				if (failedStatus) {
-					throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED);
+					throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
 				}
 			} else {
 				LOGGER.info("The given HTTP Uploader payload URI is Empty.");
-				throw new MailBoxServicesException("The given payload configuration is Empty.");
+				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 			}
 		}
 		

@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,11 +60,11 @@ public class FS2Util {
 		FlexibleStorageSystem FS2 = FS2Factory.newInstance(new SpectrumStorageConfig(spectrumConfig));
 		try {
 			URI spectrumURI = new URI(payloadURL);
-			//payload = FS2.getFS2PayloadInputStream(spectrumURI);
-			payload = new FileInputStream("D:\\opt\\addmailbox.txt");
-		} catch (/*FS2PayloadNotFoundException |*/ URISyntaxException | FileNotFoundException e) {
+			payload = FS2.getFS2PayloadInputStream(spectrumURI);
+			//payload = new FileInputStream("D:\\opt\\addmailbox.txt");
+		} catch (FS2PayloadNotFoundException | URISyntaxException  e) {
 			LOGGER.error("Failed to retrieve payload from spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to retrieve payload from spectrum due to error");
+			throw new MailBoxServicesException("Failed to retrieve payload from spectrum due to error", Response.Status.BAD_REQUEST);
 		}
 		return payload;
 	}

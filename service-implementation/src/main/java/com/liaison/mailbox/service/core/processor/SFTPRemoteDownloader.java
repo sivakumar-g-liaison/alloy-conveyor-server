@@ -21,6 +21,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
@@ -128,12 +129,12 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given payload URI is Empty.");
-				throw new MailBoxServicesException("The given payload configuration is Empty.");
+				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 			}
 			String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 			}
 
 			downloadDirectory(sftpRequest, path, remotePath);

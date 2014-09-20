@@ -18,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,15 +67,15 @@ public class HTTPServerListenerService {
 		try {
 
 			if (MailBoxUtil.isEmpty(folderPath)) {
-				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "Path");
+				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "Path", Response.Status.CONFLICT);
 			}
 
 			if (MailBoxUtil.isEmpty(filename)) {
-				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "FileName");
+				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "FileName", Response.Status.CONFLICT);
 			}
 
 			if (MailBoxUtil.isEmpty(payload)) {
-				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "Payload");
+				throw new MailBoxServicesException(Messages.EMPTY_VALUE, "Payload", Response.Status.CONFLICT);
 			}
 
 			if (folderPath.startsWith("fs2:")) {
