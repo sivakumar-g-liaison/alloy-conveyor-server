@@ -9,10 +9,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.service.core.processor.MailboxWatchDogQueueConsumer;
+import com.liaison.mailbox.service.core.processor.MailboxToServiceBrokerWorkTicketConsumer;
 
-public class WatchDogQueuePoller {
-	private static final Logger logger = LogManager.getLogger(WatchDogQueuePoller.class);
+public class MailboxToServiceBrokerWorkTicketPoller {
+	private static final Logger logger = LogManager.getLogger(MailboxToServiceBrokerWorkTicketPoller.class);
 
     private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
@@ -23,13 +23,13 @@ public class WatchDogQueuePoller {
 
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
-    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INITIALDELAY = "com.liaison.watchdog.queue.poller.initialdelay";
+    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INITIALDELAY = "com.liaison.mailboxToServiceBrokerWorkTicket.queue.poller.initialdelay";
 
     private static final long DEFAULT_INTERVAL_DELAY = 1000;
-    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INTERVAL_DELAY = "com.liaison.watchdog.queue.poller.intervaldelay";
+    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INTERVAL_DELAY = "com.liaison.mailboxToServiceBrokerWorkTicket.queue.poller.intervaldelay";
 
     private static final String DEFAULT_TIME_UNIT_NAME = TimeUnit.MILLISECONDS.name();
-    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_TIMEUNIT = "com.liaison.watchdog.queue.poller.timeunit";
+    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_TIMEUNIT = "com.liaison.mailboxToServiceBrokerWorkTicket.queue.poller.timeunit";
 
     private static final long INITIAL_DELAY = configuration.getLong(PROPERTY_WATCHDOG_QUEUE_POLLER_INITIALDELAY, DEFAULT_INITIAL_DELAY);
     private static final long INTERVAL_DELAY = configuration.getLong(PROPERTY_WATCHDOG_QUEUE_POLLER_INTERVAL_DELAY, DEFAULT_INTERVAL_DELAY);
@@ -45,12 +45,12 @@ public class WatchDogQueuePoller {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = WatchDogQueue.getInstance().popMessage();
+                String message = MailboxToServiceBrokerWorkTicket.getInstance().popMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);
                     
                     try {
-                    	MailboxWatchDogQueueConsumer qconsumer = MailboxWatchDogQueueConsumer.getMailboxWatchDogQueueConsumerInstance();
+                    	MailboxToServiceBrokerWorkTicketConsumer qconsumer = MailboxToServiceBrokerWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance();
                         qconsumer.invokeWatchDog(message);
                     } catch (Exception e) {
                         logger.error("Recovering from processing error", e);

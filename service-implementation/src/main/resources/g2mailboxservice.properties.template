@@ -39,6 +39,31 @@ com.liaison.jms.send.attempts.processor=-1
 #com.liaison.jms.init.timeout.processor
 #com.liaison.jms.queue.member.reset.interval.millis.processor
 
+
+com.liaison.jms.queuename.mailboxToServiceBrokerWorkTicket=jms.MailboxToServiceBrokerWorkTicket 
+###############################################################################
+
+#SSL Settings
+com.liaison.jms.ssl.enable.mailboxToServiceBrokerWorkTicket=false
+com.liaison.jms.ssl.truststore.path.mailboxToServiceBrokerWorkTicket=/tmp/my.cacerts
+com.liaison.jms.ssl.truststore.password.mailboxToServiceBrokerWorkTicket=changeit
+
+com.liaison.jms.hostname.mailboxToServiceBrokerWorkTicket=10.146.16.148
+com.liaison.jms.port.mailboxToServiceBrokerWorkTicket=5046
+#-1 is infinite
+com.liaison.jms.receive.attempts.mailboxToServiceBrokerWorkTicket=-1
+#com.liaison.jms.receive.timeout.mailboxToServiceBrokerWorkTicket
+#-1 is infinite
+com.liaison.jms.send.attempts.mailboxToServiceBrokerWorkTicket=-1
+#com.liaison.jms.send.timeout.mailboxToServiceBrokerWorkTicket
+#com.liaison.jms.client.count.mailboxToServiceBrokerWorkTicket
+#com.liaison.jms.init.attempts.mailboxToServiceBrokerWorkTicket
+#com.liaison.jms.init.timeout.mailboxToServiceBrokerWorkTicket
+#com.liaison.jms.queue.member.reset.interval.millis.mailboxToServiceBrokerWorkTicket
+#\\\###########################///#
+#\\\###########################///#
+
+
 ########################################################DATABASE CONFIGURATIONS############################################################
 
 # database connectivity properties
@@ -184,7 +209,7 @@ com.liaison.acl.skipList=com.wordnik.swagger.jersey.listing.ApiListingResource.r
 #Thread Count for processor
 mailbox.processor.queue.consumer.thread.count=5
 #Thread Count for watchdog
-mailbox.watchdog.queue.consumer.thread.count=5
+mailbox.mailboxToServiceBrokerWorkTicket.queue.consumer.thread.count=5
 
 # Spectrum client properties for payloads
 spectrum.client.instanceid=aws

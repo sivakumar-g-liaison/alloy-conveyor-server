@@ -8,13 +8,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-public class MailboxWatchDogQueueConsumer {
+public class MailboxToServiceBrokerWorkTicketConsumer {
 
 	private static int threadCount;		
-	private static final Logger logger = LogManager.getLogger(MailboxWatchDogQueueConsumer.class);
-	private static MailboxWatchDogQueueConsumer qConsumerInstance = null;
+	private static final Logger logger = LogManager.getLogger(MailboxToServiceBrokerWorkTicketConsumer.class);
+	private static MailboxToServiceBrokerWorkTicketConsumer qConsumerInstance = null;
 	
-	private MailboxWatchDogQueueConsumer() {
+	private MailboxToServiceBrokerWorkTicketConsumer() {
 		// defeat instantiation.
 	}
 	
@@ -41,11 +41,11 @@ public class MailboxWatchDogQueueConsumer {
 	 * @throws Exception 
 	 * @throws NumberFormatException 
 	 */
-	public static MailboxWatchDogQueueConsumer getMailboxWatchDogQueueConsumerInstance() throws Exception {
+	public static MailboxToServiceBrokerWorkTicketConsumer getMailboxWatchDogQueueConsumerInstance() throws Exception {
 		
-		threadCount = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString("mailbox.watchdog.queue.consumer.thread.count"));	
+		threadCount = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString("mailbox.mailboxToServiceBrokerWorkTicket.queue.consumer.thread.count"));	
 		if (qConsumerInstance == null) {
-			qConsumerInstance = new MailboxWatchDogQueueConsumer();
+			qConsumerInstance = new MailboxToServiceBrokerWorkTicketConsumer();
 		}
 		
 		return qConsumerInstance;
