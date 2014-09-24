@@ -29,7 +29,7 @@ public class WatchDogInvoker implements Runnable {
 		
 		logger.info("watchdog request:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		  try {
-			   MailboxToServiceBrokerWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance().printExecutorDiagonostics();
+			   ServiceBrokerToMailboxWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance().printExecutorDiagonostics();
 		  } catch(Exception e) {
 				logger.error("Mailbox watchdog queue consumer thread count error", e);
 		  }

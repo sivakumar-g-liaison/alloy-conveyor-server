@@ -60,7 +60,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
+import com.liaison.mailbox.com.liaison.queue.MailboxToServiceBrokerWorkTicket;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -539,7 +539,7 @@ public class HttpListener extends AuditedResource {
 
 
 	protected void postToQueue(String message) throws Exception {
-        SweeperQueue.getInstance().pushMessages(message);
+        MailboxToServiceBrokerWorkTicket.getInstance().pushMessages(message);
 
 	}
 

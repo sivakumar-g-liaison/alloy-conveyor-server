@@ -15,7 +15,7 @@ package com.liaison.framework.bootstrap;
 
 
 import com.liaison.mailbox.com.liaison.queue.ProcessorQueuePoller;
-import com.liaison.mailbox.com.liaison.queue.MailboxToServiceBrokerWorkTicketPoller;
+import com.liaison.mailbox.com.liaison.queue.ServiceBrokerToMailboxWorkTicketPoller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +49,7 @@ public class InitializationServlet extends HttpServlet {
 
     public void init(ServletConfig config) throws ServletException {
         ProcessorQueuePoller.startPolling();
-        MailboxToServiceBrokerWorkTicketPoller.startPolling();
+        ServiceBrokerToMailboxWorkTicketPoller.startPolling();
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
     }
 

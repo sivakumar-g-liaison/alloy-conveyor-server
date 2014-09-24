@@ -43,7 +43,7 @@ import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.fs2.api.exceptions.FS2ObjectAlreadyExistsException;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
+import com.liaison.mailbox.com.liaison.queue.MailboxToServiceBrokerWorkTicket;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.jpa.model.Processor;
@@ -288,7 +288,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 *            The input message to queue.
 	 */
 	private void postToQueue(String input)   {
-        SweeperQueue.getInstance().pushMessages(input);
+        MailboxToServiceBrokerWorkTicket.getInstance().pushMessages(input);
 
 
 	}

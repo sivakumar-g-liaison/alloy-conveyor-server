@@ -9,10 +9,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.service.core.processor.MailboxToServiceBrokerWorkTicketConsumer;
+import com.liaison.mailbox.service.core.processor.ServiceBrokerToMailboxWorkTicketConsumer;
 
-public class MailboxToServiceBrokerWorkTicketPoller {
-	private static final Logger logger = LogManager.getLogger(MailboxToServiceBrokerWorkTicketPoller.class);
+public class ServiceBrokerToMailboxWorkTicketPoller {
+	private static final Logger logger = LogManager.getLogger(ServiceBrokerToMailboxWorkTicketPoller.class);
 
     private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
@@ -45,12 +45,12 @@ public class MailboxToServiceBrokerWorkTicketPoller {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = MailboxToServiceBrokerWorkTicket.getInstance().popMessage();
+                String message = ServiceBrokerToMailboxWorkTicket.getInstance().popMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);
                     
                     try {
-                    	MailboxToServiceBrokerWorkTicketConsumer qconsumer = MailboxToServiceBrokerWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance();
+                    	ServiceBrokerToMailboxWorkTicketConsumer qconsumer = ServiceBrokerToMailboxWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance();
                         qconsumer.invokeWatchDog(message);
                     } catch (Exception e) {
                         logger.error("Recovering from processing error", e);

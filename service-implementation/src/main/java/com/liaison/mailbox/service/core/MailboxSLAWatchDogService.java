@@ -20,6 +20,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -33,11 +34,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 
-import com.google.gson.JsonParseException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.fs2.api.exceptions.FS2Exception;
@@ -50,6 +53,8 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.jpa.dao.FSMStateDAO;
 import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
+import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
+import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.jpa.model.FSMState;
@@ -63,15 +68,14 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FTPSRemoteUploader;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
-import com.liaison.mailbox.service.core.processor.SFTPRemoteDownloader;
 import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PayloadTicketRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.FS2Util;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class MailboxSLAWatchDogService {
 
@@ -243,7 +247,8 @@ public class MailboxSLAWatchDogService {
 			
 			LOG.info("#####################----WATCHDOG INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 			
-			PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
+			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
+			PayloadTicketRequestDTO dto = JAXBUtility.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 
 			// validates mandatory value.			
 			mailboxId = dto.getMailboxId();
@@ -259,9 +264,6 @@ public class MailboxSLAWatchDogService {
 			LOG.info("The given mailbox id is {}", mailboxId);
 			LOG.info("The spectrum URL is {}", spectrumUrl);
 			
-			//get payload from spectrum
-			InputStream payload = FS2Util.retrievePayloadFromSpectrum(spectrumUrl);
-			
 			//get processor of type uploader configured with mailbox present in PayloadTicketRequest 
 			processor = getProcessorOfTypeUploader(mailboxId);
 			
@@ -269,6 +271,9 @@ public class MailboxSLAWatchDogService {
 				LOG.error("Processor of type uploader is not available for mailbox {}", mailboxId);
 				throw new MailBoxServicesException(Messages.UPLOADER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
+			
+			//get payload from spectrum
+			InputStream payload = FS2Util.retrievePayloadFromSpectrum(spectrumUrl);
 			
 			//get local payload location from uploader
 			String processorPayloadLocation = getProcessorPayloadLocation(processor);
@@ -287,7 +292,7 @@ public class MailboxSLAWatchDogService {
 			
 			if (null == profileName) {
 				LOG.error("profile not configured for processor {}", processor.getProcsrName());
-				throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
+				throw new MailBoxServicesException(Messages.PROFILE_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
 			
 			// write the payload retrieved from spectrum to the configured location of processor
@@ -302,29 +307,80 @@ public class MailboxSLAWatchDogService {
 		    processorDAO.merge(processor);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 	        LOG.info("#################################################################");
+		} catch (JAXBException | JsonParseException | JsonMappingException e) {
+			//cannot send email since the request json cannot be parsed
+			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 			
 		} catch (MailBoxServicesException e) {
-			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE, ExecutionState.STAGING_FAILED, MailBoxConstants.PROCESSOR_NOT_AVAILABLE,
-					ProcessorType.REMOTEUPLOADER, (mailboxId == null)?MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE:mailboxId, (profileName == null)?MailBoxConstants.PROFILE_NOT_AVAILABLE:profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
+			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null)? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE : processor.getPguid(), ExecutionState.STAGING_FAILED, MailBoxConstants.PROCESSOR_NOT_AVAILABLE,
+					ProcessorType.REMOTEUPLOADER, (mailboxId == null) ? MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ? MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			processor.setProcsrExecutionStatus(ExecutionState.STAGING_FAILED.value());
-			processorDAO.merge(processor);
-			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), ExceptionUtils.getStackTrace(e), "HTML");
+			// processor table will be updated only if processor is available
+			if (null != processor) {
+				processor.setProcsrExecutionStatus(ExecutionState.STAGING_FAILED.value());
+				processorDAO.merge(processor);
+			}
+			notifyUser(processor, mailboxId, e);
 			LOG.error("File Staging failed", e);
 			
 		} catch (Exception e) {
 			
-			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE, ExecutionState.STAGING_FAILED, MailBoxConstants.PROCESSOR_NOT_AVAILABLE,
-					ProcessorType.REMOTEUPLOADER, (mailboxId == null)?MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE:mailboxId, (profileName == null)?MailBoxConstants.PROFILE_NOT_AVAILABLE:profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
+			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null) ? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE : processor.getPguid(), ExecutionState.STAGING_FAILED, MailBoxConstants.PROCESSOR_NOT_AVAILABLE,
+					ProcessorType.REMOTEUPLOADER, (mailboxId == null) ? MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ? MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			processor.setProcsrExecutionStatus(ExecutionState.STAGING_FAILED.value());
-			processorDAO.merge(processor);
-			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), ExceptionUtils.getStackTrace(e), "HTML");
+			// processor table will be updated only if processor is available
+			if (null != processor) {
+				processor.setProcsrExecutionStatus(ExecutionState.STAGING_FAILED.value());
+				processorDAO.merge(processor);
+			}
+			notifyUser(processor, mailboxId, e);
 			LOG.error("File Staging failed", e);
 		}
 		
+	}
+	
+	private List <String> getEmailAddress (Processor processor, String mailboxId) {
+		
+		if (null != processor) {
+			return processor.getEmailAddress();
+		}
+		if (null != mailboxId) {
+			MailBoxConfigurationDAO mailboxDAO = new MailBoxConfigurationDAOBase();
+			MailBox mailBox = null;
+			try {
+				mailBox = mailboxDAO.find(MailBox.class, mailboxId) ;
+				List<MailBoxProperty> properties = mailBox.getMailboxProperties();
+
+				if (null != properties) {
+
+					for (MailBoxProperty property : properties) {
+
+						if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
+							String address = property.getMbxPropValue();
+							return Arrays.asList(address.split(","));
+						}
+					}
+				}
+			} catch (Exception e) {
+				LOG.error ("Failed to get Email Address", e);
+			}
+		}
+		return null;
+	}
+	
+	private void notifyUser (Processor processor, String mailboxId, Exception e) {
+		
+		String emailSubject = null;
+		List <String> emailAddress = getEmailAddress(processor, mailboxId);
+		if (null != processor) {
+			emailSubject = processor.getProcsrName() + ":" + e.getMessage();
+		} else {
+			emailSubject = e.getMessage();
+		}
+		// Email will be sent only if email address is available
+		if (null != emailAddress) sendEmail(emailAddress, emailSubject, ExceptionUtils.getStackTrace(e), "HTML");
 	}
 	
 	/**
@@ -624,4 +680,5 @@ public class MailboxSLAWatchDogService {
 		}		
 
 	}
+	
 }

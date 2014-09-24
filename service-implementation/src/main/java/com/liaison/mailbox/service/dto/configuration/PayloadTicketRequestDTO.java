@@ -23,19 +23,19 @@ public class PayloadTicketRequestDTO {
 	private String mailboxId;
 	private String spectrumUrl;
 	private String targetFileName;
-	private String payload;
+	private boolean isOverwrite;
 	
-	private PayloadTicketRequestDTO() {
+	public PayloadTicketRequestDTO() {
 		super();
 	}
-	
-	public PayloadTicketRequestDTO(String mailboxId, String spectrumUrl, String targetFileName, String payload) {
+
+	public PayloadTicketRequestDTO(String mailboxId, String spectrumUrl, String targetFileName, boolean overwrite) {
 		this.mailboxId = mailboxId;
 		this.spectrumUrl = spectrumUrl;
 		this.targetFileName = targetFileName;
-		this.payload = payload;
+		this.isOverwrite = overwrite;
 	}
-	
+
 	public String getMailboxId() {
 		return mailboxId;
 	}
@@ -60,13 +60,13 @@ public class PayloadTicketRequestDTO {
 		this.targetFileName = targetFileName;
 	}
 
-	public String getPayload() {
-		return payload;
+	public boolean isOverwrite() {
+		return isOverwrite;
 	}
 
-	public void setPayload(String payload) {
-		this.payload = payload;
+	public void setOverwrite(boolean isOverwrite) {
+		this.isOverwrite = isOverwrite;
 	}
-	
+
 }
 

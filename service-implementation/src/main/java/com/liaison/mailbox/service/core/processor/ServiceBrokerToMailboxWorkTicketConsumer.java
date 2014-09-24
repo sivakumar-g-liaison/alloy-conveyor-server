@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.core.processor;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -8,13 +18,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-public class MailboxToServiceBrokerWorkTicketConsumer {
+public class ServiceBrokerToMailboxWorkTicketConsumer {
 
 	private static int threadCount;		
-	private static final Logger logger = LogManager.getLogger(MailboxToServiceBrokerWorkTicketConsumer.class);
-	private static MailboxToServiceBrokerWorkTicketConsumer qConsumerInstance = null;
+	private static final Logger logger = LogManager.getLogger(ServiceBrokerToMailboxWorkTicketConsumer.class);
+	private static ServiceBrokerToMailboxWorkTicketConsumer qConsumerInstance = null;
 	
-	private MailboxToServiceBrokerWorkTicketConsumer() {
+	private ServiceBrokerToMailboxWorkTicketConsumer() {
 		// defeat instantiation.
 	}
 	
@@ -41,11 +51,11 @@ public class MailboxToServiceBrokerWorkTicketConsumer {
 	 * @throws Exception 
 	 * @throws NumberFormatException 
 	 */
-	public static MailboxToServiceBrokerWorkTicketConsumer getMailboxWatchDogQueueConsumerInstance() throws Exception {
+	public static ServiceBrokerToMailboxWorkTicketConsumer getMailboxWatchDogQueueConsumerInstance() throws Exception {
 		
-		threadCount = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString("mailbox.mailboxToServiceBrokerWorkTicket.queue.consumer.thread.count"));	
+		threadCount = Integer.parseInt(MailBoxUtil.getEnvironmentProperties().getString("mailbox.processedPayload.queue.consumer.thread.count"));	
 		if (qConsumerInstance == null) {
-			qConsumerInstance = new MailboxToServiceBrokerWorkTicketConsumer();
+			qConsumerInstance = new ServiceBrokerToMailboxWorkTicketConsumer();
 		}
 		
 		return qConsumerInstance;

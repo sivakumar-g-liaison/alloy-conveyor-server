@@ -33,7 +33,7 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 		query = "select stateVal from FSMStateValue stateVal"
 				+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
 				+ " inner join sta.executionState staVal"
-				+ " where sta.processorId = : " + FSMStateDAO.PROCESSOR_ID + "and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
+				+ " where staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
 @NamedQuery(name = FSMStateDAO.FIND_PROC_EXECUTING_BY_VALUE,
 		query = "select stateVal from FSMStateValue stateVal"
 				+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
