@@ -28,7 +28,7 @@ public class DummyJMSClient {
 	public Response postDummyProcesssedPayload(@Context HttpServletRequest request, @PathParam(value = "mailboxId") String mailboxId, @PathParam(value = "spectrumURL") String spectrumURL, @PathParam(value = "targetFileName") String targetFileName) {
 	
 		try {
-			spectrumURL = "fs2:/text/FOO/1/17";
+			spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518";
 			PayloadTicketRequestDTO ticketRequest = new PayloadTicketRequestDTO(mailboxId, spectrumURL, targetFileName, false);
 			String payloadTicket = JAXBUtility.marshalToJSON(ticketRequest);
 			ServiceBrokerToMailboxWorkTicket.getInstance().pushMessages(payloadTicket);
