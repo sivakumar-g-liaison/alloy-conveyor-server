@@ -184,9 +184,7 @@ public class ProcessorConfigurationService {
 
 			// adding service instance id
 			processor.setServiceInstance(serviceInstance);
-			// set self-signed to 0 by default since that field is having NOTNULL constraint
-			processor.setIsSelfSigned(0);
-
+			
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
 			configDAO.persist(processor);

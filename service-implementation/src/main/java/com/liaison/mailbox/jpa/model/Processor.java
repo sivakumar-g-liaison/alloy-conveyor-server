@@ -101,20 +101,11 @@ public class Processor implements Identifiable {
 		this.javaScriptUri = javaScriptUri;
 	}
 	
-	@Column(name = "SELF_SIGNED")
-	public Number getIsSelfSigned() {
-		return isSelfSigned;
-	}
-
-	public void setIsSelfSigned(Number isSelfSigned) {
-		this.isSelfSigned = isSelfSigned;
-	}
-	
 	@Column(name = "DESCRIPTION", length = 512)
 	public String getProcsrDesc() {
 		return this.procsrDesc;
 	}
-
+	
 	public void setProcsrDesc(String procsrDesc) {
 		this.procsrDesc = procsrDesc;
 	}
