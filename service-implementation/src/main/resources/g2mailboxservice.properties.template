@@ -212,11 +212,20 @@ mailbox.processor.queue.consumer.thread.count=5
 mailbox.processedPayload.queue.consumer.thread.count=5
 
 # Spectrum client properties for payloads
-spectrum.client.instanceid=aws
-spectrum.client.serverip.aws=data.spectrumdatacloud.com
-spectrum.client.port.aws=
-spectrum.client.username.aws=jwojcik@liaison.com
-spectrum.client.password.aws=Password1
-spectrum.client.source.aws=G2_Junit
-spectrum.client.spacename.aws=jwojcik
-spectrum.client.definitionname.aws=DODJosh
+#spectrum.client.instanceid=aws
+#spectrum.client.serverip.aws=data.spectrumdatacloud.com
+#spectrum.client.port.aws=
+#spectrum.client.username.aws=jwojcik@liaison.com
+#spectrum.client.password.aws=Password1
+#spectrum.client.source.aws=G2_Junit
+#spectrum.client.spacename.aws=jwojcik
+#spectrum.client.definitionname.aws=DODJosh
+
+# fs2 client properties for payloads
+fs2.storage.spectrum.ip=10.146.16.118
+fs2.storage.spectrum.port=80
+fs2.storage.spectrum.username=g2devlab
+fs2.storage.spectrum.password=Green7Bird
+fs2.storage.spectrum.source=FS2_UnitTest
+fs2.storage.spectrum.spaceName=g2-dev-ls
+fs2.storage.spectrum.dataDefinition=Payload

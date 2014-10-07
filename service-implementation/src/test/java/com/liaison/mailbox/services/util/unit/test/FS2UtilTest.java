@@ -46,22 +46,25 @@ public class FS2UtilTest {
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
 		System.setProperty("archaius.deployment.environment", "ci");
 		
-		final String PROPERTY_FS2_IP = "spectrum.client.serverip.aws";
-		final String PROPERTY_FS2_USERNAME = "spectrum.client.username.aws";
-		final String PROPERTY_FS2_PASSWORD = "spectrum.client.password.aws";
-		final String PROPERTY_FS2_PORT = "spectrum.client.port.aws";
-		final String PROPERTY_FS2_SPACE_NAME = "spectrum.client.spacename.aws";
-		final String PROPERTY_FS2_SOURCE_NAME = "spectrum.client.source.aws";
+		final String PROPERTY_FS2_IP = "fs2.storage.spectrum.ip";
+		final String PROPERTY_FS2_USERNAME = "fs2.storage.spectrum.username";
+		final String PROPERTY_FS2_PASSWORD = "fs2.storage.spectrum.password";
+		final String PROPERTY_FS2_PORT = "fs2.storage.spectrum.port";
+		final String PROPERTY_FS2_SPACE_NAME = "fs2.storage.spectrum.spaceName";
+		final String PROPERTY_FS2_SOURCE_NAME = "fs2.storage.spectrum.source";
+		final String PROPERTY_FS2_DATA_DEFINITION = "fs2.storage.spectrum.dataDefinition";
 		
 		DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 		
 		//read spectrum properties from property file
+		//read FS2 properties from property file
 		String fs2IP = configuration.getString(PROPERTY_FS2_IP);
 		String fs2UserName = configuration.getString(PROPERTY_FS2_USERNAME);
 		String fs2Pwd = configuration.getString(PROPERTY_FS2_PASSWORD);
 		String fs2Port = configuration.getString(PROPERTY_FS2_PORT);
 		String fs2SpaceName = configuration.getString(PROPERTY_FS2_SPACE_NAME);
 		String fs2SourceName =  configuration.getString(PROPERTY_FS2_SOURCE_NAME);
+		String fs2DataDefinition = configuration.getString(PROPERTY_FS2_DATA_DEFINITION);
 		
 		final SpectrumConfig spectrumConfig = new SpectrumConfigBuilder()
 		.ip(fs2IP)
@@ -70,13 +73,13 @@ public class FS2UtilTest {
 		.password(fs2Pwd)
 		.source(fs2SourceName)
 		.spaceName(fs2SpaceName)
-		.dataDefinition("Payload")
+		.dataDefinition(fs2DataDefinition)
 		.dataRetentionTTL(500)
 		.build();
 
 		FlexibleStorageSystem FS2 = FS2Factory.newInstance(new SpectrumStorageConfig(spectrumConfig));
 		try {
-			URI spectrumUri = new URI("hardcode the URI");
+			URI spectrumUri = new URI("fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518");
 			FS2.getFS2PayloadInputStream(spectrumUri);
 		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
 			e.printStackTrace();
