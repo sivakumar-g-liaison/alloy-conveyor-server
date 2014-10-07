@@ -229,3 +229,10 @@ fs2.storage.spectrum.password=Green7Bird
 fs2.storage.spectrum.source=FS2_UnitTest
 fs2.storage.spectrum.spaceName=g2-dev-ls
 fs2.storage.spectrum.dataDefinition=Payload
+
+# DEK and KEK properties
+data.encryption.cipher.algorithm=AES
+data.encryption.key.algorithm=AES
+data.encryption.key.size=128
+data.encryption.key.maxuses=10000
+data.encryption.kek.cache.expiration=10
