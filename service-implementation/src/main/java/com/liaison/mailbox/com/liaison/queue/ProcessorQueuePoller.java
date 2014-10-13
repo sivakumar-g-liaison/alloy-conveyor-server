@@ -62,7 +62,7 @@ public class ProcessorQueuePoller  {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = ProcessorQueue.getInstance().popMessage();
+                String message = ProcessorQueue.getInstance().receiveMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);                    
                     try {
