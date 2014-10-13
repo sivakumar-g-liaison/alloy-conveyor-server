@@ -21,6 +21,15 @@ project.war.baseName = 'g2mailboxservice'
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
 
+//DELETE ME
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
+}
+//DELETE ME
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 10, 'minutes'
+}
+
 license {
 	header rootProject.file('codequality/HEADER')
 	ext.year = Calendar.getInstance().get(Calendar.YEAR)
@@ -182,7 +191,7 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
     //compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
 
-    compile 'com.liaison.commons:lib_message_bus:2.+'
+    compile 'com.liaison.commons:lib_message_bus:2.4.0-SNAPSHOT'
 
     // inherited from NetFlix Karyon (TODO integrate with main UI)
     compile project(':karyon-admin-web')
