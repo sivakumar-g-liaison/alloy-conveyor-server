@@ -296,7 +296,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	private void postToQueue(String input)   {
         LOGGER.debug("DirectorySweeper push postToQueue, message: {}", input);
 
-        SweeperQueue.getInstance().pushMessages(input);
+        SweeperQueue.getInstance().sendMessages(input);
 	}
 
 	/**
