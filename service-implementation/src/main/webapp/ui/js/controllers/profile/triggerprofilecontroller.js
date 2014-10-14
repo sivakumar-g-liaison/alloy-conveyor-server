@@ -56,7 +56,7 @@ myApp.controller('TriggerProfileCntrlr', ['$rootScope', '$scope', '$location', '
             	shardKey = $scope.mailBoxSharedKey;
             }
             
-            $scope.restService.post($scope.base_url + "/triggerProfile"
+            $scope.restService.post($scope.base_url + "/trigger/profile"
             		+ '?name=' + profName
             		+ '&excludeMailbox=' + mbxName
             		+ '&shardKey=' + shardKey, "{}")

@@ -125,7 +125,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		Assert.assertEquals(true, getResponseStatus(jsonResponse, "addProcessorToMailBoxResponse").equals(SUCCESS));
 
 		// Trigger the profile
-		String triggerProfile = "/triggerProfile" + "?name=" + profileName;
+		String triggerProfile = "/trigger/profile" + "?name=" + profileName;
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 
@@ -149,7 +149,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	public void testTriggerProfile_ProfileIsNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 	         JAXBException, IOException {
 		
-		String triggerProfile = "/triggerProfile" + "?name=" +null;
+		String triggerProfile = "/trigger/profile" + "?name=" +null;
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 
@@ -173,7 +173,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	public void testTriggerProfile_ProfileIsInvalid() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
             JAXBException, IOException {
 		
-		String triggerProfile = "/triggerProfile" + "?name=" + System.currentTimeMillis()+"INVALID_PROFILE";
+		String triggerProfile = "/trigger/profile" + "?name=" + System.currentTimeMillis()+"INVALID_PROFILE";
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 
@@ -197,7 +197,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	public void testTriggerProfile_ProfileIsEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
             JAXBException, IOException {
 		
-		String triggerProfile = "/triggerProfile" + "?name=";
+		String triggerProfile = "/trigger/profile" + "?name=";
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 

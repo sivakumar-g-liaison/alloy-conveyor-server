@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -15,10 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -38,9 +39,9 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.mailbox.service.core.ProfileConfigurationService;
-import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
+import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -55,130 +56,82 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
- * This is the gateway for the profile configuration services.
- * 
+ * This is the gateway for the mailbox configuration services.
+ *
  * @author OFS
  */
-@Path("mailbox/profile")
-@Api(value = "mailbox/profile", description = "Gateway for the profile configuration services.")
-public class ProfileConfigurationResource extends AuditedResource {
-	
-	private static final Logger LOG = LogManager.getLogger(ProfileConfigurationResource.class);
+@Path("mailbox/{id}")
+@Api(value = "mailbox/{id}", description = "Gateway for the mailbox configuration services.")
+public class MailboxConfigurationDetailsResource extends AuditedResource {
+
+	private static final Logger LOG = LogManager.getLogger(MailboxConfigurationDetailsResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	
 
-	public ProfileConfigurationResource() throws IOException {
+	public MailboxConfigurationDetailsResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 	
 	/**
-	 * REST method to initiate profile creation.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return Response Object
-	 */
-	@POST
-	@ApiOperation(value = "Create Profile",
-			notes = "create a new profile",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new profile", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	@AccessDescriptor(accessMethod = "createProfile")
-	public Response createProfile(@Context final HttpServletRequest request) {
-		
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
-				
-				serviceCallCounter.addAndGet(1);
-				
-				String requestString;
-				try {
-					requestString = getRequestBody(request);
-					AddProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
-					// creates new profile
-					ProfileConfigurationService profile = new ProfileConfigurationService();
-					return profile.createProfile(serviceRequest);
-					
-				} catch (IOException | JAXBException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
-			}
-		};		
-		worker.actionLabel = "ProfileConfigurationResource.createProfile()";
-
-		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
-	}
-	
-	/**
-	 * REST method to update a profile
-	 * 
+	 * REST method to update existing mailbox.
+	 *
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
 	@PUT
-	@ApiOperation(value = "Update profile",
-			notes = "Update an existing profile",
-			position = 2,
-			response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Update Mailbox",
+			notes = "update details of existing mailbox",
+			position = 1,
+			response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update an existing profile", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType = "body") })
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update existing mailbox", required = true,
+			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body") })
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "reviseProfile")
-	public Response reviseProfile(@Context final HttpServletRequest request) {
+	@AccessDescriptor(accessMethod = "reviseMailBox")
+	public Response reviseMailBox(
+			@Context final HttpServletRequest request,
+			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				String requestString;
-				try{
+				try {
 					requestString = getRequestBody(request);
-					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
-					// update profile
-					ProfileConfigurationService profile = new ProfileConfigurationService();
-					return profile.updateProfile(serviceRequest);
-					
+					ReviseMailBoxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							ReviseMailBoxRequestDTO.class);
+
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+
+					// updates existing mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId,
+							decodedManifestJson);
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
-				
+				}
+
 			}
 		};
-		worker.actionLabel = "ProfileConfigurationResource.updateProfile()";
+		worker.actionLabel = "MailboxConfigurationDetailsResource.reviseMailBox()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -190,42 +143,53 @@ public class ProfileConfigurationResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-	
+
 	/**
-	 * REST method to retrieve all profiles.
-	 * 
+	 * REST method to delete a mailbox.
+	 *
+	 * @param guid
+	 *            The id of the mailbox
+	 *
 	 * @return Response Object
 	 */
-	@GET
-	@ApiOperation(value = "List Profiles",
-			notes = "returns detail information of all the profiles",
-			position = 3,
-			response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
+	@DELETE
+	@ApiOperation(value = "Delete Mailbox",
+			notes = "delete a mailbox",
+			position = 2,
+			response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "readProfiles")
-	public Response readProfiles(
-			@Context final HttpServletRequest request,
-			@ApiParam(value = "Page Number", required = false) @QueryParam(value = "page") final String page,
-            @ApiParam(value = "Page Size", required = false) @QueryParam(value = "pageSize") final String pageSize,
-            @ApiParam(value = "Sorting Information", required = false) @QueryParam(value = "sortInfo") final String sortInfo,
-            @ApiParam(value = "Filter Text", required = false) @QueryParam(value = "filterText") final String filterText) {
-		
- 	  // create the worker delegate to perform the business logic
+	@AccessDescriptor(accessMethod = "deactivateMailBox")
+	public Response deactivateMailBox(@Context final HttpServletRequest request,
+			@PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") final String guid) {
+
+		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
-				serviceCallCounter.addAndGet(1);				
-				// read Profiles
-				ProfileConfigurationService profile = new ProfileConfigurationService();
-				return profile.getProfiles(page, pageSize, sortInfo, filterText);
+
+				serviceCallCounter.addAndGet(1);
+
+				try {
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+
+					// deactivates existing mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.deactivateMailBox(guid, decodedManifestJson);
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}
+
 			}
 		};
-		worker.actionLabel = "ProfileConfigurationResource.readProfiles()";
+		worker.actionLabel = "MailboxConfigurationDetailsResource.deactivateMailBox()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -235,7 +199,71 @@ public class ProfileConfigurationResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
+
+	}
+
+	/**
+	 * REST method to retrieve a mailbox details.
+	 *
+	 * @param guid
+	 *            The id of the mailbox
+	 * @return Response Object
+	 */
+	@GET
+	@ApiOperation(value = "Mailbox Details",
+			notes = "returns details of a valid mailbox",
+			position = 3,
+			response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiResponses({
+			@ApiResponse(code = 500, message = "Unexpected Service failure.")
+	})
+	@AccessDescriptor(accessMethod = "readMailBox")
+	public Response readMailBox(
+			@Context final HttpServletRequest request,
+			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
+			@QueryParam(value = "addServiceInstanceIdConstraint") final @ApiParam(name = "addServiceInstanceIdConstraint", required = true, value = "Service instance id constraint") boolean addConstraint,
+			@QueryParam(value = "sid") final @ApiParam(name = "sid", required = true, value = "Service instance id") String serviceInstanceId) {
+
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+
+				serviceCallCounter.addAndGet(1);
+
+				try {
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = request.getHeader("acl-manifest");
+					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+
+					// deactivates existing mailbox
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.getMailBox(guid, addConstraint, serviceInstanceId, decodedManifestJson);
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} catch (SymmetricAlgorithmException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
+				}
+
+			}
+		};
+		worker.actionLabel = "MailboxConfigurationDetailsResource.readMailBox()";
+
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}
 
 	}	
 	
@@ -258,6 +286,5 @@ public class ProfileConfigurationResource extends AuditedResource {
 		// TODO Auto-generated method stub
 
 	}
-
 
 }

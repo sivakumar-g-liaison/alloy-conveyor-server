@@ -162,7 +162,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             }
             
             $scope.hitCounter = $scope.hitCounter + 1;
-            $scope.restService.get($scope.base_url + "/search/",/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
+            $scope.restService.get($scope.base_url ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
                     if (status == 200) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {

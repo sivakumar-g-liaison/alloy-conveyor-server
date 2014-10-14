@@ -14,9 +14,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -34,6 +32,8 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -44,46 +44,45 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
- * This is the gateway for the mailbox http server listener detail services.
+ * This is the gateway for the mailbox helper services.
  * 
  * @author OFS
  */
-@Path("mailbox/basicauth")
-@Api(value = "mailbox/basicauth", 
-description = "Gateway for the mailbox http server listener detail services.")
-public class HTTPServerListenerDetailResource extends AuditedResource {
-	
-	private static final Logger LOG = LogManager.getLogger(HTTPServerListenerDetailResource.class);
+@Path("mailbox/serviceconfigurations")
+@Api(value = "mailbox/serviceconfigurations", 
+description = "Gateway for the mailbox helper services.")
+public class MailboxServiceConfigurationsResource extends AuditedResource {
+
+	private static final Logger LOG = LogManager.getLogger(MailboxServiceConfigurationsResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);	
 	
 
-	public HTTPServerListenerDetailResource() throws IOException {
+	public MailboxServiceConfigurationsResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 	
 	/**
-	 * Rest method to retrieve the Authorization header.
+	 * REST method to retrieve property file values.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @return The Response Object.
+	 * @return Response Object
 	 */
-	@POST
-	@ApiOperation(value = "Authorization", notes = "Authorization header. This method requires authorization header field", position = 1)
-	@Consumes(MediaType.APPLICATION_JSON)
+	@GET
+	@ApiOperation(value = "Property File",
+			notes = "returns property file values",
+			position = 1,
+			response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "basicauth")
-	public Response httpServerListener(@Context final HttpServletRequest request, @HeaderParam("Authorization") final String auth) {
+	@AccessDescriptor(accessMethod = "getPropertyFileValues")
+	public Response getPropertyFileValues(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -92,12 +91,17 @@ public class HTTPServerListenerDetailResource extends AuditedResource {
 				
 				serviceCallCounter.addAndGet(1);
 				
-				LOG.info("Successfully retrieved the auth header : {} ", auth);
-				// Audit LOG the success
-				return Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity(auth).build();					
+				try {
+					//get Property File
+					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+					return mailbox.getValuesFromPropertiesFile();					
+				} catch (IOException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}				
 			}
 		};
-		worker.actionLabel = "HTTPServerListenerDetailResource.httpServerListener()";
+		worker.actionLabel = "MailboxServiceConfigurationsResource.getPropertyFileValues()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -107,8 +111,8 @@ public class HTTPServerListenerDetailResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
-	}
+		}
+	}	
 	
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
@@ -129,5 +133,5 @@ public class HTTPServerListenerDetailResource extends AuditedResource {
 		// TODO Auto-generated method stub
 
 	}
-
+	
 }

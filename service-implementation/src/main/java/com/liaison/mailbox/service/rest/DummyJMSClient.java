@@ -1,8 +1,15 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.net.URLDecoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -19,15 +26,19 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.mailbox.com.liaison.queue.ServiceBrokerToMailboxWorkTicket;
 import com.liaison.mailbox.service.dto.configuration.PayloadTicketRequestDTO;
+import com.wordnik.swagger.annotations.ApiParam;
 
-@Path("/jmsclient")
+@Path("/jmsclient/{mailboxId}/{spectrumURL}/{targetFileName}")
 public class DummyJMSClient {
 	
 	private static final Logger logger = LogManager.getLogger(DummyJMSClient.class);
 	
 	@POST
-	@Path("/{mailboxId}/{spectrumURL}/{targetFileName}")
-	public Response postDummyProcesssedPayload(@Context HttpServletRequest request, @PathParam(value = "mailboxId") String mailboxId, @PathParam(value = "spectrumURL") String spectrumURL, @PathParam(value = "targetFileName") String targetFileName) {
+	public Response postDummyProcesssedPayload(
+			@Context HttpServletRequest request, 
+			@PathParam(value = "mailboxId") final @ApiParam(name = "mailboxId", required = true, value = "mailbox guid") String mailboxId,
+			@PathParam(value = "spectrumURL")  @ApiParam(name = "spectrumURL", required = true, value = "spectrum URL") String spectrumURL, 
+			@PathParam(value = "targetFileName") final @ApiParam(name = "targetFileName", required = true, value = "target File Name") String targetFileName) {
 	
 		try {
 			//spectrumURL = URLEncoder.encode(spectrumURL, "UTF-8");

@@ -165,7 +165,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 		gitlabBranchName: "",
 		mailboxPguidDisplayPrefix:""
 	};
-	$rootScope.restService.get($rootScope.base_url + '/getPropertyFileValues',
+	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
 		function (data, status) {
 			if (status === 200 && data.getPropertiesValueResponseDTO.response.status === 'success') {
 				$rootScope.javaProperties.globalTrustStoreId = data.getPropertiesValueResponseDTO.properties.trustStoreId;
