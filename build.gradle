@@ -99,7 +99,7 @@ subprojects {
  * like configuration properties, classes/jars loaded, jmx properties, etc
  *
  */
-project(':karyon-admin') {
+/*project(':karyon-admin') {
     dependencies {
         compile "com.netflix.karyon:karyon-core:${karyonVersion}"
 
@@ -125,11 +125,11 @@ project(':karyon-admin') {
         exclude 'com/netflix/adminresources/**'
     }    
 }
-
+*/
 /*
  * karyon-admin-web puts a pretty face (webapp) on karyon-admin
  */
-project(':karyon-admin-web') {
+/*project(':karyon-admin-web') {
     dependencies {
         compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.1'
@@ -142,7 +142,7 @@ project(':karyon-admin-web') {
         runtime 'org.freemarker:freemarker:2.3.19'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
     }
-}
+}*/
 
 project(':service-framework') {
     dependencies {
@@ -167,14 +167,21 @@ allprojects {
                 details.useTarget "commons-io:commons-io:2.4"
             }
         }
-
-        //SLF override
+		
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.name == 'bcprov-jdk16') {
+				details.useTarget "org.bouncycastle:bcprov-jdk15on:1.49"
+			}
+		}
+		
+		//SLF override
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.name == 'slf4j-simple') {
                 //prefer 'slf4j-log4j2' over 'slf4j-simple', because
                 //it's required that only one logger.jar be present for deterministic behavior of slf4j
                 details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-rc1"
-            }
+            }	
+			
         }
 
     }

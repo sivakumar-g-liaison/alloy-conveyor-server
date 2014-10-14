@@ -13,10 +13,6 @@
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
 
-    <listener>
-        <listener-class>com.netflix.adminresources.MyGuiceServletConfig</listener-class>
-    </listener>
-
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>

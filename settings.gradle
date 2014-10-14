@@ -23,4 +23,4 @@
 rootProject.name='g2mailboxservice'
 
 // include these sub-modules
-include 'karyon-admin', 'karyon-admin-web', 'service-framework', 'service-implementation'
+include 'service-framework', 'service-implementation'
