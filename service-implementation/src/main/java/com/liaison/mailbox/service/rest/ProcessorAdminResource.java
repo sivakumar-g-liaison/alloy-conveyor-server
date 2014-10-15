@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -58,10 +57,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import javax.ws.rs.DELETE;
 
-@Path("mailbox/processoradmin")
+@Path("mailbox/processoradmin/processor/execution")
 @Api(value = "mailbox/processoradmin", description = "Administration of processor services")
-public class MailboxAdminResource extends AuditedResource {
+public class ProcessorAdminResource extends AuditedResource {
 	
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
 
@@ -71,7 +71,7 @@ public class MailboxAdminResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 	
-	public MailboxAdminResource() {
+	public ProcessorAdminResource() {
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 	
@@ -89,7 +89,6 @@ public class MailboxAdminResource extends AuditedResource {
 	notes = "get list of executing processors",
 	position = 21,
 	response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
-	@Path("/processor/execution")
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
@@ -120,7 +119,7 @@ public class MailboxAdminResource extends AuditedResource {
 				}				
 			}
 		};
-		worker.actionLabel = "MailboxAdminResource.getExecutingProcessors()";
+		worker.actionLabel = "ProcessorAdminResource.getExecutingProcessors()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -140,13 +139,11 @@ public class MailboxAdminResource extends AuditedResource {
 	 *            HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
-	@POST
+	@DELETE
 	@ApiOperation(value = "Interrupt processors",
 	notes = "interrupt running processor",
 	position = 22,
 	response = com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO.class)
-	@Path("/processor/execution")
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Interrupt running processor", required = true,
 	dataType = "com.liaison.mailbox.swagger.dto.request.InterruptExecutionRequest", paramType = "body") })
@@ -154,7 +151,7 @@ public class MailboxAdminResource extends AuditedResource {
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
 	@AccessDescriptor(accessMethod = "interruptRunningProcessor")
-	public Response interruptRunningProcessor(@Context final HttpServletRequest request) {
+	public Response interruptRunningProcessor(@Context final HttpServletRequest request,@QueryParam(value = "executionID") @ApiParam(name = "executionID", required = false, value = "executionID") final String executionID) {
         
 		
 		// create the worker delegate to perform the business logic
@@ -167,17 +164,16 @@ public class MailboxAdminResource extends AuditedResource {
 				String requestString;
 				try {
 					requestString = getRequestBody(request);
-					InterruptExecutionEventRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, InterruptExecutionEventRequestDTO.class);
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
 					// creates new execution event
-					return processor.interruptRunningProcessor(serviceRequest);					
-				} catch (IOException | JAXBException e) {
+					return processor.interruptRunningProcessor(executionID);					
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}				
 			}
 		};	
-		worker.actionLabel = "MailboxAdminResource.interruptRunningProcessor()";
+		worker.actionLabel = "ProcessorAdminResource.interruptRunningProcessor()";
 
 		// hand the delegate to the framework for calling
 		try {

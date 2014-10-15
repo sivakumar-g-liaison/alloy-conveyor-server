@@ -2794,7 +2794,7 @@ var rest = myApp.controller(
                 }
             }
             $scope.uploadToSelfSignedTrustStore = function (pkGuid) {
-                $scope.restService.get($scope.base_url + '/uploadSelfSigned', //Get mail box Data
+                $scope.restService.post($scope.base_url + '/uploadkey', //Get mail box Data
                     function (data, status) {
                         if (status === 200 && data.getTrustStoreResponse.response.status === 'success') {
                             $scope.linkTrustStoreWithCertificate(pkGuid, data.getTrustStoreResponse.trustStore.trustStoreId,
