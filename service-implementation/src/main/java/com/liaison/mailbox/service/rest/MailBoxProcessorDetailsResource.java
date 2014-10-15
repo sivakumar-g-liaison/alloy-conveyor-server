@@ -17,12 +17,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,7 +29,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
@@ -43,7 +40,6 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -63,12 +59,12 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author veerasamyn
  */
-@Path("mailbox/{mailboxid}/processor")
+@Path("mailbox/{mailboxid}/processor/{processorid}")
 @Api(value = "mailbox/{mailboxid}/processor", 
 description = "Gateway for the processor configuration services.")
-public class ProcessorConfigurationResource extends AuditedResource {
+public class MailBoxProcessorDetailsResource extends AuditedResource {
 	
-	private static final Logger LOG = LogManager.getLogger(ProcessorConfigurationResource.class);
+	private static final Logger LOG = LogManager.getLogger(MailBoxProcessorDetailsResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -76,75 +72,11 @@ public class ProcessorConfigurationResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public ProcessorConfigurationResource() throws IOException {
+	public MailBoxProcessorDetailsResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 
-	/**
-	 * REST method to update a processor.
-	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @param guid
-	 *            The id of the mailbox
-	 * 
-	 * @return Response Object
-	 */
-	@POST
-	@ApiOperation(value = "Create Processor",
-	notes = "create a new processor",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new processor", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.AddProcessorToMailBoxRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	@AccessDescriptor(accessMethod = "createProcessor")
-	public Response createProcessor(
-			@Context final HttpServletRequest request,
-			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailboxid") final String guid,
-			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") final String serviceInstanceId) {
-
-		// create the worker delegate to perform the business logic
-		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-			@Override
-			public Object call() {
-				
-				serviceCallCounter.addAndGet(1);
-				
-				String requestString;
-				try {
-					requestString = getRequestBody(request);
-					AddProcessorToMailboxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
-					// create the new Processor
-					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
-					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
-					
-				} catch (IOException | JAXBException | JSONException  e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (SymmetricAlgorithmException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
-				} 		
-			}
-		};		
-		worker.actionLabel = "ProcessorConfigurationResource.createProcessor()";
-
-		// hand the delegate to the framework for calling
-		try {
-			return handleAuditedServiceRequest(request, worker);
-		} catch (LiaisonAuditableRuntimeException e) {
-			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-			}
-			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
-	}
 	
 	/**
 	 * REST method to remove a processor details.
@@ -161,7 +93,6 @@ public class ProcessorConfigurationResource extends AuditedResource {
 			notes = "remove processor details",
 			position = 2,
 			response = com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO.class)
-	@Path("/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
@@ -185,7 +116,7 @@ public class ProcessorConfigurationResource extends AuditedResource {
 				return mailbox.deactivateProcessor(mailboxguid, guid);
 			}
 		};	
-		worker.actionLabel = "ProcessorConfigurationResource.deleteProcessor()";
+		worker.actionLabel = "MailBoxProcessorDetailsResource.deleteProcessor()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -213,7 +144,6 @@ public class ProcessorConfigurationResource extends AuditedResource {
 			notes = "returns detail information of a valid processor",
 			position = 3,
 			response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
-	@Path("/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
@@ -246,7 +176,7 @@ public class ProcessorConfigurationResource extends AuditedResource {
 				
 			}
 		};
-		worker.actionLabel = "ProcessorConfigurationResource.getProcessor()";
+		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -276,7 +206,6 @@ public class ProcessorConfigurationResource extends AuditedResource {
 			notes = "revise details of valid processor",
 			position = 4,
 			response = com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO.class)
-	@Path("/{processorid}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update  processor", required = true,
@@ -314,7 +243,7 @@ public class ProcessorConfigurationResource extends AuditedResource {
 				
 			}
 		};
-		worker.actionLabel = "ProcessorConfigurationResource.getProcessor()";
+		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
 
 		// hand the delegate to the framework for calling
 		try {

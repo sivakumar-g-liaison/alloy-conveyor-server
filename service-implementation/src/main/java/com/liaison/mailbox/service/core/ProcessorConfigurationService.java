@@ -45,6 +45,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionEvents;
@@ -751,32 +752,29 @@ public class ProcessorConfigurationService {
 	 *
 	 * Interrupt the execution of running processor
 	 *
-	 * @param serviceRequest
+         * @param executionID
 	 * @throws MailBoxConfigurationServicesException
 	 *
 	 */
-	public InterruptExecutionEventResponseDTO interruptRunningProcessor( InterruptExecutionEventRequestDTO serviceRequest) throws MailBoxConfigurationServicesException {
+	public InterruptExecutionEventResponseDTO interruptRunningProcessor( String executionID) throws MailBoxConfigurationServicesException {
 
 		LOGGER.debug("Entering into interrupt processor.");
 		InterruptExecutionEventResponseDTO serviceResponse = new InterruptExecutionEventResponseDTO();
 
 		try {
 
-			FSMEventDTO fsmEventDTO = serviceRequest.getFsmEvent();
-			if (fsmEventDTO == null) {
+			if (StringUtil.isNullOrEmptyAfterTrim(executionID)) {
 				throw new ProcessorManagementFailedException(Messages.INVALID_REQUEST);
 			}
 
-			GenericValidator validator = new GenericValidator();
-			validator.validate(fsmEventDTO);
 
 			MailboxFSM fsm = new MailboxFSM();
 			LOGGER.info("############################################################################");
-			LOGGER.info("Interrupt signal received for   "+fsmEventDTO.getExecutionID());
+			LOGGER.info("Interrupt signal received for   "+executionID);
 			LOGGER.info("#############################################################################");
 
 			// persisting the FSMEvent entity
-			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, fsmEventDTO.getExecutionID());
+			fsm.createEvent(ExecutionEvents.INTERRUPT_SIGNAL_RECIVED, executionID);
 
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.RECEIVED_SUCCESSFULLY, INTERRUPT_SIGNAL, Messages.SUCCESS));
