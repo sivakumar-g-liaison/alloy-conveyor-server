@@ -18,10 +18,10 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
-import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;

@@ -10,9 +10,9 @@
 
 package com.liaison.mailbox.service.core.processor;
 
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.jpa.model.Processor;
 
 /**
  * Factory class to instantiate MailBox Processors.

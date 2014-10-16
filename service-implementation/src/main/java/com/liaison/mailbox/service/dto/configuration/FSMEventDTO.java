@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import com.liaison.mailbox.jpa.model.FSMEvent;
+import com.liaison.mailbox.rtdm.model.FSMEvent;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;

@@ -45,24 +45,27 @@ import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.Folder;
+import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
-import com.liaison.mailbox.jpa.dao.FSMStateDAO;
-import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
-import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.jpa.model.FSMState;
-import com.liaison.mailbox.jpa.model.FSMStateValue;
-import com.liaison.mailbox.jpa.model.Folder;
-import com.liaison.mailbox.jpa.model.MailBox;
-import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
+import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.model.FSMState;
+import com.liaison.mailbox.rtdm.model.FSMStateValue;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FTPSRemoteUploader;
@@ -112,9 +115,12 @@ public class MailboxSLAWatchDogService {
 		LOG.debug("Entering into validateSLARules.");
 		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
 		
-		try {			
+		try {	
 			
-			if (validateMailboxSLARule(slaViolatedMailboxesList) && validateCustomerSLARule(slaViolatedMailboxesList) ) {			
+			boolean isMailboxSLAAdhered = validateMailboxSLARule(slaViolatedMailboxesList);
+			boolean isCustomerSLAAdhered = validateCustomerSLARule(slaViolatedMailboxesList);
+			
+			if (isMailboxSLAAdhered && isCustomerSLAAdhered) {			
 				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
 			} else {
 				
@@ -275,12 +281,14 @@ public class MailboxSLAWatchDogService {
 	public void invokeWatchDog(String request) {
 		
 		Processor processor = null;
+		ProcessorExecutionState processorExecutionState = null;
 		String mailboxId = null;
 		String spectrumUrl = null;
 		String profileName = null;
 		String executionId = MailBoxUtil.getGUID();
 		MailboxFSM fsm = new MailboxFSM();
-		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();		
+		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();	
+		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		
 		try {
 			
@@ -310,6 +318,9 @@ public class MailboxSLAWatchDogService {
 				LOG.error("Processor of type uploader is not available for mailbox {}", mailboxId);
 				throw new MailBoxServicesException(Messages.UPLOADER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
+			
+			// retrieve the processor execution status of corresponding uploader from run-time DB
+			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
 			
 			//get payload from spectrum
 			InputStream payload = FS2Util.retrievePayloadFromSpectrum(spectrumUrl);
@@ -342,8 +353,9 @@ public class MailboxSLAWatchDogService {
 			fsm.addState(processorStaged);
 			//fsm.addDefaultStateTransitionRules(processorStaged);
 					        
-	        processor.setProcsrExecutionStatus(ExecutionState.STAGED.value());
-		    processorDAO.merge(processor);
+	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
+	        processorExecutionStateDAO.merge(processorExecutionState);
+		    //processorDAO.merge(processor);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 	        LOG.info("#################################################################");
 		} catch (JAXBException | JsonParseException | JsonMappingException e) {
@@ -355,9 +367,9 @@ public class MailboxSLAWatchDogService {
 					ProcessorType.REMOTEUPLOADER, (mailboxId == null) ? MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ? MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			// processor table will be updated only if processor is available
-			if (null != processor) {
-				processor.setProcsrExecutionStatus(ExecutionState.STAGING_FAILED.value());
+			// processorExecutionState table will be updated only if processorExecution is available
+			if (null != processorExecutionState) {
+				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
 				processorDAO.merge(processor);
 			}
 			notifyUser(processor, mailboxId, e);
@@ -369,9 +381,9 @@ public class MailboxSLAWatchDogService {
 					ProcessorType.REMOTEUPLOADER, (mailboxId == null) ? MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ? MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			// processor table will be updated only if processor is available
-			if (null != processor) {
-				processor.setProcsrExecutionStatus(ExecutionState.STAGING_FAILED.value());
+			// processorExecutionState table will be updated only if processorStateExecution is available
+			if (null != processorExecutionState) {
+				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
 				processorDAO.merge(processor);
 			}
 			notifyUser(processor, mailboxId, e);

@@ -10,8 +10,8 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
-import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.jpa.model.ProcessorProperty;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;

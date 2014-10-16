@@ -48,45 +48,45 @@ import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAO;
+import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAOBase;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAO;
+import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAOBase;
+import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
+import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
+import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.jpa.dao.FSMStateDAO;
-import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
-import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.MailBoxConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAO;
-import com.liaison.mailbox.jpa.dao.MailboxServiceInstanceDAOBase;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.ServiceInstanceDAO;
-import com.liaison.mailbox.jpa.dao.ServiceInstanceDAOBase;
-import com.liaison.mailbox.jpa.model.FSMStateValue;
-import com.liaison.mailbox.jpa.model.HTTPAsyncProcessor;
-import com.liaison.mailbox.jpa.model.HTTPSyncProcessor;
-import com.liaison.mailbox.jpa.model.MailBox;
-import com.liaison.mailbox.jpa.model.MailboxServiceInstance;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.ProcessorProperty;
-import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
-import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
-import com.liaison.mailbox.jpa.model.ServiceInstance;
+import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
+import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
@@ -189,7 +189,11 @@ public class ProcessorConfigurationService {
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
 			configDAO.persist(processor);
-
+			
+			// persist the processor execution state with status READY
+			ProcessorExecutionStateDAO executionDAO = new ProcessorExecutionStateDAOBase();
+			executionDAO.addProcessorExecutionState(processor.getPguid(), ExecutionState.READY.value());
+			
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
 			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(processor.getMailbox().getPguid(), serviceInstance.getPguid());
@@ -568,6 +572,7 @@ public class ProcessorConfigurationService {
 			processorDTO.copyToEntity(processor, false);
 
 			configDao.merge(processor);
+			
 			// Change the execution order if existing and incoming does not
 			// matche
 			// changeExecutionOrder(request, configDao, processor);

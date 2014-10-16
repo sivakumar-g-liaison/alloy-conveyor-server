@@ -117,7 +117,10 @@ public enum Messages {
 	MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are "),
 	UPLOADER_NOT_AVAILABLE("Mailbox %s does not contain processor of type uploader"),
 	FAILED_TO_VALIDATE_SLA("Failed to validate sla of %s"),
-	PROFILE_NOT_CONFIGURED("The profile is not configured.");
+	PROFILE_NOT_CONFIGURED("The profile is not configured."),
+	
+	// runtime DB changes
+	INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid");
 	
 	private String value;
 

@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.enums.MailBoxStatus;
-import com.liaison.mailbox.jpa.model.MailBox;
-import com.liaison.mailbox.jpa.model.MailBoxProperty;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 
 /**

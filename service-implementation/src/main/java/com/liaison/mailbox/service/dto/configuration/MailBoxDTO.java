@@ -22,10 +22,10 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.MailBoxStatus;
-import com.liaison.mailbox.jpa.model.MailBox;
-import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.jpa.model.Processor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;

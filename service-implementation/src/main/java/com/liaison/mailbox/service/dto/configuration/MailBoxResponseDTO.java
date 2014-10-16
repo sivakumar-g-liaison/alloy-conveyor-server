@@ -11,7 +11,7 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.Serializable;
 
-import com.liaison.mailbox.jpa.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**

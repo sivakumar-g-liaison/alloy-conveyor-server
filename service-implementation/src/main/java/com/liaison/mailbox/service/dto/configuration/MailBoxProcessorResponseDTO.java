@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.MailBoxStatus;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 
 /**
  * Data Transfer Object for processor details in MailBox.

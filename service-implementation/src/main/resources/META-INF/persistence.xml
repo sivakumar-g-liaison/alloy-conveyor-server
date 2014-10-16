@@ -12,31 +12,50 @@
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
-	<persistence-unit name="mailbox-pu" transaction-type="RESOURCE_LOCAL">
+	<persistence-unit name="mailbox-dtdm" transaction-type="RESOURCE_LOCAL">
 		<mapping-file>META-INF/orm.xml</mapping-file>
-		<class>com.liaison.mailbox.jpa.model.ServiceInstance</class>
-		<class>com.liaison.mailbox.jpa.model.MailboxServiceInstance</class>
-		<class>com.liaison.mailbox.jpa.model.RemoteDownloader</class>
-		<class>com.liaison.mailbox.jpa.model.RemoteUploader</class>
-		<class>com.liaison.mailbox.jpa.model.Sweeper</class>
-		<class>com.liaison.mailbox.jpa.model.HTTPAsyncProcessor</class>
-		<class>com.liaison.mailbox.jpa.model.HTTPSyncProcessor</class>
-		<class>com.liaison.mailbox.jpa.model.Credential</class>
-		<class>com.liaison.mailbox.jpa.model.Folder</class>
-		<class>com.liaison.mailbox.jpa.model.MailBox</class>
-		<class>com.liaison.mailbox.jpa.model.MailBoxProperty</class>
-		<class>com.liaison.mailbox.jpa.model.Processor</class>
-		<class>com.liaison.mailbox.jpa.model.ScheduleProfilesRef</class>
-		<class>com.liaison.mailbox.jpa.model.ProcessorProperty</class>
-		<class>com.liaison.mailbox.jpa.model.ScheduleProfileProcessor</class>
-		<class>com.liaison.mailbox.jpa.model.FSMEvent</class>
-		<class>com.liaison.mailbox.jpa.model.FSMState</class>
-		<class>com.liaison.mailbox.jpa.model.FSMStateValue</class>
-		<class>com.liaison.mailbox.jpa.model.FSMTransitionState</class>
+		<class>com.liaison.mailbox.dtdm.model.ServiceInstance</class>
+		<class>com.liaison.mailbox.dtdm.model.MailboxServiceInstance</class>
+		<class>com.liaison.mailbox.dtdm.model.RemoteDownloader</class>
+		<class>com.liaison.mailbox.dtdm.model.RemoteUploader</class>
+		<class>com.liaison.mailbox.dtdm.model.Sweeper</class>
+		<class>com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor</class>
+		<class>com.liaison.mailbox.dtdm.model.HTTPSyncProcessor</class>
+		<class>com.liaison.mailbox.dtdm.model.Credential</class>
+		<class>com.liaison.mailbox.dtdm.model.Folder</class>
+		<class>com.liaison.mailbox.dtdm.model.MailBox</class>
+		<class>com.liaison.mailbox.dtdm.model.MailBoxProperty</class>
+		<class>com.liaison.mailbox.dtdm.model.Processor</class>
+		<class>com.liaison.mailbox.dtdm.model.ScheduleProfilesRef</class>
+		<class>com.liaison.mailbox.dtdm.model.ProcessorProperty</class>
+		<class>com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor</class>
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
 			<!--  <property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" /> -->
-			<property name="javax.persistence.jtaDataSource" value="java:comp/env/jdbc/UCPPool-G2MailBox" />
+			<property name="javax.persistence.jtaDataSource" value="java:comp/env/jdbc/UCPPool-DTDM" />
+
+           <!--  <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@10.0.6.109:1521:kili1"/>
+            <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>
+            <property name="javax.persistence.jdbc.user" value="gramamurthy"/>
+            <property name="javax.persistence.jdbc.password" value="sonjava123"/>  -->
+
+			<!-- datanucleus.connectionPool.maxPoolSize : max size of pool datanucleus.connectionPool.initialPoolSize 
+				: initial size of pool -->
+            <!-- Turn off because it gives a weird user experience when UI is served up across a farm -->
+            <property name="datanucleus.cache.level2.type" value="none"/>
+		</properties>
+	</persistence-unit>
+	<persistence-unit name="mailbox-rtdm" transaction-type="RESOURCE_LOCAL">
+		<mapping-file>META-INF/orm.xml</mapping-file>
+		<class>com.liaison.mailbox.rtdm.model.FSMEvent</class>
+		<class>com.liaison.mailbox.rtdm.model.FSMState</class>
+		<class>com.liaison.mailbox.rtdm.model.FSMStateValue</class>
+		<class>com.liaison.mailbox.rtdm.model.FSMTransitionState</class>
+		<class>com.liaison.mailbox.rtdm.model.ProcessorExecutionState</class>
+		<properties>
+			  <property name="javax.persistence.transactionType" value="JTA" />
+			<!--  <property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" /> -->
+			<property name="javax.persistence.jtaDataSource" value="java:comp/env/jdbc/UCPPool-RTDM" />
 
            <!--  <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@10.0.6.109:1521:kili1"/>
             <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver"/>

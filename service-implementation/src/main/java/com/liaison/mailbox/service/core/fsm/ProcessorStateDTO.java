@@ -13,11 +13,11 @@ package com.liaison.mailbox.service.core.fsm;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.jpa.model.FSMState;
-import com.liaison.mailbox.jpa.model.FSMStateValue;
-import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.rtdm.model.FSMState;
+import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**

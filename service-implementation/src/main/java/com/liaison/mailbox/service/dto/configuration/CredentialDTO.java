@@ -14,9 +14,9 @@ import javax.ws.rs.core.Response;
 
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.jpa.model.Credential;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;

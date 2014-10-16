@@ -81,17 +81,19 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
 import com.liaison.keymanage.grammar.KeySet;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.Credential;
+import com.liaison.mailbox.dtdm.model.Folder;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.jpa.model.Credential;
-import com.liaison.mailbox.jpa.model.Folder;
-import com.liaison.mailbox.jpa.model.MailBoxProperty;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.ProcessorProperty;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
@@ -115,7 +117,6 @@ public abstract class AbstractRemoteProcessor {
 
 	private static final Logger LOGGER = LogManager.getLogger(AbstractRemoteProcessor.class);
 
-	private static final ProcessorConfigurationDAO PROCESSOR_DAO = new ProcessorConfigurationDAOBase();
 
 	protected Processor configurationInstance;
 	protected Properties mailBoxProperties;
@@ -887,16 +888,6 @@ public abstract class AbstractRemoteProcessor {
 		for (File file : files) {
 			archiveFile(file, processedFileLcoation);
 		}
-	}
-
-	/**
-	 * Method is used to modify the status during failure.
-	 */
-	protected void modifyProcessorExecutionStatus(ExecutionState status) {
-
-		configurationInstance.setProcsrExecutionStatus(status.value());
-		PROCESSOR_DAO.merge(configurationInstance);
-
 	}
 
 	/**

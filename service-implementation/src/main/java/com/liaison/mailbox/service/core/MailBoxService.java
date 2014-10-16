@@ -24,17 +24,20 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.RemoteUploader;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProcessorConfigurationDAOBase;
-import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAO;
-import com.liaison.mailbox.jpa.dao.ProfileConfigurationDAOBase;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.RemoteUploader;
-import com.liaison.mailbox.jpa.model.ScheduleProfilesRef;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
@@ -67,7 +70,9 @@ public class MailBoxService {
 	public TriggerProfileResponseDTO triggerProfile(String profileName, String mailboxNamePattern, String shardKey) {
 
 		TriggerProfileResponseDTO serviceResponse = new TriggerProfileResponseDTO();
-		List<Processor> processorMatchingProfile = new ArrayList<>();
+		List<Processor> processorMatchingProfile = new ArrayList<Processor>();
+		List<String> nonExecutingProcessorIds = new ArrayList<String>();
+		List<Processor> nonExecutingProcessorMatchingProfile = new ArrayList<Processor>();
 
 		try {
 
@@ -87,8 +92,19 @@ public class MailBoxService {
 			// finding the matching processors for the given profile
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 			processorMatchingProfile = processorDAO.findByProfileAndMbxNamePattern(profileName, mailboxNamePattern, shardKey);
+			
+			// filter processors which are not running currently
+			ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+			nonExecutingProcessorIds = processorExecutionStateDAO.findNonExecutingProcessors();
+			
+			for (Processor procsr : processorMatchingProfile) {
+				
+				if (nonExecutingProcessorIds.contains(procsr.getPguid())) {
+					nonExecutingProcessorMatchingProfile.add(procsr);
+				}
+			}
 
-			if (processorMatchingProfile == null || processorMatchingProfile.isEmpty()) {
+			if (nonExecutingProcessorMatchingProfile == null || nonExecutingProcessorMatchingProfile.isEmpty()) {
 				throw new MailBoxServicesException(Messages.NO_PROC_CONFIG_PROFILE, Response.Status.CONFLICT);
 			}
 
@@ -96,7 +112,7 @@ public class MailBoxService {
 			TriggerProcessorRequestDTO request = null;
 			String executionId = null;
 			String message = null;
-			for (Processor processor : processorMatchingProfile) {
+			for (Processor processor : nonExecutingProcessorMatchingProfile) {
 
 				executionId = MailBoxUtil.getGUID();
 				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
@@ -157,10 +173,12 @@ public class MailBoxService {
 	public void executeProcessor(String request) {
 		
 		Processor processor = null;
+		ProcessorExecutionState processorExecutionState = null;
 		String processorId = null;
 		String executionId = null;
 		MailboxFSM fsm = new MailboxFSM();
-		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();		
+		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();	
+		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		
 		try {
 			
@@ -192,38 +210,48 @@ public class MailBoxService {
 			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, dto.getProfileName(),ExecutionState.QUEUED, null, slaVerificationStatus);
 			fsm.addDefaultStateTransitionRules(processorQueued);
 			
-				if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processor.getProcsrExecutionStatus())) {
-				
-					fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
-					LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
-					return;
-			    }
-			    	
-			    LOG.info("Verified if {} is already running and it is not",processorId);
-				MailBoxProcessor processorService = MailBoxProcessorFactory.getInstance(processor);
-				
-				if(processorService == null){
-				 LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
-				 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-				}
-				
-			    LOG.info("The Processer type is {}", processor.getProcessorType());
-				processor.setProcsrExecutionStatus(ExecutionState.PROCESSING.value());
-				processorDAO.merge(processor);
-		        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
-		        
-		        processorService.invoke(executionId,fsm);
-		        
-		        processor.setProcsrExecutionStatus(ExecutionState.COMPLETED.value());
-			    processorDAO.merge(processor);
-		        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-		        LOG.info("#################################################################");
+			// retrieve the processor execution status from run-time DB
+			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
+			
+			if (null == processorExecutionState) {
+				LOG.info("Processor Execution state is not available in run time DB for processor {}", processor.getPguid());
+				throw new MailBoxServicesException(Messages.INVALID_PROCESSOR_EXECUTION_STATUS, Response.Status.CONFLICT);
+			}	
+			
+			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processorExecutionState.getExecutionStatus())) {
+			
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
+				LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
+				return;
+		    }
+		    	
+		    LOG.info("Verified if {} is already running and it is not",processorId);
+			MailBoxProcessor processorService = MailBoxProcessorFactory.getInstance(processor);
+			
+			if(processorService == null){
+			 LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
+			 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+			}
+			
+		    LOG.info("The Processer type is {}", processor.getProcessorType());
+			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
+			processorExecutionStateDAO.merge(processorExecutionState);
+	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
+	        
+	        processorService.invoke(executionId,fsm);
+	        
+	        processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
+	        processorExecutionStateDAO.merge(processorExecutionState);
+		    fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+	        LOG.info("#################################################################");
 			
 		} catch (MailBoxServicesException e) {
 			
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
-			processorDAO.merge(processor);
+			if (processorExecutionState != null) {
+				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+				processorExecutionStateDAO.merge(processorExecutionState);
+			}
 			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			LOG.error("Processor execution failed", e);
 			
@@ -231,9 +259,11 @@ public class MailBoxService {
 		catch (Exception e) {
 			
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-			processor.setProcsrExecutionStatus(ExecutionState.FAILED.value());
-			processorDAO.merge(processor);
-			sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
+			if (processorExecutionState != null) {
+				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+				processorExecutionStateDAO.merge(processorExecutionState);
+			}
+	    	sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			LOG.error("Processor execution failed", e);
 		}
 		

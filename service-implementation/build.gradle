@@ -409,8 +409,15 @@ task enhance  << {
             classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
             verbose     : true,
             api : "JPA",
-            persistenceUnit : "mailbox-pu",
+            persistenceUnit : "mailbox-dtdm",
             failonerror : true)
+	
+	ant.datanucleusenhancer(
+		classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
+		verbose     : true,
+		api : "JPA",
+		persistenceUnit : "mailbox-rtdm",
+		failonerror : true)
 
 }
 classes.dependsOn('enhance')

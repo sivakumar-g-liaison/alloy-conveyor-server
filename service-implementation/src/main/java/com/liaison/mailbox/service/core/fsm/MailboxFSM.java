@@ -23,8 +23,8 @@ import com.liaison.fsm.FSMDao;
 import com.liaison.fsm.Transition;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.jpa.dao.FSMEventDAOBase;
-import com.liaison.mailbox.jpa.dao.FSMStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
+import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
 /**

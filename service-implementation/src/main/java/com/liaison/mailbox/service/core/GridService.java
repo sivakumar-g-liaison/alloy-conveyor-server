@@ -30,8 +30,8 @@ import org.apache.logging.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.liaison.commons.jpa.DAOUtil;
-import com.liaison.mailbox.jpa.dao.FilterObject;
-import com.liaison.mailbox.jpa.dao.MailBoxDAO;
+import com.liaison.mailbox.dtdm.dao.FilterObject;
+import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 
 /**
  * 
@@ -48,7 +48,7 @@ public abstract class GridService<T> {
     public static final String SORT_DIRECTION_ASC = "asc";
     public static final String SORT_DIRECTION_DESC = "desc";
 
-    private final String persistenceUnitName = MailBoxDAO.PERSISTENCE_UNIT_NAME;
+    private final String persistenceUnitName = MailboxDTDMDAO.PERSISTENCE_UNIT_NAME;
 
     public static class GridResult<T> {
         private final long totalItems;
@@ -83,7 +83,7 @@ public abstract class GridService<T> {
             final String page, final String pageSize) {
 
         LOGGER.debug("Entering into getGridItems.");
-        Map<String, List<com.liaison.mailbox.jpa.dao.FilterObject>> searchTextObjectList = new HashMap<>();
+        Map<String, List<com.liaison.mailbox.dtdm.dao.FilterObject>> searchTextObjectList = new HashMap<>();
         Map<String, Object> sortInfoMap = new HashMap<>();
 
         // Generate JSON string from the object list

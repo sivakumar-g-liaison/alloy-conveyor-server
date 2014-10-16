@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto.configuration;
 import javax.ws.rs.core.Response;
 
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.jpa.model.Folder;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;

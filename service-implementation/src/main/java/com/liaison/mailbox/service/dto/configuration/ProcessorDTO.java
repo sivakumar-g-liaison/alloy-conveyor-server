@@ -22,14 +22,14 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Credential;
+import com.liaison.mailbox.dtdm.model.Folder;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.jpa.model.Credential;
-import com.liaison.mailbox.jpa.model.Folder;
-import com.liaison.mailbox.jpa.model.Processor;
-import com.liaison.mailbox.jpa.model.ProcessorProperty;
-import com.liaison.mailbox.jpa.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -222,7 +222,7 @@ public class ProcessorDTO {
 
 		if (isCreate) {
 			processor.setPguid(MailBoxUtil.getGUID());
-			processor.setProcsrExecutionStatus(ExecutionState.READY.value());
+			//processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
 
 		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();

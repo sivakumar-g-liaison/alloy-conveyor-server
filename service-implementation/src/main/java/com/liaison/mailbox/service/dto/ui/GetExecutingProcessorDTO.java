@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.service.dto.ui;
 
-import com.liaison.mailbox.jpa.model.FSMStateValue;
+import com.liaison.mailbox.rtdm.model.FSMStateValue;
 
 /**
  * 

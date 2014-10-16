@@ -28,8 +28,8 @@ import org.testng.annotations.Test;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.exceptions.FS2Exception;
-import com.liaison.mailbox.jpa.model.Folder;
-import com.liaison.mailbox.jpa.model.Processor;
+import com.liaison.mailbox.dtdm.model.Folder;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.processor.DirectorySweeperProcessor;
 import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
