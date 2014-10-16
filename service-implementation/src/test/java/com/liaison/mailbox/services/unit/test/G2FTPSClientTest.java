@@ -47,7 +47,7 @@ public class G2FTPSClientTest {
 		ftpsRequest.setPassive(true);
 
 		String path = "/inbox";
-		String remotePath = "C:\\opt\\oct-16";
+		String remotePath = "/tmp";
 
 		ftpsRequest.changeDirectory(path);
 		downloadDirectory(ftpsRequest, path, remotePath);
