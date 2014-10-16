@@ -112,8 +112,7 @@ public class MailboxSLAWatchDogService {
 		LOG.debug("Entering into validateSLARules.");
 		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
 		
-		try {
-			
+		try {			
 			
 			if (validateMailboxSLARule(slaViolatedMailboxesList) && validateCustomerSLARule(slaViolatedMailboxesList) ) {			
 				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
@@ -123,6 +122,7 @@ public class MailboxSLAWatchDogService {
 				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_DOES_NOT_ADHERES_SLA, Messages.FAILURE, additionalMessage));
 			}		
 		} catch (MailBoxServicesException e) {
+			
 			LOG.error(Messages.FAILED_TO_VALIDATE_SLA.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.FAILED_TO_VALIDATE_SLA, MAILBOX, Messages.FAILURE, e
 					.getMessage()));

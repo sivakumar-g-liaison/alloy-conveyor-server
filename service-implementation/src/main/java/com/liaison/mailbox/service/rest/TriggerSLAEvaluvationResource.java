@@ -49,11 +49,11 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  *
  */
-@Path("mailbox/mailboxsla")
-@Api(value = "mailbox/mailboxsla", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
-public class MailboxSLAWatchDogResource extends AuditedResource {
+@Path("mailbox/trigger/slacheck")
+@Api(value = "mailbox/trigger/slacheck", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
+public class TriggerSLAEvaluvationResource extends AuditedResource {
 	
-	private static final Logger LOG = LogManager.getLogger(MailboxSLAWatchDogResource.class);
+	private static final Logger LOG = LogManager.getLogger(TriggerSLAEvaluvationResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -63,7 +63,7 @@ public class MailboxSLAWatchDogResource extends AuditedResource {
 	
 	
 
-	public MailboxSLAWatchDogResource() {
+	public TriggerSLAEvaluvationResource() {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
@@ -111,7 +111,7 @@ public class MailboxSLAWatchDogResource extends AuditedResource {
 				
 			}
 		};
-		worker.actionLabel = "MailboxSLAResource.validateMailboxSLA()";
+		worker.actionLabel = "TriggerSLAEvaluvationResource.validateMailboxSLA()";
 
 		// hand the delegate to the framework for calling
 		try {
