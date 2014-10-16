@@ -98,12 +98,16 @@ public class MailboxSLAWatchDogResource extends AuditedResource {
 					//validate the sla rules of all mailboxes
 					MailboxSLAWatchDogService service = new MailboxSLAWatchDogService();
 					
-					return service.validateMailboxSLARule();					
+					return service.validateSLARules();					
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
-				
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+					e.printStackTrace();
+					throw new LiaisonRuntimeException("Failed to validate SLA." + e.getMessage());
+					
+				}			
 				
 			}
 		};

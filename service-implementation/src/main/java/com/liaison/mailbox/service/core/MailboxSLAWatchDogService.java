@@ -88,21 +88,64 @@ public class MailboxSLAWatchDogService {
 	private static String CUSTOMER_SLA_RULE = "Time to pick up file posted by mailbox";
 	private static final String MAILBOX = "Mailbox";
 	
-	
 	/**
-	 * Iterate all Mailboxes and check whether Mailbox satisfies the SLA Rules
-	 * @throws IOException 
+	 * Check Mailbox satisfies the SLA Rules or not.
 	 * 
-	 * @throws MailBoxConfigurationServicesException
+	 * @return MailboxSLAResponseDTO.
+	 * @throws IOException
+	 * @throws BootstrapingFailedException 
+	 * @throws CMSException 
+	 * @throws JSONException 
+	 * @throws SymmetricAlgorithmException 
+	 * @throws URISyntaxException 
+	 * @throws JAXBException 
+	 * @throws LiaisonException 
+	 * @throws OperatorCreationException 
+	 * @throws KeyStoreException 
+	 * @throws CertificateException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws UnrecoverableKeyException 
 	 */
-	public MailboxSLAResponseDTO validateMailboxSLARule() throws IOException {
+	public MailboxSLAResponseDTO validateSLARules() throws UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException, KeyStoreException, OperatorCreationException, LiaisonException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException, IOException {
 		
 		MailboxSLAResponseDTO serviceResponse = new MailboxSLAResponseDTO();
+		LOG.debug("Entering into validateSLARules.");
+		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
+		
+		try {
+			
+			
+			if (validateMailboxSLARule(slaViolatedMailboxesList) && validateCustomerSLARule(slaViolatedMailboxesList) ) {			
+				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
+			} else {
+				
+				String additionalMessage = slaViolatedMailboxesList.toString().substring(1, slaViolatedMailboxesList.toString().length() - 1);
+				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_DOES_NOT_ADHERES_SLA, Messages.FAILURE, additionalMessage));
+			}		
+		} catch (MailBoxServicesException e) {
+			LOG.error(Messages.FAILED_TO_VALIDATE_SLA.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.FAILED_TO_VALIDATE_SLA, MAILBOX, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+		}	
+		
+		LOG.debug("Exit from validateSLARules.");
+		return serviceResponse;		
+	}
+	
+	/**
+	 * Iterate all Mailboxes and check whether Mailbox satisfies the SLA Rules 
+	 * 
+	 * @param slaViolatedMailboxes
+	 * @return boolean
+	 * @throws IOException
+	 */
+	public boolean validateMailboxSLARule(List<String> slaViolatedMailboxesList) throws IOException {
+		
 		LOG.debug("Entering into validateMailboxSLARules.");
 		List <String> slaViolatedMailboxes = new ArrayList<String>();
-
-			
 		// get all processors of type sweeper
+		
 		ProcessorConfigurationDAO procConfigDAO = new ProcessorConfigurationDAOBase();
 		List <Processor> processors = procConfigDAO.findProcessorByType(ProcessorType.SWEEPER);
 		
@@ -161,16 +204,12 @@ public class MailboxSLAWatchDogService {
 			}
 		
 		}
-		String additionalMessage = null;
 		if (null != slaViolatedMailboxes && slaViolatedMailboxes.size() > 0) {
-			additionalMessage = slaViolatedMailboxes.toString().substring(1, slaViolatedMailboxes.toString().length() - 1);
-			serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_DOES_NOT_ADHERES_SLA, Messages.FAILURE, additionalMessage));
-		} else {
-			serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
-		}
+			slaViolatedMailboxesList.addAll(slaViolatedMailboxes);
+		} 
 		
 		LOG.debug("Exit from validateMailboxSLARules.");
-		return serviceResponse;
+		return slaViolatedMailboxes.isEmpty();
 
 	}
 	
@@ -500,13 +539,10 @@ public class MailboxSLAWatchDogService {
 	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public MailboxSLAResponseDTO validateCustomerSLARule() throws IOException, UnrecoverableKeyException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException, OperatorCreationException, LiaisonException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
+	public boolean validateCustomerSLARule(List<String> slaViolatedMailboxesList) throws IOException, UnrecoverableKeyException, JsonParseException, NoSuchAlgorithmException, CertificateException, KeyStoreException, OperatorCreationException, LiaisonException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
 		
-		MailboxSLAResponseDTO serviceResponse = new MailboxSLAResponseDTO();
 		LOG.debug("Entering into validateCustomerSLARule.");
 		List <String> slaViolatedMailboxes = new ArrayList<String>();
-
-		try {
 			// get all processors of type uploader
 			ProcessorConfigurationDAO procConfigDAO = new ProcessorConfigurationDAOBase();
 			List <Processor> processors = procConfigDAO.findProcessorByType(ProcessorType.REMOTEUPLOADER);
@@ -570,23 +606,12 @@ public class MailboxSLAWatchDogService {
 				}
 			
 			}
-			String additionalMessage = null;
 			if (null != slaViolatedMailboxes && slaViolatedMailboxes.size() > 0) {
-				additionalMessage = slaViolatedMailboxes.toString().substring(1, slaViolatedMailboxes.toString().length() - 1);
-				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_DOES_NOT_ADHERES_SLA, Messages.FAILURE, additionalMessage));
-			} else {
-				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
+				slaViolatedMailboxesList.addAll(slaViolatedMailboxes);
 			}
 			
 			LOG.debug("Exit from validateCustomerSLARules.");
-			return serviceResponse;
-		
-		} catch (MailBoxServicesException e) {
-			LOG.error(Messages.FAILED_TO_VALIDATE_SLA.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.FAILED_TO_VALIDATE_SLA, MAILBOX, Messages.FAILURE, e
-					.getMessage()));
-			return serviceResponse;
-		}
+			return slaViolatedMailboxes.isEmpty();
 	}
 	
 	/**
