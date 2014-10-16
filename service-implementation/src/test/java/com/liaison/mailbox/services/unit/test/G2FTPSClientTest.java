@@ -34,7 +34,7 @@ public class G2FTPSClientTest {
 
 	private static final Logger LOGGER = LogManager.getLogger(G2FTPSClientTest.class);
 
-	@Test
+	@Test(enabled=false)
 	public void ftps() throws MailBoxServicesException, IOException, LiaisonException, URISyntaxException, FS2Exception {
 
 		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
