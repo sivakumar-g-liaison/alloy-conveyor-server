@@ -10,22 +10,22 @@
 
 package com.liaison.mailbox.com.liaison.queue;
 
-import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendReceiveClient;
+
+import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
 
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class ProcessorQueue extends HornetQRecoveringCoreSendReceiveClient {
+public class SweeperQueue extends HornetQRecoveringCoreSendClient {
 
-    public static final String QUEUE_NAME = "processor";
-    private static ProcessorQueue ourInstance = new ProcessorQueue();
+    public static final String QUEUE_NAME = "sweeper";
+    private static SweeperQueue ourInstance = new SweeperQueue();
 
-    public static ProcessorQueue getInstance() {
+    public static SweeperQueue getInstance() {
         return ourInstance;
     }
 
-    private ProcessorQueue() {
+    private SweeperQueue() {
          super(QUEUE_NAME);
     }
-
 }

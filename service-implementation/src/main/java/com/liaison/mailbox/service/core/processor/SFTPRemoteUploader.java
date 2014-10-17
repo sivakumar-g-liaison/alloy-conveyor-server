@@ -158,7 +158,6 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 					sftpRequest.changeDirectory(directory);
 				}
 			}
-			
 			uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 		}

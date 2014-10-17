@@ -39,7 +39,7 @@ public class HornetQMessageListnerTest {
 	 public void postToQueue() throws NamingException, JMSException,Exception{
 
 		for(int i=0;i<2;i++){
-            ProcessorQueue.getInstance().pushMessages("mynewID"+i);
+            ProcessorQueue.getInstance().sendMessages("mynewID"+i);
 		}
 		logger.debug("Done posting");		 
 	 }	

@@ -71,7 +71,7 @@ public enum Messages {
 	HTTP_REQUEST_FAILED("HTTP request failed."),
 	RESPONSE_LOCATION_NOT_CONFIGURED("The response location is not configured or empty."),
 	PAYLOAD_LOCATION_NOT_CONFIGURED("The payload location is not configured or empty."),
-	INVALID_DIRECTORY("The given directory does not available in the system."),
+	INVALID_DIRECTORY("The given directory is not available in the system."),
 
 	PROCESSOR_EXECUTION_SUCCESSFULLY("Processor %s execution successfully."),
 	PROCESSOR_EXECUTION_FAILED("Error execution in the processor %s."),

@@ -41,10 +41,12 @@ class ProcessorInvoker implements Runnable {
 		getService().executeProcessor(request);
 		
 		logger.info("processor with id:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
+
 		  try {
 			   MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance().printExecutorDiagonostics();
 		  } catch(Exception e) {
 				logger.error("Mailbox processor queue consumer thread count error", e);
 		  }
+
 	}
 }

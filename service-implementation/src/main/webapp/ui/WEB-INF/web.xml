@@ -13,6 +13,13 @@
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
 
+<<<<<<< HEAD
+=======
+    <!--  <listener>
+        <listener-class>com.netflix.adminresources.MyGuiceServletConfig</listener-class>
+    </listener> -->
+
+>>>>>>> origin/master
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -145,7 +152,7 @@
         <servlet-class>com.liaison.service.core.SwaggerBootstrap</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
-
+    
 	<!--
     ==============================================================================
        Enable only for development when using python to make calls to tomcat  and

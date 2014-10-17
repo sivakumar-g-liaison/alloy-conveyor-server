@@ -28,7 +28,7 @@ public class MailboxProcessorQueueConsumer {
 	private static final Logger logger = LogManager.getLogger(MailboxProcessorQueueConsumer.class);
 	private static MailboxProcessorQueueConsumer qConsumerInstance = null;
 	
-	private MailboxProcessorQueueConsumer() {
+	private MailboxProcessorQueueConsumer() {		
 		// defeat instantiation.
 	}
 	
@@ -53,7 +53,6 @@ public class MailboxProcessorQueueConsumer {
 	 * Get MailboxProcessorQueueConsumer Instance.
 	 * @return MailboxProcessorQueueConsumer
 	 * @throws Exception 
-	 * @throws NumberFormatException 
 	 */
 	public static MailboxProcessorQueueConsumer getMailboxProcessorQueueConsumerInstance() throws Exception {
 		

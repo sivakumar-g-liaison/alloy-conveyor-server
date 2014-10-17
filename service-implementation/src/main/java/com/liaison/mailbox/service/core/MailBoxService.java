@@ -124,8 +124,8 @@ public class MailBoxService {
 				addProcessorToFSMState(executionId, processor, profileName, slaVerificationStatus);
 			}
 
-            LOG.debug("ABOUT TO get ProcessorQueue Instance");
-            ProcessorQueue.getInstance().pushMessages(messages.toArray(new String[messages.size()]));
+            LOG.debug("ABOUT TO get ProcessorQueue Instance {}", messages.toArray(new String[messages.size()]));
+            ProcessorQueue.getInstance().sendMessages(messages.toArray(new String[messages.size()]));
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName, Messages.SUCCESS));
 			return serviceResponse;
@@ -209,7 +209,7 @@ public class MailBoxService {
 			processor = processorDAO.find(Processor.class, processorId);
 			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, dto.getProfileName(),ExecutionState.QUEUED, null, slaVerificationStatus);
 			fsm.addDefaultStateTransitionRules(processorQueued);
-			
+
 			// retrieve the processor execution status from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
 			
@@ -266,7 +266,6 @@ public class MailBoxService {
 	    	sendEmail(processor.getEmailAddress(), processor.getProcsrName() + ":" + e.getMessage(), e, "HTML");
 			LOG.error("Processor execution failed", e);
 		}
-		
 	}
 
 	/**

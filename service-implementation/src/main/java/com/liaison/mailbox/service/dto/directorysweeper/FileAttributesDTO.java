@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.service.dto.directorysweeper;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+
 /**
  * 
  * @author OFS
@@ -80,5 +82,10 @@ public class FileAttributesDTO {
 	public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
 	}
+
+    @Override
+    public String toString() {
+        return ReflectionToStringBuilder.toString(this);
+    }
 
 }

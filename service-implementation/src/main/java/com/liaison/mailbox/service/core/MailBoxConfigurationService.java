@@ -89,6 +89,7 @@ public class MailBoxConfigurationService {
 
 		LOG.debug("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
+	
 		try {
 
 			// check if service instance id is available in query param if not throw an exception
@@ -329,7 +330,7 @@ public class MailBoxConfigurationService {
 			}
 			
 			configDao.merge(retrievedMailBox);
-			
+
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {

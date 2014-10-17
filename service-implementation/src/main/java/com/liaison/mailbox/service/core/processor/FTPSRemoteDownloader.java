@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -19,6 +19,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -47,7 +48,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
 
@@ -78,7 +79,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 	/**
 	 * Java method to inject the G2SFTP configurations
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
@@ -96,7 +97,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws CMSException
 	 * @throws UnrecoverableKeyException
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	@Override
 	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
@@ -112,7 +113,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 	/**
 	 * Java method to execute the SFTPrequest to download the file or folder
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
@@ -131,7 +132,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
 	 * @throws BootstrapingFailedException
-	 * 
+	 *
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, SymmetricAlgorithmException, JsonParseException,
@@ -164,18 +165,31 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		}
 
 		ftpsRequest.changeDirectory(path);
+
+		// For testing purpose
+		LOGGER.debug("The payload location is {}", path);
+		LOGGER.debug("The current working directory is {}", ftpsRequest.currentWorkingDirectory());
+		List<String> files = ftpsRequest.listFiles();
+		for (String file : files) {
+			LOGGER.debug("The payload is {}", file);
+		}
+		if (files.isEmpty()) {
+			LOGGER.debug("The payload location({}) is empty", path);
+		}
+		// For testing purpose
+
 		downloadDirectory(ftpsRequest, path, remotePath);
 		ftpsRequest.disconnect();
 	}
 
 	/**
 	 * Java method to download the file or folder
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws com.liaison.commons.exception.LiaisonException
 	 * @throws SftpException
-	 * 
+	 *
 	 */
 	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
 			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException,

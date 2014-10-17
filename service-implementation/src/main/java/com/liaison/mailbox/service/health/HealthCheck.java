@@ -12,8 +12,9 @@ package com.liaison.mailbox.service.health;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.netflix.karyon.spi.HealthCheckHandler;
 
 /**

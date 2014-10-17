@@ -111,8 +111,6 @@ public class SessionContext
 		}
 	}
 
-
-
 	protected void extractPipelineIdTokens (HttpServletRequest request)
 	{
 		String[] tokens = getTokens(request);
@@ -122,7 +120,9 @@ public class SessionContext
 			String[] parts = token.split("=");
 
 			if ((parts != null) && (parts.length == 2))
+
 			{				
+
 				if (parts[0].equalsIgnoreCase(DOCUMENT_PROTOCOL_TOKEN))
 				{
 					setDocumentProtocol(parts[1]);
