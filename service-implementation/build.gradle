@@ -255,8 +255,12 @@ rebel {
         omitDefaultResourcesDir = true
         resource {
           directory = "build/classes/main"
-          excludes = ["com/liaison/mailbox/jpa/model/*"]
+          excludes = ["com/liaison/mailbox/dtdm/model/*"]
         }
+		resource {
+			directory = "build/classes/main"
+			excludes = ["com/liaison/mailbox/rtdm/model/*"]
+		}
         resource {
           directory = "build/resources/main"
           excludes = ["META-INF/*"]

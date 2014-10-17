@@ -45,7 +45,7 @@ public class ServiceBrokerToMailboxWorkTicketPoller {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = ServiceBrokerToMailboxWorkTicket.getInstance().popMessage();
+                String message = ServiceBrokerToMailboxWorkTicket.getInstance().receiveMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);
                     

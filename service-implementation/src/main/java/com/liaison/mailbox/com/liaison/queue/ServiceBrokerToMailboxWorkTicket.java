@@ -10,9 +10,9 @@
 
 package com.liaison.mailbox.com.liaison.queue;
 
-import com.liaison.commons.messagebus.jms.HornetQRecoveringCoreClientPool;
+import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendReceiveClient;
 
-public class ServiceBrokerToMailboxWorkTicket extends HornetQRecoveringCoreClientPool {
+public class ServiceBrokerToMailboxWorkTicket extends HornetQRecoveringCoreSendReceiveClient {
 
 	 public static final String QUEUE_NAME = "processedPayload";
 	    private static ServiceBrokerToMailboxWorkTicket ourInstance = new ServiceBrokerToMailboxWorkTicket();

@@ -297,7 +297,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 */
 	private void postToQueue(String input)   {
 
-        MailboxToServiceBrokerWorkTicket.getInstance().pushMessages(input);
+        MailboxToServiceBrokerWorkTicket.getInstance().sendMessages(input);
         LOGGER.debug("DirectorySweeper push postToQueue, message: {}", input);
 	}
 

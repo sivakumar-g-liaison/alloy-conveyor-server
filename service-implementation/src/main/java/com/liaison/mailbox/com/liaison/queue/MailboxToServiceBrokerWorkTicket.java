@@ -10,12 +10,12 @@
 package com.liaison.mailbox.com.liaison.queue;
 
 
-import com.liaison.commons.messagebus.jms.HornetQRecoveringCoreClientPool;
+import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
 
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class MailboxToServiceBrokerWorkTicket extends HornetQRecoveringCoreClientPool {
+public class MailboxToServiceBrokerWorkTicket extends HornetQRecoveringCoreSendClient {
 
     public static final String QUEUE_NAME = "sweeper";
     private static MailboxToServiceBrokerWorkTicket ourInstance = new MailboxToServiceBrokerWorkTicket();

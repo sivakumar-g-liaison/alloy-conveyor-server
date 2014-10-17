@@ -731,11 +731,7 @@ var rest = myApp.controller(
                                       	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                                       </div>\n\
 									  <div ng-switch-when="ftpsMandatoryProperty">\n\
-<<<<<<< HEAD
                                       	<div ng-switch on = "isEdit"><div ng-switch-when="false"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=true" ng-options="property for property in booleanValues"></select></div>\n\
-=======
-                                        <div ng-switch on = "isEdit"><div ng-switch-when="false"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=true" ng-options="property for property in booleanValues"></select></div>\n\
->>>>>>> origin/master
                                         <div ng-switch-when="true"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select></div></div>\n\
                                       </div>\n\
 									  <div ng-switch-default>\n\
@@ -1342,15 +1338,9 @@ var rest = myApp.controller(
 				var i = 0;
 				for (var prop in json_data) {
 					var allowPort = false;
-<<<<<<< HEAD
 					var allowFTPSPassive = false;
 					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
 					if (prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') allowFTPSPassive = true;
-=======
-                    var allowFTPSPassive = false;
-					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
-                    if (prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') allowFTPSPassive = true;
->>>>>>> origin/master
 					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFTPSPassive) && json_data[prop] !== null && json_data[prop] !== '') {
 						i++;
 						if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
@@ -1682,11 +1672,9 @@ var rest = myApp.controller(
 									}
 									if(editProcessor === false) {
 										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
-<<<<<<< HEAD
+
 									}								
-=======
-									}
->>>>>>> origin/master
+
                             }
                         );
                     }
@@ -2366,11 +2354,9 @@ var rest = myApp.controller(
 							 $scope.allMandatoryFtpProperties.splice(indexOfPassiveForFTPS , 1);
 						}
 					}
-<<<<<<< HEAD
+
             } 
-=======
-            }            
->>>>>>> origin/master
+
             $scope.resetProcessorType = function (model) {
                 $scope.resetStaticAndMandatoryProps();
                 if (model.id === 'SWEEPER') {

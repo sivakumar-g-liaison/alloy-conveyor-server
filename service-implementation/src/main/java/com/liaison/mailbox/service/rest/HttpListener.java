@@ -540,7 +540,7 @@ public class HttpListener extends AuditedResource {
 
 
 	protected void postToQueue(String message) throws Exception {
-        MailboxToServiceBrokerWorkTicket.getInstance().pushMessages(message);
+        MailboxToServiceBrokerWorkTicket.getInstance().sendMessages(message);
         logger.debug("HttpListener postToQueue, message: {}", message);
 
 	}
