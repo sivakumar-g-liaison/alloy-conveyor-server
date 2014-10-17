@@ -218,8 +218,8 @@ mailbox.aclrequest.domain.type="SOA_SERVICE"
 mailbox.aclrequest.role.name="MailboxAdmin"
 mailbox.aclrequest.service.name="KEYMANGER"
 
-# for ACL filter
-com.liaison.acl.skipList=com.wordnik.swagger.jersey.listing.ApiListingResource.resourceListing,com.wordnik.swagger.jersey.listing.ApiListingResource.apiDeclaration,com.liaison.service.resources.acl.AclResourceMapResource.getList
+#SLA Properties
+mailbox.sla.time.configuration.unit=MINUTES
 
 #Thread Count for processor
 mailbox.processor.queue.consumer.thread.count=5
@@ -251,3 +251,10 @@ data.encryption.key.algorithm=AES
 data.encryption.key.size=128
 data.encryption.key.maxuses=10000
 data.encryption.kek.cache.expiration=10
+
+#Thread Count for processor
+mailbox.processor.queue.consumer.thread.count=5
+
+# ACL Filter uses mock verifier
+com.liaison.acl.use.mock.verifier=false
+

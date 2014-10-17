@@ -162,11 +162,10 @@ public class MailBoxUtil {
                 InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
                 properties.load(is);
             }
-
             return properties;
         }
     }
-
+	
 	/**
 	 * Method to get the current timestmp to insert into database.
 	 *
@@ -263,5 +262,6 @@ public class MailBoxUtil {
 		LOGGER.info("acl manifest decoded successfully");
 		return decodedManifestJson;
 	}
+
 
 }

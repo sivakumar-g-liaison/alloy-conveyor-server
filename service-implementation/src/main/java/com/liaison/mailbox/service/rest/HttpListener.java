@@ -155,6 +155,7 @@ public class HttpListener extends AuditedResource {
 			public Object call() throws Exception {
 				
 				serviceCallCounter.incrementAndGet();
+				InputStream responseInputStream = null;
 				
 				logger.debug("Starting sync processing");				
 				try {
@@ -177,7 +178,8 @@ public class HttpListener extends AuditedResource {
 					assignTimestamp(sessionContext);
 					HttpResponse httpResponse = forwardRequest(sessionContext, request);
 					ResponseBuilder builder = Response.ok();
-					copyResponseInfo(httpResponse, builder);	
+					responseInputStream = httpResponse.getEntity().getContent();
+					copyResponseInfo(httpResponse, builder, responseInputStream);	
 					
 					return builder.build();					
 				} catch (IOException | JAXBException e) {
@@ -188,7 +190,6 @@ public class HttpListener extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
-
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -539,7 +540,8 @@ public class HttpListener extends AuditedResource {
 
 
 	protected void postToQueue(String message) throws Exception {
-        MailboxToServiceBrokerWorkTicket.getInstance().pushMessages(message);
+        MailboxToServiceBrokerWorkTicket.getInstance().sendMessages(message);
+        logger.debug("HttpListener postToQueue, message: {}", message);
 
 	}
 
@@ -583,7 +585,7 @@ public class HttpListener extends AuditedResource {
 	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
 		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
 		logger.info("Forward request to:"+serviceBrokerSyncUri);
-		
+
 		HttpPost post = new HttpPost(serviceBrokerSyncUri);
 
 		// Set the payload.
@@ -605,7 +607,7 @@ public class HttpListener extends AuditedResource {
 	 * @throws IOException
 	 */
 	protected void copyResponseInfo(HttpResponse httpResponse,
-			ResponseBuilder builder) throws IllegalStateException, IOException {
+			ResponseBuilder builder, InputStream responseInputStream) throws IllegalStateException, IOException {
 		Header contentLength = httpResponse
 				.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
 		int iContentLength = 0;
@@ -619,30 +621,29 @@ public class HttpListener extends AuditedResource {
 			logger.debug("Response from Service Broker did not contain a content length header");
 		}
 
-		if (iContentLength > 0) {
-		    
-		    try (InputStream responseInputStream = httpResponse.getEntity()
-                    .getContent()) {
-		          Header contentType = httpResponse
-		                    .getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+	    if (iContentLength > 0) {
+            
+            responseInputStream = httpResponse.getEntity().getContent();
+            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
-		            if (responseInputStream != null) {
-		                builder.entity(responseInputStream);
-		            }
+            if (responseInputStream != null) {
+                builder.entity(responseInputStream);
+            }
 
-		            if (contentType != null) {
-		                builder.header(contentType.getName(), contentType.getValue());
-		            }
+            if (contentType != null) {
+                builder.header(contentType.getName(), contentType.getValue());
+            }
 
-		            if (contentLength != null) {
-		                builder.header(contentLength.getName(),
-		                        contentLength.getValue());
-		            }
-		    }		
+            if (contentLength != null) {
+                builder.header(contentLength.getName(),
+                        contentLength.getValue());
+            }
+            
 
-		}
+        }
 
-		copyResponseHeaders(httpResponse, builder);
+        copyResponseHeaders(httpResponse, builder);	    
+	
 	}
 
 	/**
@@ -755,6 +756,7 @@ public class HttpListener extends AuditedResource {
 		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
 		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
 		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
+
 	}
 	
 	

@@ -657,6 +657,7 @@ public abstract class AbstractRemoteProcessor {
 		if (jsonResponse != null) {
 
 			KeyServiceResponse mkr = unmarshalFromKeyManagerJSON(jsonResponse, KeyServiceResponse.class);
+
 			KeySet keySet = (KeySet) mkr.getDataTransferObject();
 			is = new ByteArrayInputStream(Base64.decodeBase64(keySet.getCurrentPublicKey()));
 		}
@@ -1573,29 +1574,6 @@ public abstract class AbstractRemoteProcessor {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	private <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
-		// make deserializer use JAXB annotations (only)
-		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
-		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
-		return ummarshaledObject;
-	}
-	
-	/**
-	 * 
-	 * @param serializedJson
-	 * @param clazz
-	 * 
-	 * @return json
-	 * 
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
 	private <T> T unmarshalFromKeyManagerJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
@@ -1606,6 +1584,29 @@ public abstract class AbstractRemoteProcessor {
 		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
 		return ummarshaledObject;
 	}
+
+	/**
+     * 
+     * @param serializedJson
+     * @param clazz
+     * 
+     * @return json
+     * 
+     * @throws JAXBException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
+    private <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+        AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+        AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+        // make deserializer use JAXB annotations (only)
+        mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
+        T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
+        return ummarshaledObject;
+    }
 
 	String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException {

@@ -164,7 +164,6 @@ public class ProcessorConfigurationService {
 					validator.validate(credentialDTO);
 				}
 			}
-			
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {

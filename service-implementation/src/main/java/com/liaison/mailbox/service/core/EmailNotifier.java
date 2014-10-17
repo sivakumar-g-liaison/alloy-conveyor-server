@@ -111,6 +111,7 @@ public class EmailNotifier {
 
         } catch (MessagingException | IOException ex ) {
         	LOGGER.error("Cannot send email. " + ex);
+
         }
 	}
 
@@ -145,6 +146,5 @@ public class EmailNotifier {
             mailSession = Session.getInstance(sessionProperties);
         }
         return mailSession;
-
     }
 }

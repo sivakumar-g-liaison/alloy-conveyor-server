@@ -16,7 +16,6 @@ var rest = myApp.controller(
             $scope.disableCertificates = true;
     	    $scope.portRequired = true;
             $scope.isPortDisabled = false;
-			
 			//GMB-155
 			$scope.sftpDefaultPort = '22';
 			$scope.ftpDefaultPort = '21';
@@ -1673,7 +1672,9 @@ var rest = myApp.controller(
 									}
 									if(editProcessor === false) {
 										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
+
 									}								
+
                             }
                         );
                     }
@@ -2353,7 +2354,9 @@ var rest = myApp.controller(
 							 $scope.allMandatoryFtpProperties.splice(indexOfPassiveForFTPS , 1);
 						}
 					}
+
             } 
+
             $scope.resetProcessorType = function (model) {
                 $scope.resetStaticAndMandatoryProps();
                 if (model.id === 'SWEEPER') {

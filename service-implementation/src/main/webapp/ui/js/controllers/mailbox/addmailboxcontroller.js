@@ -71,7 +71,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + false + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data, status) {
-                		
+
                         block.unblockUI();
                         if (status === 200) {
                         	

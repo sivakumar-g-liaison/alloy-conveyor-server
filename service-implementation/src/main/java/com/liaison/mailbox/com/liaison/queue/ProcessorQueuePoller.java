@@ -7,6 +7,8 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
+
+
 package com.liaison.mailbox.com.liaison.queue;
 
 import java.util.concurrent.Executors;
@@ -36,8 +38,6 @@ public class ProcessorQueuePoller  {
 
     private static final ScheduledExecutorService pool = Executors.newScheduledThreadPool(POOL_SIZE);
 
-
-
     private static final long DEFAULT_INITIAL_DELAY = 10000;
     public static final String PROPERTY_PROCESSOR_QUEUE_POLLER_INITIALDELAY = "com.liaison.processor.queue.poller.initialdelay";
 
@@ -61,10 +61,9 @@ public class ProcessorQueuePoller  {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = ProcessorQueue.getInstance().popMessage();
+                String message = ProcessorQueue.getInstance().receiveMessage();
                 if (message != null) {
-                    logger.debug("Polling message found {}", message);
-                    
+                    logger.debug("Polling message found {}", message);                    
                     try {
                     	MailboxProcessorQueueConsumer qconsumer = MailboxProcessorQueueConsumer.getMailboxProcessorQueueConsumerInstance();
                         qconsumer.invokeProcessor(message);
