@@ -185,7 +185,7 @@ dependencies {
     compile 'com.liaison.commons:lib_message_bus:2.+'
 
     // inherited from NetFlix Karyon (TODO integrate with main UI)
-    compile project(':karyon-admin-web')
+    //compile project(':karyon-admin-web')
 
     // reusable utilities / framework components
     compile project(':service-framework')

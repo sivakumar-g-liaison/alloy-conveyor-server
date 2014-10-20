@@ -111,7 +111,7 @@ subprojects {
  * like configuration properties, classes/jars loaded, jmx properties, etc
  *
  */
-project(':karyon-admin') {
+/*project(':karyon-admin') {
     dependencies {
         compile "com.netflix.karyon:karyon-core:${karyonVersion}"
 
@@ -136,12 +136,12 @@ project(':karyon-admin') {
         // TODO this should be fixed.  remove exclusion and test
         exclude 'com/netflix/adminresources/**'
     }    
-}
+}*/
 
 /*
  * karyon-admin-web puts a pretty face (webapp) on karyon-admin
  */
-project(':karyon-admin-web') {
+/*project(':karyon-admin-web') {
     dependencies {
         compile project(':karyon-admin')
         compile 'com.google.code.gson:gson:2.1'
@@ -154,7 +154,7 @@ project(':karyon-admin-web') {
         runtime 'org.freemarker:freemarker:2.3.19'
         runtime 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
     }
-}
+}*/
 
 project(':service-framework') {
     dependencies {
