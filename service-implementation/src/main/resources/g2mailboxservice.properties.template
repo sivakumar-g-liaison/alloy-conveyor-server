@@ -11,7 +11,7 @@ com.netflix.karyon.health.check.handler.classname=com.liaison.mailbox.service.he
 com.netflix.karyon.eureka.disable=true
 
 
-com.liaison.jms.queuename.sweeper=DEVINTMailboxToServiceBrokerWorkTicket
+com.liaison.jms.queuename.sweeper=DEVINTMailboxToServiceBrokerWorkTicketQueue
 com.liaison.jms.hostname.sweeper=10.146.16.148
 com.liaison.jms.port.sweeper=5049
 #-1 is infinite
@@ -25,7 +25,7 @@ com.liaison.jms.send.attempts.sweeper=-1
 #com.liaison.jms.init.timeout.sweeper
 #com.liaison.jms.queue.member.reset.interval.millis.sweeper
 
-com.liaison.jms.queuename.processor=DEVINTMailboxProcessorQueue
+com.liaison.jms.queuename.processor=DEVINTMailboxToMailboxProcessorQueue
 com.liaison.jms.hostname.processor=10.146.16.148
 com.liaison.jms.port.processor=5049
 #-1 is infinite
@@ -40,7 +40,7 @@ com.liaison.jms.send.attempts.processor=-1
 #com.liaison.jms.queue.member.reset.interval.millis.processor
 
 
-com.liaison.jms.queuename.processedPayload=jms.DEVINTServiceBrokerToMailboxWorkTicket 
+com.liaison.jms.queuename.processedPayload=jms.DEVINTServiceBrokerToMailboxWorkTicketQueue 
 ###############################################################################
 
 #SSL Settings

@@ -24,7 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.mailbox.com.liaison.queue.ServiceBrokerToMailboxWorkTicket;
+import com.liaison.mailbox.com.liaison.queue.DummyJMSClientQueue;
 import com.liaison.mailbox.service.dto.configuration.PayloadTicketRequestDTO;
 import com.wordnik.swagger.annotations.ApiParam;
 
@@ -45,7 +45,7 @@ public class DummyJMSClient {
 			spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
 			PayloadTicketRequestDTO ticketRequest = new PayloadTicketRequestDTO(mailboxId, spectrumURL, targetFileName, false);
 			String payloadTicket = JAXBUtility.marshalToJSON(ticketRequest);
-			ServiceBrokerToMailboxWorkTicket.getInstance().sendMessages(payloadTicket);
+			DummyJMSClientQueue.getInstance().sendMessages(payloadTicket);
 			return Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity("Posted to Queue Successfully").build();
 		} catch (JAXBException | IOException e) {
 			logger.error("Unable to marshal PayloadTicketRequestDTO", e);

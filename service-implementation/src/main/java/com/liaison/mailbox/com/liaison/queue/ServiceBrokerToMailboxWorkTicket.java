@@ -10,18 +10,18 @@
 
 package com.liaison.mailbox.com.liaison.queue;
 
-import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendReceiveClient;
+import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient;
 
-public class ServiceBrokerToMailboxWorkTicket extends HornetQRecoveringCoreSendReceiveClient {
+public class ServiceBrokerToMailboxWorkTicket extends HornetQRecoveringCoreReceiveClient {
 
 	 public static final String QUEUE_NAME = "processedPayload";
-	    private static ServiceBrokerToMailboxWorkTicket ourInstance = new ServiceBrokerToMailboxWorkTicket();
+     private static ServiceBrokerToMailboxWorkTicket ourInstance = new ServiceBrokerToMailboxWorkTicket();
 
-	    public static ServiceBrokerToMailboxWorkTicket getInstance() {
-	        return ourInstance;
-	    }
+     public static ServiceBrokerToMailboxWorkTicket getInstance() {
+         return ourInstance;
+     }
 
-	    private ServiceBrokerToMailboxWorkTicket() {
-	         super(QUEUE_NAME);
-	    }
+     private ServiceBrokerToMailboxWorkTicket() {
+        super(QUEUE_NAME);
+     }
 }

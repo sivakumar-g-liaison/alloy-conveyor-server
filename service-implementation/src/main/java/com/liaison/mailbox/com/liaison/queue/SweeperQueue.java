@@ -15,16 +15,16 @@ import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
 /**
  * Created by jeremyfranklin-ross on 7/17/14.
  */
-public class MailboxToServiceBrokerWorkTicket extends HornetQRecoveringCoreSendClient {
+public class SweeperQueue extends HornetQRecoveringCoreSendClient {
 
     public static final String QUEUE_NAME = "sweeper";
-    private static MailboxToServiceBrokerWorkTicket ourInstance = new MailboxToServiceBrokerWorkTicket();
+    private static SweeperQueue ourInstance = new SweeperQueue();
 
-    public static MailboxToServiceBrokerWorkTicket getInstance() {
+    public static SweeperQueue getInstance() {
         return ourInstance;
     }
 
-    private MailboxToServiceBrokerWorkTicket() {
+    private SweeperQueue() {
          super(QUEUE_NAME);
     }
 }
