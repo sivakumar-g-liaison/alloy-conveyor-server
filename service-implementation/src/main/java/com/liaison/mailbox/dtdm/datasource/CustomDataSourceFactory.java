@@ -6,13 +6,13 @@ import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
 
+import oracle.ucp.jdbc.PoolDataSource;
+import oracle.ucp.jdbc.PoolDataSourceFactory;
+
 import org.apache.commons.configuration.ConversionException;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-
-import oracle.ucp.jdbc.PoolDataSource;
-import oracle.ucp.jdbc.PoolDataSourceFactory;
 
 /**
  * This class is a CustomDataSource Factory that can be used to configured at Tomcat Container or Tomcat WEB App Context Level.  

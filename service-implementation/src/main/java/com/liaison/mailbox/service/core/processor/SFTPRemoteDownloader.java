@@ -34,7 +34,7 @@ import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Processor;

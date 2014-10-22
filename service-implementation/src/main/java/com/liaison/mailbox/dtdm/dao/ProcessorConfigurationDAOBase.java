@@ -26,7 +26,6 @@ import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.util.MailBoxUtil;

@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
-import com.liaison.fs2.api.FS2Exception;
+import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**

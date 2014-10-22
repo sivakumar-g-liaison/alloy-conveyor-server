@@ -10,7 +10,7 @@
 package com.liaison.mailbox.swagger.dto.request;
 
 
-import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
 
 /**
  * @author OFS

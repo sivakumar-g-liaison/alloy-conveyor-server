@@ -84,7 +84,7 @@ public class FrameworkFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
     	
     	if (!ThreadContext.isEmpty()) {
-    		ThreadContext.clear();
+    		ThreadContext.clearAll();
     	}
     	
     	fishTag(request);

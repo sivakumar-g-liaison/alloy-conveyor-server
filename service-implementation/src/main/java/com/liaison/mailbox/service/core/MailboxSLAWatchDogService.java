@@ -41,7 +41,7 @@ import org.codehaus.jettison.json.JSONException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;

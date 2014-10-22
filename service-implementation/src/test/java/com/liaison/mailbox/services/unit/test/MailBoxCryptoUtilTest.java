@@ -9,9 +9,10 @@
  */
 package com.liaison.mailbox.services.unit.test;
 
-import org.testng.annotations.Test;
 import org.testng.Assert;
-import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import org.testng.annotations.Test;
+
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 
 /**

@@ -34,7 +34,6 @@ import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
 import com.liaison.mailbox.service.dto.configuration.request.InterruptExecutionEventRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 

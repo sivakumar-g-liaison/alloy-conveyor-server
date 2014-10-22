@@ -11,8 +11,8 @@ package com.liaison.mailbox.service.util;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.liaison.commons.security.pkcs12.CryptoUtil;
-import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs7.CryptoUtil;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 
 /**
  * @author OFS

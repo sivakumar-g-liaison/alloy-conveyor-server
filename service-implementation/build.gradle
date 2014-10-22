@@ -16,7 +16,6 @@ apply plugin: 'license'
 
 // set base name (impacts war name and context path)
 project.war.baseName = 'g2mailboxservice'
-
 // Establish version and status
 ext.githubProjectName = rootProject.name // Change if github project name is not the same as the root project's name
 
@@ -70,6 +69,8 @@ buildscript {
 configurations {
     swaggerDoclet
     jdbc
+	workTicket
+	compile.extendsFrom workTicket ;
 }
 
 allprojects {
@@ -221,6 +222,8 @@ dependencies {
     	exclude group: "com.google.collections", module: "google-collections"
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
   	}
+	
+	workTicket 'com.liaison.dto:dto:1.0.0'
 }
 
 idea {
@@ -399,31 +402,69 @@ task jettyRunSetProperties {
 
 }
 
+task createPathJar (type: Jar) {
+	
+        
+		archiveName ='enhancerDependency.jar'
+		manifest{
+				attributes(//"Class-Path":project.runtimeClasspath.asPath,
+					       "Class-Path":project.runtimeClasspath.collect { it.toURI() }.join(' ')
+					       )
+			}
+	}
+	
+
+
 // JPA (datanucleus) bytecode enhancement
-task enhance  << {
+task enhance(dependsOn: ['createPathJar'])  << {
     logger.info("... Enhancing ...");
-    ant.taskdef(
+	
+     /*ant.taskdef(
             name      : 'datanucleusenhancer',
-            classpath : project.runtimeClasspath.asPath,
+            classpath : (project.runtimeClasspath - configurations.workTicket).asPath,
             classname : 'org.datanucleus.enhancer.EnhancerTask'
             )
 
-    ant.datanucleusenhancer(
-            classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
+   ant.datanucleusenhancer(
+            classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
             verbose     : true,
             api : "JPA",
             persistenceUnit : "mailbox-dtdm",
             failonerror : true)
 	
 	ant.datanucleusenhancer(
-		classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath).asPath,
+		classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
+		verbose     : true,
+		api : "JPA",
+		persistenceUnit : "mailbox-rtdm",
+		failonerror : true)*/
+	
+	ant.taskdef(
+		name      : 'datanucleusenhancer',
+		classpath : (files("$buildDir/libs/enhancerDependency.jar")).asPath,
+		classname : 'org.datanucleus.enhancer.EnhancerTask'
+		)
+	
+	ant.datanucleusenhancer(
+		classpath   : (files("$projectDir/src/main/resources")+ files("$buildDir/libs/enhancerDependency.jar") ).asPath,
+		verbose     : true,
+		api : "JPA",
+		persistenceUnit : "mailbox-dtdm",
+		failonerror : true)
+	
+	ant.datanucleusenhancer(
+		classpath   : (files("$projectDir/src/main/resources")+ files("$buildDir/libs/enhancerDependency.jar") ).asPath,
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-rtdm",
 		failonerror : true)
-
+	
+	
 }
+
+
 classes.dependsOn('enhance')
+
 
 // jettyRun configuration properties
 jettyRun {

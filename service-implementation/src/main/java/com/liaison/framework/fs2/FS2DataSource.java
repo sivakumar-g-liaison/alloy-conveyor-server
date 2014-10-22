@@ -8,13 +8,14 @@
  */
 package com.liaison.framework.fs2;
 
-import com.liaison.fs2.api.FlexibleStorageSystem;
-import com.liaison.fs2.api.exceptions.FS2PayloadNotFoundException;
-
-import javax.activation.DataSource;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+
+import javax.activation.DataSource;
+
+import com.liaison.fs2.api.FlexibleStorageSystem;
+import com.liaison.fs2.api.exceptions.FS2PayloadNotFoundException;
 
 /**
  * DataSource implementation backed by FS2.

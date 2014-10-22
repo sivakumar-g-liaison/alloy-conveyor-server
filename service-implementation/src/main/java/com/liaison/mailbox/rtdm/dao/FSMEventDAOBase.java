@@ -17,7 +17,6 @@ import javax.persistence.EntityManager;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
-import com.liaison.mailbox.dtdm.dao.MailBoxDAO;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.rtdm.model.FSMEvent;
 import com.liaison.mailbox.service.util.MailBoxUtil;

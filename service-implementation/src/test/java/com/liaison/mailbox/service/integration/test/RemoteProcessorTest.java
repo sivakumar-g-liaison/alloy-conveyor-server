@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs12.SymmetricAlgorithmException;
+import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.exceptions.FS2Exception;

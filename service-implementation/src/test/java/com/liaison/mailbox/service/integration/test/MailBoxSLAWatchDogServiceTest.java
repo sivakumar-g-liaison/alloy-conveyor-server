@@ -15,7 +15,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.mailbox.enums.ExecutionState;

@@ -43,6 +43,8 @@ public class EmailNotifier {
 
 	private static Properties MAILSERVER_CONFIG = new Properties();
 	private static Session mailSession = null;
+	
+
 
 	static {
 		fetchConfig();
