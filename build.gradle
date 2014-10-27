@@ -136,8 +136,10 @@ subprojects {
         // TODO this should be fixed.  remove exclusion and test
         exclude 'com/netflix/adminresources/**'
     }    
+
 }
 */
+
 /*
  * karyon-admin-web puts a pretty face (webapp) on karyon-admin
  */

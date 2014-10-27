@@ -65,8 +65,8 @@ dependencies {
     // Liaison code
     // commons-lib dependencies
 	compile 'com.liaison:commons-lib:4.+'
-	
 	// Netflix
 	compile "com.netflix.karyon:karyon-admin-web:${karyonVersion}"
+
 }
 
