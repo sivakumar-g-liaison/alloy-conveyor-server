@@ -33,7 +33,7 @@ Dev/Debug Access: Yes
 Performance Testing Instrumentation: No
 Functional Testing: Yes
 
-production-stage/
+uat/
 Tomcat conf and lib contents that are appropriate stage a release.
 Auto Deployment: No
 Single Machine / Cluster : Cluster
