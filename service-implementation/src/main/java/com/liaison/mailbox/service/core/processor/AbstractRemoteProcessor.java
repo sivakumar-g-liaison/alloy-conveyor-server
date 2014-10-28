@@ -77,6 +77,8 @@ import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
 import com.liaison.keymanage.grammar.KeySet;
@@ -895,8 +897,8 @@ public abstract class AbstractRemoteProcessor {
 	 *            The file attribute to be added in the group
 	 * @return true if it can be added false otherwise
 	 * @throws MailBoxServicesException
-	 */
-	protected Boolean validateAdditionalGroupFile(List<FileAttributesDTO> fileGroup, FileAttributesDTO fileAttribute) throws MailBoxServicesException {
+	 */	
+	protected Boolean validateAdditionalGroupWorkTicket(WorkTicketGroup workTicketGroup, WorkTicket workTicket) throws MailBoxServicesException {
 
 		long maxPayloadSize = 0;
 		long maxNoOfFiles = 0;
@@ -923,15 +925,16 @@ public abstract class AbstractRemoteProcessor {
 			maxNoOfFiles = 10;
 		}
 
-		if (maxNoOfFiles <= fileGroup.size()) {
+		if (maxNoOfFiles <= workTicketGroup.getWorkTicketGroup().size()) {
 			return false;
 		}
 
-		if (maxPayloadSize <= (getGroupFileSize(fileGroup) + fileAttribute.getSize())) {
+		if (maxPayloadSize <= (getWorkTicketGroupFileSize(workTicketGroup) + workTicket.getPayloadSize())) {
 			return false;
 		}
 		return true;
 	}
+
 
 	/**
 	 * Get the total file size of the group.
@@ -939,12 +942,13 @@ public abstract class AbstractRemoteProcessor {
 	 * @param fileGroup
 	 * @return
 	 */
-	private long getGroupFileSize(List<FileAttributesDTO> fileGroup) {
+	
+	private long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
 
 		long size = 0;
 
-		for (FileAttributesDTO attribute : fileGroup) {
-			size += attribute.getSize();
+		for (WorkTicket workTicket : workTicketGroup.getWorkTicketGroup()) {
+			size += workTicket.getPayloadSize();
 		}
 
 		return size;

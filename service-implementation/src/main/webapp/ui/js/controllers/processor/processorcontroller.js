@@ -283,6 +283,11 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
+                	 name: 'Spectrum Payload Encrypted',
+                     value: true,
+                     allowAdd: false,
+                     isMandatory: true
+                }, {
                     name: '',
                     value: '',
                     allowAdd: true,
@@ -500,6 +505,9 @@ var rest = myApp.controller(
                 $scope.allMandatorySweeperProperties = [{
                     "name": "PipeLine Id",
                     "id": "pipeLineID"
+                }, {
+                	"name": "Spectrum Payload Encrypted",
+                	"id": "spectrumPayloadEncrypted"
                 }];
                 $scope.allMandatoryHttpProperties = [{
                     "name": "HTTP Version",
@@ -694,6 +702,9 @@ var rest = myApp.controller(
 						 <div ng-switch-when="pipeLineID">\n\
                             <textarea ng-disabled="disablePipeLineId" class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
                         </div>\n\
+                    	<div ng-switch-when="spectrumPayloadEncrypted">\n\
+                        	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
+                    	</div>\n\
                     	 <div ng-switch-when="httpListenerPipeLineId">\n\
                     		<textarea class="form-control" ng-disabled="disableHTTPListenerPipeLineId" ng-model="COL_FIELD" required ng-init="COL_FIELD" ng-input="COL_FIELD"  style="width:94%;height:45px" ng-disabled=true placeholder="required"/>\n\
                     	</div>\n\
@@ -1338,10 +1349,16 @@ var rest = myApp.controller(
 				var i = 0;
 				for (var prop in json_data) {
 					var allowPort = false;
-					var allowFTPSPassive = false;
+					var allowFalseValues = false;
 					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
-					if (prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') allowFTPSPassive = true;
-					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFTPSPassive) && json_data[prop] !== null && json_data[prop] !== '') {
+					
+					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
+					// But Mandatory properties of type boolean will be displayed even if the value is false in the grid
+					if ((prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') || 
+                       (prop === 'spectrumPayloadEncrypted' && json_data[prop] === false && $scope.processor.protocol === 'SWEEPER')) {
+                        allowFalseValues = true;
+                    }
+					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFalseValues) && json_data[prop] !== null && json_data[prop] !== '') {
 						i++;
 						if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
 							otherReqIndex = i;
@@ -2040,6 +2057,14 @@ var rest = myApp.controller(
                             value: $rootScope.pipelineId
                         });
                     }
+                    
+                    if (name === 'spectrumPayloadEncrypted') {
+                    	mandatoryArray.push({
+                    		name: name,
+                    		value: value
+                    	});
+                    }
+                    
                     if (name === 'httpVerb' && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
                         mandatoryArray.push({
                             name: name,
@@ -2606,6 +2631,12 @@ var rest = myApp.controller(
                     value: '',
                     allowAdd: false,
                     isMandatory: true
+                }, {
+                	name: 'Spectrum Payload Encrypted',
+                	value: true,
+                	allowAdd: false,
+                	isMandatory:true
+                	
                 }, {
                     name: '',
                     value: '',

@@ -322,6 +322,7 @@ public class MailboxSLAWatchDogService {
 			// retrieve the processor execution status of corresponding uploader from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
 			
+			FS2Util.isEncryptionRequired = true;
 			//get payload from spectrum
 			InputStream payload = FS2Util.retrievePayloadFromSpectrum(spectrumUrl);
 			

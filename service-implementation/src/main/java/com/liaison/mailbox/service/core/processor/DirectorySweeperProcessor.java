@@ -10,7 +10,9 @@
 package com.liaison.mailbox.service.core.processor;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -20,7 +22,9 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.ScriptException;
 import javax.ws.rs.core.Response;
@@ -34,14 +38,10 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import com.liaison.fs2.api.CoreFS2Utils;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.FS2MetaSnapshot;
-import com.liaison.fs2.api.FS2MetaSnapshotImpl;
-import com.liaison.fs2.api.FS2Metadata;
-import com.liaison.fs2.api.FS2ObjectHeaders;
-import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.fs2.api.exceptions.FS2Exception;
-import com.liaison.fs2.api.exceptions.FS2ObjectAlreadyExistsException;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -49,10 +49,8 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.FileGroupDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.FS2InstanceCreator;
+import com.liaison.mailbox.service.util.FS2Util;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -113,16 +111,16 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		}
 
         LOGGER.debug("Is progress list is empty: {}", inProgressFiles.isEmpty());
-		List<FileAttributesDTO> files = (inProgressFiles.isEmpty())
+        List<WorkTicket> workTickets = (inProgressFiles.isEmpty())
 				? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
 				: validateInprogressFiles(inProgressFiles, timeLimit);
 
-		if (files.isEmpty()) {
+		if (workTickets.isEmpty()) {
 			LOGGER.info("There are no files to process.");
 		} else {
-            LOGGER.debug("There are {} files to process", files.size());
+            LOGGER.debug("There are {} files to process", workTickets.size());
 			// Read from mailbox property - grouping js location
-			List<List<FileAttributesDTO>> fileGroups = groupingFiles(files);
+			List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
 			String sweepedFileLocation = processMountLocation(getDynamicProperties().getProperty(
 					MailBoxConstants.SWEEPED_FILE_LOCATION));
@@ -142,13 +140,13 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 			// Renaming the file
             LOGGER.debug("ABOUT TO MARK AS SWEEPED");
-			markAsSweeped(files, fileRenameFormat, sweepedFileLocation);
+			markAsSweeped(workTickets, fileRenameFormat, sweepedFileLocation);
 
-			if (fileGroups.isEmpty()) {
+			if (workTicketGroups.isEmpty()) {
 				LOGGER.info("The file group is empty, so NOP");
 			} else {
-				for (List<FileAttributesDTO> fileGroup : fileGroups) {;
-					String jsonResponse = constructMetaDataJson(fileGroup);
+				for (WorkTicketGroup workTicketGroup : workTicketGroups) {;
+					String jsonResponse = constructMetaDataJson(workTicketGroup);
 					LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
 					postToQueue(jsonResponse);
 				}
@@ -164,21 +162,20 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 
 	/**
-	 * Method is used to retrieve all the files attributes from the given mailbox. This method
-	 * supports both FS2 and Java File API
-	 * 
+	 * Method is used to retrieve all the WorkTickets from the given mailbox. 
+	 * 	  
 	 * @param root
 	 *            The mailbox root directory
 	 * @param includeSubDir
 	 * @param listDirectoryOnly
-	 * @return List of FileAttributes
+	 * @return List of WorkTicket
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JAXBException
 	 */
-	public List<FileAttributesDTO> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
+	public List<WorkTicket> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
 			String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException {
 
@@ -209,7 +206,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
-		return getFileAttributes(result);
+		return generateWorkTickets(result);
 	}
 
 	/**
@@ -236,55 +233,57 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	/**
 	 * Grouping the files based on the payload threshold and no of files threshold.
 	 * 
-	 * @param files
-	 *            Group of all files in a given directory.
-	 * @return List of group of files
+	 * @param workTickets
+	 *            Group of all workTickets in a WorkTicketGroup.
+	 * @return List of WorkTicketGroup
 	 * @throws ScriptException
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws NoSuchMethodException
 	 * @throws MailBoxServicesException
 	 */
-	private List<List<FileAttributesDTO>> groupingFiles(List<FileAttributesDTO> files) throws ScriptException,
+	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets) throws ScriptException,
 	IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException, Exception {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
-		List<List<FileAttributesDTO>> fileGroups = new ArrayList<>();
+		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
 
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
 
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", files, LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
 
 		} else {
 
-			if (files.isEmpty()) {
+			if (workTickets.isEmpty()) {
 				LOGGER.info("There are no files available in the directory.");
 			}
 
-			List<FileAttributesDTO> fileGroup = new ArrayList<>();
-			for (FileAttributesDTO file : files) {
+			WorkTicketGroup workTicketGroup = new WorkTicketGroup();
+			List <WorkTicket> workTicketsInGroup = new ArrayList <WorkTicket>();
+			workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
+			for (WorkTicket workTicket : workTickets) {
 
-				if (validateAdditionalGroupFile(fileGroup, file)) {
-					fileGroup.add(file);
+				if (validateAdditionalGroupWorkTicket(workTicketGroup, workTicket)) {
+					workTicketGroup.getWorkTicketGroup().add(workTicket);
 				} else {
-					if (!fileGroup.isEmpty()) {
-						fileGroups.add(fileGroup);
+					if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
+						workTicketGroups.add(workTicketGroup);
 					}
-					fileGroup = new ArrayList<>();
-					fileGroup.add(file);
+					workTicketGroup = new WorkTicketGroup();
+					workTicketsInGroup = new ArrayList <WorkTicket>();
+					workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
+					workTicketGroup.getWorkTicketGroup().add(workTicket);
 
 				}
 			}
 
-			if (!fileGroup.isEmpty()) {
-				fileGroups.add(fileGroup);
+			if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
+				workTicketGroups.add(workTicketGroup);
 			}
-
 		}
-		return fileGroups;
+		return workTicketGroups;
 	}
-
 
 
 
@@ -306,22 +305,23 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * format. If sweepedFileLocation is available in the mailbox files will be moved to the given
 	 * location.
 	 * 
-	 * @param fileList
-	 *            Files list.
+	 * @param workTickets
+	 *            WorkTickets list.
 	 * @param fileRenameFormat
 	 *            The file rename format
 	 * @throws IOException
 	 * @throws JSONException
 	 * @throws FS2Exception
 	 * @throws URISyntaxException
+	 * @throws JAXBException 
+	 * @throws JsonParseException 
 	 */
-	public void markAsSweeped(List<FileAttributesDTO> fileList, String fileRenameFormat, String sweepedFileLocation)
-			throws IOException, JSONException, FS2Exception, URISyntaxException {
+	public void markAsSweeped(List<WorkTicket> workTickets, String fileRenameFormat, String sweepedFileLocation)
+			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException {
 
 		Path target = null;
 		Path oldPath = null;
 		Path newPath = null;
-		FlexibleStorageSystem FS2 = null;
 		FS2MetaSnapshot metaSnapShot = null;
 
 		if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
@@ -329,32 +329,23 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		}
 
 		LOGGER.info("Renaming the processed files");
-		for (FileAttributesDTO file : fileList) {
-
-			oldPath = new File(file.getFs2Path()).toPath();
+		for (WorkTicket workTicket : workTickets) {
+			
+			File payloadFile = new File(workTicket.getPayloadURI());
+			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 					: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
-
-			// Creating meta snapshot
-			FS2 = FS2InstanceCreator.getFS2Instance();
-			FS2Metadata metadata = new FS2Metadata(CoreFS2Utils.genURIFromPath(newPath.toString()), true, new Date(),
-					"DirectorySweeper", new FS2ObjectHeaders(), null);
-			metaSnapShot = new FS2MetaSnapshotImpl(metadata);
-			
-			// Constructing the fs2 file
-			try {
-				FS2.createObjectEntry(CoreFS2Utils.genURIFromPath(oldPath.toString()), new FS2ObjectHeaders(), null);
-
-			} catch (FS2ObjectAlreadyExistsException e) {
-				FS2.deleteRecursive(oldPath.toUri());
-				FS2.createObjectEntry(oldPath.toUri(), new FS2ObjectHeaders(), null);
-			}
-
+			String globalProcessId  = MailBoxUtil.getGUID();
+			FS2Util.isEncryptionRequired = this.getRemoteProcessorProperties().isSpectrumPayloadEncrypted();
+			// persist payload in spectrum
+			InputStream payloadToPersist = new FileInputStream(payloadFile);
+			metaSnapShot = FS2Util.persistPayloadInSpectrum(payloadToPersist, globalProcessId);
+			payloadToPersist.close();
 			// Renaming the file at the end of the step when everything is done.
 			move(oldPath, newPath);
 			//GSB-1353- After discussion with Joshua and Sean
-			file.setFs2Path(CoreFS2Utils.genURIFromPath(newPath.toFile().getAbsolutePath()).toString());
-			file.setGuid(MailBoxUtil.getGUID());
+			workTicket.setGlobalProcessId(globalProcessId);
+			workTicket.setPayloadURI(metaSnapShot.getURI().toString());
 		}
 
 		LOGGER.info("Renaming the processed files - done");
@@ -375,68 +366,71 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	}
 
 	/**
-	 * Method is used to construct the MetaData JSON from the file attributes dto list.
+	 * Method is used to construct the MetaData JSON from the workticketgroup dto.
 	 *
-	 * @param files
-	 *            The file attributes list
+	 * @param workTicketGroup
+	 *            The workticketGroup object
 	 * @return String MetaData JSON string
 	 * @throws JsonGenerationException
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	private String constructMetaDataJson(List<FileAttributesDTO> files) throws JsonGenerationException,
+
+	private String constructMetaDataJson(WorkTicketGroup workTicketGroup) throws JsonGenerationException,
 	JsonMappingException, IOException, JAXBException {
 
-        LOGGER.debug("Construct MetaData for files size:{}, {}", files.size(), files.toArray());
-        FileGroupDTO group = new FileGroupDTO();
-        group.getFileAttributes().addAll(files);
-
-        String jsonResponse = MailBoxUtil.marshalToJSON(group);
+        LOGGER.debug("Construct MetaData for workTicketGroup of size :{}, {}", workTicketGroup.getWorkTicketGroup().size(), workTicketGroup.getWorkTicketGroup().toArray());
+        String jsonResponse = MailBoxUtil.marshalToJSON(workTicketGroup);
         LOGGER.debug("Constructed MetaData: {} ", jsonResponse);
 
         return jsonResponse;
     }
 
 	/**
-	 * Returns file attributes from java.io.File
+	 * Returns List of WorkTickets from  java.io.File
 	 *
 	 * @param result
-	 *            files
-	 * @return list of file attributes
+	 *            workTickets
+	 * @return list of workTickets
 	 * @throws JAXBException
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	private List<FileAttributesDTO> getFileAttributes(List<Path> result) throws JAXBException, IOException {
+	private List<WorkTicket> generateWorkTickets(List<Path> result) throws JAXBException, IOException {
 
-		List<FileAttributesDTO> fileAttributes = new ArrayList<>();
-		FileAttributesDTO attribute = null;
+		List<WorkTicket> workTickets = new ArrayList<>();
+		WorkTicket workTicket = null;
+		Map<String, Object> additionalContext = new HashMap<String, Object>();
 		BasicFileAttributes attr = null;
 		for (Path path : result) {
             LOGGER.debug("Obtaining file Attributes for path {}", path);
-			attribute = new FileAttributesDTO();
-            LOGGER.debug("FS2 path {}", path.toAbsolutePath().toString());
-			attribute.setFs2Path(path.toAbsolutePath().toString());
+			workTicket = new WorkTicket();
+            LOGGER.debug("Payload URI {}", path.toAbsolutePath().toString());
+			workTicket.setPayloadURI(path.toAbsolutePath().toString());
             LOGGER.debug("Pipeline ID {}", getPipeLineID());
-			attribute.setPipeLineID(getPipeLineID());
+			workTicket.setPipelineId(getPipeLineID());
 
 			attr = Files.readAttributes(path, BasicFileAttributes.class);
             LOGGER.debug("File attributes{}", attr);
 
             LOGGER.debug("Time stamp {}", attr.creationTime());
-			attribute.setTimestamp(attr.creationTime().toString());
+            workTicket.setCreatedTime(new Date(attr.creationTime().toMillis()));
             LOGGER.debug("Size stamp {}", attr.size());
-			attribute.setSize(attr.size());
+			workTicket.setPayloadSize(attr.size());
             LOGGER.debug("Filename {}", path.toFile().getName());
-			attribute.setFilename(path.toFile().getName());
-			fileAttributes.add(attribute);
+			workTicket.setFileName(path.toFile().getName());
+		    LOGGER.debug("Foldername {}", path.toFile().getParent());
+		    additionalContext.put(MailBoxConstants.FOLDER_NAME, path.toFile().getParent());
+		    
+		    workTicket.setAdditionalContext(additionalContext);
+			workTickets.add(workTicket);
 		}
 
-        LOGGER.debug("FileAttributes size:{}, {}", fileAttributes.size(), fileAttributes.toArray());
+        LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());
 
-        return fileAttributes;
+        return workTickets;
 	}
 
 	/**
@@ -474,7 +468,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	private List<FileAttributesDTO> validateInprogressFiles(List<Path> inprogressFiles, long timelimit)
+	private List<WorkTicket> validateInprogressFiles(List<Path> inprogressFiles, long timelimit)
 			throws JAXBException, IOException {
 
 		List<Path> files = new ArrayList<>();
@@ -489,7 +483,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		}
 
 		inprogressFiles.clear();//Clearing the recently updated files after the second call.
-		return getFileAttributes(files);
+		return generateWorkTickets(files);
 	}
 
 }

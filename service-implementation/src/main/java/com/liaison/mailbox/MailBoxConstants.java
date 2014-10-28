@@ -108,4 +108,10 @@ public interface MailBoxConstants {
 	public final static String DUMMY_MAILBOX_ID_FOR_FSM_STATE =   "ABCDEFGHIJKLMNOPQRSTUVWXYZ789101";
 	public final static String DUMMY_PROCESSOR_ID_FOR_FSM_STATE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456";
 	
+	// spectrum payload prefix
+	public final static String SPECTRUM_PAYLOAD_PREFIX = "/mailboxsweeper/payload/1.0/";
+	
+	// foldername key in additional context of Sweeper DTO ticket
+	public final static String FOLDER_NAME = "folderdername";
+	
 }

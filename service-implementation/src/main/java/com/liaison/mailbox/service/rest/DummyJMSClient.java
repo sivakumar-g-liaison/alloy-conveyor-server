@@ -42,7 +42,8 @@ public class DummyJMSClient {
 	
 		try {
 			//spectrumURL = URLEncoder.encode(spectrumURL, "UTF-8");
-			spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
+			spectrumURL = "fs2:/mailboxsweeper/payload/1.0/55FB3A3F0A0A000C0A774FB208B57192";
+			//spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
 			PayloadTicketRequestDTO ticketRequest = new PayloadTicketRequestDTO(mailboxId, spectrumURL, targetFileName, false);
 			String payloadTicket = JAXBUtility.marshalToJSON(ticketRequest);
 			DummyJMSClientQueue.getInstance().sendMessages(payloadTicket);

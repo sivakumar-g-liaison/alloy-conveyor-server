@@ -26,13 +26,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.processor.DirectorySweeperProcessor;
-import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
@@ -85,10 +85,10 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
+		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
-		Assert.assertEquals(name, path.get(0).getFilename());
+		Assert.assertEquals(name, path.get(0).getFileName());
 	}
     
 	/**
@@ -124,12 +124,12 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
+		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		target.toFile().setReadable(true);
 		target.toFile().setWritable(true);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
-		Assert.assertEquals(name, path.get(0).getFilename());
+		Assert.assertEquals(name, path.get(0).getFileName());
 	}
     
 	/**
@@ -163,10 +163,10 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
+		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
-		Assert.assertEquals(name, path.get(0).getFilename());
+		Assert.assertEquals(name, path.get(0).getFileName());
 	}
     
 	/**
@@ -201,10 +201,10 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
-		List<FileAttributesDTO> files = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
+		List<WorkTicket> files = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, files.size());
-		Assert.assertEquals(name, files.get(0).getFilename());
+		Assert.assertEquals(name, files.get(0).getFileName());
 
 	}
 
