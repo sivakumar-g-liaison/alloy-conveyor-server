@@ -58,13 +58,6 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
-import com.liaison.accessmanagement.service.client.ACLClient;
-import com.liaison.accessmanagement.service.client.ACLManifestResponse;
-import com.liaison.accessmanagement.service.dto.EnvelopeDTO;
-import com.liaison.accessmanagement.service.dto.request.ManifestRequestACL;
-import com.liaison.accessmanagement.service.dto.request.ManifestRequestDTO;
-import com.liaison.accessmanagement.service.dto.request.ManifestRequestDomain;
-import com.liaison.accessmanagement.service.dto.request.ManifestRequestPlatform;
 import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
@@ -80,6 +73,13 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.gem.service.client.GEMClient;
+import com.liaison.gem.service.client.GEMManifestResponse;
+import com.liaison.gem.service.dto.EnvelopeDTO;
+import com.liaison.gem.service.dto.request.ManifestRequestDTO;
+import com.liaison.gem.service.dto.request.ManifestRequestDomain;
+import com.liaison.gem.service.dto.request.ManifestRequestGEM;
+import com.liaison.gem.service.dto.request.ManifestRequestPlatform;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
 import com.liaison.keymanage.grammar.KeySet;
 import com.liaison.mailbox.MailBoxConstants;
@@ -99,7 +99,6 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.CredentialInfoModel;
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
-import com.liaison.mailbox.service.dto.directorysweeper.FileAttributesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.HTTPClientUtil;
@@ -639,14 +638,13 @@ public abstract class AbstractRemoteProcessor {
 
 		// To be fetched from DataBase
 		url = url + trustStoreId;
-
-		// get acl manifest response from ACL
-		/*String unsignedData = trustStoreId;
-		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);*/
 		
-		ACLManifestResponse aclManifestFromACL = null;
-		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
+		// get gem manifest response from GEM
+	    String unsignedData = trustStoreId;
+		String signedData = signRequestData(unsignedData);
+		GEMManifestResponse gemManifestFromGEM = getGEMManifestFromGEMClient(unsignedData, signedData);
+		
+		Map<String, String> headerMap = getRequestHeaders(gemManifestFromGEM);
 
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
@@ -690,16 +688,15 @@ public abstract class AbstractRemoteProcessor {
 
 		// To be fetched from DataBase
 		url = url + keypairPguid;
-
-		// get acl manifest response from ACL
-		/*String unsignedData = keypairPguid;
-		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);*/
 		
-		ACLManifestResponse aclManifestFromACL =  null;
-		// setting the request headers in the request to key manager from acl
+		// get gem manifest response from GEM
+	    String unsignedData = keypairPguid;
+		String signedData = signRequestData(unsignedData);
+		GEMManifestResponse gemManifestFromGEM = getGEMManifestFromGEMClient(unsignedData, signedData);
+		
+		// setting the request headers in the request to key manager from gem
 		// manifest response
-		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
+		Map<String, String> headerMap = getRequestHeaders(gemManifestFromGEM);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
@@ -1420,23 +1417,23 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Method used to construct the ACLManifestRequest
+	 * Method used to construct the GEMManifestRequest
 	 * 
 	 * @return ManifestRequestDTO
 	 * @throws IOException 
 	 */
-	private ManifestRequestDTO constructACLManifestRequest() throws IOException {
+	private ManifestRequestDTO constructGEMManifestRequest() throws IOException {
 
-		LOGGER.info("Constructing the acl manifest request with default values");
+		LOGGER.info("Constructing the gem manifest request with default values");
 		// Construct Envelope
 		EnvelopeDTO envelope = new EnvelopeDTO();
 
 		// Construct Domain
 		ManifestRequestDomain domain = new ManifestRequestDomain();
-		domain.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.domain.name"));
-		domain.setType(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.domain.type"));
+		domain.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.domain.name"));		
+		domain.setType(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.domain.type"));
 		List<String> roles = new ArrayList<String>();
-		roles.add(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.role.name"));
+		roles.add(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.role.name"));
 		domain.setRoles(roles);
 
 		List<ManifestRequestDomain> domains = new ArrayList<ManifestRequestDomain>();
@@ -1444,7 +1441,7 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct NestedServiceDependency
 		NestedServiceDependencyContraint dependencyConstraint = new NestedServiceDependencyContraint();
-		dependencyConstraint.setServiceName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.service.name"));
+		dependencyConstraint.setServiceName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.service.name"));
 		dependencyConstraint.setPrimaryId(configurationInstance.getServiceInstance().getName());
 
 		List<NestedServiceDependencyContraint> constraintList = new ArrayList<NestedServiceDependencyContraint>();
@@ -1452,21 +1449,21 @@ public abstract class AbstractRemoteProcessor {
 
 		// Construct Platform
 		ManifestRequestPlatform platform = new ManifestRequestPlatform();
-		platform.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.aclrequest.platform.name"));
+		platform.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.platform.name"));
 		platform.setConstraintList(constraintList);
 		platform.setDomains(domains);
 
 		List<ManifestRequestPlatform> platforms = new ArrayList<ManifestRequestPlatform>();
 		platforms.add(platform);
 
-		// Construct ManifestRequestACL
-		ManifestRequestACL manifestRequestACL = new ManifestRequestACL();
-		manifestRequestACL.setEnvelope(envelope);
-		manifestRequestACL.setPlatforms(platforms);
+		// Construct ManifestRequestGEM
+		ManifestRequestGEM manifestRequestGEM = new ManifestRequestGEM();
+		manifestRequestGEM.setEnvelope(envelope);
+		manifestRequestGEM.setPlatforms(platforms);
 
 		// Construct ManifestRequestDTO
 		ManifestRequestDTO manifestRequest = new ManifestRequestDTO();
-		manifestRequest.setAcl(manifestRequestACL);
+		manifestRequest.setAcl(manifestRequestGEM);
 
 		return manifestRequest;
 	}
@@ -1517,46 +1514,48 @@ public abstract class AbstractRemoteProcessor {
 	}
 
 	/**
-	 * Method used to retrieve the acl manifest from ACLClient
+	 * Method used to retrieve the gem manifest from GEMClient
 	 * 
 	 * @param unsignedData
 	 * @param signedData
-	 * @return String aclManifest
+	 * @return String gemManifest
 	 * @throws IOException
 	 */
-	private ACLManifestResponse getACLManifestFromACLClient(String unsignedData, String signedData) throws IOException {
-		ACLManifestResponse aclManifestResponse = null;
-		ACLClient aclClient = new ACLClient();
+	private GEMManifestResponse getGEMManifestFromGEMClient(String unsignedData, String signedData) throws IOException {
+		
+		GEMManifestResponse gemManifestResponse = null;
+		
+		GEMClient gemClient = new GEMClient();
 
-		LOGGER.debug("Entering the getACLManifestFromACLClient method.");
-		// construct acl manifset request
-		ManifestRequestDTO manifestRequest = constructACLManifestRequest();
+		LOGGER.debug("Entering the getGEMManifestFromGEMClient method.");
+		// construct gem manifset request
+		ManifestRequestDTO manifestRequest = constructGEMManifestRequest();
 
 		LOGGER.info("Read public key guid used to sign the unsigned data from properies file");
 		// read the public key guid from properties file
 		String publicKeyGuid = MailBoxUtil.getEnvironmentProperties().getString("mailbox.signer.public.key.guid");
-		LOGGER.info("Retrieving acl manifest form ACL using ACLClient.");
-		// get aclManifest response through ACLClient
-		aclManifestResponse = aclClient.getACLManifest(unsignedData, signedData, publicKeyGuid, manifestRequest);
-		return aclManifestResponse;
+		LOGGER.info("Retrieving gem manifest form GEM using GEMClient.");
+		// get gemManifest response through GEMClient
+		gemManifestResponse = gemClient.getGEMManifest(unsignedData, signedData, publicKeyGuid, manifestRequest);
+		return gemManifestResponse;
 	}
 
 	/**
 	 * Method to set the request header for the requests to key manager
 	 * 
-	 * @param aclManifestResponse
+	 * @param gemManifestResponse
 	 * @return requestHeaders in a Map object
 	 */
-	private Map<String, String> getRequestHeaders(ACLManifestResponse aclManifestFromACL) {
+	private Map<String, String> getRequestHeaders(GEMManifestResponse gemManifestFromGEM) {
 
-		LOGGER.info("setting request headers from acl manifest response to key manager request");
+		LOGGER.info("setting request headers from gem manifest response to key manager request");
 		Map<String, String> headerMap = new HashMap<String, String>();
-		String aclManifest = (aclManifestFromACL != null) ? aclManifestFromACL.getAclManifest() : null;
-		String signedACLManifest = (aclManifestFromACL != null) ? aclManifestFromACL.getSignature() : null;
-		String aclSignerPublicKey = (aclManifestFromACL != null) ? aclManifestFromACL.getPublicKeyGuid() : null;
-		headerMap.put("acl-manifest", aclManifest);
-		headerMap.put("acl-signature", signedACLManifest);
-		headerMap.put("acl_signer_public_key_guid", aclSignerPublicKey);
+		String gemManifest = (gemManifestFromGEM != null) ? gemManifestFromGEM.getManifest() : null;
+		String signedGEMManifest = (gemManifestFromGEM != null) ? gemManifestFromGEM.getSignature() : null;
+		String gemSignerPublicKey = (gemManifestFromGEM != null) ? gemManifestFromGEM.getPublicKeyGuid() : null;
+		headerMap.put("gem-manifest", gemManifest);
+		headerMap.put("gem-signature", signedGEMManifest);
+		headerMap.put("gem_signer_public_key_guid", gemSignerPublicKey);
 		headerMap.put("Content-Type", "application/json");
 		return headerMap;
 	}
@@ -1610,15 +1609,14 @@ public abstract class AbstractRemoteProcessor {
 	String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException {
 
-		// get acl manifest response from ACL
-		/*String unsignedData = guid;
+		// get gem manifest response from GEM
+	    String unsignedData = guid;
 		String signedData = signRequestData(unsignedData);
-		ACLManifestResponse aclManifestFromACL = getACLManifestFromACLClient(unsignedData, signedData);*/
+		GEMManifestResponse gemManifestFromGEM = getGEMManifestFromGEMClient(unsignedData, signedData);
 		
-		ACLManifestResponse aclManifestFromACL = null;
-		// setting the request headers in the request to key manager from acl
+		// setting the request headers in the request to key manager from gem
 		// manifest response
-		Map<String, String> headerMap = getRequestHeaders(aclManifestFromACL);
+		Map<String, String> headerMap = getRequestHeaders(gemManifestFromGEM);
 		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 

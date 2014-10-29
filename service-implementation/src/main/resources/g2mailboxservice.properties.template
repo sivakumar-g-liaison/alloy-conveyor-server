@@ -206,17 +206,19 @@ bootstrap.remote.keypair.filepath=mbx-bootstrap/signandverifykeystore.jks
 
 #ACL Integration
 mailbox.signer.public.key.guid = CD5990860A9270E0142300DCB508D8CD
-#ACL verify and  getManifest URL
-acl.url.getACLManifest = http://10.146.16.143:8989/accessmanagement/rest/v1/accessmanagement/verifyAndGetManifest
+#GEM verify and  getManifest URL
+#acl.url.getACLManifest = http://10.146.16.143:8989/accessmanagement/rest/v1/accessmanagement/verifyAndGetManifest
 
 #Maibox guid prefix to be used by http synch/asych listner invocation
 maibox.pguid.display.prefix = Add this to your http listener asynch/synch calls as a query param: mailboxId=
 
-mailbox.aclrequest.platform.name="SERVICE_BROKER"
-mailbox.aclrequest.domain.name="SERVICE_BROKER"
-mailbox.aclrequest.domain.type="SOA_SERVICE"
-mailbox.aclrequest.role.name="MailboxAdmin"
-mailbox.aclrequest.service.name="KEYMANGER"
+#GEM Integration
+gem.url.getGEMManifest = http://localhost:7070/globalenterprisemanager/rest/v1/gem/verifyAndGetManifest
+mailbox.gemrequest.platform.name=SERVICE_BROKER
+mailbox.gemrequest.domain.name=SERVICE_BROKER
+mailbox.gemrequest.domain.type=SOA_SERVICE
+mailbox.gemrequest.role.name=MailboxAdmin
+mailbox.gemrequest.service.name=KEYMANGER
 
 #SLA Properties
 mailbox.sla.time.configuration.unit=MINUTES

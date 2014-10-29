@@ -216,6 +216,9 @@ dependencies {
 		exclude module:'karyon-admin'
 		exclude module:'karyon-admin-web'}
 	
+	//Dependency for GEM client Integration
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'1.0.1-SNAPSHOT', changing: true
+	
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
 
