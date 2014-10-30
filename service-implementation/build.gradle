@@ -526,7 +526,8 @@ task buildFlywayTable << {
         }
     }
     def driverClass = "oracle.jdbc.OracleDriver"
-    String jdbcUrl = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
+    String jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
+	
     configurations.jdbc.each { file ->
         gradle.class.classLoader.addURL(file.toURI().toURL())
     }
