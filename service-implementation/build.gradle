@@ -340,7 +340,7 @@ task setDevProperties << {
     {
         filterchain {
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
-            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port=${dbServerPort}))(connect_data=(service_name=${dbServerService})))" ) }) }
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL") }
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL.sshenc") }
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
@@ -349,6 +349,8 @@ task setDevProperties << {
         }
     }
 }
+
+
 
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: ['stageTomcat', 'setDevProperties'], group:'DEV/CI Deployment', description : "Adds tomcat-environments files for common and current (${deployEnvironment}) deploymentEnvironment") << {
