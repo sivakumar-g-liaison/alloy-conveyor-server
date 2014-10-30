@@ -472,7 +472,7 @@ task pingTest {
 def flywayWorkingRoot = "${projectDir}/src/main/resources/db/~work"
 def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
 flyway {
-    url = "jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
+    url = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
     driver = 'oracle.jdbc.OracleDriver'
     user = "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR"
     password = "${dbaPassword}"
@@ -526,7 +526,7 @@ task buildFlywayTable << {
         }
     }
     def driverClass = "oracle.jdbc.OracleDriver"
-    String jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
+    String jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
 	
     configurations.jdbc.each { file ->
         gradle.class.classLoader.addURL(file.toURI().toURL())
