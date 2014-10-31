@@ -43,7 +43,7 @@ public class JavaScriptEngineUtilTest {
 	public void testExecuteJavaScript() {
 		
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
-		System.setProperty("archaius.deployment.environment", "ci");
+		System.setProperty("archaius.deployment.environment", "dev-int");
 		
 		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 		JavascriptScriptContext scriptContext = null;

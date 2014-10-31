@@ -74,7 +74,7 @@ public class FS2UtilTest {
 		.source(fs2SourceName)
 		.spaceName(fs2SpaceName)
 		.dataDefinition(fs2DataDefinition)
-		.dataRetentionTTL(500)
+		//.dataRetentionTTL(500)
 		.build();
 
 		FlexibleStorageSystem FS2 = FS2Factory.newInstance(new SpectrumStorageConfig(spectrumConfig));

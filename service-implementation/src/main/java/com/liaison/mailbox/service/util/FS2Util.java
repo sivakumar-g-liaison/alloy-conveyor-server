@@ -66,10 +66,10 @@ public class FS2Util {
 			String path = MailBoxConstants.SPECTRUM_PAYLOAD_PREFIX + globalProcessId;
 			if (isEncryptionRequired) {
 				getFS2Instance();
-				snapshot = FS2.createObjectEntry(CoreFS2Utils.genURIFromPath(path.toString()), fs2Headers, payload);
+				snapshot = FS2.createObjectEntry(CoreFS2Utils.genURIFromPath("sfs2",path.toString()), fs2Headers, payload);
 			} else {
 				getFS2InstanceWithoutEncryption();
-				snapshot = FS2WithoutEncryption.createObjectEntry(CoreFS2Utils.genURIFromPath(path.toString()), fs2Headers, payload);
+				snapshot = FS2WithoutEncryption.createObjectEntry(CoreFS2Utils.genURIFromPath("fs2",path.toString()), fs2Headers, payload);
 			}			
 			LOGGER.info("FS2 payload path {}" + path);
 
