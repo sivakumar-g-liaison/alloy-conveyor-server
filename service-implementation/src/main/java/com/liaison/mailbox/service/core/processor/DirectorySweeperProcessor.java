@@ -41,6 +41,7 @@ import org.codehaus.jettison.json.JSONObject;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.FS2MetaSnapshot;
+import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
@@ -336,15 +337,16 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 					: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
+			workTicket.setGlobalProcessId(globalProcessId);
 			FS2Util.isEncryptionRequired = this.getRemoteProcessorProperties().isSpectrumPayloadEncrypted();
 			// persist payload in spectrum
 			InputStream payloadToPersist = new FileInputStream(payloadFile);
-			metaSnapShot = FS2Util.persistPayloadInSpectrum(payloadToPersist, globalProcessId);
+			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
+			metaSnapShot = FS2Util.persistPayloadInSpectrum(payloadToPersist, globalProcessId, fs2Header);
 			payloadToPersist.close();
 			// Renaming the file at the end of the step when everything is done.
 			move(oldPath, newPath);
 			//GSB-1353- After discussion with Joshua and Sean
-			workTicket.setGlobalProcessId(globalProcessId);
 			workTicket.setPayloadURI(metaSnapShot.getURI().toString());
 		}
 
@@ -484,6 +486,27 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		inprogressFiles.clear();//Clearing the recently updated files after the second call.
 		return generateWorkTickets(files);
+	}
+	
+	/**
+	 * Method to construct FS2ObjectHeaders from the given workTicket
+	 * 
+	 * @param workTicket
+	 * @return FS2ObjectHeaders
+	 * @throws IOException 
+	 * @throws MailBoxServicesException 
+	 */
+	private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket) throws MailBoxServicesException, IOException {
+		
+		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
+		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
+		fs2Header.addHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, workTicket.getPayloadSize().toString());
+		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
+		fs2Header.addHeader(MailBoxConstants.KEY_PAYLOAD_DESCRIPTION, String.format(MailBoxConstants.PAYLOAD_DESCRIPTION_VALUE, getPayloadURI()));
+		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, configurationInstance.getServiceInstance().getName());
+		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, configurationInstance.getMailbox().getTenancyKey());
+		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
+		return fs2Header;
 	}
 
 }

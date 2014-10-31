@@ -15,6 +15,7 @@ import com.liaison.framework.fs2.PayloadEncryptionProvider;
 import com.liaison.fs2.api.CoreFS2Utils;
 import com.liaison.fs2.api.FS2Factory;
 import com.liaison.fs2.api.FS2MetaSnapshot;
+import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.fs2.api.encryption.FS2EncryptionProvider;
 import com.liaison.fs2.api.encryption.FS2KEKProvider;
@@ -56,7 +57,7 @@ public class FS2Util {
 		return payload;
 	}
 	
-	public static FS2MetaSnapshot persistPayloadInSpectrum(InputStream payload, String globalProcessId) {
+	public static FS2MetaSnapshot persistPayloadInSpectrum(InputStream payload, String globalProcessId, FS2ObjectHeaders fs2Headers) {
 		
 		FS2MetaSnapshot snapshot = null;
 		try {
@@ -65,10 +66,10 @@ public class FS2Util {
 			String path = MailBoxConstants.SPECTRUM_PAYLOAD_PREFIX + globalProcessId;
 			if (isEncryptionRequired) {
 				getFS2Instance();
-				snapshot = FS2.createObjectEntry(CoreFS2Utils.genURIFromPath(path.toString()), null, payload);
+				snapshot = FS2.createObjectEntry(CoreFS2Utils.genURIFromPath(path.toString()), fs2Headers, payload);
 			} else {
 				getFS2InstanceWithoutEncryption();
-				snapshot = FS2WithoutEncryption.createObjectEntry(CoreFS2Utils.genURIFromPath(path.toString()), null, payload);
+				snapshot = FS2WithoutEncryption.createObjectEntry(CoreFS2Utils.genURIFromPath(path.toString()), fs2Headers, payload);
 			}			
 			LOGGER.info("FS2 payload path {}" + path);
 

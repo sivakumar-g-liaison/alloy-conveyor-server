@@ -202,6 +202,7 @@ public class MailBoxUtil {
 				//also need  to do changes to match latest ACLManifest structure.
 				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
+				tenancyKey.setGuid(rbac.getDomainInternalName());
 				tenancyKeys.add(tenancyKey);
 
 		}
@@ -214,7 +215,7 @@ public class MailBoxUtil {
 
 		List<String> tenancyKeyGuids = new ArrayList<String>();
 		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
-			tenancyKeyGuids.add(tenancyKey.getName().toLowerCase());
+			tenancyKeyGuids.add(tenancyKey.getGuid());
 		}
 		return tenancyKeyGuids;
 

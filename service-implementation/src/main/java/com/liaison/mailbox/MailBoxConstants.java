@@ -111,6 +111,15 @@ public interface MailBoxConstants {
 	// spectrum payload prefix
 	public final static String SPECTRUM_PAYLOAD_PREFIX = "/mailboxsweeper/payload/1.0/";
 	
+	// FS2 Header Keys
+	public final static String KEY_PIPELINE_ID = "PIPELINE_ID";
+	public final static String KEY_GLOBAL_PROCESS_ID = "GLOBAL_PROCESS_ID";
+	public final static String KEY_RAW_PAYLOAD_SIZE = "RAW_PAYLOAD_SIZE";
+	public final static String KEY_SERVICE_INSTANCE_ID = "SERVICE_INSTANCE_ID";
+	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
+	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
+	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
+	
 	// foldername key in additional context of Sweeper DTO ticket
 	public final static String FOLDER_NAME = "folderdername";
 	

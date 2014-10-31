@@ -228,7 +228,7 @@ public class MailBoxConfigurationService {
 			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
 
 			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
-			if (!tenancyKeyGuids.contains(mailBox.getTenancyKey().toLowerCase())) {
+			if (!tenancyKeyGuids.contains(mailBox.getTenancyKey())) {
 				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
 			}
 
@@ -325,7 +325,7 @@ public class MailBoxConfigurationService {
 			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
 
 			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
-			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey().toLowerCase())) {
+			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
 				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
 			}
 			
@@ -400,7 +400,7 @@ public class MailBoxConfigurationService {
 			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
 
 			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
-			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey().toLowerCase())) {
+			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
 				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
 			}
 

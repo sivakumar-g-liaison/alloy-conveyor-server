@@ -9,6 +9,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		$scope.isProcessorsAvailable = false;
 		$scope.isMailBoxSaved = false;
 		
+		 $scope.enumTenancyKey = [];
+	     $scope.tenancyKey = {guid:'', name:''};
+		
         $scope.showMailboxGuid = false;
         //Model for Add MB
         addRequest = $scope.addRequest = {
@@ -90,6 +93,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                                     data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                                 $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
+                                $scope.getTenancyKeyWithGuid(data.getMailBoxResponse.mailBox.tenancyKey);
                                 $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
                                 $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                                 for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
@@ -451,7 +455,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         };
         
         // Type ahead method to retrieve all domains in tenancy keys
-       $scope.getTenancyKeys = function (val) {
+       $scope.getTenancyKeys = function (val, callback) {
              var tenancyKeys = [];
                        
            	/*$scope.restService.get($scope.base_url + '/tenancyKeys' ,
@@ -482,9 +486,24 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                     angular.forEach(res.data.getTenancyKeysResponse.tenancyKeys, function (item) {
                         tenancyKeys.push(item);
                     });
+                    if (typeof callback != 'undefined')callback(tenancyKeys);
                     return tenancyKeys;
                 });
                
+        };
+        
+        $scope.onTenancyKeySelected = function(tenancyKey) {
+            $scope.tenancyKey = tenancyKey;
+            $scope.mailBox.tenancyKey = tenancyKey.guid;
+        };
+        
+        $scope.getTenancyKeyWithGuid = function(tenancyKeyGuid) {
+            var tenancyKeys = [];
+            tenancyKeys = $scope.getTenancyKeys('', function(tenancyKeys) {
+            angular.forEach(tenancyKeys, function (item) {
+                   if (item.guid === tenancyKeyGuid) $scope.tenancyKey.name = item.name;
+             });
+             return $scope.tenancyKey.name;});
         };
     }
 ]);

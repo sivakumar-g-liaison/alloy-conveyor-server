@@ -66,9 +66,9 @@
             Tenancy key*
           </label>
 
-            <input class="form-control" type="text" id="tenancykey" ng-model="mailBox.tenancyKey" name="tenancykey" ng-pattern="userInputPattern"
-                   ng-minLength=3 ng-maxLength=80 typeahead="tenancykey.name for tenancykey in getTenancyKeys($viewValue)"
-				   typeahead-loading="loadingLocations" class="form-control" typeahead-min-length="typeaheadMinLength" typeahead-wait-ms="typeaheadWaitMS" required ng-disabled = "isMailBoxEdit"/>
+            <input class="form-control" type="text" id="tenancykey" ng-model="tenancyKey.name" name="tenancykey" ng-pattern="userInputPattern"
+                   ng-minLength=3 ng-maxLength=80 typeahead="tenancykey as tenancykey.name for tenancykey in getTenancyKeys($viewValue)| filter:$viewValue"
+				   typeahead-loading="loadingLocations" class="form-control" typeahead-min-length="typeaheadMinLength" typeahead-wait-ms="typeaheadWaitMS" typeahead-on-select="onTenancyKeySelected($item)" required ng-disabled = "isMailBoxEdit"/>
             <div ng-show="formAddMbx.tenancykey.$dirty && formAddMbx.tenancykey.$invalid">
                 <span id="mbx-add-tenancykeyInvalid-pattern" class="customHide" ng-class="{'help-block-custom' : formAddMbx.tenancykey.$error.pattern }" ng-show="formAddMbx.tenancykey.$error.pattern">Invalid Tenancy Key.</span>
                 <span id="mbx-add-tenancykeyRequired" class="customHide" ng-class="{'help-block-custom' : formAddMbx.tenancykey.$error.required }" ng-show="formAddMbx.tenancykey.$error.required">Tenancy Key is Mandatory.</span>
