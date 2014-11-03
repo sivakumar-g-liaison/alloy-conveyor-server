@@ -409,7 +409,7 @@ task jettyRunSetProperties {
 
 }
 
-def enhancerLib = "$projectDir/enhancerLib"
+/*def enhancerLib = "$projectDir/enhancerLib"
 task createPathJar (type: Jar) {
 	
 	    overwrite = true
@@ -420,15 +420,15 @@ task createPathJar (type: Jar) {
 					       "Class-Path":project.runtimeClasspath.collect { it.toURI() }.join(' ')
 					       )
 			}
-	}
+	}*/
 	
 
 
 // JPA (datanucleus) bytecode enhancement
-task enhance(dependsOn: ['createPathJar'])  << {
+task enhance()  << {
     logger.info("... Enhancing ...");
 	
-     /*ant.taskdef(
+    ant.taskdef(
             name      : 'datanucleusenhancer',
             classpath : (project.runtimeClasspath - configurations.workTicket).asPath,
             classname : 'org.datanucleus.enhancer.EnhancerTask'
@@ -446,9 +446,9 @@ task enhance(dependsOn: ['createPathJar'])  << {
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-rtdm",
-		failonerror : true)*/
+		failonerror : true)
 	
-	ant.taskdef(
+	/*ant.taskdef(
 		name      : 'datanucleusenhancer',
 		classpath : (files("$projectDir/enhancerLib/enhancerDependency.jar")).asPath,
 		classname : 'org.datanucleus.enhancer.EnhancerTask'
@@ -466,7 +466,7 @@ task enhance(dependsOn: ['createPathJar'])  << {
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-rtdm",
-		failonerror : true)
+		failonerror : true)*/
 	
 	
 }
