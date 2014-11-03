@@ -43,6 +43,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
@@ -73,7 +74,6 @@ import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.PayloadTicketRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -283,7 +283,7 @@ public class MailboxSLAWatchDogService {
 		Processor processor = null;
 		ProcessorExecutionState processorExecutionState = null;
 		String mailboxId = null;
-		String spectrumUrl = null;
+		String payloadURI = null;
 		String profileName = null;
 		String executionId = MailBoxUtil.getGUID();
 		MailboxFSM fsm = new MailboxFSM();
@@ -295,21 +295,21 @@ public class MailboxSLAWatchDogService {
 			LOG.info("#####################----WATCHDOG INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 			
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
-			PayloadTicketRequestDTO dto = JAXBUtility.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
+			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
 			// validates mandatory value.			
-			mailboxId = dto.getMailboxId();
+			mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
 			if (MailBoxUtil.isEmpty(mailboxId)) {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id", Response.Status.CONFLICT);
 			}
 			
-			spectrumUrl = dto.getSpectrumUrl();
-			if (MailBoxUtil.isEmpty(spectrumUrl)) {
+			payloadURI = workTicket.getPayloadURI();
+			if (MailBoxUtil.isEmpty(payloadURI)) {
 				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL", Response.Status.CONFLICT);
 			}
 			
 			LOG.info("The given mailbox id is {}", mailboxId);
-			LOG.info("The spectrum URL is {}", spectrumUrl);
+			LOG.info("The payloadURI is {}", payloadURI);
 			
 			//get processor of type uploader configured with mailbox present in PayloadTicketRequest 
 			processor = getProcessorOfTypeUploader(mailboxId);
@@ -324,7 +324,7 @@ public class MailboxSLAWatchDogService {
 			
 			FS2Util.isEncryptionRequired = true;
 			//get payload from spectrum
-			InputStream payload = FS2Util.retrievePayloadFromSpectrum(spectrumUrl);
+			InputStream payload = FS2Util.retrievePayloadFromSpectrum(payloadURI);
 			
 			//get local payload location from uploader
 			String processorPayloadLocation = getProcessorPayloadLocation(processor);
@@ -336,7 +336,7 @@ public class MailboxSLAWatchDogService {
 			
 			// check if file Name is available in the payloadTicketRequest if so save the file with the 
 			// provided file Name if not save with processor Name with Timestamp
-			String fileName = (dto.getTargetFileName() == null)?(processor.getProcsrName() + System.nanoTime()):dto.getTargetFileName();
+			String fileName = (workTicket.getFileName() == null)?(processor.getProcsrName() + System.nanoTime()):workTicket.getFileName();
 			
 			// get the very first profile configured in the processor
 			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().get(0).getScheduleProfilesRef().getSchProfName():null;
@@ -346,8 +346,9 @@ public class MailboxSLAWatchDogService {
 				throw new MailBoxServicesException(Messages.PROFILE_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
 			
+			boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE)?true:false;
 			// write the payload retrieved from spectrum to the configured location of processor
-			writeSpectrumPayloadToProcessorLocation(payload, processorPayloadLocation, fileName);		
+			writeSpectrumPayloadToProcessorLocation(payload, processorPayloadLocation, fileName, isOverwrite);		
 			
 			//Initiate FSM	
 			ProcessorStateDTO processorStaged = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, profileName, ExecutionState.STAGED, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
@@ -443,7 +444,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
-	public void writeSpectrumPayloadToProcessorLocation(InputStream response, String payloadLocation, String filename) throws IOException {
+	public void writeSpectrumPayloadToProcessorLocation(InputStream response, String payloadLocation, String filename, Boolean isOverwrite) throws IOException {
 
 		LOG.info("Started writing payload from spectrum");
 		File directory = new File(payloadLocation);
@@ -452,8 +453,13 @@ public class MailboxSLAWatchDogService {
 		}
 		
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-		Files.write(file.toPath(), IOUtils.toByteArray(response));
-		LOG.info("Payload from spectrum is successfully written" + file.getAbsolutePath());
+		// if the file already exists create a file and write the contents.
+		if (file.exists() && !isOverwrite)  {
+			LOG.info("File {} already exists and should not be overwritten", file.getName());
+		} else {
+			Files.write(file.toPath(), IOUtils.toByteArray(response));
+		}
+		LOG.info("Payload from spectrum is successfully written to location {}", file.getAbsolutePath());
 		if (response != null) {
 		    response.close();
 		}
