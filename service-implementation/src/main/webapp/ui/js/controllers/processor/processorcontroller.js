@@ -1,12 +1,11 @@
 var rest = myApp.controller(
-    'ProcessorCntrlr', ['$rootScope', '$scope', '$timeout',
+    'ProcessorCntrlr', ['$rootScope', '$modal', '$scope', '$timeout',
         '$filter', '$location', '$log', '$blockUI',
-        function ($rootScope, $scope, $timeout, $filter,
+        function ($rootScope, $modal, $scope, $timeout, $filter,
             $location, $log, $blockUI) {
 			
 			//for loading js from git
-			$scope.constructedGitUrl = "http://" + $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
-			$scope.isGitUrlSelected = '1';
+			$scope.constructedGitUrl = $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
 		
 			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;
@@ -136,8 +135,12 @@ var rest = myApp.controller(
 				$scope.sorting = 'name';
                 $scope.isFileSelected = false;
         		$scope.isEdit = false;
+				$scope.scriptIsEdit = false;
                 $scope.isProcessorTypeSweeper = false;
-                $scope.mailboxName = $location.search().mbxname;
+                $scope.mailboxName = $location.search().mbxname;				
+				//GIT URL
+				$scope.script = '';
+			    $scope.scriptIsEdit = false; 
                 
                 // to disable protocol for http listener processor
                 $scope.isProcessorTypeHTTPListener = false;
@@ -1274,13 +1277,7 @@ var rest = myApp.controller(
 											
 				//check if it is the gitlab url
 				if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
-					if(data.getProcessorResponse.processor.javaScriptURI.indexOf("gitlab:") != -1) {
-						$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI.split("gitlab:").pop();
-						$scope.isGitUrlSelected = '1';
-					} else {
 						$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
-						$scope.isGitUrlSelected = '0';
-					}
 				}
 				$scope.processor.description = data.getProcessorResponse.processor.description;
 				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
@@ -1667,6 +1664,7 @@ var rest = myApp.controller(
                 //To notify passwordDirective to clear the password and error message
                 $scope.doSend();
                 $scope.isEdit = true;
+				$scope.scriptIsEdit = true;
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
@@ -2017,12 +2015,7 @@ var rest = myApp.controller(
                 $scope.formAddPrcsr.$setPristine();
                
             };
-            $scope.saveProcessor = function () {
-			
-				//regarding loading js from git
-				if($scope.isGitUrlSelected === '1' && $scope.modal.uri !== "" && $scope.modal.uri !== null) {
-					$scope.modal.uri = "gitlab:" + $scope.modal.uri;
-				} 
+            $scope.saveProcessor = function () {			
 					
             	var lenDynamicProps = $scope.processorProperties.length;
                 var commaSplit = [];
@@ -2302,6 +2295,7 @@ var rest = myApp.controller(
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 							$scope.isEdit = true;
+							$scope.scriptIsEdit = true;
 							$scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
 							$scope.editProcessor($scope.processor.guid, false);
 							if (data.addProcessorToMailBoxResponse.response.status === 'success') {
@@ -2343,6 +2337,9 @@ var rest = myApp.controller(
 					$scope.defaultPortValue();
                     $scope.disableSSHKeys = true;
                     $scope.disableCertificates = true;
+					//GIT URL
+				    $scope.script = '';
+			        $scope.scriptIsEdit = false; 					
                     formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
                      // To reset the values in the file browser window
                     $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
@@ -2927,11 +2924,9 @@ var rest = myApp.controller(
 
                     }
 				}
-			}	
-			$scope.onScriptTypeSelected = function() {
-				$scope.modal.uri = '';
 			}
-                       // SSHkeys Uploading section begins
+			
+             // SSHkeys Uploading section begins
              $scope.setSSHPrivateKey = function (element) {
                 console.log(element.value);
                 $scope.$apply(function ($scope) {
@@ -3190,5 +3185,173 @@ var rest = myApp.controller(
 					}
 				}
 			});
+			
+			$scope.script = '';
+			$scope.scriptIsEdit = false;
+			$scope.scriptUriIsExist = false;
+			
+			//check script uri is exist or not.
+			$scope.onScriptUriSelected = function () {
+				if ($scope.modal.uri && $scope.modal.uri != '') {	
+					$scope.scriptUriIsExist = true;
+				} else {
+				 $scope.scriptUriIsExist = false;
+				}				
+			};
+			//create new script.	
+			  $scope.onScriptTypeSelected = function () {				  
+				  block.blockUI();
+				  if ($scope.modal.uri) {					  
+					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.modal.uri)
+					  .success(function (data) {
+						  block.unblockUI(); 
+						if (data.scriptserviceResponse.response.status === 'success') {
+							 $scope.scriptIsEdit = true;					
+							 $scope.script = data.scriptserviceResponse.script;
+							 $scope.populateScriptOnModel();
+						} else {
+						   $scope.script = '';
+						   $scope.scriptIsEdit = false;
+						   $scope.populateScriptOnModel();
+						}	
+		         	})
+					.error(function() {
+					block.unblockUI(); 
+					$scope.populateScriptOnModel();
+					showSaveMessage("Error while File update to GitLab", 'error');
+				    });									        
+				 }
+			 };			  
+			 $scope.populateScriptOnModel = function () {			  
+			  var modalInstance = $modal.open({
+				            templateUrl: 'partials/processor/createScriptFileModal.html',
+				            controller: ScriptCreateFileController,
+				            scope: $scope,
+							resolve: {}
+				        });
+			};			    
         }
     ]);
+var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
+     
+    // Editor Section Begins
+      var editor;
+      var block = $rootScope.block;
+      $scope.createdBy = $rootScope.loginInput; 
+      
+      
+      
+	  $scope.loadValueData = function (_editor) {	  
+        editor = _editor;
+	    editor.getSession().setValue($scope.$parent.script);
+     };	
+
+     $scope.loadDefaultScript = function() {
+    	 $scope.restService.get("data/gitjs.js")
+            .success(function(data) {
+            	editor.getSession().setValue(data);
+           });
+     };	
+     
+     $scope.save = function() {	
+    	 
+    	 if ($scope.$parent.scriptIsEdit) {
+		     $scope.checkScript();	     		 
+    	 } else {
+		    $scope.saveScript();	
+		 }    	 
+     }
+     
+   //checkProfileJson     
+	 $scope.checkScript = function() {	
+	    if ($scope.$parent.script !== editor.getSession().getValue()) {
+			 $scope.editScript();
+	    } else {
+		    showSaveMessage('No changes made to save.');
+		}
+	 }
+     
+   //CREATE NEW SCRIPT FILE IN GIT.     
+	$scope.saveScript = function() {
+		
+		 block.blockUI();
+		 $scope.createFileRequest = {
+	  			scriptserviceRequest: {
+	  				script : {
+	              	data: "",
+	              	scriptFileUri: "",
+	              	createdBy: ""
+	  				}
+	           }
+	      }; 
+		  
+		 editor = ace.edit("aceEditor");
+		 $scope.scriptContents = editor.getSession().getValue();	    	
+	    	     	
+    	 $scope.createFileRequest.scriptserviceRequest.script.data = $scope.scriptContents;
+         $scope.createFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.modal.uri;
+         $scope.createFileRequest.scriptserviceRequest.script.createdBy = $scope.createdBy;
+      
+         $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest))
+         .success(function (data) {
+        	block.unblockUI(); 
+        	if (data.scriptserviceResponse.response.status === 'success') {
+        		$scope.$parent.scriptIsEdit = true;
+        		$scope.$parent.script = $scope.scriptContents;
+			    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
+			} else {
+				$scope.$parent.scriptIsEdit = false;
+				showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+			}
+         })
+         .error(function() { 
+        	block.unblockUI(); 
+        	showSaveMessage("Error while File save to GitLab", 'error');
+         });
+     $scope.$dismiss();		 
+	}; 
+	
+	//UPDATE EXIT SCRIPT FILE IN GIT. 
+	 $scope.editScript = function() {
+			
+	    	block.blockUI();
+	    	$scope.editFileRequest = {
+	    			scriptserviceRequest: {
+	    				script : {
+		              	data: "",
+		              	scriptFileUri: "",
+		              	createdBy: ""
+		  				}
+		           }
+	         };    	
+	    	
+	    	 editor = ace.edit("aceEditor");
+			 $scope.scriptContents = editor.getSession().getValue();	    	
+		    	     	
+	    	 $scope.editFileRequest.scriptserviceRequest.script.data = $scope.scriptContents;
+	         $scope.editFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.modal.uri;
+	         $scope.editFileRequest.scriptserviceRequest.script.createdBy = $scope.createdBy;
+
+	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest))
+	            .success(function (data) {     
+	            	block.unblockUI(); 
+	            	if (data.scriptserviceResponse.response.status === 'success') {
+	            		$scope.$parent.scriptIsEdit = true;
+	            		$scope.$parent.script = $scope.scriptContents;
+					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
+					} else {
+						showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+					}
+	            })
+	            .error(function() {
+	            	block.unblockUI();
+	            	showSaveMessage("Error while File update to GitLab", 'error');
+	            });
+				$scope.$dismiss();
+	     };	
+	
+     
+     $scope.cancel = function () { 
+        $scope.$dismiss();
+     }; 
+};

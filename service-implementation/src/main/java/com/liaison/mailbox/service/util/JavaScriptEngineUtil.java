@@ -8,7 +8,6 @@
  */
 package com.liaison.mailbox.service.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -28,6 +27,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.MailBoxConstants;
 
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
@@ -152,13 +152,14 @@ public final class JavaScriptEngineUtil {
 		
 		URI myUri = null;
 		
-		String scriptName = null;
+		String scriptName = scriptPath;
+		
+		String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
+				  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
+		scriptPath = gitlabDirectory+"/"+scriptPath;
 		
 		if(scriptPath.contains("gitlab:")) {
 			myUri = new URI(scriptPath);
-		} else {
-			File sriptURL = new File(scriptPath);
-			myUri = sriptURL.toURI();
 		}
 					
 		if (scriptContext == null) {

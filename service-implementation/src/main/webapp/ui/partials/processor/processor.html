@@ -65,6 +65,9 @@
         padding-right: 5px;
 		
     }
+	.adjustPaddingRightForScript {
+        padding-left: 4px;		
+    }	
     /*This class is included to align browse button close to text area in processor details*/
     .removePaddingLeft {
         padding-left: 0px;
@@ -90,6 +93,15 @@
     .customHide{
 		display: none;
 	}
+  .adjustMarginBottom {
+    margin-top: -1.5%;
+  }  
+  /*This class is included to align browse button close to text area in account information*/
+  .adjustgitPaddingRight {
+   width: 465px; 
+   height: 20px;
+   padding: 1px
+  }
 </style>
 
 <div class="container fade-in">
@@ -134,7 +146,7 @@
         Processors Details
       </h3>
             <div class="row">
-                <div class="col-sm-6 col-md-6">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label>
                             Name *
@@ -150,13 +162,21 @@
 
                         </div>
                     </div>
+					<div class="form-group adjustMarginBottom">
+                        <label>
+                            Status
+                        </label>
+                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
+                        </select>
+
+                    </div>					
                 </div>
-                <div class="col-sm-6 col-md-6">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label>
                             Description
                         </label>
-                        <textarea id="mbx-procsr-description" width="40px" height="20px" rows="2" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxLength=512 class="form-control"></textarea>
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" style="height:108px;" ng-maxlength=512 class="form-control"></textarea>
                         <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
                             <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
@@ -165,49 +185,8 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-6 col-md-6">
-                    <div class="form-group">
-                        <label>
-                            Status
-                        </label>
-                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.name for e in enumstats" class="form-control">
-                        </select>
-
-                    </div>
-                </div>
-
-				<div class="col-sm-6 col-md-6" >
-					<label>Add script url</label>
-					<div ng-switch on="isGitUrlSelected">
-						<div ng-switch-when="1">
-							<div class="col-sm-5 col-md-5 removePaddingLeft">
-								<small><label>{{constructedGitUrl}}</label></small>
-								
-							</div>
-							<div class="col-sm-7 col-md-7 adjustPaddingRight">
-								<input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control">
-							</div>
-						</div>
-						<div ng-switch-when="0">
-							<div class="col-sm-11 col-md-10 removePaddingLeft">
-								<input id="mbx-procsr-scriptFilePath" type="text" ng-model="modal.uri" class="form-control"/>
-								
-							</div>
-							<div class="col-sm-1 col-md-1 adjustPaddingRight">
-								<a id="mbx-procsr-scriptbrowse" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#myModal" class="btn btn-primary">Browse</a> 
-							</div>
-						</div>
-					</div>
-					<br><br>
-								<input id="mbx-procsr-git" type="radio" ng-change="onScriptTypeSelected()" ng-model="isGitUrlSelected"  value="1">  git url </input>
-								<input id="mbx-procsr-filePath" type="radio" ng-change="onScriptTypeSelected()" ng-model="isGitUrlSelected" value="0">  file path url </input>
-								</br></br>
-				</div>
-							
-			</div>
-            <div class="row">
-                <div class="col-sm-6 col-md-6">
+			<div class="row">
+                <div class="col-sm-6 col-md-6 adjustMarginBottom">
                     <div class="form-group">
 						<br>
                         <label>
@@ -218,7 +197,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-6">
+                <div class="col-sm-6 col-md-6 adjustMarginBottom">
                     <div class="form-group">
 						<br>
                         <label>
@@ -229,6 +208,30 @@
                     </div>
                 </div>
             </div>
+			<label>Script URI</label>
+            <div class="row">
+			    <div class="col-sm-6 col-md-6">
+                <h5>{{constructedGitUrl}}</h5>					
+				</div>
+				<div class="col-sm-6 col-md-6">
+				  <div class="col-sm-5 col-md-5 adjustgitPaddingRight">
+				     <input id="mbx-procsr-scriptFilePath" type="text" ng-disabled="scriptIsEdit" ng-model="modal.uri" class="form-control" ng-change="onScriptUriSelected()"/>				     				
+				  </div>
+					 <div class="col-sm-1 col-md-1 adjustPaddingRightForScript">
+					 <div ng-controller="ScriptCreateFileController">						
+						<div ng-switch on="scriptIsEdit">
+						    <div ng-switch-when="true">
+						     <button id="createNewScriptFileToEdit"  class="btn btn-primary" ng-click="onScriptTypeSelected()">EditScript</button>
+						    </div>
+						    <div ng-switch-when="false">
+						     <button id="createNewScriptFileToAdd" class="btn btn-primary" ng-disabled="!scriptUriIsExist" ng-click="onScriptTypeSelected()">AddScript</button>
+						    </div>
+						</div>
+                       </div>							
+					</div>
+			  </div>
+							
+			</div>       
 
             <!-- Modal -->
             <div class="modal-custom fade" id="myModal" role="dialog" aria-hidden="true">
@@ -285,12 +288,12 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button id="mbx-procsr-properties-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
+                            <button id="mbx-procsr-properties-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title">Edit Value</h4>
                         </div>
                         <div class="modal-body">
                             <div ui-ace="{onLoad : loadValueData,
-				  theme : 'chaos',
+				  theme : 'monokai',
 				  useWrapMode : true,
 				  showGutter: true,
 				  mode: 'json'
