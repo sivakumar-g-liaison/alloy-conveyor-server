@@ -24,8 +24,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.com.liaison.queue.DummyJMSClientQueue;
-import com.liaison.mailbox.service.dto.configuration.PayloadTicketRequestDTO;
 import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/jmsclient/{mailboxId}/{spectrumURL}/{targetFileName}")
@@ -42,9 +43,14 @@ public class DummyJMSClient {
 	
 		try {
 			//spectrumURL = URLEncoder.encode(spectrumURL, "UTF-8");
-			spectrumURL = "fs2:/mailboxsweeper/payload/1.0/55FB3A3F0A0A000C0A774FB208B57192";
+			//spectrumURL = "fs2:/mailboxsweeper/payload/1.0/55FB3A3F0A0A000C0A774FB208B57192";
+			spectrumURL = "sfs2:/mailboxsweeper/payload/1.0/759951520A0A00170A814DD199C9A267";
 			//spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
-			PayloadTicketRequestDTO ticketRequest = new PayloadTicketRequestDTO(mailboxId, spectrumURL, targetFileName, false);
+			WorkTicket ticketRequest = new WorkTicket();
+			ticketRequest.setPayloadURI(spectrumURL);
+			ticketRequest.setFileName(targetFileName);
+			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_ID, mailboxId);
+			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_OVERWRITE, Boolean.FALSE);		
 			String payloadTicket = JAXBUtility.marshalToJSON(ticketRequest);
 			DummyJMSClientQueue.getInstance().sendMessages(payloadTicket);
 			return Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity("Posted to Queue Successfully").build();

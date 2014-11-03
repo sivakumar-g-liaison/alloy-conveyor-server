@@ -120,7 +120,8 @@ public interface MailBoxConstants {
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
 	
-	// foldername key in additional context of Sweeper DTO ticket
-	public final static String FOLDER_NAME = "folderdername";
-	
+	// additional context keys Worker ticket
+	public final static String KEY_FOLDER_NAME = "folderdername";
+	public final static String KEY_MAILBOX_ID = "mailboxId";
+	public final static String KEY_OVERWRITE = "overwrite";
 }

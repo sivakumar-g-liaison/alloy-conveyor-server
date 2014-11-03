@@ -424,7 +424,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
             LOGGER.debug("Filename {}", path.toFile().getName());
 			workTicket.setFileName(path.toFile().getName());
 		    LOGGER.debug("Foldername {}", path.toFile().getParent());
-		    additionalContext.put(MailBoxConstants.FOLDER_NAME, path.toFile().getParent());
+		    additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, path.toFile().getParent());
 		    
 		    workTicket.setAdditionalContext(additionalContext);
 			workTickets.add(workTicket);
