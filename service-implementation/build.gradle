@@ -406,10 +406,12 @@ task jettyRunSetProperties {
 
 }
 
+def enhancerLib = "$projectDir/enhancerLib"
 task createPathJar (type: Jar) {
 	
-        
+	    overwrite = true
 		archiveName ='enhancerDependency.jar'
+		destinationDir= new File(enhancerLib);
 		manifest{
 				attributes(//"Class-Path":project.runtimeClasspath.asPath,
 					       "Class-Path":project.runtimeClasspath.collect { it.toURI() }.join(' ')
@@ -445,19 +447,19 @@ task enhance(dependsOn: ['createPathJar'])  << {
 	
 	ant.taskdef(
 		name      : 'datanucleusenhancer',
-		classpath : (files("$buildDir/libs/enhancerDependency.jar")).asPath,
+		classpath : (files("$projectDir/enhancerLib/enhancerDependency.jar")).asPath,
 		classname : 'org.datanucleus.enhancer.EnhancerTask'
 		)
 	
 	ant.datanucleusenhancer(
-		classpath   : (files("$projectDir/src/main/resources")+ files("$buildDir/libs/enhancerDependency.jar") ).asPath,
+		classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-dtdm",
 		failonerror : true)
 	
 	ant.datanucleusenhancer(
-		classpath   : (files("$projectDir/src/main/resources")+ files("$buildDir/libs/enhancerDependency.jar") ).asPath,
+		classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-rtdm",
