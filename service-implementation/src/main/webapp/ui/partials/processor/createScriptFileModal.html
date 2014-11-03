@@ -1,0 +1,25 @@
+<form name="saveScriptFileForm">
+ <div class="modal-content">
+	<div class="modal-header">
+	    <button id="mbx-script-closeFile" type="button" class="close" ng-click="cancel()">&times;</button>
+		<h4 class="modal-title">Script File</h4>
+	</div>					  
+	<div class="modal-body">
+		<div id="aceEditor" ui-ace="{onLoad : loadValueData,
+			  theme : 'monokai',
+			  useWrapMode : true,
+			  showGutter: true,
+			  mode: 'json'
+			}">
+	   </div>
+   </div>			   
+   <div class="modal-footer">
+	<button class="btn btn-primary" type="button" ng-click="loadDefaultScript()">Load default template</button>
+		<button class="btn btn-primary" type="button" ng-click="save()">
+			<span class="glyphicon glyphicon-save glyphicon-white"></span> Save
+		</button>
+		<button class="btn btn-primary" type="button" ng-click="cancel()">Cancel
+		</button>
+	</div>
+  </div>
+</form>

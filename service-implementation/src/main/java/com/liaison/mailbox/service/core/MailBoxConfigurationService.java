@@ -26,6 +26,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAO;
@@ -562,7 +563,7 @@ public class MailBoxConfigurationService {
 			String globalTrustStoreGroupId = MailBoxUtil.getEnvironmentProperties().getString(
 					"mailbox.global.trustgroup.id");
 			String gitlabHost = MailBoxUtil.getEnvironmentProperties().getString(
-					"com.liaison.gitlab.script.server.host");
+					MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_HOST);
 			String gitlabPort = MailBoxUtil.getEnvironmentProperties().getString(
 					"com.liaison.gitlab.script.server.port");
 			String gitlabProjectName = MailBoxUtil.getEnvironmentProperties().getString(

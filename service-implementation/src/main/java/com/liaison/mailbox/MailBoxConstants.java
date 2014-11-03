@@ -124,4 +124,11 @@ public interface MailBoxConstants {
 	public final static String KEY_FOLDER_NAME = "folderdername";
 	public final static String KEY_MAILBOX_ID = "mailboxId";
 	public final static String KEY_OVERWRITE = "overwrite";
+	
+	//GITURI
+	public static final String PROPERTY_GITLAB_ACTIVITY_PROJECT_ID = "com.liaison.gitlab.mailbox.script.project.id";
+	public static final String PROPERTY_GITLAB_ACTIVITY_PRIVATE_TOKEN = "com.liaison.gitlab.mailbox.script.private_token";
+	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_HOST = "com.liaison.gitlab.mailbox.script.server.host";
+	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER = "com.liaison.gitlab.mailbox.script.folder";
+	
 }
