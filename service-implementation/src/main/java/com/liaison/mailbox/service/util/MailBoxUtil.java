@@ -187,7 +187,7 @@ public class MailBoxUtil {
 	public static List <TenancyKeyDTO>  getTenancyKeysFromACLManifest(String aclManifestJson) throws IOException {
 
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson,false,false);
+		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson, true, true);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
 
@@ -198,13 +198,12 @@ public class MailBoxUtil {
 		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
 		LOGGER.info("Retrieving tenancy key from acl manifest");
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-				// TODO: once guid is available in domain, need to make changes to use guid instead of name
-				//also need  to do changes to match latest ACLManifest structure.
+				
 				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
-				tenancyKey.setGuid(rbac.getDomainInternalName());
+				// if domainInternalName is not available then domainName will be used.
+				tenancyKey.setGuid((rbac.getDomainInternalName() == null) ? rbac.getDomainName() : rbac.getDomainInternalName());
 				tenancyKeys.add(tenancyKey);
-
 		}
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
@@ -222,46 +221,35 @@ public class MailBoxUtil {
 	}
 
 	/**
-	 * Method to retrieve the base64 decoded acl manifest json
+	 * Method to retrieve the dummy acl manifest json from properties file
 	 *
 	 * @param manifestJson
 	 * @return
 	 * @throws IOException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public static String getDecodedManifestJson(String manifestJson) throws IOException, MailBoxConfigurationServicesException {
+	public static String getDummyManifestJson() throws IOException, MailBoxConfigurationServicesException {
 
-		String decodedManifestJson = null;
-
-		// if manifest is available in the header then use acl-manifest in the header irrespective of
-		// the property "use.dummy.manifest" configured in properties file
-		if (!MailBoxUtil.isEmpty(manifestJson)) {
-			LOGGER.info("acl manifest available in the header");
-		} else {
-			// check the value of property "use.dummy.manifest"
-			// if it is true use dummy manifest else throw an error due to the
-			// non-availability of manifest in header
-			if ((MailBoxUtil.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
-
-				LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-				manifestJson = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");
-				if (MailBoxUtil.isEmpty(manifestJson)) {
-					LOGGER.error("dummy acl manifest is not available in the properties file");
-					throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE, Response.Status.BAD_REQUEST);
-				}
-
-			} else {
-				LOGGER.error("acl manifest is not available in the request header");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER, Response.Status.BAD_REQUEST);
+		String dummyManifestJson = null;
+		
+		// check the value of property "use.dummy.manifest"
+		// if it is true use dummy manifest else throw an error due to the
+		// non-availability of manifest in header
+		if ((MailBoxUtil.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
+	
+			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
+			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");
+			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
+				LOGGER.error("dummy acl manifest is not available in the properties file");
+				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE, Response.Status.BAD_REQUEST);
 			}
-
+	
+		} else {
+			LOGGER.error("acl manifest is not available in the request header");
+			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER, Response.Status.BAD_REQUEST);
 		}
 
-		// decode the manifest using base64
-		LOGGER.info("decoding the acl manifest");
-		decodedManifestJson = new String(Base64.decodeBase64(manifestJson));
-		LOGGER.info("acl manifest decoded successfully");
-		return decodedManifestJson;
+		return dummyManifestJson;
 	}
 
 

@@ -11,6 +11,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		
 		 $scope.enumTenancyKey = [];
 	     $scope.tenancyKey = {guid:'', name:''};
+	     $scope.tenancyKeys = [];
 		
         $scope.showMailboxGuid = false;
         //Model for Add MB
@@ -60,6 +61,34 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             value: '',
             allowAdd: true
         }];
+        
+       // Type ahead method to retrieve all domains in tenancy keys
+       $scope.getTenancyKeys = function () {
+            var retrievedTenancyKeys = [];         
+           	$scope.restService.get($scope.base_url + '/tenancyKeys' ,
+                     function (data, status) {
+                         if (status === 200) {
+
+                        	 if (data.getTenancyKeysResponse.response.status === 'success') {
+                                  angular.forEach(data.getTenancyKeysResponse.tenancyKeys, function (item) {
+                                	  retrievedTenancyKeys.push(item);
+                                  });
+                                 $scope.tenancyKeys = retrievedTenancyKeys;
+                                 console.log("tenancyKeys"+$scope.tenancyKeys);                        		
+                             } else {
+                                 showSaveMessage(data.getTenancyKeysResponse.response.message, 'error');
+                                
+                             }
+
+                         } else {
+                             showSaveMessage("Error while retrieving tenancykeys", 'error');
+                             
+                         }
+                        
+        	 });               
+        };
+        $scope.getTenancyKeys();
+        
         // Loads the details initially if edit
         $scope.load = function () {
 
@@ -454,56 +483,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             return "Dor%^7#@"
         };
         
-        // Type ahead method to retrieve all domains in tenancy keys
-       $scope.getTenancyKeys = function (val, callback) {
-             var tenancyKeys = [];
-                       
-           	/*$scope.restService.get($scope.base_url + '/tenancyKeys' ,
-                     function (data, status) {
-                         if (status === 200) {
-
-                        	 if (data.getTenancyKeysResponse.response.status === 'success') {
-                                  angular.forEach(data.getTenancyKeysResponse.tenancyKeys, function (item) {
-                                    tenancyKeys.push(item);
-                                  });
-                                 console.log("tenancyKeys"+tenancyKeys); 
-                        		
-                             } else {
-                                 showSaveMessage(data.getTenancyKeysResponse.response.message, 'error');
-                                
-                             }
-
-                         } else {
-                             showSaveMessage("Error while retrieving tenancykeys", 'error');
-                             
-                         }
-                         return tenancyKeys;
-        	 });*/
-             return $http.get($rootScope.base_url + "/tenancyKeys", {
-               
-            }).then(function (res) {
-                    var tenancyKeys = [];
-                    angular.forEach(res.data.getTenancyKeysResponse.tenancyKeys, function (item) {
-                        tenancyKeys.push(item);
-                    });
-                    if (typeof callback != 'undefined')callback(tenancyKeys);
-                    return tenancyKeys;
-                });
-               
-        };
-        
         $scope.onTenancyKeySelected = function(tenancyKey) {
             $scope.tenancyKey = tenancyKey;
             $scope.mailBox.tenancyKey = tenancyKey.guid;
         };
         
         $scope.getTenancyKeyWithGuid = function(tenancyKeyGuid) {
-            var tenancyKeys = [];
-            tenancyKeys = $scope.getTenancyKeys('', function(tenancyKeys) {
-            angular.forEach(tenancyKeys, function (item) {
-                   if (item.guid === tenancyKeyGuid) $scope.tenancyKey.name = item.name;
-             });
-             return $scope.tenancyKey.name;});
+	        angular.forEach($scope.tenancyKeys, function (item) {
+	            if (item.guid === tenancyKeyGuid) $scope.tenancyKey.name = item.name;
+	        });	
         };
-    }
-]);
+}]);

@@ -92,10 +92,15 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 					// retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
-					String decodedManifestJson = MailBoxUtil.getDecodedManifestJson(manifestJson);
+					if (MailBoxUtil.isEmpty(manifestJson)) {
+						LOG.info("ACL Manifest not available in the request header");
+						manifestJson =  MailBoxUtil.getDummyManifestJson();
+					} else {
+						LOG.info("ACL Manifest available in the request header");
+					}
 					//retrieve TenancyKeys
 					MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
-					return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(decodedManifestJson);					
+					return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(manifestJson);					
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());

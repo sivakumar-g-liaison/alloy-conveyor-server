@@ -52,7 +52,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and mbx.tenancyKey IN (" + collectionToSqlString(tenancyKeys) + ")")
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 			
 			totalItems = (Long)em
@@ -91,7 +91,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and mbx.tenancyKey IN (" + collectionToSqlString(tenancyKeys) + ")")
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 			
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
@@ -144,7 +144,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and mbx.tenancyKey IN (" + collectionToSqlString(tenancyKeys) + ")");
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")");
 			totalItems = (Long)entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.getSingleResult();
@@ -177,7 +177,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and mbx.tenancyKey IN (" + collectionToSqlString(tenancyKeys) + ")");
+					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")");
 			
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 				
