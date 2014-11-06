@@ -16,7 +16,6 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +28,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.util.LiaisonGZipUtils;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
@@ -827,31 +825,6 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		SearchMailBoxResponseDTO searchResponceDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, SearchMailBoxResponseDTO.class);
 		Assert.assertEquals(FAILURE, searchResponceDTO.getResponse().getStatus());
 			
-	}
-	
-	
-	@Test
-	public void testACLManifest() throws IOException {
-		
-		String json = "{\"envelope\":{\"createdDate\":\"2014-11-05T08:56:49.805Z\",\"globalId\":null,\"parentId\":null,\"processId\":null,\"userId\":\"08sepsftp@liaison.dev\",\"userFirstName\":null,\"userLastName\":null,\"createdByApplication\":null},\"platform\":[{\"platformName\":\"SERVICE_BROKER\",\"roleBasedAccessControl\":[{\"domainName\":\"SERVICE_BROKER\",\"domainType\":\"ORGANIZATION\",\"domainInternalName\":\"831BAEC40A0A00160A1A71A4D69A4A74\",\"role\":[\"MailboxAdmin\"],\"privilege\":[{\"resource\":\"SERVICE_BROKER\",\"resourceType\":\"Rest Resource\",\"resourceContext\":\"*\",\"permission\":[{\"value\":\"WRITE\",\"permissionType\":\"WHITELIST\"}]}]},{\"domainName\":\"Doug 04 Organization\",\"domainType\":\"ORGANIZATION\",\"role\":[\"Doug_Role\"],\"privilege\":[{\"resource\":\"SERVICE_BROKER\",\"resourceType\":\"Rest Resource\",\"resourceContext\":\"*\",\"permission\":[{\"value\":\"WRITE\",\"permissionType\":\"WHITELIST\"}]}]},{\"domainName\":\"SERVICE_BROKER\",\"domainType\":\"ORGANIZATION\",\"domainInternalName\":\"\",\"role\":[\"nameTest\"],\"privilege\":[{\"resource\":\"SERVICE_BROKER\",\"resourceType\":\"Rest Resource\",\"resourceContext\":\"*\",\"permission\":[{\"value\":\"WRITE\",\"permissionType\":\"WHITELIST\"}]}]},{\"domainName\":\"SERVICE_BROKER\",\"domainType\":\"ORGANIZATION\",\"domainInternalName\":\"\",\"role\":[\"0aTest\"],\"privilege\":[{\"resource\":\"SERVICE_BROKER\",\"resourceType\":\"Rest Resource\",\"resourceContext\":\"*\",\"permission\":[{\"value\":\"WRITE\",\"permissionType\":\"WHITELIST\"}]}]},{\"domainName\":\"Test123456789012345678901234567890\",\"domainType\":\"ORGANIZATION\",\"domainInternalName\":\"\",\"role\":[\"Longest_Org_Name\"],\"privilege\":[{\"resource\":\"SERVICE_BROKER\",\"resourceType\":\"Rest Resource\",\"resourceContext\":\"*\",\"permission\":[{\"value\":\"WRITE\",\"permissionType\":\"WHITELIST\"}]}]}],\"nestedServiceDependencyContraint\":[{\"serviceName\":\"KEYMANGER\",\"primaryId\":null,\"nestedServiceId\":[],\"nestedServiceDependency\":[]}]}]}" ;
-		byte[] compressedEncodedManifest = Base64.encodeBase64(LiaisonGZipUtils.compress(json.getBytes()));
-		String finalManifest = new String(compressedEncodedManifest);
-		System.out.println("final manifest " + finalManifest);
-		
-		/*List<String> sids = new ArrayList<>();
-		sids.add("test ");
-		sids.add("test test 345");
-		sids.add("test test 678");
-		sids.add("testii*() test 678");
-		sids.add("testtest678");
-		String test = StringUtils.join(sids, ", ");
-		StringBuilder s = new StringBuilder();
-		for (final String str : sids) {
-			s.append("'").append(str).append("'").append(",");
-		}
-		
-		String sqlQuery = s.toString().substring(0, s.toString().length() - 1);*/
-
 	}
 	
 }
