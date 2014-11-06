@@ -135,12 +135,12 @@ var rest = myApp.controller(
 				$scope.sorting = 'name';
                 $scope.isFileSelected = false;
         		$scope.isEdit = false;
-				$scope.scriptIsEdit = false;
                 $scope.isProcessorTypeSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;				
 				//GIT URL
 				$scope.script = '';
 			    $scope.scriptIsEdit = false; 
+				$scope.scriptUriIsExist = false;
                 
                 // to disable protocol for http listener processor
                 $scope.isProcessorTypeHTTPListener = false;
@@ -1664,11 +1664,15 @@ var rest = myApp.controller(
                 //To notify passwordDirective to clear the password and error message
                 $scope.doSend();
                 $scope.isEdit = true;
-				$scope.scriptIsEdit = true;
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
                         $log.info($filter('json')(data));
+						$scope.scriptIsEdit = false;
+						if (data.getProcessorResponse.processor.javaScriptURI != null && 
+						data.getProcessorResponse.processor.javaScriptURI != "") {
+						$scope.scriptIsEdit = true;
+						}						
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
@@ -1688,7 +1692,7 @@ var rest = myApp.controller(
 									if(editProcessor === false) {
 										$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 
-									}								
+									}											
 
                             }
                         );
@@ -2150,6 +2154,11 @@ var rest = myApp.controller(
                     $scope.processor.linkedProfiles[i] = $scope.selectedProfiles[i].name;
                 }
                 $scope.processor.javaScriptURI = $scope.modal.uri;
+				$scope.scriptIsEdit = false;
+				if ($scope.processor.javaScriptURI != null && 
+						$scope.processor.javaScriptURI != "") {
+						$scope.scriptIsEdit = true;
+				}	
                 block.blockUI();
                 if ($scope.isEdit) {
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
@@ -2295,7 +2304,6 @@ var rest = myApp.controller(
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 							$scope.isEdit = true;
-							$scope.scriptIsEdit = true;
 							$scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
 							$scope.editProcessor($scope.processor.guid, false);
 							if (data.addProcessorToMailBoxResponse.response.status === 'success') {
@@ -2339,7 +2347,8 @@ var rest = myApp.controller(
                     $scope.disableCertificates = true;
 					//GIT URL
 				    $scope.script = '';
-			        $scope.scriptIsEdit = false; 					
+			        $scope.scriptIsEdit = false; 
+                    $scope.scriptUriIsExist = false;					
                     formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
                      // To reset the values in the file browser window
                     $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
@@ -3191,7 +3200,7 @@ var rest = myApp.controller(
 			$scope.scriptUriIsExist = false;
 			
 			//check script uri is exist or not.
-			$scope.onScriptUriSelected = function () {
+			$scope.onScriptUriChanged = function () {
 				if ($scope.modal.uri && $scope.modal.uri != '') {	
 					$scope.scriptUriIsExist = true;
 				} else {
@@ -3200,8 +3209,9 @@ var rest = myApp.controller(
 			};
 			//create new script.	
 			  $scope.onScriptTypeSelected = function () {				  
-				  block.blockUI();
-				  if ($scope.modal.uri) {					  
+				  
+				  if ($scope.modal.uri) {	
+                      block.blockUI();				  
 					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.modal.uri)
 					  .success(function (data) {
 						  block.unblockUI(); 
