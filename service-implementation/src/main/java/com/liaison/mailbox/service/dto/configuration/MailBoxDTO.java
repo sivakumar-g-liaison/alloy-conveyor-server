@@ -27,6 +27,7 @@ import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -138,13 +139,16 @@ public class MailBoxDTO implements Serializable {
 	 * 
 	 * @param mailBox
 	 *            The MailBox Entity
+	 * @throws IOException 
 	 */
-	public void copyToEntity(MailBox mailBox) {
+	public void copyToEntity(MailBox mailBox) throws IOException {
 
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
-		mailBox.setTenancyKey(this.getTenancyKey());
+		// Tenancy key has to be truncated and trimmed to supported guid sized of 32 if acl manifest backward compatibility is on
+		String tenancyKey =  MailBoxUtil.handleTenancyKeyForBackwardCompatilbility(this.getTenancyKey());
+		mailBox.setTenancyKey(tenancyKey);
 
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
@@ -187,7 +191,9 @@ public class MailBoxDTO implements Serializable {
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
-		this.setTenancyKey(mailBox.getTenancyKey());
+		// Tenancy key has to be truncated and trimmed to supported guid sized of 32 if acl manifest backward compatibility is on
+		String tenancyKey =  MailBoxUtil.handleTenancyKeyForBackwardCompatilbility(mailBox.getTenancyKey());
+		this.setTenancyKey(tenancyKey);
 
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

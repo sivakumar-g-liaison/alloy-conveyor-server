@@ -39,13 +39,17 @@ import com.liaison.commons.acl.manifest.dto.ACLManifest;
 import com.liaison.commons.acl.manifest.dto.Platform;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
 import com.liaison.commons.acl.util.ACLUtil;
+import com.liaison.commons.util.LiaisonGZipUtils;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.netflix.config.ConfigurationManager;
 
 /**
@@ -61,6 +65,9 @@ public class MailBoxUtil {
 	private static final String PROPERTIES_FILE = "Properties file";
 	private static final Object lock = new Object();
 	private static final Properties properties = new Properties();
+	private static final String ACL_BACKWARD_COMPATABILITY_PROPERTY = "mailbox.acl.manifest.backward.compatibility.mode";
+	private static final String DUMMY_MANIFEST_USAGE_PROPERTY = "use.dummy.manifest.as.backup";
+	private static final String DUMMY_MANIFEST_PROPERTY = "dummy.acl.manifest.json";
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -187,7 +194,8 @@ public class MailBoxUtil {
 	public static List <TenancyKeyDTO>  getTenancyKeysFromACLManifest(String aclManifestJson) throws IOException {
 
 		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(aclManifestJson, true, true);
+		String decodedManifestString = new String(LiaisonGZipUtils.uncompress(Base64.decodeBase64(aclManifestJson)));
+		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(decodedManifestString, false, false);
 		LOGGER.info("acl Manifest DTO deserialized successfully");
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
 
@@ -201,8 +209,13 @@ public class MailBoxUtil {
 				
 				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
-				// if domainInternalName is not available then domainName will be used.
-				tenancyKey.setGuid((rbac.getDomainInternalName() == null) ? rbac.getDomainName() : rbac.getDomainInternalName());
+				// if domainInternalName is not available then domainName will be used
+				// only if acl manifest backward compatibility mode is on otherwise exception will be thrown.
+				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) && 
+						!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
+					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
+				}  
+				tenancyKey.setGuid(StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ? handleTenancyKeyForBackwardCompatilbility(rbac.getDomainName()) : rbac.getDomainInternalName());
 				tenancyKeys.add(tenancyKey);
 		}
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
@@ -235,10 +248,10 @@ public class MailBoxUtil {
 		// check the value of property "use.dummy.manifest"
 		// if it is true use dummy manifest else throw an error due to the
 		// non-availability of manifest in header
-		if ((MailBoxUtil.getEnvironmentProperties().getString("use.dummy.manifest.as.backup")).equals("true")) {
+		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(DUMMY_MANIFEST_USAGE_PROPERTY))) {
 	
 			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");
+			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(DUMMY_MANIFEST_PROPERTY);
 			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
 				LOGGER.error("dummy acl manifest is not available in the properties file");
 				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE, Response.Status.BAD_REQUEST);
@@ -250,6 +263,21 @@ public class MailBoxUtil {
 		}
 
 		return dummyManifestJson;
+	}
+	
+	/**
+	 * This Method will truncate and trim the given tenancyKey
+	 * 
+	 * @param actualTenancyKey
+	 * @return
+	 * @throws IOException
+	 */
+	public static String handleTenancyKeyForBackwardCompatilbility(String tenancyKeyValue) throws IOException {
+		
+		String truncatedTenancyKey =  (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(ACL_BACKWARD_COMPATABILITY_PROPERTY)) && 
+				tenancyKeyValue.length() > MailBoxConstants.GUID_LENGTH) ? 
+				tenancyKeyValue.substring(0, MailBoxConstants.GUID_LENGTH).trim():tenancyKeyValue.trim();
+		return truncatedTenancyKey;
 	}
 
 

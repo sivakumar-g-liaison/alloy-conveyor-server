@@ -225,14 +225,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 
 		StringBuilder s = new StringBuilder();
-		for (String str : sids) {
-			if (s.length() > 0) {
-				s.append(", ");
-			}
-			s.append(str);
+		for (final String str : sids) {
+			s.append("'").append(str).append("'").append(",");
 		}
-
-		return s.toString().replaceAll("(\\w+)", "\'$1\'");
+		
+		return s.toString().substring(0, s.toString().length() - 1);
 	}
 
 }

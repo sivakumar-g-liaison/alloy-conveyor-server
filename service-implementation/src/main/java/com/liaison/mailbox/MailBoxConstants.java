@@ -131,4 +131,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_HOST = "com.liaison.gitlab.mailbox.script.server.host";
 	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER = "com.liaison.gitlab.mailbox.script.folder";
 	
+	// ACL Manifest
+	public final static int GUID_LENGTH = 32;
+	
 }

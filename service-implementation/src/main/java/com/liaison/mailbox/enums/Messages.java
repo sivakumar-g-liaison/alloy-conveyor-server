@@ -80,7 +80,7 @@ public enum Messages {
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
 	
 	// MBX GUID DOES NOT MATCH WITH THE GIVEN PROCESSOR
-	PROC_DOES_NOT_BELONG_TO_MBX("The given processor is not belongs to given mailbox."),
+	PROC_DOES_NOT_BELONG_TO_MBX("The given processor does not belong to given mailbox."),
 
 	ERROR_MSG("Validation failed with the following error(s):"),
 	VALIDATOR_ERROR_MSG("Error in validator, object cannot be null."),
@@ -120,7 +120,10 @@ public enum Messages {
 	PROFILE_NOT_CONFIGURED("The profile is not configured."),
 	
 	// runtime DB changes
-	INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid");
+	INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid"),
+	
+	// Manifest validation
+	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name.");
 	
 	private String value;
 
