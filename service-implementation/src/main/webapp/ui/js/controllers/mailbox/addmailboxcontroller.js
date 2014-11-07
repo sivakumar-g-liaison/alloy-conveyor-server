@@ -74,7 +74,10 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 	  retrievedTenancyKeys.push(item);
                                   });
                                  $scope.tenancyKeys = retrievedTenancyKeys;
-                                 console.log("tenancyKeys"+$scope.tenancyKeys);                        		
+                                 console.log("tenancyKeys"+$scope.tenancyKeys);  
+                                 // load mailbox details only if tenancykeys are available
+                                 $scope.load();
+                                 
                              } else {
                                  showSaveMessage(data.getTenancyKeysResponse.response.message, 'error');
                                 
@@ -157,7 +160,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             }
         };
 
-        $scope.load();
+        //$scope.load();
 
         $scope.saveForm = function () {
         	
