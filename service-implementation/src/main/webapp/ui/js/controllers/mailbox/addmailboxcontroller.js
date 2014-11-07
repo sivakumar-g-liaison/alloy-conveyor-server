@@ -64,9 +64,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         
        // Type ahead method to retrieve all domains in tenancy keys
        $scope.getTenancyKeys = function () {
-            var retrievedTenancyKeys = [];         
+            var retrievedTenancyKeys = [];  
+            block.blockUI(); 
            	$scope.restService.get($scope.base_url + '/tenancyKeys' ,
                      function (data, status) {
+           				 block.unblockUI();
                          if (status === 200) {
 
                         	 if (data.getTenancyKeysResponse.response.status === 'success') {
