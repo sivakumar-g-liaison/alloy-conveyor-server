@@ -36,7 +36,7 @@ public class RemoteProcessorPropertiesDTO {
 	private String pipeLineID;
 	private String httpListenerPipeLineId;
 	private List<HttpOtherRequestHeaderDTO> otherRequestHeader;
-	private boolean spectrumPayloadEncrypted;
+	private boolean securedPayload;
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -165,13 +165,15 @@ public class RemoteProcessorPropertiesDTO {
 	public void setHttpListenerPipeLineId(String httpListenerPipeLineId) {
 		this.httpListenerPipeLineId = httpListenerPipeLineId;
 	}
-	
-	public boolean isSpectrumPayloadEncrypted() {
-		return spectrumPayloadEncrypted;
+
+	public boolean isSecuredPayload() {
+		return securedPayload;
 	}
 
-	public void setSpectrumPayloadEncrypted(boolean spectrumPayloadEncrypted) {
-		this.spectrumPayloadEncrypted = spectrumPayloadEncrypted;
+	public void setSecuredPayload(boolean securedPayload) {
+		this.securedPayload = securedPayload;
 	}
+	
+	
 	
 }

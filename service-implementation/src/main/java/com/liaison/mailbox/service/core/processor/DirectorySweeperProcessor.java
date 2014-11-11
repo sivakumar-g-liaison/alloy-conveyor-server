@@ -38,6 +38,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.FS2MetaSnapshot;
@@ -338,7 +339,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 					: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
-			FS2Util.isEncryptionRequired = this.getRemoteProcessorProperties().isSpectrumPayloadEncrypted();
+			FS2Util.isEncryptionRequired = this.getRemoteProcessorProperties().isSecuredPayload();
 			// persist payload in spectrum
 			InputStream payloadToPersist = new FileInputStream(payloadFile);
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
@@ -383,7 +384,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	JsonMappingException, IOException, JAXBException {
 
         LOGGER.debug("Construct MetaData for workTicketGroup of size :{}, {}", workTicketGroup.getWorkTicketGroup().size(), workTicketGroup.getWorkTicketGroup().toArray());
-        String jsonResponse = MailBoxUtil.marshalToJSON(workTicketGroup);
+        String jsonResponse = JAXBUtility.marshalToJSON(workTicketGroup);
         LOGGER.debug("Constructed MetaData: {} ", jsonResponse);
 
         return jsonResponse;

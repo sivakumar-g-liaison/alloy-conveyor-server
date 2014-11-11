@@ -155,9 +155,9 @@ public class MailboxSLAWatchDogService {
 		ProcessorConfigurationDAO procConfigDAO = new ProcessorConfigurationDAOBase();
 		List <Processor> processors = procConfigDAO.findProcessorByType(ProcessorType.SWEEPER);
 		
-		String timeToPickUpFilePostedToMailbox = null;
 		for (Processor procsr : processors) {
 			
+			String timeToPickUpFilePostedToMailbox = null;
 			// get the mailbox of this processor to retrieve sla properties			
 			MailBox mailbox = procsr.getMailbox();
 			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();

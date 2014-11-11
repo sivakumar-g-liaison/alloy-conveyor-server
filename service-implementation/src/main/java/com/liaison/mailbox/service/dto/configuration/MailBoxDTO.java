@@ -53,6 +53,7 @@ public class MailBoxDTO implements Serializable {
 	private String status;
 	private String shardKey;
 	private String tenancyKey;
+	private String tenancyKeyDisplayName;
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -133,6 +134,16 @@ public class MailBoxDTO implements Serializable {
 	public void setProcessors(List<MailBoxProcessorResponseDTO> processors) {
 		this.processors = processors;
 	}
+	
+	
+
+	public String getTenancyKeyDisplayName() {
+		return tenancyKeyDisplayName;
+	}
+
+	public void setTenancyKeyDisplayName(String tenancyKeyDisplayName) {
+		this.tenancyKeyDisplayName = tenancyKeyDisplayName;
+	}
 
 	/**
 	 * Copies all data from DTO to entity except PGUID.
@@ -146,9 +157,7 @@ public class MailBoxDTO implements Serializable {
 		mailBox.setMbxName(this.getName());
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
-		// Tenancy key has to be truncated and trimmed to supported guid sized of 32 if acl manifest backward compatibility is on
-		String tenancyKey =  MailBoxUtil.handleTenancyKeyForBackwardCompatilbility(this.getTenancyKey());
-		mailBox.setTenancyKey(tenancyKey);
+		mailBox.setTenancyKey(this.getTenancyKey());
 
 		MailBoxProperty property = null;
 		List<MailBoxProperty> properties = new ArrayList<>();
@@ -191,9 +200,7 @@ public class MailBoxDTO implements Serializable {
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
-		// Tenancy key has to be truncated and trimmed to supported guid sized of 32 if acl manifest backward compatibility is on
-		String tenancyKey =  MailBoxUtil.handleTenancyKeyForBackwardCompatilbility(mailBox.getTenancyKey());
-		this.setTenancyKey(tenancyKey);
+		this.setTenancyKey(mailBox.getTenancyKey());
 
 		PropertyDTO propertyDTO = null;
 		for (MailBoxProperty property : mailBox.getMailboxProperties()) {

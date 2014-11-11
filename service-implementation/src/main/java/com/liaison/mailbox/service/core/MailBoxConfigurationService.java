@@ -26,6 +26,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -225,11 +226,12 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
 			}
 
-			// retrieve the actual tenancykey guids from DTO
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
+			// retrieve the actual tenancykey Display Name from TenancyKeys
+			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyWithGuid(mailBox.getTenancyKey(), tenancyKeys);
 
-			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
-			if (!tenancyKeyGuids.contains(mailBox.getTenancyKey())) {
+			// if the tenancy key display name is not available then error will be logged as the given tenancyKey is
+			// not available in tenancyKeys retrieved from acl manifest 
+			if (StringUtil.isNullOrEmptyAfterTrim(tenancyKeyDisplayName)) {
 				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
 			}
 
@@ -245,6 +247,7 @@ public class MailBoxConfigurationService {
 
 			MailBoxDTO dto = new MailBoxDTO();
 			dto.copyFromEntity(mailBox);
+			dto.setTenancyKeyDisplayName(tenancyKeyDisplayName);
 
 			serviceResponse.setMailBox(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));

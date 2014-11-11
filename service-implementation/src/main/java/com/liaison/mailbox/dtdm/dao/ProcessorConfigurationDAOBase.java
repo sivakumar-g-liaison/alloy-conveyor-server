@@ -290,10 +290,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox")
-					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE);
+					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
+					.append(" and processor.procsrStatus = :" + STATUS);
 			Class <?> processorType = getProcessorClass(type);
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PROCESSOR_TYPE, processorType)
+					.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();

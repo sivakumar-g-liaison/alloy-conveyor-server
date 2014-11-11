@@ -286,7 +286,7 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	 name: 'Spectrum Payload Encrypted',
+                	 name: 'SecuredPayload',
                      value: true,
                      allowAdd: false,
                      isMandatory: true
@@ -509,8 +509,8 @@ var rest = myApp.controller(
                     "name": "PipeLine Id",
                     "id": "pipeLineID"
                 }, {
-                	"name": "Spectrum Payload Encrypted",
-                	"id": "spectrumPayloadEncrypted"
+                	"name": "SecuredPayload",
+                	"id": "securedPayload"
                 }];
                 $scope.allMandatoryHttpProperties = [{
                     "name": "HTTP Version",
@@ -705,7 +705,7 @@ var rest = myApp.controller(
 						 <div ng-switch-when="pipeLineID">\n\
                             <textarea ng-disabled="disablePipeLineId" class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
                         </div>\n\
-                    	<div ng-switch-when="spectrumPayloadEncrypted">\n\
+                    	<div ng-switch-when="securedPayload">\n\
                         	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                     	</div>\n\
                     	 <div ng-switch-when="httpListenerPipeLineId">\n\
@@ -1352,7 +1352,7 @@ var rest = myApp.controller(
 					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
 					// But Mandatory properties of type boolean will be displayed even if the value is false in the grid
 					if ((prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') || 
-                       (prop === 'spectrumPayloadEncrypted' && json_data[prop] === false && $scope.processor.protocol === 'SWEEPER')) {
+                       (prop === 'securedPayload' && json_data[prop] === false && $scope.processor.protocol === 'SWEEPER')) {
                         allowFalseValues = true;
                     }
 					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFalseValues) && json_data[prop] !== null && json_data[prop] !== '') {
@@ -2055,7 +2055,7 @@ var rest = myApp.controller(
                         });
                     }
                     
-                    if (name === 'spectrumPayloadEncrypted') {
+                    if (name === 'securedPayload') {
                     	mandatoryArray.push({
                     		name: name,
                     		value: value
@@ -2638,7 +2638,7 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	name: 'Spectrum Payload Encrypted',
+                	name: 'SecuredPayload',
                 	value: true,
                 	allowAdd: false,
                 	isMandatory:true

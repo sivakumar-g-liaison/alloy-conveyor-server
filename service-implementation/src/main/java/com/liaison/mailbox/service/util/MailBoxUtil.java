@@ -215,7 +215,7 @@ public class MailBoxUtil {
 						!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
 					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
 				}  
-				tenancyKey.setGuid(StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ? handleTenancyKeyForBackwardCompatilbility(rbac.getDomainName()) : rbac.getDomainInternalName());
+				tenancyKey.setGuid(StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ? (rbac.getDomainName()) : rbac.getDomainInternalName());
 				tenancyKeys.add(tenancyKey);
 		}
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
@@ -264,20 +264,23 @@ public class MailBoxUtil {
 
 		return dummyManifestJson;
 	}
+
 	
 	/**
-	 * This Method will truncate and trim the given tenancyKey
+	 * This Method will retrieve the TenancyKey Name from the given guid
 	 * 
-	 * @param actualTenancyKey
+	 * @param tenancyKeyGuid
+	 * @param tenancyKeys
 	 * @return
-	 * @throws IOException
+	 * @throws IOException 
 	 */
-	public static String handleTenancyKeyForBackwardCompatilbility(String tenancyKeyValue) throws IOException {
+	public static String getTenancyKeyWithGuid(String tenancyKeyGuid, List <TenancyKeyDTO> tenancyKeys) throws IOException {
 		
-		String truncatedTenancyKey =  (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(ACL_BACKWARD_COMPATABILITY_PROPERTY)) && 
-				tenancyKeyValue.length() > MailBoxConstants.GUID_LENGTH) ? 
-				tenancyKeyValue.substring(0, MailBoxConstants.GUID_LENGTH).trim():tenancyKeyValue.trim();
-		return truncatedTenancyKey;
+		String tenancyKeyDisplayName = null;
+		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
+			if (tenancyKey.getGuid().equals(tenancyKeyGuid)) tenancyKeyDisplayName = tenancyKey.getName();
+		}
+		return tenancyKeyDisplayName;
 	}
 
 

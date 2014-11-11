@@ -15,7 +15,7 @@ com.liaison.jms.queuename.sweeper=DEVINTMailboxToServiceBrokerWorkTicketQueue
 com.liaison.jms.hostname.sweeper=10.146.16.148
 com.liaison.jms.port.sweeper=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.sweeper=-1
+com.liaison.jms.receive.attempts.sweeper=1
 #com.liaison.jms.receive.timeout.sweeper
 #-1 is infinite
 com.liaison.jms.send.attempts.sweeper=-1
@@ -29,7 +29,7 @@ com.liaison.jms.queuename.processor=DEVINTMailboxToMailboxProcessorQueue
 com.liaison.jms.hostname.processor=10.146.16.148
 com.liaison.jms.port.processor=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.processor=-1
+com.liaison.jms.receive.attempts.processor=1
 #com.liaison.jms.receive.timeout.processor
 #-1 is infinite
 com.liaison.jms.send.attempts.processor=-1
@@ -40,7 +40,7 @@ com.liaison.jms.send.attempts.processor=-1
 #com.liaison.jms.queue.member.reset.interval.millis.processor
 
 
-com.liaison.jms.queuename.processedPayload=jms.DEVINTServiceBrokerToMailboxWorkTicketQueue 
+com.liaison.jms.queuename.processedPayload=jms.DEVINTServiceBrokerToMailboxWorkTicket
 ###############################################################################
 
 #SSL Settings
@@ -51,7 +51,7 @@ com.liaison.jms.ssl.truststore.password.processedPayload=changeit
 com.liaison.jms.hostname.processedPayload=10.146.16.148
 com.liaison.jms.port.processedPayload=5046
 #-1 is infinite
-com.liaison.jms.receive.attempts.processedPayload=-1
+com.liaison.jms.receive.attempts.processedPayload=1
 #com.liaison.jms.receive.timeout.processedPayload
 #-1 is infinite
 com.liaison.jms.send.attempts.processedPayload=-1

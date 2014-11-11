@@ -65,7 +65,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
        // Type ahead method to retrieve all domains in tenancy keys
        $scope.getTenancyKeys = function () {
             var retrievedTenancyKeys = [];  
-            block.blockUI(); 
            	$scope.restService.get($scope.base_url + '/tenancyKeys' ,
                      function (data, status) {
            				 block.unblockUI();
@@ -77,9 +76,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                   });
                                  $scope.tenancyKeys = retrievedTenancyKeys;
                                  console.log("tenancyKeys"+$scope.tenancyKeys);  
-                                 // load mailbox details only if tenancykeys are available
-                                 $scope.load();
-                                 
+                                
                              } else {
                                  showSaveMessage(data.getTenancyKeysResponse.response.message, 'error');
                                 
@@ -127,7 +124,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                                     data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
                                 $scope.mailBox.shardKey = data.getMailBoxResponse.mailBox.shardKey;
-                                $scope.getTenancyKeyWithGuid(data.getMailBoxResponse.mailBox.tenancyKey);
+                                $scope.tenancyKey.name = data.getMailBoxResponse.mailBox.tenancyKeyDisplayName;
                                 $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
                                 $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                                 for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
@@ -162,7 +159,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             }
         };
 
-        //$scope.load();
+        $scope.load();
 
         $scope.saveForm = function () {
         	
@@ -493,9 +490,4 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             $scope.mailBox.tenancyKey = tenancyKey.guid;
         };
         
-        $scope.getTenancyKeyWithGuid = function(tenancyKeyGuid) {
-	        angular.forEach($scope.tenancyKeys, function (item) {
-	            if (item.guid === tenancyKeyGuid) $scope.tenancyKey.name = item.name;
-	        });	
-        };
 }]);
