@@ -15,30 +15,18 @@ com.liaison.jms.queuename.sweeper=DEVINTMailboxToServiceBrokerWorkTicketQueue
 com.liaison.jms.hostname.sweeper=10.146.16.148
 com.liaison.jms.port.sweeper=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.sweeper=1
-#com.liaison.jms.receive.timeout.sweeper
+com.liaison.jms.receive.attempts.sweeper=-1
 #-1 is infinite
 com.liaison.jms.send.attempts.sweeper=-1
-#com.liaison.jms.send.timeout.sweeper
-#com.liaison.jms.client.count.sweeper
-#com.liaison.jms.init.attempts.sweeper
-#com.liaison.jms.init.timeout.sweeper
-#com.liaison.jms.queue.member.reset.interval.millis.sweeper
 
 com.liaison.jms.queuename.processor=DEVINTMailboxToMailboxProcessorQueue
 com.liaison.jms.hostname.processor=10.146.16.148
 com.liaison.jms.port.processor=5049
 #-1 is infinite
-com.liaison.jms.receive.attempts.processor=1
-#com.liaison.jms.receive.timeout.processor
+com.liaison.jms.receive.attempts.processor=-1
+
 #-1 is infinite
 com.liaison.jms.send.attempts.processor=-1
-#com.liaison.jms.send.timeout.processor
-#com.liaison.jms.client.count.processor
-#com.liaison.jms.init.attempts.processor
-#com.liaison.jms.init.timeout.processor
-#com.liaison.jms.queue.member.reset.interval.millis.processor
-
 
 com.liaison.jms.queuename.processedPayload=jms.DEVINTServiceBrokerToMailboxWorkTicket
 ###############################################################################
@@ -51,19 +39,12 @@ com.liaison.jms.ssl.truststore.password.processedPayload=changeit
 com.liaison.jms.hostname.processedPayload=10.146.16.148
 com.liaison.jms.port.processedPayload=5046
 #-1 is infinite
-com.liaison.jms.receive.attempts.processedPayload=1
-#com.liaison.jms.receive.timeout.processedPayload
+com.liaison.jms.receive.attempts.processedPayload=-1
 #-1 is infinite
 com.liaison.jms.send.attempts.processedPayload=-1
-#com.liaison.jms.send.timeout.processedPayload
-#com.liaison.jms.client.count.processedPayload
-#com.liaison.jms.init.attempts.processedPayload
-#com.liaison.jms.init.timeout.processedPayload
-#com.liaison.jms.queue.member.reset.interval.millis.processedPayload
+
 #\\\###########################///#
 #\\\###########################///#
-
-
 ########################################################DATABASE CONFIGURATIONS############################################################
 
 # config time database connectivity properties
@@ -75,13 +56,9 @@ com.liaison.dtdm.DB_MINPOOLSIZE=2
 com.liaison.dtdm.DB_MAXPOOLSIZE=100
 com.liaison.dtdm.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
 com.liaison.dtdm.DB_DESCRIPTION=G2 Mailbox DTDM UI UCP in Tomcat (DEV)
-#com.liaison.dtdm.DB_VALIDATECONNECTIONONBORROW=true
-#com.liaison.dtdm.DB_ABANDONEDCONNECTIONTIMEOUT=10
-#com.liaison.dtdm.DB_MAXCONNECTIONREUSETIME=3000
 
 # property of our db connection initialization query
 com.liaison.initializationQuery=SELECT * FROM DUAL
-
 
 # runtime database connectivity properties
 com.liaison.rtdm.DB_DRIVER=oracle.jdbc.OracleDriver
@@ -92,9 +69,6 @@ com.liaison.rtdm.DB_MINPOOLSIZE=2
 com.liaison.rtdm.DB_MAXPOOLSIZE=100
 com.liaison.rtdm.DB_CONNECTIONFACTORYCLASSNAME=oracle.jdbc.pool.OracleDataSource
 com.liaison.rtdm.DB_DESCRIPTION=G2 Mailbox RTDM UI UCP in Tomcat (DEV)
-#com.liaison.rtdm.DB_VALIDATECONNECTIONONBORROW=true
-#com.liaison.rtdm.DB_ABANDONEDCONNECTIONTIMEOUT=10
-#com.liaison.rtdm.DB_MAXCONNECTIONREUSETIME=3000
 
 # jpa persistence unit name
 com.liaison.persistenceUnitName.dtdm=mailbox-dtdm
@@ -127,20 +101,15 @@ com.liaison.gitlab.mailbox.script.folder=gitlab:/src/test/resources
 scripting.thread.execution.timeout = 5
 scripting.thread.execution.timeunit = MINUTES
 
-#queue to which all processors of a triggered profile is queued.
-triggered.profile.processor.queue.name=/queue/mailboxProcessorQueue
-
 #Generic Mount Location - FOR CONFIGURATION PATTERN REPLACEMENT
 MOUNT_POINT=/app/mailbox/
 
 #Directory sweeper will create a FS2 entry with no backing payload in this location
 mount-point=/app/mailbox/fs2mount/
-#Flag controlling the wipeout of the fs store during restart. MUST be always false
-delete-existing-data=false
+
 #Added for directory sweeper
 g2.queueing.server.url=jnp://10.146.20.40:5446
 directory.sweeper.queue.name=/queue/G2Queue
-queueConnectionFactory=/ConnectionFactory
 # Directory sweeper configuration to check files are modified with in the given time limit in SECONDS
 last.modified.tolerance = 3
 
@@ -150,15 +119,6 @@ ssh.private.key.temp.location =/app/mailbox/tempprivatekey/
 # MAIL SERVER CONFIGURATIONS
 mail.host=smtpout.liaison.com
 mail.from=g2mailbox-errornotifier@liaison.com
-# Other possible items include:
-#mail.user=tqiu
-#mail.password=
-#mail.store.protocol=
-#mail.transport.protocol=smtp
-#mail.smtp.host=owa.liaison.com
-#mail.smtp.user=tqiu
-#mail.debug=true
-#recievers= -- Commented out in code right now
 
 # FOR JOB MONITORING ADMIN USE CASES - FOR GRACEFULLY INTTERUPTING THE JOB PROCESSING.
 default.job.search.period.in.hours=24
@@ -172,8 +132,6 @@ com.liaison.mailbox.http.async.payload.dir=/app/mailbox/httpasyncpayloads
 com.liaison.servicebroker.sync.uri=http://10.146.16.141:8989/service-broker-v1.0.0/process/sync
 # This is 10meg
 com.liaison.servicebroker.sync.max.request.size=10485760
-# This is 50meg
-com.liaison.servicebroker.async.max.request.size=52428800
 
 #########################################################KMS Configurations########################################################
 kms-base-url=http://10.146.16.147:8989/key-management/
@@ -190,7 +148,6 @@ signatureverifier.publickey.url=http://10.146.16.143:8989/key-management/export/
 
 #retrieving serviceinstance id from acl manifest
 use.dummy.manifest.as.backup=false
-acl.constraint.service.name=Mailbox
 
 #acl-manifest json string
 dummy.acl.manifest.json=H4sIAAAAAAAAAI2TXWvbMBSG7wf7D0GXY+1ix02aXE1J3M6kTcAxG2spQ7POipgsGUkxNSX/fXIcmyixYb4w9jnP+Xyl948fBocHgSiAyxzQYDZ4b6zWniogBujSvioX8odecOV5V8Nx4t3MhsFsdHNtbU/o80nQK5e/CY9oFSF2nJ/6cqJAmB6fkilo3e3caVC1BzFh4BUy/ytnhGkprikU6Jy9Y0qbNcmgL9kD6fcfx56XOM85S4lhUjRcg+3bAJRzYv5IlVXIs7O/xtMUQtsw/h4twl/zeLMKY6drJTnMiQaK02oNCymMNV3ktCSVGWHiP3K2bFLW2qJNfI/X0RNOos26k4zscpUgvM2+9CcTHM6DIZ76/nQ88gIvGOO7xQjfTm5H0/AsSzVF3TNaQflIBLFSWckxzZjd4YtL54oVjFs1O8askoGWO5XWjXyh8NctdkK0A8agTdyE9dHVbuHNHAI+XVA5qIxpfdT8oitLFITvoDvaiW+7+vEtSsKHaJsgl94PXk4Nzu/eWRYSdjCgW1AFS2EJOQgKIi0Px8TqZroOiq7pVstV+PMRr+8vDomVISOq7Lx556Vr6PlcyZ72jqwzVXuDms/9Pzn4MJeJBAAA
@@ -210,8 +167,6 @@ bootstrap.remote.keypair.filepath=mbx-bootstrap/signandverifykeystore.jks
 
 #ACL Integration
 mailbox.signer.public.key.guid = CD5990860A9270E0142300DCB508D8CD
-#GEM verify and  getManifest URL
-#acl.url.getACLManifest = http://10.146.16.143:8989/accessmanagement/rest/v1/accessmanagement/verifyAndGetManifest
 
 #Maibox guid prefix to be used by http synch/asych listner invocation
 maibox.pguid.display.prefix = Add this to your http listener asynch/synch calls as a query param: mailboxId=
@@ -232,16 +187,6 @@ mailbox.processor.queue.consumer.thread.count=5
 #Thread Count for watchdog
 mailbox.processedPayload.queue.consumer.thread.count=5
 
-# Spectrum client properties for payloads
-#spectrum.client.instanceid=aws
-#spectrum.client.serverip.aws=data.spectrumdatacloud.com
-#spectrum.client.port.aws=
-#spectrum.client.username.aws=jwojcik@liaison.com
-#spectrum.client.password.aws=Password1
-#spectrum.client.source.aws=G2_Junit
-#spectrum.client.spacename.aws=jwojcik
-#spectrum.client.definitionname.aws=DODJosh
-
 # fs2 client properties for payloads
 fs2.storage.spectrum.ip=10.146.16.118
 fs2.storage.spectrum.port=80
@@ -258,11 +203,11 @@ data.encryption.key.size=128
 data.encryption.key.maxuses=10000
 data.encryption.kek.cache.expiration=10
 
-#Thread Count for processor
-mailbox.processor.queue.consumer.thread.count=5
-
 # ACL Filter uses mock verifier
 com.liaison.acl.use.mock.verifier=false
 
 #Property for acl-manifest backward compatibility
 mailbox.acl.manifest.backward.compatibility.mode = true
+
+# G2 service client properties
+client.key-management.baseUrl=http://lsvlkms01d.liaison.dev:8989/key-management

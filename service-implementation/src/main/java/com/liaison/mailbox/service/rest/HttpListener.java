@@ -15,7 +15,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,6 +62,7 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -258,21 +262,18 @@ public class HttpListener extends AuditedResource {
 					// "Http Listner Auth Check Required" is true
 					if (isAuthenticationCheckRequired(httpListenerProperties)) {
 						authenticateRequestor(request);
-					}
-					SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);			
-					assignGlobalProcessId(sessionContext);
-					assignTimestamp(sessionContext);
-
-					storePayload(request, sessionContext, httpListenerProperties);
-					createWorkTicket(request, sessionContext);
-
+					}					
+					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);					
+					storePayload(request, workTicket, httpListenerProperties);
+					constructMetaDataJson(request, workTicket);
+					
 					return Response
 							.ok()
 							.status(Status.ACCEPTED)
 							.type(MediaType.TEXT_PLAIN)
 							.entity(String.format(
 									"Payload accepted as process ID '%s'",
-									sessionContext.getGlobalProcessId())).build();					
+									workTicket.getGlobalProcessId())).build();					
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -370,6 +371,60 @@ public class HttpListener extends AuditedResource {
 		sessionContext.setMailboxId(mailboxPguid);
 		return sessionContext;
 	}
+	
+	/**
+	 * This method will create workTicket by given request.
+	 * 
+	 * @param request
+	 * @param mailboxPguid
+	 * @param httpListenerProperties
+	 * @return WorkTicket
+	 */
+	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
+		WorkTicket workTicket = new WorkTicket();		
+		workTicket.setAdditionalContext("httpMethod", request.getMethod());
+		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
+		workTicket.setAdditionalContext("httpRemotePort", request.getRemotePort());
+		workTicket.setAdditionalContext("httpCharacterEncoding", request.getCharacterEncoding());
+		workTicket.setAdditionalContext("httpRemoteUser", request.getRemoteUser());
+		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
+		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
+		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
+		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));	
+		copyRequestHeadersToWorkTicket(request, workTicket);
+		assignAsyncGlobalProcessId(workTicket);
+		assignAsyncTimestamp(workTicket);
+		
+		return workTicket;		
+	}
+	
+	/**
+	 * Copies all the request header from HttpServletRequest to WorkTicket.
+	 * 
+	 * @param request
+	 *        HttpServletRequest
+	 * @param request 
+	 *        workTicket
+	 *        
+	 */
+	protected void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{	
+		
+		Enumeration<String> headerNames = request.getHeaderNames();		
+		while (headerNames.hasMoreElements())
+		{
+			String headerName = headerNames.nextElement();
+			List<String> headerValues = new ArrayList<>();
+			Enumeration<String> values = request.getHeaders(headerName);
+			
+			while (values.hasMoreElements())
+			{
+				headerValues.add(values.nextElement());
+			}
+			
+			workTicket.addHeaders(headerName,  headerValues);
+		}
+		
+	}
 
 	/**
 	 * This method will set globalProcessId to sessionContext.
@@ -381,23 +436,38 @@ public class HttpListener extends AuditedResource {
 		String uuid = uuidGen.getUUID();
 		sessionContext.setGlobalProcessId(uuid);
 	}
-
+	
+	/**
+	 * This method will set globalProcessId to workTicket.
+	 * 
+	 * @param workTicket
+	 */
+	protected void assignAsyncGlobalProcessId(WorkTicket workTicket) {
+		UUIDGen uuidGen = new UUIDGen();
+		String uuid = uuidGen.getUUID();
+		workTicket.setGlobalProcessId(uuid);
+	}
+	
 	protected void assignTimestamp(SessionContext sessionContext) {
 		sessionContext.setRequestTimestamp(new Date());
+	}
+	
+	protected void assignAsyncTimestamp(WorkTicket workTicket) {
+		workTicket.setCreatedTime(new Date());
 	}
 
 	/**
 	 * This method will store the payload file name by given request.
 	 * 
 	 * @param request
-	 * @param sessionContext
+	 * @param workTicket
 	 * @throws IOException
 	 */
 	protected void storePayload(HttpServletRequest request,
-			SessionContext sessionContext, Map <String, String> httpListenerProperties) throws IOException {
+			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws IOException {
 
-		String payloadFileName = createPayloadFileName(sessionContext, httpListenerProperties);
-		sessionContext.setPayloadUri(createPayloadUri(payloadFileName));
+		String payloadFileName = createPayloadFileName(workTicket, httpListenerProperties);
+		workTicket.setPayloadURI(createPayloadUri(payloadFileName));
 		ensurePayloadDirExists(payloadFileName);
 
 		InputStream inputStream = null;
@@ -435,42 +505,32 @@ public class HttpListener extends AuditedResource {
 				}
 			}
 		}
-	}
+	}				
 
 	/**
-	 * This method will create payload file name by given sessionContext.
+	 * This method will create payload file name by given workTicket.
 	 * 
-	 * @param sessionContext
+	 * @param workTicket
 	 * @return payloadFileName
 	 */
-	protected String createPayloadFileName(SessionContext sessionContext, Map <String, String> httpListenerProperties) {
+	protected String createPayloadFileName(WorkTicket workTicket, Map <String, String> httpListenerProperties) {
 		StringBuilder payloadFileName = new StringBuilder();
 		String payloadDirectory = getHttpAsyncPayloadDirectory(retrieveAsyncPayloadLocation(httpListenerProperties));
 
 		payloadFileName.append(payloadDirectory);
 		payloadFileName.append(File.separatorChar);
 
-		if (sessionContext.getPipelineId() != null) {
-			payloadFileName.append(sessionContext.getPipelineId());
+		if (workTicket.getPipelineId() != null) {
+			payloadFileName.append(workTicket.getPipelineId());
 			payloadFileName.append(File.separatorChar);
 		}
 
-		if (sessionContext.getDocumentProtocol() != null) {
-			payloadFileName.append(sessionContext.getDocumentProtocol());
-			payloadFileName.append(File.separatorChar);
-		}
-
-		if (sessionContext.getDocumentType() != null) {
-			payloadFileName.append(sessionContext.getDocumentType());
-			payloadFileName.append(File.separatorChar);
-		}
-
-		payloadFileName.append(sessionContext.getGlobalProcessId());
+		payloadFileName.append(workTicket.getGlobalProcessId());
 		payloadFileName.append(".http_async_payload");
 
 		return payloadFileName.toString();
 	}
-
+    
 	/**
 	 * This method will create Payload Uri by given payloadFileName.
 	 * 
@@ -532,10 +592,10 @@ public class HttpListener extends AuditedResource {
 		return payloadDirectory;
 	}
 
-	protected void createWorkTicket(HttpServletRequest request,
-			SessionContext sessionContext) throws Exception {
-		String workTicket = JAXBUtility.marshalToJSON(sessionContext);
-		postToQueue(workTicket);
+	protected void constructMetaDataJson(HttpServletRequest request,
+			WorkTicket workTicket) throws Exception {
+		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
+		postToQueue(workTicketJson);
 	}
 
 
