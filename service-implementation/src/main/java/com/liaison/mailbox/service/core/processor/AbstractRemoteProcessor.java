@@ -9,7 +9,6 @@
  */
 package com.liaison.mailbox.service.core.processor;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,46 +25,31 @@ import java.nio.file.StandardCopyOption;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
-import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.security.KeyStoreUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.commons.security.pkcs7.signandverify.DigitalSignature;
-import com.liaison.commons.util.bootstrap.BootstrapRemoteKeystore;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
@@ -73,15 +57,6 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.exceptions.FS2Exception;
-import com.liaison.gem.service.client.GEMClient;
-import com.liaison.gem.service.client.GEMManifestResponse;
-import com.liaison.gem.service.dto.EnvelopeDTO;
-import com.liaison.gem.service.dto.request.ManifestRequestDTO;
-import com.liaison.gem.service.dto.request.ManifestRequestDomain;
-import com.liaison.gem.service.dto.request.ManifestRequestGEM;
-import com.liaison.gem.service.dto.request.ManifestRequestPlatform;
-import com.liaison.keymanage.grammar.KeyServiceResponse;
-import com.liaison.keymanage.grammar.KeySet;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Folder;
@@ -101,7 +76,7 @@ import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHea
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.HTTPClientUtil;
+import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -568,7 +543,7 @@ public abstract class AbstractRemoteProcessor {
 		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
 		if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
-			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword());
+			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
 			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), passwordFromKMS));
 		}
 
@@ -583,7 +558,7 @@ public abstract class AbstractRemoteProcessor {
 				// trustoreid
 				String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri())) ? (MailBoxUtil.getEnvironmentProperties()
 						.getString("mailbox.global.trustgroup.id")) : trustStoreCredential.getCredsIdpUri();
-				InputStream instream = fetchTrustStore(trustStoreID);
+				InputStream instream = KMSUtil.fetchTrustStore(trustStoreID);
 
 				if (instream == null) {
 					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
@@ -611,104 +586,7 @@ public abstract class AbstractRemoteProcessor {
 		return request;
 
 	}
-
-	/**
-	 * 
-	 * Method for fetching TrustStore as an InputStream
-	 * 
-	 * @return InputStream
-	 * @throws LiaisonException
-	 * @throws JSONException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyStoreException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws CertificateEncodingException 
-	 */
-	private InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
-
-		InputStream is = null;
-
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
-		url = url + "fetch/truststore/current/";
-
-		// To be fetched from DataBase
-		url = url + trustStoreId;
 		
-		// get gem manifest response from GEM
-	    String unsignedData = trustStoreId;
-		String signedData = signRequestData(unsignedData);
-		GEMManifestResponse gemManifestFromGEM = getGEMManifestFromGEMClient(unsignedData, signedData);
-		
-		Map<String, String> headerMap = getRequestHeaders(gemManifestFromGEM);
-
-		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
-		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
-
-		if (jsonResponse != null) {
-
-			KeyServiceResponse mkr = unmarshalFromKeyManagerJSON(jsonResponse, KeyServiceResponse.class);
-
-			KeySet keySet = (KeySet) mkr.getDataTransferObject();
-			is = new ByteArrayInputStream(Base64.decodeBase64(keySet.getCurrentPublicKey()));
-		}
-
-		return is;
-	}
-
-	/**
-	 * 
-	 * Method for fetching SSH Privatekey as an InputStream
-	 * 
-	 * @return InputStream
-	 * @throws LiaisonException
-	 * @throws JSONException
-	 * @throws IOException
-	 * @throws CMSException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws CertificateEncodingException
-	 * @throws BootstrapingFailedException
-	 * @throws JAXBException
-	 */
-	private byte[] fetchSSHPrivateKey(String keypairPguid) throws LiaisonException, JSONException, IOException, CertificateEncodingException,
-			UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException,
-			JAXBException {
-
-		byte[] privateKeyBytes = null;
-
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
-		url = url + "fetch/group/keypair/current/";
-
-		// To be fetched from DataBase
-		url = url + keypairPguid;
-		
-		// get gem manifest response from GEM
-	    String unsignedData = keypairPguid;
-		String signedData = signRequestData(unsignedData);
-		GEMManifestResponse gemManifestFromGEM = getGEMManifestFromGEMClient(unsignedData, signedData);
-		
-		// setting the request headers in the request to key manager from gem
-		// manifest response
-		Map<String, String> headerMap = getRequestHeaders(gemManifestFromGEM);
-		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
-
-		if (jsonResponse != null) {
-
-			KeyServiceResponse mkr = unmarshalFromKeyManagerJSON(jsonResponse, KeyServiceResponse.class);
-			KeySet keySet = (KeySet) mkr.getDataTransferObject();
-			privateKeyBytes = keySet.getCurrentPrivateKey().getBytes();
-		}
-
-		return privateKeyBytes;
-	}
-
 	/**
 	 * Method to read the javascript file as string
 	 * 
@@ -1003,7 +881,7 @@ public abstract class AbstractRemoteProcessor {
 		 */
 		if ((loginCredential != null)) {
 
-			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword()); 
+			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword()); 
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
 					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
@@ -1026,7 +904,7 @@ public abstract class AbstractRemoteProcessor {
 						.getEnvironmentProperties()
 						.getString("mailbox.global.trustgroup.id"))
 						: trustStoreCredential.getCredsIdpUri();
-				InputStream instream = fetchTrustStore(trustStoreID);
+				InputStream instream = KMSUtil.fetchTrustStore(trustStoreID);
 
 				if (instream == null) {
 					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
@@ -1096,7 +974,7 @@ public abstract class AbstractRemoteProcessor {
 
 		if ((loginCredential != null)) {
 
-			String passwordFromKMS = getSecretFromKMS(loginCredential.getCredsPassword());
+			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
 				sftpRequest.setUser(loginCredential.getCredsUsername());
@@ -1116,7 +994,7 @@ public abstract class AbstractRemoteProcessor {
 				throw new MailBoxServicesException("Credential requires file path", Response.Status.CONFLICT);
 			}
 
-			byte[] privateKeyStream = fetchSSHPrivateKey(sshKeyPairCredential.getCredsIdpUri());
+			byte[] privateKeyStream = KMSUtil.fetchSSHPrivateKey(sshKeyPairCredential.getCredsIdpUri());
 
 			if (privateKeyStream == null) {
 				throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
@@ -1414,219 +1292,6 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		LOGGER.info("Trigerring - The private key file path not configured.");
-	}
-
-	/**
-	 * Method used to construct the GEMManifestRequest
-	 * 
-	 * @return ManifestRequestDTO
-	 * @throws IOException 
-	 */
-	private ManifestRequestDTO constructGEMManifestRequest() throws IOException {
-
-		LOGGER.info("Constructing the gem manifest request with default values");
-		// Construct Envelope
-		EnvelopeDTO envelope = new EnvelopeDTO();
-
-		// Construct Domain
-		ManifestRequestDomain domain = new ManifestRequestDomain();
-		domain.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.domain.name"));		
-		domain.setType(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.domain.type"));
-		List<String> roles = new ArrayList<String>();
-		roles.add(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.role.name"));
-		domain.setRoles(roles);
-
-		List<ManifestRequestDomain> domains = new ArrayList<ManifestRequestDomain>();
-		domains.add(domain);
-
-		// Construct NestedServiceDependency
-		NestedServiceDependencyContraint dependencyConstraint = new NestedServiceDependencyContraint();
-		dependencyConstraint.setServiceName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.service.name"));
-		dependencyConstraint.setPrimaryId(configurationInstance.getServiceInstance().getName());
-
-		List<NestedServiceDependencyContraint> constraintList = new ArrayList<NestedServiceDependencyContraint>();
-		constraintList.add(dependencyConstraint);
-
-		// Construct Platform
-		ManifestRequestPlatform platform = new ManifestRequestPlatform();
-		platform.setName(MailBoxUtil.getEnvironmentProperties().getString("mailbox.gemrequest.platform.name"));
-		platform.setConstraintList(constraintList);
-		platform.setDomains(domains);
-
-		List<ManifestRequestPlatform> platforms = new ArrayList<ManifestRequestPlatform>();
-		platforms.add(platform);
-
-		// Construct ManifestRequestGEM
-		ManifestRequestGEM manifestRequestGEM = new ManifestRequestGEM();
-		manifestRequestGEM.setEnvelope(envelope);
-		manifestRequestGEM.setPlatforms(platforms);
-
-		// Construct ManifestRequestDTO
-		ManifestRequestDTO manifestRequest = new ManifestRequestDTO();
-		manifestRequest.setAcl(manifestRequestGEM);
-
-		return manifestRequest;
-	}
-
-	/**
-	 * Method used to sign the actual request to be sent to keyManager
-	 * 
-	 * @param unsignedData
-	 * @return String - signed base64 encoded string of actual request to be
-	 *         signed
-	 * @throws IOException
-	 * @throws CMSException
-	 * @throws OperatorCreationException
-	 * @throws CertificateEncodingException
-	 * @throws KeyStoreException
-	 * @throws NoSuchAlgorithmException
-	 * @throws UnrecoverableKeyException
-	 * @throws BootstrapingFailedException
-	 */
-	private String signRequestData(String unsignedData) throws CertificateEncodingException, OperatorCreationException, CMSException, IOException,
-			KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, BootstrapingFailedException {
-
-		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-		}
-		char[] password = null;
-		KeyStore ks = null;
-		// read keystore from Bootstrap
-		// BootstrapRemoteKeystore.bootstrap();
-		password = BootstrapRemoteKeystore.getDecryptedRemoteKeypairPassphrase().toCharArray();
-		LOGGER.debug("Loading keystore from Bootstrap");
-		ks = BootstrapRemoteKeystore.getRemoteKeyStore();
-
-		X509Certificate originalSignerCert = KeyStoreUtil.getX509Certificate(ks);
-		PrivateKey privateKey = (PrivateKey) ks.getKey(KeyStoreUtil.getKeyAlias(ks), password);
-		List<X509Certificate> listOfOriginalSignerCerts = new ArrayList<>();
-		listOfOriginalSignerCerts.add(originalSignerCert);
-
-		// FOR SIGNING
-		DigitalSignature sig = new DigitalSignature();
-		byte[] MESSAGE_TO_SIGN = unsignedData.getBytes();
-		byte[] singedData = null;
-		try (ByteArrayInputStream bis = new ByteArrayInputStream(MESSAGE_TO_SIGN)) {
-		    singedData = sig.sign(bis, originalSignerCert, privateKey);
-		}
-		return Base64.encodeBase64String(singedData);
-
-	}
-
-	/**
-	 * Method used to retrieve the gem manifest from GEMClient
-	 * 
-	 * @param unsignedData
-	 * @param signedData
-	 * @return String gemManifest
-	 * @throws IOException
-	 */
-	private GEMManifestResponse getGEMManifestFromGEMClient(String unsignedData, String signedData) throws IOException {
-		
-		GEMManifestResponse gemManifestResponse = null;
-		
-		GEMClient gemClient = new GEMClient();
-
-		LOGGER.debug("Entering the getGEMManifestFromGEMClient method.");
-		// construct gem manifset request
-		ManifestRequestDTO manifestRequest = constructGEMManifestRequest();
-
-		LOGGER.info("Read public key guid used to sign the unsigned data from properies file");
-		// read the public key guid from properties file
-		String publicKeyGuid = MailBoxUtil.getEnvironmentProperties().getString("mailbox.signer.public.key.guid");
-		LOGGER.info("Retrieving gem manifest form GEM using GEMClient.");
-		// get gemManifest response through GEMClient
-		gemManifestResponse = gemClient.getGEMManifest(unsignedData, signedData, publicKeyGuid, manifestRequest);
-		return gemManifestResponse;
-	}
-
-	/**
-	 * Method to set the request header for the requests to key manager
-	 * 
-	 * @param gemManifestResponse
-	 * @return requestHeaders in a Map object
-	 */
-	private Map<String, String> getRequestHeaders(GEMManifestResponse gemManifestFromGEM) {
-
-		LOGGER.info("setting request headers from gem manifest response to key manager request");
-		Map<String, String> headerMap = new HashMap<String, String>();
-		String gemManifest = (gemManifestFromGEM != null) ? gemManifestFromGEM.getManifest() : null;
-		String signedGEMManifest = (gemManifestFromGEM != null) ? gemManifestFromGEM.getSignature() : null;
-		String gemSignerPublicKey = (gemManifestFromGEM != null) ? gemManifestFromGEM.getPublicKeyGuid() : null;
-		headerMap.put("gem-manifest", gemManifest);
-		headerMap.put("gem-signature", signedGEMManifest);
-		headerMap.put("gem_signer_public_key_guid", gemSignerPublicKey);
-		headerMap.put("Content-Type", "application/json");
-		return headerMap;
-	}
-
-	/**
-	 * 
-	 * @param serializedJson
-	 * @param clazz
-	 * 
-	 * @return json
-	 * 
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws IOException
-	 */
-	private <T> T unmarshalFromKeyManagerJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
-		// make deserializer use JAXB annotations (only)
-		mapper.setAnnotationIntrospector(introspector);
-		T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
-		return ummarshaledObject;
-	}
-
-	/**
-     * 
-     * @param serializedJson
-     * @param clazz
-     * 
-     * @return json
-     * 
-     * @throws JAXBException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     */
-    private <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-        AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-        AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
-        // make deserializer use JAXB annotations (only)
-        mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
-        T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
-        return ummarshaledObject;
-    }
-
-	String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
-			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException {
-
-		// get gem manifest response from GEM
-	    String unsignedData = guid;
-		String signedData = signRequestData(unsignedData);
-		GEMManifestResponse gemManifestFromGEM = getGEMManifestFromGEMClient(unsignedData, signedData);
-		
-		// setting the request headers in the request to key manager from gem
-		// manifest response
-		Map<String, String> headerMap = getRequestHeaders(gemManifestFromGEM);
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
-		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
-
-		if (base64EncodedPassword == null || base64EncodedPassword == "") {
-			throw new MailBoxServicesException(Messages.READ_SECRET_FAILED, Response.Status.BAD_REQUEST);
-		} else {
-			String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
-			String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));
-			return base64DecodedPassword;
-		}
-	}
+	}		
 
 }

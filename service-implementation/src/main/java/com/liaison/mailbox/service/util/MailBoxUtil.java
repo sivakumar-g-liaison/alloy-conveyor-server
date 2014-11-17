@@ -64,8 +64,7 @@ public class MailBoxUtil {
 	private static final String REQUEST_HEADER = "Request Header";
 	private static final String PROPERTIES_FILE = "Properties file";
 	private static final Object lock = new Object();
-	private static final Properties properties = new Properties();
-	private static final String ACL_BACKWARD_COMPATABILITY_PROPERTY = "mailbox.acl.manifest.backward.compatibility.mode";
+	private static final Properties properties = new Properties();	
 	private static final String DUMMY_MANIFEST_USAGE_PROPERTY = "use.dummy.manifest.as.backup";
 	private static final String DUMMY_MANIFEST_PROPERTY = "dummy.acl.manifest.json";
 
@@ -212,7 +211,7 @@ public class MailBoxUtil {
 				// if domainInternalName is not available then domainName will be used
 				// only if acl manifest backward compatibility mode is on otherwise exception will be thrown.
 				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) && 
-						!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
+						!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
 					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
 				}  
 				tenancyKey.setGuid(StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ? (rbac.getDomainName()) : rbac.getDomainInternalName());
