@@ -37,12 +37,12 @@ import com.liaison.mailbox.service.validation.GenericValidator;
  * @author OFS
  */
 public class ScriptService {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(ScriptService.class);
 	private GitLabService gitlab;
 	private static final Map<String, String> cache = new HashMap<>();
 	private static final String SCRIPT = "Script File";
-	
+
 	public ScriptService() throws IOException {
 
 		String gitlabServerHost = MailBoxUtil.getEnvironmentProperties().getString(
@@ -54,7 +54,7 @@ public class ScriptService {
 
 		gitlab = new GitLabService(gitlabServerHost, gitlabPrivateToken, gitlabProjectId);
 	}
-	
+
 	/**
 	 * Creates User script
 	 *
@@ -63,115 +63,115 @@ public class ScriptService {
 	 * @throws JAXBException
 	 */
 	public ScriptServiceResponseDTO createScript(ScriptServiceDTO scriptRequest) {
-		
+
 		LOGGER.debug("Entered into createScript() method");
-		LOGGER.info("The retrieve script uri is  ", scriptRequest.getScriptFileUri());
+		LOGGER.info("The retrieve script uri is  {}", scriptRequest.getScriptFileUri());
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		GenericValidator validator = new GenericValidator();
 		String uri = scriptRequest.getScriptFileUri();
-		
+
 		try {
-			
-			validator.validate(scriptRequest);			
+
+			validator.validate(scriptRequest);
 			uri = checkGitLabUrl(uri);
-			
+
 			gitlab.createNewFile(uri, "master", scriptRequest.getData(), "File [" + uri + "] created by user " + scriptRequest.getCreatedBy());
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, SCRIPT, Messages.SUCCESS));	
-			
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, SCRIPT, Messages.SUCCESS));
+
 			// refresh cache during update
 			String[] urlParts = null;
 			urlParts = uri.split(":/");
 			if ("gitlab".equalsIgnoreCase(urlParts[0])) {
 				uri = urlParts[1];
 			}
-			
+
 			cache.put(uri, scriptRequest.getData());
 			LOGGER.debug("Exit from createScript() method");
-			
+
 			return serviceResponse;
-			
+
 		} catch (Exception e) {
-			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);	
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, SCRIPT, Messages.FAILURE, 
+			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, SCRIPT, Messages.FAILURE,
 					e.getMessage()));
-			
+
 			return serviceResponse;
-		}		
+		}
 	}
-	
+
 	/**
 	 * Get the script file from git by given git uri.
-	 * 
+	 *
 	 * @param uri
 	 * @param commitSha
 	 * @return ScriptServiceResponseDTO
 	 */
 	public ScriptServiceResponseDTO getScript(String uri, String commitSha) {
-		
+
 		LOGGER.debug("Entered into getScript() method");
-		LOGGER.info("The retrieve script uri is  ", uri);
+		LOGGER.info("The retrieve script uri is {} ", uri);
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		String script;
-		String[] urlParts = null;  
-		
+		String[] urlParts = null;
+
 		try {
-			
+
 			if (StringUtil.isNullOrEmptyAfterTrim(uri)) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);		
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
-			
-            uri = checkGitLabUrl(uri);			
+
+            uri = checkGitLabUrl(uri);
 			urlParts = uri.split(":/");
 			if ("gitlab".equalsIgnoreCase(urlParts[0])) {
 				uri = urlParts[1];
-			}			
+			}
 			script = cache.get(uri);
 			if (MailBoxUtil.isEmpty(script)) {
 				script = gitlab.getFileContent(commitSha, uri);
 				cache.put(uri, script);
 				LOGGER.info("Not available in cache, so loading it from GIT.");
 			}
-			
+
 			// response message construction
-			serviceResponse.setScript(script);			
-		    serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, SCRIPT, Messages.SUCCESS));						
-		    LOGGER.debug("Exit from getScript() method");	
-		    
-		    return serviceResponse;	
-			
+			serviceResponse.setScript(script);
+		    serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, SCRIPT, Messages.SUCCESS));
+		    LOGGER.debug("Exit from getScript() method");
+
+		    return serviceResponse;
+
 		} catch (Exception e) {
-			
-			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);	
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, SCRIPT, Messages.FAILURE, 
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, SCRIPT, Messages.FAILURE,
 					e.getMessage()));
-			
-			return serviceResponse;	
-		}			
+
+			return serviceResponse;
+		}
 	}
-	
-	
+
+
 	/**
-	 * method revise script file. 
-	 * 
+	 * method revise script file.
+	 *
 	 * @param scriptRequest
 	 * @return
 	 */
 	public ScriptServiceResponseDTO updateScript(ScriptServiceDTO scriptRequest) {
-		
+
 		LOGGER.debug("Entered into updateScript() method");
 		LOGGER.info("The retrieve script uri is  ", scriptRequest.getScriptFileUri());
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		GenericValidator validator = new GenericValidator();
-		
+
 		try {
 			validator.validate(scriptRequest);
 			String uri = scriptRequest.getScriptFileUri();
 			uri = checkGitLabUrl(uri);
-			
+
 			gitlab.updateFile(uri, "master", scriptRequest.getData(),
 					"File [" + uri + "] updated by user " + scriptRequest.getCreatedBy());
-			
+
 		    serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, SCRIPT, Messages.SUCCESS));
 		    // refresh cache during update
 			String[] urlParts = null;
@@ -179,37 +179,37 @@ public class ScriptService {
 			if ("gitlab".equalsIgnoreCase(urlParts[0])) {
 				uri = urlParts[1];
 			}
-			cache.put(uri, scriptRequest.getData());			
+			cache.put(uri, scriptRequest.getData());
 			LOGGER.debug("Exit from updateScript() method.");
-			
-			return serviceResponse;	
-			
-		} catch (Exception e) {
-			
-			LOGGER.error(Messages.REVISE_OPERATION_FAILED.name(), e);	
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, SCRIPT, Messages.FAILURE, 
-					e.getMessage()));				
+
 			return serviceResponse;
-		}	
-		
+
+		} catch (Exception e) {
+
+			LOGGER.error(Messages.REVISE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, SCRIPT, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+
 	}
-	
+
 	/**
 	   * This method to check script uri contains gitlab or not
-	   * 
+	   *
 	   * @param uri
 	   * @return String
 	   * @throws IOException
 	   */
 	 private String checkGitLabUrl(String uri) throws IOException {
-		  
-	   if (!uri.toLowerCase().contains("gitlab:")) {    	    	
+
+	   if (!uri.toLowerCase().contains("gitlab:")) {
 		  String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
 				  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
 		  uri = gitlabDirectory+"/"+uri;
-	   }	
+	   }
 	  return uri;
-	  
-	 }	
+
+	 }
 
 }
