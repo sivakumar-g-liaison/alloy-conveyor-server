@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -82,7 +82,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public abstract class AbstractRemoteProcessor {
 
@@ -102,7 +102,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Construct DTO from Entity.
-	 * 
+	 *
 	 * @return the remoteProcessorProperties
 	 * @throws IOException
 	 * @throws JAXBException
@@ -120,7 +120,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * To Retrieve the credential info from the processor
-	 * 
+	 *
 	 * @return array of CredentialDTO
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
@@ -150,7 +150,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * To Retrieve the folder info from the processor
-	 * 
+	 *
 	 * @return array of FolderDTO
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
@@ -180,7 +180,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * To Retrieve the Payload file from the URI
-	 * 
+	 *
 	 * @return array of files
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
@@ -216,7 +216,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * To Retrieve the Payload URI
-	 * 
+	 *
 	 * @return Payload URI String
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
@@ -240,7 +240,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get HTTPRequest configurations from processor.
-	 * 
+	 *
 	 * @return JSON String containing URL, Verb..etc of the processor
 	 */
 	public String getClientConfiguration() {
@@ -253,7 +253,7 @@ public abstract class AbstractRemoteProcessor {
 	 * Get the URI to which the response should be written, this can be used if
 	 * the JS decides to write the response straight to the file system or
 	 * database
-	 * 
+	 *
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
@@ -276,7 +276,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get the URI to which the mailbox sweeper should be happen
-	 * 
+	 *
 	 * @return URI
 	 * @throws MailBoxConfigurationServicesException
 	 */
@@ -299,7 +299,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Get the credential URI of TrustStore & Keystore to execute the FTPS
 	 * uploader/downloader
-	 * 
+	 *
 	 * @return String URI
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
@@ -327,7 +327,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Get the credential URI for login details to execute the FTPS & SFTP
 	 * uploader/downloader
-	 * 
+	 *
 	 * @return String URI
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
@@ -353,7 +353,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Get the login details from credentialURI to execute the FTPS & SFTP
 	 * uploader/downloader
-	 * 
+	 *
 	 * @return String[]
 	 * @throws MailBoxServicesException
 	 * @throws URISyntaxException
@@ -374,7 +374,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * call back method to write the response back to MailBox from JS
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws URISyntaxException
 	 * @throws IOException
@@ -395,7 +395,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * call back method to write the file response back to MailBox from JS
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws URISyntaxException
 	 * @throws IOException
@@ -427,7 +427,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Get the list of dynamic properties of the MailBox known only to java
 	 * script
-	 * 
+	 *
 	 * @return MailBox dynamic properties
 	 */
 	public Properties getDynamicProperties() {
@@ -445,12 +445,12 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Update the dynamic property list of the MailBox known only to java script
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
-	 * 
+	 *
 	 */
 	public void addUpdateDynamicProperty(String dynamicProperties) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
@@ -466,7 +466,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get the decrypted value of a String, known only to java script
-	 * 
+	 *
 	 * @param encryptedValue
 	 *            The text to be decrypted
 	 * @return decrypted data as String
@@ -477,7 +477,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get HTTPRequest with injected configurations.
-	 * 
+	 *
 	 * @return configured HTTPRequest
 	 * @throws MailBoxServicesException
 	 * @throws IOException
@@ -572,11 +572,11 @@ public abstract class AbstractRemoteProcessor {
 				    try {
 				        if (null != instream) {
 	                        instream.close();
-	                    } 
+	                    }
 				    } catch (IOException e) {
 				        LOGGER.error("Cannot close stream while fetching trustore from key manager.");
 				    }
-			    }	
+			    }
 
 				request.truststore(trustStore);
 			}
@@ -586,13 +586,13 @@ public abstract class AbstractRemoteProcessor {
 		return request;
 
 	}
-		
+
 	/**
 	 * Method to read the javascript file as string
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
-	 * 
+	 *
 	 */
 	protected String getJavaScriptString(String URI) throws IOException, URISyntaxException {
 
@@ -618,12 +618,12 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Method to list file from folder
-	 * 
+	 *
 	 * @throws MailBoxServicesException
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
-	 * 
+	 *
 	 */
 	private void listFiles(String path, List<File> files) throws MailBoxServicesException {
 
@@ -673,7 +673,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Creates a filter for directories only.
-	 * 
+	 *
 	 * @return Object which implements DirectoryStream.Filter interface and that
 	 *         accepts directories only.
 	 */
@@ -693,7 +693,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Method is used to move the file to the processed folder.
-	 * 
+	 *
 	 * @param filePath
 	 *            The source location
 	 * @throws IOException
@@ -714,7 +714,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Method is used to move the files to the processed folder.
-	 * 
+	 *
 	 * @param filePath
 	 *            The source location
 	 * @throws IOException
@@ -727,7 +727,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Method is used to move the uploaded file to the given folder.
-	 * 
+	 *
 	 * @param file
 	 *            File to be moved
 	 * @param processedFileLcoation
@@ -751,7 +751,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Method is used to move the uploaded file to the given folder.
-	 * 
+	 *
 	 * @param filePath
 	 *            The source location
 	 * @throws IOException
@@ -765,14 +765,14 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Use to validate the given file can be added in the given group.
-	 * 
+	 *
 	 * @param fileGroup
 	 *            The file attributes group
 	 * @param fileAttribute
 	 *            The file attribute to be added in the group
 	 * @return true if it can be added false otherwise
 	 * @throws MailBoxServicesException
-	 */	
+	 */
 	protected Boolean validateAdditionalGroupWorkTicket(WorkTicketGroup workTicketGroup, WorkTicket workTicket) throws MailBoxServicesException {
 
 		long maxPayloadSize = 0;
@@ -813,11 +813,11 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get the total file size of the group.
-	 * 
+	 *
 	 * @param fileGroup
 	 * @return
 	 */
-	
+
 	private long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
 
 		long size = 0;
@@ -831,7 +831,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get FTPSRequest with injected configurations.
-	 * 
+	 *
 	 * @return configured FTPSRequest
 	 * @throws MailBoxServicesException
 	 * @throws IOException
@@ -881,7 +881,7 @@ public abstract class AbstractRemoteProcessor {
 		 */
 		if ((loginCredential != null)) {
 
-			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword()); 
+			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
 
 			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
 					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
@@ -918,7 +918,7 @@ public abstract class AbstractRemoteProcessor {
 				    try {
                         if (null != instream) {
                             instream.close();
-                        } 
+                        }
                     } catch (IOException e) {
                         LOGGER.error("Cannot close stream while fetching trustore from key manager.");
                     }
@@ -933,7 +933,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get SFTPRequest with injected configurations.
-	 * 
+	 *
 	 * @return configured SFTPRequest
 	 * @throws MailBoxServicesException
 	 * @throws IOException
@@ -1005,7 +1005,7 @@ public abstract class AbstractRemoteProcessor {
 			// write to a file
 			try (FileOutputStream out = new FileOutputStream(privateKeyPath)) {
 			    out.write(privateKeyStream);
-			}			
+			}
 			sftpRequest.setPrivateKeyPath(privateKeyPath);
 
 		}
@@ -1023,7 +1023,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method is used to get the CredentialInfo model for getting login username
 	 * & password.
-	 * 
+	 *
 	 * @throws SymmetricAlgorithmException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
@@ -1064,7 +1064,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method is used to get the CredentialInfoModel for getting keystore
 	 * credentials
-	 * 
+	 *
 	 * @throws SymmetricAlgorithmException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
@@ -1097,7 +1097,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Method is used to write the file to the response folder for SFTP/FTP(S).
-	 * 
+	 *
 	 * @param response
 	 *            Bytearray response
 	 * @param filename
@@ -1132,18 +1132,18 @@ public abstract class AbstractRemoteProcessor {
 		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
 		// close the stream
 		if (response != null) response.close();
-		
+
 	}
 
 	/**
 	 * Method is used to process the folder path given by user and replace the
 	 * mount location with proper value form properties file.
-	 * 
+	 *
 	 * @param folderPath
 	 *            The folder path given by user
-	 * 
+	 *
 	 * @return processedFolderPath The folder path with mount location
-	 * 
+	 *
 	 */
 	protected String processMountLocation(String folderPath) throws IOException {
 
@@ -1161,7 +1161,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Sent notifications for trigger system failure.
-	 * 
+	 *
 	 * @param toEmailAddrList
 	 *            The extra receivers. The default receiver will be available in
 	 *            the mailbox.
@@ -1192,7 +1192,7 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Sent notifications for trigger system failure.
-	 * 
+	 *
 	 * @param toEmailAddrList
 	 *            The extra receivers. The default receiver will be available in
 	 *            the mailbox.
@@ -1210,8 +1210,8 @@ public abstract class AbstractRemoteProcessor {
 
 	/**
 	 * Get the credential Details configured for a processor
-	 * 
-	 * 
+	 *
+	 *
 	 * @return String URI
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
@@ -1240,7 +1240,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method is used to process the response location and create folders if not
 	 * already exists for SFTP/FTP(S).
-	 * 
+	 *
 	 * @param filename
 	 *            The source location
 	 * @throws IOException
@@ -1271,7 +1271,7 @@ public abstract class AbstractRemoteProcessor {
 	/**
 	 * Method used to remove the privatekey downloaded from keymanager once
 	 * successfully authenticated using key
-	 * 
+	 *
 	 * @param fileLocation
 	 * @throws IOException
 	 * @throws SymmetricAlgorithmException
@@ -1292,6 +1292,45 @@ public abstract class AbstractRemoteProcessor {
 		}
 
 		LOGGER.info("Trigerring - The private key file path not configured.");
-	}		
+	}
+
+	/**
+	 * Logging methods for javascript
+	 */
+	/**
+	 *
+	 * @param msg
+	 */
+	public void logInfo(String msg) {
+		LOGGER.info(msg);
+	}
+
+	/**
+	 * @param msg
+	 */
+	public void logError(String msg) {
+		LOGGER.error(msg);
+	}
+
+	/**
+	 * @param error
+	 */
+	public void logError(Object error) {
+		logError(error.toString());
+	}
+
+	/**
+	 * @param error
+	 */
+	public void logError(Throwable error) {
+		logError(error.getLocalizedMessage());
+	}
+
+	/**
+	 * @param msg
+	 */
+	public void logDebug(String msg) {
+		LOGGER.debug(msg);
+	}
 
 }

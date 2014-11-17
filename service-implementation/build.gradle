@@ -62,7 +62,7 @@ buildscript {
 
         // https://github.com/zeroturnaround/gradle-jrebel-plugin
         classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.1.2'
-		
+
     }
 }
 
@@ -116,13 +116,13 @@ war.dependsOn('configureTomcat')
 
 dependencies {
 
-    
+
 	// GitLab Client
     compile "org.gitlab.api:java-gitlab-api:1.1.3a"
-	
+
     // resolve fs2 in nexus
-   // compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true	
-	
+   // compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
+
 	compile("com.liaison:fs2:1.2.0"){
 		exclude group:"bouncycastle", module:"bcprov-jdk16"
 		 }
@@ -150,7 +150,7 @@ dependencies {
 //    compile "jboss:jnp-client:4.0.2"
 
     // for G2Javascript engine
-    compile group: 'com.liaison.commons', name: 'commons-scripting', version: '2.0.0-SNAPSHOT', changing: true
+    compile group: 'com.liaison.commons', name: 'commons-scripting', version: '2.0.+'
 
     //Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
    //compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
@@ -215,10 +215,10 @@ dependencies {
 	compile('com.liaison.key.management:key-management:1.+:grammar'){
 		exclude module:'karyon-admin'
 		exclude module:'karyon-admin-web'}
-	
+
 	//Dependency for GEM client Integration
 	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'1.0.2-SNAPSHOT', changing: true
-	
+
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
 
@@ -226,8 +226,10 @@ dependencies {
     	exclude group: "com.google.collections", module: "google-collections"
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
   	}
-	
+
 	workTicket 'com.liaison.dto:dto:1.0.0'
+
+	compile group: "com.liaison.commons.log4j2.glass", name: "glass_log4j2_lib", version: "1.+", changing: false
 }
 
 idea {
@@ -408,7 +410,7 @@ task jettyRunSetProperties {
 
 /*def enhancerLib = "$projectDir/enhancerLib"
 task createPathJar (type: Jar) {
-	
+
 	    overwrite = true
 		archiveName ='enhancerDependency.jar'
 		destinationDir= new File(enhancerLib);
@@ -418,13 +420,13 @@ task createPathJar (type: Jar) {
 					       )
 			}
 	}*/
-	
+
 
 
 // JPA (datanucleus) bytecode enhancement
 task enhance()  << {
     logger.info("... Enhancing ...");
-	
+
     ant.taskdef(
             name      : 'datanucleusenhancer',
             classpath : (project.runtimeClasspath - configurations.workTicket).asPath,
@@ -437,35 +439,35 @@ task enhance()  << {
             api : "JPA",
             persistenceUnit : "mailbox-dtdm",
             failonerror : true)
-	
+
 	ant.datanucleusenhancer(
 		classpath   : (files("$projectDir/src/main/resources") + project.runtimeClasspath - configurations.workTicket).asPath,
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-rtdm",
 		failonerror : true)
-	
+
 	/*ant.taskdef(
 		name      : 'datanucleusenhancer',
 		classpath : (files("$projectDir/enhancerLib/enhancerDependency.jar")).asPath,
 		classname : 'org.datanucleus.enhancer.EnhancerTask'
 		)
-	
+
 	ant.datanucleusenhancer(
 		classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-dtdm",
 		failonerror : true)
-	
+
 	ant.datanucleusenhancer(
 		classpath   : (files("$projectDir/src/main/resources")+ files("$projectDir/enhancerLib/enhancerDependency.jar") ).asPath,
 		verbose     : true,
 		api : "JPA",
 		persistenceUnit : "mailbox-rtdm",
 		failonerror : true)*/
-	
-	
+
+
 }
 
 
