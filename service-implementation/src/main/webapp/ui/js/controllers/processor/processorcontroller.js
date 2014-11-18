@@ -3208,28 +3208,28 @@ var rest = myApp.controller(
 				}				
 			};
 			//create new script.	
-			  $scope.onScriptTypeSelected = function () {				  
+			$scope.onScriptTypeSelected = function () {				  
 				  
 				  if ($scope.modal.uri) {	
-                      block.blockUI();				  
-					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.modal.uri)
-					  .success(function (data) {
-						  block.unblockUI(); 
-						if (data.scriptserviceResponse.response.status === 'success') {
-							 $scope.scriptIsEdit = true;					
-							 $scope.script = data.scriptserviceResponse.script;
-							 $scope.populateScriptOnModel();
-						} else {
-						   $scope.script = '';
-						   $scope.scriptIsEdit = false;
-						   $scope.populateScriptOnModel();
-						}	
-		         	})
-					.error(function() {
-					block.unblockUI(); 
-					$scope.populateScriptOnModel();
-					showSaveMessage("Error while File update to GitLab", 'error');
-				    });									        
+                    block.blockUI();				  
+					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.modal.uri,
+					  function (data, status) { 
+                         block.unblockUI();
+                        if (status === 200) { 	
+							if (data.scriptserviceResponse.response.status === 'success') {
+								 $scope.scriptIsEdit = true;					
+								 $scope.script = data.scriptserviceResponse.script;
+								 $scope.populateScriptOnModel();
+							} else {
+							   $scope.script = '';
+							   $scope.scriptIsEdit = false;
+							   $scope.populateScriptOnModel();
+							}	
+						  } else {
+							 showSaveMessage("Error while retrieve File from GitLab", 'error');
+						  }				   
+				    }
+                );				   
 				 }
 			 };			  
 			 $scope.populateScriptOnModel = function () {			  
@@ -3256,11 +3256,26 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	    editor.getSession().setValue($scope.$parent.script);
      };	
 
+     var defaultScriptFile = '';
      $scope.loadDefaultScript = function() {
-    	 $scope.restService.get("data/gitjs.js")
-            .success(function(data) {
-            	editor.getSession().setValue(data);
-           });
+	   if (defaultScriptFile === '' || defaultScriptFile !== editor.getSession().getValue()) {
+ 	     block.blockUI();
+     	 $scope.restService.get($scope.base_url + "/git/content/" + "defaultTemplate.js",
+          function (data, status) {
+               block.unblockUI();
+              if (status === 200) { 			
+ 				if (data.scriptserviceResponse.response.status === 'success') {
+ 					defaultScriptFile = data.scriptserviceResponse.script;
+ 				   editor.getSession().setValue(defaultScriptFile);
+ 				} else {
+ 					showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+ 				} 
+ 			} else {
+ 			 showSaveMessage("Error while retrieve File from GitLab", 'error');
+ 			}          	
+           }
+ 		);	
+       }		
      };	
      
      $scope.save = function() {	
