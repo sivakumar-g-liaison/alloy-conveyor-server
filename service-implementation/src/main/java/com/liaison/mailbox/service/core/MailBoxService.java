@@ -40,7 +40,7 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
-import com.liaison.mailbox.service.core.processor.MailBoxProcessor;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -226,7 +226,7 @@ public class MailBoxService {
 		    }
 		    	
 		    LOG.info("Verified if {} is already running and it is not",processorId);
-			MailBoxProcessor processorService = MailBoxProcessorFactory.getInstance(processor);
+			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 			
 			if(processorService == null){
 			 LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());

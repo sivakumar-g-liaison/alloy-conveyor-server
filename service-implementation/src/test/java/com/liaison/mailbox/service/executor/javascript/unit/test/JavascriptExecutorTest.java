@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.service.core.processor.AbstractRemoteProcessor;
+import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 import com.liaison.mailbox.service.core.processor.HttpRemoteDownloader;
 import com.liaison.mailbox.service.executor.javascript.JavascriptExecutor;
 
@@ -19,7 +19,7 @@ import com.liaison.mailbox.service.executor.javascript.JavascriptExecutor;
  */
 public class JavascriptExecutorTest {
 
-	public AbstractRemoteProcessor processorService;
+	public AbstractProcessor processorService;
 
 	@BeforeClass
 	public void createProcessor() {

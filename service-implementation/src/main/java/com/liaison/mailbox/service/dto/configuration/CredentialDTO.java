@@ -18,7 +18,6 @@ import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.MailBoxCryptoUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
@@ -163,7 +162,4 @@ public class CredentialDTO {
 		this.setGuId(credential.getPguid());
 	}
 
-	public String getDecryptedString(String encryptedValue) throws SymmetricAlgorithmException {
-		return MailBoxCryptoUtil.doPasswordEncryption(encryptedValue, 2);
-	}
 }

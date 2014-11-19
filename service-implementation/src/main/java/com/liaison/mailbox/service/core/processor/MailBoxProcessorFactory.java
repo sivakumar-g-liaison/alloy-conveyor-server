@@ -35,9 +35,9 @@ public class MailBoxProcessorFactory {
 	 *            The Processor Entity
 	 * @return The MailBox Processor instance.
 	 */
-	public static MailBoxProcessor getInstance(Processor processor) {
+	public static MailBoxProcessorI getInstance(Processor processor) {
 
-		MailBoxProcessor mailBoxProcessor = null;
+		MailBoxProcessorI mailBoxProcessor = null;
 
 		Protocol foundProtocolType = Protocol.findByCode(processor.getProcsrProtocol());
 

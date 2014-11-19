@@ -58,15 +58,15 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * DirectorySweeper
- * 
+ *
  * <P>
  * DirectorySweeper sweeps the files from mail box and creates meta data about file and post it to
  * the queue.
- * 
+ *
  * @author veerasamyn
  */
 
-public class DirectorySweeperProcessor extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class DirectorySweeperProcessor extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeperProcessor.class);
 
@@ -92,7 +92,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 		} else {
 			executeRequest();
 		}
@@ -102,7 +102,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
-		String fileRenameFormat = getDynamicProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
+		String fileRenameFormat = getCustomProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
@@ -124,7 +124,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			// Read from mailbox property - grouping js location
 			List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
-			String sweepedFileLocation = processMountLocation(getDynamicProperties().getProperty(
+			String sweepedFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
 					MailBoxConstants.SWEEPED_FILE_LOCATION));
 			if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
                 LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
@@ -164,8 +164,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 
 	/**
-	 * Method is used to retrieve all the WorkTickets from the given mailbox. 
-	 * 	  
+	 * Method is used to retrieve all the WorkTickets from the given mailbox.
+	 *
 	 * @param root
 	 *            The mailbox root directory
 	 * @param includeSubDir
@@ -213,7 +213,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 	/**
 	 * Method to get the pipe line id from the remote processor properties.
-	 * 
+	 *
 	 * @return
 	 * @throws JAXBException
 	 * @throws JsonParseException
@@ -234,7 +234,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 	/**
 	 * Grouping the files based on the payload threshold and no of files threshold.
-	 * 
+	 *
 	 * @param workTickets
 	 *            Group of all workTickets in a WorkTicketGroup.
 	 * @return List of WorkTicketGroup
@@ -253,6 +253,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
 
 			// Use custom G2JavascriptEngine
+			//TODO
 			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
 
 		} else {
@@ -266,7 +267,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			workTicketGroup.setWorkTicketGroup(workTicketsInGroup);
 			for (WorkTicket workTicket : workTickets) {
 
-				if (validateAdditionalGroupWorkTicket(workTicketGroup, workTicket)) {
+				if (canAddToGroup(workTicketGroup, workTicket)) {
 					workTicketGroup.getWorkTicketGroup().add(workTicket);
 				} else {
 					if (!workTicketGroup.getWorkTicketGroup().isEmpty()) {
@@ -292,7 +293,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
     /**
 	 * Method to post meta data to rest service/ queue.
-	 * 
+	 *
 	 * @param input
 	 *            The input message to queue.
 	 */
@@ -306,7 +307,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * Method is used to rename the processed files using given file rename
 	 * format. If sweepedFileLocation is available in the mailbox files will be moved to the given
 	 * location.
-	 * 
+	 *
 	 * @param workTickets
 	 *            WorkTickets list.
 	 * @param fileRenameFormat
@@ -315,8 +316,8 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 	 * @throws JSONException
 	 * @throws FS2Exception
 	 * @throws URISyntaxException
-	 * @throws JAXBException 
-	 * @throws JsonParseException 
+	 * @throws JAXBException
+	 * @throws JsonParseException
 	 */
 	public void markAsSweeped(List<WorkTicket> workTickets, String fileRenameFormat, String sweepedFileLocation)
 			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException {
@@ -332,14 +333,14 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 		LOGGER.info("Renaming the processed files");
 		for (WorkTicket workTicket : workTickets) {
-			
+
 			File payloadFile = new File(workTicket.getPayloadURI());
 			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 					: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
-			FS2Util.isEncryptionRequired = this.getRemoteProcessorProperties().isSecuredPayload();
+			FS2Util.isEncryptionRequired = this.getProperties().isSecuredPayload();
 			// persist payload in spectrum
 			InputStream payloadToPersist = new FileInputStream(payloadFile);
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
@@ -426,7 +427,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 			workTicket.setFileName(path.toFile().getName());
 		    LOGGER.debug("Foldername {}", path.toFile().getParent());
 		    additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, path.toFile().getParent());
-		    
+
 		    workTicket.setAdditionalContext(additionalContext);
 			workTickets.add(workTicket);
 		}
@@ -438,7 +439,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 	/**
 	 * Checks whether a file is modified with in the given time limit
-	 * 
+	 *
 	 * @param timelimit
 	 *            to check the file is modified with in the given time limit
 	 * @param file
@@ -462,7 +463,7 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 
 	/**
 	 * Checks recently in-progress files are completed or not
-	 * 
+	 *
 	 * @param inprogressFiles
 	 *            list of recently update files
 	 * @param timelimit
@@ -488,17 +489,17 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		inprogressFiles.clear();//Clearing the recently updated files after the second call.
 		return generateWorkTickets(files);
 	}
-	
+
 	/**
 	 * Method to construct FS2ObjectHeaders from the given workTicket
-	 * 
+	 *
 	 * @param workTicket
 	 * @return FS2ObjectHeaders
-	 * @throws IOException 
-	 * @throws MailBoxServicesException 
+	 * @throws IOException
+	 * @throws MailBoxServicesException
 	 */
 	private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket) throws MailBoxServicesException, IOException {
-		
+
 		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
 		fs2Header.addHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, workTicket.getPayloadSize().toString());
@@ -508,6 +509,78 @@ public class DirectorySweeperProcessor extends AbstractRemoteProcessor implement
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, configurationInstance.getMailbox().getTenancyKey());
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 		return fs2Header;
+	}
+
+	/**
+	 * Use to validate the given file can be added in the given group.
+	 *
+	 * @param fileGroup
+	 *            The file attributes group
+	 * @param fileAttribute
+	 *            The file attribute to be added in the group
+	 * @return true if it can be added false otherwise
+	 * @throws MailBoxServicesException
+	 */
+	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket) throws MailBoxServicesException {
+
+		long maxPayloadSize = 0;
+		long maxNoOfFiles = 0;
+
+		try {
+
+			String payloadSize = getCustomProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
+			String maxFile = getCustomProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
+			if (!MailBoxUtil.isEmpty(payloadSize)) {
+				maxPayloadSize = Long.parseLong(payloadSize);
+			}
+			if (!MailBoxUtil.isEmpty(maxFile)) {
+				maxNoOfFiles = Long.parseLong(maxFile);
+			}
+
+		} catch (NumberFormatException e) {
+			throw new MailBoxServicesException("The given threshold size is not a valid one.", Response.Status.CONFLICT);
+		}
+
+		if (maxPayloadSize == 0) {
+			maxPayloadSize = 131072;
+		}
+		if (maxNoOfFiles == 0) {
+			maxNoOfFiles = 10;
+		}
+
+		if (maxNoOfFiles <= workTicketGroup.getWorkTicketGroup().size()) {
+			return false;
+		}
+
+		if (maxPayloadSize <= (getWorkTicketGroupFileSize(workTicketGroup) + workTicket.getPayloadSize())) {
+			return false;
+		}
+		return true;
+	}
+
+
+	/**
+	 * Get the total file size of the group.
+	 *
+	 * @param fileGroup
+	 * @return
+	 */
+
+	private long getWorkTicketGroupFileSize(WorkTicketGroup workTicketGroup) {
+
+		long size = 0;
+
+		for (WorkTicket workTicket : workTicketGroup.getWorkTicketGroup()) {
+			size += workTicket.getPayloadSize();
+		}
+
+		return size;
+	}
+
+	@Override
+	public Object getClient() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -28,25 +28,28 @@ import com.liaison.commons.scripting.javascript.JavascriptExecutor;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.core.processor.AbstractProcessor;
+import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
+import com.liaison.mailbox.service.executor.javascript.JavascriptValidator;
 
 /**
  * This class load the javascript content from various protocol and execute the javascript content in Java ScriptEngine.
- *  
+ *
  * @author OFS
  *
  */
 public final class JavaScriptEngineUtil {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(JavaScriptEngineUtil.class);
 	private static final String SCTIPT_TYPE = "JavaScript";
-	
+
     //create a script engine manager
     ScriptEngineManager manager = new ScriptEngineManager();
-	
+
     /**
-     * Load the script from provided script path and create the new ScriptEngine object and executes the script in script engine. 
+     * Load the script from provided script path and create the new ScriptEngine object and executes the script in script engine.
      * Call the Javascript method using <b>invokeFunction</b> and return the script response.
-     * 
+     *
      * @param scriptPath String
      * @param methodName String
      * @param parameters Object[]
@@ -56,15 +59,15 @@ public final class JavaScriptEngineUtil {
      * @throws ScriptException
      * @throws LiaisonException
      */
-	protected Object executeJavaScriptMethod(String scriptPath, String methodName, Object... parameters) 
+	protected Object executeJavaScriptMethod(String scriptPath, String methodName, Object... parameters)
 			throws NoSuchMethodException, MalformedURLException, ScriptException, LiaisonException, IOException {
-		
+
 		return getScriptEngineInvocable(scriptPath).invokeFunction(methodName, parameters);
 	}
-	
+
 	/**
 	 * Invoke the javascript method in ScriptEngine and return the invoked javascript response object.
-	 * 
+	 *
 	 * @param invocable Invocable
 	 * @param methodName String
 	 * @param parameters Object[]
@@ -74,47 +77,47 @@ public final class JavaScriptEngineUtil {
 	 * @throws ScriptException
 	 * @throws LiaisonException
 	 */
-	protected Object executeJavaScriptMethod(Invocable invocable, String methodName, Object... parameters) 
+	protected Object executeJavaScriptMethod(Invocable invocable, String methodName, Object... parameters)
 			throws NoSuchMethodException, MalformedURLException, ScriptException, LiaisonException {
-		
+
 		return invocable.invokeFunction(methodName, parameters);
 	}
-	
+
 	/**
 	 * Create the new ScriptEngine object and executes the specified script in script engine.
-	 * 
+	 *
 	 * @param scriptPath String
 	 * @return Invocable
 	 * @throws ScriptException
 	 * @throws MalformedURLException
 	 * @throws LiaisonException
 	 */
-	protected Invocable getScriptEngineInvocable(String scriptPath) 
+	protected Invocable getScriptEngineInvocable(String scriptPath)
 		throws ScriptException, MalformedURLException, LiaisonException, IOException {
-		
+
 		ScriptEngine engine = getScriptEngine();
-		String script = getScriptContent(scriptPath);		
+		String script = getScriptContent(scriptPath);
 		loadJavaScriptInEngine(engine, script);
 		return (Invocable) engine;
 	}
-	
-	private String getScriptContent(String scriptPath) 
+
+	private String getScriptContent(String scriptPath)
 		throws MalformedURLException, LiaisonException, IOException {
-		
+
 		String response = null;
-	
+
 		if (scriptPath.startsWith("http://")) {
 			response = HTTPClientUtil.getHTTPResponseInString(LOGGER, scriptPath, null);
         } else {
 			response = ServiceUtils.readFileFromClassPath(scriptPath);
 		}
-		
+
 		return response;
 	}
-	
+
 	/**
 	 * Get the <b>ScriptEngine</b> object from <b>ScriptEngineManager</b> using script engine name.
-	 * 
+	 *
 	 * @return ScriptEngine
 	 */
 	private ScriptEngine getScriptEngine() {
@@ -122,7 +125,7 @@ public final class JavaScriptEngineUtil {
 	}
 	/**
 	 * Executes the specified script in given script engine.
-	 * 
+	 *
 	 * @param engine ScriptEngine
 	 * @param script String
 	 * @throws ScriptException
@@ -130,48 +133,48 @@ public final class JavaScriptEngineUtil {
 	private void loadJavaScriptInEngine(ScriptEngine engine, String script) throws ScriptException {
 		 engine.eval(script);
 	}
-	
-	
+
+
 	/**
 	 * Executes the specified method in the javascript available
 	 *  in the script path provided using G2 custom Js engine.
-	 * 
+	 *
 	 * @param scriptPath String
 	 * @param methodName String
 	 * @Param parameters Object
 	 * @return Object
 	 * @throws Exception
-	 * 
+	 *
 	 */
 	public static Object executeJavaScript(String scriptPath, String methodName,  Object... parameters) throws Exception {
-		
+
 		Exception expectedException = null;
-		
+
 		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 		JavascriptScriptContext scriptContext = null;
-		
+
 		URI myUri = null;
-		
+
 		String scriptName = scriptPath;
-		
+
 		String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
 				  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
 		scriptPath = gitlabDirectory+"/"+scriptPath;
-		
+
 		if(scriptPath.contains("gitlab:")) {
 			myUri = new URI(scriptPath);
 		}
-					
+
 		if (scriptContext == null) {
-		     
+
 		    try (InputStreamReader reader = new InputStreamReader(System.in); PrintWriter outputWriter = new PrintWriter(System.out);
 		            PrintWriter errorWriter = new PrintWriter(System.err)) {
 		        scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
 		    }
-			
+
 		}
 	    scriptExecutor.setScriptContext(scriptContext);
-	    
+
 	    Object returnValue = scriptExecutor.executeInContext(scriptContext, scriptName, myUri, methodName, parameters);
 
 	    // did my function call throw?
@@ -179,8 +182,48 @@ public final class JavaScriptEngineUtil {
 	    if (null != expectedException) {
 	       	throw expectedException;
 	    }
-	    
-	    return returnValue;	
+
+	    return returnValue;
+	}
+
+	/**
+	 * Executes the specified method in the javascript available
+	 *  in the script path provided using G2 custom Js engine.
+	 *
+	 * @param scriptPath String
+	 * @param methodName String
+	 * @Param parameters Object
+	 * @return Object
+	 * @throws Exception
+	 *
+	 */
+	public static Object executeJavaScript(String scriptPath, ProcessorJavascriptI processorService) throws Exception {
+
+		JavascriptScriptContext scriptContext = null;
+
+		URI scriptUri = null;
+
+		String scriptName = scriptPath;
+
+		String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
+				  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
+		scriptPath = gitlabDirectory+"/"+scriptPath;
+
+		if (scriptPath.contains("gitlab:")) {
+			scriptUri = new URI(scriptPath);
+		}
+
+	    com.liaison.mailbox.service.executor.javascript.JavascriptExecutor exec = new com.liaison.mailbox.service.executor.javascript.JavascriptExecutor(scriptUri.toString(), processorService);
+	    scriptContext = exec.call();
+
+	    // did my function call throw?
+	    Map<String, Exception> exceptionMap = ((Map<String, Exception>) scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS));
+	    Exception expectedException = exceptionMap.get(scriptName + ":" + JavascriptValidator.PROCESS_FUNCTION_NAME);
+	    if (null != expectedException) {
+	       	throw expectedException;
+	    }
+
+	    return scriptContext;
 	}
 }
 

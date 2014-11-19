@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -50,10 +50,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author OFS
  */
-public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(SFTPRemoteUploader.class);
 
@@ -67,7 +67,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 	/**
 	 * Java method to inject the G2SFTP configurations
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
@@ -75,20 +75,20 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws JSONException 
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyStoreException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws CertificateEncodingException 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JSONException
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 * @throws CertificateEncodingException
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	@Override
-	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+	public G2SFTPClient getHttpClient() throws LiaisonException, IOException, JAXBException,
 			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
 		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
@@ -99,7 +99,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 	/**
 	 * Java method to execute the SFTPrequest to upload the file or folder
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
@@ -108,22 +108,22 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws JSONException 
-	 * @throws JsonParseException 
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyStoreException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws CertificateEncodingException 
-	 * 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 * @throws CertificateEncodingException
+	 *
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) throws LiaisonException, IOException, JAXBException, URISyntaxException,
 			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
-		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
+		G2SFTPClient sftpRequest = getHttpClient();
 		sftpRequest.connect();
 
 		String path = getPayloadURI();
@@ -134,7 +134,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		}
 
 		if (sftpRequest.openChannel()) {
-			
+
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
@@ -162,20 +162,20 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 		}
 		// remove the private key once connection established successfully
-		removePrivateKey();		
+		removePrivateKeyFromTemp();
 		sftpRequest.disconnect();
 
 	}
 
 	/**
 	 * Java method to upload the file or folder
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws SftpException
 	 * @throws MailBoxServicesException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 *
 	 */
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, com.liaison.commons.exception.LiaisonException {
@@ -185,13 +185,13 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 		// variable to hold the status of file upload request execution
 		int replyCode = -1;
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
-		
+
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
-		
+
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
-				
+
 				//interrupt signal check
 				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					lastCheckTime = new Date();
@@ -204,7 +204,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 						return;
 					}
 				}
-				
+
 				if (item.getName().equals(".") || item.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
@@ -244,11 +244,11 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 				}
 
 				if (null != item) {
-					
+
 					// File Uploading done successfully so move the file to processed folder
 					if (replyCode == 0) {
-						
-						String processedFileLocation = processMountLocation(getDynamicProperties().getProperty(
+
+						String processedFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
 								MailBoxConstants.PROCESSED_FILE_LOCATION));
 						if (MailBoxUtil.isEmpty(processedFileLocation)) {
 							archiveFile(item.getAbsolutePath(), false);
@@ -256,9 +256,9 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 							archiveFile(item, processedFileLocation);
 						}
 					} else {
-						
+
 						// File Uploading failed so move the file to error folder
-						String errorFileLocation = processMountLocation(getDynamicProperties().getProperty(
+						String errorFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
 								MailBoxConstants.ERROR_FILE_LOCATION));
 						if (MailBoxUtil.isEmpty(errorFileLocation)) {
 							archiveFile(item.getAbsolutePath(), true);
@@ -266,7 +266,7 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 							archiveFile(item, errorFileLocation);
 						}
 					}
-					
+
 				}
 			}
 		}
@@ -274,43 +274,49 @@ public class SFTPRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
-		
+
 		LOGGER.debug("Entering in invoke.");
 		// SFTPRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			
+
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// SFTPRequest executed through Java
 			executeRequest(executionId, fsm);
 		}
 	}
-	
+
 	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
-		
+
 		boolean isFileExists = false;
-		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
+		G2SFTPClient sftpRequest = getHttpClient();
 		sftpRequest.connect();
 
 		if (sftpRequest.openChannel()) {
-			
+
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
 				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 			}
-			
+
 			List <String> files = sftpRequest.listFiles(remotePath);
-			isFileExists = (null != files && !files.isEmpty());	
+			isFileExists = (null != files && !files.isEmpty());
 		}
 
 		sftpRequest.disconnect();
 		return isFileExists;
 	}
-	
-	
+
+	@Override
+	public Object getClient() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 }

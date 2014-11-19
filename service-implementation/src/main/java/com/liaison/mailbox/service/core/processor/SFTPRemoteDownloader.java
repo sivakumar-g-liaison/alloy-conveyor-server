@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -48,10 +48,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * SFTP remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author OFS
  */
-public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(SFTPRemoteDownloader.class);
 
@@ -65,7 +65,7 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 	/**
 	 * Java method to inject the G2SFTP configurations
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
@@ -73,20 +73,20 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws URISyntaxException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JsonParseException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws JSONException 
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyStoreException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws CertificateEncodingException 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JSONException
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 * @throws CertificateEncodingException
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	@Override
-	public G2SFTPClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
+	public G2SFTPClient getHttpClient() throws LiaisonException, IOException, JAXBException,
 			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
 		// Convert the json string to DTO
@@ -98,34 +98,34 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 	/**
 	 * Java method to execute the SFTPrequest
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws JAXBException
 	 * @throws SymmetricAlgorithmException
 	 * @throws SftpException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws JSONException 
-	 * @throws JsonParseException 
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyStoreException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws CertificateEncodingException 
-	 * 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 * @throws CertificateEncodingException
+	 *
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	private void executeSFTPRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
 			FS2Exception, MailBoxServicesException, SymmetricAlgorithmException, SftpException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
-		G2SFTPClient sftpRequest = getClientWithInjectedConfiguration();
+		G2SFTPClient sftpRequest = getHttpClient();
 		sftpRequest.connect();
 
 		if (sftpRequest.openChannel()) {
-			
+
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given payload URI is Empty.");
@@ -140,21 +140,21 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 			downloadDirectory(sftpRequest, path, remotePath);
 		}
 		// remove the private key once connection established successfully
-		removePrivateKey();
+		removePrivateKeyFromTemp();
 		sftpRequest.disconnect();
 	}
 
 	/**
 	 * Java method to download the folder and its files
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws FS2Exception
 	 * @throws MailBoxServicesException
 	 * @throws SftpException
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * 
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 *
 	 */
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
 			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException, SftpException, com.liaison.commons.exception.LiaisonException {
@@ -176,8 +176,8 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					continue;
 				}
 				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
-				
-				
+
+
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + root.getName();
@@ -194,13 +194,13 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 					// String remotePath = dirToList + "/" + root.getName();
 					String localDir = localFileDir + File.separatorChar + root.getName();
 					sftpRequest.changeDirectory(dirToList);
-					processResponseLocation(localDir);
+					createResponseDirectory(localDir);
 					try (FileOutputStream fos = new FileOutputStream(localDir);
 		                 BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 					     sftpRequest.getFile(root.getName(), bos);
 					}
-					
-					
+
+
 				}
 			}
 		}
@@ -208,19 +208,25 @@ public class SFTPRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
-		
+
 		LOGGER.debug("Entering in invoke.");
 		// G2SFTP executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			
+
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// G2SFTP executed through Java
 			executeSFTPRequest();
 		}
+	}
+
+	@Override
+	public Object getClient() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

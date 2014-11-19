@@ -29,7 +29,8 @@ import com.liaison.commons.message.glass.dom.MetricTag;
 import com.liaison.commons.scripting.ScriptExecutorBase;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.IdentifierUtil;
-import com.liaison.mailbox.service.core.processor.AbstractRemoteProcessor;
+import com.liaison.mailbox.service.core.processor.AbstractProcessor;
+import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
 import com.liaison.mailbox.service.executor.ContextCreator;
 
 /**
@@ -54,12 +55,12 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 	protected JavascriptScriptContext scriptContext = null;
 	protected String script = null;
-	protected AbstractRemoteProcessor processor = null;
+	protected ProcessorJavascriptI processor = null;
 	protected MetricAPI metricAPI = new MetricAPI();
 
 	private static final Logger logger = LogManager.getLogger(JavascriptExecutor.class);
 
-	public JavascriptExecutor(String script, AbstractRemoteProcessor processor) {
+	public JavascriptExecutor(String script, ProcessorJavascriptI processorService) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("mailbox - JavascriptExecutor.JavascriptExecutor(): called(): script: " + script);

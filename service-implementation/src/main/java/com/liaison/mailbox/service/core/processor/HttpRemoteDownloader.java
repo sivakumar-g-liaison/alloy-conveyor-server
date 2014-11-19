@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -51,10 +51,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Http remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author OFS
  */
-public class HttpRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(HttpRemoteDownloader.class);
 
@@ -76,9 +76,9 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			
+
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// HTTPRequest executed through Java
@@ -88,56 +88,56 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws JAXBException
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
 	 * @throws KeyStoreException
 	 * @throws CertificateException
 	 * @throws NoSuchAlgorithmException
-	 * @throws JSONException 
-	 * @throws JsonParseException 
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * 
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 *
 	 */
 	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException,
 			KeyStoreException, NoSuchAlgorithmException, CertificateException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
 
-		HTTPRequest request = (HTTPRequest) getClientWithInjectedConfiguration();
+		HTTPRequest request = (HTTPRequest) getHttpClient();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096);
         request.setOutputStream(responseStream);
-        
+
         HTTPResponse response = null;
         boolean failedStatus = false;
-           
+
 		// Set the pay load value to http client input data for POST & PUT
 		// request
 		File[] files = null;
-		
-		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
-		    
-		    RemoteProcessorPropertiesDTO remoteProcessorProperties = getRemoteProcessorProperties();
 
-		    files = getProcessorPayload();
+		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+
+		    RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
+
+		    files = getFilesToUpload();
 			if (null != files) {
 
 				for (File entry : files) {
-				    
+
 				    try (InputStream contentStream = FileUtils.openInputStream(entry)) {
-				        
+
 				        request.inputData(contentStream, remoteProcessorProperties.getContentType());
-	                    
+
 	                    response = request.execute();
 	                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
 	                    if (response.getStatusCode() != 200) {
@@ -155,7 +155,7 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
 	                        }
 	                    }
-				    }	                          
+				    }
 				}
 				if (failedStatus) {
                     throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
@@ -165,12 +165,12 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		    response = request.execute();
 	        writeResponseToMailBox(responseStream);
 		}
-		
+
 	}
-	
+
 	   /**
      * Delegate method to archive the file.
-     * 
+     *
      * @param file
      * @param locationName
      * @param isError
@@ -178,11 +178,17 @@ public class HttpRemoteDownloader extends AbstractRemoteProcessor implements Mai
      */
     private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException {
 
-        String fileLocation = processMountLocation(getDynamicProperties().getProperty(locationName));
+        String fileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(locationName));
         if (MailBoxUtil.isEmpty(fileLocation)) {
             archiveFile(file.getAbsolutePath(), isError);
         } else {
             archiveFile(file, fileLocation);
         }
     }
+
+	@Override
+	public Object getClient() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

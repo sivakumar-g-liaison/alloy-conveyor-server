@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -52,10 +52,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Http remote uploader to perform push operation, also it has support methods for JavaScript.
- * 
+ *
  * @author veerasamyn
  */
-public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(HttpRemoteUploader.class);
 
@@ -70,7 +70,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
@@ -81,16 +81,16 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 * @throws CertificateException
 	 * @throws NoSuchAlgorithmException
 	 * @throws SymmetricAlgorithmException
-	 * @throws JSONException 
-	 * @throws JsonParseException 
-	 * @throws com.liaison.commons.exception.LiaisonException 
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * 
+	 * @throws JSONException
+	 * @throws JsonParseException
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 *
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	public void executeRequest(String executionId,MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
 			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
@@ -100,22 +100,22 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		HTTPResponse response = null;
 		boolean failedStatus = false;
 
-		RemoteProcessorPropertiesDTO remoteProcessorProperties = getRemoteProcessorProperties();
+		RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
 
 		// Set the pay load value to http client input data for POST & PUT request
 		File[] files = null;
 		if ("POST".equals(remoteProcessorProperties.getHttpVerb())
 				|| "PUT".equals(remoteProcessorProperties.getHttpVerb())) {
 
-			files = getProcessorPayload();
+			files = getFilesToUpload();
 			if (null != files) {
-				
+
 				FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 				Date lastCheckTime = new Date();
 				String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
-				
+
 				for (File entry : files) {
-					
+
 					//interrupt signal check
 					if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 						lastCheckTime = new Date();
@@ -128,14 +128,14 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 							return;
 						}
 					}
-		
+
 					try (InputStream contentStream = FileUtils.openInputStream(entry); ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
-					    
-					    request = (HTTPRequest) getClientWithInjectedConfiguration();
+
+					    request = (HTTPRequest) getHttpClient();
 	                    request.setOutputStream(responseStream);
-					    
+
 					    request.inputData(contentStream, remoteProcessorProperties.getContentType());
-	                    
+
 	                    response = request.execute();
 	                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
 	                    if (response.getStatusCode() != 200) {
@@ -154,7 +154,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	                        }
 	                    }
 					}
-					
+
 				}
 
 				if (failedStatus) {
@@ -165,12 +165,12 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 			}
 		}
-		
+
 	}
 
 	/**
 	 * Delegate method to archive the file.
-	 * 
+	 *
 	 * @param file
 	 * @param locationName
 	 * @param isError
@@ -178,7 +178,7 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 	 */
 	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException {
 
-		String fileLocation = processMountLocation(getDynamicProperties().getProperty(locationName));
+		String fileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(locationName));
 		if (MailBoxUtil.isEmpty(fileLocation)) {
 			archiveFile(file.getAbsolutePath(), isError);
 		} else {
@@ -192,16 +192,22 @@ public class HttpRemoteUploader extends AbstractRemoteProcessor implements MailB
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this,LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// HTTPRequest executed through Java
 			executeRequest(executionId, fsm);
 		}
 	}
-	
+
 	protected boolean checkFileExistence() {
 		// TODO: Implementation Logic for file existence
 		return false;
+	}
+
+	@Override
+	public Object getClient() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

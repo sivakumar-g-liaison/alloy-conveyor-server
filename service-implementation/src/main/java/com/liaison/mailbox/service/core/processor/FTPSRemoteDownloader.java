@@ -13,8 +13,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -38,19 +40,23 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
+import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
  *
  */
-public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements MailBoxProcessor {
+public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 
 	private static final Logger LOGGER = LogManager.getLogger(FTPSRemoteDownloader.class);
 
@@ -69,46 +75,12 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), "init", this, LOGGER);
+			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// FTPSRequest executed through Java
 			executeRequest();
 		}
-	}
-
-	/**
-	 * Java method to inject the G2SFTP configurations
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws MailBoxServicesException
-	 * @throws URISyntaxException
-	 * @throws SymmetricAlgorithmException
-	 * @throws JsonParseException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws KeyStoreException
-	 * @throws CertificateException
-	 * @throws NoSuchAlgorithmException
-	 * @throws BootstrapingFailedException
-	 * @throws OperatorCreationException
-	 * @throws CMSException
-	 * @throws UnrecoverableKeyException
-	 * @throws MailBoxConfigurationServicesException
-	 *
-	 */
-	@Override
-	public G2FTPSClient getClientWithInjectedConfiguration() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException,
-			com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException,
-			KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException,
-			BootstrapingFailedException {
-
-		G2FTPSClient ftpsRequest = getFTPSClient(LOGGER);
-		return ftpsRequest;
-
 	}
 
 	/**
@@ -134,22 +106,18 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 	 * @throws BootstrapingFailedException
 	 *
 	 */
-	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, SymmetricAlgorithmException, JsonParseException,
-			com.liaison.commons.exception.LiaisonException, NoSuchAlgorithmException, CertificateException,
-			KeyStoreException, JSONException, UnrecoverableKeyException, OperatorCreationException, CMSException,
-			BootstrapingFailedException {
+	protected void executeRequest() throws Exception {
 
-		G2FTPSClient ftpsRequest = getClientWithInjectedConfiguration();
+		G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
 
 		ftpsRequest.enableSessionReuse(true);
 		ftpsRequest.connect();
 		ftpsRequest.login();
 		ftpsRequest.enableDataChannelEncryption();
 
-		if (getRemoteProcessorProperty() != null) {
-			ftpsRequest.setBinary(getRemoteProcessorProperty().isBinary());
-			ftpsRequest.setPassive(getRemoteProcessorProperty().isPassive());
+		if (getProperties() != null) {
+			ftpsRequest.setBinary(getProperties().isBinary());
+			ftpsRequest.setPassive(getProperties().isPassive());
 		}
 
 		String path = getPayloadURI();
@@ -217,7 +185,7 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 
 					String localDir = localFileDir + File.separatorChar + currentFileName;
 					ftpClient.changeDirectory(dirToList);
-					processResponseLocation(localDir);
+					createResponseDirectory(localDir);
 
 					try {// GSB-1337,GSB-1336
 
@@ -241,5 +209,80 @@ public class FTPSRemoteDownloader extends AbstractRemoteProcessor implements Mai
 				}
 			}
 		}
+	}
+
+	@Override
+	public Object getClient() throws Exception {
+
+		// Convert the json string to DTO
+		RemoteProcessorPropertiesDTO properties = MailBoxUtil
+				.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
+						RemoteProcessorPropertiesDTO.class);
+
+		G2FTPSClient ftpsRequest = new G2FTPSClient();
+		ftpsRequest.setURI(properties.getUrl());
+		ftpsRequest.setDiagnosticLogger(LOGGER);
+		ftpsRequest.setCommandLogger(LOGGER);
+		ftpsRequest.setConnectionTimeout(properties.getConnectionTimeout());
+
+		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
+		ftpsRequest.setRetryCount(properties.getRetryAttempts());
+
+		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
+
+		/*
+		 * For FTPS, SFTP, and FTP processors credential password will be
+		 * getting from KM
+		 */
+		if ((loginCredential != null)) {
+
+			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
+
+			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
+					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
+				ftpsRequest.setUser(loginCredential.getCredsUsername());
+				ftpsRequest.setPassword(passwordFromKMS);
+			}
+		}
+
+		// Configure keystore for HTTPS request
+		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("ftps")) {
+
+			KeyStore trustStore = KeyStore.getInstance(KeyStore
+					.getDefaultType());
+			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
+			if (trustStoreCredential != null) {
+				// If no certificate is configured then use default global
+				// trustoreid
+				String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential
+						.getCredsIdpUri())) ? (MailBoxUtil
+						.getEnvironmentProperties()
+						.getString("mailbox.global.trustgroup.id"))
+						: trustStoreCredential.getCredsIdpUri();
+				InputStream instream = KMSUtil.fetchTrustStore(trustStoreID);
+
+				if (instream == null) {
+					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
+				}
+
+				try {
+
+					trustStore.load(instream, null);
+
+				} finally {
+				    try {
+                        if (null != instream) {
+                            instream.close();
+                        }
+                    } catch (IOException e) {
+                        LOGGER.error("Cannot close stream while fetching trustore from key manager.");
+                    }
+				}
+
+				ftpsRequest.setTrustStore(trustStore);
+			}
+
+		}
+		return ftpsRequest;
 	}
 }
