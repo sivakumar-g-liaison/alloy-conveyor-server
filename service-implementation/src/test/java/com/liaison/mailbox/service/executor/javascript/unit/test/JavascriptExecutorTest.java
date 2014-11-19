@@ -7,9 +7,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 import com.liaison.mailbox.service.core.processor.HttpRemoteDownloader;
-import com.liaison.mailbox.service.executor.javascript.JavascriptExecutor;
+import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 
 /**
  * Unit tests for Javascript Executor
@@ -19,7 +19,7 @@ import com.liaison.mailbox.service.executor.javascript.JavascriptExecutor;
  */
 public class JavascriptExecutorTest {
 
-	public AbstractProcessor processorService;
+	public ProcessorJavascriptI processorService;
 
 	@BeforeClass
 	public void createProcessor() {
@@ -35,8 +35,7 @@ public class JavascriptExecutorTest {
 		String scriptRelativePath = "processor-scripts/veera/noop.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
 
-		JavascriptExecutor exec = new JavascriptExecutor(scriptUri.toString(), processorService);
-		exec.call();
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 	}
 
 	//java.lang.RuntimeException: Script 'gitlab:/processor-scripts/veera/invalidfunction.js' is invalid: Script 'gitlab:/processor-scripts/veera/invalidfunction.js' is missing required function 'process'.
@@ -49,8 +48,8 @@ public class JavascriptExecutorTest {
 		String scriptRelativePath = "processor-scripts/veera/invalidfunction.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
 
-		JavascriptExecutor exec = new JavascriptExecutor(scriptUri.toString(), processorService);
-		exec.call();
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
+
 	}
 
 	//java.lang.RuntimeException: After evaluating script 'gitlab:/processor-scripts/veera/invalid.js', script engine is null. There must have been an error evaluating the script.
@@ -63,8 +62,7 @@ public class JavascriptExecutorTest {
 		String scriptRelativePath = "processor-scripts/veera/invalid.js";
 		URI scriptUri = new URI("gitlab:/" + scriptRelativePath);
 
-		JavascriptExecutor exec = new JavascriptExecutor(scriptUri.toString(), processorService);
-		exec.call();
+		JavaScriptExecutorUtil.executeJavaScript(scriptUri, processorService);
 
 	}
 

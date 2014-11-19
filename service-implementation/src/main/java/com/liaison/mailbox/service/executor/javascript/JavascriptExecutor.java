@@ -67,6 +67,16 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 		this.processor = processorService;
 	}
 
+	public JavascriptExecutor(URI script, ProcessorJavascriptI processorService) {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("mailbox - JavascriptExecutor.JavascriptExecutor(): called(): script: " + script);
+		}
+		this.script = script.toString();
+		this.processor = processorService;
+	}
+
+
 	public JavascriptScriptContext call() {
 
 		if (script != null) {
@@ -110,7 +120,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 		// Eval the script so we can check to be sure it is valid (has the expected functions).
 		// Passing fqn as the function name will just eval the script and not run anything.
-		je.executeInContext(scriptContext, script, scriptUri, script);
+		je.executeInContext(scriptContext, script, scriptUri, null);
 		if (logger.isDebugEnabled()) {
 			logger.debug("mailbox: JavascriptExecutor.runScript(): executeInContext() called. No function name.");
 		}

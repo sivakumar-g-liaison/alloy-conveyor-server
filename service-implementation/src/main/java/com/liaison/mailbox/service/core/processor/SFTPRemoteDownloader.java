@@ -43,7 +43,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -188,7 +188,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
 			// Use custom G2JavascriptEngine
-			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// G2SFTP executed through Java

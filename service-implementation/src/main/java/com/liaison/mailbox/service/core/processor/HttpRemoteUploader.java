@@ -48,7 +48,7 @@ import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -197,7 +197,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// HTTPRequest executed through Java

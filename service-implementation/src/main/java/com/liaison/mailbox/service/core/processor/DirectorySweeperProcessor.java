@@ -51,7 +51,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 import com.liaison.mailbox.service.util.FS2Util;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -92,7 +92,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			// Use custom G2JavascriptEngine
-			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 		} else {
 			executeRequest();
 		}
@@ -261,7 +261,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 			// Use custom G2JavascriptEngine
 			//TODO
-			JavaScriptUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
+			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
 
 		} else {
 

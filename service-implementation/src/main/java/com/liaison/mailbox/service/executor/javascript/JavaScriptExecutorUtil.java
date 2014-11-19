@@ -28,10 +28,10 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  *
  */
-public final class JavaScriptUtil {
+public final class JavaScriptExecutorUtil {
 
 	//TODO use logging
-	private static final Logger LOGGER = LogManager.getLogger(JavaScriptUtil.class);
+	private static final Logger LOGGER = LogManager.getLogger(JavaScriptExecutorUtil.class);
 
 	/**
 	 * Executes the specified method in the javascript available
@@ -108,7 +108,7 @@ public final class JavaScriptUtil {
 		try {
 
 			String gitlabDirectory = (String) MailBoxUtil.getEnvironmentProperties().getProperty(
-					  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER );
+					  MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER);
 			scriptPath = gitlabDirectory+"/"+scriptPath;
 
 			if (scriptPath.contains("gitlab:")) {
@@ -121,6 +121,39 @@ public final class JavaScriptUtil {
 		    // did my function call throw?
 		    Map<String, Exception> exceptionMap = ((Map<String, Exception>) scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS));
 		    Exception expectedException = exceptionMap.get(scriptName + ":" + JavascriptValidator.PROCESS_FUNCTION_NAME);
+		    if (null != expectedException) {
+		       	throw expectedException;
+		    }
+
+		    return scriptContext;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Executes the specified method in the javascript available
+	 *  in the script uri provided using G2 custom Js engine.
+	 *
+	 * @param scriptPath String
+	 * @param methodName String
+	 * @Param parameters Object
+	 * @return Object
+	 * @throws Exception
+	 *
+	 */
+	public static Object executeJavaScript(URI scriptUri, ProcessorJavascriptI processorService) {
+
+		JavascriptScriptContext scriptContext = null;
+
+		try {
+
+		    com.liaison.mailbox.service.executor.javascript.JavascriptExecutor exec = new com.liaison.mailbox.service.executor.javascript.JavascriptExecutor(scriptUri.toString(), processorService);
+		    scriptContext = exec.call();
+
+		    // did my function call throw?
+		    Map<String, Exception> exceptionMap = ((Map<String, Exception>) scriptContext.getAttribute(JavascriptExecutor.SCRIPT_EXCEPTIONS));
+		    Exception expectedException = exceptionMap.get(scriptUri.toString() + ":" + JavascriptValidator.PROCESS_FUNCTION_NAME);
 		    if (null != expectedException) {
 		       	throw expectedException;
 		    }
