@@ -32,7 +32,14 @@ public class PropertiesFileDTO {
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
 	private String mailboxPguidDisplayPrefix;
+	private String defaultScriptTemplateName;	
 	
+	public String getDefaultScriptTemplateName() {
+		return defaultScriptTemplateName;
+	}
+	public void setDefaultScriptTemplateName(String defaultScriptTemplateName) {
+		this.defaultScriptTemplateName = defaultScriptTemplateName;
+	}
 	public String getFsmEventCheckIntervalInSeconds() {
 		return fsmEventCheckIntervalInSeconds;
 	}

@@ -582,6 +582,8 @@ public class MailBoxConfigurationService {
 					"check.for.interrupt.signal.frequency.in.sec");
 			String mailboxPguidDisplayPrefix = MailBoxUtil.getEnvironmentProperties().getString(
 					"maibox.pguid.display.prefix");
+			String defaultScriptTemplateName = MailBoxUtil.getEnvironmentProperties().getString(
+					"mailbox.script.default.template");
 
 			dto.setTrustStoreId(globalTrustStoreId);
 			dto.setTrustStoreGroupId(globalTrustStoreGroupId);
@@ -592,6 +594,7 @@ public class MailBoxConfigurationService {
 			dto.setListJobsIntervalInHours(listJobsIntervalInHours);
 			dto.setFsmEventCheckIntervalInSeconds(fsmEventCheckIntervalInSeconds);
 			dto.setMailboxPguidDisplayPrefix(mailboxPguidDisplayPrefix);
+			dto.setDefaultScriptTemplateName(defaultScriptTemplateName);
 
 			serviceResponse.setProperties(dto);
 

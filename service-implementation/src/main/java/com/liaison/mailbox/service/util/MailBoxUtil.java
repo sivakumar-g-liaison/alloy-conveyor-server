@@ -202,24 +202,28 @@ public class MailBoxUtil {
 		Platform platform = aclManifestDTO.getPlatform().get(0);
 
 		// retrieve all domains present in platform
-		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():null;
+		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():new ArrayList<RoleBasedAccessControl>();
 		LOGGER.info("Retrieving tenancy key from acl manifest");
+		TenancyKeyDTO tenancyKey = null;
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 				
-				TenancyKeyDTO tenancyKey = new TenancyKeyDTO();
+				tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
 				// if domainInternalName is not available then domainName will be used
 				// only if acl manifest backward compatibility mode is on otherwise exception will be thrown.
-				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) && 
-						!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
-					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
-				}  
-				tenancyKey.setGuid(StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ? (rbac.getDomainName()) : rbac.getDomainInternalName());
-				tenancyKeys.add(tenancyKey);
-		}
+				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ) {
+					if (!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
+						throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);						
+					}
+					tenancyKey.setGuid(rbac.getDomainName());					
+				} else {
+					tenancyKey.setGuid(rbac.getDomainInternalName());
+				} 
+		  tenancyKeys.add(tenancyKey);
+	   }
+		
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
-
 	}
 
 	public static List <String> getTenancyKeyGuidsFromTenancyKeys (List <TenancyKeyDTO> tenancyKeys) {

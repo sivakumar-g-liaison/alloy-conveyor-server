@@ -212,3 +212,6 @@ traditional.acl.request=eyJhY2xSZXF1ZXN0Ijp7ImFjbCI6eyJlbnZlbG9wZSI6eyJnbG9iYWxJ
 
 # G2 service client properties
 client.key-management.baseUrl=http://lsvlkms01d.liaison.dev:8989/key-management
+
+#default script template name
+mailbox.script.default.template=defaultScriptTemplate.js

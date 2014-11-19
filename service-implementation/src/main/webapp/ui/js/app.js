@@ -163,7 +163,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 		gitlabPort: "",
 		gitlabProjectName: "",
 		gitlabBranchName: "",
-		mailboxPguidDisplayPrefix:""
+		mailboxPguidDisplayPrefix: "",
+		defaultScriptTemplateName: ""	
 	};
 	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
 		function (data, status) {
@@ -175,6 +176,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 				$rootScope.javaProperties.gitlabProjectName = data.getPropertiesValueResponseDTO.properties.gitlabProjectName;
 				$rootScope.javaProperties.gitlabBranchName = data.getPropertiesValueResponseDTO.properties.gitlabBranchName;
 				$rootScope.javaProperties.mailboxPguidDisplayPrefix = data.getPropertiesValueResponseDTO.properties.mailboxPguidDisplayPrefix;
+				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
+				
 			} else {
 				return;
 			}

@@ -142,7 +142,7 @@ public class MailBox implements Identifiable {
 		this.mailboxServiceInstances = mailboxServiceInstances;
 	}
 	
-	@Column(name = "TENANCY_KEY", nullable = false, length = 32)
+	@Column(name = "TENANCY_KEY", nullable = false, length = 128)
 	public String getTenancyKey() {
 		return tenancyKey;
 	}

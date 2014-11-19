@@ -3260,7 +3260,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
      $scope.loadDefaultScript = function() {
 	   if (defaultScriptFile === '' || defaultScriptFile !== editor.getSession().getValue()) {
  	     block.blockUI();
-     	 $scope.restService.get($scope.base_url + "/git/content/" + "defaultTemplate.js",
+     	 $scope.restService.get($scope.base_url + "/git/content/" + $scope.javaProperties.defaultScriptTemplateName,
           function (data, status) {
                block.unblockUI();
               if (status === 200) { 			

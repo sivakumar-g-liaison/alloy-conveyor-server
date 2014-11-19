@@ -66,7 +66,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 			logger.debug("mailbox - JavascriptExecutor.JavascriptExecutor(): called(): script: " + script);
 		}
 		this.script = script;
-		this.processor = processor;
+		this.processor = processorService;
 	}
 
 	public JavascriptScriptContext call() {

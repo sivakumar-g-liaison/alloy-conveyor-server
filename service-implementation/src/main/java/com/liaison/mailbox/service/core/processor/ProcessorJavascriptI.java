@@ -12,8 +12,6 @@ import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.logging.log4j.Logger;
-
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
