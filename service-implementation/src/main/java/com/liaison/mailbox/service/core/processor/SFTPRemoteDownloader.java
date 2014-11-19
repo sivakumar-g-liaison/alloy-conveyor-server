@@ -40,9 +40,10 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -61,39 +62,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	public SFTPRemoteDownloader(Processor processor) {
 		super(processor);
-	}
-
-	/**
-	 * Java method to inject the G2SFTP configurations
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws MailBoxServicesException
-	 * @throws URISyntaxException
-	 * @throws SymmetricAlgorithmException
-	 * @throws JsonParseException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws CertificateEncodingException
-	 * @throws MailBoxConfigurationServicesException
-	 *
-	 */
-	@Override
-	public G2SFTPClient getHttpClient() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
-
-		// Convert the json string to DTO
-		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
-
-		return sftpRequest;
-
 	}
 
 	/**
@@ -118,30 +86,34 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws MailBoxConfigurationServicesException
 	 *
 	 */
-	private void executeSFTPRequest() throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SymmetricAlgorithmException, SftpException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
+	private void executeSFTPRequest() {
 
-		G2SFTPClient sftpRequest = getHttpClient();
-		sftpRequest.connect();
+		try {
+			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+			sftpRequest.connect();
 
-		if (sftpRequest.openChannel()) {
+			if (sftpRequest.openChannel()) {
 
-			String path = getPayloadURI();
-			if (MailBoxUtil.isEmpty(path)) {
-				LOGGER.info("The given payload URI is Empty.");
-				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
+				String path = getPayloadURI();
+				if (MailBoxUtil.isEmpty(path)) {
+					LOGGER.info("The given payload URI is Empty.");
+					throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
+				}
+				String remotePath = getWriteResponseURI();
+				if (MailBoxUtil.isEmpty(remotePath)) {
+					LOGGER.info("The given remote URI is Empty.");
+					throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
+				}
+
+				downloadDirectory(sftpRequest, path, remotePath);
 			}
-			String remotePath = getWriteResponseURI();
-			if (MailBoxUtil.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
-			}
-
-			downloadDirectory(sftpRequest, path, remotePath);
+			// remove the private key once connection established successfully
+			removePrivateKeyFromTemp();
+			sftpRequest.disconnect();
+		} catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
+				| SftpException | SymmetricAlgorithmException e) {
+			throw new RuntimeException(e);
 		}
-		// remove the private key once connection established successfully
-		removePrivateKeyFromTemp();
-		sftpRequest.disconnect();
 	}
 
 	/**
@@ -157,7 +129,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 *
 	 */
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException, SftpException, com.liaison.commons.exception.LiaisonException {
+			LiaisonException, URISyntaxException, MailBoxServicesException, SftpException, com.liaison.commons.exception.LiaisonException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {
@@ -207,7 +179,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		// G2SFTP executed through JavaScript
@@ -216,7 +188,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// G2SFTP executed through Java
@@ -226,7 +198,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public Object getClient() {
-		// TODO Auto-generated method stub
-		return null;
+		return ClientFactory.getClient(this);
 	}
 }

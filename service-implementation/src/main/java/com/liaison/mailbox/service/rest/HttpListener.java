@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -64,9 +64,9 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.SessionContext;
 import com.liaison.usermanagement.service.client.UserManagementClient;
@@ -79,7 +79,7 @@ import com.netflix.servo.monitor.Monitors;
 
 /**
  * G2 HTTP Gateway.
- * 
+ *
  * @author OFS
  */
 
@@ -142,7 +142,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will processing the sync message by give request.
-	 * 
+	 *
 	 * @param request
 	 *            The HttpServletRequest
 	 * @return The Response Object
@@ -152,22 +152,22 @@ public class HttpListener extends AuditedResource {
 	@AccessDescriptor(skipFilter=true)
 	public Response handleSync(@Context final HttpServletRequest request,
 							   @QueryParam(value = "mailboxId") final String mailboxPguid) {
-		
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() throws Exception {
-				
+
 				serviceCallCounter.incrementAndGet();
 				InputStream responseInputStream = null;
-				
-				logger.debug("Starting sync processing");				
+
+				logger.debug("Starting sync processing");
 				try {
 					validateRequestSize(request);
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-					
+
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
@@ -176,21 +176,21 @@ public class HttpListener extends AuditedResource {
 						authenticateRequestor(request);
 					}
 					SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);
-					
+
 					logger.debug("Pipeline id is set in session context");
 					assignGlobalProcessId(sessionContext);
 					assignTimestamp(sessionContext);
 					HttpResponse httpResponse = forwardRequest(sessionContext, request);
 					ResponseBuilder builder = Response.ok();
 					responseInputStream = httpResponse.getEntity().getContent();
-					copyResponseInfo(httpResponse, builder, responseInputStream);	
-					
-					return builder.build();					
+					copyResponseInfo(httpResponse, builder, responseInputStream);
+
+					return builder.build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} 		
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
@@ -202,7 +202,7 @@ public class HttpListener extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}			
+		}
 	}
 
 	@POST
@@ -231,7 +231,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will processing the async message by give request.
-	 * 
+	 *
 	 * @param request
 	 *            The HttpServletRequest
 	 * @return The Response Object
@@ -241,43 +241,43 @@ public class HttpListener extends AuditedResource {
 	@AccessDescriptor(skipFilter=true)
 	public Response handleAsync(@Context final HttpServletRequest request,
 								@QueryParam(value = "mailboxId") final String mailboxPguid) {
-		
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() throws Exception {
-				
+
 				serviceCallCounter.incrementAndGet();
-				
+
 				logger.debug("Starting async processing");
 				try {
 					validateRequestSize(request);
-					
+
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-					
+
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
 					if (isAuthenticationCheckRequired(httpListenerProperties)) {
 						authenticateRequestor(request);
-					}					
-					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);					
+					}
+					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 					storePayload(request, workTicket, httpListenerProperties);
 					constructMetaDataJson(request, workTicket);
-					
+
 					return Response
 							.ok()
 							.status(Status.ACCEPTED)
 							.type(MediaType.TEXT_PLAIN)
 							.entity(String.format(
 									"Payload accepted as process ID '%s'",
-									workTicket.getGlobalProcessId())).build();					
+									workTicket.getGlobalProcessId())).build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
+				}
 			}
 		};
 		worker.actionLabel = "HttpListener.handleAsync()";
@@ -290,12 +290,12 @@ public class HttpListener extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
 	}
 
 	/**
 	 * This method will validate the size of the request.
-	 * 
+	 *
 	 * @param request
 	 *            The HttpServletRequest
 	 */
@@ -359,29 +359,29 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will create session context by given request.
-	 * 
+	 *
 	 * @param request
 	 *            the HttpServletRequest
 	 * @return SessionContext
 	 */
-	protected SessionContext createSessionContext(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {		
+	protected SessionContext createSessionContext(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
 		SessionContext sessionContext = new SessionContext();
 		sessionContext.copyFrom(request);
 		sessionContext.setPipelineId(retrievePipelineId(httpListenerProperties));
 		sessionContext.setMailboxId(mailboxPguid);
 		return sessionContext;
 	}
-	
+
 	/**
 	 * This method will create workTicket by given request.
-	 * 
+	 *
 	 * @param request
 	 * @param mailboxPguid
 	 * @param httpListenerProperties
 	 * @return WorkTicket
 	 */
 	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
-		WorkTicket workTicket = new WorkTicket();		
+		WorkTicket workTicket = new WorkTicket();
 		workTicket.setAdditionalContext("httpMethod", request.getMethod());
 		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
 		workTicket.setAdditionalContext("httpRemotePort", request.getRemotePort());
@@ -390,45 +390,45 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
-		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));	
+		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
 		copyRequestHeadersToWorkTicket(request, workTicket);
 		assignAsyncGlobalProcessId(workTicket);
 		assignAsyncTimestamp(workTicket);
-		
-		return workTicket;		
+
+		return workTicket;
 	}
-	
+
 	/**
 	 * Copies all the request header from HttpServletRequest to WorkTicket.
-	 * 
+	 *
 	 * @param request
 	 *        HttpServletRequest
-	 * @param request 
+	 * @param request
 	 *        workTicket
-	 *        
+	 *
 	 */
-	protected void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{	
-		
-		Enumeration<String> headerNames = request.getHeaderNames();		
+	protected void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{
+
+		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements())
 		{
 			String headerName = headerNames.nextElement();
 			List<String> headerValues = new ArrayList<>();
 			Enumeration<String> values = request.getHeaders(headerName);
-			
+
 			while (values.hasMoreElements())
 			{
 				headerValues.add(values.nextElement());
 			}
-			
+
 			workTicket.addHeaders(headerName,  headerValues);
 		}
-		
+
 	}
 
 	/**
 	 * This method will set globalProcessId to sessionContext.
-	 * 
+	 *
 	 * @param sessionContext
 	 */
 	protected void assignGlobalProcessId(SessionContext sessionContext) {
@@ -436,10 +436,10 @@ public class HttpListener extends AuditedResource {
 		String uuid = uuidGen.getUUID();
 		sessionContext.setGlobalProcessId(uuid);
 	}
-	
+
 	/**
 	 * This method will set globalProcessId to workTicket.
-	 * 
+	 *
 	 * @param workTicket
 	 */
 	protected void assignAsyncGlobalProcessId(WorkTicket workTicket) {
@@ -447,18 +447,18 @@ public class HttpListener extends AuditedResource {
 		String uuid = uuidGen.getUUID();
 		workTicket.setGlobalProcessId(uuid);
 	}
-	
+
 	protected void assignTimestamp(SessionContext sessionContext) {
 		sessionContext.setRequestTimestamp(new Date());
 	}
-	
+
 	protected void assignAsyncTimestamp(WorkTicket workTicket) {
 		workTicket.setCreatedTime(new Date());
 	}
 
 	/**
 	 * This method will store the payload file name by given request.
-	 * 
+	 *
 	 * @param request
 	 * @param workTicket
 	 * @throws IOException
@@ -505,11 +505,11 @@ public class HttpListener extends AuditedResource {
 				}
 			}
 		}
-	}				
+	}
 
 	/**
 	 * This method will create payload file name by given workTicket.
-	 * 
+	 *
 	 * @param workTicket
 	 * @return payloadFileName
 	 */
@@ -530,10 +530,10 @@ public class HttpListener extends AuditedResource {
 
 		return payloadFileName.toString();
 	}
-    
+
 	/**
 	 * This method will create Payload Uri by given payloadFileName.
-	 * 
+	 *
 	 * @param payloadFileName
 	 * @return payloadUri
 	 */
@@ -548,7 +548,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will validate Payload Directory by given payload File Name.
-	 * 
+	 *
 	 * @param payloadFileName
 	 */
 	protected void ensurePayloadDirExists(String payloadFileName) {
@@ -560,7 +560,7 @@ public class HttpListener extends AuditedResource {
 					"Failed to create payload directory '%s'",
 					payloadDir.getAbsolutePath()));
 		}
-		
+
 		if (!(payloadDir.isDirectory() && payloadDir.canWrite())) {
 			throw new RuntimeException(
 					"HTTP Async payload directory configuration ('"
@@ -573,7 +573,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will retrieve Payload Directory.
-	 * 
+	 *
 	 * @return payloadDirectory
 	 */
 	protected String getHttpAsyncPayloadDirectory(String payloadURI) {
@@ -607,7 +607,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will retrieve the HttpResponse from sessionContext.
-	 * 
+	 *
 	 * @param sessionContext
 	 * @param request
 	 * @return HttpResponse
@@ -626,7 +626,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will create HttpClient.
-	 * 
+	 *
 	 * @return HttpClient
 	 */
 	protected HttpClient createHttpClient() {
@@ -637,7 +637,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will create HttpPost request by given request.
-	 * 
+	 *
 	 * @return HttpPost
 	 * @throws Exception
 	 * @throws JAXBException
@@ -660,7 +660,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will copy all Response Information.
-	 * 
+	 *
 	 * @param httpResponse
 	 * @param builder
 	 * @throws IllegalStateException
@@ -682,7 +682,7 @@ public class HttpListener extends AuditedResource {
 		}
 
 	    if (iContentLength > 0) {
-            
+
             responseInputStream = httpResponse.getEntity().getContent();
             Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
@@ -698,17 +698,17 @@ public class HttpListener extends AuditedResource {
                 builder.header(contentLength.getName(),
                         contentLength.getValue());
             }
-            
+
 
         }
 
-        copyResponseHeaders(httpResponse, builder);	    
-	
+        copyResponseHeaders(httpResponse, builder);
+
 	}
 
 	/**
 	 * This method will retrieve Response Content Length by given HttpResponse.
-	 * 
+	 *
 	 * @param httpResponse
 	 * @return responsecontentLength
 	 */
@@ -728,7 +728,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will retrieve Response Content type by given httpresponse.
-	 * 
+	 *
 	 * @param httpResponse
 	 * @return ContentType
 	 */
@@ -748,7 +748,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will retrieve Response headers by given httpresponse.
-	 * 
+	 *
 	 * @param httpResponse
 	 * @param builder
 	 */
@@ -769,7 +769,7 @@ public class HttpListener extends AuditedResource {
 
 	/**
 	 * This method will retrieve the Service Broker Uri from config.
-	 * 
+	 *
 	 * @return serviceBrokerUri
 	 */
 	protected String getServiceBrokerUriFromConfig() {
@@ -791,7 +791,7 @@ public class HttpListener extends AuditedResource {
 	/**
 	 * Method to retrieve the mailbox from the pguid and return the value of
 	 * HTTPListener propery "Http Listner Auth Check Required "
-	 * 
+	 *
 	 * @param mailboxpguid
 	 * @return
 	 * @throws Exception
@@ -803,31 +803,31 @@ public class HttpListener extends AuditedResource {
 		logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}", httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
 		return isAuthCheckRequired;
 	}
-	
+
 	/**
-	 * Method to retrieve http listener properties of processor of specific type by given mailboxGuid 
-	 * 
+	 * Method to retrieve http listener properties of processor of specific type by given mailboxGuid
+	 *
 	 * @param mailboxGuid mailbox Pguid
 	 * @param isSync boolean specifying
 	 * @return
 	 */
 	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) {
-		
+
 		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
 		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
 		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
 
 	}
-	
-	
+
+
 	/**
 	 * retrieve the pipeline id configured in httplistener of mailbox
-	 * 
+	 *
 	 * @param mailboxpguid
 	 * @Param isSync boolean
 	 * @return String pipeline id
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	private String retrievePipelineId(Map <String, String> httpListenerProperties) {
 
@@ -836,7 +836,7 @@ public class HttpListener extends AuditedResource {
 		logger.info("PIPELINE ID is set to be :"+pipelineId);
 		return pipelineId;
 	}
-	
+
 	private String retrieveAsyncPayloadLocation (Map <String, String> httpListenerProperties) {
 		String payloadLocation = null;
 		payloadLocation = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION);
@@ -855,13 +855,13 @@ public class HttpListener extends AuditedResource {
 	@Override
 	protected void beginMetricsCollection() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

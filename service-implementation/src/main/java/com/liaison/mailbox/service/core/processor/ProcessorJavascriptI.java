@@ -1,5 +1,11 @@
 /**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
  *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
  */
 package com.liaison.mailbox.service.core.processor;
 
@@ -30,7 +36,7 @@ public interface ProcessorJavascriptI {
 	 * @return
 	 * @throws Exception
 	 */
-	Object getClient() throws Exception;
+	public Object getClient();
 
 
 	/**
@@ -38,14 +44,14 @@ public interface ProcessorJavascriptI {
 	 *
 	 * @return
 	 */
-	String getPropertiesJson();
+	public String getPropertiesJson();
 
 	/**
 	 * Returns array of files from the configured payload location. It reads from the local directory.
 	 *
 	 * @return
 	 */
-	File[] getFilesToUpload() throws MailBoxServicesException, IOException;
+	public File[] getFilesToUpload() throws MailBoxServicesException, IOException;
 
 	/**
 	 * Returns the location to write the payload
@@ -54,7 +60,7 @@ public interface ProcessorJavascriptI {
 	 * @throws IOException
 	 * @throws MailBoxServicesException
 	 */
-	String getWriteResponseURI() throws MailBoxServicesException, IOException;
+	public String getWriteResponseURI() throws MailBoxServicesException, IOException;
 
 	/**
 	 * Writes the response stream to the file.
@@ -66,7 +72,7 @@ public interface ProcessorJavascriptI {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException;
+	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException;
 
 	/**
 	 * Writes the response stream to the file using the given file name.
@@ -78,7 +84,7 @@ public interface ProcessorJavascriptI {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException;
+	public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException;
 
 	/**
 	 * Adds or Updates the dynamic properties to a processor. The input should be a Json string which should contain name value pair.
@@ -87,19 +93,19 @@ public interface ProcessorJavascriptI {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	void addorUpdateCustomProperty(String dynamicProperties) throws JAXBException, IOException;
+	public void addorUpdateCustomProperty(String dynamicProperties) throws JAXBException, IOException;
 
 	/**
 	 * Returns the list of custom properties of the processor known only to java script
 	 *
 	 * @return
 	 */
-	Properties getCustomProperties();
+	public Properties getCustomProperties();
 
 	/**
 	 * TODO
 	 */
-	void updateState();
+	public void updateState();
 
 	/**
 	 * Returns array of credentials of the processor
@@ -107,7 +113,7 @@ public interface ProcessorJavascriptI {
 	 * TODO How to returns the keys??
 	 * @return
 	 */
-	CredentialDTO[] getCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException;
+	public CredentialDTO[] getCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException;
 
 	/**
 	 * Send email notifications
@@ -121,13 +127,49 @@ public interface ProcessorJavascriptI {
 	 * @param type
 	 *            The notification type(TEXT/HTML).
 	 */
-	void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type);
+	public void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type);
 
 	/**
 	 * Returns the properties of the Mailbox
 	 *
 	 * @return
 	 */
-	Properties getMailBoxProperties();
+	public Properties getMailBoxProperties();
+
+	/**
+	 * Info level logging
+	 *
+	 * @param msg
+	 */
+	public void logInfo(String msg);
+
+	/**
+	 * Error level logging
+	 *
+	 * @param msg
+	 */
+	public void logError(String msg);
+
+	/**
+	 * Error level logging
+	 *
+	 * @param error
+	 */
+	public void logError(Object error);
+
+	/**
+	 * Error level logging
+	 *
+	 * @param error
+	 */
+	public void logError(Throwable error);
+
+	/**
+	 * Debug level logging
+	 *
+	 * @param msg
+	 */
+	public void logDebug(String msg);
+
 
 }

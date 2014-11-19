@@ -43,13 +43,13 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
  * @author OFS
  */
 public class KMSUtil {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(KMSUtil.class);
 	public static final String PROPERTY_KEY_MANAGEMENT_BASE_URL = "client.key-management.baseUrl";
-	
+
 	/**
 	 * Util method get stored secret from KMS
-	 * 
+	 *
 	 * @param guid
 	 * @return String
 	 * @throws CertificateEncodingException
@@ -62,22 +62,22 @@ public class KMSUtil {
 	 * @throws BootstrapingFailedException
 	 * @throws LiaisonException
 	 * @throws MailBoxServicesException
-	 * @throws JAXBException 
-	 * @throws JsonParseException 
+	 * @throws JAXBException
+	 * @throws JsonParseException
 	 */
 	public static String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException, JsonParseException, JAXBException {
-		
+
 			// get gem manifest response from GEM
 			String unsignedData = guid;
 			GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
-			
+
 			// setting the request headers in the request to key manager from gem
 			// manifest response
 			Map<String, String> headerMap = ACLClientUtil.getRequestHeaders(gemManifestFromGEM);
 			String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
-			
+
 			if (base64EncodedPassword == null || base64EncodedPassword == "") {
 				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED, Response.Status.BAD_REQUEST);
 			} else {
@@ -86,11 +86,11 @@ public class KMSUtil {
 				return base64DecodedPassword;
 			}
     }
-	
+
 	/**
-	 * 
+	 *
 	 * Method for fetching SSH Privatekey as an InputStream
-	 * 
+	 *
 	 * @return InputStream
 	 * @throws LiaisonException
 	 * @throws JSONException
@@ -115,11 +115,11 @@ public class KMSUtil {
 
 		// To be fetched from DataBase
 		url = url + keypairPguid;
-		
+
 		// get gem manifest response from GEM
 	    String unsignedData = keypairPguid;
 		GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
-		
+
 		// setting the request headers in the request to key manager from gem
 		// manifest response
 		Map<String, String> headerMap = ACLClientUtil.getRequestHeaders(gemManifestFromGEM);
@@ -134,23 +134,23 @@ public class KMSUtil {
 
 		return privateKeyBytes;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Method for fetching TrustStore as an InputStream
-	 * 
+	 *
 	 * @return InputStream
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws IOException
 	 * @throws JAXBException
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws KeyStoreException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
-	 * @throws CertificateEncodingException 
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
+	 * @throws CertificateEncodingException
 	 */
 	public static InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
@@ -161,11 +161,11 @@ public class KMSUtil {
 
 		// To be fetched from DataBase
 		url = url + trustStoreId;
-		
+
 		// get gem manifest response from GEM
 	    String unsignedData = trustStoreId;
 		GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
-		
+
 		Map<String, String> headerMap = ACLClientUtil.getRequestHeaders(gemManifestFromGEM);
 
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
@@ -179,18 +179,22 @@ public class KMSUtil {
 			is = new ByteArrayInputStream(Base64.decodeBase64(keySet.getCurrentPublicKey()));
 		}
 
+		if (null == is) {
+			throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
+		}
+
 		return is;
 	}
-	
+
 	/**
      * Construct a KMS URL from a partial path. Base URL comes from properties.
      *
      * @param path
      * @return String
-	 * @throws IOException 
+	 * @throws IOException
      */
     public static String getKeyManagementUrl(String path) throws IOException {
-    	
+
         String baseUrl = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_KEY_MANAGEMENT_BASE_URL);
         if(baseUrl == null) {
             throw new RuntimeException(String.format("Property [%s] cannot be null", PROPERTY_KEY_MANAGEMENT_BASE_URL));
@@ -200,6 +204,6 @@ public class KMSUtil {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
         return baseUrl + path;
-    } 
+    }
 
 }

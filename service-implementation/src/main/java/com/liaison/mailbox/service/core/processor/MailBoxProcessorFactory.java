@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -16,13 +16,13 @@ import com.liaison.mailbox.enums.Protocol;
 
 /**
  * Factory class to instantiate MailBox Processors.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxProcessorFactory {
 
 	/**
-	 * 
+	 *
 	 */
 	private MailBoxProcessorFactory() {
 		// TODO Auto-generated constructor stub
@@ -30,7 +30,7 @@ public class MailBoxProcessorFactory {
 
 	/**
 	 * Factory to method to create instances for mailbox processor.
-	 * 
+	 *
 	 * @param processor
 	 *            The Processor Entity
 	 * @return The MailBox Processor instance.
@@ -80,7 +80,7 @@ public class MailBoxProcessorFactory {
 				break;
 
 			case SFTP:
-				mailBoxProcessor = new SFTPRemoteUploader(processor);
+				mailBoxProcessor = new SFTPRemoteDownloader(processor);
 				break;
 
 			case HTTP:

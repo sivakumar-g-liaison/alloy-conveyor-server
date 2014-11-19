@@ -30,8 +30,8 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.com.liaison.queue.ProcessorQueuePoller;
-import com.liaison.mailbox.com.liaison.queue.ServiceBrokerToMailboxWorkTicketPoller;
+import com.liaison.mailbox.service.queue.consumer.ProcessorQueuePoller;
+import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTicketPoller;
 
 
 /**

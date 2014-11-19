@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.com.liaison.queue.DummyJMSClientQueue;
+import com.liaison.mailbox.service.queue.DummyJMSClientQueue;
 import com.wordnik.swagger.annotations.ApiParam;
 
 @Path("/jmsclient/{mailboxId}/{spectrumURL}/{targetFileName}")

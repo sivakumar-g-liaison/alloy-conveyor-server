@@ -42,9 +42,9 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -63,38 +63,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	public SFTPRemoteUploader(Processor processor) {
 		super(processor);
-	}
-
-	/**
-	 * Java method to inject the G2SFTP configurations
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws MailBoxServicesException
-	 * @throws URISyntaxException
-	 * @throws SymmetricAlgorithmException
-	 * @throws JsonParseException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws CertificateEncodingException
-	 * @throws MailBoxConfigurationServicesException
-	 *
-	 */
-	@Override
-	public G2SFTPClient getHttpClient() throws LiaisonException, IOException, JAXBException,
-			URISyntaxException, MailBoxServicesException, JsonParseException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
-
-		G2SFTPClient sftpRequest = getSFTPClient(LOGGER);
-
-		return sftpRequest;
-
 	}
 
 	/**
@@ -120,50 +88,56 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CertificateEncodingException
 	 *
 	 */
-	private void executeRequest(String executionId, MailboxFSM fsm) throws LiaisonException, IOException, JAXBException, URISyntaxException,
-			FS2Exception, MailBoxServicesException, SftpException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JsonParseException, JSONException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
+	private void executeRequest(String executionId, MailboxFSM fsm) {
 
-		G2SFTPClient sftpRequest = getHttpClient();
-		sftpRequest.connect();
+		try {
 
-		String path = getPayloadURI();
+			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+			sftpRequest.connect();
 
-		if (MailBoxUtil.isEmpty(path)) {
-			LOGGER.info("The given payload URI is Empty.");
-			throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
-		}
+			String path = getPayloadURI();
 
-		if (sftpRequest.openChannel()) {
-
-		    String remotePath = getWriteResponseURI();
-			if (MailBoxUtil.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
+			if (MailBoxUtil.isEmpty(path)) {
+				LOGGER.info("The given payload URI is Empty.");
+				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 			}
 
-			//GMB-320 - Creates directory to the remote folder
-			for (String directory : remotePath.split(File.separator)) {
+			if (sftpRequest.openChannel()) {
 
-				if (directory.isEmpty()) {//For when path starts with /
-					continue;
+			    String remotePath = getWriteResponseURI();
+				if (MailBoxUtil.isEmpty(remotePath)) {
+					LOGGER.info("The given remote URI is Empty.");
+					throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
 				}
 
-				try {
-					sftpRequest.getNative().lstat(directory);
-					LOGGER.info("The remote directory{} already exists.", directory);
-					sftpRequest.changeDirectory(directory);
-				} catch (Exception ex) {
-					sftpRequest.getNative().mkdir(directory);
-					LOGGER.info("The remote directory{} is not exist.So created that.", directory);
-					sftpRequest.changeDirectory(directory);
+				//GMB-320 - Creates directory to the remote folder
+				for (String directory : remotePath.split(File.separator)) {
+
+					if (directory.isEmpty()) {//For when path starts with /
+						continue;
+					}
+
+					try {
+						sftpRequest.getNative().lstat(directory);
+						LOGGER.info("The remote directory{} already exists.", directory);
+						sftpRequest.changeDirectory(directory);
+					} catch (Exception ex) {
+						sftpRequest.getNative().mkdir(directory);
+						LOGGER.info("The remote directory{} is not exist.So created that.", directory);
+						sftpRequest.changeDirectory(directory);
+					}
 				}
+				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
+
 			}
-			uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
+			// remove the private key once connection established successfully
+			removePrivateKeyFromTemp();
+			sftpRequest.disconnect();
 
+		} catch (LiaisonException | MailBoxServicesException | IOException
+				| SftpException | SymmetricAlgorithmException e) {
+			throw new RuntimeException(e);
 		}
-		// remove the private key once connection established successfully
-		removePrivateKeyFromTemp();
-		sftpRequest.disconnect();
 
 	}
 
@@ -273,7 +247,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		// SFTPRequest executed through JavaScript
@@ -282,7 +256,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// SFTPRequest executed through Java
@@ -293,7 +267,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
 
 		boolean isFileExists = false;
-		G2SFTPClient sftpRequest = getHttpClient();
+		G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 		sftpRequest.connect();
 
 		if (sftpRequest.openChannel()) {
@@ -314,8 +288,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public Object getClient() {
-		// TODO Auto-generated method stub
-		return null;
+		return ClientFactory.getClient(this);
 	}
 
 

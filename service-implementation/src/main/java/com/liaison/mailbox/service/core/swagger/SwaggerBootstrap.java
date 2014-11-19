@@ -7,7 +7,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.service.core;
+package com.liaison.mailbox.service.core.swagger;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

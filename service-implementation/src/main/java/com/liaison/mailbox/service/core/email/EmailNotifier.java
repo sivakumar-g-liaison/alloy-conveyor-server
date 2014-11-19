@@ -2,13 +2,13 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.core;
+package com.liaison.mailbox.service.core.email;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +30,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
 
 /**
- * 
+ *
  * @author OFS
  *
  */
@@ -43,7 +43,7 @@ public class EmailNotifier {
 
 	private static Properties MAILSERVER_CONFIG = new Properties();
 	private static Session mailSession = null;
-	
+
 
 
 	static {
@@ -74,7 +74,7 @@ public class EmailNotifier {
 			}
 		}
 	}
-    
+
 	/**
 	 * Send a single email.
 	 */
@@ -123,13 +123,13 @@ public class EmailNotifier {
 	public void sendEmail(String aFromEmailAddr, String aToEmailAddr, String aSubject, String aBody) {
 
 		try {
-		    
+
 	        // Here, no Authenticator argument is used (it is null).
 	        // Authenticators are used to prompt the user for user
 	        // name and password.
 		    Session session = getMailSession(MailBoxUtil.getEnvProperties());
 	        MimeMessage message = new MimeMessage(session);
-	        
+
 			// the "from" address may be set in code, or set in the
 			// config file under "mail.from" ; here, the latter style is used
 			// message.setFrom( new InternetAddress(aFromEmailAddr) );
@@ -142,7 +142,7 @@ public class EmailNotifier {
 		    LOGGER.error("Cannot send email. " + ex);
 		}
 	}
-	
+
     private Session getMailSession(Properties sessionProperties){
         if(mailSession == null){
             mailSession = Session.getInstance(sessionProperties);

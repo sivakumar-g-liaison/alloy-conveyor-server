@@ -29,9 +29,7 @@ import com.liaison.commons.message.glass.dom.MetricTag;
 import com.liaison.commons.scripting.ScriptExecutorBase;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 import com.liaison.framework.util.IdentifierUtil;
-import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
-import com.liaison.mailbox.service.executor.ContextCreator;
 
 /**
  * This actually executes a javascript in a thread. Siblings to this could include a JavaExecutor or any other

@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -53,7 +53,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class RemoteProcessorTest extends BaseServiceTest {
 
@@ -67,10 +67,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		Files.deleteIfExists(Paths.get(responseLocation));
 		Files.createDirectory(Paths.get(responseLocation));
 	}
-    
+
 	/**
 	 * Method to test remote downloader with valid data.
-	 * 
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws LiaisonException
@@ -85,10 +85,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 	 * @throws NoSuchAlgorithmException
 	 * @throws CertificateException
 	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws BootstrapingFailedException 
-	 * @throws CMSException 
-	 * @throws OperatorCreationException 
-	 * @throws UnrecoverableKeyException 
+	 * @throws BootstrapingFailedException
+	 * @throws CMSException
+	 * @throws OperatorCreationException
+	 * @throws UnrecoverableKeyException
 	 */
 	@Test
 	public void testRemoteDownloader() throws JsonParseException,
@@ -114,15 +114,14 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
-		HTTPRequest request = (HTTPRequest) downloader
-				.getHttpClient();
+		HTTPRequest request = (HTTPRequest) downloader.getClient();
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
 	}
-    
+
 	/**
 	 * Method to test credential utility.
-	 * 
+	 *
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxConfigurationServicesException
 	 */
@@ -155,10 +154,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		Assert.assertEquals(credentialDTO.getUserId(), resultDTO.getUserId());
 
 	}
-    
+
 	/**
 	 * Method to test credential utility with invalid credential type.
-	 * 
+	 *
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxConfigurationServicesException
 	 */
@@ -174,10 +173,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		credentialDTO.copyToEntity(credential);
 
 	}
-    
+
 	/**
 	 * Method to test mailbox response.
-	 * 
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws LiaisonException
@@ -216,10 +215,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream);
 	}
-    
+
 	/**
 	 * Method to test mailbox response without processor name.
-	 * 
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws LiaisonException
@@ -258,10 +257,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream);
 	}
-    
+
 	/**
-	 *  Method to test mailbox response from file. 
-	 * 
+	 *  Method to test mailbox response from file.
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws LiaisonException
@@ -301,10 +300,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		downloader.writeResponseToMailBox(stream,
 				"test" + System.nanoTime() + ".txt");
 	}
-    
+
 	/**
 	 * Method to test mailbox response with new directory.
-	 * 
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws LiaisonException
@@ -345,10 +344,10 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		downloader.writeResponseToMailBox(stream,
 				"test" + System.nanoTime() + ".txt");
 	}
-    
+
 	/**
 	 *  Method to test mailbox response with invalid file name.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws FS2Exception

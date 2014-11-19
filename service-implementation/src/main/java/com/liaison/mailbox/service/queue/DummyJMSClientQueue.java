@@ -1,4 +1,4 @@
-package com.liaison.mailbox.com.liaison.queue;
+package com.liaison.mailbox.service.queue;
 
 import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
 

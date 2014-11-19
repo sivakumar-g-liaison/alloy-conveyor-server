@@ -13,10 +13,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -40,16 +38,12 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
-import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ExecutionEvents;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
+import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
-import com.liaison.mailbox.service.util.KMSUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -69,13 +63,13 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void invoke(String executionId, MailboxFSM fsm) throws Exception {
+	public void invoke(String executionId, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		// FTPSRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// FTPSRequest executed through Java
@@ -106,48 +100,54 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws BootstrapingFailedException
 	 *
 	 */
-	protected void executeRequest() throws Exception {
+	protected void executeRequest() {
 
-		G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
+		try {
 
-		ftpsRequest.enableSessionReuse(true);
-		ftpsRequest.connect();
-		ftpsRequest.login();
-		ftpsRequest.enableDataChannelEncryption();
+			G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
 
-		if (getProperties() != null) {
-			ftpsRequest.setBinary(getProperties().isBinary());
-			ftpsRequest.setPassive(getProperties().isPassive());
+			ftpsRequest.enableSessionReuse(true);
+			ftpsRequest.connect();
+			ftpsRequest.login();
+			ftpsRequest.enableDataChannelEncryption();
+
+			if (getProperties() != null) {
+				ftpsRequest.setBinary(getProperties().isBinary());
+				ftpsRequest.setPassive(getProperties().isPassive());
+			}
+
+			String path = getPayloadURI();
+			if (MailBoxUtil.isEmpty(path)) {
+				LOGGER.info("The given payload URI is Empty.");
+				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
+			}
+
+			String remotePath = getWriteResponseURI();
+			if (MailBoxUtil.isEmpty(remotePath)) {
+				LOGGER.info("The given remote URI is Empty.");
+				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
+			}
+
+			ftpsRequest.changeDirectory(path);
+
+			// For testing purpose
+			LOGGER.debug("The payload location is {}", path);
+			LOGGER.debug("The current working directory is {}", ftpsRequest.currentWorkingDirectory());
+			List<String> files = ftpsRequest.listFiles();
+			for (String file : files) {
+				LOGGER.debug("The payload is {}", file);
+			}
+			if (files.isEmpty()) {
+				LOGGER.debug("The payload location({}) is empty", path);
+			}
+			// For testing purpose
+
+			downloadDirectory(ftpsRequest, path, remotePath);
+			ftpsRequest.disconnect();
+
+		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException | URISyntaxException e) {
+			throw new RuntimeException(e);
 		}
-
-		String path = getPayloadURI();
-		if (MailBoxUtil.isEmpty(path)) {
-			LOGGER.info("The given payload URI is Empty.");
-			throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
-		}
-
-		String remotePath = getWriteResponseURI();
-		if (MailBoxUtil.isEmpty(remotePath)) {
-			LOGGER.info("The given remote URI is Empty.");
-			throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
-		}
-
-		ftpsRequest.changeDirectory(path);
-
-		// For testing purpose
-		LOGGER.debug("The payload location is {}", path);
-		LOGGER.debug("The current working directory is {}", ftpsRequest.currentWorkingDirectory());
-		List<String> files = ftpsRequest.listFiles();
-		for (String file : files) {
-			LOGGER.debug("The payload is {}", file);
-		}
-		if (files.isEmpty()) {
-			LOGGER.debug("The payload location({}) is empty", path);
-		}
-		// For testing purpose
-
-		downloadDirectory(ftpsRequest, path, remotePath);
-		ftpsRequest.disconnect();
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 *
 	 */
 	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, FS2Exception, MailBoxServicesException,
+			LiaisonException, URISyntaxException, MailBoxServicesException,
 			com.liaison.commons.exception.LiaisonException {
 
 		String dirToList = "";
@@ -212,77 +212,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public Object getClient() throws Exception {
-
-		// Convert the json string to DTO
-		RemoteProcessorPropertiesDTO properties = MailBoxUtil
-				.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
-						RemoteProcessorPropertiesDTO.class);
-
-		G2FTPSClient ftpsRequest = new G2FTPSClient();
-		ftpsRequest.setURI(properties.getUrl());
-		ftpsRequest.setDiagnosticLogger(LOGGER);
-		ftpsRequest.setCommandLogger(LOGGER);
-		ftpsRequest.setConnectionTimeout(properties.getConnectionTimeout());
-
-		ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
-		ftpsRequest.setRetryCount(properties.getRetryAttempts());
-
-		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
-
-		/*
-		 * For FTPS, SFTP, and FTP processors credential password will be
-		 * getting from KM
-		 */
-		if ((loginCredential != null)) {
-
-			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
-
-			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
-					&& !MailBoxUtil.isEmpty(passwordFromKMS)) {
-				ftpsRequest.setUser(loginCredential.getCredsUsername());
-				ftpsRequest.setPassword(passwordFromKMS);
-			}
-		}
-
-		// Configure keystore for HTTPS request
-		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("ftps")) {
-
-			KeyStore trustStore = KeyStore.getInstance(KeyStore
-					.getDefaultType());
-			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
-			if (trustStoreCredential != null) {
-				// If no certificate is configured then use default global
-				// trustoreid
-				String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential
-						.getCredsIdpUri())) ? (MailBoxUtil
-						.getEnvironmentProperties()
-						.getString("mailbox.global.trustgroup.id"))
-						: trustStoreCredential.getCredsIdpUri();
-				InputStream instream = KMSUtil.fetchTrustStore(trustStoreID);
-
-				if (instream == null) {
-					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
-				}
-
-				try {
-
-					trustStore.load(instream, null);
-
-				} finally {
-				    try {
-                        if (null != instream) {
-                            instream.close();
-                        }
-                    } catch (IOException e) {
-                        LOGGER.error("Cannot close stream while fetching trustore from key manager.");
-                    }
-				}
-
-				ftpsRequest.setTrustStore(trustStore);
-			}
-
-		}
-		return ftpsRequest;
+	public Object getClient() {
+		return FTPSClient.getClient(this);
 	}
 }

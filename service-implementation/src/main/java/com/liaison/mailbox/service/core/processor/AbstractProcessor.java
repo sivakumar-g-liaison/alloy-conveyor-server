@@ -11,22 +11,13 @@ package com.liaison.mailbox.service.core.processor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,19 +28,11 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jettison.json.JSONException;
 
 import com.google.gson.JsonParseException;
-import com.liaison.commons.exception.BootstrapingFailedException;
-import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.commons.util.client.http.HTTPRequest;
-import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
-import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
@@ -60,16 +43,14 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.service.core.EmailNotifier;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
-import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -80,16 +61,20 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
 
-
 	protected Processor configurationInstance;
-	protected Properties mailBoxProperties;
-	protected RemoteProcessorPropertiesDTO remoteProcessorProperties;
+	public Properties mailBoxProperties;
+	public RemoteProcessorPropertiesDTO remoteProcessorProperties;
 
 	public AbstractProcessor() {
 	}
 
 	public AbstractProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
+	}
+
+
+	public Processor getConfigurationInstance() {
+		return configurationInstance;
 	}
 
 	/**
@@ -101,7 +86,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public RemoteProcessorPropertiesDTO getProperties() throws JsonParseException, JsonMappingException, JAXBException, IOException {
+	public RemoteProcessorPropertiesDTO getProperties() throws JAXBException, IOException {
 
 		if (null == remoteProcessorProperties) {
 			remoteProcessorProperties = MailBoxUtil.unmarshalFromJSON(configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
@@ -214,7 +199,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws MailBoxServicesException
 	 */
-	protected String getPayloadURI() throws MailBoxServicesException, IOException {
+	public String getPayloadURI() throws MailBoxServicesException, IOException {
 
 		if (configurationInstance.getFolders() != null) {
 
@@ -297,7 +282,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
-	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, FS2Exception, MailBoxServicesException {
+	public void writeResponseToMailBox(ByteArrayOutputStream response) throws URISyntaxException, IOException, MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 		String processorName = MailBoxConstants.PROCESSOR;
@@ -318,7 +303,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
-	public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException, FS2Exception,
+	public void writeResponseToMailBox(ByteArrayOutputStream response, String filename) throws URISyntaxException, IOException,
 			MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
@@ -374,118 +359,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		ProcessorConfigurationService service = new ProcessorConfigurationService();
 		DynamicPropertiesDTO dynamicPropertiesDTO = JAXBUtility.unmarshalFromJSON(dynamicProperties, DynamicPropertiesDTO.class);
 		service.addOrUpdateProcessorProperties(String.valueOf(configurationInstance.getPrimaryKey()), dynamicPropertiesDTO);
-	}
-
-	/**
-	 * Get HTTPRequest with injected configurations.
-	 *
-	 * @return configured HTTPRequest
-	 * @throws MailBoxServicesException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws LiaisonException
-	 * @throws URISyntaxException
-	 * @throws SymmetricAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws CertificateException
-	 * @throws NoSuchAlgorithmException
-	 * @throws JSONException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws CMSException
-	 * @throws UnrecoverableKeyException
-	 * @throws BootstrapingFailedException
-	 */
-	public Object getHttpClient() throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			JSONException, com.liaison.commons.exception.LiaisonException, CMSException, UnrecoverableKeyException, OperatorCreationException,
-			BootstrapingFailedException {
-
-		LOGGER.info("Started injecting HTTP/S configurations to HTTPClient");
-		// Create HTTPRequest and set the properties
-		HTTPRequest request = new HTTPRequest(null);
-		request.setLogger(LOGGER);
-
-		// Convert the json string to DTO
-		RemoteProcessorPropertiesDTO properties = getProperties();
-
-		// Set url to HTTPRequest
-		URL url = new URL(properties.getUrl());
-		request.setUrl(url);
-
-		// Set configurations
-		request.setVersion(properties.getHttpVersion());
-		request.setMethod(properties.getHttpVerb());
-		request.setNumberOfRetries(properties.getRetryAttempts());
-		request.setConnectionTimeout(properties.getConnectionTimeout());
-		request.setChunkedEncoding(properties.isChunkedEncoding());
-
-		if (properties.getSocketTimeout() > 0) {
-			request.setSocketTimeout(properties.getSocketTimeout());
-		}
-		if (properties.getPort() > 0) {
-			request.setPort(properties.getPort());
-		}
-
-		// Set the Other header to HttpRequest
-		if (properties.getOtherRequestHeader() != null) {
-			for (HttpOtherRequestHeaderDTO header : properties.getOtherRequestHeader()) {
-				request.addHeader(header.getName(), header.getValue());
-			}
-		}
-
-		// Set the content type header to HttpRequest
-		if (!MailBoxUtil.isEmpty(properties.getContentType())) {
-			request.addHeader("Content-Type", properties.getContentType());
-		}
-
-		// Set the basic auth header for http request
-		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
-
-		if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername()) && !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
-			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
-			request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), passwordFromKMS));
-		}
-
-		// Configure keystore for HTTPS request
-		if (configurationInstance.getProcsrProtocol().equalsIgnoreCase("https")) {
-
-			KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-			Credential trustStoreCredential = getCredentialOfSpecificType(CredentialType.TRUSTSTORE_CERT);
-
-			if (trustStoreCredential != null) {
-				// If no certificate is configured then use default global
-				// trustoreid
-				String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri())) ? (MailBoxUtil.getEnvironmentProperties()
-						.getString("mailbox.global.trustgroup.id")) : trustStoreCredential.getCredsIdpUri();
-				InputStream instream = KMSUtil.fetchTrustStore(trustStoreID);
-
-				if (instream == null) {
-					throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
-				}
-
-				try {
-
-					trustStore.load(instream, null);
-
-				} finally {
-				    try {
-				        if (null != instream) {
-	                        instream.close();
-	                    }
-				    } catch (IOException e) {
-				        LOGGER.error("Cannot close stream while fetching trustore from key manager.");
-				    }
-			    }
-
-				request.truststore(trustStore);
-			}
-
-		}
-		LOGGER.info("Returns HTTP/S configured HTTPClient");
-		return request;
-
 	}
 
 	/**
@@ -545,7 +418,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @return Object which implements DirectoryStream.Filter interface and that
 	 *         accepts directories only.
 	 */
-	protected DirectoryStream.Filter<Path> defineFilter(final boolean listDirectoryOnly) {
+	public DirectoryStream.Filter<Path> defineFilter(final boolean listDirectoryOnly) {
 
 		DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
 
@@ -566,7 +439,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFile(String filePath, boolean isError) throws IOException {
+	public void archiveFile(String filePath, boolean isError) throws IOException {
 
 		File file = new File(filePath);
 		String targetFolder = (isError) ? MailBoxConstants.ERROR_FOLDER : MailBoxConstants.PROCESSED_FOLDER;
@@ -587,7 +460,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFiles(File[] files, boolean isError) throws IOException {
+	public void archiveFiles(File[] files, boolean isError) throws IOException {
 		for (File file : files) {
 			archiveFile(file.getAbsolutePath(), isError);
 		}
@@ -602,7 +475,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFile(File file, String processedFileLcoation) throws IOException {
+	public void archiveFile(File file, String processedFileLcoation) throws IOException {
 
 		Path oldPath = null;
 		Path newPath = null;
@@ -624,93 +497,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 *            The source location
 	 * @throws IOException
 	 */
-	protected void archiveFiles(File[] files, String processedFileLcoation) throws IOException {
+	public void archiveFiles(File[] files, String processedFileLcoation) throws IOException {
 
 		for (File file : files) {
 			archiveFile(file, processedFileLcoation);
 		}
-	}
-
-	/**
-	 * Get SFTPRequest with injected configurations.
-	 *
-	 * @return configured SFTPRequest
-	 * @throws MailBoxServicesException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws LiaisonException
-	 * @throws URISyntaxException
-	 * @throws SymmetricAlgorithmException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JSONException
-	 * @throws CMSException
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws CertificateEncodingException
-	 * @throws BootstrapingFailedException
-	 */
-	protected G2SFTPClient getSFTPClient(Logger logger) throws JsonParseException, JsonMappingException, JAXBException, IOException, LiaisonException,
-			URISyntaxException, MailBoxServicesException, SymmetricAlgorithmException, com.liaison.commons.exception.LiaisonException, JSONException,
-			CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException,
-			BootstrapingFailedException {
-
-		RemoteProcessorPropertiesDTO properties = MailBoxUtil
-				.unmarshalFromJSON(configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
-
-		G2SFTPClient sftpRequest = new G2SFTPClient();
-		sftpRequest.setURI(properties.getUrl());
-		sftpRequest.setDiagnosticLogger(logger);
-		sftpRequest.setCommandLogger(logger);
-		sftpRequest.setTimeout(properties.getConnectionTimeout());
-		sftpRequest.setStrictHostChecking(false);
-		sftpRequest.setRetryInterval(properties.getRetryInterval());
-		sftpRequest.setRetryCount(properties.getRetryAttempts());
-
-		Credential loginCredential = getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
-
-		if ((loginCredential != null)) {
-
-			String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
-
-			if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
-				sftpRequest.setUser(loginCredential.getCredsUsername());
-
-			}
-			if (!MailBoxUtil.isEmpty(passwordFromKMS)) {
-				sftpRequest.setPassword(passwordFromKMS);
-			}
-		}
-		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-
-		if (sshKeyPairCredential != null) {
-
-			if (MailBoxUtil.isEmpty(sshKeyPairCredential.getCredsIdpUri())) {
-
-				LOGGER.info("Credential requires file path");
-				throw new MailBoxServicesException("Credential requires file path", Response.Status.CONFLICT);
-			}
-
-			byte[] privateKeyStream = KMSUtil.fetchSSHPrivateKey(sshKeyPairCredential.getCredsIdpUri());
-
-			if (privateKeyStream == null) {
-				throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
-			}
-
-			String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
-					+ ".txt";
-			// write to a file
-			try (FileOutputStream out = new FileOutputStream(privateKeyPath)) {
-			    out.write(privateKeyStream);
-			}
-			sftpRequest.setPrivateKeyPath(privateKeyPath);
-
-		}
-
-		return sftpRequest;
 	}
 
 	/**
@@ -723,7 +514,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @return processedFolderPath The folder path with mount location
 	 *
 	 */
-	protected String replaceTokensInFolderPath(String folderPath) throws IOException {
+	public String replaceTokensInFolderPath(String folderPath) throws IOException {
 
 		String processedFolderPath = null;
 
@@ -775,7 +566,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws MailBoxServicesException
 	 * @throws SymmetricAlgorithmException
 	 */
-	protected Credential getCredentialOfSpecificType(CredentialType type) throws MailBoxServicesException, SymmetricAlgorithmException {
+	public Credential getCredentialOfSpecificType(CredentialType type) throws MailBoxServicesException, SymmetricAlgorithmException {
 
 		if (configurationInstance.getCredentials() != null) {
 
@@ -806,7 +597,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 */
-	protected void createResponseDirectory(String fileName) throws URISyntaxException, IOException, MailBoxServicesException {
+	public void createResponseDirectory(String fileName) throws URISyntaxException, IOException, MailBoxServicesException {
 
 		LOGGER.info("Started writing response");
 
@@ -836,7 +627,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws SymmetricAlgorithmException
 	 * @throws MailBoxServicesException
 	 */
-	protected void removePrivateKeyFromTemp() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
+	public void removePrivateKeyFromTemp() throws IOException, MailBoxServicesException, SymmetricAlgorithmException {
 
 		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
@@ -866,6 +657,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 *
 	 * @param msg
 	 */
+	@Override
 	public void logInfo(String msg) {
 		LOGGER.info(msg);
 	}
@@ -873,6 +665,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	/**
 	 * @param msg
 	 */
+	@Override
 	public void logError(String msg) {
 		LOGGER.error(msg);
 	}
@@ -880,6 +673,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	/**
 	 * @param error
 	 */
+	@Override
 	public void logError(Object error) {
 		logError(error.toString());
 	}
@@ -887,6 +681,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	/**
 	 * @param error
 	 */
+	@Override
 	public void logError(Throwable error) {
 		logError(error.getLocalizedMessage());
 	}
@@ -894,6 +689,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	/**
 	 * @param msg
 	 */
+	@Override
 	public void logDebug(String msg) {
 		LOGGER.debug(msg);
 	}

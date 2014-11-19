@@ -17,6 +17,6 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
  */
 public interface MailBoxProcessorI {
 
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception;
+	public void invoke(String executionId,MailboxFSM fsm);
 
 }

@@ -16,7 +16,7 @@ import javax.naming.NamingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.mailbox.com.liaison.queue.ProcessorQueue;
+import com.liaison.mailbox.service.queue.ProcessorQueue;
 
 
 

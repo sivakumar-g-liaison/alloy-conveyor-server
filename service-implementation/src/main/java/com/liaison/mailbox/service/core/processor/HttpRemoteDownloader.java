@@ -42,10 +42,11 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -69,7 +70,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		// HTTPRequest executed through JavaScript
@@ -78,7 +79,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// HTTPRequest executed through Java
@@ -110,65 +111,74 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws UnrecoverableKeyException
 	 *
 	 */
-	protected void executeRequest() throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, MailBoxConfigurationServicesException, SymmetricAlgorithmException,
-			KeyStoreException, NoSuchAlgorithmException, CertificateException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
+	protected void executeRequest() {
 
-		HTTPRequest request = (HTTPRequest) getHttpClient();
+		HTTPRequest request = (HTTPRequest) getClient();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096);
         request.setOutputStream(responseStream);
 
         HTTPResponse response = null;
         boolean failedStatus = false;
 
-		// Set the pay load value to http client input data for POST & PUT
-		// request
+		// Set the pay load value to http client input data for POST & PUT request
 		File[] files = null;
 
-		if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
+		try {
 
-		    RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
+			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
-		    files = getFilesToUpload();
-			if (null != files) {
+			    RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
 
-				for (File entry : files) {
+			    files = getFilesToUpload();
+				if (null != files) {
 
-				    try (InputStream contentStream = FileUtils.openInputStream(entry)) {
+					for (File entry : files) {
 
-				        request.inputData(contentStream, remoteProcessorProperties.getContentType());
+					    try (InputStream contentStream = FileUtils.openInputStream(entry)) {
 
-	                    response = request.execute();
-	                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
-	                    if (response.getStatusCode() != 200) {
+					        request.inputData(contentStream, remoteProcessorProperties.getContentType());
 
-	                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-	                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+		                    response = request.execute();
+		                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
+		                    if (response.getStatusCode() != 200) {
 
-	                        failedStatus = true;
-	                        delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
-	                        //continue;
+		                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
+		                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
 
-	                    } else {
+		                        failedStatus = true;
+		                        delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
+		                        //continue;
 
-	                        if (null != entry) {
-	                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
-	                        }
-	                    }
-				    }
+		                    } else {
+
+		                        if (null != entry) {
+		                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
+		                        }
+		                    }
+					    }
+					}
+					if (failedStatus) {
+	                    throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
+	                }
 				}
-				if (failedStatus) {
-                    throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
-                }
+			} else {
+			    response = request.execute();
+		        writeResponseToMailBox(responseStream);
 			}
-		} else {
-		    response = request.execute();
-	        writeResponseToMailBox(responseStream);
+
+		} catch(MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException e) {
+			throw new RuntimeException(e);
 		}
 
 	}
 
-	   /**
+
+	@Override
+	public Object getClient() {
+		return ClientFactory.getClient(this);
+	}
+
+	/**
      * Delegate method to archive the file.
      *
      * @param file
@@ -185,10 +195,4 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
             archiveFile(file, fileLocation);
         }
     }
-
-	@Override
-	public Object getClient() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

@@ -1,4 +1,4 @@
-package com.liaison.mailbox.com.liaison.queue;
+package com.liaison.mailbox.service.queue.consumer;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.mailbox.service.core.processor.ServiceBrokerToMailboxWorkTicketConsumer;
 
 public class ServiceBrokerToMailboxWorkTicketPoller {
 	private static final Logger logger = LogManager.getLogger(ServiceBrokerToMailboxWorkTicketPoller.class);

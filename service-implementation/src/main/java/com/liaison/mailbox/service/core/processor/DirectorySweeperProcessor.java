@@ -45,15 +45,15 @@ import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.com.liaison.queue.SweeperQueue;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
+import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 import com.liaison.mailbox.service.util.FS2Util;
-import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -87,18 +87,20 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) {
 
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 			// Use custom G2JavascriptEngine
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 		} else {
 			executeRequest();
 		}
 	}
 
-	private void executeRequest() throws Exception {
+	private void executeRequest() {
+
+		try {
 
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
@@ -150,7 +152,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 				for (WorkTicketGroup workTicketGroup : workTicketGroups) {;
 					String jsonResponse = constructMetaDataJson(workTicketGroup);
 					LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
-					postToQueue(jsonResponse);
+					postToSweeperQueue(jsonResponse);
 				}
 
 			}
@@ -159,6 +161,11 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		// call again when in-progress file list is not empty
 		if (!inProgressFiles.isEmpty()) {
 			executeRequest();
+		}
+
+		} catch (MailBoxServicesException | IOException | URISyntaxException
+				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException | JSONException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -245,7 +252,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws MailBoxServicesException
 	 */
 	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets) throws ScriptException,
-	IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException, Exception {
+	IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
@@ -254,7 +261,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 			// Use custom G2JavascriptEngine
 			//TODO
-			JavaScriptEngineUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
+			JavaScriptUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
 
 		} else {
 
@@ -297,7 +304,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @param input
 	 *            The input message to queue.
 	 */
-	private void postToQueue(String input)   {
+	private void postToSweeperQueue(String input)   {
 
         SweeperQueue.getInstance().sendMessages(input);
         LOGGER.debug("DirectorySweeper push postToQueue, message: {}", input);

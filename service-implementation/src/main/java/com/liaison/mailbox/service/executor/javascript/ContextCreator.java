@@ -6,7 +6,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.executor;
+package com.liaison.mailbox.service.executor.javascript;
 
 
 import java.io.Reader;

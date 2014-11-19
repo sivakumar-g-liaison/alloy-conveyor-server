@@ -44,10 +44,11 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.JavaScriptEngineUtil;
+import com.liaison.mailbox.service.executor.javascript.JavaScriptUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -92,78 +93,82 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws MailBoxConfigurationServicesException
 	 *
 	 */
-	public void executeRequest(String executionId,MailboxFSM fsm) throws MailBoxServicesException, LiaisonException, IOException, FS2Exception,
-			URISyntaxException, JAXBException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
-			SymmetricAlgorithmException, JsonParseException, JSONException, com.liaison.commons.exception.LiaisonException, UnrecoverableKeyException, OperatorCreationException, CMSException, BootstrapingFailedException {
+	public void executeRequest(String executionId,MailboxFSM fsm) {
 
 		HTTPRequest request = null;
 		HTTPResponse response = null;
 		boolean failedStatus = false;
 
-		RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
+		try {
 
-		// Set the pay load value to http client input data for POST & PUT request
-		File[] files = null;
-		if ("POST".equals(remoteProcessorProperties.getHttpVerb())
-				|| "PUT".equals(remoteProcessorProperties.getHttpVerb())) {
+			RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
 
-			files = getFilesToUpload();
-			if (null != files) {
+			// Set the pay load value to http client input data for POST & PUT request
+			File[] files = null;
+			if ("POST".equals(remoteProcessorProperties.getHttpVerb())
+					|| "PUT".equals(remoteProcessorProperties.getHttpVerb())) {
 
-				FSMEventDAOBase eventDAO = new FSMEventDAOBase();
-				Date lastCheckTime = new Date();
-				String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
+				files = getFilesToUpload();
+				if (null != files) {
 
-				for (File entry : files) {
+					FSMEventDAOBase eventDAO = new FSMEventDAOBase();
+					Date lastCheckTime = new Date();
+					String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
 
-					//interrupt signal check
-					if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
-						lastCheckTime = new Date();
-						if(eventDAO.isThereAInterruptSignal(executionId)) {
-							LOGGER.info("##########################################################################");
-							LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
-							LOGGER.info("#############################################################################");
-							fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
-							fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
-							return;
+					for (File entry : files) {
+
+						//interrupt signal check
+						if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+							lastCheckTime = new Date();
+							if(eventDAO.isThereAInterruptSignal(executionId)) {
+								LOGGER.info("##########################################################################");
+								LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
+								LOGGER.info("#############################################################################");
+								fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
+								fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
+								return;
+							}
 						}
+
+						try (InputStream contentStream = FileUtils.openInputStream(entry);
+								ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
+
+						    request = (HTTPRequest) getClient();
+		                    request.setOutputStream(responseStream);
+
+						    request.inputData(contentStream, remoteProcessorProperties.getContentType());
+
+		                    response = request.execute();
+		                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
+		                    if (response.getStatusCode() != 200) {
+
+		                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
+		                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+
+		                        failedStatus = true;
+		                        delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
+		                        //continue;
+
+		                    } else {
+
+		                        if (null != entry) {
+		                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
+		                        }
+		                    }
+						}
+
 					}
 
-					try (InputStream contentStream = FileUtils.openInputStream(entry); ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
-
-					    request = (HTTPRequest) getHttpClient();
-	                    request.setOutputStream(responseStream);
-
-					    request.inputData(contentStream, remoteProcessorProperties.getContentType());
-
-	                    response = request.execute();
-	                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
-	                    if (response.getStatusCode() != 200) {
-
-	                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-	                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
-
-	                        failedStatus = true;
-	                        delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
-	                        //continue;
-
-	                    } else {
-
-	                        if (null != entry) {
-	                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
-	                        }
-	                    }
+					if (failedStatus) {
+						throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
 					}
-
+				} else {
+					LOGGER.info("The given HTTP Uploader payload URI is Empty.");
+					throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 				}
-
-				if (failedStatus) {
-					throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
-				}
-			} else {
-				LOGGER.info("The given HTTP Uploader payload URI is Empty.");
-				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 			}
+		} catch (JAXBException | IOException | LiaisonException e) {
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -187,12 +192,12 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) throws Exception {
+	public void invoke(String executionId,MailboxFSM fsm) {
 
 		// HTTPRequest executed through JavaScript
 		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptEngineUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			JavaScriptUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
 		} else {
 			// HTTPRequest executed through Java
@@ -207,7 +212,6 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public Object getClient() {
-		// TODO Auto-generated method stub
-		return null;
+		return ClientFactory.getClient(this);
 	}
 }
