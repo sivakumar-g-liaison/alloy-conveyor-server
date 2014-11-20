@@ -80,7 +80,7 @@ public class MailBoxProcessorFactory {
 				break;
 
 			case SFTP:
-				mailBoxProcessor = new SFTPRemoteDownloader(processor);
+				mailBoxProcessor = new SFTPRemoteUploader(processor);
 				break;
 
 			case HTTP:
