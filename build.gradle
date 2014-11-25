@@ -66,6 +66,7 @@ apply from: file('gradle/check.gradle')
 apply from: file('gradle/bundler/bundle.gradle')
 apply from: file('gradle/bundler/framework.gradle')
 apply from: file('gradle/bundler_project.gradle')
+apply from: file('gradle/slf4j-fix.gradle')
 
 war {
     //a hack to remove the empty project_root war from consideration
@@ -82,9 +83,6 @@ subprojects {
 
     // TODO should move dependencies to subprojects?
     dependencies {
-        def log4j2Version = '2.0-rc1';
-        
-        compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
 
         compile 'com.google.guava:guava:11.0.2'
        
@@ -93,7 +91,7 @@ subprojects {
         testCompile 'org.testng:testng:6.8'
 
         //Dependency for ACL integration 
-        compile 'com.liaison.commons.acl:acl-commons-lib:4.+'
+        compile 'com.liaison.commons.acl:acl-commons-lib:5.+'
      }
 
     test {
@@ -187,16 +185,6 @@ allprojects {
 				details.useTarget "org.bouncycastle:bcprov-jdk15on:1.49"
 			}
 		}
-		
-		//SLF override
-        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.name == 'slf4j-simple') {
-                //prefer 'slf4j-log4j2' over 'slf4j-simple', because
-                //it's required that only one logger.jar be present for deterministic behavior of slf4j
-                details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.0-rc1"
-            }	
-			
-        }
 
     }
 }

@@ -2,7 +2,7 @@
 # ==================================================================
 # Set application specific system properties in this script
 # ==================================================================
-export APP_ENV="dev"
+export APP_ENV="uat"
 export APP_NAME="g2mailboxservice"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$APP_ENV"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_NAME"

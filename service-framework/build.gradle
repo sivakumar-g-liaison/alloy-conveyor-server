@@ -31,12 +31,6 @@ dependencies {
 
     testCompile 'org.testng:testng:6.8'
 
-    // log4j 2.x
-    def log4j2Version = '2.0-rc1';
-    compile "org.apache.logging.log4j:log4j-api:${log4j2Version}"
-    compile "org.apache.logging.log4j:log4j-core:${log4j2Version}"
-    compile "org.apache.logging.log4j:log4j-slf4j-impl:${log4j2Version}"
-
     def jacksonVersion='1.9.12'
     // JACKSON 1.9.x (2.x would supplant these w/ different name spaces)
     compile "org.codehaus.jackson:jackson-core-asl:${jacksonVersion}"
@@ -64,7 +58,7 @@ dependencies {
     compile 'com.oracle:ucp:11g-11.2.0.3.0'
     // Liaison code
     // commons-lib dependencies
-	compile 'com.liaison:commons-lib:4.2.1-SNAPSHOT'
+	compile 'com.liaison:commons-lib:4.+'
 	// Netflix
 	compile "com.netflix.karyon:karyon-admin-web:${karyonVersion}"
 

@@ -29,10 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.AuditStatement.Status;
-import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.log4j2.auditmessage.LogTags;
-import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.framework.exceptions.UnhandledApplicationException;
 
 /**
@@ -64,7 +61,7 @@ public class FrameworkFilter implements Filter {
     		
     		HttpServletRequest httpRequest = ((HttpServletRequest)request);
     		// logger.info("Fish Tagging Request URL..."+httpRequest.getRequestURL().toString());
-   	     	ThreadContext.put(LogTags.RESOURCE, httpRequest.getServletPath());
+   	     	 ThreadContext.put(LogTags.RESOURCE, httpRequest.getServletPath());
     	     ThreadContext.put(LogTags.REQUEST_URL, httpRequest.getRequestURL().toString()); 
     	     ThreadContext.put(LogTags.REQUEST_QUERY, httpRequest.getQueryString());
     	     String userPrincipal = (null != httpRequest.getUserPrincipal()) ? httpRequest.getUserPrincipal().getName() : "NOUSER";

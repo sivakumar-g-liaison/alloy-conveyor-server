@@ -2,7 +2,7 @@
 rem ==================================================================
 rem Set application specific system properties in this script
 rem ==================================================================
-set APP_ENV=dev
+set APP_ENV=uat
 set APP_NAME=g2mailboxservice
 set CATALINA_OPTS=%CATALINA_OPTS% -Darchaius.deployment.environment=%APP_ENV%
 set CATALINA_OPTS=%CATALINA_OPTS% -Darchaius.deployment.applicationId=%APP_NAME%

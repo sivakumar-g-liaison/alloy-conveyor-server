@@ -103,7 +103,7 @@ distTar.dependsOn('stageUnlimitedJCE')
 // =======================================================================
 task stageAppConfigs(type: Copy, description: 'Stage application configs', group: "Production Bundler - Project Specific") {
     from ("$rootDir/service-implementation/src/main/resources") {
-        include '*.json', '*.properties', '*EmailTemplate.txt', 'log4j2.xml'
+        include '*.json', '*.properties', '*EmailTemplate.txt', 'log4j2*.xml'
     }
     into "$installPath/configs/app"
 }

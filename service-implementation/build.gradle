@@ -173,23 +173,15 @@ dependencies {
     runtime 'com.oracle:ojdbc6:${oracleVersion}'
     compile 'com.oracle:ucp:${oracleVersion}'
 
-
-
-    // used for logging
-    //compile 'org.slf4j:slf4j-api:1.7.5'
-	compile 'org.apache.logging.log4j:log4j:2.0-beta9'
-
     compile 'com.sun.jersey:jersey-core:1.18'
     compile 'com.sun.jersey:jersey-server:1.18'
     compile 'com.sun.jersey:jersey-json:1.18'
     compile 'com.sun.jersey.contribs:jersey-multipart:1.18'
 
 
-    // used for logging
-    //def log4j2Version = '2.0-beta9';
-    compile "org.apache.logging.log4j:log4j-api:$log4j2Version"
-    compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
-    //compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
+	compile 'net.logstash.log4j2:log4j2-logstash-jsonevent-layout:3.+'
+	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:1.+'
 
 //TODO change to 2.+ after logging updATE
     compile 'com.liaison.commons:lib_message_bus:2.4.1'
