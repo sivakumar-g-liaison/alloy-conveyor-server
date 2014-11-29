@@ -37,6 +37,16 @@ public class RemoteProcessorPropertiesDTO {
 	private String httpListenerPipeLineId;
 	private List<HttpOtherRequestHeaderDTO> otherRequestHeader;
 	private boolean securedPayload;
+	private boolean handOverExecutionToJavaScript;
+
+	public boolean isHandOverExecutionToJavaScript() {
+		return handOverExecutionToJavaScript;
+	}
+
+	public void setHandOverExecutionToJavaScript(
+			boolean handOverExecutionToJavaScript) {
+		this.handOverExecutionToJavaScript = handOverExecutionToJavaScript;
+	}
 
 	public String getHttpVersion() {
 		return httpVersion;
@@ -172,8 +182,5 @@ public class RemoteProcessorPropertiesDTO {
 
 	public void setSecuredPayload(boolean securedPayload) {
 		this.securedPayload = securedPayload;
-	}
-	
-	
-	
+	}	
 }

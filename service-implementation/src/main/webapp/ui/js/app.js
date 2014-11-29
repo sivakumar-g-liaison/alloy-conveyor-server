@@ -7,6 +7,7 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.directiveCustomCell', // custom directives
     'myApp.dynamicComponentDirectiveForName',
     'myApp.passwordDirective',
+    'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'ngGrid', // angular grid
     'ngSanitize', // for html-bind in ckeditor

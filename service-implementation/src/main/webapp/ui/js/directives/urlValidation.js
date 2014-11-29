@@ -1,0 +1,64 @@
+/* 
+ *open the template in the editor.
+ */
+angular.module(
+    'myApp.urlValidation', []
+).directive('urlValidation', 
+ function($rootScope) {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ngModel) {
+            elem.bind('blur', function() {
+
+                scope.href = ngModel.$modelValue;                
+				if(typeof scope.href == "undefined" || scope.href.length == 0) {
+				   ngModel.$setValidity('allowed', true);
+					    scope.$parent.scriptUrlIsValid = false;
+                        scope.$apply();
+                        return undefined;			  
+				}
+								
+                if(typeof scope.href != "undefined" && scope.href.length > 0) {				
+				  
+                    var res = scope.href.split(":/");
+
+                    scope.allowedProtocols = ["gitlab", "Gitlab", "GITLAB"];
+
+                    if (scope.allowedProtocols.indexOf(res[0]) > -1 && res[1].charAt(0) != '/' && res[1] != "") {
+					
+					if(attrs.id == "modelscriptUrlName") {
+					    scope.$parent.loader = true;
+						 $rootScope.restService.get($rootScope.base_url + "/git/content/" + res[1],
+							function (data, status) {
+							scope.$parent.loader = false;
+							  if (status === 200) { 			
+								if (data.scriptserviceResponse.response.status === 'success') {
+								   scope.$parent.scriptTemplateIsExist = true;
+								   scope.$parent.editor.getSession().setValue(data.scriptserviceResponse.script);
+								} else {
+								    scope.$parent.scriptTemplateIsExist = false;
+								    scope.$parent.editor.getSession().setValue("");
+								} 
+							} else {
+							 showSaveMessage("Error while retrieving file from GitLab", 'error');
+							}          	
+						   }
+						);	
+					}
+					ngModel.$setValidity('allowed', true);
+					    scope.$parent.scriptUrlIsValid = true;
+                        scope.$apply();
+                        return ngModel.$modelValue;
+				    }
+                    else {
+                        ngModel.$setValidity('allowed', false);
+						scope.$parent.scriptUrlIsValid = false;
+                        scope.$apply();
+                        return undefined;
+                    }
+                }
+            });
+        }
+    };
+  });

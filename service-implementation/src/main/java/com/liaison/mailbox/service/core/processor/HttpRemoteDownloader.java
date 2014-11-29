@@ -73,17 +73,21 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	public void invoke(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
-		// HTTPRequest executed through JavaScript
-		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
+		
+		try {			
+			// HTTPRequest executed through JavaScript
+			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+				// Use custom G2JavascriptEngine
+				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-
-			// Use custom G2JavascriptEngine
-			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
-
-		} else {
-			// HTTPRequest executed through Java
-			executeRequest();
+			} else {
+				// HTTPRequest executed through Java
+				executeRequest();
+			}
+			
+		} catch(JAXBException |IOException e) {			
+			throw new RuntimeException(e);
 		}
 	}
 

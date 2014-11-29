@@ -9,7 +9,17 @@ var rest = myApp.controller(
 		
 			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;
-    	
+            $scope.isJavaScriptExecution = false;
+            
+            //check JavaScriptExecutor
+            $scope.onChangeJavaScriptExecutor = function () {            	
+            	if ($scope.isJavaScriptExecution) {            		
+            		$scope.isJavaScriptExecution = false;
+            	} else {            		
+            		$scope.isJavaScriptExecution = true;
+            	} 	            	
+            }
+            
              //ssh key implementation
             $scope.disableSSHKeys = true;
             $scope.disableCertificates = true;
@@ -140,8 +150,7 @@ var rest = myApp.controller(
 				//GIT URL
 				$scope.script = '';
 			    $scope.scriptIsEdit = false; 
-				$scope.scriptUriIsExist = false;
-                
+				$scope.isJavaScriptExecution = false;
                 // to disable protocol for http listener processor
                 $scope.isProcessorTypeHTTPListener = false;
                 
@@ -675,7 +684,7 @@ var rest = myApp.controller(
                                 <div ng-switch-when="chunkedEncoding">\n\
                                     <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
                                 </div>\n\
-                                 <div ng-switch-when="binary">\n\
+                    	        <div ng-switch-when="binary">\n\
                                     <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
                                 </div>\n\
                                  <div ng-switch-when="passive">\n\
@@ -1278,8 +1287,13 @@ var rest = myApp.controller(
 				//check if it is the gitlab url
 				if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
 						$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
+						$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
 				}
-				$scope.processor.description = data.getProcessorResponse.processor.description;
+				
+				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;
+				
+				
+				$scope.processor.description = data.getProcessorResponse.processor.description;				
 				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
 				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
 				$scope.processor.protocol = data.getProcessorResponse.processor.protocol;
@@ -1346,7 +1360,8 @@ var rest = myApp.controller(
 				var i = 0;
 				for (var prop in json_data) {
 					var allowPort = false;
-					var allowFalseValues = false;
+					var allowFalseValues = false;					
+					if(prop === 'handOverExecutionToJavaScript') continue;		
 					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
 					
 					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
@@ -1672,7 +1687,10 @@ var rest = myApp.controller(
 						if (data.getProcessorResponse.processor.javaScriptURI != null && 
 						data.getProcessorResponse.processor.javaScriptURI != "") {
 						$scope.scriptIsEdit = true;
-						}						
+						}
+						
+						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;					
+						
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
@@ -1753,7 +1771,7 @@ var rest = myApp.controller(
 			};
             // For Procsr Dynamic Props
             $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData, addedProperty) {
-                
+            
                 if (valueSelectedinSelectionBox.value === null) {
                     showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                     return;
@@ -2153,12 +2171,14 @@ var rest = myApp.controller(
                 for (var i = 0; i < profileLen; i++) {
                     $scope.processor.linkedProfiles[i] = $scope.selectedProfiles[i].name;
                 }
-                $scope.processor.javaScriptURI = $scope.modal.uri;
+                $scope.processor.javaScriptURI = $scope.trimScriptTemplateName();
+                $scope.processor.remoteProcessorProperties["handOverExecutionToJavaScript"] = $scope.isJavaScriptExecution;
 				$scope.scriptIsEdit = false;
 				if ($scope.processor.javaScriptURI != null && 
 						$scope.processor.javaScriptURI != "") {
 						$scope.scriptIsEdit = true;
-				}	
+				}				
+				
                 block.blockUI();
                 if ($scope.isEdit) {
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
@@ -2347,8 +2367,9 @@ var rest = myApp.controller(
                     $scope.disableCertificates = true;
 					//GIT URL
 				    $scope.script = '';
-			        $scope.scriptIsEdit = false; 
-                    $scope.scriptUriIsExist = false;					
+			        $scope.scriptIsEdit = false; 	
+                    $scope.isJavaScriptExecution = false;
+                    $scope.formAddPrcsr.scriptName.$setValidity('allowed', true);
                     formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
                      // To reset the values in the file browser window
                     $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
@@ -3197,22 +3218,23 @@ var rest = myApp.controller(
 			
 			$scope.script = '';
 			$scope.scriptIsEdit = false;
-			$scope.scriptUriIsExist = false;
-			
-			//check script uri is exist or not.
-			$scope.onScriptUriChanged = function () {
-				if ($scope.modal.uri && $scope.modal.uri != '') {	
-					$scope.scriptUriIsExist = true;
-				} else {
-				 $scope.scriptUriIsExist = false;
-				}				
-			};
-			//create new script.	
+			$scope.scriptUrlIsValid = false;
+			$scope.scriptTemplateIsExist = false;		
+			$scope.editor = '';
+			$scope.loader = false;
+			//create new script.			
+			$scope.editScripTemplatetName = '';
+			$scope.trimScriptTemplateName = function () {
+			  if ($scope.modal.uri != '' && $scope.modal.uri != null && $scope.modal.uri.indexOf('gitlab:/') == 0) {
+				  return $scope.modal.uri.split("gitlab:/").pop();
+			  }
+			  return $scope.modal.uri;
+			}			
 			$scope.onScriptTypeSelected = function () {				  
-				  
+				  $scope.editScripTemplatetName = $scope.modal.uri;
 				  if ($scope.modal.uri) {	
-                    block.blockUI();				  
-					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.modal.uri,
+                      block.blockUI();			  
+					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.trimScriptTemplateName(),
 					  function (data, status) { 
                          block.unblockUI();
                         if (status === 200) { 	
@@ -3222,7 +3244,9 @@ var rest = myApp.controller(
 								 $scope.populateScriptOnModel();
 							} else {
 							   $scope.script = '';
-							   $scope.scriptIsEdit = false;
+							   if (!$scope.scriptIsEdit) {
+							    $scope.scriptIsEdit = false;
+							   }							   
 							   $scope.populateScriptOnModel();
 							}	
 						  } else {
@@ -3239,26 +3263,23 @@ var rest = myApp.controller(
 				            scope: $scope,
 							resolve: {}
 				        });
-			};			    
+			};		   
         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
      
     // Editor Section Begins
-      var editor;
+      
       var block = $rootScope.block;
       $scope.createdBy = $rootScope.loginInput; 
-      
-      
-      
 	  $scope.loadValueData = function (_editor) {	  
-        editor = _editor;
-	    editor.getSession().setValue($scope.$parent.script);
-     };	
-
+        $scope.$parent.editor = _editor;
+	    $scope.$parent.editor.getSession().setValue($scope.$parent.script);
+     };
+	 
      var defaultScriptFile = '';
      $scope.loadDefaultScript = function() {
-	   if (defaultScriptFile === '' || defaultScriptFile !== editor.getSession().getValue()) {
+	   if (defaultScriptFile === '' || defaultScriptFile !== $scope.$parent.editor.getSession().getValue()) {
  	     block.blockUI();
      	 $scope.restService.get($scope.base_url + "/git/content/" + $scope.javaProperties.defaultScriptTemplateName,
           function (data, status) {
@@ -3266,7 +3287,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
               if (status === 200) { 			
  				if (data.scriptserviceResponse.response.status === 'success') {
  					defaultScriptFile = data.scriptserviceResponse.script;
- 				   editor.getSession().setValue(defaultScriptFile);
+ 				   $scope.$parent.editor.getSession().setValue(defaultScriptFile);
  				} else {
  					showSaveMessage(data.scriptserviceResponse.response.message, 'error');
  				} 
@@ -3276,23 +3297,25 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
            }
  		);	
        }		
-     };	
-     
-     $scope.save = function() {	
-    	 
+     };	 	 
+     $scope.save = function() {	    	 
     	 if ($scope.$parent.scriptIsEdit) {
 		     $scope.checkScript();	     		 
     	 } else {
 		    $scope.saveScript();	
 		 }    	 
      }
-     
-   //checkProfileJson     
+     $scope.revertScriptURL = function () {
+	    $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;	 
+	 }
+    //checkProfileJson     
 	 $scope.checkScript = function() {	
-	    if ($scope.$parent.script !== editor.getSession().getValue()) {
-			 $scope.editScript();
-	    } else {
-		    showSaveMessage('No changes made to save.');
+	    if ( $scope.$parent.editScripTemplatetName !== $scope.$parent.modal.uri && !$scope.$parent.scriptTemplateIsExist) {			 
+			 $scope.saveScript();
+	    } else if ($scope.$parent.script !== $scope.$parent.editor.getSession().getValue()){
+		    $scope.editScript();		    
+		} else {		  
+		   showSaveMessage('No changes made to save.');
 		}
 	 }
      
@@ -3310,11 +3333,11 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	           }
 	      }; 
 		  
-		 editor = ace.edit("aceEditor");
-		 $scope.scriptContents = editor.getSession().getValue();	    	
-	    	     	
+		 $scope.$parent.editor = ace.edit("aceEditor");
+		 $scope.scriptContents = $scope.$parent.editor.getSession().getValue();
+         	    	     	
     	 $scope.createFileRequest.scriptserviceRequest.script.data = $scope.scriptContents;
-         $scope.createFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.modal.uri;
+         $scope.createFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.trimScriptTemplateName();
          $scope.createFileRequest.scriptserviceRequest.script.createdBy = $scope.createdBy;
       
          $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest))
@@ -3325,7 +3348,11 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
         		$scope.$parent.script = $scope.scriptContents;
 			    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
 			} else {
-				$scope.$parent.scriptIsEdit = false;
+			    if (!$scope.$parent.scriptIsEdit) {
+				 $scope.$parent.scriptIsEdit = false;				
+				} else {
+				 $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;				
+				}				
 				showSaveMessage(data.scriptserviceResponse.response.message, 'error');
 			}
          })
@@ -3333,7 +3360,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
         	block.unblockUI(); 
         	showSaveMessage("Error while File save to GitLab", 'error');
          });
-     $scope.$dismiss();		 
+      $scope.$dismiss();		 
 	}; 
 	
 	//UPDATE EXIT SCRIPT FILE IN GIT. 
@@ -3350,11 +3377,11 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 		           }
 	         };    	
 	    	
-	    	 editor = ace.edit("aceEditor");
-			 $scope.scriptContents = editor.getSession().getValue();	    	
+	    	 $scope.$parent.editor = ace.edit("aceEditor");
+			 $scope.scriptContents = $scope.$parent.editor.getSession().getValue();	    	
 		    	     	
 	    	 $scope.editFileRequest.scriptserviceRequest.script.data = $scope.scriptContents;
-	         $scope.editFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.modal.uri;
+	         $scope.editFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.trimScriptTemplateName();
 	         $scope.editFileRequest.scriptserviceRequest.script.createdBy = $scope.createdBy;
 
 	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest))
@@ -3364,7 +3391,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	            		$scope.$parent.scriptIsEdit = true;
 	            		$scope.$parent.script = $scope.scriptContents;
 					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
-					} else {
+					} else {					
 						showSaveMessage(data.scriptserviceResponse.response.message, 'error');
 					}
 	            })
@@ -3374,9 +3401,11 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	            });
 				$scope.$dismiss();
 	     };	
-	
-     
-     $scope.cancel = function () { 
+		 
+     $scope.cancel = function () {
+        if ($scope.$parent.scriptIsEdit) {
+		  $scope.revertScriptURL();
+		}	 
         $scope.$dismiss();
      }; 
 };

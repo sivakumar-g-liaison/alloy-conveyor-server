@@ -193,16 +193,23 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {
+        
+		try {
+			
+			// HTTPRequest executed through JavaScript
+			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
-		// HTTPRequest executed through JavaScript
-		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
-
-		} else {
-			// HTTPRequest executed through Java
-			executeRequest(executionId, fsm);
+			} else {
+				// HTTPRequest executed through Java
+				executeRequest(executionId, fsm);
+			}
+			
+		} catch(JAXBException |IOException e) {			
+			throw new RuntimeException(e);
 		}
+		
 	}
 
 	protected boolean checkFileExistence() {

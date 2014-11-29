@@ -135,4 +135,8 @@ public interface MailBoxConstants {
 	public final static int GUID_LENGTH = 32;
 	public static final String ACL_BACKWARD_COMPATABILITY_PROPERTY = "mailbox.acl.manifest.backward.compatibility.mode";
 	
+	//Empty script file
+	
+	public static final String DEFAULT_SCRIPT_TMPLATE_CONTENT = "// Scripts File is empty.";	
+	
 }

@@ -66,15 +66,20 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	public void invoke(String executionId, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
+	    try {
+		   
 		// FTPSRequest executed through JavaScript
-		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
-		} else {
-			// FTPSRequest executed through Java
-			executeRequest();
-		}
+			} else {
+				// FTPSRequest executed through Java
+				executeRequest();
+			}			
+	   } catch(JAXBException |IOException e) {			
+			throw new RuntimeException(e);
+		}		
 	}
 
 	/**

@@ -182,18 +182,24 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	public void invoke(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
-		// G2SFTP executed through JavaScript
-		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
+		try {			
+			// G2SFTP executed through JavaScript
+			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
 
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
-			// Use custom G2JavascriptEngine
-			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+				// Use custom G2JavascriptEngine
+				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
-		} else {
-			// G2SFTP executed through Java
-			executeSFTPRequest();
+			} else {
+				// G2SFTP executed through Java
+				executeSFTPRequest();
+			}
+			
+		} catch(JAXBException |IOException e) {			
+			throw new RuntimeException(e);
 		}
+		
 	}
 
 	@Override

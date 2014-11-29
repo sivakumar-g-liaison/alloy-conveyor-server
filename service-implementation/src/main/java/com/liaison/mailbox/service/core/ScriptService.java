@@ -73,6 +73,10 @@ public class ScriptService {
 		try {
 
 			validator.validate(scriptRequest);
+			
+			if (StringUtil.isNullOrEmptyAfterTrim(scriptRequest.getData())) {
+				scriptRequest.setData(MailBoxConstants.DEFAULT_SCRIPT_TMPLATE_CONTENT);
+			}
 			uri = checkGitLabUrl(uri);
 
 			gitlab.createNewFile(uri, "master", scriptRequest.getData(), "File [" + uri + "] created by user " + scriptRequest.getCreatedBy());

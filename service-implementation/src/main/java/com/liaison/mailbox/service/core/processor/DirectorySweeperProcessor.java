@@ -88,14 +88,19 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {
-
-		if (!MailBoxUtil.isEmpty(configurationInstance.getJavaScriptUri())) {
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-			// Use custom G2JavascriptEngine
-			JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
-		} else {
-			executeRequest();
-		}
+		
+		try {
+			
+			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
+				// Use custom G2JavascriptEngine
+				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
+			} else {
+				executeRequest();
+			}
+		} catch(JAXBException |IOException e) {			
+			throw new RuntimeException(e);
+		}		
 	}
 
 	private void executeRequest() {

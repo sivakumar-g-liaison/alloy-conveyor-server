@@ -64,9 +64,19 @@
     .adjustPaddingRight {
         padding-right: 5px;
 		
+    }	
+	.adjustPaddingTop {
+		margin-top: 2.5%;		
+    }
+	.adjustScriptLabelPaddingTop {
+		margin-top: 2.5%;		
+    }
+	.adjustUploadPaddingTop {
+		margin-top: -2.5%;		
     }
 	.adjustPaddingRightForScript {
         padding-left: 4px;		
+		margin-top: -2.5%;	
     }	
     /*This class is included to align browse button close to text area in processor details*/
     .removePaddingLeft {
@@ -100,7 +110,8 @@
   .adjustgitPaddingRight {
    width: 465px; 
    height: 20px;
-   padding: 1px
+   padding: 2px;
+   margin-top: -15px;
   }
 </style>
 
@@ -207,15 +218,38 @@
                         </select>
                     </div>
                 </div>
-            </div>
-			<label>Script URI</label>
+            </div>            			
             <div class="row">
-			    <div class="col-sm-6 col-md-6">
-                <h5>{{constructedGitUrl}}</h5>					
+			    <div class="col-sm-6 col-md-6 adjustPaddingTop">
+				 <span>HandOverExecutionToJavaScript <input type="checkbox" ng-model="isJavaScriptExecution" id="mbx_procsr_javascript" ng-click="onChangeJavaScriptExecutor()">
+				</span>
 				</div>
 				<div class="col-sm-6 col-md-6">
+				<div class="form-group">
+				<label>Script URL<span ng-show="isJavaScriptExecution"> *</span></label>
+				</div>
+				<div class="form-group">
 				  <div class="col-sm-5 col-md-5 adjustgitPaddingRight">
-				     <input id="mbx-procsr-scriptFilePath" type="text" ng-disabled="scriptIsEdit" ng-model="modal.uri" class="form-control" ng-change="onScriptUriChanged()"/>				     				
+				      <div ng-switch on="isJavaScriptExecution">
+						 <div ng-switch-when="true">
+						  <input id="mbx-procsr-scriptFilePath" type="text" name="scriptName" ng-disabled="scriptIsEdit" ng-model="modal.uri" class="form-control" url-validation required />
+						  <div ng-show="formAddPrcsr.$error.allowed">
+				          <span id="mbx-procsr-JavaScript-required" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.$error.allowed}" 
+						  ng-show="formAddPrcsr.$error.allowed">URL is invalid. (gitlab:/{path} is allowed.)</span>					   
+						  </div>
+                          <div ng-show="!formAddPrcsr.$error.allowed && formAddPrcsr.scriptName.$dirty && formAddPrcsr.scriptName.$invalid">
+	                     <span id="mbx-procsr-JavaScriptName-required" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.scriptName.$error.required}" 
+	                     ng-show="formAddPrcsr.scriptName.$error.required">URL is invalid. (gitlab:/{path} is allowed.)</span>	  
+	                     </div>						  
+					     </div>
+						 <div ng-switch-when="false">
+						 <input id="scriptFileUrl" type="text" name="scriptName" ng-disabled="scriptIsEdit" ng-model="modal.uri" class="form-control" url-validation />
+						 <div ng-show="formAddPrcsr.$error.allowed">
+				          <span id="mbx-procsr-scriptFilePath" class="customHide" ng-class = "{'help-block-custom': formAddPrcsr.$error.allowed}" 
+						  ng-show="formAddPrcsr.$error.allowed">URL is invalid. (gitlab:/{path} is allowed.)</span>					   
+						  </div>						 
+						 </div>
+					  </div>					      							     				
 				  </div>
 					 <div class="col-sm-1 col-md-1 adjustPaddingRightForScript">
 					 <div ng-controller="ScriptCreateFileController">						
@@ -224,10 +258,11 @@
 						     <button id="createNewScriptFileToEdit"  class="btn btn-primary" ng-click="onScriptTypeSelected()">EditScript</button>
 						    </div>
 						    <div ng-switch-when="false">
-						     <button id="createNewScriptFileToAdd" class="btn btn-primary" ng-disabled="!scriptUriIsExist" ng-click="onScriptTypeSelected()">AddScript</button>
+						     <button id="createNewScriptFileToAdd" class="btn btn-primary" ng-disabled="formAddPrcsr.scriptName.$invalid  || !scriptUrlIsValid" ng-click="onScriptTypeSelected()">AddScript</button>
 						    </div>
 						</div>
                        </div>							
+					</div>
 					</div>
 			  </div>
 							
@@ -320,57 +355,65 @@
                 <div>
                     <h4>Credentials</h4>
                     <div class ="row" ng-show="!disableSSHKeys">
-                        <div class="col-sm-5 col-md-5 adjustPaddingRight">
-                            <label>
-                                SSH Private Key 
-                            </label>
-                            <input id="mbx-procsr-sshprivatekeypath" type="text" ng-model="sshkeyModal.sshPrivateKeyURI" class="form-control" ng-disabled="true">
-                        </div>
-                        <div class="col-md-1 removePaddingLeft">
-                            <br>
-                            <div class="fileUpload btn btn-primary">
-                                <span>Browse</span>
-                                <input id="mbx-procsr-sshprivatekeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPrivateKey(this)" /> 
-						    </div>
-						</div>
-                        <div class="col-sm-5 col-md-5 adjustPaddingRight">
-                            <label>
-                                SSH Public Key 
-                            </label>
-                            <input id="mbx-procsr-sshpublickeypath" type="text" ng-model="sshkeyModal.sshPublicKeyURI" class="form-control" ng-disabled="true">
-                        </div>
-                        <div class="col-md-1 removePaddingLeft">
-                            <br>
-                            <div class="fileUpload btn btn-primary">
-                                <span>Browse</span>
-                                <input id="mbx-procsr-sshpublickeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPublicKey(this)" /> 
-						    </div>
-					   </div>
+						<div class="col-sm-6 col-md-6">
+						<div class ="row">
+							<div class="col-sm-10 col-md-10 adjustPaddingRight">
+								<label>
+									SSH Private Key 
+								</label>
+								<input id="mbx-procsr-sshprivatekeypath" type="text" ng-model="sshkeyModal.sshPrivateKeyURI" class="form-control" ng-disabled="true">
+							</div>
+							<div class="col-sm-2 col-md-2 removePaddingLeft">
+								<br>
+								<div class="fileUpload btn btn-primary">
+									<span>Browse</span>
+									<input id="mbx-procsr-sshprivatekeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPrivateKey(this)" /> 
+								</div>
+							</div>
+							</div>
+							<div class ="row">
+							<div class="col-sm-10 col-md-10 adjustPaddingRight adjustPaddingTop">
+								<label>
+									SSH Public Key 
+								</label>
+								<input id="mbx-procsr-sshpublickeypath" type="text" ng-model="sshkeyModal.sshPublicKeyURI" class="form-control" ng-disabled="true">
+							</div>
+							<div class="col-sm-2 col-md-2 removePaddingLeft adjustPaddingTop">
+								<br>
+								<div class="fileUpload btn btn-primary">
+									<span>Browse</span>
+									<input id="mbx-procsr-sshpublickeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPublicKey(this)" /> 
+								</div>
+						   </div>
+						   </div>
+						   </div>
+						   <div class="col-md-6">
+							   <!-- <div class = "row" ng-show="!disableSSHKeys"> -->
+							<div class="form-group">
+							<label>
+								Passphrase
+							</label>
+							<input id="mbx-procsr-sshkeypair-passphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairPassphrase" name="sshkeypassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
+							<!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+								 <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
+							</div> -->
+							</div>
+							<div class="form-group">
+								 <label>
+								Confirm Passphrase
+								</label>
+								<input id="mbx-procsr-sshkeypair-confirmpassphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairConfirmPassphrase" name="sshkeyconfirmpassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
+								<!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+									 <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
+								</div>-->
+							</div>
+						   </div>
                       </div>
-                      <div class = "row" ng-show="!disableSSHKeys">
-                        <div class="col-md-6 col-sm-6 form-group">
-                        <label>
-                            Passphrase
-                        </label>
-                        <input id="mbx-procsr-sshkeypair-passphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairPassphrase" name="sshkeypassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
-                        <!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                             <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
-                        </div> -->
-                        </div>
-                        <div class="col-md-5 col-sm-5 adjustPaddingRight">
-                             <label>
-                            Confirm Passphrase
-                            </label>
-                            <input id="mbx-procsr-sshkeypair-confirmpassphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairConfirmPassphrase" name="sshkeyconfirmpassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
-                            <!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                                 <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
-                            </div>-->
-                        </div>
-                         <div class = "col-md-1 cod-sm-1 removePaddingLeft">
-                            <button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary" style="margin-top:25px;" ng-click="uploadSSHKey()">Upload</button>
-                        </div>
-                       
-                   </div>
+					  </div>
+					  <div class="adjustUploadPaddingTop" ng-show="!disableSSHKeys">
+						<button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary" style="margin-top:25px;" ng-click="uploadSSHKey()">Upload</button>
+					    <br/><br/>
+					 </div>
                    <div class="row" ng-show="!disableCertificates">
 
                         <div class="col-sm-4 col-md-4 adjustPaddingRight">
@@ -403,7 +446,6 @@
                             </div>
                         </div>
                     </div>
-                    <br/>
                     <div class="gridStyle" ng-grid="gridOptionsForProcessorCredential">
                     </div>
                 </div>
