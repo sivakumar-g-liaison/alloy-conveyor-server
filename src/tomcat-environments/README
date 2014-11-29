@@ -1,4 +1,3 @@
-
 Below is a guide for configuration of different Tomcat Environments. These are rules of thumb to help understand the intent of the different environments. These distinctions are derived from Apache Tomcat 7 Essentials, Packt Publishing 2012:
 
 production/
@@ -33,12 +32,12 @@ Dev/Debug Access: Yes
 Performance Testing Instrumentation: No
 Functional Testing: Yes
 
-production-stage/
+uat/
 Tomcat conf and lib contents that are appropriate stage a release.
-Auto Deployment: No
+Auto Deployment: Yes
 Single Machine / Cluster : Cluster
 Dev/Debug Access: No
-Performance Testing Instrumentation: Yes
+Performance Testing Instrumentation: No
 Functional Testing: No
 
 common/

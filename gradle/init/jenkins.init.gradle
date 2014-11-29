@@ -9,6 +9,7 @@ ext.dbServerPort='1521'
 ext.dbSchemaNamePrefix='JENKINS'
 ext.dbSchemaNameMoniker='GATEWAY'
 ext.dbaPassword='12345678'
+ext.dbServerProtocol='TCP'
 //ext.dbDevSampleData='true'
 
 }

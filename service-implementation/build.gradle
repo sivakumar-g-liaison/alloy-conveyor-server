@@ -352,19 +352,23 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 
 
 task setDevProperties << {
-	ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
-	{
-		filterchain {
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port=${dbServerPort}))(connect_data=(service_name=${dbServerService})))") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL.sshenc") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.mailbox\\.http\\.async\\.payload\\.dir=)(.*)', replace:"\\1${asyncpayloaddir}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.servicebroker\\.sync\\.uri=)(.*)', replace:"\\1${servicebrokersyncuri}") }
-		}
-	}
+    ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
+    {
+        filterchain {
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_DRIVER=)(.*)', replace:'\\1oracle.jdbc.OracleDriver') }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_URL=)(.*)', replace:"\\1jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port=${dbServerPort}))(connect_data=(service_name=${dbServerService})))" ) }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_USER=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.db\\.password\\.filepath=)(.*)', replace:"\\1${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_APPL.sshenc") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.DB_PASSWORD=)(.*)', replace:"\\1${dbaPassword}") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.mailbox\\.http\\.async\\.payload\\.dir=)(.*)', replace:"\\1${asyncpayloaddir}") }
+            tokenfilter { replaceregex(pattern:'(com\\.liaison\\.servicebroker\\.sync\\.uri=)(.*)', replace:"\\1${servicebrokersyncuri}") }
+        }
+    }
+	
 }
+
+
+
 
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: [
@@ -528,19 +532,20 @@ task pingTest {
 def flywayWorkingRoot = "${projectDir}/src/main/resources/db/~work"
 def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
 flyway {
-	url = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
-	driver = 'oracle.jdbc.OracleDriver'
-	user = "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR"
-	password = "${dbaPassword}"
-	table = 'schema_version'
-	locations = [
-		//'classpath:com.mycompany.project.migration',  // use classpath for Java migrations
-		'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
-	]
-	//if (project.dbDevSampleData == 'true') {
-	//    logger.info(":flyway: Including dev sample data.")
-	//    locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
-	//}
+    url = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
+    driver = 'oracle.jdbc.OracleDriver'
+    user = "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR"
+    password = "${dbaPassword}"
+    table = 'schema_version'
+    locations = [
+        //'classpath:com.mycompany.project.migration',  // use classpath for Java migrations
+        'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
+    ]
+    //if (project.dbDevSampleData == 'true') {
+    //    logger.info(":flyway: Including dev sample data.")
+    //    locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
+    //}
+
 }
 flywayMigrate.doFirst() {
 	logger.info("Building objects for database user '${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR'...");
@@ -563,32 +568,35 @@ task flywaySetup << {
 	//}
 }
 task buildFlywayTable << {
-	logger.info("Building flyway schema_version table...");
-	// This is a workaround for https://github.com/flyway/flyway/issues/98
-	// TODO - remove/refactor when the above issue is fixed
-	def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
-	ant.copy( toDir: flywayTableDir, overwrite:true)
-	{
-		fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
-		// the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
-		filterchain {
-			tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
-			tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
-			tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
-			tokenfilter { replaceregex(pattern:'^/$', replace:'') }
-			tokenfilter { replaceregex(pattern:'AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)', replace:'') }
-			tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
-			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
-		}
-	}
-	def driverClass = "oracle.jdbc.OracleDriver"
-	String jdbcUrl = "jdbc:oracle:thin:@//${dbServerName}:${dbServerPort}/${dbServerService}"
-	configurations.jdbc.each { file ->
-		gradle.class.classLoader.addURL(file.toURI().toURL())
-	}
-	def sql = groovy.sql.Sql.newInstance(url: jdbcUrl, user: "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR", password: "${dbaPassword}", driver: driverClass)
-	def ddl = new File("${flywayTableDir}/schema_version_table.sql").text
-	sql.execute (ddl)
+
+    logger.info("Building flyway schema_version table...");
+    // This is a workaround for https://github.com/flyway/flyway/issues/98
+    // TODO - remove/refactor when the above issue is fixed
+    def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
+    ant.copy( toDir: flywayTableDir, overwrite:true)
+    {
+        fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
+        // the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+        filterchain {
+            tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+            tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+            tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+            tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+            tokenfilter { replaceregex(pattern:'AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)', replace:'') }
+            tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+            tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
+        }
+    }
+    def driverClass = "oracle.jdbc.OracleDriver"
+    String jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
+	
+    configurations.jdbc.each { file ->
+        gradle.class.classLoader.addURL(file.toURI().toURL())
+    }
+    def sql = groovy.sql.Sql.newInstance(url: jdbcUrl, user: "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR", password: "${dbaPassword}", driver: driverClass)
+    def ddl = new File("${flywayTableDir}/schema_version_table.sql").text
+    sql.execute (ddl)
+
 }
 flywaySetup.dependsOn('buildFlywayTable')
 flywayMigrate.dependsOn('flywaySetup')
