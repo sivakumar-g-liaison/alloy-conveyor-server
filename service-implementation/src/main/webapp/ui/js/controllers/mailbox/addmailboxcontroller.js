@@ -486,7 +486,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         };
         
         $scope.onTenancyKeySelected = function(tenancyKey) {
-            $scope.tenancyKey = tenancyKey;
+            $scope.tenancyKey = angular.copy(tenancyKey);
             $scope.mailBox.tenancyKey = tenancyKey.guid;
         };
         
