@@ -219,8 +219,8 @@ dependencies {
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
 	}
 
-	workTicket 'com.liaison.dto:dto:1.0.0'
-	
+	workTicket 'com.liaison.dto:dto:1.2.0'
+
 }
 
 idea {
@@ -364,7 +364,7 @@ task setDevProperties << {
             tokenfilter { replaceregex(pattern:'(com\\.liaison\\.servicebroker\\.sync\\.uri=)(.*)', replace:"\\1${servicebrokersyncuri}") }
         }
     }
-	
+
 }
 
 
@@ -589,7 +589,7 @@ task buildFlywayTable << {
     }
     def driverClass = "oracle.jdbc.OracleDriver"
     String jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
-	
+
     configurations.jdbc.each { file ->
         gradle.class.classLoader.addURL(file.toURI().toURL())
     }
