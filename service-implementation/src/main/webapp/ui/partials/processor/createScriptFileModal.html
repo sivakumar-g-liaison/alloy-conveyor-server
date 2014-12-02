@@ -11,7 +11,8 @@
 <div class="row">
 <form name="saveScriptFileForm">
  <div class="modal-body">
-	 <div class="row" ng-show="scriptIsEdit">
+  <img ng-show="loader && !scriptIsEdit" height="20px" width="20px" src="img/spinner.gif"/>
+	<div class="row" ng-show="scriptIsEdit">
 	 <div class="col-sm-3 col-md-3">
 	 <label>Script URL *</label>
 	 </div>
@@ -27,7 +28,7 @@
 	      ng-show="saveScriptFileForm.scriptName.$error.required">URL is invalid. (gitlab:/{path} is allowed.)</span>	  
 	  </div>
 	 </div>	
-	 </div>
+	</div>
      </br> 
 		<div id="aceEditor" ui-ace="{onLoad : loadValueData,
 			  theme : 'monokai',
@@ -37,8 +38,8 @@
 			}">
 	   </div>	   
       <div class="modal-footer">
-	    <button class="btn btn-primary" type="button" ng-click="loadDefaultScript()">Load default template</button>
-		<button class="btn btn-primary" type="button" ng-click="save()" ng-disabled="saveScriptFileForm.$invalid">
+	    <button class="btn btn-primary" type="button" ng-click="loadDefaultScript()" ng-disabled="loader">Load default template</button>
+		<button class="btn btn-primary" type="button" ng-click="save()" ng-disabled="saveScriptFileForm.$invalid || loader">
 			<span class="glyphicon glyphicon-save glyphicon-white"></span> Save
 		</button>
 		<button class="btn btn-primary" type="button" ng-click="cancel()">Cancel

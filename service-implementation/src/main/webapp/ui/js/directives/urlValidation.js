@@ -11,17 +11,15 @@ angular.module(
         link: function(scope, elem, attrs, ngModel) {
             elem.bind('blur', function() {
 
-                scope.href = ngModel.$modelValue;                
-				if(typeof scope.href == "undefined" || scope.href.length == 0) {
+                scope.scriptURL = ngModel.$modelValue;                
+				if(typeof scope.scriptURL == "undefined" || scope.scriptURL.length == 0) {
 				   ngModel.$setValidity('allowed', true);
 					    scope.$parent.scriptUrlIsValid = false;
                         scope.$apply();
                         return undefined;			  
-				}
-								
-                if(typeof scope.href != "undefined" && scope.href.length > 0) {				
+				} else {				
 				  
-                    var res = scope.href.split(":/");
+                    var res = scope.scriptURL.split(":/");
 
                     scope.allowedProtocols = ["gitlab", "Gitlab", "GITLAB"];
 

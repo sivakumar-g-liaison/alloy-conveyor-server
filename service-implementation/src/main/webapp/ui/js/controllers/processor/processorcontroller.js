@@ -3280,10 +3280,10 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
      var defaultScriptFile = '';
      $scope.loadDefaultScript = function() {
 	   if (defaultScriptFile === '' || defaultScriptFile !== $scope.$parent.editor.getSession().getValue()) {
- 	     block.blockUI();
+	    $scope.loader = true;
      	 $scope.restService.get($scope.base_url + "/git/content/" + $scope.javaProperties.defaultScriptTemplateName,
           function (data, status) {
-               block.unblockUI();
+			   $scope.loader = false;
               if (status === 200) { 			
  				if (data.scriptserviceResponse.response.status === 'success') {
  					defaultScriptFile = data.scriptserviceResponse.script;
@@ -3309,8 +3309,8 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	    $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;	 
 	 }
     //checkProfileJson     
-	 $scope.checkScript = function() {	
-	    if ( $scope.$parent.editScripTemplatetName !== $scope.$parent.modal.uri && !$scope.$parent.scriptTemplateIsExist) {			 
+	 $scope.checkScript = function() {
+	    if ( $scope.$parent.editScripTemplatetName !== $scope.$parent.modal.uri && !$scope.scriptTemplateIsExist) {			 
 			 $scope.saveScript();
 	    } else if ($scope.$parent.script !== $scope.$parent.editor.getSession().getValue()){
 		    $scope.editScript();		    
