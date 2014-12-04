@@ -52,9 +52,11 @@ public class FS2Util {
 			URI spectrumURI = new URI(payloadURL);
 			if (isEncryptionRequired) {
 				getFS2Instance();
+				LOGGER.info("Retrieving payload from spectrum");
 				payload = FS2.getFS2PayloadInputStream(spectrumURI);
 			} else {
-				getFS2InstanceWithoutEncryption();		
+				getFS2InstanceWithoutEncryption();
+				LOGGER.info("Retrieving payload without encryption from spectrum");
 				payload = FS2WithoutEncryption.getFS2PayloadInputStream(spectrumURI);
 			}
 			

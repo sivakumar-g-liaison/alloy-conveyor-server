@@ -38,16 +38,15 @@ import com.liaison.mailbox.enums.ProcessorType;
 						query = "select count(processor) from Processor processor"
 								+ " inner join processor.mailbox mbx"
 								+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_TYPE,
-						query = "select processor.processorId, mbx from Processor processor"
-								+" inner join processor.maibox mbx"
-								+" where TYPE(processor) = :" + ProcessorConfigurationDAO.PROCESSOR_TYPE)
+		@NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
+						query = "select processor from Processor processor"
+								+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS)
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
 	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
 	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
-	public static final String FIND_PROCESSOR_BY_TYPE = "findProcessorByType";
+	public static final String FIND_ALL_ACTIVE_PROCESSORS = "findAllActiveProcessors";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -111,5 +110,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processors
 	 */
 	public List <Processor> findProcessorByType(ProcessorType type);
+	
+	/**
+	 * Retrieves list of all processors  
+	 * @return list of processors
+	 */
+	public List <Processor> findAllActiveProcessors(); 
 
 }

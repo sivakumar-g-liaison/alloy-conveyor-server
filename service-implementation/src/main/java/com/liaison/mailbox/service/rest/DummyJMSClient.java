@@ -44,7 +44,7 @@ public class DummyJMSClient {
 		try {
 			//spectrumURL = URLEncoder.encode(spectrumURL, "UTF-8");
 			//spectrumURL = "fs2:/mailboxsweeper/payload/1.0/55FB3A3F0A0A000C0A774FB208B57192";
-			spectrumURL = "sfs2:/mailboxsweeper/payload/1.0/759951520A0A00170A814DD199C9A267";
+			spectrumURL = "sfs2:/mailboxsweeper/payload/1.0/13BD64360A0A007D0A180BCD85F93951";
 			//spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
 			WorkTicket ticketRequest = new WorkTicket();
 			ticketRequest.setPayloadURI(spectrumURL);
