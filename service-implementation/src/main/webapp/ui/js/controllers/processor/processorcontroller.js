@@ -2320,13 +2320,13 @@ var rest = myApp.controller(
 				$scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor' + '?sid=' + $rootScope.serviceInstanceId, $filter('json')(addRequest),
 					function (data, status) {
 						if (status === 200) {
+							if (data.addProcessorToMailBoxResponse.response.status === 'success') {
 							//$scope.readOnlyProcessors = true;
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 							$scope.isEdit = true;
 							$scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
 							$scope.editProcessor($scope.processor.guid, false);
-							if (data.addProcessorToMailBoxResponse.response.status === 'success') {
 								if($scope.isFileSelected)  $scope.isFileSelected = false;
 								$scope.isPrivateKeySelected = false;
 								$scope.isPublicKeySelected = false;

@@ -162,7 +162,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             }
             
             $scope.hitCounter = $scope.hitCounter + 1;
-            $scope.restService.get($scope.base_url ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
+            $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
                     if (status == 200) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
@@ -230,21 +230,28 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
         <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
 
-        $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div><div ng-switch-when="INCOMPLETE_CONFIGURATION">Incomplete Configuration</div></div>';
+        $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
+        $scope.manageConfigStatus = '<div ng-switch on="row.getProperty(\'configStatus\')"><div ng-switch-when="COMPLETED">Completed</div><div ng-switch-when="INCOMPLETE_CONFIGURATION">Incomplete Configuration</div></div>';
+       
         // Setting the grid details
         $scope.gridOptions = {
-            columnDefs: [{
+        		columnDefs: [{
                     field: 'name',
-                    width: '30%',
+                    width: '20%',
                     displayName: 'Name',
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '37%',
+                    width: '20%',
                     displayName: 'Description'
                 }, {
+                	field: 'configStatus' ,
+                	width: '20%' ,
+                	displayName: 'Config Status' , 
+                	cellTemplate: $scope.manageConfigStatus
+                }, {
                     field: 'status',
-                    width: '23%',
+                    width: '20%',
                     displayName: 'Status',
                     cellTemplate: $scope.manageStatus
                 },
@@ -253,10 +260,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 				 */
                 { // Customized column
                     displayName: 'Action',
-                    width: '10%',
+                    width: '20%',
                     sortable: false,
                     cellTemplate: $scope.editableInPopup
                 }
+
 
             ],
             data: 'mailboxes',

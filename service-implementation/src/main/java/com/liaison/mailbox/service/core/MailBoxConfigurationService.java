@@ -257,9 +257,7 @@ public class MailBoxConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse
-					.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
-							.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
 
@@ -436,6 +434,7 @@ public class MailBoxConfigurationService {
 	 *
 	 * @param profName
 	 *            The name of the profile
+	 * @param serviceInstId 
 	 *
 	 * @return The SearchMailBoxResponseDTO
 	 * @throws IOException
@@ -443,7 +442,7 @@ public class MailBoxConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String profName, String aclManifestJson, String page, String pageSize, String sortField, String sortDirection)
+	public SearchMailBoxResponseDTO searchMailBox(String mbxName,String serviceInstanceId, String profName, String aclManifestJson, String page, String pageSize, String sortField, String sortDirection)
 			throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.debug("Entering into search mailbox.");
@@ -456,6 +455,11 @@ public class MailBoxConfigurationService {
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
 
 		try {
+			
+			// check if service instance id is available in query param if not throw an exception
+			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+				LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+			}
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
@@ -502,7 +506,7 @@ public class MailBoxConfigurationService {
 			for (MailBox mbx : mailboxes) {
 
 				serachMailBoxDTO = new SearchMailBoxDTO();
-				serachMailBoxDTO.copyFromEntity(mbx, dao.isMailboxHasProcessor(mbx.getPguid()));
+				serachMailBoxDTO.copyFromEntity(mbx, dao.isMailboxHasProcessor(mbx.getPguid(), serviceInstanceId));
 				searchMailBoxDTOList.add(serachMailBoxDTO);
 			}
 

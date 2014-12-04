@@ -73,7 +73,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param guid pguid of the mailbox
 	 * @return boolean
 	 */
-	public boolean isMailboxHasProcessor(String guid);
+	public boolean isMailboxHasProcessor(String siid, String mbxGuid);
 
 	/**
 	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
@@ -116,5 +116,6 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processors
 	 */
 	public List <Processor> findAllActiveProcessors(); 
+
 
 }

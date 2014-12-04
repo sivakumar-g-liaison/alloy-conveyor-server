@@ -30,6 +30,7 @@ public class SearchMailBoxDTO {
 	private String name;
 	private String description;
 	private String status;
+	public  String configStatus;
 	private Integer serviceInstId;
 	private String shardKey;
 	private List<PropertyDTO> properties;
@@ -51,6 +52,10 @@ public class SearchMailBoxDTO {
 	public String getStatus() {
 		return status;
 	}
+	
+	public String getConfigStatus(){
+		return configStatus;
+	}
 
 	public String getProfiles() {
 		return profiles;
@@ -70,6 +75,10 @@ public class SearchMailBoxDTO {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	
+	public void setConfigStatus(String configStatus){
+		this.configStatus = configStatus;
 	}
 
 	public void setProfiles(String profiles) {
@@ -128,7 +137,7 @@ public class SearchMailBoxDTO {
 		this.setGuid(mailBox.getPguid());
 		this.setName(mailBox.getMbxName());
 		this.setDescription(mailBox.getMbxDesc());
-
+		
 		MailBoxStatus status = MailBoxStatus.findByCode(mailBox.getMbxStatus());
 		this.setStatus(status.name());
 
@@ -142,8 +151,11 @@ public class SearchMailBoxDTO {
 			this.getProperties().add(propertyDTO);
 		}
 
-		if (MailBoxStatus.ACTIVE.value().equals(mailBox.getMbxStatus()) && !isMbxHasProcessors) {
-			this.setStatus(MailBoxConstants.INCOMPLETE_STATUS);
+		if(!isMbxHasProcessors) {
+			this.setConfigStatus(MailBoxConstants.INCOMPLETE_STATUS);
+		}
+		else {
+			this.setConfigStatus(MailBoxConstants.COMPLETE_STATUS);
 		}
 
 	}

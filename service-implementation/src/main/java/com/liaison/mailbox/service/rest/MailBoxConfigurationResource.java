@@ -171,7 +171,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
 			@QueryParam(value= "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
 			@QueryParam(value= "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
-			@QueryParam(value= "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection) {		
+ 			@QueryParam(value= "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
+			@QueryParam(value= "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId) {		
 
 		
 		// create the worker delegate to perform the business logic
@@ -194,7 +195,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 						LOG.info("ACL Manifest available in the request header");
 					}
                     //search the mailbox based on the given query parameters
-					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(mbxName, profileName, manifestJson, page, pageSize, sortField, sortDirection);
+					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(mbxName, serviceInstanceId, profileName, manifestJson, page, pageSize, sortField, sortDirection);
 					serviceResponse.setHitCounter(hitCounter);
 					
 					return serviceResponse;					

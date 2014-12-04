@@ -44,6 +44,8 @@ public interface MailBoxConstants {
 	public final static String CREDENTIAL_TYPE = "CredentialType";
 
 	public final static String INCOMPLETE_STATUS = "INCOMPLETE_CONFIGURATION";
+	
+	public final static String COMPLETE_STATUS = "COMPLETED";
 
 	public final static String GROUPING_JS_PROP_NAME = "filegroupingjspath";
 
