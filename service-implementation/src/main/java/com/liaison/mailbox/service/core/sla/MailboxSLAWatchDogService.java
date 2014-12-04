@@ -340,6 +340,11 @@ public class MailboxSLAWatchDogService {
 			FS2Util.isEncryptionRequired = true;
 			//get payload from spectrum
 			InputStream payload = FS2Util.retrievePayloadFromSpectrum(payloadURI);
+			
+			if (null == payload) {			
+				LOG.error("Failed to retrieve payload from spectrum");
+				throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
+			}
 
 			//get local payload location from uploader
 			String processorPayloadLocation = getProcessorPayloadLocation(processor);
