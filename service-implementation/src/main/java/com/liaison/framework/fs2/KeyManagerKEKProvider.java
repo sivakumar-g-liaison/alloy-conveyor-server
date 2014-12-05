@@ -6,11 +6,11 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.framework.fs2;
 
+package com.liaison.framework.fs2;
 import static com.liaison.commons.acl.util.ACLUtil.HEADER_KEY_ACL_MANIFEST;
 import static com.liaison.commons.acl.util.ACLUtil.HEADER_KEY_ACL_SIGNATURE;
-
+import static com.liaison.commons.acl.util.ACLUtil.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -118,7 +118,7 @@ public class KeyManagerKEKProvider implements FS2KEKProvider {
             HTTPRequest httpRequest = HTTPRequest.post(KMSUtil.getKeyManagementUrl(PATH_FOR_OPERATION_ENCRYPT))
                     .header(HEADER_KEY_ACL_MANIFEST, manifestResponse.getManifest())
                     .header(HEADER_KEY_ACL_SIGNATURE, manifestResponse.getSignature())
-                    .header("acl_signer_public_key_guid", manifestResponse.getPublicKeyGuid())
+                    .header(HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
                     .inputData(new ByteArrayInputStream(clearIn), ENCRYPT_REQUEST_CONTENT_TYPE)
                     .outputStream(response);
 
@@ -166,7 +166,7 @@ public class KeyManagerKEKProvider implements FS2KEKProvider {
             HTTPResponse oResponse = HTTPRequest.put(KMSUtil.getKeyManagementUrl(String.format(PATH_FOR_OPERATION_DECRYPT, kekGuid)))
                     .header(HEADER_KEY_ACL_MANIFEST, manifestResponse.getManifest())
                     .header(HEADER_KEY_ACL_SIGNATURE, manifestResponse.getSignature())
-                    .header("acl_signer_public_key_guid", manifestResponse.getPublicKeyGuid())
+                    .header(HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
                     .inputData(bais, DECRYPT_REQUEST_CONTENT_TYPE)
                     .outputStream(response)
                     .execute();
