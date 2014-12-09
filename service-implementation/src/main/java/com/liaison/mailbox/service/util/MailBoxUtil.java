@@ -64,7 +64,7 @@ public class MailBoxUtil {
 	private static final String REQUEST_HEADER = "Request Header";
 	private static final String PROPERTIES_FILE = "Properties file";
 	private static final Object lock = new Object();
-	private static final Properties properties = new Properties();	
+	private static final Properties properties = new Properties();
 	private static final String DUMMY_MANIFEST_USAGE_PROPERTY = "use.dummy.manifest.as.backup";
 	private static final String DUMMY_MANIFEST_PROPERTY = "dummy.acl.manifest.json";
 
@@ -152,8 +152,7 @@ public class MailBoxUtil {
 		return str == null || str.isEmpty();
 	}
 
-	public static DecryptableConfiguration getEnvironmentProperties() throws IOException {
-
+	public static DecryptableConfiguration getEnvironmentProperties() {
 		return LiaisonConfigurationFactory.getConfiguration();
 	}
 
@@ -171,7 +170,7 @@ public class MailBoxUtil {
             return properties;
         }
     }
-	
+
 	/**
 	 * Method to get the current timestmp to insert into database.
 	 *
@@ -206,22 +205,22 @@ public class MailBoxUtil {
 		LOGGER.info("Retrieving tenancy key from acl manifest");
 		TenancyKeyDTO tenancyKey = null;
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-				
+
 				tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
 				// if domainInternalName is not available then domainName will be used
 				// only if acl manifest backward compatibility mode is on otherwise exception will be thrown.
 				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ) {
 					if (!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
-						throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);						
+						throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
 					}
-					tenancyKey.setGuid(rbac.getDomainName());					
+					tenancyKey.setGuid(rbac.getDomainName());
 				} else {
 					tenancyKey.setGuid(rbac.getDomainInternalName());
-				} 
+				}
 		  tenancyKeys.add(tenancyKey);
 	   }
-		
+
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
 	}
@@ -247,19 +246,19 @@ public class MailBoxUtil {
 	public static String getDummyManifestJson() throws IOException, MailBoxConfigurationServicesException {
 
 		String dummyManifestJson = null;
-		
+
 		// check the value of property "use.dummy.manifest"
 		// if it is true use dummy manifest else throw an error due to the
 		// non-availability of manifest in header
 		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(DUMMY_MANIFEST_USAGE_PROPERTY))) {
-	
+
 			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
 			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(DUMMY_MANIFEST_PROPERTY);
 			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
 				LOGGER.error("dummy acl manifest is not available in the properties file");
 				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE, Response.Status.BAD_REQUEST);
 			}
-	
+
 		} else {
 			LOGGER.error("acl manifest is not available in the request header");
 			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER, Response.Status.BAD_REQUEST);
@@ -268,17 +267,17 @@ public class MailBoxUtil {
 		return dummyManifestJson;
 	}
 
-	
+
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
-	 * 
+	 *
 	 * @param tenancyKeyGuid
 	 * @param tenancyKeys
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static String getTenancyKeyWithGuid(String tenancyKeyGuid, List <TenancyKeyDTO> tenancyKeys) throws IOException {
-		
+
 		String tenancyKeyDisplayName = null;
 		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
 			if (tenancyKey.getGuid().equals(tenancyKeyGuid)) tenancyKeyDisplayName = tenancyKey.getName();

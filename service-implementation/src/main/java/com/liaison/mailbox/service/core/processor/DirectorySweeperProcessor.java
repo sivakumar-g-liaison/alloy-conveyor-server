@@ -53,7 +53,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
-import com.liaison.mailbox.service.util.FS2Util;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -88,9 +88,9 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {
-		
+
 		try {
-			
+
 			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
@@ -98,9 +98,9 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			} else {
 				executeRequest();
 			}
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException e) {
 			throw new RuntimeException(e);
-		}		
+		}
 	}
 
 	private void executeRequest() {
@@ -352,13 +352,16 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 					: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
-			FS2Util.isEncryptionRequired = this.getProperties().isSecuredPayload();
+
 			// persist payload in spectrum
-			InputStream payloadToPersist = new FileInputStream(payloadFile);
-			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
-			metaSnapShot = FS2Util.persistPayloadInSpectrum(payloadToPersist, globalProcessId, fs2Header);
-			payloadToPersist.close();
-			// Renaming the file at the end of the step when everything is done.
+			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
+				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
+				metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,
+						fs2Header, this.getProperties().isSecuredPayload());
+				payloadToPersist.close();
+			}
+
+
 			move(oldPath, newPath);
 			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(metaSnapShot.getURI().toString());

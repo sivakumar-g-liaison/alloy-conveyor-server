@@ -80,7 +80,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.FS2Util;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class MailboxSLAWatchDogService {
@@ -126,7 +126,7 @@ public class MailboxSLAWatchDogService {
 		seggregateProcessorsOfTypeSweeperAndUploaders(processors, sweepers, uploaders);
 
 		try {
-			
+
 			boolean isMailboxSLAAdhered = validateMailboxSLARule(slaViolatedMailboxesList, sweepers);
 			boolean isCustomerSLAAdhered = validateCustomerSLARule(slaViolatedMailboxesList, uploaders);
 
@@ -160,7 +160,7 @@ public class MailboxSLAWatchDogService {
 
 		LOG.debug("Entering into validateMailboxSLARules.");
 		List <String> slaViolatedMailboxes = new ArrayList<String>();
-	
+
 		for (Processor procsr : sweepers) {
 
 			String timeToPickUpFilePostedToMailbox = null;
@@ -193,7 +193,7 @@ public class MailboxSLAWatchDogService {
 			StringBuilder emailBody = null;
 			// If the list is empty then the processor is not executed at all during the specified sla time.
 			if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
-				
+
 				LOG.debug("The processor was not executed with in the specified mailbox SLA configuration time");
 				mailboxName = procsr.getMailbox().getMbxName();
 				slaViolatedMailboxes.add(mailboxName);
@@ -333,15 +333,14 @@ public class MailboxSLAWatchDogService {
 				throw new MailBoxServicesException(Messages.UPLOADER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
 			LOG.debug("Processor {} of type uploader is available for mailbox {}", processor.getProcsrName(), mailboxId);
-			
+
 			// retrieve the processor execution status of corresponding uploader from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
 
-			FS2Util.isEncryptionRequired = true;
 			//get payload from spectrum
-			InputStream payload = FS2Util.retrievePayloadFromSpectrum(payloadURI);
-			
-			if (null == payload) {			
+			InputStream payload = StorageUtilities.retrievePayload(payloadURI);
+
+			if (null == payload) {
 				LOG.error("Failed to retrieve payload from spectrum");
 				throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
 			}
@@ -415,7 +414,7 @@ public class MailboxSLAWatchDogService {
 	}
 
 	private List <String> getEmailAddress (Processor processor, String mailboxId) {
-		
+
 		LOG.debug ("Retrieving Email Address from mailbox properties");
 		if (null != processor) {
 			return processor.getEmailAddress();
@@ -498,7 +497,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws IOException
 	 */
 	private String getProcessorPayloadLocation (Processor processor) throws MailBoxServicesException, IOException {
-		
+
 		LOG.info("Retrieving payload location from processor");
 		if (processor.getFolders() != null) {
 
@@ -549,7 +548,7 @@ public class MailboxSLAWatchDogService {
 	 * @return
 	 */
 	private Processor getProcessorOfTypeUploader(String mailboxId) {
-		
+
 		LOG.info("Retrieving processors of type uploader for mailbox {}", mailboxId);
 		// get processor of type remote uploader of given mailbox id
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
@@ -587,7 +586,7 @@ public class MailboxSLAWatchDogService {
 
 		LOG.debug("Entering into validateCustomerSLARule.");
 		List <String> slaViolatedMailboxes = new ArrayList<String>();
-		
+
 
 		String timeToPickUpFilePostedByMailbox = null;
 		for (Processor procsr : uploaders) {
@@ -757,19 +756,19 @@ public class MailboxSLAWatchDogService {
 		}
 
 	}
-	
+
 	/**
 	 * Method to separate sweepers and uploaders from all processors
-	 * 
+	 *
 	 * @param processors
 	 * @param sweepers
 	 * @param uploaders
 	 */
 	private void seggregateProcessorsOfTypeSweeperAndUploaders(List <Processor> processors, List <Sweeper> sweepers, List <RemoteUploader> uploaders) {
-		
+
 		LOG.info("Seggregating processors of type sweeper and uploader from all processors");
 		for (Processor processor : processors) {
-			
+
 			if (processor instanceof Sweeper) {
 				sweepers.add((Sweeper)processor);
 			}

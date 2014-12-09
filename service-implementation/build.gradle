@@ -123,7 +123,7 @@ dependencies {
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
 
-	compile("com.liaison:fs2:1.2.0"){
+	compile("com.liaison:fs2:3.0.0-SNAPSHOT"){
 		exclude group:"bouncycastle", module:"bcprov-jdk16"
 	}
 

@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -32,7 +32,6 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -45,11 +44,11 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox helper services.
- * 
+ *
  * @author OFS
  */
 @Path("mailbox/serviceconfigurations")
-@Api(value = "mailbox/serviceconfigurations", 
+@Api(value = "mailbox/serviceconfigurations",
 description = "Gateway for the mailbox helper services.")
 public class MailboxServiceConfigurationsResource extends AuditedResource {
 
@@ -59,17 +58,17 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);	
-	
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
+
 
 	public MailboxServiceConfigurationsResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
+
 	/**
 	 * REST method to retrieve property file values.
-	 * 
+	 *
 	 * @return Response Object
 	 */
 	@GET
@@ -88,17 +87,12 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
-				try {
-					//get Property File
-					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.getValuesFromPropertiesFile();					
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
+
+				//get Property File
+				MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
+				return mailbox.getValuesFromPropertiesFile();
 			}
 		};
 		worker.actionLabel = "MailboxServiceConfigurationsResource.getPropertyFileValues()";
@@ -112,8 +106,8 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-	}	
-	
+	}
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
@@ -133,5 +127,5 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 }
