@@ -10,6 +10,10 @@
 
 package com.liaison.mailbox.service.util;
 
+import static com.liaison.commons.acl.util.ACLUtil.HEADER_KEY_ACL_MANIFEST;
+import static com.liaison.commons.acl.util.ACLUtil.HEADER_KEY_ACL_SIGNATURE;
+import static com.liaison.commons.acl.util.ACLUtil.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -177,10 +181,11 @@ public class ACLClientUtil {
 		String gemManifest = (gemManifestFromGEM != null) ? gemManifestFromGEM.getManifest() : null;
 		String signedGEMManifest = (gemManifestFromGEM != null) ? gemManifestFromGEM.getSignature() : null;
 		String gemSignerPublicKey = (gemManifestFromGEM != null) ? gemManifestFromGEM.getPublicKeyGuid() : null;
-		headerMap.put("gem-manifest", gemManifest);
-		headerMap.put("gem-signature", signedGEMManifest);
-		headerMap.put("gem_signer_public_key_guid", gemSignerPublicKey);
+		headerMap.put(HEADER_KEY_ACL_MANIFEST, gemManifest);
+		headerMap.put(HEADER_KEY_ACL_SIGNATURE, signedGEMManifest);
+		headerMap.put(HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, gemSignerPublicKey);
 		headerMap.put("Content-Type", "application/json");
+		
 		return headerMap;
 	}	
 	
