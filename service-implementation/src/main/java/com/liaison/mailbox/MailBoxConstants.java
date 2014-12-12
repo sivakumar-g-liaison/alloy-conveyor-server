@@ -99,6 +99,7 @@ public interface MailBoxConstants {
 	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
 	public static final String HTTPLISTENER_PIPELINEID = "httplistenerpipelineid";
 	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httplistenerpayload";
+	public static final String HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";	
 	
 	// properties used to configure sla rules of an mailbox
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
@@ -140,5 +141,15 @@ public interface MailBoxConstants {
 	//Empty script file
 	
 	public static final String DEFAULT_SCRIPT_TMPLATE_CONTENT = "// Scripts File is empty.";	
+	
+	//DEFAULTVALUE_FOR_REQUIRED_PROPS
+	
+	public static final String DEFAULT_SCRIPT_TEMPLATE_NAME = "mailbox.script.default.template";
+	public static final String DEFAULT_GLOBAL_TRUSTSTORE_ID = "mailbox.global.truststore.id";
+	public static final String DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID = "mailbox.global.trustgroup.id";
+	public static final String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
+	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
+	public static final String DEFAULT_PGUID_DISPLAY_PREFIX = "maibox.pguid.display.prefix";
+	
 	
 }

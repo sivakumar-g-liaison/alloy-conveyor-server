@@ -685,7 +685,7 @@ public class ProcessorConfigurationService {
 		LOGGER.debug("Entering into getExecutingProcessors.");
 		try {
 
-			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString("default.job.search.period.in.hours");
+			String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS);
 			Timestamp timeStmp = new Timestamp(new Date().getTime());
 
 			Calendar cal = Calendar.getInstance();
@@ -827,7 +827,7 @@ public class ProcessorConfigurationService {
 
 				if ((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
 					processorDTO = new ProcessorDTO();
-					processorDTO.copyFromEntity(processor);
+					processorDTO.copyFromEntity(processor);					
 				}
 				if ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
 					processorDTO = new ProcessorDTO();
@@ -845,6 +845,12 @@ public class ProcessorConfigurationService {
 
 					// retrieving the httplistener pipeline id from remote processor properties
 					String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
+					boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
+					
+					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
+					httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());
+					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));	
+					
 					if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
 
 					//retrieving httplistener authenctication check required property from dynamic properties of processor
@@ -856,6 +862,8 @@ public class ProcessorConfigurationService {
 					}
 
 				}
+				
+						
 			}
 
 
@@ -869,5 +877,5 @@ public class ProcessorConfigurationService {
 
 		return httpListenerProperties;
 
-	}
+	}	
 }

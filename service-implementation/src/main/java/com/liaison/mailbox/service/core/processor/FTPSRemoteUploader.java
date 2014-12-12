@@ -173,7 +173,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		int replyCode = 0;
 
 		Date lastCheckTime = new Date();
-		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
+		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 

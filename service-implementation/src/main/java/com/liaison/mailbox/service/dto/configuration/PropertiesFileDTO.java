@@ -25,10 +25,6 @@ public class PropertiesFileDTO {
 	
 	private String trustStoreId;
 	private String trustStoreGroupId;
-	private String gitlabHost;
-	private String gitlabPort;
-	private String gitlabProjectName;
-	private String gitlabBranchName;
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
 	private String mailboxPguidDisplayPrefix;
@@ -46,30 +42,6 @@ public class PropertiesFileDTO {
 	public void setFsmEventCheckIntervalInSeconds(
 			String fsmEventCheckIntervalInSeconds) {
 		this.fsmEventCheckIntervalInSeconds = fsmEventCheckIntervalInSeconds;
-	}
-	public String getGitlabHost() {
-		return gitlabHost;
-	}
-	public void setGitlabHost(String gitlabHost) {
-		this.gitlabHost = gitlabHost;
-	}
-	public String getGitlabPort() {
-		return gitlabPort;
-	}
-	public void setGitlabPort(String gitlabPort) {
-		this.gitlabPort = gitlabPort;
-	}
-	public String getGitlabProjectName() {
-		return gitlabProjectName;
-	}
-	public void setGitlabProjectName(String gitlabProjectName) {
-		this.gitlabProjectName = gitlabProjectName;
-	}
-	public String getGitlabBranchName() {
-		return gitlabBranchName;
-	}
-	public void setGitlabBranchName(String gitlabBranchName) {
-		this.gitlabBranchName = gitlabBranchName;
 	}
 	public String getTrustStoreId() {
 		return trustStoreId;

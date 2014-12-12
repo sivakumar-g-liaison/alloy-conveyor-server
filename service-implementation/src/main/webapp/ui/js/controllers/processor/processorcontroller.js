@@ -3,9 +3,6 @@ var rest = myApp.controller(
         '$filter', '$location', '$log', '$blockUI',
         function ($rootScope, $modal, $scope, $timeout, $filter,
             $location, $log, $blockUI) {
-			
-			//for loading js from git
-			$scope.constructedGitUrl = $rootScope.javaProperties.gitlabHost +"/"+ $rootScope.javaProperties.gitlabProjectName + "/" + $rootScope.javaProperties.gitlabBranchName;
 		
 			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;

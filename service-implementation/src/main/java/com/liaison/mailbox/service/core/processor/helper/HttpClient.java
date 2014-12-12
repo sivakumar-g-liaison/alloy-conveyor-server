@@ -31,6 +31,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHandler;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
@@ -116,7 +117,7 @@ public class HttpClient {
 
 					// If no certificate is configured then use default global trustoreid
 					String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri()))
-							? (MailBoxUtil.getEnvironmentProperties().getString("mailbox.global.trustgroup.id"))
+							? (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID))
 							: trustStoreCredential.getCredsIdpUri();
 
 					try (InputStream instream = KMSUtil.fetchTrustStore(trustStoreID)) {

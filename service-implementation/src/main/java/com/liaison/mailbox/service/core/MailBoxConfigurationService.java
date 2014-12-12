@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -560,52 +561,27 @@ public class MailBoxConfigurationService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {
+	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() throws IOException  {
 
 		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
 
-
 		PropertiesFileDTO dto = new PropertiesFileDTO();
-
-		//TODO use MailBoxUtil.getEnvProperties()
-		//Sample
-		//Properties prop = MailBoxUtil.getEnvProperties();
-		//String globalTrustStoreId = prop.getProperty("mailbox.global.truststore.id", "DEFAULTVALUE_FOR_REQUIRED_PROPS");
-		//TODO Do not hardcode the props . Read it from constants
-		//MailBoxUtil.getEnvProperties()
-
-		String globalTrustStoreId = MailBoxUtil.getEnvironmentProperties()
-				.getString("mailbox.global.truststore.id");
-		String globalTrustStoreGroupId = MailBoxUtil.getEnvironmentProperties().getString(
-				"mailbox.global.trustgroup.id");
-		String gitlabHost = MailBoxUtil.getEnvironmentProperties().getString(
-				MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_HOST);
-		String gitlabPort = MailBoxUtil.getEnvironmentProperties().getString(
-				"com.liaison.gitlab.script.server.port");
-		String gitlabProjectName = MailBoxUtil.getEnvironmentProperties().getString(
-				"com.liaison.gitlab.script.project.name");
-		String gitlabBranchName = MailBoxUtil.getEnvironmentProperties().getString(
-				"com.liaison.gitlab.script.branch.name");
-		String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString(
-				"default.job.search.period.in.hours");
-		String fsmEventCheckIntervalInSeconds = MailBoxUtil.getEnvironmentProperties().getString(
-				"check.for.interrupt.signal.frequency.in.sec");
-		String mailboxPguidDisplayPrefix = MailBoxUtil.getEnvironmentProperties().getString(
-				"maibox.pguid.display.prefix");
-		String defaultScriptTemplateName = MailBoxUtil.getEnvironmentProperties().getString(
-				"mailbox.script.default.template");
-
+		
+		Properties prop = MailBoxUtil.getEnvProperties();
+		String globalTrustStoreId = prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID);
+		String globalTrustStoreGroupId = prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID);		
+		String listJobsIntervalInHours = prop.getProperty(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS);
+		String fsmEventCheckIntervalInSeconds = prop.getProperty(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);		
+		String mailboxPguidDisplayPrefix = prop.getProperty(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX);	
+		String defaultScriptTemplateName = prop.getProperty(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME);
+			
 		dto.setTrustStoreId(globalTrustStoreId);
 		dto.setTrustStoreGroupId(globalTrustStoreGroupId);
-		dto.setGitlabHost(gitlabHost);
-		dto.setGitlabPort(gitlabPort);
-		dto.setGitlabBranchName(gitlabBranchName);
-		dto.setGitlabProjectName(gitlabProjectName);
 		dto.setListJobsIntervalInHours(listJobsIntervalInHours);
 		dto.setFsmEventCheckIntervalInSeconds(fsmEventCheckIntervalInSeconds);
 		dto.setMailboxPguidDisplayPrefix(mailboxPguidDisplayPrefix);
 		dto.setDefaultScriptTemplateName(defaultScriptTemplateName);
-
+		
 		serviceResponse.setProperties(dto);
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,

@@ -161,7 +161,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		Date lastCheckTime = new Date();
-		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString("check.for.interrupt.signal.frequency.in.sec");
+		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {

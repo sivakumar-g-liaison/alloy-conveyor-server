@@ -86,7 +86,7 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() {
+			public Object call() throws IOException {
 
 				serviceCallCounter.addAndGet(1);
 
