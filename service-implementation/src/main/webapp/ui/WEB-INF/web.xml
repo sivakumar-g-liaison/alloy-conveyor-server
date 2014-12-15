@@ -78,9 +78,8 @@
         </servlet-class>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.liaison.mailbox.service;com.wordnik.swagger.jersey.listing;com.liaison.service.resources.acl</param-value>
-
-        </init-param>
+            <param-value>com.liaison.mailbox.service.rest;com.wordnik.swagger.jersey.listing;com.liaison.service.resources.acl</param-value>
+         </init-param>
         <init-param>
             <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
             <param-value>true</param-value>

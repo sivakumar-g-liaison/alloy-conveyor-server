@@ -89,7 +89,6 @@ public class ProcessorAdminResource extends AuditedResource {
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-	@AccessDescriptor(accessMethod = "getExecutingProcessors")
 	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "get list of executing processors with the status specified") @ApiParam(name="status", required=false, value="status") final String status,
 			@QueryParam(value = "frmDate") @ApiParam(name="frmDate", required=false, value="get list of executing processors from the date specified ") final String frmDate, @QueryParam(value = "toDate") @ApiParam(name="toDate", required=false, value="get list of executing processors to the date specified") final String toDate, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") final String hitCounter) {
 
@@ -146,7 +145,6 @@ public class ProcessorAdminResource extends AuditedResource {
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-	@AccessDescriptor(accessMethod = "interruptRunningProcessor")
 	public Response interruptRunningProcessor(@Context final HttpServletRequest request,@QueryParam(value = "executionID") @ApiParam(name = "executionID", required = false, value = "executionID") final String executionID) {
         
 		
