@@ -529,7 +529,7 @@ task pingTest {
 }
 
 // Database build scripting
-def flywayWorkingRoot = "${projectDir}/src/main/resources/db/~work"
+def flywayWorkingRoot = "${projectDir}/src/main/db/~work"
 def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
 flyway {
     url = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
@@ -554,7 +554,7 @@ task flywaySetup << {
 	logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
 	ant.copy( toDir: flywayMigrationRoot, overwrite:true)
 	{
-		fileset(dir: 'src/main/resources/db/migration', includes: '**/*.sql')
+		fileset(dir: 'src/main/db/migration', includes: '**/*.sql')
 		filterchain {
 			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
 		}
@@ -575,7 +575,7 @@ task buildFlywayTable << {
     def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
     ant.copy( toDir: flywayTableDir, overwrite:true)
     {
-        fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
+        fileset(dir: "${projectDir}/src/main/db/provision/flyway", includes: '**/*.sql')
         // the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
         filterchain {
             tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
