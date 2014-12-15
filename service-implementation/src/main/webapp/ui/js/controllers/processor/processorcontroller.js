@@ -308,6 +308,11 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
+                	 name: 'SecuredPayload',
+                     value: true,
+                     allowAdd: false,
+                     isMandatory: true
+                }, {
                     name: '',
                     value: '',
                     allowAdd: true,
@@ -537,6 +542,9 @@ var rest = myApp.controller(
                 $scope.allMandatoryHttpListenerProperties = [{
                     "name": "HTTP Listener PipelineId",
                     "id": "httpListenerPipeLineId"
+                }, {
+                	"name": "SecuredPayload",
+                	"id": "securedPayload"
                 }];
 				
 				$scope.allStaticPropertiesForDownloaderProcessorFolder = [{
@@ -1364,7 +1372,8 @@ var rest = myApp.controller(
 					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
 					// But Mandatory properties of type boolean will be displayed even if the value is false in the grid
 					if ((prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') || 
-                       (prop === 'securedPayload' && json_data[prop] === false && $scope.processor.protocol === 'SWEEPER')) {
+                       (prop === 'securedPayload' && json_data[prop] === false && $scope.processor.protocol === 'SWEEPER') ||
+					   (prop === 'securedPayload' && json_data[prop] === false && ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR')) ) {					   
                         allowFalseValues = true;
                     }
 					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFalseValues) && json_data[prop] !== null && json_data[prop] !== '') {
@@ -2024,7 +2033,11 @@ var rest = myApp.controller(
                 var sweeperVal = getIndex($scope.allMandatorySweeperProperties, name);
                 if (sweeperVal !== -1) {
                     return sweeperVal;
-                }
+                }			
+				var httpListenerVal = getIndex($scope.allMandatoryHttpListenerProperties, name);
+				if (httpListenerVal !== -1) {
+                    return httpListenerVal;
+                }				
                 return getId($scope.allStaticProperties, name);
             };
             $scope.save = function () {
@@ -2673,6 +2686,11 @@ var rest = myApp.controller(
                     value: '',
                     allowAdd: false,
                     isMandatory: true
+                }, {
+                	 name: 'SecuredPayload',
+                     value: true,
+                     allowAdd: false,
+                     isMandatory: true
                 }, {
                     name: '',
                     value: '',

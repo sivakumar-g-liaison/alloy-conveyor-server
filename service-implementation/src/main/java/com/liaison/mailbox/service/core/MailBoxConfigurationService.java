@@ -561,33 +561,37 @@ public class MailBoxConfigurationService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() throws IOException  {
-
+	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {		
+		LOG.debug("Entering into getValuesFromPropertiesFile.");
+		
 		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
-
 		PropertiesFileDTO dto = new PropertiesFileDTO();
 		
-		Properties prop = MailBoxUtil.getEnvProperties();
-		String globalTrustStoreId = prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID);
-		String globalTrustStoreGroupId = prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID);		
-		String listJobsIntervalInHours = prop.getProperty(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS);
-		String fsmEventCheckIntervalInSeconds = prop.getProperty(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);		
-		String mailboxPguidDisplayPrefix = prop.getProperty(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX);	
-		String defaultScriptTemplateName = prop.getProperty(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME);
+		try {
 			
-		dto.setTrustStoreId(globalTrustStoreId);
-		dto.setTrustStoreGroupId(globalTrustStoreGroupId);
-		dto.setListJobsIntervalInHours(listJobsIntervalInHours);
-		dto.setFsmEventCheckIntervalInSeconds(fsmEventCheckIntervalInSeconds);
-		dto.setMailboxPguidDisplayPrefix(mailboxPguidDisplayPrefix);
-		dto.setDefaultScriptTemplateName(defaultScriptTemplateName);
+			Properties prop = MailBoxUtil.getEnvProperties();
+			
+			dto.setTrustStoreId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
+			dto.setTrustStoreGroupId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
+			dto.setListJobsIntervalInHours(prop.getProperty(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+			dto.setFsmEventCheckIntervalInSeconds(prop.getProperty(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
+			dto.setMailboxPguidDisplayPrefix(prop.getProperty(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX));
+			dto.setDefaultScriptTemplateName(prop.getProperty(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+			
+			serviceResponse.setProperties(dto);		
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
+					Messages.SUCCESS));
+			LOG.debug("Exit from getValuesFromPropertiesFile.");
+			return serviceResponse;
 		
-		serviceResponse.setProperties(dto);
+		} catch (IOException e) {
 
-		serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
-				Messages.SUCCESS));
-
-		return serviceResponse;
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX, Messages.FAILURE, e
+							.getMessage()));
+			return serviceResponse;
+		}
 
 	}
 

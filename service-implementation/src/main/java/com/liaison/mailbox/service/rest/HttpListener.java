@@ -10,13 +10,11 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -183,7 +181,7 @@ public class HttpListener extends AuditedResource {
 					}
 					logger.debug("constructed workticket");
 					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
-									
+
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 					ResponseBuilder builder = Response.ok();
 					responseInputStream = httpResponse.getEntity().getContent();
@@ -379,7 +377,7 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
-		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));		
+		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
 		copyRequestHeadersToWorkTicket(request, workTicket);
 		assignGlobalProcessId(workTicket);
 		assignTimestamp(workTicket);
@@ -592,24 +590,26 @@ public class HttpListener extends AuditedResource {
 	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties)
 			throws JAXBException, Exception {
 		logger.info("Starting to forward request...");
-		
-		FS2MetaSnapshot metaSnapShot = null;		
-		InputStream payloadToPersist = new ByteArrayInputStream(new String(StreamUtil.streamToBytes(request.getInputStream())).getBytes(StandardCharsets.UTF_8));			
-		workTicket.setPayloadSize((long)new CountingInputStream(payloadToPersist).available());			
-		FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);			
-		metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, 
-					   workTicket.getGlobalProcessId(), fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));			
-		logger.info("The received path uri is ", metaSnapShot.getURI().toString());
-		payloadToPersist.close();	
-	
-		workTicket.setProcessMode(ProcessMode.SYNC);
-		workTicket.setPayloadURI(metaSnapShot.getURI().toString());		
-		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);		
+
+		try (InputStream payloadToPersist = request.getInputStream()) {
+
+			  payloadToPersist.read();
+              workTicket.setPayloadSize(Long.valueOf(new CountingInputStream(payloadToPersist).available()));
+              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
+              payloadToPersist.close();
+              logger.info("The received path uri is ", metaSnapShot.getURI().toString());
+              workTicket.setProcessMode(ProcessMode.SYNC);
+              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+        }
+
+		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);
 		httpRequest.setHeader("Content-type", request.getContentType().toString());
-		StringEntity params =new StringEntity(workTicketJson);
-		httpRequest.setEntity(params);		
-		HttpClient httpClient = createHttpClient();		
+		StringEntity requestBody =new StringEntity(workTicketJson);
+		httpRequest.setEntity(requestBody);
+		HttpClient httpClient = createHttpClient();
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
 		return httpResponse;
 	}
@@ -824,7 +824,7 @@ public class HttpListener extends AuditedResource {
 		logger.info("Payload Location is set to be :"+payloadLocation);
 		return payloadLocation;
 	}
-	
+
 	/**
 	 * Method to construct FS2ObjectHeaders from the given workTicket
 	 *
@@ -844,7 +844,7 @@ public class HttpListener extends AuditedResource {
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 		return fs2Header;
 	}
-	
+
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
