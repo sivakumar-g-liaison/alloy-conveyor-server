@@ -530,7 +530,7 @@ task pingTest {
 
 // Database build scripting
 def flywayWorkingRoot = "${projectDir}/src/main/db/~work"
-def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
+def flywayMigrationRoot = "${flywayWorkingRoot}/migration/DTDM"
 flyway {
     url = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
     driver = 'oracle.jdbc.OracleDriver'
@@ -554,7 +554,7 @@ task flywaySetup << {
 	logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
 	ant.copy( toDir: flywayMigrationRoot, overwrite:true)
 	{
-		fileset(dir: 'src/main/db/migration', includes: '**/*.sql')
+		fileset(dir: 'src/main/db/migration/DTDM', includes: '**/*.sql')
 		filterchain {
 			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
 		}
