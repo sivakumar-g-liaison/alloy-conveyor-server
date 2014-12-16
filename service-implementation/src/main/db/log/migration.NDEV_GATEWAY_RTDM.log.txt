@@ -1,7 +1,0 @@
-Flyway (Command-line Tool) v.2.3
-
-Current version of schema "NDEV_GATEWAY_RTDM_OWNR": << Empty Schema >>
-Migrating schema "NDEV_GATEWAY_RTDM_OWNR" to version 1.0.0.10
-Migrating schema "NDEV_GATEWAY_RTDM_OWNR" to version 1.0.0.20
-Migrating schema "NDEV_GATEWAY_RTDM_OWNR" to version 1.0.0.30
-Successfully applied 3 migrations to schema "NDEV_GATEWAY_RTDM_OWNR" (execution time 00:01.452s).

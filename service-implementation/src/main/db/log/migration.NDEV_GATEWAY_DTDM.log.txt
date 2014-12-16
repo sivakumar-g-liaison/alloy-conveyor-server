@@ -1,8 +1,0 @@
-Flyway (Command-line Tool) v.2.3
-
-Current version of schema "NDEV_GATEWAY_DTDM_OWNR": << Empty Schema >>
-Migrating schema "NDEV_GATEWAY_DTDM_OWNR" to version 1.0.0.10
-Migrating schema "NDEV_GATEWAY_DTDM_OWNR" to version 1.0.0.20
-Migrating schema "NDEV_GATEWAY_DTDM_OWNR" to version 1.0.0.30
-Migrating schema "NDEV_GATEWAY_DTDM_OWNR" to version 1.0.0.40
-Successfully applied 4 migrations to schema "NDEV_GATEWAY_DTDM_OWNR" (execution time 00:03.366s).

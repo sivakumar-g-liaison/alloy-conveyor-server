@@ -101,5 +101,6 @@ service-implementation/src/main/webapp/ui/nbproject/
 /build
 
 *.wer1
-/service-implementation/src/main/resources/db/~work/
-/service-implementation/src/main/resources/db/~provision.*
+/service-implementation/src/main/db/~work/
+/service-implementation/src/main/db/~provision.*
+/service-implementation/src/main/db/log
