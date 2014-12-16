@@ -75,6 +75,7 @@ public class KMSUtil {
 
 			// setting the request headers in the request to key manager from gem
 			Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+
 			String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
@@ -120,7 +121,9 @@ public class KMSUtil {
 		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
 		// setting the request headers in the request to key manager from gem
+		// manifest response
 		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {

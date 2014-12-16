@@ -160,10 +160,6 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 	$rootScope.javaProperties = {
 		globalTrustStoreId: "",
 		globalTrustStoreGroupId: "",
-		gitlabHost: "",
-		gitlabPort: "",
-		gitlabProjectName: "",
-		gitlabBranchName: "",
 		mailboxPguidDisplayPrefix: "",
 		defaultScriptTemplateName: ""	
 	};
@@ -172,10 +168,6 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 			if (status === 200 && data.getPropertiesValueResponseDTO.response.status === 'success') {
 				$rootScope.javaProperties.globalTrustStoreId = data.getPropertiesValueResponseDTO.properties.trustStoreId;
 				$rootScope.javaProperties.globalTrustStoreGroupId = data.getPropertiesValueResponseDTO.properties.trustStoreGroupId;
-				$rootScope.javaProperties.gitlabHost = data.getPropertiesValueResponseDTO.properties.gitlabHost;
-				$rootScope.javaProperties.gitlabPort = data.getPropertiesValueResponseDTO.properties.gitlabPort;
-				$rootScope.javaProperties.gitlabProjectName = data.getPropertiesValueResponseDTO.properties.gitlabProjectName;
-				$rootScope.javaProperties.gitlabBranchName = data.getPropertiesValueResponseDTO.properties.gitlabBranchName;
 				$rootScope.javaProperties.mailboxPguidDisplayPrefix = data.getPropertiesValueResponseDTO.properties.mailboxPguidDisplayPrefix;
 				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
 				

@@ -10,11 +10,8 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -37,14 +34,14 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,18 +54,20 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.util.StreamUtil;
 import com.liaison.commons.util.UUIDGen;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.fs2.api.FS2MetaSnapshot;
+import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.SessionContext;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.MonitorRegistry;
@@ -175,12 +174,10 @@ public class HttpListener extends AuditedResource {
 					if (isAuthenticationCheckRequired(httpListenerProperties)) {
 						authenticateRequestor(request);
 					}
-					SessionContext sessionContext = createSessionContext(request, mailboxPguid, httpListenerProperties);
+					logger.debug("constructed workticket");
+					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 
-					logger.debug("Pipeline id is set in session context");
-					assignGlobalProcessId(sessionContext);
-					assignTimestamp(sessionContext);
-					HttpResponse httpResponse = forwardRequest(sessionContext, request);
+					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 					ResponseBuilder builder = Response.ok();
 					responseInputStream = httpResponse.getEntity().getContent();
 					copyResponseInfo(httpResponse, builder, responseInputStream);
@@ -266,7 +263,6 @@ public class HttpListener extends AuditedResource {
 					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 					storePayload(request, workTicket, httpListenerProperties);
 					constructMetaDataJson(request, workTicket);
-
 					return Response
 							.ok()
 							.status(Status.ACCEPTED)
@@ -358,21 +354,6 @@ public class HttpListener extends AuditedResource {
 	}
 
 	/**
-	 * This method will create session context by given request.
-	 *
-	 * @param request
-	 *            the HttpServletRequest
-	 * @return SessionContext
-	 */
-	protected SessionContext createSessionContext(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
-		SessionContext sessionContext = new SessionContext();
-		sessionContext.copyFrom(request);
-		sessionContext.setPipelineId(retrievePipelineId(httpListenerProperties));
-		sessionContext.setMailboxId(mailboxPguid);
-		return sessionContext;
-	}
-
-	/**
 	 * This method will create workTicket by given request.
 	 *
 	 * @param request
@@ -392,8 +373,8 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
 		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
 		copyRequestHeadersToWorkTicket(request, workTicket);
-		assignAsyncGlobalProcessId(workTicket);
-		assignAsyncTimestamp(workTicket);
+		assignGlobalProcessId(workTicket);
+		assignTimestamp(workTicket);
 
 		return workTicket;
 	}
@@ -427,169 +408,45 @@ public class HttpListener extends AuditedResource {
 	}
 
 	/**
-	 * This method will set globalProcessId to sessionContext.
-	 *
-	 * @param sessionContext
-	 */
-	protected void assignGlobalProcessId(SessionContext sessionContext) {
-		UUIDGen uuidGen = new UUIDGen();
-		String uuid = uuidGen.getUUID();
-		sessionContext.setGlobalProcessId(uuid);
-	}
-
-	/**
 	 * This method will set globalProcessId to workTicket.
 	 *
 	 * @param workTicket
 	 */
-	protected void assignAsyncGlobalProcessId(WorkTicket workTicket) {
+	protected void assignGlobalProcessId(WorkTicket workTicket) {
 		UUIDGen uuidGen = new UUIDGen();
 		String uuid = uuidGen.getUUID();
 		workTicket.setGlobalProcessId(uuid);
 	}
 
-	protected void assignTimestamp(SessionContext sessionContext) {
-		sessionContext.setRequestTimestamp(new Date());
-	}
-
-	protected void assignAsyncTimestamp(WorkTicket workTicket) {
+	protected void assignTimestamp(WorkTicket workTicket) {
 		workTicket.setCreatedTime(new Date());
 	}
 
 	/**
-	 * This method will store the payload file name by given request.
+	 * This method will persist payload in spectrum.
 	 *
 	 * @param request
 	 * @param workTicket
 	 * @throws IOException
 	 */
+	@SuppressWarnings("resource")
 	protected void storePayload(HttpServletRequest request,
-			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws IOException {
+			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws Exception {
 
-		String payloadFileName = createPayloadFileName(workTicket, httpListenerProperties);
-		workTicket.setPayloadURI(createPayloadUri(payloadFileName));
-		ensurePayloadDirExists(payloadFileName);
+	  try (InputStream payloadToPersist = request.getInputStream()) {
+			 try (CountingInputStream cio = new CountingInputStream(payloadToPersist)) {
 
-		InputStream inputStream = null;
-		OutputStream outputStream = null;
-
-		try {
-			inputStream = request.getInputStream();
-			outputStream = new FileOutputStream(payloadFileName);
-			StreamUtil.copyStream(inputStream, outputStream);
-		} finally {
-			if (outputStream != null) {
-				try {
-					outputStream.flush();
-				} catch (IOException e) {
-					logger.error(
-							"Could not flush the output stream while store payload file",
-							e);
-				}
-				try {
-					outputStream.close();
-				} catch (IOException e) {
-					logger.error(
-							"Could not close the output stream while store payload file",
-							e);
-				}
-			}
-
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException e) {
-					logger.error(
-							"Could not close the input stream while store payload file",
-							e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * This method will create payload file name by given workTicket.
-	 *
-	 * @param workTicket
-	 * @return payloadFileName
-	 */
-	protected String createPayloadFileName(WorkTicket workTicket, Map <String, String> httpListenerProperties) {
-		StringBuilder payloadFileName = new StringBuilder();
-		String payloadDirectory = getHttpAsyncPayloadDirectory(retrieveAsyncPayloadLocation(httpListenerProperties));
-
-		payloadFileName.append(payloadDirectory);
-		payloadFileName.append(File.separatorChar);
-
-		if (workTicket.getPipelineId() != null) {
-			payloadFileName.append(workTicket.getPipelineId());
-			payloadFileName.append(File.separatorChar);
-		}
-
-		payloadFileName.append(workTicket.getGlobalProcessId());
-		payloadFileName.append(".http_async_payload");
-
-		return payloadFileName.toString();
-	}
-
-	/**
-	 * This method will create Payload Uri by given payloadFileName.
-	 *
-	 * @param payloadFileName
-	 * @return payloadUri
-	 */
-	protected String createPayloadUri(String payloadFileName) {
-		StringBuilder payloadUri = new StringBuilder();
-
-		payloadUri.append("file://");
-		payloadUri.append(payloadFileName);
-
-		return payloadUri.toString();
-	}
-
-	/**
-	 * This method will validate Payload Directory by given payload File Name.
-	 *
-	 * @param payloadFileName
-	 */
-	protected void ensurePayloadDirExists(String payloadFileName) {
-		File payloadFile = new File(payloadFileName);
-		File payloadDir = payloadFile.getParentFile();
-
-		if (!payloadDir.exists() && !payloadDir.mkdirs()) {
-			throw new RuntimeException(String.format(
-					"Failed to create payload directory '%s'",
-					payloadDir.getAbsolutePath()));
-		}
-
-		if (!(payloadDir.isDirectory() && payloadDir.canWrite())) {
-			throw new RuntimeException(
-					"HTTP Async payload directory configuration ('"
-							+ CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR
-							+ "') value ('"
-							+ payloadDir
-							+ "') is invalid (not a directory or not writeable).");
-		}
-	}
-
-	/**
-	 * This method will retrieve Payload Directory.
-	 *
-	 * @return payloadDirectory
-	 */
-	protected String getHttpAsyncPayloadDirectory(String payloadURI) {
-		DecryptableConfiguration config = LiaisonConfigurationFactory
-				.getConfiguration();
-		// read payload location from properties file if it is not configured in the httplistenerProperties
-		String payloadDirectory = (StringUtil.isNullOrEmptyAfterTrim(payloadURI))?config
-				.getString(CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR):payloadURI;
-
-		if (payloadDirectory == null) {
-			throw new RuntimeException(
-					"HTTP Async payload directory not configured ('"
-							+ CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR
-							+ "'), cannot process async");
-		}
-		return payloadDirectory;
+				 //the total number of bytes read into the buffer
+				  payloadToPersist.read();
+	              workTicket.setPayloadSize(Long.valueOf(new CountingInputStream(payloadToPersist).available()));
+	              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+	              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+	                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
+	              logger.info("The received path uri is ", metaSnapShot.getURI().toString());
+	              workTicket.setProcessMode(ProcessMode.ASYNC);
+	              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+           }
+	    }
 	}
 
 	protected void constructMetaDataJson(HttpServletRequest request,
@@ -598,7 +455,6 @@ public class HttpListener extends AuditedResource {
 		postToQueue(workTicketJson);
 	}
 
-
 	protected void postToQueue(String message) throws Exception {
         SweeperQueue.getInstance().sendMessages(message);
         logger.debug("HttpListener postToQueue, message: {}", message);
@@ -606,7 +462,7 @@ public class HttpListener extends AuditedResource {
 	}
 
 	/**
-	 * This method will retrieve the HttpResponse from sessionContext.
+	 * This method will persist payload in spectrum.
 	 *
 	 * @param sessionContext
 	 * @param request
@@ -614,12 +470,32 @@ public class HttpListener extends AuditedResource {
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	protected HttpResponse forwardRequest(SessionContext sessionContext,HttpServletRequest request)
+	@SuppressWarnings("resource")
+	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties)
 			throws JAXBException, Exception {
 		logger.info("Starting to forward request...");
-		HttpClient httpClient = createHttpClient();
+
+		try (InputStream payloadToPersist = request.getInputStream()) {
+			 try (CountingInputStream cio = new CountingInputStream(payloadToPersist)) {
+
+				 //the total number of bytes read into the buffer
+				  payloadToPersist.read();
+	              workTicket.setPayloadSize(Long.valueOf(new CountingInputStream(payloadToPersist).available()));
+	              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+	              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+	                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
+	              logger.info("The received path uri is ", metaSnapShot.getURI().toString());
+	              workTicket.setProcessMode(ProcessMode.SYNC);
+	              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+           }
+	    }
+
+		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);
-		sessionContext.copyTo(httpRequest);
+		httpRequest.setHeader("Content-type", request.getContentType().toString());
+		StringEntity requestBody =new StringEntity(workTicketJson);
+		httpRequest.setEntity(requestBody);
+		HttpClient httpClient = createHttpClient();
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
 		return httpResponse;
 	}
@@ -645,16 +521,7 @@ public class HttpListener extends AuditedResource {
 	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
 		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
 		logger.info("Forward request to:"+serviceBrokerSyncUri);
-
 		HttpPost post = new HttpPost(serviceBrokerSyncUri);
-
-		// Set the payload.
-		int contentLength = request.getContentLength();
-		ContentType contentType = ContentType.parse(request.getContentType());
-		HttpEntity entity = new InputStreamEntity(request.getInputStream(),
-				contentLength, contentType);
-		post.setEntity(entity);
-
 		return post;
 	}
 
@@ -819,7 +686,6 @@ public class HttpListener extends AuditedResource {
 
 	}
 
-
 	/**
 	 * retrieve the pipeline id configured in httplistener of mailbox
 	 *
@@ -837,12 +703,26 @@ public class HttpListener extends AuditedResource {
 		return pipelineId;
 	}
 
-	private String retrieveAsyncPayloadLocation (Map <String, String> httpListenerProperties) {
-		String payloadLocation = null;
-		payloadLocation = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION);
-		logger.info("Payload Location is set to be :"+payloadLocation);
-		return payloadLocation;
+	/**
+	 * Method to construct FS2ObjectHeaders from the given workTicket
+	 *
+	 * @param workTicket
+	 * @return FS2ObjectHeaders
+	 * @throws IOException
+	 * @throws MailBoxServicesException
+	 */
+	private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket, Map <String, String> httpListenerProperties) {
+
+		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
+		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
+		fs2Header.addHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, workTicket.getPayloadSize().toString());
+		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
+		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
+		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, httpListenerProperties.get(MailBoxConstants.KEY_TENANCY_KEY));
+		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
+		return fs2Header;
 	}
+
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {

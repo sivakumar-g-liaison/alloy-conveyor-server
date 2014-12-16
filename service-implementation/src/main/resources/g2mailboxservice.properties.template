@@ -129,7 +129,7 @@ check.for.interrupt.signal.frequency.in.sec=86400
 # This dir should never be swept.
 com.liaison.mailbox.http.async.payload.dir=/app/mailbox/httpasyncpayloads
 # Service Broker Sync interface info
-com.liaison.servicebroker.sync.uri=http://10.146.16.141:8989/service-broker-v1.0.0/process/sync
+com.liaison.servicebroker.sync.uri=http://10.146.16.141:8989/service-broker-v1.0.0/process/workticket
 # This is 10meg
 com.liaison.servicebroker.sync.max.request.size=10485760
 
@@ -170,6 +170,7 @@ maibox.pguid.display.prefix = Add this to your http listener asynch/synch calls 
 
 #GEM Integration
 com.liaison.acl.manifest.url = http://10.146.20.20:8989/globalenterprisemanager/rest/v1/gem/verifyAndGetManifest
+
 #Properties required for Manifest request generation
 com.liaison.acl.request.runtime.platform.name=G2
 com.liaison.acl.request.runtime.domain.type=SOA_SERVICE

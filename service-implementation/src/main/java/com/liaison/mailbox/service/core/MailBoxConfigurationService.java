@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -558,58 +559,37 @@ public class MailBoxConfigurationService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {
-
+	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {		
+		LOG.debug("Entering into getValuesFromPropertiesFile.");
+		
 		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
-
-
 		PropertiesFileDTO dto = new PropertiesFileDTO();
+		
+		try {
+			
+			Properties prop = MailBoxUtil.getEnvProperties();
+			
+			dto.setTrustStoreId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
+			dto.setTrustStoreGroupId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
+			dto.setListJobsIntervalInHours(prop.getProperty(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+			dto.setFsmEventCheckIntervalInSeconds(prop.getProperty(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
+			dto.setMailboxPguidDisplayPrefix(prop.getProperty(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX));
+			dto.setDefaultScriptTemplateName(prop.getProperty(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+			
+			serviceResponse.setProperties(dto);		
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
+					Messages.SUCCESS));
+			LOG.debug("Exit from getValuesFromPropertiesFile.");
+			return serviceResponse;
+		
+		} catch (IOException e) {
 
-		//TODO use MailBoxUtil.getEnvProperties()
-		//Sample
-		//Properties prop = MailBoxUtil.getEnvProperties();
-		//String globalTrustStoreId = prop.getProperty("mailbox.global.truststore.id", "DEFAULTVALUE_FOR_REQUIRED_PROPS");
-		//TODO Do not hardcode the props . Read it from constants
-		//MailBoxUtil.getEnvProperties()
-
-		String globalTrustStoreId = MailBoxUtil.getEnvironmentProperties()
-				.getString("mailbox.global.truststore.id");
-		String globalTrustStoreGroupId = MailBoxUtil.getEnvironmentProperties().getString(
-				"mailbox.global.trustgroup.id");
-		String gitlabHost = MailBoxUtil.getEnvironmentProperties().getString(
-				MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_HOST);
-		String gitlabPort = MailBoxUtil.getEnvironmentProperties().getString(
-				"com.liaison.gitlab.script.server.port");
-		String gitlabProjectName = MailBoxUtil.getEnvironmentProperties().getString(
-				"com.liaison.gitlab.script.project.name");
-		String gitlabBranchName = MailBoxUtil.getEnvironmentProperties().getString(
-				"com.liaison.gitlab.script.branch.name");
-		String listJobsIntervalInHours = MailBoxUtil.getEnvironmentProperties().getString(
-				"default.job.search.period.in.hours");
-		String fsmEventCheckIntervalInSeconds = MailBoxUtil.getEnvironmentProperties().getString(
-				"check.for.interrupt.signal.frequency.in.sec");
-		String mailboxPguidDisplayPrefix = MailBoxUtil.getEnvironmentProperties().getString(
-				"maibox.pguid.display.prefix");
-		String defaultScriptTemplateName = MailBoxUtil.getEnvironmentProperties().getString(
-				"mailbox.script.default.template");
-
-		dto.setTrustStoreId(globalTrustStoreId);
-		dto.setTrustStoreGroupId(globalTrustStoreGroupId);
-		dto.setGitlabHost(gitlabHost);
-		dto.setGitlabPort(gitlabPort);
-		dto.setGitlabBranchName(gitlabBranchName);
-		dto.setGitlabProjectName(gitlabProjectName);
-		dto.setListJobsIntervalInHours(listJobsIntervalInHours);
-		dto.setFsmEventCheckIntervalInSeconds(fsmEventCheckIntervalInSeconds);
-		dto.setMailboxPguidDisplayPrefix(mailboxPguidDisplayPrefix);
-		dto.setDefaultScriptTemplateName(defaultScriptTemplateName);
-
-		serviceResponse.setProperties(dto);
-
-		serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
-				Messages.SUCCESS));
-
-		return serviceResponse;
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse
+					.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX, Messages.FAILURE, e
+							.getMessage()));
+			return serviceResponse;
+		}
 
 	}
 
