@@ -94,7 +94,7 @@ public class Credential implements Identifiable {
 		this.credsType = credsType;
 	}
 
-	@Column(name = "URI", length = 128)
+	@Column(name = "URI_GUID", length = 128)
 	public String getCredsUri() {
 		return this.credsUri;
 	}

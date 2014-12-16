@@ -18,11 +18,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public enum ProcessorType {
 
-	REMOTEDOWNLOADER("remotedownloader"),
-	REMOTEUPLOADER("remoteuploader"),
-	HTTPASYNCPROCESSOR("httpasyncprocessor"),
-	HTTPSYNCPROCESSOR("httpsyncprocessor"),
-	SWEEPER("sweeper");
+	REMOTEDOWNLOADER("REMOTEDOWNLOADER"),
+	REMOTEUPLOADER("REMOTEUPLOADER"),
+	HTTPASYNCPROCESSOR("HTTPASYNCPROCESSOR"),
+	HTTPSYNCPROCESSOR("HTTPSYNCPROCESSOR"),
+	SWEEPER("SWEEPER");
 	
 	private final String code;
 

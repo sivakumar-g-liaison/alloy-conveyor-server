@@ -45,11 +45,11 @@ public class Processor implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String TYPE_REMOTEDOWNLOADER = "remotedownloader";
-	public static final String TYPE_REMOTEUPLOADER = "remoteuploader";
-	public static final String TYPE_SWEEPER = "sweeper";
-	public static final String HTTP_ASYNC = "httpasyncprocessor";
-	public static final String HTTP_SYNC = "httpsyncprocessor";
+	public static final String TYPE_REMOTEDOWNLOADER = "REMOTEDOWNLOADER";
+	public static final String TYPE_REMOTEUPLOADER = "REMOTEUPLOADER";
+	public static final String TYPE_SWEEPER = "SWEEPER";
+	public static final String HTTP_ASYNC = "HTTPASYNCPROCESSOR";
+	public static final String HTTP_SYNC = "HTTPSYNCPROCESSOR";
 
 	private String pguid;
 	private String javaScriptUri;
@@ -136,7 +136,7 @@ public class Processor implements Identifiable {
 		this.procsrExecutionStatus = procsrExecutionStatus;
 	}*/
 
-	@Column(name = "NAME", length = 512)
+	@Column(name = "NAME", nullable = false, length = 512)
 	public String getProcsrName() {
 		return procsrName;
 	}

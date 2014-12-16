@@ -60,7 +60,7 @@ public class MailBox implements Identifiable {
 		this.pguid = pguid;
 	}
 
-	@Column(name = "DESCRIPTION", length = 1024)
+	@Column(name = "DESCRIPTION", length = 512)
 	public String getMbxDesc() {
 		return this.mbxDesc;
 	}
@@ -78,7 +78,7 @@ public class MailBox implements Identifiable {
 		this.mbxName = mbxName;
 	}
 
-	@Column(name = "STATUS", nullable = false, length = 128)
+	@Column(name = "STATUS", nullable = false, length = 16)
 	public String getMbxStatus() {
 		return this.mbxStatus;
 	}

@@ -18,8 +18,8 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public enum MailBoxStatus {
 
-	ACTIVE("active"),
-	INACTIVE("inactive");
+	ACTIVE("ACTIVE"),
+	INACTIVE("INACTIVE");
 
 	private String value;
 
