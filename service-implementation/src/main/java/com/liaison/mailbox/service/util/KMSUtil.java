@@ -31,6 +31,7 @@ import org.codehaus.jettison.json.JSONException;
 import com.google.gson.JsonParseException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.keymanage.grammar.KeyServiceResponse;
 import com.liaison.keymanage.grammar.KeySet;
@@ -69,12 +70,11 @@ public class KMSUtil {
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException, JsonParseException, JAXBException {
 
 			// get gem manifest response from GEM
-			String unsignedData = guid;
-			GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
+			GEMACLClient gemClient = new GEMACLClient();
+			GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
 			// setting the request headers in the request to key manager from gem
-			// manifest response
-			Map<String, String> headerMap = ACLClientUtil.getRequestHeaders(gemManifestFromGEM);
+			Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
 			String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
@@ -109,20 +109,18 @@ public class KMSUtil {
 			JAXBException {
 
 		byte[] privateKeyBytes = null;
+		GEMACLClient gemClient = new GEMACLClient();
 
 		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/group/keypair/current/";
 
 		// To be fetched from DataBase
 		url = url + keypairPguid;
-
 		// get gem manifest response from GEM
-	    String unsignedData = keypairPguid;
-		GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
+		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
 		// setting the request headers in the request to key manager from gem
-		// manifest response
-		Map<String, String> headerMap = ACLClientUtil.getRequestHeaders(gemManifestFromGEM);
+		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
@@ -155,6 +153,7 @@ public class KMSUtil {
 	public static InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
 
 		InputStream is = null;
+		GEMACLClient gemClient = new GEMACLClient();
 
 		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url");
 		url = url + "fetch/truststore/current/";
@@ -163,10 +162,9 @@ public class KMSUtil {
 		url = url + trustStoreId;
 
 		// get gem manifest response from GEM
-	    String unsignedData = trustStoreId;
-		GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
+		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
-		Map<String, String> headerMap = ACLClientUtil.getRequestHeaders(gemManifestFromGEM);
+		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
 
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
