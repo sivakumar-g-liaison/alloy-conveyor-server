@@ -1372,8 +1372,8 @@ var rest = myApp.controller(
 					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
 					// But Mandatory properties of type boolean will be displayed even if the value is false in the grid
 					if ((prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') || 
-                       (prop === 'securedPayload' && json_data[prop] === false && $scope.processor.protocol === 'SWEEPER') ||
-					   (prop === 'securedPayload' && json_data[prop] === false && ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR')) ) {					   
+                       (prop === 'securedPayload' && json_data[prop] === false && ($scope.processor.protocol === 'SWEEPER' || 
+                    		   $scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR')) ) {					   
                         allowFalseValues = true;
                     }
 					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFalseValues) && json_data[prop] !== null && json_data[prop] !== '') {
