@@ -123,7 +123,7 @@ dependencies {
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
 
-	compile("com.liaison:fs2:3.0.0-SNAPSHOT"){
+	compile("com.liaison:fs2:3.1.0-SNAPSHOT"){
 		exclude group:"bouncycastle", module:"bcprov-jdk16"
 	}
 
@@ -209,7 +209,7 @@ dependencies {
 		exclude module:'karyon-admin-web'}
 
 	//Dependency for GEM client Integration
-	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'1.1.2-SNAPSHOT', changing: true
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'2.0', changing: true
 
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
@@ -529,8 +529,8 @@ task pingTest {
 }
 
 // Database build scripting
-def flywayWorkingRoot = "${projectDir}/src/main/resources/db/~work"
-def flywayMigrationRoot = "${flywayWorkingRoot}/migration"
+def flywayWorkingRoot = "${projectDir}/src/main/db/~work"
+def flywayMigrationRoot = "${flywayWorkingRoot}/migration/DTDM"
 flyway {
     url = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
     driver = 'oracle.jdbc.OracleDriver'
@@ -554,7 +554,7 @@ task flywaySetup << {
 	logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
 	ant.copy( toDir: flywayMigrationRoot, overwrite:true)
 	{
-		fileset(dir: 'src/main/resources/db/migration', includes: '**/*.sql')
+		fileset(dir: 'src/main/db/migration/DTDM', includes: '**/*.sql')
 		filterchain {
 			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
 		}
@@ -575,7 +575,7 @@ task buildFlywayTable << {
     def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
     ant.copy( toDir: flywayTableDir, overwrite:true)
     {
-        fileset(dir: "${projectDir}/src/main/resources/db/provision/flyway", includes: '**/*.sql')
+        fileset(dir: "${projectDir}/src/main/db/provision/flyway", includes: '**/*.sql')
         // the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
         filterchain {
             tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }

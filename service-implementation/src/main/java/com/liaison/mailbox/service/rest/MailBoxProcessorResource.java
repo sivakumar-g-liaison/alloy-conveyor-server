@@ -99,7 +99,6 @@ public class MailBoxProcessorResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "createProcessor")
 	public Response createProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailboxid") final String guid,

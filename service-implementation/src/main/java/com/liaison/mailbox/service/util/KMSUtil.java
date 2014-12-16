@@ -70,13 +70,12 @@ public class KMSUtil {
 			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException, JsonParseException, JAXBException {
 
 			// get gem manifest response from GEM
-			String unsignedData = guid;
 			GEMACLClient gemClient = new GEMACLClient();
-			GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
+			GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
 			// setting the request headers in the request to key manager from gem
-			// manifest response
-			Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM ,"application/json");
+			Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+
 			String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
@@ -118,14 +117,13 @@ public class KMSUtil {
 
 		// To be fetched from DataBase
 		url = url + keypairPguid;
-
 		// get gem manifest response from GEM
-	    String unsignedData = keypairPguid;
-		GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
+		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
 		// setting the request headers in the request to key manager from gem
 		// manifest response
-		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM ,"application/json");
+		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
 		if (jsonResponse != null) {
@@ -167,10 +165,9 @@ public class KMSUtil {
 		url = url + trustStoreId;
 
 		// get gem manifest response from GEM
-	    String unsignedData = trustStoreId;
-		GEMManifestResponse gemManifestFromGEM = ACLClientUtil.retrieveSignedManifestDTO(unsignedData);
+		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
-		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM ,"application/json");
+		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
 
 		LOGGER.info("The KMS URL TO PULL TRUSTSTORE IS " + url);
 		String jsonResponse = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);

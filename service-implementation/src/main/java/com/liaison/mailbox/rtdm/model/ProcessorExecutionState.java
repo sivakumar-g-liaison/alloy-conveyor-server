@@ -9,7 +9,7 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 
 @Entity
-@Table(name = "PROCESSOR_EXECUTION_STATE")
+@Table(name = "PROCESSOR_EXEC_STATE")
 public class ProcessorExecutionState implements Identifiable {
 	
 	private static final long serialVersionUID = 1L;

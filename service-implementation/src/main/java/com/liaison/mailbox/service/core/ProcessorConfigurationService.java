@@ -206,7 +206,6 @@ public class ProcessorConfigurationService {
 			if (mailboxServiceInstance == null) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
-				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(mailBox);
 				msiDao.persist(msi);
@@ -276,7 +275,6 @@ public class ProcessorConfigurationService {
 			for (ScheduleProfilesRef profile : scheduleProfilesRef) {
 
 				profileProcessor = new ScheduleProfileProcessor();
-				profileProcessor.setPguid(MailBoxUtil.getGUID());
 				profileProcessor.setScheduleProfilesRef(profile);
 				scheduleProfileProcessors.add(profileProcessor);
 			}

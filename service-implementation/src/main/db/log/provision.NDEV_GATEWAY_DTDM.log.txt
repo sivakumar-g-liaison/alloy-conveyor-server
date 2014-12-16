@@ -1,0 +1,358 @@
+Creating Tablespaces... 
+================================================ 
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Dec 15 18:06:15 2014
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+
+SQL> 
+SQL> DECLARE
+  2    v_stmt	 VARCHAR2(4000);
+  3  
+  4  FUNCTION TablespaceExists(
+  5    p_Name IN DBA_TABLESPACES.Tablespace_Name%Type
+  6  ) RETURN BOOLEAN
+  7  IS
+  8    v_ts	DBA_TABLESPACES.Tablespace_Name%Type;
+  9  BEGIN
+ 10    SELECT Tablespace_Name
+ 11  	 INTO v_ts
+ 12  	 FROM DBA_TABLESPACES
+ 13  	 WHERE Tablespace_Name = p_Name;
+ 14    RETURN TRUE;
+ 15  EXCEPTION
+ 16    WHEN NO_DATA_FOUND
+ 17    THEN
+ 18  	 RETURN FALSE;
+ 19  END TablespaceExists;
+ 20  
+ 21  BEGIN
+ 22  
+ 23    IF NOT TablespaceExists('NDEV_GATEWAY_DTDM_CONF') THEN
+ 24  	 v_stmt := 'CREATE TABLESPACE NDEV_GATEWAY_DTDM_CONF';
+ 25  	 EXECUTE IMMEDIATE v_stmt;
+ 26    END IF;
+ 27  
+ 28    IF NOT TablespaceExists('NDEV_GATEWAY_DTDM_TEMP_01') THEN
+ 29  	 v_stmt := 'CREATE TEMPORARY TABLESPACE NDEV_GATEWAY_DTDM_TEMP_01 TEMPFILE SIZE 256M AUTOEXTEND ON NEXT 256M TABLESPACE GROUP NDEV_GATEWAY_DTDM_TEMP';
+ 30  	 EXECUTE IMMEDIATE v_stmt;
+ 31    END IF;
+ 32  
+ 33    IF NOT TablespaceExists('JUNK') THEN
+ 34  	 v_stmt := 'CREATE TABLESPACE JUNK DATAFILE SIZE 2M AUTOEXTEND OFF';
+ 35  	 EXECUTE IMMEDIATE v_stmt;
+ 36    END IF;
+ 37  
+ 38  	IF NOT TablespaceExists('NDEV_GATEWAY_DTDM_TRNX') THEN
+ 39  	 v_stmt := 'CREATE TABLESPACE NDEV_GATEWAY_DTDM_TRNX';
+ 40  	 EXECUTE IMMEDIATE v_stmt;
+ 41    END IF;
+ 42  
+ 43  END;
+ 44  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> quit;
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+ 
+Creating Profiles... 
+================================================ 
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Dec 15 18:06:17 2014
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+
+SQL> 
+SQL> DECLARE
+  2    v_stmt	 VARCHAR2(4000);
+  3  
+  4  FUNCTION ProfileExists(
+  5    p_name IN DBA_PROFILES.profile%Type
+  6  ) RETURN BOOLEAN
+  7  IS
+  8    v_count int;
+  9  BEGIN
+ 10    SELECT count(*)
+ 11  	 INTO v_count
+ 12  	 FROM DBA_PROFILES
+ 13  	 WHERE profile = p_name;
+ 14    RETURN v_count > 0;
+ 15  EXCEPTION
+ 16    WHEN NO_DATA_FOUND
+ 17    THEN
+ 18  	 RETURN FALSE;
+ 19  END ProfileExists;
+ 20  
+ 21  BEGIN
+ 22  
+ 23    IF NOT ProfileExists('NDEV_GATEWAY_DTDM_APPL_PROFILE') THEN
+ 24  	 v_stmt := 'CREATE PROFILE NDEV_GATEWAY_DTDM_APPL_PROFILE LIMIT IDLE_TIME 60 PASSWORD_LIFE_TIME UNLIMITED';
+ 25  	 EXECUTE IMMEDIATE v_stmt;
+ 26    END IF;
+ 27  
+ 28    IF NOT ProfileExists('NDEV_GATEWAY_DTDM_OWNR_PROFILE') THEN
+ 29  	 v_stmt := 'CREATE PROFILE NDEV_GATEWAY_DTDM_OWNR_PROFILE LIMIT IDLE_TIME 60 PASSWORD_LIFE_TIME UNLIMITED';
+ 30  	 EXECUTE IMMEDIATE v_stmt;
+ 31    END IF;
+ 32  
+ 33  END;
+ 34  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> quit;
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+ 
+Creating Roles and Users... 
+================================================ 
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Dec 15 18:06:18 2014
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+
+SQL> 
+SQL> DECLARE
+  2    v_stmt	 VARCHAR2(4000);
+  3  
+  4  FUNCTION UserExists(
+  5    p_UserName IN DBA_USERS.UserName%Type
+  6  ) RETURN BOOLEAN
+  7  IS
+  8    v_user  DBA_USERS.UserName%Type;
+  9  BEGIN
+ 10    SELECT UserName
+ 11  	 INTO v_user
+ 12  	 FROM DBA_USERS
+ 13  	 WHERE UserName = p_UserName;
+ 14    RETURN TRUE;
+ 15  EXCEPTION
+ 16    WHEN NO_DATA_FOUND
+ 17    THEN
+ 18  	 RETURN FALSE;
+ 19  END UserExists;
+ 20  
+ 21  FUNCTION RoleExists(
+ 22    p_role IN DBA_ROLES.Role%Type
+ 23  ) RETURN BOOLEAN
+ 24  IS
+ 25    v_role  DBA_ROLES.Role%Type;
+ 26  BEGIN
+ 27    SELECT Role
+ 28  	 INTO v_role
+ 29  	 FROM DBA_ROLES
+ 30  	 WHERE Role = p_role;
+ 31    RETURN TRUE;
+ 32  EXCEPTION
+ 33    WHEN NO_DATA_FOUND
+ 34    THEN
+ 35  	 RETURN FALSE;
+ 36  END RoleExists;
+ 37  
+ 38  PROCEDURE ResetRole(
+ 39    p_role IN DBA_SYS_PRIVS.Grantee%Type
+ 40  )
+ 41  IS
+ 42  BEGIN
+ 43    FOR c in (
+ 44    SELECT
+ 45  	   UNIQUE privilege, grantee
+ 46  	 FROM
+ 47  	   DBA_SYS_PRIVS
+ 48  	 WHERE
+ 49  	   grantee = p_role
+ 50    )
+ 51    LOOP
+ 52  	 EXECUTE IMMEDIATE 'REVOKE ' || c.privilege || ' FROM ' || c.grantee;
+ 53    END LOOP;
+ 54  END ResetRole;
+ 55  
+ 56  BEGIN
+ 57  
+ 58    IF NOT RoleExists('NDEV_GATEWAY_DTDM_APPL_ROLE') THEN
+ 59  	 v_stmt := 'CREATE ROLE NDEV_GATEWAY_DTDM_APPL_ROLE';
+ 60  	 EXECUTE IMMEDIATE v_stmt;
+ 61    END IF;
+ 62  
+ 63    ResetRole('NDEV_GATEWAY_DTDM_APPL_ROLE');
+ 64  
+ 65    v_stmt := 'GRANT CREATE SESSION TO NDEV_GATEWAY_DTDM_APPL_ROLE';
+ 66    EXECUTE IMMEDIATE v_stmt;
+ 67  
+ 68    IF NOT RoleExists('NDEV_GATEWAY_DTDM_OWNR_ROLE') THEN
+ 69  	 v_stmt := 'CREATE ROLE NDEV_GATEWAY_DTDM_OWNR_ROLE';
+ 70  	 EXECUTE IMMEDIATE v_stmt;
+ 71    END IF;
+ 72  
+ 73    ResetRole('NDEV_GATEWAY_DTDM_OWNR_ROLE');
+ 74  
+ 75    v_stmt := 'GRANT CREATE SESSION TO NDEV_GATEWAY_DTDM_OWNR_ROLE';
+ 76    EXECUTE IMMEDIATE v_stmt;
+ 77    v_stmt := 'GRANT CREATE ANY SYNONYM TO NDEV_GATEWAY_DTDM_OWNR_ROLE';
+ 78    EXECUTE IMMEDIATE v_stmt;
+ 79    v_stmt := 'GRANT CREATE TABLE TO NDEV_GATEWAY_DTDM_OWNR_ROLE';
+ 80    EXECUTE IMMEDIATE v_stmt;
+ 81  
+ 82    IF NOT UserExists('NDEV_GATEWAY_DTDM_APPL') THEN
+ 83  	 v_stmt := 'CREATE USER NDEV_GATEWAY_DTDM_APPL IDENTIFIED BY 12345678 DEFAULT TABLESPACE JUNK TEMPORARY TABLESPACE NDEV_GATEWAY_DTDM_TEMP PROFILE NDEV_GATEWAY_DTDM_APPL_PROFILE';
+ 84  	 EXECUTE IMMEDIATE v_stmt;
+ 85    END IF;
+ 86  
+ 87    v_stmt := 'GRANT NDEV_GATEWAY_DTDM_APPL_ROLE TO NDEV_GATEWAY_DTDM_APPL';
+ 88    EXECUTE IMMEDIATE v_stmt;
+ 89    v_stmt := 'ALTER USER NDEV_GATEWAY_DTDM_APPL DEFAULT ROLE NDEV_GATEWAY_DTDM_APPL_ROLE';
+ 90    EXECUTE IMMEDIATE v_stmt;
+ 91  
+ 92    IF NOT UserExists('NDEV_GATEWAY_DTDM_OWNR') THEN
+ 93  	 v_stmt := 'CREATE USER NDEV_GATEWAY_DTDM_OWNR IDENTIFIED BY 12345678 DEFAULT TABLESPACE JUNK TEMPORARY TABLESPACE NDEV_GATEWAY_DTDM_TEMP PROFILE NDEV_GATEWAY_DTDM_OWNR_PROFILE';
+ 94  	 EXECUTE IMMEDIATE v_stmt;
+ 95    END IF;
+ 96  
+ 97    v_stmt := 'GRANT NDEV_GATEWAY_DTDM_OWNR_ROLE TO NDEV_GATEWAY_DTDM_OWNR';
+ 98    EXECUTE IMMEDIATE v_stmt;
+ 99    v_stmt := 'GRANT NDEV_GATEWAY_DTDM_APPL_ROLE TO NDEV_GATEWAY_DTDM_OWNR';
+100    EXECUTE IMMEDIATE v_stmt;
+101    v_stmt := 'ALTER USER NDEV_GATEWAY_DTDM_OWNR DEFAULT ROLE NDEV_GATEWAY_DTDM_OWNR_ROLE';
+102    EXECUTE IMMEDIATE v_stmt;
+103  
+104  END;
+105  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> quit;
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+ 
+Assigning Quotas... 
+================================================ 
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Dec 15 18:06:18 2014
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+
+SQL> 
+SQL> ALTER USER NDEV_GATEWAY_DTDM_OWNR
+  2  	 QUOTA 0 ON JUNK
+  3  	 QUOTA 0 ON SYSTEM
+  4  	 QUOTA 0 ON SYSAUX
+  5  	 QUOTA UNLIMITED ON NDEV_GATEWAY_DTDM_CONF
+  6  	 QUOTA UNLIMITED ON NDEV_GATEWAY_DTDM_TRNX
+  7  ;
+
+User altered.
+
+SQL> 
+SQL> ALTER USER NDEV_GATEWAY_DTDM_APPL
+  2  	 QUOTA 0 ON JUNK
+  3  	 QUOTA 0 ON SYSTEM
+  4  	 QUOTA 0 ON SYSAUX
+  5  	 QUOTA 0 ON NDEV_GATEWAY_DTDM_CONF
+  6  	 QUOTA 0 ON NDEV_GATEWAY_DTDM_TRNX
+  7  ;
+
+User altered.
+
+SQL> 
+SQL> quit;
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+ 
+Creating Flyway Tracking Table... 
+================================================ 
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Dec 15 18:06:19 2014
+
+Copyright (c) 1982, 2010, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+
+SQL> 
+SQL> DECLARE
+  2  	 v_stmt VARCHAR2(4000);
+  3  	 v_c	  int;
+  4  BEGIN
+  5  	 SELECT count(*) INTO v_c FROM dba_tables WHERE upper(table_name) = upper('SCHEMA_VERSION') AND upper(owner) = upper('NDEV_GATEWAY_DTDM_OWNR');
+  6  	 IF v_c = 0 THEN
+  7  	     v_stmt := 'CREATE TABLE "NDEV_GATEWAY_DTDM_OWNR"."schema_version"
+  8  		   (
+  9  		     "version_rank"   NUMBER(*,0) NOT NULL ENABLE,
+ 10  		     "installed_rank" NUMBER(*,0) NOT NULL ENABLE,
+ 11  		     "version"	      VARCHAR2(50 BYTE) NOT NULL ENABLE,
+ 12  		     "description"    VARCHAR2(200 BYTE) NOT NULL ENABLE,
+ 13  		     "type"	      VARCHAR2(20 BYTE) NOT NULL ENABLE,
+ 14  		     "script"	      VARCHAR2(1000 BYTE) NOT NULL ENABLE,
+ 15  		     "checksum"       NUMBER(*,0),
+ 16  		     "installed_by"   VARCHAR2(100 BYTE) NOT NULL ENABLE,
+ 17  		     "installed_on" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP NOT NULL ENABLE,
+ 18  		     "execution_time" NUMBER(*,0) NOT NULL ENABLE,
+ 19  		     "success"	      NUMBER(1,0) NOT NULL ENABLE
+ 20  		   )
+ 21  		 TABLESPACE "NDEV_GATEWAY_DTDM_CONF"
+ 22  		 STORAGE
+ 23  		 (
+ 24  		     INITIAL 64K
+ 25  		     NEXT 64K
+ 26  		     PCTINCREASE 0
+ 27  		 )
+ 28  		 NOPARALLEL';
+ 29  	     EXECUTE IMMEDIATE v_stmt;
+ 30  
+ 31  	     v_stmt := 'ALTER TABLE "NDEV_GATEWAY_DTDM_OWNR"."schema_version" ADD CONSTRAINT "schema_version_pk" PRIMARY KEY ("version") USING INDEX TABLESPACE "NDEV_GATEWAY_DTDM_CONF"';
+ 32  	     EXECUTE IMMEDIATE v_stmt;
+ 33  
+ 34  	     v_stmt := 'CREATE INDEX "NDEV_GATEWAY_DTDM_OWNR"."schema_version_s_idx" ON "NDEV_GATEWAY_DTDM_OWNR"."schema_version"("success") TABLESPACE "NDEV_GATEWAY_DTDM_CONF"';
+ 35  	     EXECUTE IMMEDIATE v_stmt;
+ 36  	     v_stmt := 'CREATE INDEX "NDEV_GATEWAY_DTDM_OWNR"."schema_version_ir_idx" ON "NDEV_GATEWAY_DTDM_OWNR"."schema_version" ("installed_rank") TABLESPACE "NDEV_GATEWAY_DTDM_CONF"';
+ 37  	     EXECUTE IMMEDIATE v_stmt;
+ 38  	     v_stmt := 'CREATE INDEX "NDEV_GATEWAY_DTDM_OWNR"."schema_version_vr_idx" ON "NDEV_GATEWAY_DTDM_OWNR"."schema_version" ("version_rank") TABLESPACE "NDEV_GATEWAY_DTDM_CONF"';
+ 39  	     EXECUTE IMMEDIATE v_stmt;
+ 40  	 END IF;
+ 41  END;
+ 42  /
+
+PL/SQL procedure successfully completed.
+
+SQL> 
+SQL> EXIT;
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, Automatic Storage Management, OLAP, Data Mining
+and Real Application Testing options
+ 

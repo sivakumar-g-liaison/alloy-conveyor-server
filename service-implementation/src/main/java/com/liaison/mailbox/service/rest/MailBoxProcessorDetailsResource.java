@@ -97,8 +97,7 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	@AccessDescriptor(accessMethod = "deleteProcessor")
+	})	
 	public Response deleteProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
@@ -148,8 +147,7 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	@AccessDescriptor(accessMethod = "getProcessor")
+	})	
 	public Response getProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
@@ -212,8 +210,7 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProcessorRequest", paramType = "body") })
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	@AccessDescriptor(accessMethod = "reviseProcessor")
+	})	
 	public Response reviseProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
