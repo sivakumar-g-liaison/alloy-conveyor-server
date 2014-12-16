@@ -123,7 +123,7 @@ dependencies {
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
 
-	compile("com.liaison:fs2:3.0.0-SNAPSHOT"){
+	compile("com.liaison:fs2:3.1.0-SNAPSHOT"){
 		exclude group:"bouncycastle", module:"bcprov-jdk16"
 	}
 
@@ -209,7 +209,7 @@ dependencies {
 		exclude module:'karyon-admin-web'}
 
 	//Dependency for GEM client Integration
-	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'1.1.2-SNAPSHOT', changing: true
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'2.0', changing: true
 
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
