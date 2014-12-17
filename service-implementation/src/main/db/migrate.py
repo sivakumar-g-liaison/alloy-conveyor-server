@@ -54,7 +54,7 @@ def main( argv ):
 			userprefix = userprefix[:userprefix.find(".")]
 		dbuserprefix = userprefix + '_' + projectprefix + '_' + moniker
 
-	templatefolder = 'migration/' + moniker
+	templatefolder = 'migration/' + projectprefix + '_' + moniker
 	workingfolder = 'log/work/migration/' + dbuserprefix
 	logfile = 'log/migration.' + dbuserprefix + '.log.txt'
 

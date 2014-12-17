@@ -5,6 +5,14 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 
 import oracle.jdbc.OracleDriver
+// flyway
+import oracle.jdbc.OracleDriver
+import com.googlecode.flyway.core.Flyway
+import com.googlecode.flyway.gradle.task.AbstractFlywayTask
+import com.googlecode.flyway.core.api.FlywayException
+import com.googlecode.flyway.core.util.jdbc.DriverDataSource
+import com.googlecode.flyway.core.util.StringUtils
+import com.googlecode.flyway.gradle.FlywayExtension
 
 apply plugin: 'jetty'
 apply plugin: 'cargo'
@@ -46,8 +54,8 @@ buildscript {
 		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:0.6.1'
 
 		// Flyway Plugin
-		// License: Apache v2 - https://raw.github.com/ben-manes/gradle-flyway-plugin/master/LICENSE.txt
-		classpath 'com.github.ben-manes:gradle-flyway-plugin:0.5'
+		// License: Apache v2
+        classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
 		classpath "com.oracle:ojdbc6:11g-11.2.0.3.0"
 
 		// SOAP UI
@@ -528,85 +536,241 @@ task pingTest {
 	dependsOn 'test'
 }
 
-// Database build scripting
-def flywayWorkingRoot = "${projectDir}/src/main/db/~work"
-def flywayMigrationRoot = "${flywayWorkingRoot}/migration/DTDM"
-flyway {
-    url = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
-    driver = 'oracle.jdbc.OracleDriver'
-    user = "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR"
-    password = "${dbaPassword}"
-    table = 'schema_version'
-    locations = [
-        //'classpath:com.mycompany.project.migration',  // use classpath for Java migrations
-        'filesystem:' + file(flywayMigrationRoot).getCanonicalPath(),
-    ]
-    //if (project.dbDevSampleData == 'true') {
-    //    logger.info(":flyway: Including dev sample data.")
-    //    locations << 'filesystem:' + file(flywayMigrationRoot + '-dev').getCanonicalPath()
-    //}
 
+
+// override flywayClean
+flywayClean.doFirst() {
+	flywayCleanDtdm.execute()
+	flywayCleanRtdm.execute()
+	throw new StopExecutionException() // end here, do not execute the default flywayClean
 }
+
+// override flywayMigrate
 flywayMigrate.doFirst() {
-	logger.info("Building objects for database user '${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR'...");
+	flywayMigrateDtdm.execute()
+	flywayMigrateRtdm.execute()
+	throw new StopExecutionException() // end here, do not execute the default flywayMigrate
 }
-task flywaySetup << {
-	logger.info("Copying SQL scripts to ${flywayMigrationRoot}...");
-	ant.copy( toDir: flywayMigrationRoot, overwrite:true)
-	{
-		fileset(dir: 'src/main/db/migration/DTDM', includes: '**/*.sql')
-		filterchain {
-			tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
+
+// drop database objects
+task flywayCleanDtdm(type: OracleFlywayCleanTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameDtdm}:${dbServerPortDtdm}/${dbServerServiceDtdm}"
+	flywayUser = "${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_OWNR"
+	flywayPassword = dbaPasswordDtdm
+}
+
+task flywayCleanRtdm(type: OracleFlywayCleanTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameRtdm}:${dbServerPortRtdm}/${dbServerServiceRtdm}"
+	flywayUser = "${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_OWNR"
+	flywayPassword = dbaPasswordRtdm
+}
+
+
+
+def flywaySourceRoot = "${projectDir}/src/main/db"
+def flywayWorkingRoot = "${projectDir}/src/main/db/~work"
+
+// upgrade database objects
+task flywayMigrateDtdm(type: OracleFlywayMigrateTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameDtdm}:${dbServerPortDtdm}/${dbServerServiceDtdm}"
+	flywayUser = "${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_OWNR"
+	flywayPassword = dbaPasswordDtdm
+	flywayLocations = [
+		'filesystem:' + file("${flywayWorkingRoot}/migration/${dbSchemaNameDtdm}").getCanonicalPath()
+	]
+	flywayTableSql = "${flywayWorkingRoot}/provision/${dbSchemaNameDtdm}/flyway/schema_version_table.sql"
+	classLoader = gradle.class.classLoader
+	jdbcDrivers = configurations.jdbc
+
+	doFirst {
+		ant.copy( toDir: "${flywayWorkingRoot}/provision/${dbSchemaNameDtdm}/flyway", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/provision/flyway", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+				tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+				tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+				tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+				tokenfilter { replaceregex(pattern:"AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)", replace:'') }
+				tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+		ant.copy( toDir: "${flywayWorkingRoot}/migration/${dbSchemaNameDtdm}", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/migration/${dbSchemaNameDtdm}", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_", flags: 'gis', byline: 'false') }				
+			}
 		}
 	}
-	//ant.copy( toDir: flywayMigrationRoot+ '-dev', overwrite:true)
-	//{
-	//    fileset(dir: 'src/main/resources/db/migration-dev', includes: '**/*.sql')
-	//    filterchain {
-	//        tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
-	//    }
-	//}
 }
-task buildFlywayTable << {
 
-    logger.info("Building flyway schema_version table...");
-    // This is a workaround for https://github.com/flyway/flyway/issues/98
-    // TODO - remove/refactor when the above issue is fixed
-    def flywayTableDir = "${flywayWorkingRoot}/provision/flyway"
-    ant.copy( toDir: flywayTableDir, overwrite:true)
-    {
-        fileset(dir: "${projectDir}/src/main/db/provision/flyway", includes: '**/*.sql')
-        // the script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
-        filterchain {
-            tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
-            tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
-            tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
-            tokenfilter { replaceregex(pattern:'^/$', replace:'') }
-            tokenfilter { replaceregex(pattern:'AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)', replace:'') }
-            tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
-            tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_", flags: 'gis', byline: 'false') }
-        }
-    }
-    def driverClass = "oracle.jdbc.OracleDriver"
-    String jdbcUrl = "jdbc:oracle:thin:@(description=(address=(protocol=${dbServerProtocol})(host=${dbServerName})(port= ${dbServerPort}))(connect_data=(service_name=${dbServerService})))"
+task flywayMigrateRtdm(type: OracleFlywayMigrateTask) {
+	flywayUrl = "jdbc:oracle:thin:@//${dbServerNameRtdm}:${dbServerPortRtdm}/${dbServerServiceRtdm}"
+	flywayUser = "${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_OWNR"
+	flywayPassword = dbaPasswordRtdm
+	flywayLocations = [
+		'filesystem:' + file("${flywayWorkingRoot}/migration/${dbSchemaNameRtdm}").getCanonicalPath()
+	]
+	flywayTableSql = "${flywayWorkingRoot}/provision/${dbSchemaNameRtdm}/flyway/schema_version_table.sql"
+	classLoader = gradle.class.classLoader
+	jdbcDrivers = configurations.jdbc
 
-    configurations.jdbc.each { file ->
-        gradle.class.classLoader.addURL(file.toURI().toURL())
-    }
-    def sql = groovy.sql.Sql.newInstance(url: jdbcUrl, user: "${dbSchemaNamePrefix}_${dbSchemaNameMoniker}_OWNR", password: "${dbaPassword}", driver: driverClass)
-    def ddl = new File("${flywayTableDir}/schema_version_table.sql").text
-    sql.execute (ddl)
+	doFirst {
+		ant.copy( toDir: "${flywayWorkingRoot}/provision/${dbSchemaNameRtdm}/flyway", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/provision/flyway", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'set serverout on', replace:'') }
+				tokenfilter { replaceregex(pattern:'set echo on', replace:'') }
+				tokenfilter { replaceregex(pattern:'EXIT;', replace:'') }
+				tokenfilter { replaceregex(pattern:'^/$', replace:'') }
+				tokenfilter { replaceregex(pattern:"AND upper\\(owner\\) = upper\\(\'GATEWAY_OWNR\'\\)", replace:'') }
+				tokenfilter { replaceregex(pattern:'dba_tables', replace:'user_tables') }
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+		ant.copy( toDir: "${flywayWorkingRoot}/migration/${dbSchemaNameRtdm}", overwrite:true)
+		{
+			fileset(dir: "${flywaySourceRoot}/migration/${dbSchemaNameRtdm}", includes: '**/*.sql')
+			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
+			filterchain {
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixRtdm}_${dbSchemaNameRtdm}_", flags: 'gis', byline: 'false') }
+			}
+		}
+	}
+}
+
+class OracleFlywayCleanTask extends AbstractOracleTask {
+	OracleFlywayCleanTask() {
+		super()
+		description = 'Drops all objects in the configured schemas.'
+	}
+
+	@Override
+	def run(Flyway flyway) {
+		flyway.clean()
+	}
+}
+
+class OracleFlywayMigrateTask extends AbstractOracleTask {
+	public String flywayTableSql
+	def jdbcDrivers
+	def classLoader
+
+
+	OracleFlywayMigrateTask() {
+		super()
+		description = 'RUN THIS: Migrates the schema to the latest version (IGNORE vanilla flywayMigrate task)'
+	}
+
+	// This is a workaround for https://github.com/flyway/flyway/issues/98
+	// TODO - remove/refactor when the above issue is fixed
+	void buildSchemaVersionTable() {
+		println("Building flyway schema_version table...");
+		this.jdbcDrivers.each { file ->
+			this.classLoader.addURL(file.toURI().toURL())
+		}
+		def sql = groovy.sql.Sql.newInstance(url: this.flywayUrl, user: this.flywayUser, password: this.flywayPassword, driver: this.flywayDriver)
+		def ddl = new File(flywayTableSql).text
+		println("Executing ${flywayTableSql}")
+		sql.execute (ddl)
+	}
+
+	@Override
+	java.lang.Object run(Flyway flyway) {
+		buildSchemaVersionTable()
+		didWork = flyway.migrate() > 0
+	}
+}
+
+class AbstractOracleTask extends AbstractFlywayTask {
+	/**
+	 * Property name prefix for placeholders that are configured through System properties.
+	 */
+	protected static final String PLACEHOLDERS_PROPERTY_PREFIX = "flyway.placeholders."
+
+	public String flywayDriver = 'oracle.jdbc.OracleDriver'
+	public String flywayTable = 'schema_version'
+	public String flywayUrl
+	public String flywayUser
+	public String flywayPassword
+	public String[] flywayLocations
+	public String[] flywaySchemas
+
+	AbstractOracleTask() {
+		super()
+	}
+
+	def run(Flyway flyway) {
+		flyway.clean()
+	}
+
+	@Override
+	protected def createFlyway() {
+		def flyway = new Flyway()
+		flyway.setDataSource(new DriverDataSource(this.flywayDriver, this.flywayUrl, this.flywayUser, this.flywayPassword))
+
+		println('flyway.url  = ' + this.flywayUrl)
+		println('flyway.user = ' + this.flywayUser)
+        // println(this.flywayPassword)
+
+		if (this.flywayTable != null) {
+			// use method call instead of property as it does not work nice with overload GROOVY-6084
+			flyway.setTable(this.flywayTable)
+		}
+		propSet(flyway, 'initVersion')
+		propSet(flyway, 'initDescription')
+		propSet(flyway, 'sqlMigrationPrefix')
+		propSet(flyway, 'sqlMigrationSuffix')
+		propSet(flyway, 'encoding')
+		propSet(flyway, 'placeholderPrefix')
+		propSet(flyway, 'placeholderSuffix')
+		propSet(flyway, 'target')
+		propSetAsBoolean(flyway, 'outOfOrder')
+		propSetAsBoolean(flyway, 'validateOnMigrate')
+		propSetAsBoolean(flyway, 'cleanOnValidationError')
+		propSetAsBoolean(flyway, 'initOnMigrate')
+
+		def sysSchemas = System.getProperty("flyway.schemas")
+		if (sysSchemas != null) {
+			flyway.schemas = StringUtils.tokenizeToStringArray(sysSchemas, ",")
+		} else if (project.hasProperty("flyway.schemas")) {
+			flyway.schemas = StringUtils.tokenizeToStringArray(project["flyway.schemas"].toString(), ",")
+		} else if (this.flywaySchemas != null) {
+			flyway.schemas = this.flywaySchemas
+		}
+
+		def sysLocations = System.getProperty("flyway.locations")
+		if (sysLocations != null) {
+			flyway.locations = StringUtils.tokenizeToStringArray(sysLocations, ",")
+		} else if (this.flywayLocations != null) {
+			flyway.locations = this.flywayLocations
+		}
+
+		Map<String, String> placeholders = [:]
+		System.getProperties().each { String key, String value ->
+			if (key.startsWith(PLACEHOLDERS_PROPERTY_PREFIX)) {
+				placeholders.put(key.substring(PLACEHOLDERS_PROPERTY_PREFIX.length()), value)
+			}
+		}
+		if (placeholders.isEmpty()) {
+			project.properties.keySet().each { String key ->
+				if (key.startsWith(PLACEHOLDERS_PROPERTY_PREFIX)) {
+					placeholders.put(key.substring(PLACEHOLDERS_PROPERTY_PREFIX.length()), project.properties[key])
+				}
+			}
+		}
+
+		flyway.placeholders = placeholders
+
+		flyway
+	}
 
 }
-flywaySetup.dependsOn('buildFlywayTable')
-flywayMigrate.dependsOn('flywaySetup')
 
-flywayClean.doLast {
-	ant.delete(
-			dir:flywayWorkingRoot,
-			includes:'**/*',
-			includeemptydirs:true,
-			deleteonexit:true,
-			performGCOnFailedDelete:true
-			)
-}
+
