@@ -11,6 +11,7 @@
 package com.liaison.mailbox.dtdm.model;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -34,10 +35,21 @@ public class MailboxServiceInstance implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
 
+	private String pguid;
 	private MailBox mailbox;
 	private ServiceInstance serviceInstance;
 
 	public MailboxServiceInstance() {
+	}
+
+	@Id
+	@Column(unique = true, nullable = false, length = 32)
+	public String getPguid() {
+		return this.pguid;
+	}
+
+	public void setPguid(String pguid) {
+		this.pguid = pguid;
 	}
 
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
@@ -50,7 +62,6 @@ public class MailboxServiceInstance implements Identifiable {
 		this.mailbox = mailbox;
 	}
 
-	@Id
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
 	public ServiceInstance getServiceInstance() {
@@ -64,7 +75,7 @@ public class MailboxServiceInstance implements Identifiable {
 	@Override
 	@Transient
 	public Object getPrimaryKey() {
-		return getServiceInstance();
+		return getPguid();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

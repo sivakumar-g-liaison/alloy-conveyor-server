@@ -176,6 +176,7 @@ public class MailBoxConfigurationService {
 			if (mailboxServiceInstance == null) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
+				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				mbxServiceInstances.add(msi);
 				mailbox.setMailboxServiceInstances(mbxServiceInstances);
@@ -348,6 +349,7 @@ public class MailBoxConfigurationService {
 
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
+				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(retrievedMailBox);
 				msiDao.persist(msi);
