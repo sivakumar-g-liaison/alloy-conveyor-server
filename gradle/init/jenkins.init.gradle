@@ -9,6 +9,7 @@ ext.dbSchemaNameDtdm='GATEWAY_DTDM'
 ext.dbSchemaNamePrefixDtdm='JEN'
 ext.dbaPasswordDtdm='12345678'
 
+
 ext.dbServerNameRtdm='lsildb23d.liaison.dev'
 ext.dbServerServiceRtdm='G2DEV.liaison.dev'
 ext.dbServerPortRtdm='1521'
