@@ -717,7 +717,7 @@ class AbstractOracleTask extends AbstractFlywayTask {
 
 		println('flyway.url  = ' + this.flywayUrl)
 		println('flyway.user = ' + this.flywayUser)
-        println('flyway.user = ' +this.flywayPassword)
+        println('flyway.password = ' +this.flywayPassword)
 
 		if (this.flywayTable != null) {
 			// use method call instead of property as it does not work nice with overload GROOVY-6084
