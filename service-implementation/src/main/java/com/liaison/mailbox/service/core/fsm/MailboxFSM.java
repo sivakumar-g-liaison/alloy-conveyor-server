@@ -193,7 +193,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
-		ProcessorStateDTO skipProcessing = processorQueued.createACopyWithNewState(ExecutionState.SKIPPED_SINCE_ALREADY_RUNNING);
+		ProcessorStateDTO skipProcessing = processorQueued.createACopyWithNewState(ExecutionState.SKIPPED);
 		transition.addUpdate(skipProcessing.getExecutionId(), skipProcessing);
 		this.addTransition(transition);
 		
@@ -202,7 +202,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.INTERRUPTED));
-		ProcessorStateDTO processorInterrupted = processorProcessing.createACopyWithNewState(ExecutionState.GRACEFULLY_INTERRUPTED);
+		ProcessorStateDTO processorInterrupted = processorProcessing.createACopyWithNewState(ExecutionState.INTERRUPTED);
 		transition.addUpdate(processorInterrupted.getExecutionId(), processorInterrupted);
 		this.addTransition(transition);
 
@@ -229,7 +229,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-		ProcessorStateDTO processorHandedOverToJS = processorProcessing.createACopyWithNewState(ExecutionState.HANDED_OVER_TO_JS);
+		ProcessorStateDTO processorHandedOverToJS = processorProcessing.createACopyWithNewState(ExecutionState.HANDED_TO_JS);
 		transition.addUpdate(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
 		this.addTransition(transition);	
 		
