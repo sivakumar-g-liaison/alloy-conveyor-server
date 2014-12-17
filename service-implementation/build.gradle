@@ -219,7 +219,7 @@ dependencies {
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
 	}
 
-	workTicket 'com.liaison.dto:dto:1.2.0'
+	workTicket 'com.liaison.dto:dto:2.0.0'
 
 }
 
