@@ -253,7 +253,7 @@ public class MailBoxService {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-			sendEmail(processor.getEmailAddress(), "Processor:"+processor.getProcsrName() + "execution failed", e, "HTML");
+			sendEmail(processor.getEmailAddress(), "Processor:"+processor.getProcsrName() + " execution failed", e, "HTML");
 			LOG.error("Processor execution failed", e);
 
 		}
@@ -264,7 +264,7 @@ public class MailBoxService {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-	    	sendEmail(processor.getEmailAddress(), "Processor:"+processor.getProcsrName() + "execution failed", e, "HTML");
+	    	sendEmail(processor.getEmailAddress(), "Processor:"+processor.getProcsrName() + " execution failed", e, "HTML");
 			LOG.error("Processor execution failed", e);
 		}
 	}
