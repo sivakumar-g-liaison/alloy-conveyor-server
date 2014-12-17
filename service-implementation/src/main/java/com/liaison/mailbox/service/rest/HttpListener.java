@@ -262,6 +262,7 @@ public class HttpListener extends AuditedResource {
 					}
 					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 					storePayload(request, workTicket, httpListenerProperties);
+					workTicket.setProcessMode(ProcessMode.ASYNC);
 					constructMetaDataJson(request, workTicket);
 					return Response
 							.ok()
@@ -429,7 +430,6 @@ public class HttpListener extends AuditedResource {
 	 * @param workTicket
 	 * @throws IOException
 	 */
-	@SuppressWarnings("resource")
 	protected void storePayload(HttpServletRequest request,
 			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws Exception {
 
@@ -438,12 +438,11 @@ public class HttpListener extends AuditedResource {
 
 				 //the total number of bytes read into the buffer
 				  payloadToPersist.read();
-	              workTicket.setPayloadSize(Long.valueOf(new CountingInputStream(payloadToPersist).available()));
+	              workTicket.setPayloadSize(Long.valueOf(cio.available()));
 	              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
 	              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
 	                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
 	              logger.info("The received path uri is ", metaSnapShot.getURI().toString());
-	              workTicket.setProcessMode(ProcessMode.ASYNC);
 	              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
            }
 	    }
@@ -470,26 +469,13 @@ public class HttpListener extends AuditedResource {
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	@SuppressWarnings("resource")
 	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties)
 			throws JAXBException, Exception {
 		logger.info("Starting to forward request...");
 
-		try (InputStream payloadToPersist = request.getInputStream()) {
-			 try (CountingInputStream cio = new CountingInputStream(payloadToPersist)) {
-
-				 //the total number of bytes read into the buffer
-				  payloadToPersist.read();
-	              workTicket.setPayloadSize(Long.valueOf(new CountingInputStream(payloadToPersist).available()));
-	              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-	              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
-	                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-	              logger.info("The received path uri is ", metaSnapShot.getURI().toString());
-	              workTicket.setProcessMode(ProcessMode.SYNC);
-	              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
-           }
-	    }
-
+		//persist payload in spectrum
+		storePayload(request, workTicket, httpListenerProperties);
+		workTicket.setProcessMode(ProcessMode.SYNC);
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);
 		httpRequest.setHeader("Content-type", request.getContentType().toString());
