@@ -45,11 +45,11 @@ public abstract class AbstractResourceDelegate<T> implements Callable<T> {
 		if (null == enclosingMethod) {
 			return "UNABLE TO DETERMINE PATH, PLEASE USE AbstractResourceDelegate as METHOD LOCAL ANONYMOUS INNER CLASS";
 		}
-		Path pathAnnotation = enclosingMethod.getAnnotation(Path.class);
+		Path pathAnnotation = enclosingMethod.getDeclaringClass().getAnnotation(Path.class);
 		if (null == pathAnnotation) {
 			return "UNABLE TO DETERMINE PATH, PLEASE USE AbstractResourceDelegate as METHOD LOCAL ANONYMOUS INNER CLASS FROM METHOD WITH PATH ANNOTATION";
 		}
-		return pathAnnotation.value();
+		return pathAnnotation.value()+"/"+enclosingMethod.getName();
 	}
 
 	public String getFishTagService() {
