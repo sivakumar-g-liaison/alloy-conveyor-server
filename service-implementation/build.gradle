@@ -114,7 +114,7 @@ war {
 	// exclude the archaius properties, they are external
 	rootSpec.exclude 'g2mailboxservice*.properties'
 	// exclude the logging config, it is external
-	rootSpec.exclude "log4j2.xml"
+	rootSpec.exclude "log4j2*.xml"
 	// exclude the WADL tools, they are build time
 	rootSpec.exclude "*wadl*"
 }
