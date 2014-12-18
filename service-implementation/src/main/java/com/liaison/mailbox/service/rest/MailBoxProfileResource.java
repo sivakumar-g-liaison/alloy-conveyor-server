@@ -97,7 +97,7 @@ public class MailBoxProfileResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "createProfile")
+	
 	public Response createProfile(@Context final HttpServletRequest request) {
 		
 		// create the worker delegate to perform the business logic
@@ -153,7 +153,7 @@ public class MailBoxProfileResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "reviseProfile")
+	
 	public Response reviseProfile(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
@@ -206,7 +206,7 @@ public class MailBoxProfileResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "readProfiles")
+	
 	public Response readProfiles(
 			@Context final HttpServletRequest request,
 			@ApiParam(value = "Page Number", required = false) @QueryParam(value = "page") final String page,

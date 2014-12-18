@@ -85,7 +85,7 @@ public class MailBoxFileResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "getFileList")
+	
 	public Response getFileList(@Context final HttpServletRequest request) {
         
 		// create the worker delegate to perform the business logic

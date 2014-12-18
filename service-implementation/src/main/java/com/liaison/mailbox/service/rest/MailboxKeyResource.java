@@ -87,7 +87,7 @@ public class MailboxKeyResource extends AuditedResource{
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "uploadSelfSignedTrustStore")
+	
 	public Response uploadSelfSignedTrustStore(@Context final HttpServletRequest request) {
 		
 	  // create the worker delegate to perform the business logic

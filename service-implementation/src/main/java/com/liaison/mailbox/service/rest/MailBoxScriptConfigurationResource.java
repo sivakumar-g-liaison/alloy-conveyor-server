@@ -99,7 +99,7 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 	 @ApiResponses({
 	 @ApiResponse( code = 500, message = "Unexpected Service failure." )
 	 })
-	 @AccessDescriptor(accessMethod = "createnewscript")
+	
      public Response createScript(@Context final HttpServletRequest request) throws Exception {
 		 
 		// create the worker delegate to perform the business logic
@@ -157,7 +157,7 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 	 @ApiResponses({
 	 @ApiResponse( code = 500, message = "Unexpected Service failure." )
 	 })
-	 @AccessDescriptor(accessMethod = "updateexistscript")
+	 
      public Response updateScript(@Context final HttpServletRequest request) throws Exception {
 		 
 		// create the worker delegate to perform the business logic

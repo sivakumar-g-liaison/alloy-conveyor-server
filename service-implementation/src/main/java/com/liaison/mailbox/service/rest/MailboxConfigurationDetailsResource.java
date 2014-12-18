@@ -96,7 +96,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "reviseMailBox")
+	
 	public Response reviseMailBox(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
@@ -167,7 +167,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "deactivateMailBox")
+	
 	public Response deactivateMailBox(@Context final HttpServletRequest request,
 			@PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") final String guid) {
 
@@ -230,7 +230,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "readMailBox")
+	
 	public Response readMailBox(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,

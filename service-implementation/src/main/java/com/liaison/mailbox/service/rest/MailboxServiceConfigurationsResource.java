@@ -80,7 +80,7 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "getPropertyFileValues")
+	
 	public Response getPropertyFileValues(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic

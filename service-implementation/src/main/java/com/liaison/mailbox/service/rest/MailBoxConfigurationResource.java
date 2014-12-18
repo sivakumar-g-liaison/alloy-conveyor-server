@@ -94,7 +94,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "createMailBox")
+	
 	public Response createMailBox(
 			@Context final HttpServletRequest request,
 			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") final String serviceInstanceId) {
@@ -162,7 +162,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	@AccessDescriptor(accessMethod = "searchMailBox")
+	
 	public Response searchMailBox(
 			@Context final HttpServletRequest request,
 			@QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") final String mbxName,

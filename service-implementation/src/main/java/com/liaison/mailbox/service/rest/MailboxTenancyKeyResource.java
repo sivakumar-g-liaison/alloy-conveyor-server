@@ -79,7 +79,7 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-	@AccessDescriptor(accessMethod = "retrieveTenancyKeys")
+	
 	public Response retrieveTenancyKeys(@Context final HttpServletRequest request) {
 		
 		// create the worker delegate to perform the business logic

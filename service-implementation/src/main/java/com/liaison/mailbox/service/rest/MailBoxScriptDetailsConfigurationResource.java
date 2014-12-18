@@ -96,7 +96,7 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
    @ApiResponses({
 	@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-   @AccessDescriptor(accessMethod = "fetchscriptfile")
+   
 	public Response readScript(
 			@Context final HttpServletRequest request,			
 			@PathParam(value = "git.file.name") @ApiParam(name = "git.file.name", required = true, value = "URL where file is going to be fetch") final String gitFileName) throws Exception {
