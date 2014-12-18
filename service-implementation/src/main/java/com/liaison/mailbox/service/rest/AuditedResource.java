@@ -69,7 +69,8 @@ public abstract class AuditedResource extends BaseResource {
 			String... expectedMediaTypes) {
 		// *****************************************************
 		// Log boiler plate (hopefully to be added to filter soon).
-		// initLogContext(worker); //enable when fish tag is needed
+		worker.id = getUserIdFromHeader(request);
+		initLogContext(worker); //enable when fish tag is needed
 		logger.info(getInitialAuditStatement(worker.getActionLabel()));
 		Response response = null;
 		try {

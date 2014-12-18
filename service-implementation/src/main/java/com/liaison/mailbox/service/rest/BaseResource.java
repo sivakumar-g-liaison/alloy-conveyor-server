@@ -31,6 +31,7 @@ import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.StreamUtil;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
@@ -47,6 +48,8 @@ public class BaseResource {
 
 	private static final Logger logger = LogManager.getLogger(BaseResource.class);
 	private static final Logger kpi = LogManager.getLogger("com.liaison.mailbox.metrics.KPI");
+	public static final String HEADER_X_GATE_GATEWAYID = "x-gate-gatewayid";
+	public static final String HEADER_USER_ID = "UserId";
 
 	protected void auditAttempt(String message) {
 
@@ -110,14 +113,16 @@ public class BaseResource {
 	 */
 	protected <T> void initLogContext(AbstractResourceDelegate<T> worker) {
 
-		ThreadContext.put("@Path", worker.getFishTagPath()); // audit log context
-		ThreadContext.put("@Service", worker.getFishTagService()); // audit log context
+		ThreadContext.put(LogTags.RELATIVE_PATH, worker.getFishTagPath()); // audit log context
+		ThreadContext.put(LogTags.SERVICE, worker.getFishTagService()); // audit log context
 		if (null != worker.getID()) {
-			ThreadContext.put("@Id", worker.getID()); // audit log context
+			ThreadContext.put(LogTags.USER_PRINCIPAL, worker.getID()); // audit log context
+			ThreadContext.put(LogTags.USER_PRINCIPAL_ID, worker.getID()); // audit log context
+			
 		}
 		if (null != worker.getQueryParams()) {
 			for (Entry<String, String> paramEntry : worker.getQueryParams().entrySet()) {
-				ThreadContext.put("@Param_" + paramEntry.getKey(), paramEntry.getValue());
+				ThreadContext.put(LogTags.QUERY_PARAM + paramEntry.getKey(), paramEntry.getValue());
 			}
 		}
 	}
@@ -126,11 +131,11 @@ public class BaseResource {
 	 * success audit statement.
 	 */
 	protected AuditStatement successExitStatement = new DefaultAuditStatement(Status.SUCCEED,
-			"response is success (2xx)");
+			"Success (2xx)");
 	protected AuditStatement failExitStatement = new DefaultAuditStatement(Status.FAILED,
-			"response is not success (not 2xx), assume fail");
+			"Failure");
 	protected AuditStatement unknownExitStatusStatement = new DefaultAuditStatement(Status.SUCCEED,
-			"response status not set, assuming success");
+			"assume Success");
 
 	/**
 	 * Call this when concluding a service, indicates successful exit (or fail) based on response status.
@@ -234,4 +239,17 @@ public class BaseResource {
 			return requestString;
 		}
 	}
+	
+	public static String getGatewayIdFromHeader(HttpServletRequest request) {
+		return request.getHeader(HEADER_X_GATE_GATEWAYID);
+	}
+
+    protected String getUserIdFromHeader(final HttpServletRequest request) {
+        String userId = request.getHeader(HEADER_USER_ID);
+        if(userId == null || userId.isEmpty()) {
+            return "unknown-user";
+        }
+
+        return userId;
+    }
 }

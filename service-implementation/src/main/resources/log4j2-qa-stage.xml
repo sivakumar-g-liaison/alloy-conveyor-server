@@ -145,13 +145,13 @@
             </filters>
         </GlassMessageSpectrum>
 
-        <File name="FileSyslogLogFile" fileName="/tmp/filesyslog.log" append="true" >
+        <File name="FileSyslogLogFile" fileName="/var/log/tomcat/filesyslog.log" append="true" >
         <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
         <filters>
         <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
         </filters>
         </File>
-    
+        
 
 
        <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
@@ -175,7 +175,7 @@
 	        <appender-ref ref="Console" />
 	       
 	        <!-- logs syslog formatted audit messages to local file (not for production)         -->
-            <!--<appender-ref ref="FileSyslogLogFile" />-->
+            <appender-ref ref="FileSyslogLogFile" />
 
              <appender-ref ref="OrgGSALENSAppender"/>
 
