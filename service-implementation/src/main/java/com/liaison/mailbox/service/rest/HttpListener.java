@@ -367,8 +367,8 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("httpMethod", request.getMethod());
 		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
 		workTicket.setAdditionalContext("httpRemotePort", request.getRemotePort());
-		workTicket.setAdditionalContext("httpCharacterEncoding", request.getCharacterEncoding());
-		workTicket.setAdditionalContext("httpRemoteUser", request.getRemoteUser());
+		workTicket.setAdditionalContext("httpCharacterEncoding", (request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
+		workTicket.setAdditionalContext("httpRemoteUser", (request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
 		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
