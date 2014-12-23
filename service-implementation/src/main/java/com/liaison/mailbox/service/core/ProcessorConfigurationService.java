@@ -184,15 +184,15 @@ public class ProcessorConfigurationService {
 
 			// adding service instance id
 			processor.setServiceInstance(serviceInstance);
-			
+
 			// persist the processor.
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
 			configDAO.persist(processor);
-			
+
 			// persist the processor execution state with status READY
 			ProcessorExecutionStateDAO executionDAO = new ProcessorExecutionStateDAOBase();
 			executionDAO.addProcessorExecutionState(processor.getPguid(), ExecutionState.READY.value());
-			
+
 			// linking mailbox and service instance id
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
 			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(processor.getMailbox().getPguid(), serviceInstance.getPguid());
@@ -571,7 +571,7 @@ public class ProcessorConfigurationService {
 			processorDTO.copyToEntity(processor, false);
 
 			configDao.merge(processor);
-			
+
 			// Change the execution order if existing and incoming does not
 			// matche
 			// changeExecutionOrder(request, configDao, processor);
@@ -827,7 +827,7 @@ public class ProcessorConfigurationService {
 
 				if ((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
 					processorDTO = new ProcessorDTO();
-					processorDTO.copyFromEntity(processor);					
+					processorDTO.copyFromEntity(processor);
 				}
 				if ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
 					processorDTO = new ProcessorDTO();
@@ -846,11 +846,12 @@ public class ProcessorConfigurationService {
 					// retrieving the httplistener pipeline id from remote processor properties
 					String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
 					boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
-					
+
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
-					httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());
-					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));	
-					
+					//Commented by Veera -Not needed, because tenancy key format has changed as per service broker
+					//httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());
+					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+
 					if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
 
 					//retrieving httplistener authenctication check required property from dynamic properties of processor
@@ -862,8 +863,8 @@ public class ProcessorConfigurationService {
 					}
 
 				}
-				
-						
+
+
 			}
 
 
@@ -877,5 +878,5 @@ public class ProcessorConfigurationService {
 
 		return httpListenerProperties;
 
-	}	
+	}
 }

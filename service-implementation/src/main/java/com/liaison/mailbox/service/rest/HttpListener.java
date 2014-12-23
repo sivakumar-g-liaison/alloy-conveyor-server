@@ -704,7 +704,7 @@ public class HttpListener extends AuditedResource {
 		fs2Header.addHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, workTicket.getPayloadSize().toString());
 		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
 		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, httpListenerProperties.get(MailBoxConstants.KEY_TENANCY_KEY));
+		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, (MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 		return fs2Header;
 	}

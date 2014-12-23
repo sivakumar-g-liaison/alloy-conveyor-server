@@ -521,7 +521,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
 		fs2Header.addHeader(MailBoxConstants.KEY_PAYLOAD_DESCRIPTION, String.format(MailBoxConstants.PAYLOAD_DESCRIPTION_VALUE, getPayloadURI()));
 		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, configurationInstance.getServiceInstance().getName());
-		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, configurationInstance.getMailbox().getTenancyKey());
+		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, (MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 		return fs2Header;
 	}

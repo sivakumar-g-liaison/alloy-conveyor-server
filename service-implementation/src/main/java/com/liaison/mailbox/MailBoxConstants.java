@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -11,8 +11,8 @@
 package com.liaison.mailbox;
 
 /**
- * 
- * 
+ *
+ *
  * @author veerasamyn
  */
 public interface MailBoxConstants {
@@ -44,7 +44,7 @@ public interface MailBoxConstants {
 	public final static String CREDENTIAL_TYPE = "CredentialType";
 
 	public final static String INCOMPLETE_STATUS = "INCOMPLETE_CONFIGURATION";
-	
+
 	public final static String COMPLETE_STATUS = "COMPLETED";
 
 	public final static String GROUPING_JS_PROP_NAME = "filegroupingjspath";
@@ -70,50 +70,50 @@ public interface MailBoxConstants {
 	// Properties for sweeper grouping boundary condition
 	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
 	public final static String NUMER_OF_FILES_THRESHOLD = "numoffilesthreshold";
-	
+
 	// Added for processing Mount Location from Folder Path given by User
 	public final static String MOUNT_LOCATION = "MOUNT_POINT";
 	public final static String MOUNT_LOCATION_PATTERN = "(?i:MOUNT_POINT)";
-	
+
 	// Added for Error File Location
 	public final static String ERROR_FOLDER = "ERROR";
 	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
-	
+
 	// Type of Credentials
 	public final static String TRUSTSTORE_CERT = "truststore_cert";
 	public final static String SSH_KEYPAIR = "ssh_keypair";
 	public final static String LOGIN_CREDENTIAL = "login_credential";
-	
+
 	// Type of Truststore
 	public final static String GLOBAL = "GLOBAL";
 	public final static String SELFSIGNED = "SELFSIGNED";
-	
+
 	// Added to acl Manifest Request construction
 	public final static String DOMAIN_NAME = "SERVICE_BROKER";
 	public final static String DOMAIN_TYPE = "ORGANIZATION";
 	public final static String PLATFORM_NAME = "SERVICE_BROKER";
 	public final static String SERVICE_NAME = "KEYMANAGER";
 	public final static String ROLE_NAME = "MailboxAdmin";
-	
+
 	// retrieval of httplistener specific properties
 	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
 	public static final String HTTPLISTENER_PIPELINEID = "httplistenerpipelineid";
 	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httplistenerpayload";
-	public static final String HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";	
-	
+	public static final String HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
+
 	// properties used to configure sla rules of an mailbox
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX = "timetopickupfilepostedbymailbox";
-	
+
 	// sla validation
 	public final static String PROCESSOR_NOT_AVAILABLE = "processor_not_available";
 	public final static String PROFILE_NOT_AVAILABLE = "profile_not_available";
 	public final static String DUMMY_MAILBOX_ID_FOR_FSM_STATE =   "ABCDEFGHIJKLMNOPQRSTUVWXYZ789101";
 	public final static String DUMMY_PROCESSOR_ID_FOR_FSM_STATE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456";
-	
+
 	// spectrum payload prefix
 	public final static String SPECTRUM_PAYLOAD_PREFIX = "/mailboxsweeper/payload/1.0/";
-	
+
 	// FS2 Header Keys
 	public final static String KEY_PIPELINE_ID = "PIPELINE_ID";
 	public final static String KEY_GLOBAL_PROCESS_ID = "GLOBAL_PROCESS_ID";
@@ -121,35 +121,36 @@ public interface MailBoxConstants {
 	public final static String KEY_SERVICE_INSTANCE_ID = "SERVICE_INSTANCE_ID";
 	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
+	public final static String PIPELINE_FULLY_QUALIFIED_PACKAGE = "com.liaison.service.core.edm.model.Pipeline";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
-	
+
 	// additional context keys Worker ticket
 	public final static String KEY_FOLDER_NAME = "folderdername";
 	public final static String KEY_MAILBOX_ID = "mailboxId";
 	public final static String KEY_OVERWRITE = "overwrite";
-	
+
 	//GITURI
 	public static final String PROPERTY_GITLAB_ACTIVITY_PROJECT_ID = "com.liaison.gitlab.mailbox.script.project.id";
 	public static final String PROPERTY_GITLAB_ACTIVITY_PRIVATE_TOKEN = "com.liaison.gitlab.mailbox.script.private_token";
 	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_HOST = "com.liaison.gitlab.mailbox.script.server.host";
 	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER = "com.liaison.gitlab.mailbox.script.folder";
-	
+
 	// ACL Manifest
 	public final static int GUID_LENGTH = 32;
 	public static final String ACL_BACKWARD_COMPATABILITY_PROPERTY = "mailbox.acl.manifest.backward.compatibility.mode";
-	
+
 	//Empty script file
-	
-	public static final String DEFAULT_SCRIPT_TMPLATE_CONTENT = "// Scripts File is empty.";	
-	
+
+	public static final String DEFAULT_SCRIPT_TMPLATE_CONTENT = "// Scripts File is empty.";
+
 	//DEFAULTVALUE_FOR_REQUIRED_PROPS
-	
+
 	public static final String DEFAULT_SCRIPT_TEMPLATE_NAME = "mailbox.script.default.template";
 	public static final String DEFAULT_GLOBAL_TRUSTSTORE_ID = "mailbox.global.truststore.id";
 	public static final String DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID = "mailbox.global.trustgroup.id";
 	public static final String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	public static final String DEFAULT_PGUID_DISPLAY_PREFIX = "maibox.pguid.display.prefix";
-	
-	
+
+
 }
