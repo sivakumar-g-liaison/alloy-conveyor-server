@@ -105,6 +105,7 @@ public class HttpListener extends AuditedResource {
 	protected static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 	protected static final String GATEWAY_HEADER_PREFIX = "x-gate-";
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
+	protected static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
 
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
@@ -521,22 +522,15 @@ public class HttpListener extends AuditedResource {
 	 */
 	protected void copyResponseInfo(HttpResponse httpResponse,
 			ResponseBuilder builder, InputStream responseInputStream) throws IllegalStateException, IOException {
-		Header contentLength = httpResponse
-				.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
-		int iContentLength = 0;
 
-		if (contentLength != null) {
-			logger.debug(
-					"Response from Service Broker contained content length header with value: {}",
-					contentLength.getValue());
-			iContentLength = Integer.parseInt(contentLength.getValue());
-		} else {
-			logger.debug("Response from Service Broker did not contain a content length header");
-		}
 
-	    if (iContentLength > 0) {
+		Header contentLength = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
+		Header transferEncoding = httpResponse.getFirstHeader(HTTP_HEADER_TRANSFER_ENCODING);
 
-            responseInputStream = httpResponse.getEntity().getContent();
+		//If the transfer encoding is chunked, then the Content-Length field will not be set
+		if ("chunked".equals(transferEncoding.getValue())) {
+
+			responseInputStream = httpResponse.getEntity().getContent();
             Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
             if (responseInputStream != null) {
@@ -547,13 +541,40 @@ public class HttpListener extends AuditedResource {
                 builder.header(contentType.getName(), contentType.getValue());
             }
 
-            if (contentLength != null) {
-                builder.header(contentLength.getName(),
-                        contentLength.getValue());
-            }
+		} else {
+
+			int iContentLength = 0;
+
+			if (contentLength != null) {
+				logger.debug("Response from Service Broker contained content length header with value: {}",
+						contentLength.getValue());
+				iContentLength = Integer.parseInt(contentLength.getValue());
+			} else {
+				logger.debug("Response from Service Broker did not contain a content length header");
+			}
+
+		    if (iContentLength > 0) {
+
+	            responseInputStream = httpResponse.getEntity().getContent();
+	            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+
+	            if (responseInputStream != null) {
+	                builder.entity(responseInputStream);
+	            }
+
+	            if (contentType != null) {
+	                builder.header(contentType.getName(), contentType.getValue());
+	            }
+
+	            if (contentLength != null) {
+	                builder.header(contentLength.getName(),
+	                        contentLength.getValue());
+	            }
 
 
-        }
+	        }
+
+		}
 
         copyResponseHeaders(httpResponse, builder);
 
