@@ -271,7 +271,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	private Class<?> getProcessorClass(ProcessorType processorType) {
 
 		Class <?> processorClass = null;
-		switch(processorType.getCode()) {
+		switch(processorType.getCode().toLowerCase()) {
 
 		case "httpsyncprocessor":
 			processorClass = HTTPSyncProcessor.class;
