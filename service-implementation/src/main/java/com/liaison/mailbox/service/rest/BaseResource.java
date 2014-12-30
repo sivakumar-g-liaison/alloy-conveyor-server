@@ -121,6 +121,7 @@ public class BaseResource {
 			
 		}
 		if (null != worker.getQueryParams()) {
+			ThreadContext.put(LogTags.PGUIDS, worker.getFishTagService()+":"+worker.getQueryParams().get("guid"));
 			for (Entry<String, String> paramEntry : worker.getQueryParams().entrySet()) {
 				ThreadContext.put(LogTags.QUERY_PARAM + paramEntry.getKey(), paramEntry.getValue());
 			}
