@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -30,7 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 
-import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -56,14 +55,14 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- * 
+ *
  * @author veerasamyn
  */
 @Path("mailbox/{mailboxid}/processor")
-@Api(value = "mailbox/{mailboxid}/processor", 
+@Api(value = "mailbox/{mailboxid}/processor",
 description = "Gateway for the processor configuration services.")
 public class MailBoxProcessorResource extends AuditedResource {
-	
+
 	private static final Logger LOG = LogManager.getLogger(MailBoxProcessorResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -79,12 +78,12 @@ public class MailBoxProcessorResource extends AuditedResource {
 
 	/**
 	 * REST method to update a processor.
-	 * 
+	 *
 	 * @param request
 	 *            HttpServletRequest, injected with context annotation
 	 * @param guid
 	 *            The id of the mailbox
-	 * 
+	 *
 	 * @return Response Object
 	 */
 	@POST
@@ -108,9 +107,9 @@ public class MailBoxProcessorResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				String requestString;
 				try {
 					requestString = getRequestBody(request);
@@ -118,16 +117,16 @@ public class MailBoxProcessorResource extends AuditedResource {
 					// create the new Processor
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
-					
+
 				} catch (IOException | JAXBException | JSONException  e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				} catch (SymmetricAlgorithmException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
-				} 		
+				}
 			}
-		};		
+		};
 		worker.actionLabel = "MailBoxProcessorResource.createProcessor()";
 
 		// hand the delegate to the framework for calling
@@ -140,7 +139,7 @@ public class MailBoxProcessorResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-			
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

@@ -61,7 +61,7 @@ public class FrameworkFilter implements Filter {
     		
     		HttpServletRequest httpRequest = ((HttpServletRequest)request);
     		// logger.info("Fish Tagging Request URL..."+httpRequest.getRequestURL().toString());
-   	     	 ThreadContext.put(LogTags.RESOURCE, httpRequest.getServletPath());
+   	     	 ThreadContext.put(LogTags.RESOURCE, httpRequest.getPathInfo());
     	     ThreadContext.put(LogTags.REQUEST_URL, httpRequest.getRequestURL().toString()); 
     	     ThreadContext.put(LogTags.REQUEST_QUERY, httpRequest.getQueryString());
     	     String userPrincipal = (null != httpRequest.getUserPrincipal()) ? httpRequest.getUserPrincipal().getName() : "NOUSER";

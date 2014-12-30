@@ -33,7 +33,7 @@ import com.netflix.servo.monitor.StatsTimer;
 import com.netflix.servo.stats.StatsConfig;
 
 /**
- * 
+ *
  * @author OFS
  *
  */
@@ -61,7 +61,7 @@ public abstract class AuditedResource extends BaseResource {
 
 	/**
 	 * This handles auditing around your business logic, then hands the worker off to the KPI instrumented caller.
-	 * 
+	 *
 	 * @param request
 	 * @param worker
 	 * @param expectedMediaTypes
@@ -100,7 +100,7 @@ public abstract class AuditedResource extends BaseResource {
 
 	/**
 	 * The KPI instrumented caller invokes the delegate worker.
-	 * 
+	 *
 	 * @param request
 	 * @param worker
 	 * @param expectedMediaTypes
@@ -119,18 +119,18 @@ public abstract class AuditedResource extends BaseResource {
 			serializationMediaType = determineDesiredSerialization(request);
 
 			Object responseObject = worker.call();
-			if(responseObject instanceof CommonResponseDTO){
-           		CommonResponseDTO response=(CommonResponseDTO)responseObject;
-           		if(Messages.FAILURE.value().equalsIgnoreCase(response.getResponse().getStatus())){
-           			httpCode = 400;
-           			success = false;
-           		}
-           	}
+			 if(responseObject instanceof CommonResponseDTO) {
+				 CommonResponseDTO response=(CommonResponseDTO)responseObject;
+				 if(Messages.FAILURE.value().equalsIgnoreCase(response.getResponse().getStatus())) {
+					 httpCode = 400;
+					 success = false;
+				 }
+			}
 			if (responseObject instanceof Serializable) {
 				// invoke the delegate to do the read work for
 				// both get and list type operations
 				serviceResponse = (Serializable) responseObject;
-				
+
 				// populate the response body
 				returnResponse = marshalResponse(httpCode, serializationMediaType, serviceResponse);
 			} else {
@@ -163,7 +163,7 @@ public abstract class AuditedResource extends BaseResource {
 
 	/**
 	 * Implement initial audit statement common to exports service requests.
-	 * 
+	 *
 	 * @param actionLabel
 	 * @return
 	 */

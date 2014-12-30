@@ -68,7 +68,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
            	$scope.restService.get($scope.base_url + '/tenancyKeys' ,
                      function (data, status) {
            				 block.unblockUI();
-                         if (status === 200) {
+                         if (status === 200 || status === 400) {
 
                         	 if (data.getTenancyKeysResponse.response.status === 'success') {
                                   angular.forEach(data.getTenancyKeysResponse.tenancyKeys, function (item) {
@@ -103,8 +103,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                     function (data, status) {
 
                         block.unblockUI();
-                        if (status === 200) {
-                        	
+                        if (status === 200 || status === 400) {                        	
                         	if (data.getMailBoxResponse.response.status === 'success') {
                                 $scope.mailBox.guid = $scope.mailBoxId;
                                 $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
@@ -187,7 +186,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                     function (data, status) {
                         
                 	    block.unblockUI();
-                        if (status === 200) {
+                        if (status === 200 || status === 400) {
                              $scope.isMailBoxSaved = true;
                             if (fromAddProcsr) {
                                 $location.$$search = {};
@@ -212,7 +211,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                     function (data, status) {
 
                         block.unblockUI();
-                        if (status === 200) {
+                        if (status === 200 || status === 400) {
 
                         	if(data.addMailBoxResponse.mailBox !== null) {
                             	$scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;

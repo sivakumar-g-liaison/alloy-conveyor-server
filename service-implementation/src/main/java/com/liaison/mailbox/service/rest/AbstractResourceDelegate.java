@@ -57,7 +57,7 @@ public abstract class AbstractResourceDelegate<T> implements Callable<T> {
 		if (null == enclosingMethod) {
 			return "UNABLE TO DETERMINE PATH, PLEASE USE AbstractResourceDelegate as METHOD LOCAL ANONYMOUS INNER CLASS";
 		}
-		return enclosingMethod.getDeclaringClass().getSimpleName() + ": " + enclosingMethod.getName();
+		return enclosingMethod.getName();
 	}
 
 }

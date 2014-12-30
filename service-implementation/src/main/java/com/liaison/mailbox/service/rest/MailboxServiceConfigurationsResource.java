@@ -25,7 +25,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -80,7 +79,7 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 	@ApiResponses({
 			@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	
+
 	public Response getPropertyFileValues(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic

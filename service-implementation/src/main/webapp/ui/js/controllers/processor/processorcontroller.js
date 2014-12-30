@@ -2303,7 +2303,7 @@ var rest = myApp.controller(
 				$log.info($filter('json')(editRequest));
 				$scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
 					function (data, status) {
-						if (status === 200) {
+						if (status === 200 || status === 400) {
 							$scope.editProcessor($scope.processor.guid, false);
 							if (data.reviseProcessorResponse.response.status === 'success') {
 								if($scope.isFileSelected)  $scope.isFileSelected = false;
@@ -2329,7 +2329,7 @@ var rest = myApp.controller(
 				$log.info($filter('json')(addRequest));
 				$scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor' + '?sid=' + $rootScope.serviceInstanceId, $filter('json')(addRequest),
 					function (data, status) {
-						if (status === 200) {
+						if (status === 200 || status === 400) {
 							if (data.addProcessorToMailBoxResponse.response.status === 'success') {
 							//$scope.readOnlyProcessors = true;
 							$scope.readAllProcessors();
@@ -3252,7 +3252,7 @@ var rest = myApp.controller(
 					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.trimScriptTemplateName(),
 					  function (data, status) { 
                          block.unblockUI();
-                        if (status === 200) { 	
+                        if (status === 200 || status === 400) {
 							if (data.scriptserviceResponse.response.status === 'success') {
 								 $scope.scriptIsEdit = true;					
 								 $scope.script = data.scriptserviceResponse.script;
@@ -3299,7 +3299,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
      	 $scope.restService.get($scope.base_url + "/git/content/" + $scope.javaProperties.defaultScriptTemplateName,
           function (data, status) {
 			   $scope.loader = false;
-              if (status === 200) { 			
+              if (status === 200 || status === 400) { 			
  				if (data.scriptserviceResponse.response.status === 'success') {
  					defaultScriptFile = data.scriptserviceResponse.script;
  				   $scope.$parent.editor.getSession().setValue(defaultScriptFile);
