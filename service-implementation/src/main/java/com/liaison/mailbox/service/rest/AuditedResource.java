@@ -23,6 +23,8 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.exception.LiaisonUnhandledContainerException;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -112,17 +114,25 @@ public abstract class AuditedResource extends BaseResource {
 		Response returnResponse = null;
 		String serializationMediaType = null;
 		boolean success = true;
+		int httpCode = 200;
 		try {
 			serializationMediaType = determineDesiredSerialization(request);
 
 			Object responseObject = worker.call();
+			if(responseObject instanceof CommonResponseDTO){
+           		CommonResponseDTO response=(CommonResponseDTO)responseObject;
+           		if(Messages.FAILURE.value().equalsIgnoreCase(response.getResponse().getStatus())){
+           			httpCode = 400;
+           			success = false;
+           		}
+           	}
 			if (responseObject instanceof Serializable) {
 				// invoke the delegate to do the read work for
 				// both get and list type operations
 				serviceResponse = (Serializable) responseObject;
 				
 				// populate the response body
-				returnResponse = marshalResponse(200, serializationMediaType, serviceResponse);
+				returnResponse = marshalResponse(httpCode, serializationMediaType, serviceResponse);
 			} else {
 				// marshalling may have already been handled elsewhere
 				returnResponse = (Response) responseObject;
