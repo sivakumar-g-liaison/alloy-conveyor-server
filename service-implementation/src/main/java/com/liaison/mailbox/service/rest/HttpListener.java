@@ -34,7 +34,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -435,17 +434,14 @@ public class HttpListener extends AuditedResource {
 			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws Exception {
 
 	  try (InputStream payloadToPersist = request.getInputStream()) {
-			 try (CountingInputStream cio = new CountingInputStream(payloadToPersist)) {
 
-				 //the total number of bytes read into the buffer
-				  payloadToPersist.read();
-	              workTicket.setPayloadSize(Long.valueOf(cio.available()));
-	              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-	              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
-	                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-	              logger.info("The received path uri is ", metaSnapShot.getURI().toString());
-	              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
-           }
+              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
+              logger.info("The received path uri is {} ", metaSnapShot.getURI().toString());
+              //Hack
+              workTicket.setPayloadSize(Long.valueOf(metaSnapShot.getHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE)[0]));
+              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
 	    }
 	}
 
@@ -722,7 +718,6 @@ public class HttpListener extends AuditedResource {
 
 		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
-		fs2Header.addHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, workTicket.getPayloadSize().toString());
 		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
 		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, (MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));

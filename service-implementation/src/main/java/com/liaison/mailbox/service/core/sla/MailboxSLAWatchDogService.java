@@ -169,7 +169,7 @@ public class MailboxSLAWatchDogService {
 			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving Mailbox SLA Configuration property");
 			for (MailBoxProperty property : mailboxProps) {
-				if (property .getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX)) {
+				if (property.getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX)) {
 					timeToPickUpFilePostedToMailbox = property.getMbxPropValue();
 					LOG.debug("The Mailbox SLA configuration is {}", timeToPickUpFilePostedToMailbox);
 					break;
