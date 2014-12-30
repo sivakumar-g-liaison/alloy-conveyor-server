@@ -41,7 +41,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             $scope.restService.post(url, $filter('json')(addRequest),
                 function (data, status) {
 
-                    if (status === 200) {
+            	  if (status === 200 || status === 400) {
                     	var messageType = (data.addProfileResponse.response.status == 'success')?'success':'error';
                         showSaveMessage(data.addProfileResponse.response.message, messageType);
                   

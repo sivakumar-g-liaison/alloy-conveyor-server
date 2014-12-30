@@ -10,26 +10,23 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
-import java.io.Serializable;
-
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 
 /**
- * 
- * 
+ *
+ *
  * @author veerasamyn
  */
 @JsonRootName("getMailBoxResponse")
-public class GetMailBoxResponseDTO implements Serializable {
+public class GetMailBoxResponseDTO extends CommonResponseDTO {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private ResponseDTO response;
 	private MailBoxDTO mailBox;
 
 	public MailBoxDTO getMailBox() {
@@ -38,14 +35,6 @@ public class GetMailBoxResponseDTO implements Serializable {
 
 	public void setMailBox(MailBoxDTO mailBox) {
 		this.mailBox = mailBox;
-	}
-
-	public ResponseDTO getResponse() {
-		return response;
-	}
-
-	public void setResponse(ResponseDTO response) {
-		this.response = response;
 	}
 
 }

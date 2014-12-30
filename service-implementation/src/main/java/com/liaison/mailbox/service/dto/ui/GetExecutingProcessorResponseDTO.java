@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -10,23 +10,21 @@
 
 package com.liaison.mailbox.service.dto.ui;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
- * 
+ *
  * @author OFS
  */
-public class GetExecutingProcessorResponseDTO implements Serializable {
+public class GetExecutingProcessorResponseDTO extends CommonResponseDTO {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private ResponseDTO response;
 	private List<GetExecutingProcessorDTO> executingProcessors;
 	private String hitCounter;
 
@@ -42,14 +40,6 @@ public class GetExecutingProcessorResponseDTO implements Serializable {
 		this.executingProcessors = executingProcessors;
 	}
 
-	public ResponseDTO getResponse() {
-		return response;
-	}
-
-	public void setResponse(ResponseDTO response) {
-		this.response = response;
-	}
-	
 	public void setHitCounter(String hitCounter) {
 		this.hitCounter = hitCounter;
 	}

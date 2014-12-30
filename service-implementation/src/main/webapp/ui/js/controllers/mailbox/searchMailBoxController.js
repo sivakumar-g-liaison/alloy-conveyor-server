@@ -164,7 +164,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             $scope.hitCounter = $scope.hitCounter + 1;
             $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
-                    if (status == 200) {
+            	if (status === 200 || status === 400) {
                         if (data.searchMailBoxResponse.response.status == 'failure') {
                         	// Commented out because of inconsistency
                             // showSaveMessage(data.searchMailBoxResponse.response.message,

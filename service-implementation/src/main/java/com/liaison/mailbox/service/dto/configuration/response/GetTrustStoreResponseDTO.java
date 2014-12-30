@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -10,38 +10,29 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
-import java.io.Serializable;
-
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
-import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 
 /**
- * 
+ *
  *
  * @author OFS
  */
 @JsonRootName("getTrustStoreResponse")
-public class GetTrustStoreResponseDTO implements Serializable {
+public class GetTrustStoreResponseDTO extends CommonResponseDTO {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private ResponseDTO response;
 	private TrustStoreDTO trustStore;
-	
+
 	public TrustStoreDTO getTrustStore() {
 		return trustStore;
 	}
 	public void setTrustStore(TrustStoreDTO trustStore) {
 		this.trustStore = trustStore;
-	}
-	public ResponseDTO getResponse() {
-		return response;
-	}
-	public void setResponse(ResponseDTO response) {
-		this.response = response;
 	}
 }
