@@ -131,7 +131,7 @@ dependencies {
 	// resolve fs2 in nexus
 	// compile group: "com.liaison", name: "fs2", version: "1.1.1-SNAPSHOT", changing: true
 
-	compile("com.liaison:fs2:3.1.0-SNAPSHOT"){
+	compile("com.liaison:fs2:3.+"){
 		exclude group:"bouncycastle", module:"bcprov-jdk16"
 	}
 
@@ -602,7 +602,7 @@ task flywayMigrateDtdm(type: OracleFlywayMigrateTask) {
 			fileset(dir: "${flywaySourceRoot}/migration/${dbSchemaNameDtdm}", includes: '**/*.sql')
 			// the original script is written for Sql*Plus, so we have to do some munging to make is SQL99 compliant
 			filterchain {
-				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_", flags: 'gis', byline: 'false') }				
+				tokenfilter { replaceregex(pattern:'GATEWAY_', replace:"${dbSchemaNamePrefixDtdm}_${dbSchemaNameDtdm}_", flags: 'gis', byline: 'false') }
 			}
 		}
 	}

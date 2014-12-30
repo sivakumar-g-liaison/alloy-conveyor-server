@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -32,7 +32,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> implements ProcessorConfigurationDAO, MailboxDTDMDAO {
 
@@ -44,7 +44,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	/**
 	 * Fetches all the Processor from PROCESSOR database table by profileName and mailbox name pattern.
-	 * 
+	 *
 	 * @param profileName
 	 *            The profile name.
 	 * @param mbxNamePattern
@@ -89,7 +89,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	/**
 	 * Checks the mailbox has the processor or not.
-	 * 
+	 *
 	 *
 	 * @param siid service instance id(name)
 	 * @param mbxGuid pguid of the mailbox
@@ -115,9 +115,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					.setParameter(PGUID , mbxGuid)
 					.setParameter(SERV_INST_ID, siid)
 					.getSingleResult();
-			
+
 			if (count > 0) {
- 				status = true; 
+ 				status = true;
 			}
 
 		} finally {
@@ -132,7 +132,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	/**
 	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
-	 * 
+	 *
 	 * @param mbxGuid pguid of the mailbox
 	 * @param siGuid service instance id(name)
 	 * @return list of processor
@@ -179,7 +179,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	/**
 	 * Retrieves list of processor from the given mailbox guid
-	 * 
+	 *
 	 * @param mbxGuid the mailbox guid
 	 * @return list of processor
 	 */
@@ -223,14 +223,14 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	/**
 	 * Retrieves list of all processors of specific type from given mailbox guid
-	 * 
+	 *
 	 * @param type the processor type
 	 * @param mbxGuid the mailbox guid
 	 * @return list of processors
 	 */
 	@Override
 	public List<Processor> findProcessorByTypeAndMbx(ProcessorType type, String mbxGuid) {
-		
+
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
 
@@ -239,9 +239,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.info("Fetching the processor count starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
-					.append(" inner join processor.mailbox")
+					.append(" inner join processor.mailbox mbx")
 					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
-					.append(" and mailbox.pguid = :" + PGUID);
+					.append(" and mbx.pguid = :" + PGUID);
 			Class <?> processorType = getProcessorClass(type);
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PROCESSOR_TYPE, processorType)
@@ -267,18 +267,18 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return processors;
 	}
-	
+
 	private Class<?> getProcessorClass(ProcessorType processorType) {
-		
+
 		Class <?> processorClass = null;
 		switch(processorType.getCode()) {
-		
+
 		case "httpsyncprocessor":
 			processorClass = HTTPSyncProcessor.class;
 			break;
 		case "httpasyncprocessor":
 			processorClass = HTTPAsyncProcessor.class;
-			break;		
+			break;
 		case  "sweeper":
 			processorClass = Sweeper.class;
 			break;
@@ -288,9 +288,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 		return processorClass;
 	}
-	
+
 	public List <Processor> findProcessorByType(ProcessorType type) {
-		
+
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
 
@@ -327,14 +327,14 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return processors;
 	}
-	
+
 	public List <Processor> findAllActiveProcessors() {
-		
+
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
-		
+
 		try {
-			
+
 			List <?> proc = entityManager.createNamedQuery(FIND_ALL_ACTIVE_PROCESSORS)
 								.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
 								.getResultList();
@@ -348,7 +348,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
 						processor.getProcsrProperties(), processor.getProcsrStatus());
 			}
-			
+
 		} finally {
 			if (entityManager != null) {
 				entityManager.close();
@@ -356,5 +356,5 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 		return processors;
 	}
-	
+
 }
