@@ -883,7 +883,7 @@ var rest = myApp.controller(
                         '<div ng-switch-when="false">\n\
                                            <div ng-switch on="row.getProperty(\'isMandatory\')">' +
                         '<div ng-switch-when="true">-NA-</div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,valueSelectedinSelectionBox)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
+                        '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticAndDynamicProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,valueSelectedinSelectionBox)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                         '</div>\n\
                                     </div>\n\
                              </div>'
