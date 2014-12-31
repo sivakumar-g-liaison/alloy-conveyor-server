@@ -205,6 +205,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationResource.searchMailBox()";
+		worker.queryParams.put("name", mbxName);
+		worker.queryParams.put("profile", profileName);
 
 		// hand the delegate to the framework for calling
 		try {

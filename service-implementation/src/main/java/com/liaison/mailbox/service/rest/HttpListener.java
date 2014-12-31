@@ -191,6 +191,7 @@ public class HttpListener extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
+		worker.queryParams.put("guid", mailboxPguid);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

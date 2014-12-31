@@ -115,7 +115,9 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			}
 		};	
 		worker.actionLabel = "MailBoxProcessorDetailsResource.deleteProcessor()";
-
+		worker.queryParams.put("mailboxid", mailboxguid);
+		worker.queryParams.put("processorid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -174,7 +176,9 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
-
+		worker.queryParams.put("mailboxid", mailboxguid);
+		worker.queryParams.put("processorid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -240,7 +244,9 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
-
+		worker.queryParams.put("mailboxid", mailboxguid);
+		worker.queryParams.put("processorid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

@@ -225,6 +225,7 @@ public class MailBoxProfileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.readProfiles()";
+		worker.queryParams.put("filterText", filterText);
 
 		// hand the delegate to the framework for calling
 		try {

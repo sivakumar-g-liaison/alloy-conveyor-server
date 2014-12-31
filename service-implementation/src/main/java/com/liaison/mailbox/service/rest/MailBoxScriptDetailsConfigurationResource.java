@@ -118,6 +118,7 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxScriptDetailsConfigurationResource.readScript()";
+		worker.queryParams.put("gitFileName", gitFileName);
 
 		// hand the delegate to the framework for calling
 		try {
