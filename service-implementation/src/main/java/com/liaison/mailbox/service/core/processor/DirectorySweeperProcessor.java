@@ -39,6 +39,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.FS2MetaSnapshot;
@@ -466,6 +467,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		    additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, path.toFile().getParent());
 
 		    workTicket.setAdditionalContext(additionalContext);
+		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
 		}
 

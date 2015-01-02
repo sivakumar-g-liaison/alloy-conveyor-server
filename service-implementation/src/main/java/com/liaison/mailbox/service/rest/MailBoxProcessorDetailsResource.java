@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -116,7 +115,9 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			}
 		};	
 		worker.actionLabel = "MailBoxProcessorDetailsResource.deleteProcessor()";
-
+		worker.queryParams.put("mailboxid", mailboxguid);
+		worker.queryParams.put("processorid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -175,7 +176,9 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
-
+		worker.queryParams.put("mailboxid", mailboxguid);
+		worker.queryParams.put("processorid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -241,7 +244,9 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
-
+		worker.queryParams.put("mailboxid", mailboxguid);
+		worker.queryParams.put("processorid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

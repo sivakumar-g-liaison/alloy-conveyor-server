@@ -30,7 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -226,6 +225,7 @@ public class MailBoxProfileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.readProfiles()";
+		worker.queryParams.put("filterText", filterText);
 
 		// hand the delegate to the framework for calling
 		try {

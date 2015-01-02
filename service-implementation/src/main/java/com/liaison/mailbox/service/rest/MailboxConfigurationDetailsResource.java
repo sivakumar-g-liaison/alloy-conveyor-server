@@ -31,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
@@ -137,6 +136,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.reviseMailBox()";
+		worker.queryParams.put("guid", guid);
 
 		// hand the delegate to the framework for calling
 		try {
@@ -200,7 +200,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.deactivateMailBox()";
-
+		worker.queryParams.put("guid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -269,7 +270,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.readMailBox()";
-
+		worker.queryParams.put("guid", guid);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

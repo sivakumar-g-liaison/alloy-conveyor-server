@@ -106,7 +106,7 @@ public class TriggerProfileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "TriggerProfileResource.triggerProfile()";
-
+		worker.queryParams.put("name", profileName);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

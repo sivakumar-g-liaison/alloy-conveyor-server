@@ -27,7 +27,6 @@ import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;

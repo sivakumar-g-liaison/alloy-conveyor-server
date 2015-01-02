@@ -114,6 +114,8 @@ public class ProcessorAdminResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "ProcessorAdminResource.getExecutingProcessors()";
+		worker.queryParams.put("frmDate", frmDate);
+		worker.queryParams.put("toDate", toDate);
 
 		// hand the delegate to the framework for calling
 		try {
@@ -167,7 +169,8 @@ public class ProcessorAdminResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "ProcessorAdminResource.interruptRunningProcessor()";
-
+		worker.queryParams.put("executionID", executionID);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

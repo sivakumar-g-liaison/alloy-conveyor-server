@@ -236,16 +236,20 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		try {
 
-			LOG.info("Fetching the processor count starts.");
+			LOG.info("Fetching the processor starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
 					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
-					.append(" and mbx.pguid = :" + PGUID);
+					.append(" and mbx.pguid = :" + PGUID)
+					.append(" and processor.procsrStatus = :" + STATUS)
+					.append(" and mbx.mbxStatus = :" + STATUS);
 			Class <?> processorType = getProcessorClass(type);
+
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PROCESSOR_TYPE, processorType)
 					.setParameter(PGUID, mbxGuid)
+					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -289,7 +293,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processorClass;
 	}
 
-	public List <Processor> findProcessorByType(ProcessorType type) {
+	public List<Processor> findProcessorByType(ProcessorType type) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
@@ -299,10 +303,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.info("Fetching the processor count starts.");
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
-					.append(" inner join processor.mailbox")
+					.append(" inner join processor.mailbox mbx")
 					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
-					.append(" and processor.procsrStatus = :" + STATUS);
+					.append(" and processor.procsrStatus = :" + STATUS)
+					.append(" and mbx.mbxStatus = :" + STATUS);
 			Class <?> processorType = getProcessorClass(type);
+
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PROCESSOR_TYPE, processorType)
 					.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
@@ -328,7 +334,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 
-	public List <Processor> findAllActiveProcessors() {
+	public List<Processor> findAllActiveProcessors() {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
