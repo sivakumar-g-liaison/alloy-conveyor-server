@@ -222,12 +222,15 @@ dependencies {
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
 
-	compile ("com.liaison.commons.spectrum.client:spectrum-client:1.0.8-SNAPSHOT") {
+	compile ("com.liaison.commons.spectrum.client:spectrum-client:1.+") {
 		exclude group: "com.google.collections", module: "google-collections"
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
 	}
 
 	workTicket 'com.liaison.dto:dto:2.0.0'
+	
+	compile ("com.liaison.commons.message.glass:glass-message-lib:4.+")
+	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
 
 }
 

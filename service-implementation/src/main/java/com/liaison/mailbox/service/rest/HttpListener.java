@@ -62,12 +62,16 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.MonitorRegistry;
@@ -177,8 +181,21 @@ public class HttpListener extends AuditedResource {
 					}
 					logger.debug("constructed workticket");
 					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
-
+                    
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
+					
+					//GLASS LOGGING BEGINS//
+					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+					GlassMessage glassMessage = new GlassMessage();
+					glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
+					glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());					
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+					glassMessage.setMailboxId(mailboxPguid);					
+					glassMessage.setStatus(ExecutionState.STAGED);
+					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassLogger.logToGlass(glassMessage);					
+					//GLASS LOGGING ENDS//
+					
 					ResponseBuilder builder = Response.ok();
 					responseInputStream = httpResponse.getEntity().getContent();
 					copyResponseInfo(httpResponse, builder, responseInputStream);
@@ -265,6 +282,19 @@ public class HttpListener extends AuditedResource {
 					storePayload(request, workTicket, httpListenerProperties);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					constructMetaDataJson(request, workTicket);
+					
+					//GLASS LOGGING BEGINS//
+					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+					GlassMessage glassMessage = new GlassMessage();
+					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
+					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());					
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+					glassMessage.setMailboxId(mailboxPguid);					
+					glassMessage.setStatus(ExecutionState.STAGED);
+					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassLogger.logToGlass(glassMessage);
+					//GLASS LOGGING ENDS//
+					
 					return Response
 							.ok()
 							.status(Status.ACCEPTED)

@@ -47,14 +47,19 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * DirectorySweeper
@@ -85,12 +90,24 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	public DirectorySweeperProcessor(Processor configurationInstance) {
 		super(configurationInstance);
 	}
-
+    
+	TransactionVisibilityClient glassLogger = null;
+	GlassMessage glassMessage = null;
+	
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {
 
 		try {
-
+            
+			//GLASS LOGGING BEGINS//
+			glassLogger = new TransactionVisibilityClient(executionId);
+			glassMessage = new GlassMessage();
+			glassMessage.setCategory(ProcessorType.SWEEPER);
+			glassMessage.setProtocol(Protocol.SWEEPER.getCode());
+			glassMessage.setExecutionId(executionId);
+			glassMessage.setPipelineId(getPipeLineID());					
+			//GLASS LOGGING ENDS//
+			
 			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
@@ -112,8 +129,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		String fileRenameFormat = getCustomProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
-		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
-
+		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);		
 		// Validation of the necessary properties
 		if (MailBoxUtil.isEmpty(inputLocation)) {
 			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
@@ -155,9 +171,15 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 				LOGGER.info("The file group is empty, so NOP");
 			} else {
 				for (WorkTicketGroup workTicketGroup : workTicketGroups) {;
-					String jsonResponse = constructMetaDataJson(workTicketGroup);
-					LOGGER.info("Returns json response.{}", new JSONObject(jsonResponse).toString(2));
-					postToSweeperQueue(jsonResponse);
+					String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
+					LOGGER.info("Returns json response.{}", new JSONObject(wrkTcktToSbr).toString(2));
+					postToSweeperQueue(wrkTcktToSbr);
+					//For glass logging :(
+					for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()){
+						glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
+						glassMessage.setStatus(ExecutionState.STAGED);
+						glassLogger.logToGlass(glassMessage);
+					}
 				}
 
 			}
@@ -349,7 +371,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			File payloadFile = new File(workTicket.getPayloadURI());
 			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
-					: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
+						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
 
