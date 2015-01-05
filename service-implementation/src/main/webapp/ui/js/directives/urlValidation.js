@@ -30,7 +30,7 @@ angular.module(
 						 $rootScope.restService.get($rootScope.base_url + "/git/content/" + res[1],
 							function (data, status) {
 							scope.$parent.loader = false;
-							  if (status === 200) { 			
+							  if (status === 200 || status === 400) { 			
 								if (data.scriptserviceResponse.response.status === 'success') {
 								   scope.$parent.scriptTemplateIsExist = true;
 								   scope.$parent.editor.getSession().setValue(data.scriptserviceResponse.script);
