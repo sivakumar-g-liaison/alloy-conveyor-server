@@ -3358,22 +3358,23 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
          $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest))
          .success(function (data) {
         	block.unblockUI(); 
-        	if (data.scriptserviceResponse.response.status === 'success') {
         		$scope.$parent.scriptIsEdit = true;
         		$scope.$parent.script = $scope.scriptContents;
 			    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
-			} else {
-			    if (!$scope.$parent.scriptIsEdit) {
-				 $scope.$parent.scriptIsEdit = false;				
-				} else {
-				 $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;				
-				}				
-				showSaveMessage(data.scriptserviceResponse.response.message, 'error');
-			}
          })
-         .error(function() { 
-        	block.unblockUI(); 
-        	showSaveMessage("Error while File save to GitLab", 'error');
+         .error(function(data) { 
+        	block.unblockUI();
+        	if (angular.isObject(data)) {
+        		if (!$scope.$parent.scriptIsEdit) {
+   				 $scope.$parent.scriptIsEdit = false;				
+   				} else {
+   				 $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;				
+   				}				
+   				showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+        	} else {
+        		showSaveMessage("Error while File save to GitLab", 'error');
+        	}     	
+        	
          });
       $scope.$dismiss();		 
 	}; 
@@ -3402,17 +3403,18 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest))
 	            .success(function (data) {     
 	            	block.unblockUI(); 
-	            	if (data.scriptserviceResponse.response.status === 'success') {
 	            		$scope.$parent.scriptIsEdit = true;
 	            		$scope.$parent.script = $scope.scriptContents;
-					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
-					} else {					
-						showSaveMessage(data.scriptserviceResponse.response.message, 'error');
-					}
+					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');					
 	            })
-	            .error(function() {
+	            .error(function(data) {
 	            	block.unblockUI();
-	            	showSaveMessage("Error while File update to GitLab", 'error');
+	            	if (angular.isObject(data)) {
+	            	    showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+	            	} else {
+	            		showSaveMessage("Error while File update to GitLab", 'error');	            		
+	            	}
+	            	
 	            });
 				$scope.$dismiss();
 	     };	

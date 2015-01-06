@@ -63,8 +63,13 @@ myApp.controller('TriggerProfileCntrlr', ['$rootScope', '$scope', '$location', '
                 .success(function (data) {
                      var messageType = (data.triggerProfileResponse.response.status == 'success')?'success':'error';
                 	 showSaveMessage(data.triggerProfileResponse.response.message, messageType);
-                }).error(function (data){
-                	 showSaveMessage(data.triggerProfileResponse.response.message, 'error');
+                }).error(function (data) {
+                	if (angular.isObject(data)) {
+                		showSaveMessage(data.triggerProfileResponse.response.message, 'error');
+                	} else {
+                		showSaveMessage("Error triggering the profile", 'error');
+                	}
+                	 
                 });
         };
 		
