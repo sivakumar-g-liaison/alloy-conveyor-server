@@ -817,7 +817,10 @@ public class ProcessorConfigurationService {
 		// retrieve the list of processors of specific type
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 		List <Processor> processors = config.findProcessorByMbx(mailboxGuid);
-
+		
+		if(processors.isEmpty()) {
+			throw new MailBoxConfigurationServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
+		}
 
 		try {
 

@@ -124,8 +124,10 @@ public enum Messages {
 	INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid"),
 
 	// Manifest validation
-	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name.");
-
+	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name."),
+	
+	//sync and async process
+	MISSING_PROCESSOR("The %s is not found for the mailbox.");
 	private String value;
 
 	// some caching to provide a better search algorithm
