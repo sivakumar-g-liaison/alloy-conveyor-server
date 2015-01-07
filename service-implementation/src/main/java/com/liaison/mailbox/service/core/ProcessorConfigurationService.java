@@ -69,7 +69,6 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -816,33 +815,22 @@ public class ProcessorConfigurationService {
 
 		// retrieve the list of processors of specific type
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-		List <Processor> processors = config.findProcessorByMbx(mailboxGuid);
+		List <Processor> processors = config.findProcessorByMbx(mailboxGuid, true);
 		
 		if(processors.isEmpty()) {
 			throw new MailBoxConfigurationServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
 		}
 
 		try {
-
+			
+			ProcessorDTO processorDTO = null;
+			
 			for (Processor processor : processors) {
 
-				ProcessorDTO processorDTO = null;
-
-				if ((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
+				if (((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) || ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value())))) {
 					processorDTO = new ProcessorDTO();
 					processorDTO.copyFromEntity(processor);
-				}
-				if ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) {
-					processorDTO = new ProcessorDTO();
-					processorDTO.copyFromEntity(processor);
-					// retrieving folder properties from HTTPAsync
-					for (FolderDTO folder : processorDTO.getFolders()) {
-
-						if ((folder.getFolderType().toLowerCase()).equals(FolderType.PAYLOAD_LOCATION.getCode())) {
-							httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PAYLOAD_LOCATION, folder.getFolderURI());
-						}
-					}
-				}
+				} 
 
 				if (null != processorDTO) {
 
@@ -869,13 +857,16 @@ public class ProcessorConfigurationService {
 
 
 			}
-
+			
+			if (null == processorDTO) {
+				throw new MailBoxConfigurationServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
+			}
 
 		} catch (JAXBException
 				| IOException | MailBoxConfigurationServicesException
 				| SymmetricAlgorithmException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
-			return null;
+			throw new RuntimeException(e.getMessage());
 		}
 
 

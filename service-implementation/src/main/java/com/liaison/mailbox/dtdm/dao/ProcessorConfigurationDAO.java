@@ -90,7 +90,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param mbxGuid the mailbox guid
 	 * @return list of processor
 	 */
-	public List<Processor> findProcessorByMbx(String mbxGuid);
+	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
 	
 	/**
 	 * Retrieves list of all processors of specific type from given mailbox guid

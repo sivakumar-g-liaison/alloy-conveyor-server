@@ -127,7 +127,7 @@ public enum Messages {
 	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name."),
 	
 	//sync and async process
-	MISSING_PROCESSOR("The %s is not found for the mailbox.");
+	MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this id.");
 	private String value;
 
 	// some caching to provide a better search algorithm

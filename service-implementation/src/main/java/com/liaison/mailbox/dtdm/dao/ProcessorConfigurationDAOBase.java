@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,10 +182,11 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * Retrieves list of processor from the given mailbox guid
 	 *
 	 * @param mbxGuid the mailbox guid
+	 * @param activeEntityRequired if true active processors linked with active mailbox is only retrieved. 
 	 * @return list of processor
 	 */
 	@Override
-	public List<Processor> findProcessorByMbx(String mbxGuid) {
+	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
@@ -196,11 +198,18 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
 					.append(" where mbx.pguid = :" + PGUID);
-
-			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(PGUID, mbxGuid)
-					.getResultList();
-
+			if(activeEntityRequired) {
+				query.append(" and mbx.mbxStatus = :" + STATUS)
+					 .append(" and processor.procsrStatus = :" + STATUS);
+			}
+			
+			Query processorQuery = entityManager.createQuery(query.toString())
+												.setParameter(PGUID, mbxGuid);
+			if(activeEntityRequired) {
+				processorQuery.setParameter(STATUS, MailBoxStatus.ACTIVE.value());
+			}		
+			
+			List<?> proc = processorQuery.getResultList();
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {

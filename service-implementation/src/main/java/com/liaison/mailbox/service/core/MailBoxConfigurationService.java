@@ -248,7 +248,7 @@ public class MailBoxConfigurationService {
 						mailBox.getPguid(), serviceInstanceId);
 				mailBox.setMailboxProcessors(filteredProcessor);
 			} else {
-				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid());
+				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
 				mailBox.setMailboxProcessors(processors);
 			}
 

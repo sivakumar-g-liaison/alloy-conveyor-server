@@ -61,16 +61,10 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
-import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
-import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.MailBoxStatus;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
@@ -177,13 +171,6 @@ public class HttpListener extends AuditedResource {
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
 					
-					// Getting the mailbox.
-					MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-					MailBox retrievedMailBox = configDao.find(MailBox.class, mailboxPguid);
-					if(null == retrievedMailBox || MailBoxStatus.INACTIVE.value().equals(retrievedMailBox.getMbxStatus())) {
-						throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailboxPguid, Response.Status.NOT_FOUND);
-					}
-					
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
@@ -283,13 +270,6 @@ public class HttpListener extends AuditedResource {
 
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
-					}
-					
-					// Getting the mailbox.
-					MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-					MailBox retrievedMailBox = configDao.find(MailBox.class, mailboxPguid);
-					if(null == retrievedMailBox || MailBoxStatus.INACTIVE.value().equals(retrievedMailBox.getMbxStatus())) {
-						throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, mailboxPguid, Response.Status.NOT_FOUND);
 					}
 					
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
