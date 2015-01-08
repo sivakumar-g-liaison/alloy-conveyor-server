@@ -97,6 +97,7 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorRes
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -827,7 +828,10 @@ public class ProcessorConfigurationService {
 			
 			for (Processor processor : processors) {
 
-				if (((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value()))) || ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode().equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())) && (processor.getProcsrStatus().equals(MailBoxStatus.ACTIVE.value())))) {
+				if (((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode()
+						.equals(ProcessorType.HTTPSYNCPROCESSOR.getCode())))
+						|| ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode()
+								.equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())))) {
 					processorDTO = new ProcessorDTO();
 					processorDTO.copyFromEntity(processor);
 				} 
@@ -852,21 +856,20 @@ public class ProcessorConfigurationService {
 							httpListenerProperties.put(propertyDTO.getName(), propertyDTO.getValue());
 						}
 					}
-
+					break;
 				}
-
 
 			}
 			
 			if (null == processorDTO) {
-				throw new MailBoxConfigurationServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
+				throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
 			}
 
 		} catch (JAXBException
-				| IOException | MailBoxConfigurationServicesException
+				| IOException 
 				| SymmetricAlgorithmException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e);
 		}
 
 
