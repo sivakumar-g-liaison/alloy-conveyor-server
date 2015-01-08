@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlEnum;
 
 /**
  * This is a set of error codes and their English meaning.
- * 
+ *
  * @author veerasamyn
  */
 @XmlEnum
@@ -31,6 +31,7 @@ public enum Messages {
 	MBX_PROFILE_LINK_DOES_NOT_EXIST("Mailbox-Profile link with the given id %s does not exist."),
 	MBX_PROFILE_LINK_DOES_NOT_MATCH("Mailbox-Profile link with the given id %s does not match the given Mailbox."),
 	PROFILE_ALREADY_EXISTS("Profile Already exists"),
+	ENTITY_ALREADY_EXIST("%s already exists in the system."),
 
 	// COMMON MESSAGES
 	CREATE_OPERATION_FAILED("%s creation failed."),
@@ -76,7 +77,7 @@ public enum Messages {
 
 	// INVALID ENUM
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
-	
+
 	// MBX GUID DOES NOT MATCH WITH THE GIVEN PROCESSOR
 	PROC_DOES_NOT_BELONG_TO_MBX("The given processor does not belong to given mailbox."),
 
@@ -92,39 +93,41 @@ public enum Messages {
 	INVALID_ACC_REQUEST("The input request is invalid."),
 	ACC_DOES_NOT_EXIST("User Account with the given id %s does not exist."),
 	DATA_PREPOPULATE("Data populated successfully"),
-	
+
 	// KMS Messages
 	SELFSIGNED_TRUSTSTORE_CREATION_FAILED("SelfSigned TrustStore Creation Failed"),
-	
+
 	//getting java properties
 	READ_JAVA_PROPERTIES_SUCCESSFULLY("%s properties read successfully."),
 	READ_JAVA_PROPERTIES_FAILED("%s properties read failed."),
-	
+
 	//retrieving tenancy key from acl manifest
 	TENANCY_KEY_RETRIEVAL_FAILED("Manifest does not contain the Tenancy Key for mailbox."),
 	TENANCY_KEY_MISMATCH("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox."),
 	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),
 
 	READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
-	
+
 	//retrieving service instance id from query parameter
 	SERVICE_INSTANCE_ID_NOT_AVAILABLE("Service Instance ID is not available as query parameter."),
-	
+
 	// Mailbox Expectation Management
 	MAILBOX_ADHERES_SLA("Mailbox adheres to SLA rules"),
 	MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are "),
 	UPLOADER_OR_FILEWRITER_NOT_AVAILABLE("Mailbox %s does not contain processor of type uploader or filewriter"),
 	FAILED_TO_VALIDATE_SLA("Failed to validate sla of %s"),
 	PROFILE_NOT_CONFIGURED("The profile is not configured."),
-	
+
 	// runtime DB changes
 	INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid"),
-	
+
 	// Manifest validation
 	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name."),
-	//
-	LOCATION_NOT_CONFIGURED("The %s location is not configured or empty.");
 	
+	LOCATION_NOT_CONFIGURED("The %s location is not configured or empty."),
+	
+	//sync and async process
+	MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this id.");
 	private String value;
 
 	// some caching to provide a better search algorithm

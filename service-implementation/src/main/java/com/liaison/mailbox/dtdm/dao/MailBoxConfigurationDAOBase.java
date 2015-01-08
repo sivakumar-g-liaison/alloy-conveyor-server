@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -18,22 +18,23 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		implements MailBoxConfigurationDAO, MailboxDTDMDAO  {
 
 	public MailBoxConfigurationDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
-		
+
 	}
-	
+
 	/**
 	 * Fetches the count of all MailBoxes from  MAILBOX database table by given mailbox name, profile name and service instance ids.
-	 * 
+	 *
 	 * @param mbxName
 	 * @param profName
 	 * @return count of mailbox retrieved
@@ -43,7 +44,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		Long totalItems = null;
 		int count = 0;
-		
+
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
@@ -54,13 +55,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
-			
+
 			totalItems = (Long)em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.getSingleResult();
-			
+
 			count = totalItems.intValue();
 
 		} finally {
@@ -70,10 +71,10 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Fetches all MailBox from  MAILBOX database table by given mailbox name, profile name and service instance ids.
-	 * 
+	 *
 	 * @param mbxName
 	 * @param profName
 	 * @return list of mailbox
@@ -93,9 +94,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
-			
+
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
-				
+
 				sortDirection = sortDirection.toUpperCase();
 				switch (sortField.toLowerCase()) {
 					case "name":
@@ -126,10 +127,10 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 		return mailBoxes;
 	}
-	
+
 	/**
 	 * Fetches the count of all  MailBoxes from  MAILBOX database table by given mailbox name.
-	 * 
+	 *
 	 * @param mbxName
 	 * @return count of mailboxes retrieved
 	 */
@@ -156,13 +157,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				entityManager.close();
 			}
 		}
-		
+
 		return count;
 	}
 
 	/**
 	 * Fetches all  MailBox from  MAILBOX database table by given mailbox name.
-	 * 
+	 *
 	 * @param mbxName
 	 * @return list of mailbox
 	 */
@@ -178,9 +179,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")");
-			
+
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
-				
+
 				sortDirection = sortDirection.toUpperCase();
 				switch (sortField.toLowerCase()) {
 					case "name":
@@ -196,7 +197,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			}else {
 				query.append(" order by mbx.mbxName");
 			}
-			
+
 			mailboxList = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.setFirstResult(pagingOffset)
@@ -208,7 +209,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 				entityManager.close();
 			}
 		}
-		
+
 		return mailboxList;
 	}
 
@@ -228,8 +229,45 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		for (final String str : sids) {
 			s.append("'").append(str).append("'").append(",");
 		}
-		
+
 		return s.toString().substring(0, s.toString().length() - 1);
+	}
+
+	/**
+	 * Fetches MailBox from  MAILBOX database table by given mailbox name and tenancyKey name.
+	 *
+	 * @param mbxName
+	 * * @param tenancyKeyName
+	 * @return MailBox
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<MailBox> mailboxList = null;
+		MailBox appEntity = null;
+
+		try {
+
+			mailboxList = entityManager.createNamedQuery(FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME)
+					.setParameter(MBOX_NAME,  (MailBoxUtil.isEmpty(mbxName) ? "''" : mbxName))
+					.setParameter(TENANCY_KEYS, (MailBoxUtil.isEmpty(tenancyKeyName) ? "''" : tenancyKeyName))
+					.getResultList();
+
+			if ((mailboxList == null) || (mailboxList.size() == 0)) {
+                return null;
+            }
+
+            appEntity = mailboxList.get(0);
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return appEntity;
 	}
 
 }

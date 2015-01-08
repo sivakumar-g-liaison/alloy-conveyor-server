@@ -1726,7 +1726,7 @@ var rest = myApp.controller(
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
                     function (data) {
-                        $log.info($filter('json')(data));
+                        //$log.info($filter('json')(data));
 						$scope.scriptIsEdit = false;
 						if (data.getProcessorResponse.processor.javaScriptURI != null && 
 						data.getProcessorResponse.processor.javaScriptURI != "") {
@@ -1739,7 +1739,7 @@ var rest = myApp.controller(
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
                             function (profData) {
                                 
-								$log.info($filter('json')(profData));
+								//$log.info($filter('json')(profData));
 								
 									var editProcessor = false;
 									for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
@@ -1773,7 +1773,7 @@ var rest = myApp.controller(
                 $scope.restService.get($scope.base_url + '/listFile', //Get mail box Data
                     function (data) {
                         $scope.roleList = data.ArrayList;
-                        $log.info($scope.roleList);
+                        //$log.info($scope.roleList);
                         $scope.modal.roleList = $scope.roleList;
                     }
                 );
@@ -1798,13 +1798,13 @@ var rest = myApp.controller(
                 $scope.profilesSelectedinProcessorProfile = [];
             };
             $scope.setTypeDuringProcessorEdit = function (protoId) {
-                console.log(protoId);
-                console.log(getIndexOfId($scope.enumprocsrtype, protoId));
+                //console.log(protoId);
+                //console.log(getIndexOfId($scope.enumprocsrtype, protoId));
                 $scope.procsrType = $scope.enumprocsrtype[getIndexOfId($scope.enumprocsrtype, protoId)];
             };
 			
 			$scope.getFolderTypeDuringProcessorEdit = function (folderID) {
-				console.log(folderID);
+				//console.log(folderID);
                 if($scope.procsrType.id === 'REMOTEDOWNLOADER') {
 					return getName($scope.allStaticPropertiesForDownloaderProcessorFolder, folderID);
 				} else if ($scope.procsrType.id === 'REMOTEUPLOADER') {
@@ -2190,7 +2190,7 @@ var rest = myApp.controller(
                         value: colonSplit[1]
                     });
                 }
-                console.log(commaSplit);
+                //console.log(commaSplit);
                 var lenFolderProps = $scope.processorFolderProperties.length;
 				
 				//Removed empty folder row for sweeper , HTTP Async Processor and File Writer
@@ -2328,7 +2328,7 @@ var rest = myApp.controller(
 			function storeSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.post(secretUrl, base64EncodedSecret,
 					function (secdata, status) {
-						console.log('status and data = ' + secdata + ', '+ status);
+						//console.log('status and data = ' + secdata + ', '+ status);
 						if (status === 201) {
 							addRequest.addProcessorToMailBoxRequest.processor.credentials[a].password = secdata;
 							$scope.processorSaveAfterKM();
@@ -2342,7 +2342,7 @@ var rest = myApp.controller(
 			}
 			
 			$scope.processorReviseAfterKM = function() {
-				$log.info($filter('json')(editRequest));
+				//$log.info($filter('json')(editRequest));
 				$scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
 					function (data, status) {
 						if (status === 200 || status === 400) {
@@ -2368,7 +2368,7 @@ var rest = myApp.controller(
 			}
 			
 			$scope.processorSaveAfterKM = function() {
-				$log.info($filter('json')(addRequest));
+				//$log.info($filter('json')(addRequest));
 				$scope.restService.post($scope.base_url + '/' + $location.search().mailBoxId + '/processor' + '?sid=' + $rootScope.serviceInstanceId, $filter('json')(addRequest),
 					function (data, status) {
 						if (status === 200 || status === 400) {
@@ -2545,7 +2545,7 @@ var rest = myApp.controller(
                 $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
             };
             $scope.resetProtocol = function (model) {
-                console.log(model);
+               // console.log(model);
 				$scope.isPortDisabled = false;
                 $scope.resetStaticAndMandatoryProps();
                 if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
@@ -2870,7 +2870,7 @@ var rest = myApp.controller(
             };
             // File Upload Section Begins
             $scope.setFiles = function (element) {
-                console.log(element.value);
+               // console.log(element.value);
                 $scope.$apply(function ($scope) {
                     // Turn the FileList object into an Array
                     $scope.files = [];
@@ -2884,7 +2884,7 @@ var rest = myApp.controller(
                 });
             };
             $scope.uploadFile = function () {
-                console.log('Entering upload event');
+                //console.log('Entering upload event');
                  block.blockUI();
                 var fd = new FormData();
                 $scope.pkObj['serviceInstanceId'] = Date.now().toString();
@@ -2918,10 +2918,10 @@ var rest = myApp.controller(
                     //var pkGuid = 'testdata';
                     pkGuid = pkGuid.toString();
                     if ($scope.certificateModal.isGlobalTrustore === "0") {
-                        console.log('creating self signed trust store');
+                        //console.log('creating self signed trust store');
                         $scope.uploadToSelfSignedTrustStore(pkGuid);
                     } else {
-                        console.log('uploading to global trust store');
+                       // console.log('uploading to global trust store');
                         $scope.linkTrustStoreWithCertificate(pkGuid, $rootScope.javaProperties.globalTrustStoreId, $rootScope.javaProperties.globalTrustStoreGroupId);
                     }
                 } else {
@@ -3035,13 +3035,13 @@ var rest = myApp.controller(
 			
              // SSHkeys Uploading section begins
              $scope.setSSHPrivateKey = function (element) {
-                console.log(element.value);
+                //console.log(element.value);
                 $scope.$apply(function ($scope) {
                     // Turn the FileList object into an Array
                     for (var i = 0; i < element.files.length; i++) {
                          $scope.sshKeys.privatekey = element.files[i];
                     }
-                    console.log('sshKeys:', $scope.sshKeys);
+                    //console.log('sshKeys:', $scope.sshKeys);
                     $scope.sshkeyModal.sshPrivateKeyURI = element.files[0].name;
                     $scope.isPrivateKeySelected = true;
                     $scope.progressVisible = false;
@@ -3049,13 +3049,13 @@ var rest = myApp.controller(
              };
              
               $scope.setSSHPublicKey = function (element) {
-                console.log(element.value);
+               // console.log(element.value);
                 $scope.$apply(function ($scope) {
                     // Turn the FileList object into an Array
                     for (var i = 0; i < element.files.length; i++) {
                        $scope.sshKeys.publickey = element.files[i];
                     }
-                    console.log('sshKeys:', $scope.sshKeys);
+                   // console.log('sshKeys:', $scope.sshKeys);
                     $scope.sshkeyModal.sshPublicKeyURI = element.files[0].name;
                     $scope.isPublicKeySelected = true;
                     $scope.progressVisible = false;
@@ -3063,7 +3063,7 @@ var rest = myApp.controller(
              };
             
               $scope.uploadSSHKey = function () {
-                console.log('Entering upload event of ssh keys');
+                //console.log('Entering upload event of ssh keys');
                 if ($scope.sshkeyModal.sshKeyPairPassphrase !== $scope.sshkeyModal.sshKeyPairConfirmPassphrase) {
     				showSaveMessage("Passwords does not match.", 'error');
     				$(sshkeypassphrase).focus();
@@ -3083,7 +3083,7 @@ var rest = myApp.controller(
 				$scope.sshKeyObj.dataTransferObject['validityDateTo'] = afterOneYear.toISOString();
                 $scope.sshKeyObj.dataTransferObject['custodianPassphrase'] = $scope.sshkeyModal.sshKeyPairPassphrase;
                 fd.append("json", angular.toJson($scope.sshKeyObj));
-                console.log(angular.toJson($scope.sshKeyObj));
+                //console.log(angular.toJson($scope.sshKeyObj));
                 fd.append($scope.sshKeys.privatekey.name, $scope.sshKeys.privatekey);
                 fd.append($scope.sshKeys.publickey.name, $scope.sshKeys.publickey);
                 var xhr = new XMLHttpRequest();
@@ -3099,7 +3099,7 @@ var rest = myApp.controller(
                 $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
                 /* This event is raised when the server send back a response */
                 if (evt.target.status === 201) {
-                    console.log('ssh key uploaded successfully');
+                   // console.log('ssh key uploaded successfully');
                     var resp = angular.fromJson(evt.target.responseText);
                     var pkGuid = resp['dataTransferObject']['pguid'];
                     //var pkGuid = 'F45EE0F10A006FF106655CE31D400F66';
@@ -3420,22 +3420,23 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
          $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest))
          .success(function (data) {
         	block.unblockUI(); 
-        	if (data.scriptserviceResponse.response.status === 'success') {
         		$scope.$parent.scriptIsEdit = true;
         		$scope.$parent.script = $scope.scriptContents;
 			    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
-			} else {
-			    if (!$scope.$parent.scriptIsEdit) {
-				 $scope.$parent.scriptIsEdit = false;				
-				} else {
-				 $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;				
-				}				
-				showSaveMessage(data.scriptserviceResponse.response.message, 'error');
-			}
          })
-         .error(function() { 
-        	block.unblockUI(); 
-        	showSaveMessage("Error while File save to GitLab", 'error');
+         .error(function(data) { 
+        	block.unblockUI();
+        	if (angular.isObject(data)) {
+        		if (!$scope.$parent.scriptIsEdit) {
+   				 $scope.$parent.scriptIsEdit = false;				
+   				} else {
+   				 $scope.$parent.modal.uri = $scope.$parent.editScripTemplatetName;				
+   				}				
+   				showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+        	} else {
+        		showSaveMessage("Error while File save to GitLab", 'error');
+        	}     	
+        	
          });
       $scope.$dismiss();		 
 	}; 
@@ -3464,17 +3465,18 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest))
 	            .success(function (data) {     
 	            	block.unblockUI(); 
-	            	if (data.scriptserviceResponse.response.status === 'success') {
 	            		$scope.$parent.scriptIsEdit = true;
 	            		$scope.$parent.script = $scope.scriptContents;
-					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
-					} else {					
-						showSaveMessage(data.scriptserviceResponse.response.message, 'error');
-					}
+					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');					
 	            })
-	            .error(function() {
+	            .error(function(data) {
 	            	block.unblockUI();
-	            	showSaveMessage("Error while File update to GitLab", 'error');
+	            	if (angular.isObject(data)) {
+	            	    showSaveMessage(data.scriptserviceResponse.response.message, 'error');
+	            	} else {
+	            		showSaveMessage("Error while File update to GitLab", 'error');	            		
+	            	}
+	            	
 	            });
 				$scope.$dismiss();
 	     };	

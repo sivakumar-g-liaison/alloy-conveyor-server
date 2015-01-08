@@ -170,7 +170,7 @@ public class HttpListener extends AuditedResource {
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-
+					
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
@@ -271,7 +271,7 @@ public class HttpListener extends AuditedResource {
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-
+					
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true

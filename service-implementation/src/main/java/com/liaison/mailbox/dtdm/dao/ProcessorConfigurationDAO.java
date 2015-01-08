@@ -17,7 +17,6 @@ import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.ProcessorType;
 
 /**
  * @author OFS
@@ -90,8 +89,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param mbxGuid the mailbox guid
 	 * @return list of processor
 	 */
-	public List<Processor> findProcessorByMbx(String mbxGuid);
-		
+	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
+
 	/**
 	 * Retrieves all active processors of specific types of given mailbox 
 	 * 

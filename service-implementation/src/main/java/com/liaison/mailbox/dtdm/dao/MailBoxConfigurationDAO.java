@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -20,7 +20,7 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 
 /**
  * @author OFS
- * 
+ *
  */
 @NamedQueries({
 		@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,
@@ -30,7 +30,9 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
 						+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
 						+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
-						+ " order by mbx.mbxName")
+						+ " order by mbx.mbxName"),
+	  @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME, query = "SELECT mbx from MailBox mbx "
+				        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME + " and mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS)
 })
 public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 
@@ -40,11 +42,12 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String GET_MBX = "findMailBoxes";
 	public static final String SCHD_PROF_NAME = "schd_name";
 	public static final String TENANCY_KEYS = "tenancy_keys";
-	
+	public static final String FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME = "findByMboxNameAndTenancyKeyName";
+
 	public int getMailboxCountByProtocol(String mbxName, String profName, List <String> tenancyKeys);
 	public List<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
 
 	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys);
 	public List<MailBox> findByName(String mbxName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
-	
+	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName);
 }

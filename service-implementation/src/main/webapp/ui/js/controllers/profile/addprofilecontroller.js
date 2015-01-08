@@ -220,19 +220,19 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 				$scope.reviseRequest.reviseProfileRequest.profile = $scope.reviseProfile;
 				$scope.restService.put($rootScope.base_url + "/profile", $filter('json')(reviseRequest), "")
 					 .success(function (data, status) {
-						if (data.reviseProfileResponse.response.status == 'failure') {
-							showSaveMessage(data.reviseProfileResponse.response.message, 'error');
-							$scope.loadProfiles();
-							$scope.cancelRevise();
-						}else {
-							showSaveMessage("Profile is updated successfully", 'success');
-							$scope.loadProfiles();
-							$scope.cancelRevise();
-						}
-					 }).error(function (data, status) {
-						showSaveMessage('Failed to update Profile.' + data, 'error');
+						showSaveMessage(data.reviseProfileResponse.response.message, 'success');
 						$scope.loadProfiles();
 						$scope.cancelRevise();
+					 }).error(function (data) {
+						 if (angular.isObject(data)) {
+							 showSaveMessage(data.reviseProfileResponse.response.message, 'error');
+							 $scope.loadProfiles();
+							$scope.cancelRevise();
+						 } else {
+							 showSaveMessage("Failed to update Profile", 'error');
+							 $scope.loadProfiles();
+							 $scope.cancelRevise();
+						 }						
 					});
 			}else {
 				showSaveMessage('No changes made to save.');

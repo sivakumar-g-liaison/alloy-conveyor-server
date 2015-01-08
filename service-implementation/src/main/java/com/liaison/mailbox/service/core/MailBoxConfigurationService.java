@@ -105,6 +105,13 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 
+			// Getting the mailbox.
+			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(), mailboxDTO.getTenancyKey());
+
+			if (null != retrievedEntity) {
+	            throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST,MAILBOX, Response.Status.CONFLICT);
+	        }
 			// validation
 			GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
@@ -126,7 +133,6 @@ public class MailBoxConfigurationService {
 			createMailboxServiceInstanceIdLink(serviceInstanceId, mailBox);
 
 			// persisting the mailbox entity
-			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			configDao.persist(mailBox);
 
 			// response message construction
@@ -242,7 +248,7 @@ public class MailBoxConfigurationService {
 						mailBox.getPguid(), serviceInstanceId);
 				mailBox.setMailboxProcessors(filteredProcessor);
 			} else {
-				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid());
+				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
 				mailBox.setMailboxProcessors(processors);
 			}
 
@@ -311,6 +317,15 @@ public class MailBoxConfigurationService {
 			if (retrievedMailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
+
+			if (!mailboxDTO.getName().equals(retrievedMailBox.getMbxName())) {
+				// Getting the mailbox.
+				MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(), mailboxDTO.getTenancyKey());
+
+				if (null != retrievedEntity) {
+		            throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST,MAILBOX, Response.Status.CONFLICT);
+		        }
+		  }
 
 			// Removing the child items.
 			retrievedMailBox.getMailboxProperties().clear();
@@ -561,29 +576,29 @@ public class MailBoxConfigurationService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {		
+	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {
 		LOG.debug("Entering into getValuesFromPropertiesFile.");
-		
+
 		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
 		PropertiesFileDTO dto = new PropertiesFileDTO();
-		
+
 		try {
-			
+
 			Properties prop = MailBoxUtil.getEnvProperties();
-			
+
 			dto.setTrustStoreId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
 			dto.setTrustStoreGroupId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
 			dto.setListJobsIntervalInHours(prop.getProperty(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
 			dto.setFsmEventCheckIntervalInSeconds(prop.getProperty(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
 			dto.setMailboxPguidDisplayPrefix(prop.getProperty(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX));
 			dto.setDefaultScriptTemplateName(prop.getProperty(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
-			
-			serviceResponse.setProperties(dto);		
+
+			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
 					Messages.SUCCESS));
 			LOG.debug("Exit from getValuesFromPropertiesFile.");
 			return serviceResponse;
-		
+
 		} catch (IOException e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
