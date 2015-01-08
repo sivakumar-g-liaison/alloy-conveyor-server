@@ -819,7 +819,7 @@ public class ProcessorConfigurationService {
 		List <Processor> processors = config.findProcessorByMbx(mailboxGuid, true);
 		
 		if(processors.isEmpty()) {
-			throw new MailBoxConfigurationServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
+			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
 		}
 
 		try {
@@ -869,6 +869,7 @@ public class ProcessorConfigurationService {
 				| IOException 
 				| SymmetricAlgorithmException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
+			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
 		}
 
