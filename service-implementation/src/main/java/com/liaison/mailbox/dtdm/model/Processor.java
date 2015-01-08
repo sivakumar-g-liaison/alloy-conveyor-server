@@ -50,6 +50,7 @@ public class Processor implements Identifiable {
 	public static final String TYPE_SWEEPER = "SWEEPER";
 	public static final String HTTP_ASYNC = "HTTPASYNCPROCESSOR";
 	public static final String HTTP_SYNC = "HTTPSYNCPROCESSOR";
+	public static final String TYPE_FILE_WRITER = "FILEWRITER";
 
 	private String pguid;
 	private String javaScriptUri;
@@ -265,6 +266,7 @@ public class Processor implements Identifiable {
 	public Class getEntityClass() {
 		return this.getClass();
 	}
+	
 
 	/**
 	 * Method returns the processor type from the discriminator value.
@@ -298,6 +300,8 @@ public class Processor implements Identifiable {
 			processor = new HTTPAsyncProcessor();
 		} else if (ProcessorType.HTTPSYNCPROCESSOR.equals(processorType)) {
 			processor = new HTTPSyncProcessor();
+		} else if (ProcessorType.FILEWRITER.equals(processorType)) {
+			processor = new FileWriter();
 		} else {
 			processor = new Sweeper();
 		}

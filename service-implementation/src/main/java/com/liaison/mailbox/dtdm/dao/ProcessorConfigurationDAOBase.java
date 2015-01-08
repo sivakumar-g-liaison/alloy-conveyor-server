@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -207,9 +208,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
 						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
+						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -220,16 +221,45 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return processors;
 	}
-
-	/**
-	 * Retrieves list of all processors of specific type from given mailbox guid
-	 *
-	 * @param type the processor type
-	 * @param mbxGuid the mailbox guid
-	 * @return list of processors
-	 */
+	
 	@Override
-	public List<Processor> findProcessorByTypeAndMbx(ProcessorType type, String mbxGuid) {
+	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes) {
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("Fetching the processor starts.");
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
+						.append(" where processor.procsrStatus = :" + STATUS)
+						.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
+	}
+	
+	@Override
+	public List<Processor> findSpecificProcessorTypesOfMbx(String mbxGuid, List<String>specificProcessorTypes) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
@@ -237,17 +267,14 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		try {
 
 			LOG.info("Fetching the processor starts.");
-
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
-					.append(" inner join processor.mailbox mbx")
-					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
-					.append(" and mbx.pguid = :" + PGUID)
-					.append(" and processor.procsrStatus = :" + STATUS)
-					.append(" and mbx.mbxStatus = :" + STATUS);
-			Class <?> processorType = getProcessorClass(type);
+						.append(" inner join processor.mailbox mbx")
+						.append(" where mbx.pguid = :" + PGUID)
+						.append(" and mbx.mbxStatus = :" + STATUS)
+						.append(" and processor.procsrStatus = :" + STATUS)
+						.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(PROCESSOR_TYPE, processorType)
 					.setParameter(PGUID, mbxGuid)
 					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
 					.getResultList();
@@ -258,9 +285,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 				processor = (Processor) iter.next();
 				processors.add(processor);
-				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
 						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
-						processor.getProcsrProperties(), processor.getProcsrStatus());
+						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
 			}
 
 		} finally {
@@ -271,6 +298,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return processors;
 	}
+
 
 	private Class<?> getProcessorClass(ProcessorType processorType) {
 
@@ -288,6 +316,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			break;
 		case "remoteuploader":
 			processorClass = RemoteUploader.class;
+			break;
+		case "filewriter":
+			processorClass = FileWriter.class;
 			break;
 		}
 		return processorClass;
@@ -361,6 +392,29 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			}
 		}
 		return processors;
+	}
+	
+	/**
+	 * This method will construct a string of processor types appended by OR operator instead of using IN Clause 
+	 * because using IN clause along with TYPE operator is having issues
+	 * 
+	 * @param specificProcessorTypes
+	 * @return
+	 */
+	private String constructSqlStringForTypeOperator(List <String> specificProcessorTypes) {
+		
+		StringBuilder s = new StringBuilder();
+		
+		for (int i = 0; i < specificProcessorTypes.size(); i++) {
+			
+			if (i == 0) {
+				s.append(" TYPE(processor) = " + specificProcessorTypes.get(i));
+			} else {
+				s.append(" or TYPE(processor) = " + specificProcessorTypes.get(i));
+			}
+		}
+		return s.toString();
+		
 	}
 
 }

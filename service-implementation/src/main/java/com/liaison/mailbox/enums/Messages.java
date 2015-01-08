@@ -69,8 +69,6 @@ public enum Messages {
 	CREDENTIAL_URI_INVALID("Credential configured for processors, but Credetial uri is invalid."),
 	INJECTION_OF_PROPERTIES_FAILED("Injection of properties while building http client from processor configuration failed."),
 	HTTP_REQUEST_FAILED("HTTP request failed."),
-	RESPONSE_LOCATION_NOT_CONFIGURED("The response location is not configured or empty."),
-	PAYLOAD_LOCATION_NOT_CONFIGURED("The payload location is not configured or empty."),
 	INVALID_DIRECTORY("The given directory is not available in the system."),
 
 	PROCESSOR_EXECUTION_SUCCESSFULLY("Processor %s execution successfully."),
@@ -115,7 +113,7 @@ public enum Messages {
 	// Mailbox Expectation Management
 	MAILBOX_ADHERES_SLA("Mailbox adheres to SLA rules"),
 	MAILBOX_DOES_NOT_ADHERES_SLA("Mailbox does not adhere to SLA rules.Mailboxes which violated SLA rules are "),
-	UPLOADER_NOT_AVAILABLE("Mailbox %s does not contain processor of type uploader"),
+	UPLOADER_OR_FILEWRITER_NOT_AVAILABLE("Mailbox %s does not contain processor of type uploader or filewriter"),
 	FAILED_TO_VALIDATE_SLA("Failed to validate sla of %s"),
 	PROFILE_NOT_CONFIGURED("The profile is not configured."),
 	
@@ -123,7 +121,9 @@ public enum Messages {
 	INVALID_PROCESSOR_EXECUTION_STATUS("The processor execution status is invalid"),
 	
 	// Manifest validation
-	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name.");
+	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name."),
+	//
+	LOCATION_NOT_CONFIGURED("The %s location is not configured or empty.");
 	
 	private String value;
 

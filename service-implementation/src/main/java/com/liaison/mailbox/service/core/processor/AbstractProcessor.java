@@ -253,6 +253,30 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	}
 
 	/**
+	 * To Retrieve the File write URI
+	 *
+	 * @return File Write Location as String
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws MailBoxServicesException
+	 */
+	public String getFileWriteLocation() throws MailBoxServicesException, IOException {
+
+		if (configurationInstance.getFolders() != null) {
+
+			for (Folder folder : configurationInstance.getFolders()) {
+
+				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
+				if (null == foundFolderType) {
+					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
+				} else if (FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
+					return replaceTokensInFolderPath(folder.getFldrUri());
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Get the URI to which the mailbox sweeper should be happen
 	 *
 	 * @return URI
@@ -310,7 +334,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String responseLocation = getWriteResponseURI();
 
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
+			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
 		}
 
 		File directory = new File(responseLocation);
@@ -603,7 +627,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		String responseLocation = getWriteResponseURI();
 		if (MailBoxUtil.isEmpty(responseLocation)) {
-			throw new MailBoxServicesException(Messages.RESPONSE_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
+			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.RESPONSE_LOCATION, Response.Status.CONFLICT);
 		}
 
 		File directory = new File(responseLocation);

@@ -151,6 +151,13 @@ public interface MailBoxConstants {
 	public static final String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	public static final String DEFAULT_PGUID_DISPLAY_PREFIX = "maibox.pguid.display.prefix";
+	
+	//added for generic error message if any location is missing
+	public static final String PAYLOAD_LOCATION = "payload";
+	public static final String RESPONSE_LOCATION = "response";
+	public static final String FILEWRITE_LOCATION = "file write";
+	public static final String COMMON_LOCATION = "payload or file write";
+	
 
 
 }

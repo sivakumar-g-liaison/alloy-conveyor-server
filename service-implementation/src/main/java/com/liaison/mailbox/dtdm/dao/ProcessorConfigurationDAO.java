@@ -91,25 +91,23 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processor
 	 */
 	public List<Processor> findProcessorByMbx(String mbxGuid);
+		
+	/**
+	 * Retrieves all active processors of specific types of given mailbox 
+	 * 
+	 * @param mbxGuid
+	 * @param specificProcessorTypes - A List of Canonical Names of different types of processor class.
+	 * @return list of specific types of processors
+	 */
+	public List<Processor> findSpecificProcessorTypesOfMbx(String mbxGuid, List<String>specificProcessorTypes);
 	
 	/**
-	 * Retrieves list of all processors of specific type from given mailbox guid
+	 * Retrieves all active processors of given types
 	 * 
-	 * @param type the processor type
-	 * @param mbxGuid the mailbox guid
-	 * @return list of processors
+	 * @param specificProcessorTypes
+	 * @return
 	 */
-	public List <Processor> findProcessorByTypeAndMbx(ProcessorType type, String mbxGuid);
-	
-	
-	/**
-	 * Retrieves list of all processors of specific type from given mailbox guid
-	 * 
-	 * @param type the processor type
-	 * @param mbxGuid the mailbox guid
-	 * @return list of processors
-	 */
-	public List <Processor> findProcessorByType(ProcessorType type);
+	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes);
 	
 	/**
 	 * Retrieves list of all processors  

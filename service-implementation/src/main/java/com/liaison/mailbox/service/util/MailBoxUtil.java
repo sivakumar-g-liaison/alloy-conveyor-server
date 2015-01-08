@@ -11,8 +11,10 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -283,6 +286,32 @@ public class MailBoxUtil {
 			if (tenancyKey.getGuid().equals(tenancyKeyGuid)) tenancyKeyDisplayName = tenancyKey.getName();
 		}
 		return tenancyKeyDisplayName;
+	}
+	
+	/**
+	 * method to write the given inputstream to given location
+	 *
+	 * @throws IOException
+	 */
+	public static void writeDataToGivenLocation(InputStream response, String targetLocation, String filename, Boolean isOverwrite) throws IOException {
+
+		LOGGER.info("Started writing given inputstream to given location {}", targetLocation);
+		File directory = new File(targetLocation);
+		if (!directory.exists()) {
+			Files.createDirectories(directory.toPath());
+		}
+
+		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
+		// if the file already exists create a file and write the contents.
+		if (file.exists() && !isOverwrite)  {
+			LOGGER.info("File {} already exists and should not be overwritten", file.getName());
+		} else {
+			Files.write(file.toPath(), IOUtils.toByteArray(response));
+		}
+		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
+		if (response != null) {
+		    response.close();
+		}
 	}
 
 
