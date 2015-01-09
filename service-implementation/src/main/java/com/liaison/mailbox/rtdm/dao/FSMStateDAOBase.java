@@ -356,19 +356,28 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
     }
 
 	@Override
-	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(
-			String processorId) {
+	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(String processorId, ProcessorType processorType) {
 		
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 				
 		try {
 			
 			List<FSMStateValue> jobs = new ArrayList<FSMStateValue>();
+			String executionValue = null;
+			switch(processorType.getCode().toLowerCase()) {
 			
+			case "remoteuploader":
+				executionValue = ExecutionState.COMPLETED.value();
+				break;
+			case "filewriter":
+				executionValue = ExecutionState.STAGED.value();
+				break;
+			}
+
 			List<?> jobsRunning = entityManager
 						 .createNamedQuery(FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR)
 						 .setParameter(PROCESSOR_ID, processorId)
-						 .setParameter(BY_VALUE, ExecutionState.COMPLETED.value())
+						 .setParameter(BY_VALUE, executionValue)
 						 .getResultList();
 			Iterator<?> iter = jobsRunning.iterator();
             FSMStateValue job = null;
@@ -422,22 +431,35 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		}
 	}
 
-	@Override
-	public List<FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution) {
+	public List<FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution, ProcessorType processorType) {
 		
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		
 		try {
 			
 			List <FSMState> fileStagedEvents = new ArrayList<FSMState>();
+					
+			StringBuilder query = new StringBuilder().append("select state from FSMState state")
+							.append(" inner join state.executionState stateValue")
+							.append(" where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS) 
+							.append(" and state.processorId = :" + FSMStateDAO.PROCESSOR_ID)
+							.append(" and stateValue.value = :" + FSMStateDAO.BY_VALUE);
 			
-			List <?> executionStates = entityManager
-									   .createNamedQuery(FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS)
-									   .setParameter(SLA_VERIFICATION_STATUS, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode())
-									   .setParameter(PROCESSOR_ID, processorId)
-									   .setParameter(TO_DATE, processorLastExecution)
-									   .setParameter(BY_VALUE, ExecutionState.STAGED.value())
-									   .getResultList();
+			switch(processorType.getCode().toLowerCase()) {
+			
+				case "remoteuploader":
+					query.append(" and stateValue.createdDate < :" +FSMStateDAO.TO_DATE );
+					break;
+				case "filewriter":
+					query.append(" and stateValue.createdDate <= :" +FSMStateDAO.TO_DATE );
+					break;
+			}
+			List <?> executionStates = entityManager.createQuery(query.toString())
+					   .setParameter(SLA_VERIFICATION_STATUS, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode())
+					   .setParameter(PROCESSOR_ID, processorId)
+					   .setParameter(TO_DATE, processorLastExecution)
+					   .setParameter(BY_VALUE, ExecutionState.STAGED.value())
+					   .getResultList();
 			
 			 Iterator<?> iter = executionStates.iterator();
 			 FSMState fileStagedEvent;
@@ -455,4 +477,5 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 			}
 		}
 	}
+	
 }

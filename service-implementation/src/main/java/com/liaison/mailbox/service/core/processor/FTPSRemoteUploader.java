@@ -275,6 +275,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 */
 	public boolean checkFileExistence() throws Exception {
 
+		LOGGER.debug ("Entering file Existence check for FTP Uploader processor");
 		G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
 
 		boolean isFileExists = false;
@@ -303,6 +304,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			isFileExists = (null !=  files && !files.isEmpty());
 		}
 		ftpsRequest.disconnect();
+		LOGGER.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
 		return isFileExists;
 		}
 

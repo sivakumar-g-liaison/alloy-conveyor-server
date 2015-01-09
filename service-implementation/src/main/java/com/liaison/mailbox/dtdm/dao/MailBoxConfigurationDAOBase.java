@@ -87,7 +87,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
 
-			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
+			StringBuilder query = new StringBuilder().append("SELECT distinct mbx FROM MailBox mbx")
 					.append(" inner join mbx.mailboxProcessors prcsr")
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")

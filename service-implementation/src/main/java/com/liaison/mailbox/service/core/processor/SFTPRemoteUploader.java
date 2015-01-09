@@ -272,6 +272,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
 
+		LOGGER.debug ("Entering file Existence check for SFTP Uploader processor");
 		boolean isFileExists = false;
 		G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 		sftpRequest.connect();
@@ -289,6 +290,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 		sftpRequest.disconnect();
+		LOGGER.debug("File Eixstence check completed for SFTP Uploader. File exists - {}", isFileExists);
 		return isFileExists;
 	}
 

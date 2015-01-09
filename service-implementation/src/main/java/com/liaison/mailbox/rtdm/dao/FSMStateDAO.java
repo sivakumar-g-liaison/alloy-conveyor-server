@@ -19,6 +19,7 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.fsm.FSMDao;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.model.FSMState;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
@@ -65,12 +66,6 @@ import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
                 + " inner join sta.executionState staVal"
                 + " where sta.processorId = :" + FSMStateDAO.PROCESSOR_ID 
                 + " and staVal.value = :" + FSMStateDAO.BY_VALUE + ")"),
-/*@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS, 
-		query = "select state from FSMState state" 
-				+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS 
-				+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
-				+ " and state.executionState IN (select stateVal from FSMStateValue stateVal where stateVal.createdDate < :" +FSMStateDAO.TO_DATE 
-				+ " and stateVal.value = :" + FSMStateDAO.BY_VALUE + ")")*/
 @NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE, 
 		query = "select state from FSMState state" 
 				+ " inner join state.executionState stateValue"
@@ -163,6 +158,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 */
 	public List<FSMStateValue> findProcessorsExecutingByProcessorId(String processorId, Timestamp timeInterval);
 	
+		
 	/**
 	 * Find the most recent successful execution of a processor based on given processor Id
 	 * 
@@ -170,7 +166,7 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @return FSMStateValue
 	 */
 	
-	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(String processorId);
+	public List<FSMStateValue> findMostRecentSuccessfulExecutionOfProcessor(String processorId, ProcessorType processorType);
 	
 	
 	/**
@@ -187,6 +183,6 @@ public interface FSMStateDAO extends GenericDAO<FSMState>, FSMDao<ProcessorState
 	 * @param processorId
 	 * @return list of FSMState
 	 */
-	public List <FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution);
+	public List<FSMState> findNonSLAVerifiedFileStagedEvents(String processorId, Timestamp processorLastExecution, ProcessorType processorType);
 
 }

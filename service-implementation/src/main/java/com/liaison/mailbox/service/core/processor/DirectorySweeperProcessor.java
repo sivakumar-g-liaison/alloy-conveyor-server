@@ -133,7 +133,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);		
 		// Validation of the necessary properties
 		if (MailBoxUtil.isEmpty(inputLocation)) {
-			throw new MailBoxServicesException(Messages.PAYLOAD_LOCATION_NOT_CONFIGURED, Response.Status.CONFLICT);
+			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
 		}
 
         LOGGER.debug("Is progress list is empty: {}", inProgressFiles.isEmpty());

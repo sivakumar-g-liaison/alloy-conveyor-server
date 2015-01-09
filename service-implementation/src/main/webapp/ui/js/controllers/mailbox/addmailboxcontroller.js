@@ -75,7 +75,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 	  retrievedTenancyKeys.push(item);
                                   });
                                  $scope.tenancyKeys = retrievedTenancyKeys;
-                                 console.log("tenancyKeys"+$scope.tenancyKeys);  
+                                 //console.log("tenancyKeys"+$scope.tenancyKeys);  
                                 
                              } else {
                                  showSaveMessage(data.getTenancyKeysResponse.response.message, 'error');
@@ -180,7 +180,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.editReq.reviseMailBoxRequest.mailBox.guid = $scope.mailBoxId;
                 $scope.editReq.reviseMailBoxRequest.mailBox.status = $scope.status.id;
 
-                $log.info($filter('json')(editReq));
+                //$log.info($filter('json')(editReq));
 
                 $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" +$rootScope.serviceInstanceId, $filter('json')(editReq),
                     function (data, status) {
@@ -205,7 +205,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             } else {
                 $scope.addRequest.addMailBoxRequest.mailBox = $scope.mailBox;
                 $scope.addRequest.addMailBoxRequest.mailBox.status =$scope.status.id;
-                $log.info($filter('json')(addRequest));
+                //$log.info($filter('json')(addRequest));
 
                 $scope.restService.post($scope.base_url + '?sid=' + $rootScope.serviceInstanceId, $filter('json')(addRequest),
                     function (data, status) {
@@ -380,8 +380,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
             // validation
 
-            $log.info(valueSelectedinSelectionBox.value.id);
-            $log.info(row.getProperty('value'));
+            //$log.info(valueSelectedinSelectionBox.value.id);
+            //$log.info(row.getProperty('value'));
 
             var attrName = '';
                       

@@ -214,7 +214,7 @@
                         <label>
                             Protocol
                         </label>
-                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol for protocol in enumprotocoltype" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -462,19 +462,19 @@
                         all available schedules
                         </i>
                     </label>
-                    <select id="mbx-procsr-availableSchedule" ng-disabled="isProcessorTypeHTTPListener" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
+                    <select id="mbx-procsr-availableSchedule" ng-disabled="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
                     </select>
                 </div>
                 <div class="col-md-1">
                     <div>
                         <br>
-                        <button id="mbx-procsr-chooseProfile" class="btn btn-primary multipleSelectionListButton" ng-disabled="isProcessorTypeHTTPListener" ng-click="chooseProfile()">
+                        <button id="mbx-procsr-chooseProfile" class="btn btn-primary multipleSelectionListButton" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-click="chooseProfile()">
                             &gt;&gt;
                         </button>
                     </div>
                     <div>
                         <br>
-                        <button id="mbx-procsr-removeProfile" class="btn btn-primary multipleSelectionListButton" ng-disabled="isProcessorTypeHTTPListener" ng-click="removeProfile()">
+                        <button id="mbx-procsr-removeProfile" class="btn btn-primary multipleSelectionListButton" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-click="removeProfile()">
                             &lt;&lt;
                         </button>
                     </div>
@@ -485,7 +485,7 @@
                         linked schedules
                         </i>
                     </label>
-                    <select id="mbx-procsr-linkedSchedules"  multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-disabled="isProcessorTypeHTTPListener" ng-options="selected.name for selected in selectedProfiles" class="form-control">
+                    <select id="mbx-procsr-linkedSchedules"  multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-options="selected.name for selected in selectedProfiles" class="form-control">
                     </select>
                 </div>
 

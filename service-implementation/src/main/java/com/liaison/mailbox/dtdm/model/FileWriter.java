@@ -14,19 +14,19 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 /**
-* The persistent class for the processor type sweeper in processor database table.
+* The persistent class for the processor type file writer in processor database table.
 * 
 * @author OFS
 */
 @Entity
-@DiscriminatorValue(Processor.TYPE_SWEEPER)
-public class Sweeper extends Processor {
+@DiscriminatorValue(Processor.TYPE_FILE_WRITER)
+public class FileWriter extends Processor {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public Class getEntityClass() {
+	public  Class getEntityClass() {
 		return this.getClass();
 	}
 

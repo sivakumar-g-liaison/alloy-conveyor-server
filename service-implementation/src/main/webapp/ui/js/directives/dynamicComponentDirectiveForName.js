@@ -54,7 +54,7 @@ angular.module(
                          scope.iconColor.color="glyphicon-white";
                          } */
 
-                        console.log(scope.selectedValue);
+                        //console.log(scope.selectedValue);
 
                         if (scope.selectedValue.value !== null && scope.selectedValue.value.id === "add new -->") {
                             scope.addNew.value = true;
