@@ -67,7 +67,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		LOGGER.debug("Entering in invoke.");
 	    try {
-		   
+
 		// FTPSRequest executed through JavaScript
 			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -76,10 +76,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			} else {
 				// FTPSRequest executed through Java
 				executeRequest();
-			}			
-	   } catch(JAXBException |IOException e) {			
+			}
+	   } catch(JAXBException |IOException e) {
 			throw new RuntimeException(e);
-		}		
+		}
 	}
 
 	/**
@@ -114,7 +114,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			ftpsRequest.enableSessionReuse(true);
 			ftpsRequest.connect();
 			ftpsRequest.login();
-			ftpsRequest.enableDataChannelEncryption();
+			//GMB-345 - Just a try
+			//ftpsRequest.enableDataChannelEncryption();
 
 			if (getProperties() != null) {
 				ftpsRequest.setBinary(getProperties().isBinary());
