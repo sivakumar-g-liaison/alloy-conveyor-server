@@ -787,23 +787,60 @@ public class MailboxSLAWatchDogService {
 	private boolean doCustomerSLAVerification (Processor processor, List <String> slaViolatedMailboxes) throws Exception {
 
 		LOG.info("Entering Customer SLA Verification check");
-		MailBoxProcessorI uploaderProcessor = MailBoxProcessorFactory.getInstance(processor);
-
 		boolean isCustomerSLAViolated = false;
+		
+		// check if the file exists in the configured file write location
+		// for processors  of type FileWriter if file exists then customer
+		// sla is violated
+		if (processor instanceof FileWriter) {
+			isCustomerSLAViolated = checkFileExistenceOfFileWriter(processor);
+		} else {
+			MailBoxProcessorI uploaderProcessor = MailBoxProcessorFactory.getInstance(processor);
 
-		// check if file exist in the configured uploader location
-		// if it exists then customer sla violated 
-		if (uploaderProcessor instanceof FTPSRemoteUploader) {
+			// check if file exist in the configured payload location 
+			// for processors of type uploader if file exists then
+			// customer sla is violated 
+			if (uploaderProcessor instanceof FTPSRemoteUploader) {
 
-			FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
-			isCustomerSLAViolated = ftpsRemoteUploader.checkFileExistence();
+				FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
+				isCustomerSLAViolated = ftpsRemoteUploader.checkFileExistence();
 
-		} else if (uploaderProcessor instanceof SFTPRemoteUploader) {
+			} else if (uploaderProcessor instanceof SFTPRemoteUploader) {
 
-			SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
-			isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();
-		}
+				SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
+				isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();
+			} 
+		}		
 		return isCustomerSLAViolated;
+		
+	}
+	
+	/**
+	 * This method will get the file write location of filewriter and check if any file exist in that specified location
+	 * 
+	 * @param processor
+	 * @return boolean - if the file exists it will return value of true otherwise a value of false.
+	 * @throws MailBoxServicesException
+	 * @throws IOException
+	 */
+	private boolean checkFileExistenceOfFileWriter(Processor processor) throws MailBoxServicesException, IOException {
+		
+		LOG.debug ("Entering file Existence check for File Writer processor");
+		boolean isFileExists = false;
+		String fileWriteLocation = getLocationToWritePayloadFromSpectrum(processor);
+		if (null == fileWriteLocation) {
+			LOG.error("filewrite location  not configured for processor {}", processor.getProcsrName());
+			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.FILEWRITE_LOCATION, Response.Status.CONFLICT);
+		}
+		File fileWriteLocationDirectory = new File(fileWriteLocation);
+		if (fileWriteLocationDirectory.isDirectory() && fileWriteLocationDirectory.exists()) {
+			String[] files =  fileWriteLocationDirectory.list();
+			isFileExists = (null != files && files.length > 0);
+		} else {
+			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
+		}
+		LOG.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
+		return isFileExists;
 		
 	}
 
