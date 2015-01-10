@@ -129,7 +129,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 *
 	 */
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, MailBoxServicesException, SftpException, com.liaison.commons.exception.LiaisonException {
+			LiaisonException, URISyntaxException, MailBoxServicesException, SftpException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {
@@ -148,8 +148,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					continue;
 				}
 				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
-
-
+				
+				
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + root.getName();
@@ -165,14 +165,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 					// String remotePath = dirToList + "/" + root.getName();
 					String localDir = localFileDir + File.separatorChar + root.getName();
-					sftpRequest.changeDirectory(dirToList);
+				   	sftpRequest.changeDirectory(dirToList);
 					createResponseDirectory(localDir);
 					try (FileOutputStream fos = new FileOutputStream(localDir);
 		                 BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 					     sftpRequest.getFile(root.getName(), bos);
 					}
-
-
 				}
 			}
 		}
@@ -205,5 +203,32 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	@Override
 	public Object getClient() {
 		return ClientFactory.getClient(this);
+	}
+
+	@Override
+	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
+		
+		G2SFTPClient sftpClient = (G2SFTPClient)client;
+	    try {
+			downloadDirectory(sftpClient, remotePayloadLocation, localTargetLocation);
+		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException | SftpException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cleanup() {
+		// To remove the private key retrieved from key manager	
+		try {
+			removePrivateKeyFromTemp();
+		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

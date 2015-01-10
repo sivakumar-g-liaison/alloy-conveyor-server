@@ -18,6 +18,8 @@ import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
+import com.jcraft.jsch.SftpException;
+import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
@@ -136,6 +138,45 @@ public interface ProcessorJavascriptI {
 	 */
 	public Properties getMailBoxProperties();
 
+	
+	/**
+	 * To Retrieve the Payload URI
+	 *
+	 * @return Payload URI String
+	 * @throws MailBoxConfigurationServicesException
+	 * @throws MailBoxServicesException
+	 */
+	public String getPayloadURI() throws MailBoxServicesException, IOException;
+	
+	/**
+	 * Method to download the file or folder for FTP/SFTP processor
+	 *
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws SftpException
+	 *
+	 */
+	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation);
+	
+	
+	/**
+	 * Method to upload the file or folder for FTP/SFTP processor
+	 *
+	 * @throws IOException
+	 * @throws LiaisonException
+	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws SftpException
+	 *
+	 */
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation);
+	
+	
+	/**
+	 * Method to do clean up activities once JS completes the execution of a processor
+	 * 
+	 */
+	public void cleanup();
 	/**
 	 * Info level logging
 	 *

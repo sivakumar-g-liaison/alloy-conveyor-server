@@ -166,8 +166,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 *
 	 */
 	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, MailBoxServicesException,
-			com.liaison.commons.exception.LiaisonException {
+			LiaisonException, URISyntaxException, MailBoxServicesException {
 
 		String dirToList = "";
 		if (!currentDir.equals("")) {
@@ -190,7 +189,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				if (file.isFile()) {
 
 					String localDir = localFileDir + File.separatorChar + currentFileName;
-					ftpClient.changeDirectory(dirToList);
+				   	ftpClient.changeDirectory(dirToList);
 					createResponseDirectory(localDir);
 
 					try {// GSB-1337,GSB-1336
@@ -220,5 +219,28 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	@Override
 	public Object getClient() {
 		return FTPSClient.getClient(this);
+	}
+
+	@Override
+	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
+		
+		G2FTPSClient ftpClient = (G2FTPSClient)client;
+		try {
+			downloadDirectory(ftpClient, remotePayloadLocation, localTargetLocation);
+		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException e) {
+			throw new RuntimeException(e);
+		}		
+	}
+
+	@Override
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargeLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cleanup() {
+		// TODO Auto-generated method stub
+		
 	}
 }

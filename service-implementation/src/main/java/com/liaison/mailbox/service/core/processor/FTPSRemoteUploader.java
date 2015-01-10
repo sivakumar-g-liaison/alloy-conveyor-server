@@ -36,6 +36,7 @@ import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -165,7 +166,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 *
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, com.liaison.commons.exception.LiaisonException,MailBoxServicesException {
+			throws IOException, LiaisonException, MailBoxServicesException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -180,8 +181,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
 
-				//interrupt signal check
-				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+				//interrupt signal check has to be done only if execution Id is present
+				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
 						fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 						fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
@@ -212,7 +213,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 
 					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
-
+					
 					boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remoteFilePath);
 					if (!dirExists) {
 						// create directory on the server
@@ -313,4 +314,26 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		return FTPSClient.getClient(this);
 	}
 
+    	@Override
+	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
+		G2FTPSClient ftpRequest = (G2FTPSClient)client;
+		try {
+			uploadDirectory(ftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
+		} catch (MailBoxServicesException | IOException | LiaisonException  e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+
+	@Override
+	public void cleanup() {
+		// TODO Auto-generated method stub
+		
+	}
 }

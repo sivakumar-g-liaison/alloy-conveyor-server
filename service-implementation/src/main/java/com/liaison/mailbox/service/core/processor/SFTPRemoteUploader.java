@@ -36,6 +36,7 @@ import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -112,7 +113,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				//GMB-320 - Creates directory to the remote folder
 				for (String directory : remotePath.split(File.separator)) {
-
+				
 					if (directory.isEmpty()) {//For when path starts with /
 						continue;
 					}
@@ -152,7 +153,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 *
 	 */
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, SftpException, MailBoxServicesException, com.liaison.commons.exception.LiaisonException {
+			throws IOException, LiaisonException, SftpException, MailBoxServicesException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -166,8 +167,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		if (subFiles != null && subFiles.length > 0) {
 			for (File item : subFiles) {
 
-				//interrupt signal check
-				if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+				//interrupt signal check has to be done only if execution Id is present
+				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					lastCheckTime = new Date();
 					if(eventDAO.isThereAInterruptSignal(executionId)) {
 						LOGGER.info("##########################################################################");
@@ -191,7 +192,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 
 					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
-
+					
 					Boolean fileExists = true;
 					try {
 						sftpRequest.getNative().lstat(remoteFilePath);
@@ -205,7 +206,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					// upload the sub directory
 					sftpRequest.changeDirectory(remoteFilePath);
 					String localDr = localParentDir + File.separatorChar + item.getName();
-					uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm);
+	                uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm);
 					replyCode = 0;
 
 				} else {
@@ -299,5 +300,32 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		return ClientFactory.getClient(this);
 	}
 
+	@Override
+	public void downloadDirectory(Object client, String localTargetLocation, String remotePayloadLocation) {
+		// TODO Auto-generated method stub
+		
+	}
 
+	@Override
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
+		
+		G2SFTPClient sftpRequest = (G2SFTPClient)client;
+		try {
+			uploadDirectory(sftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
+		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+
+	@Override
+	public void cleanup() {
+		// To remove the private key retrieved from key manager	
+		try {
+			removePrivateKeyFromTemp();
+		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
 }

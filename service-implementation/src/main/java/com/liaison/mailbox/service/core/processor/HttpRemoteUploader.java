@@ -37,6 +37,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -117,8 +118,8 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					for (File entry : files) {
 
-						//interrupt signal check
-						if(((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+						//interrupt signal check has to be done only if execution Id is present
+						if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 							lastCheckTime = new Date();
 							if(eventDAO.isThereAInterruptSignal(executionId)) {
 								LOGGER.info("##########################################################################");
@@ -220,5 +221,23 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	@Override
 	public Object getClient() {
 		return ClientFactory.getClient(this);
+	}
+
+	@Override
+	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cleanup() {
+		// TODO Auto-generated method stub
+		
 	}
 }
