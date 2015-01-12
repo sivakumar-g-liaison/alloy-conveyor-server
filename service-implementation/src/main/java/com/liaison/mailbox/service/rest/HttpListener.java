@@ -170,7 +170,7 @@ public class HttpListener extends AuditedResource {
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-					
+
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
@@ -180,21 +180,21 @@ public class HttpListener extends AuditedResource {
 					}
 					logger.debug("constructed workticket");
 					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
-                    
+
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
-					
+
 					//GLASS LOGGING BEGINS//
 					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 					GlassMessage glassMessage = new GlassMessage();
 					glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
-					glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());					
+					glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-					glassMessage.setMailboxId(mailboxPguid);					
+					glassMessage.setMailboxId(mailboxPguid);
 					glassMessage.setStatus(ExecutionState.STAGED);
 					glassMessage.setPipelineId(workTicket.getPipelineId());
-					glassLogger.logToGlass(glassMessage);					
+					glassLogger.logToGlass(glassMessage);
 					//GLASS LOGGING ENDS//
-					
+
 					ResponseBuilder builder = Response.ok();
 					responseInputStream = httpResponse.getEntity().getContent();
 					copyResponseInfo(httpResponse, builder, responseInputStream);
@@ -271,7 +271,7 @@ public class HttpListener extends AuditedResource {
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-					
+
 					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
@@ -282,19 +282,19 @@ public class HttpListener extends AuditedResource {
 					storePayload(request, workTicket, httpListenerProperties);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					constructMetaDataJson(request, workTicket);
-					
+
 					//GLASS LOGGING BEGINS//
 					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 					GlassMessage glassMessage = new GlassMessage();
 					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
-					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());					
+					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-					glassMessage.setMailboxId(mailboxPguid);					
+					glassMessage.setMailboxId(mailboxPguid);
 					glassMessage.setStatus(ExecutionState.STAGED);
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 					glassLogger.logToGlass(glassMessage);
 					//GLASS LOGGING ENDS//
-					
+
 					return Response
 							.ok()
 							.status(Status.ACCEPTED)
@@ -403,6 +403,7 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
+		workTicket.setAdditionalContext("httpContentType", request.getContentType());
 		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
 		copyRequestHeadersToWorkTicket(request, workTicket);
 		assignGlobalProcessId(workTicket);
@@ -506,7 +507,7 @@ public class HttpListener extends AuditedResource {
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);
-		httpRequest.setHeader("Content-type", request.getContentType().toString());
+		httpRequest.setHeader("Content-type", ContentType.APPLICATION_JSON.getMimeType());
 		StringEntity requestBody =new StringEntity(workTicketJson);
 		httpRequest.setEntity(requestBody);
 		HttpClient httpClient = createHttpClient();
