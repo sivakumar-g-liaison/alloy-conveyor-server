@@ -43,27 +43,10 @@ public class MailBoxSLAWatchDogServiceTest extends BaseServiceTest {
 
 	
 	@Test
-	public void testMailboxSLAWatchDog() throws LiaisonException, JsonParseException, 
+	public void testMailboxCustomerSLAWatchDog() throws LiaisonException, JsonParseException, 
 			JsonMappingException, JAXBException, IOException {
 		// Get the executing processors
-		String url = getBASE_URL() + "/mailboxsla";
-		request = constructHTTPRequest(url, HTTP_METHOD.POST, null, logger);
-		request.execute();
-
-		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);
-
-		MailboxSLAResponseDTO mailboxSLAResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, MailboxSLAResponseDTO.class);
-
-		// Assertion
-		Assert.assertEquals(SUCCESS, mailboxSLAResponseDTO.getResponse().getStatus());
-	}
-	
-	@Test
-	public void testCustomerSLAWatchDog() throws LiaisonException, JsonParseException, 
-			JsonMappingException, JAXBException, IOException {
-		// Get the executing processors
-		String url = getBASE_URL() + "/customersla";
+		String url = getBASE_URL() + "/trigger/slacheck";
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, null, logger);
 		request.execute();
 

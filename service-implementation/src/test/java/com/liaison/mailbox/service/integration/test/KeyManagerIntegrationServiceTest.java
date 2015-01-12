@@ -94,7 +94,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"upload/truststore"); 
+        HttpPost httpPost = new HttpPost(getKMS_BASE_URL() + "/upload/truststore"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
@@ -127,7 +127,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/publickeyrequest.json");
 		
 		 // prepare post method  
-        HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"/upload/public"); 
+        HttpPost httpPost = new HttpPost(getKMS_BASE_URL() + "/upload/public"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
@@ -161,7 +161,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/keymanager/truststore_update_request.json");
 		
 		 // prepare post method  
-        HttpPut httpPut = new HttpPut(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
+        HttpPut httpPut = new HttpPut(getKMS_BASE_URL() + "/update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
         DefaultHttpClient httpclient = new DefaultHttpClient();
         
         httpPut.addHeader("Content-Type", "application/json");
@@ -187,7 +187,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			JAXBException, IOException, com.liaison.commons.exception.LiaisonException {
 
 		// Get the mailbox
-		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+"fetch/truststore/current/75D5112D0A0006340665134D334351D5";
+		String url = getKMS_BASE_URL() + "/fetch/truststore/current/75D5112D0A0006340665134D334351D5";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -254,7 +254,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			//InputStream is = null;
 			byte[] privateKeyBytes = null;
 			
-			String url = "http://10.0.6.101:8989/key-management/fetch/group/keypair/current/2798BD330A004E740665A6EF61AE4A01";
+			String url = getKMS_BASE_URL() + "/fetch/group/keypair/current/2798BD330A004E740665A6EF61AE4A01";
 			//  F45EE0F10A006FF106655CE31D400F66
 			
 			Map<String, String> headerMap = new HashMap<String, String>();
@@ -297,7 +297,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 			//InputStream is = null;
 			byte[] privateKeyBytes = null;
 			
-			String url = "http://10.0.6.101:8989/key-management/fetch/group/keypair/current/27C062AB0A004E740665A6EFCE333E6A";
+			String url = getKMS_BASE_URL() + "/fetch/group/keypair/current/27C062AB0A004E740665A6EFCE333E6A";
 			
 			
 			Map<String, String> headerMap = new HashMap<String, String>();

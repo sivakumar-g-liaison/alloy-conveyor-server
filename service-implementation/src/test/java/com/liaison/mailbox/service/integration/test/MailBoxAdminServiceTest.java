@@ -138,8 +138,8 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetExecutingProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
-		// Get the executing processors with HANDED_OVER_TO_JS status
-		url = getBASE_URL() + "/processoradmin/processor/execution" + "?status=HANDED_OVER_TO_JS";
+		// Get the executing processors with HANDED_TO_JS status
+		url = getBASE_URL() + "/processoradmin/processor/execution" + "?status=HANDED_TO_JS";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -149,8 +149,8 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetExecutingProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
-		// Get the executing processors with GRACEFULLY_INTERRUPTED status
-		url = getBASE_URL() + "/processoradmin/processor/execution" + "?status=GRACEFULLY_INTERRUPTED";
+		// Get the executing processors with INTERRUPTED status
+		url = getBASE_URL() + "/processoradmin/processor/execution" + "?status=INTERRUPTED";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -161,7 +161,7 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
 		// Get the executing processors with SKIPPED_SINCE_ALREADY_RUNNING status
-		url = getBASE_URL() + "/processoradmin/processor/execution" + "?status=SKIPPED_SINCE_ALREADY_RUNNING";
+		url = getBASE_URL() + "/processoradmin/processor/execution" + "?status=SKIPPED";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -266,7 +266,7 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetExecutingProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
-		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=HANDED_OVER_TO_JS";
+		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=HANDED_TO_JS";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -276,7 +276,7 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetExecutingProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
-		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=GRACEFULLY_INTERRUPTED";
+		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=INTERRUPTED";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -286,7 +286,7 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetExecutingProcessorResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		
-		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=SKIPPED_SINCE_ALREADY_RUNNING";
+		url = getBASE_URL() + "/processoradmin/processor/execution" + "?frmDate=" +URLEncoder.encode(frmDate, "UTF-8")+ "&toDate=" +URLEncoder.encode(toDate, "UTF-8")+ "&status=SKIPPED";
 		request = constructHTTPRequest(url, HTTP_METHOD.GET, null, logger);
 		request.execute();
 
@@ -437,8 +437,8 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/processor/interruptExecutionRequest.json");
 		InterruptExecutionEventRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, InterruptExecutionEventRequestDTO.class);
 
-		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL() + "/processoradmin/processor/execution", HTTP_METHOD.POST, jsonRequest, logger);
+		String url = getBASE_URL() + "/processoradmin/processor/execution" + "?executionID=" + requestDTO.getFsmEvent().getExecutionID(); 
+		request = constructHTTPRequest(url, HTTP_METHOD.DELETE, null, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -466,7 +466,7 @@ public class MailBoxAdminServiceTest extends BaseServiceTest {
 		fsm.setExecutionID("");
 		requestDTO.setFsmEvent(fsm);
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		request = constructHTTPRequest(getBASE_URL() + "/processoradmin/processor/execution", HTTP_METHOD.POST, jsonRequest, logger);
+		request = constructHTTPRequest(getBASE_URL() + "/processoradmin/processor/execution", HTTP_METHOD.DELETE, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);

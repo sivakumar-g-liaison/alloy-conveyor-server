@@ -43,6 +43,7 @@ public abstract class BaseServiceTest {
 
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
+	private static String KMS_BASE_URL;
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
@@ -58,6 +59,9 @@ public abstract class BaseServiceTest {
 			prop.load(is);
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
+			setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
+			System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
+            System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
 			// close the stream
 			is.close();
 		} 		
@@ -80,6 +84,14 @@ public abstract class BaseServiceTest {
 		BASE_URL = bASE_URL;
 	}
 
+	public static String getKMS_BASE_URL() {
+		return KMS_BASE_URL;
+	}
+
+	public static void setKMS_BASE_URL(String kMS_BASE_URL) {
+		KMS_BASE_URL = kMS_BASE_URL;
+	}
+	
 	@AfterMethod
 	public void finalCleanUp() {
 
