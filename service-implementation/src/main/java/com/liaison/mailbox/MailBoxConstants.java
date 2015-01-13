@@ -158,6 +158,10 @@ public interface MailBoxConstants {
 	public static final String FILEWRITE_LOCATION = "file write";
 	public static final String COMMON_LOCATION = "payload or file write";
 	
+	// added for Dropbox file transfer
+	public static final String AUTH_TOKEN = "authentication-token";
+	public static final String ACL_MANIFEST_HEADER = "acl-manifest";
+	
 
 
 }

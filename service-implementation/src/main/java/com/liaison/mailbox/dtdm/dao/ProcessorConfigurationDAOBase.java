@@ -310,6 +310,47 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 
+	public List<Processor> findProcessorsOfSpecificTypeByProfileAndTenancyKey(String profileId, String tenancyKey, List<String> specificProcessorTypes) {
+		
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+		
+		try {
+			LOG.info("Fetching the processor by specific type, profile Id and tenancyKey starts.");
+			
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
+						.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
+						.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
+						.append(" where profile.pguid = :" + ProcessorConfigurationDAO.PROFILE_ID)
+						.append(" and processor.mailbox.tenancyKey = :" + ProcessorConfigurationDAO.TENANCY_KEY)
+						.append(" and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS)
+						.append(" and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS)
+						.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+			
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(ProcessorConfigurationDAO.PROFILE_ID, profileId)
+					.setParameter(ProcessorConfigurationDAO.TENANCY_KEY, tenancyKey)
+					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
+			}
+					
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return processors;
+	}
 
 	private Class<?> getProcessorClass(ProcessorType processorType) {
 

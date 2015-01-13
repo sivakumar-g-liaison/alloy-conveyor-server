@@ -51,6 +51,7 @@ public class Processor implements Identifiable {
 	public static final String HTTP_ASYNC = "HTTPASYNCPROCESSOR";
 	public static final String HTTP_SYNC = "HTTPSYNCPROCESSOR";
 	public static final String TYPE_FILE_WRITER = "FILEWRITER";
+	public static final String TYPE_DROPBOX_PROCESSOR = "DROPBOXPROCESSOR";
 
 	private String pguid;
 	private String javaScriptUri;
@@ -302,6 +303,8 @@ public class Processor implements Identifiable {
 			processor = new HTTPSyncProcessor();
 		} else if (ProcessorType.FILEWRITER.equals(processorType)) {
 			processor = new FileWriter();
+		} else if (ProcessorType.DROPBOXPROCESSOR.equals(processorType)) {
+			processor = new DropBoxProcessor();
 		} else {
 			processor = new Sweeper();
 		}

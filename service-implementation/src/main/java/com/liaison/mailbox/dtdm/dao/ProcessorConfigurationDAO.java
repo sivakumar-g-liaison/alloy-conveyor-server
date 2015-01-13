@@ -54,6 +54,8 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String PGUID = "pguid";
 	public static final String SERV_INST_ID = "proc_serv_inst_id";
 	public static final String PROCESSOR_TYPE = "processor_type";
+	public static final String PROFILE_ID = "profile_id";
+	public static final String TENANCY_KEY = "tenancy_key";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -99,6 +101,16 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of specific types of processors
 	 */
 	public List<Processor> findSpecificProcessorTypesOfMbx(String mbxGuid, List<String>specificProcessorTypes);
+	
+	/**
+	 * Retrieves specific type of processors based on the given profile id and Tenancy key
+	 * 
+	 * @param profileId - Pguid of linked profile
+	 * @param tenancyKey - tenancykey of mailbox of the processor
+	 * @param specificProcessorTypes A List of Canonical Names of different types of processor class.
+	 * @return list of specific types of processors based on profile id and tenancykey
+	 */
+	public List<Processor> findProcessorsOfSpecificTypeByProfileAndTenancyKey(String profileId, String tenancyKey, List<String> specificProcessorTypes);
 	
 	/**
 	 * Retrieves all active processors of given types
