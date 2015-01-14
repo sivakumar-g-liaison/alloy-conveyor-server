@@ -159,9 +159,17 @@ public interface MailBoxConstants {
 	public static final String COMMON_LOCATION = "payload or file write";
 	
 	// added for Dropbox file transfer
-	public static final String AUTH_TOKEN = "authentication-token";
+	public static final String AUTH_TOKEN = "token";
 	public static final String ACL_MANIFEST_HEADER = "acl-manifest";
+
 	public static final String DROPBOX_AUTH_TOKEN = "dropbox-auth-token";
 	public static final String ACL_SIGNED_MANIFEST_HEADER = "acl-signature";
 	public static final String ACL_MANIFEST_FAILURE_MESSAGE = "Get manifest failed.";
+
+	public static final String ACL_SIGNER_GUID_HEADER = "acl-signer-public-key-guid";
+	
+	public static final int AUTH_SUCCESS_CODE = 200;
+	public static final int AUTH_FAILURE_CODE = 401;
+	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;	
+
 }

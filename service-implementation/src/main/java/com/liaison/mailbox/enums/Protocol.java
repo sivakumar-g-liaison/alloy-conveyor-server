@@ -26,7 +26,8 @@ public enum Protocol {
 	SWEEPER("sweeper"),
 	HTTPSYNCPROCESSOR("httpsyncprocessor"),
 	HTTPASYNCPROCESSOR("httpasyncprocessor"),
-	FILEWRITER("filewriter");
+	FILEWRITER("filewriter"),
+	DROPBOXPROCESSOR("dropboxprocessor");
 
 	private final String code;
 

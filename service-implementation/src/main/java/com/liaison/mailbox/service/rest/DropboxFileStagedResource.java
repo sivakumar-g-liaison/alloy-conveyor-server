@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -14,13 +15,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.mailbox.service.core.DropboxFileTransferService;
+import com.liaison.mailbox.service.core.DropboxFileStagedService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -29,6 +30,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+@Path("/dropbox/stagedFiles")
 public class DropboxFileStagedResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileStagedResource.class);
@@ -65,9 +67,9 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 				LOG.debug("Entering getStagedFiles");
 				try {
-					// TODO : Need to write a service for retrieving all file staged events and call that service here.					
-					DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
-					return fileTransferService.getTransferProfiles(serviceRequest);		
+								
+					DropboxFileStagedService fileStagedService = new DropboxFileStagedService();
+					return fileStagedService.getStagedFiles(serviceRequest);		
 				
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);

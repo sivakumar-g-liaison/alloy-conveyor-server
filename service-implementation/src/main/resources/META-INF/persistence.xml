@@ -23,6 +23,7 @@
 		<class>com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor</class>
 		<class>com.liaison.mailbox.dtdm.model.HTTPSyncProcessor</class>
 		<class>com.liaison.mailbox.dtdm.model.FileWriter</class>
+		<class>com.liaison.mailbox.dtdm.model.DropBoxProcessor</class>
 		<class>com.liaison.mailbox.dtdm.model.Credential</class>
 		<class>com.liaison.mailbox.dtdm.model.Folder</class>
 		<class>com.liaison.mailbox.dtdm.model.MailBox</class>

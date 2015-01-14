@@ -1,14 +1,11 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -18,19 +15,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
+import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.core.DropboxFileTransferService;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -39,36 +32,32 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("/dropbox/filetransfer")
-public class DropboxFileTransferResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferResource.class);
+@Path("/dropbox/transferProfiles")
+public class DropboxTransferProfileResource extends AuditedResource {
+	
+	private static final Logger LOG = LogManager.getLogger(DropboxTransferProfileResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
-	public DropboxFileTransferResource() throws IOException {
+	public DropboxTransferProfileResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
-	@POST
-	@ApiOperation(value = "upload content to spectrum",
-	notes = "update details of existing mailbox",
+	@GET
+	@ApiOperation(value = "get list of transferprofiles",
+	notes = "retrieve the list of transferprofiles",
 	position = 1,
 	response = com.liaison.mailbox.service.dto.configuration.response.DropboxFileTransferResponseDTO.class)
 
 	@ApiResponses({
 		@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	public Response uploadContentAsync(@Context final HttpServletRequest serviceRequest,
-								@QueryParam(value = "transferprofileid") final String transferProfileId) {
-		
+	public Response getTransferProfiles(@Context final HttpServletRequest serviceRequest) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -76,39 +65,19 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				LOG.debug("Entering uploadContentAsync");
+				LOG.debug("Entering getTransferProfiles");
 				try {
-					Response serviceResponse = null;
-					validateRequestSize(serviceRequest);
-					Response authResponse = DropboxAuthenticatorUtil.authenticateAndGetManifest(serviceRequest);
-					Map <String, String> responseHeaders = DropboxAuthenticatorUtil.retrieveResponseHeaders(authResponse);
-					switch (authResponse.getStatus()) {
-					
-						case MailBoxConstants.ACL_RETRIVAL_FAILURE_CODE:
-							serviceResponse =  authResponse;
-							break;
-						case MailBoxConstants.AUTH_FAILURE_CODE:
-							serviceResponse =  authResponse;
-							break;
-						case MailBoxConstants.AUTH_SUCCESS_CODE:
-							DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
-							if (StringUtil.isNullOrEmptyAfterTrim(transferProfileId)) {
-								throw new MailBoxServicesException("Transfer Profile Id is Mandatory", Response.Status.BAD_REQUEST);
-							}
-							serviceResponse = fileTransferService.uploadContentAsyncToSpectrum(serviceRequest, transferProfileId, responseHeaders);					
-					
-					}
-					return serviceResponse;																	
-				} catch (MailBoxServicesException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(e.getMessage());
+										
+					DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
+					return fileTransferService.getTransferProfiles(serviceRequest);				
+				
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}
 		};
-		worker.actionLabel = "DropboxFileTransferResource.uploadContentAsync()";
+		worker.actionLabel = "DropboxFileTransferResource.getTransferProfiles()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -118,26 +87,6 @@ public class DropboxFileTransferResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}
-	}
-	
-	/**
-	 * This method will validate the size of the request.
-	 *
-	 * @param request
-	 *            The HttpServletRequest
-	 */
-	protected void validateRequestSize(HttpServletRequest request) {
-		long contentLength = request.getContentLength();
-		DecryptableConfiguration config = LiaisonConfigurationFactory
-				.getConfiguration();
-		int maxRequestSize = config.getInt(CONFIGURATION_MAX_REQUEST_SIZE);
-
-		if (contentLength > maxRequestSize) {
-			throw new RuntimeException("Request has content length of "
-					+ contentLength
-					+ " which exceeds the configured maximum size of "
-					+ maxRequestSize);
 		}
 	}
 	
@@ -160,5 +109,4 @@ public class DropboxFileTransferResource extends AuditedResource {
 		// TODO Auto-generated method stub
 		
 	}
-
 }

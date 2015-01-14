@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +31,6 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DropboxFileTransferResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
@@ -39,68 +41,61 @@ public class DropboxFileTransferService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferService.class);
 	
-	public static final String TRANSFER_PROFILE = "Tranfer Profile";
+	public static final String TRANSFER_PROFILE = "Tranfer Profiles";
 	
-	public DropboxFileTransferResponseDTO uploadContentAsyncToSpectrum(HttpServletRequest request, String profileId) throws Exception {
+	public Response uploadContentAsyncToSpectrum(HttpServletRequest request, String profileId, Map<String, String>responseHeaders) throws Exception {
 		
 		LOG.debug("Entering into uploadContentAsyncToSpectrum service.");
-		DropboxFileTransferResponseDTO serviceResponse = new DropboxFileTransferResponseDTO();
 		
-		try {
-			// retrieve token from request
-			String authenticationToken = request.getHeader(MailBoxConstants.AUTH_TOKEN);
-			
-			// validate token
-			authenticationToken = validateToken(authenticationToken);
-			
-			// retrieve acl manifest from request
-			String aclManifest = request.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-			
-			String tenancyKey = null;
-			// retrieve the tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
-			if (tenancyKeys.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
-				throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
-			} else {
-				tenancyKey = tenancyKeys.get(0).getGuid();
-			}	
-			
-			List <String> specificProcessorTypes = new ArrayList<String>();
-			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
-			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-			List <Processor> processors = processorDAO.findProcessorsOfSpecificTypeByProfileAndTenancyKey(profileId, tenancyKey, specificProcessorTypes);
-			
-			if (processors.isEmpty()) {
-				//TODO throw exception if no processors are available.
-				LOG.error("There are no processors available for the profile id - {} with tenancykey - {}", profileId, tenancyKey);
-			}
-			ProcessorDTO processorDTO = null;
-			for (Processor processor : processors) {
+		String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
+		String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
+		String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
+		String token = responseHeaders.get(MailBoxConstants.AUTH_TOKEN);
 				
-				processorDTO = new ProcessorDTO();
-				processorDTO.copyFromEntity(processor);
-				
-				// retrieving the httplistener pipeline id from remote processor properties
-				String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
-				boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
-				String mailboxPguid = processor.getMailbox().getPguid();
-			
-				generateWorkTicketAndPostToQueue(request, mailboxPguid, isSecuredPayload, pipeLineId);	
-			}
-			
-			// response message construction
-			
-			LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
-			return serviceResponse;
-				
-			
-		} catch (MailBoxServicesException e) {
-			LOG.error(Messages.FILE_TRANSFER_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.FILE_TRANSFER_FAILED, null, Messages.FAILURE, e
-					.getMessage()));
-			return serviceResponse;
+		String tenancyKey = null;
+		LOG.info("Retrieving tenancy keys from acl-manifest");
+		// retrieve the tenancy key from acl manifest
+		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		if (tenancyKeys.isEmpty()) {
+			LOG.error("retrieval of tenancy key from acl manifest failed");
+			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
+		} else {
+			tenancyKey = tenancyKeys.get(0).getGuid();
+		}	
+		
+		List <String> specificProcessorTypes = new ArrayList<String>();
+		specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
+		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+		List <Processor> processors = processorDAO.findProcessorsOfSpecificTypeByProfileAndTenancyKey(profileId, tenancyKey, specificProcessorTypes);
+		
+		if (processors.isEmpty()) {
+			//TODO throw exception if no processors are available.
+			LOG.error("There are no processors available for the profile id - {} with tenancykey - {}", profileId, tenancyKey);
+			throw new MailBoxServicesException("There are no Dropbox Processor available", Response.Status.NOT_FOUND);
 		}
+		ProcessorDTO processorDTO = null;
+		for (Processor processor : processors) {
+			
+			processorDTO = new ProcessorDTO();
+			processorDTO.copyFromEntity(processor);
+			
+			// retrieving the httplistener pipeline id from remote processor properties
+			String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
+			boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
+			String mailboxPguid = processor.getMailbox().getPguid();
+		
+			generateWorkTicketAndPostToQueue(request, mailboxPguid, isSecuredPayload, pipeLineId);	
+		}
+		
+		// response message construction
+		ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
+				.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
+				.header(MailBoxConstants.AUTH_TOKEN, token)
+				.type(MediaType.TEXT_PLAIN)
+				.entity("Files Successfully uploaded")
+				.status(Response.Status.OK);
+		LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
+		return builder.build();	
 		
 	}
 	
@@ -108,10 +103,14 @@ public class DropboxFileTransferService {
 		
 		GetTransferProfilesResponseDTO serviceResponse = new GetTransferProfilesResponseDTO();
 		List <ProfileDTO> transferProfiles = new ArrayList<ProfileDTO>();
-		ProfileDTO transferProfile = new ProfileDTO();
-		transferProfile.setId("Dummy Profile id");
-		transferProfile.setName("Dummy Profile Name");
-		transferProfiles.add(transferProfile);
+		// Dummy json holding 4 records
+		for (int i = 0; i < 5; i++)  {
+			ProfileDTO transferProfile = new ProfileDTO();
+			transferProfile.setId("Dummy Profile id" + i);
+			transferProfile.setName("Dummy Profile Name" +  i);
+			transferProfiles.add(transferProfile);
+		}
+		
 		serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));
 		serviceResponse.setTranferProfiles(transferProfiles);
 		return serviceResponse;
@@ -125,12 +124,7 @@ public class DropboxFileTransferService {
 		storePayload(request, workTicket, isSecurePayload);		
 		constructMetaDataJson(workTicket);
 	}
-	
-	private String validateToken(String authenticationToken) {
-		String newAuthenticationToken = "test token";
-		return newAuthenticationToken;
-	}
-	
+		
 	private WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, String pipeLineId) {
 		
 		LOG.debug("Generating workticket for Mailbox - {}", mailboxPguid);
