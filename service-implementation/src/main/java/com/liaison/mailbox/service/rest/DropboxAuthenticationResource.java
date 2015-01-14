@@ -54,8 +54,8 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author santoshc
  */
-@Path("mailbox/dropbox/authenticate")
-@Api(value = "mailbox/dropbox/authenticate",
+@Path("dropbox/authenticate")
+@Api(value = "dropbox/authenticate",
 description = "Gateway for the dropbox services.")
 public class DropboxAuthenticationResource extends AuditedResource {
 
@@ -113,8 +113,8 @@ public class DropboxAuthenticationResource extends AuditedResource {
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(
 							requestString, AuthenticateUserRequestDTO.class);
 
-					DropboxConfigurationService authService = new DropboxConfigurationService();
-					return authService.authenticateAccount(serviceRequest);
+					DropboxConfigurationService dropboxService = new DropboxConfigurationService();
+					return dropboxService.authenticateAccount(serviceRequest);
 
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);

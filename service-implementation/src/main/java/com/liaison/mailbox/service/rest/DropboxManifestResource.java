@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.rest;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -37,7 +38,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.core.DropboxConfigurationService;
-import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -55,8 +56,8 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author santoshc
  */
-@Path("mailbox/dropbox/manifest")
-@Api(value = "mailbox/dropbox/manifest",
+@Path("dropbox/authAndGetACL")
+@Api(value = "dropbox/authAndGetACL",
 description = "Gateway for the dropbox manifest services.")
 public class DropboxManifestResource extends AuditedResource {
 
@@ -97,10 +98,10 @@ public class DropboxManifestResource extends AuditedResource {
             public Object call() {
 
             	serviceCallCounter.addAndGet(1);
-            	AuthenticateUserRequestDTO serviceRequest;
+            	DropboxAuthAndGetManifestRequestDTO serviceRequest;
                 try {
                     String requestString = getRequestBody(request);
-                    serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AuthenticateUserRequestDTO.class);
+                    serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, DropboxAuthAndGetManifestRequestDTO.class);
                 } catch (IOException | JAXBException e) {
                 	LOG.error(e.getMessage(), e);
                     throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -111,7 +112,7 @@ public class DropboxManifestResource extends AuditedResource {
                 return dropboxService.authenticateAndGetManifest(serviceRequest);
             }
         };
-        worker.actionLabel = "DropboxAuthenticateAndManifestResource.listManifest()";
+        worker.actionLabel = "DropboxAuthenticateAndManifestResource.authenticateAndGetManifest()";
 
         // hand the delegate to the framework for calling
         try {
@@ -144,14 +145,14 @@ public class DropboxManifestResource extends AuditedResource {
         // create the worker delegate to perform the business logic
         AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
             @Override
-            public Object call() {
+            public Object call() throws MessagingException, IOException {
 
                 DropboxConfigurationService dropboxService = new DropboxConfigurationService();
 
                 return dropboxService.getManifest();
             }
         };
-        worker.actionLabel = "DropboxManifestResource.listManifest()";
+        worker.actionLabel = "DropboxManifestResource.getManifest()";
 
         // hand the delegate to the framework for calling
         try {
