@@ -35,7 +35,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.mailbox.service.core.DropboxConfigurationService;
+import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -113,7 +113,7 @@ public class DropboxAuthenticationResource extends AuditedResource {
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(
 							requestString, AuthenticateUserRequestDTO.class);
 
-					DropboxConfigurationService dropboxService = new DropboxConfigurationService();
+					DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 					return dropboxService.authenticateAccount(serviceRequest);
 
 				} catch (IOException | JAXBException e) {

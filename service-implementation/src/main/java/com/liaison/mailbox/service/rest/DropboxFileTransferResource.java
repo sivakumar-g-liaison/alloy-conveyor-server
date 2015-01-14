@@ -29,7 +29,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.core.DropboxFileTransferService;
+import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;

@@ -6,7 +6,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
-package com.liaison.mailbox.service.dto.configuration.request;
+package com.liaison.mailbox.service.dto.dropbox.request;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 

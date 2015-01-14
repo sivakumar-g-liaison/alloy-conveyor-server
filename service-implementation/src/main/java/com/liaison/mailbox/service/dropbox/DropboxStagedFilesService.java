@@ -1,4 +1,4 @@
-package com.liaison.mailbox.service.core;
+package com.liaison.mailbox.service.dropbox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +11,11 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetStagedFilesResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 
-public class DropboxFileStagedService {
+public class DropboxStagedFilesService {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxFileStagedService.class);
+	private static final Logger LOG = LogManager.getLogger(DropboxStagedFilesService.class);
 	
 	public static final String STAGED_FILES = "Staged Files";
 	

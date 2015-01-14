@@ -1,4 +1,4 @@
-package com.liaison.mailbox.service.core;
+package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
 import java.io.InputStream;

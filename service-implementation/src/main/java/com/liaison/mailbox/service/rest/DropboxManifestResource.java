@@ -37,8 +37,8 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.mailbox.service.core.DropboxConfigurationService;
-import com.liaison.mailbox.service.dto.configuration.request.DropboxAuthAndGetManifestRequestDTO;
+import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
+import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -107,7 +107,7 @@ public class DropboxManifestResource extends AuditedResource {
                     throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
                 }
 
-                DropboxConfigurationService dropboxService = new DropboxConfigurationService();
+                DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 
                 return dropboxService.authenticateAndGetManifest(serviceRequest);
             }
@@ -147,7 +147,7 @@ public class DropboxManifestResource extends AuditedResource {
             @Override
             public Object call() throws MessagingException, IOException {
 
-                DropboxConfigurationService dropboxService = new DropboxConfigurationService();
+                DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 
                 return dropboxService.getManifest();
             }

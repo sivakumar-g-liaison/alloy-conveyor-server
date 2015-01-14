@@ -1,4 +1,4 @@
-package com.liaison.mailbox.service.dto.configuration.response;
+package com.liaison.mailbox.service.dto.dropbox.response;
 
 import java.util.List;
 
@@ -7,6 +7,10 @@ import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
 
 public class GetStagedFilesResponseDTO extends CommonResponseDTO {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private List<StagedFileDTO> stagedFiles;
 
 	public List<StagedFileDTO> getStagedFiles() {

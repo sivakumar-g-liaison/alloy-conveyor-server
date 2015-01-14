@@ -131,6 +131,7 @@ public enum Messages {
 
 	AUTHENTICATION_SUCCESSFULL("%s authenticated successfully."),
 	AUTHENTICATION_FAILURE("Failed to authenticate user."),
+	AUTH_AND_GET_ACL_FAILURE("Failed to authenticate and get user ACL"),
 	AUTHENTICATION_SUCCESS("User authenticated successfully."),
 	// DropBox Processor
 	FILE_TRANSFER_SUCCESSFUL("File Transfer was successful"),

@@ -21,7 +21,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.mailbox.service.core.DropboxFileStagedService;
+import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -68,7 +68,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 				LOG.debug("Entering getStagedFiles");
 				try {
 								
-					DropboxFileStagedService fileStagedService = new DropboxFileStagedService();
+					DropboxStagedFilesService fileStagedService = new DropboxStagedFilesService();
 					return fileStagedService.getStagedFiles(serviceRequest);		
 				
 				} catch (Exception e) {

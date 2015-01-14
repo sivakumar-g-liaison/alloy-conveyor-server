@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.core.DropboxConfigurationService;
+import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -31,7 +31,7 @@ public class DropboxAuthenticatorUtil {
 		// authenticate and authorize
 		Response authResponse =  null;
 				
-		DropboxConfigurationService authService = new DropboxConfigurationService();
+		DropboxAuthenticationService authService = new DropboxAuthenticationService();
 		AuthenticateUserRequestDTO authenticationDTO = constructAuthenticationRequest("user Name", "password", token);
 		//authResponse = authService.authenticateAndGetManifest(authenticationDTO);
 		

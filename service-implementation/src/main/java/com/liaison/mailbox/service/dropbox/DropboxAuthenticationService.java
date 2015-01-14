@@ -8,7 +8,7 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.core;
+package com.liaison.mailbox.service.dropbox;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,8 +36,8 @@ import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.request.DropboxAuthAndGetManifestRequestDTO;
-import com.liaison.mailbox.service.dto.configuration.response.DropboxAuthAndGetManifestResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
+import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
 import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;
@@ -47,9 +47,9 @@ import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountRe
  * 
  * @author OFS
  */
-public class DropboxConfigurationService {
+public class DropboxAuthenticationService {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxConfigurationService.class);
+	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationService.class);
 
 	/**
 	 * Method to authenticate user Account by given serviceRequest.
@@ -64,20 +64,24 @@ public class DropboxConfigurationService {
 		AuthenticateUserAccountResponseDTO response = new AuthenticateUserAccountResponseDTO();
 
 		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
-				serviceRequest.getToken());
+		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getToken());
+		
 		UMClient.authenticate();
+		
 		if (!UMClient.isSuccessful()) {
-			response.setResponse(new AuthenticationResponseDTO(
-					com.liaison.usermanagement.enums.Messages.AUTHENTICATION_FAILED,
-					com.liaison.usermanagement.enums.Messages.STATUS_FAILURE, UMClient.getAuthenticationToken(),
-					UMClient.getSessionDate(), ""));
-		} else {
-			response.setResponse(new AuthenticationResponseDTO(
-					com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
-					com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS, UMClient.getAuthenticationToken(),
-					UMClient.getSessionDate(), ""));
+			response.setResponse(new AuthenticationResponseDTO(com.liaison.usermanagement.enums.Messages.AUTHENTICATION_FAILED,
+															   com.liaison.usermanagement.enums.Messages.STATUS_FAILURE,
+															   UMClient.getAuthenticationToken(),
+															   UMClient.getSessionDate(), ""));
+			LOG.debug("Auth failed");
+			return response;
 		}
+		
+		response.setResponse(new AuthenticationResponseDTO(com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
+															   com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS,
+															   UMClient.getAuthenticationToken(),
+															   UMClient.getSessionDate(), ""));
+		
 		LOG.debug("Exit from user authentication for dropbox.");
 		return response;
 	}
@@ -166,49 +170,44 @@ public class DropboxConfigurationService {
 		LOG.debug("Entering into user authentication and get manifest service for dropbox.");
 
 		Response response = null;
-		DropboxAuthAndGetManifestResponseDTO responseEntity = new DropboxAuthAndGetManifestResponseDTO();
-
-		// Calling UM for authentication
+		DropboxAuthAndGetManifestResponseDTO responseEntity = null;
+       
+		
 		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
-				serviceRequest.getToken());
-		UMClient.authenticate();
+		try {
+			
+			UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getToken());
+			
+			// Calling UM for authentication
+			UMClient.authenticate();
+	
+			// handling UM authentication response
+			if (!UMClient.isSuccessful()) {	
+				LOG.error("Dropbox - user authentication failed");	
+				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,Messages.FAILURE);
+				return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
+			} 
+	
+			// if authenticated successfully get manifest from GEM			
+			GEMACLClient gemClient = new GEMACLClient();
+			//TODO this is wrong you must pass the incoming logid and get the Manifest. You have to use the following from client.
+			// getACLManifest(String unsignedDocument, String signedDocument, String publicKeyGuid, String manifestRequest)
+			GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest(); 
 
-		// handling UM authentication response
-		if (!UMClient.isSuccessful()) {
-
-			LOG.error("Dropbox - user authentication failed");
-
-			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE.toString(),
-					Messages.FAILURE.toString());
-			response = Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity)
-					.build();
-		} else {
-
-			// if authenticated successfully get manifest from GEM
-			try {
-				GEMACLClient gemClient = new GEMACLClient();
-				GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
-
-				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_SUCCESS.toString(),
-						Messages.SUCCESS.toString());
-				response = Response
-						.ok(responseEntity)
-						.header("Content-Type", MediaType.APPLICATION_JSON)
-						.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, UMClient.getAuthenticationToken())
-						.header(MailBoxConstants.ACL_MANIFEST_HEADER, gemManifestFromGEM.getManifest())
-						.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, gemManifestFromGEM.getSignature())
-						.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-								gemManifestFromGEM.getPublicKeyGuid()).build();
-			} catch (Exception e) {
-				LOG.error("Dropbox - getting manifest after authentication failed.");
-				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE.toString(),
-						Messages.FAILURE.toString());
-				response = Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
-						.entity(responseEntity).build();
-			}
+			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_SUCCESS,Messages.SUCCESS);
+			response = Response.ok(responseEntity)
+							   .header("Content-Type", MediaType.APPLICATION_JSON)
+							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, UMClient.getAuthenticationToken()) //TODO you should re encrypt token and what you return should really be E(UMClient.getAuthenticationToken()::loginId) 
+							   .header(MailBoxConstants.ACL_MANIFEST_HEADER, gemManifestFromGEM.getManifest())
+							   .header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, gemManifestFromGEM.getSignature())
+							   .header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,gemManifestFromGEM.getPublicKeyGuid()).build();
+			
+		} catch (Exception e) {
+			LOG.error("Dropbox - getting manifest after authentication failed.");
+			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,Messages.FAILURE);
+			response = Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 		}
-
+		
 		LOG.debug("Exiting from user authentication and get manifest service for dropbox.");
 
 		return response;
