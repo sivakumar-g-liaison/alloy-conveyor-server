@@ -7,7 +7,6 @@ var rest = myApp.controller(
 			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;
             $scope.isJavaScriptExecution = false;
-            
             //check JavaScriptExecutor
             $scope.onChangeJavaScriptExecutor = function () {            	
             	if ($scope.isJavaScriptExecution) {            		
@@ -300,11 +299,16 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	 name: 'SecuredPayload',
+                	 name: 'Secure Payload',
                      value: true,
                      allowAdd: false,
                      isMandatory: true
                 }, {
+               	 name: 'Delete file after sweep',
+                 value: true,
+                 allowAdd: false,
+                 isMandatory: true
+                },{
                     name: '',
                     value: '',
                     allowAdd: true,
@@ -316,7 +320,7 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	 name: 'SecuredPayload',
+                	 name: 'Secure Payload',
                      value: true,
                      allowAdd: false,
                      isMandatory: true
@@ -529,8 +533,11 @@ var rest = myApp.controller(
                     "name": "PipeLine Id",
                     "id": "pipeLineID"
                 }, {
-                	"name": "SecuredPayload",
+                	"name": "Secure Payload",
                 	"id": "securedPayload"
+                }, {
+                	"name": "Delete file after sweep",
+                	"id": "deleteFileAfterSweep"
                 }];
                 $scope.allMandatoryHttpProperties = [{
                     "name": "HTTP Version",
@@ -552,7 +559,7 @@ var rest = myApp.controller(
                     "name": "HTTP Listener PipelineId",
                     "id": "httpListenerPipeLineId"
                 }, {
-                	"name": "SecuredPayload",
+                	"name": "Secure Payload",
                 	"id": "securedPayload"
                 }];	
                 $scope.allMandatoryFileWriterProperties =[];
@@ -738,6 +745,9 @@ var rest = myApp.controller(
                     	<div ng-switch-when="securedPayload">\n\
                         	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
                     	</div>\n\
+                    	<div ng-switch-when="deleteFileAfterSweep">\n\
+                    	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
+                	   </div>\n\
                     	 <div ng-switch-when="httpListenerPipeLineId">\n\
                     		<textarea class="form-control" ng-disabled="disableHTTPListenerPipeLineId" ng-model="COL_FIELD" required ng-init="COL_FIELD" ng-input="COL_FIELD"  style="width:94%;height:45px" ng-disabled=true placeholder="required"/>\n\
                     	</div>\n\
@@ -1403,10 +1413,12 @@ var rest = myApp.controller(
 					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
 					// But Mandatory properties of type boolean will be displayed even if the value is false in the grid
 					if ((prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') || 
-                       (prop === 'securedPayload' && json_data[prop] === false && ($scope.processor.protocol === 'SWEEPER' || 
-                    		   $scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR')) ) {					   
-                        allowFalseValues = true;
-                    }
+		                       (prop === 'securedPayload' && json_data[prop] === false && ($scope.processor.protocol === 'SWEEPER' || 
+		                    		   $scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR')) || 
+		                    		   (prop === 'deleteFileAfterSweep' && json_data[prop] === false && ($scope.processor.protocol === 'SWEEPER' )) ) {					   
+		                        allowFalseValues = true;
+		           }
+					
 					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFalseValues) && json_data[prop] !== null && json_data[prop] !== '') {
 						i++;
 						if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
@@ -1532,7 +1544,7 @@ var rest = myApp.controller(
 					if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
 						$scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
 					} else if ($scope.processor.protocol === 'SWEEPER') {
-						$scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1);
+						//$scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1); //GMB 371
 					} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                         $scope.httpListenerMandatoryProperties.splice(otherReqIndex - 1, 1);
                     } else {
@@ -2124,6 +2136,13 @@ var rest = myApp.controller(
                     }
                     
                     if (name === 'securedPayload') {
+                    	mandatoryArray.push({
+                    		name: name,
+                    		value: value
+                    	});
+                    }
+                    
+                    if (name === 'deleteFileAfterSweep') {
                     	mandatoryArray.push({
                     		name: name,
                     		value: value
@@ -2730,7 +2749,13 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	name: 'SecuredPayload',
+                	name: 'Secure Payload',
+                	value: true,
+                	allowAdd: false,
+                	isMandatory:true
+                	
+                }, {
+                	name: 'Delete file after sweep',
                 	value: true,
                 	allowAdd: false,
                 	isMandatory:true
@@ -2748,7 +2773,7 @@ var rest = myApp.controller(
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	 name: 'SecuredPayload',
+                	 name: 'Secure Payload',
                      value: true,
                      allowAdd: false,
                      isMandatory: true

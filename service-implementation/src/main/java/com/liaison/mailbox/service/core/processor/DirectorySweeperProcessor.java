@@ -384,10 +384,11 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 				payloadToPersist.close();
 			}
 
-            if(true){ //TODO replace this with the processor property "delete file after sweep".Right now it is hard wired to delete always.GMB-371.
+            if(this.getProperties().isDeleteFileAfterSweep()){
+            	LOGGER.debug("Deleting file after sweep");
             	 delete(oldPath);
-            	 
-            }else{
+             }else{
+            	 LOGGER.debug("Moving file after sweep");
             	move(oldPath, newPath);
             	
             }

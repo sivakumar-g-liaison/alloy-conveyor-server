@@ -38,6 +38,15 @@ public class RemoteProcessorPropertiesDTO {
 	private List<HttpOtherRequestHeaderDTO> otherRequestHeader;
 	private boolean securedPayload;
 	private boolean handOverExecutionToJavaScript;
+	private boolean deleteFileAfterSweep;
+
+	public boolean isDeleteFileAfterSweep() {
+		return deleteFileAfterSweep;
+	}
+
+	public void setDeleteFileAfterSweep(boolean deleteFileAfterSweep) {
+		this.deleteFileAfterSweep = deleteFileAfterSweep;
+	}
 
 	public boolean isHandOverExecutionToJavaScript() {
 		return handOverExecutionToJavaScript;
