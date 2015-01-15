@@ -384,8 +384,13 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 				payloadToPersist.close();
 			}
 
-
-			move(oldPath, newPath);
+            if(true){ //TODO replace this with the processor property "delete file after sweep".Right now it is hard wired to delete always.GMB-371.
+            	 delete(oldPath);
+            	 
+            }else{
+            	move(oldPath, newPath);
+            	
+            }
 			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(metaSnapShot.getURI().toString());
 		}
@@ -405,6 +410,19 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 */
 	private void move(Path file, Path target) throws IOException {
 		Files.move(file, target, StandardCopyOption.REPLACE_EXISTING);
+	}
+	
+	/**
+	 * Method is used to move the file to the sweeped folder.
+	 *
+	 * @param file
+	 *            The source location
+	 * @param target
+	 *            The target location
+	 * @throws IOException
+	 */
+	private void delete(Path file) throws IOException {
+		Files.deleteIfExists(file);
 	}
 
 	/**
