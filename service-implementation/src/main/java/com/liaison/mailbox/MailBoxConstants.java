@@ -125,7 +125,10 @@ public interface MailBoxConstants {
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
 
 	// additional context keys Worker ticket
-	public final static String KEY_FOLDER_NAME = "folderdername";
+	public final static String KEY_FOLDER_NAME = "folderName";
+	public final static String KEY_FILE_NAME = "fileName";
+	public final static String KEY_FILE_CREATED_NAME = "createdTime";
+	public final static String KEY_FILE_MODIFIED_NAME = "modifiedTime";
 	public final static String KEY_MAILBOX_ID = "mailboxId";
 	public final static String KEY_OVERWRITE = "overwrite";
 
@@ -151,13 +154,13 @@ public interface MailBoxConstants {
 	public static final String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	public static final String DEFAULT_PGUID_DISPLAY_PREFIX = "maibox.pguid.display.prefix";
-	
+
 	//added for generic error message if any location is missing
 	public static final String PAYLOAD_LOCATION = "payload";
 	public static final String RESPONSE_LOCATION = "response";
 	public static final String FILEWRITE_LOCATION = "file write";
 	public static final String COMMON_LOCATION = "payload or file write";
-	
+
 
 
 }
