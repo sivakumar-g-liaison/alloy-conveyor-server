@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
@@ -91,24 +93,24 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	public DirectorySweeperProcessor(Processor configurationInstance) {
 		super(configurationInstance);
 	}
-    
+
 	TransactionVisibilityClient glassLogger = null;
 	GlassMessage glassMessage = null;
-	
+
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {
 
 		try {
-            
+
 			//GLASS LOGGING BEGINS//
 			glassLogger = new TransactionVisibilityClient(executionId);
 			glassMessage = new GlassMessage();
 			glassMessage.setCategory(ProcessorType.SWEEPER);
 			glassMessage.setProtocol(Protocol.SWEEPER.getCode());
 			glassMessage.setExecutionId(executionId);
-			glassMessage.setPipelineId(getPipeLineID());					
+			glassMessage.setPipelineId(getPipeLineID());
 			//GLASS LOGGING ENDS//
-			
+
 			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
@@ -130,7 +132,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		String fileRenameFormat = getCustomProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
-		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);		
+		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
 		// Validation of the necessary properties
 		if (MailBoxUtil.isEmpty(inputLocation)) {
 			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
@@ -390,7 +392,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
              }else{
             	 LOGGER.debug("Moving file after sweep");
             	move(oldPath, newPath);
-            	
+
             }
 			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(metaSnapShot.getURI().toString());
@@ -412,7 +414,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	private void move(Path file, Path target) throws IOException {
 		Files.move(file, target, StandardCopyOption.REPLACE_EXISTING);
 	}
-	
+
 	/**
 	 * Method is used to move the file to the sweeped folder.
 	 *
@@ -465,25 +467,48 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		WorkTicket workTicket = null;
 		Map<String, Object> additionalContext = new HashMap<String, Object>();
 		BasicFileAttributes attr = null;
+		ISO8601Util dateUtil = new ISO8601Util();
+
+		String folderName = null;
+		String fileName = null;
+		FileTime createdTime = null;
+		FileTime modifiedTime = null;
+
 		for (Path path : result) {
+
             LOGGER.debug("Obtaining file Attributes for path {}", path);
+
 			workTicket = new WorkTicket();
             LOGGER.debug("Payload URI {}", path.toAbsolutePath().toString());
 			workTicket.setPayloadURI(path.toAbsolutePath().toString());
+
             LOGGER.debug("Pipeline ID {}", getPipeLineID());
 			workTicket.setPipelineId(getPipeLineID());
 
 			attr = Files.readAttributes(path, BasicFileAttributes.class);
             LOGGER.debug("File attributes{}", attr);
 
-            LOGGER.debug("Time stamp {}", attr.creationTime());
-            workTicket.setCreatedTime(new Date(attr.creationTime().toMillis()));
+            createdTime = attr.creationTime();
+            LOGGER.debug("Created Time stamp {}", createdTime);
+            workTicket.setCreatedTime(new Date(createdTime.toMillis()));
+            workTicket.addHeader(MailBoxConstants.KEY_FILE_CREATED_NAME, dateUtil.fromDate(workTicket.getCreatedTime()));
+
+            modifiedTime = attr.lastModifiedTime();
+            LOGGER.debug("Modified Time stamp {}", modifiedTime);
+            workTicket.addHeader(MailBoxConstants.KEY_FILE_MODIFIED_NAME, dateUtil.fromDate(new Date(modifiedTime.toMillis())));
+
             LOGGER.debug("Size stamp {}", attr.size());
 			workTicket.setPayloadSize(attr.size());
-            LOGGER.debug("Filename {}", path.toFile().getName());
-			workTicket.setFileName(path.toFile().getName());
-		    LOGGER.debug("Foldername {}", path.toFile().getParent());
-		    additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, path.toFile().getParent());
+
+			fileName = path.toFile().getName();
+            LOGGER.debug("Filename {}", fileName);
+			workTicket.setFileName(fileName);
+			workTicket.addHeader(MailBoxConstants.KEY_FILE_NAME, fileName);
+
+			folderName = path.toFile().getParent();
+		    LOGGER.debug("Foldername {}", folderName);
+		    additionalContext.put(MailBoxConstants.KEY_FOLDER_NAME, folderName);
+		    workTicket.addHeader(MailBoxConstants.KEY_FOLDER_NAME, folderName);
 
 		    workTicket.setAdditionalContext(additionalContext);
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
@@ -644,18 +669,18 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cleanup() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
