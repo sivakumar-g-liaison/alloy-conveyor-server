@@ -1,8 +1,8 @@
 package com.liaison.mailbox.service.util;
 
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
 
 public class GlassMessage {
 
@@ -16,7 +16,17 @@ public class GlassMessage {
 	private String serviceInstandId;
     private String protocol;
     private String pipelineId;
+    private GatewayType inAgent;
     
+
+	public GatewayType getInAgent() {
+		return inAgent;
+	}
+
+	public void setInAgent(GatewayType inAgent) {
+		this.inAgent = inAgent;
+	}
+
 	public String getPipelineId() {
 		return pipelineId;
 	}
