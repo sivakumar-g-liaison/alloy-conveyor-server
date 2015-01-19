@@ -3442,7 +3442,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
          $scope.createFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.trimScriptTemplateName();
          $scope.createFileRequest.scriptserviceRequest.script.createdBy = $scope.createdBy;
       
-         $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest))
+         $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest), function() {} )
          .success(function (data) {
         	block.unblockUI(); 
         		$scope.$parent.scriptIsEdit = true;
@@ -3487,7 +3487,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	         $scope.editFileRequest.scriptserviceRequest.script.scriptFileUri = $scope.$parent.trimScriptTemplateName();
 	         $scope.editFileRequest.scriptserviceRequest.script.createdBy = $scope.createdBy;
 
-	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest))
+	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest), function() {} )
 	            .success(function (data) {     
 	            	block.unblockUI(); 
 	            		$scope.$parent.scriptIsEdit = true;
