@@ -9,7 +9,7 @@
  */
 package com.liaison.mailbox.swagger.dto.request;
 
-import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserRequestDTO;
+import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 
 /**
  * @author OFS
@@ -17,13 +17,13 @@ import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserReq
  */
 public class AuthenticateRequest {
 
-	private AuthenticateUserRequestDTO authenticateRequest;
+	private DropboxAuthAndGetManifestRequestDTO authenticateRequest;
 
-	public AuthenticateUserRequestDTO getAuthenticateRequest() {
+	public DropboxAuthAndGetManifestRequestDTO getAuthenticateRequest() {
 		return authenticateRequest;
 	}
 
-	public void setAuthenticateRequest(AuthenticateUserRequestDTO authenticateRequest) {
+	public void setAuthenticateRequest(DropboxAuthAndGetManifestRequestDTO authenticateRequest) {
 		this.authenticateRequest = authenticateRequest;
 	}
 
