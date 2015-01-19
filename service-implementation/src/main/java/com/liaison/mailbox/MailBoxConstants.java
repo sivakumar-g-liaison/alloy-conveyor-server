@@ -171,5 +171,8 @@ public interface MailBoxConstants {
 	public static final int AUTH_SUCCESS_CODE = 200;
 	public static final int AUTH_FAILURE_CODE = 401;
 	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;	
+	
+	//charsetname
+	public static final String CHARSETNAME = "UTF-8";
 
 }
