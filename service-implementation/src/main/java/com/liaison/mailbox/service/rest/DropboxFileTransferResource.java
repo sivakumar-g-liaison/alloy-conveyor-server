@@ -12,6 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +32,9 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
+import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -39,7 +43,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("/dropbox/filetransfer")
+@Path("/dropbox/transferContent")
 public class DropboxFileTransferResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferResource.class);
@@ -61,13 +65,13 @@ public class DropboxFileTransferResource extends AuditedResource {
 	@ApiOperation(value = "upload content to spectrum",
 	notes = "update details of existing mailbox",
 	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.DropboxFileTransferResponseDTO.class)
+	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 
 	@ApiResponses({
 		@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	public Response uploadContentAsync(@Context final HttpServletRequest serviceRequest,
-								@QueryParam(value = "transferprofileid") final String transferProfileId) {
+								@QueryParam(value = "transferProfileId") final String transferProfileId) {
 		
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -95,14 +99,32 @@ public class DropboxFileTransferResource extends AuditedResource {
 							if (StringUtil.isNullOrEmptyAfterTrim(transferProfileId)) {
 								throw new MailBoxServicesException("Transfer Profile Id is Mandatory", Response.Status.BAD_REQUEST);
 							}
-							serviceResponse = fileTransferService.uploadContentAsyncToSpectrum(serviceRequest, transferProfileId, responseHeaders);					
+							
+							// retrieving headers from auth response
+							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
+							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
+							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
+							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+							
+							DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService.uploadContentAsyncToSpectrum(serviceRequest, transferProfileId, aclManifest);
+							String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
+							// response message construction
+							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
+									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
+									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
+									.type(MediaType.APPLICATION_JSON)
+									.entity(responseBody)
+									.status(Response.Status.OK);
+							LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
+							return builder.build();	
+												
 					
 					}
 					return serviceResponse;																	
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
-				} catch (Exception e) {
+				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

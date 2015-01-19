@@ -134,8 +134,12 @@ public enum Messages {
 	AUTH_AND_GET_ACL_FAILURE("Failed to authenticate and get user ACL"),
 	AUTHENTICATION_SUCCESS("User authenticated successfully."),
 	// DropBox Processor
-	FILE_TRANSFER_SUCCESSFUL("File Transfer was successful"),
-	FILE_TRANSFER_FAILED("File Transfer got failed");
+	CONTENT_QUEUED_FOR_TRANSFER_SUCCESSFUL("Content queued for transfer successfully."),
+	CONTENT_QUEUED_FOR_TRANSFER_FAILED("Content queued for transfer got failed."),
+	
+	// processing of token for the retrieval of login id or authentication token failed.
+	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed.");
+	
 	
 	private String value;
 

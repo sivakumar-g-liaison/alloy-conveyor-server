@@ -1,6 +1,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +26,14 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
+import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
+import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -52,7 +62,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 	@ApiOperation(value = "get list of transferprofiles",
 	notes = "retrieve the list of transferprofiles",
 	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.DropboxFileTransferResponseDTO.class)
+	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 
 	@ApiResponses({
 		@ApiResponse(code = 500, message = "Unexpected Service failure.")
@@ -67,11 +77,46 @@ public class DropboxTransferProfileResource extends AuditedResource {
 
 				LOG.debug("Entering getTransferProfiles");
 				try {
-										
-					DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
-					return fileTransferService.getTransferProfiles(serviceRequest);				
+					Response serviceResponse = null;
+					Response authResponse = DropboxAuthenticatorUtil.authenticateAndGetManifest(serviceRequest);
+					Map <String, String> responseHeaders = DropboxAuthenticatorUtil.retrieveResponseHeaders(authResponse);
+					switch (authResponse.getStatus()) {
+					
+						case MailBoxConstants.ACL_RETRIVAL_FAILURE_CODE:
+							serviceResponse =  authResponse;
+							break;
+						case MailBoxConstants.AUTH_FAILURE_CODE:
+							serviceResponse =  authResponse;
+							break;
+						case MailBoxConstants.AUTH_SUCCESS_CODE:
+							
+							DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
+							
+							// retrieving headers from auth response
+							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
+							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
+							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
+							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+							
+							GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(serviceRequest);
+							String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
+							// response message construction
+							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
+									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
+									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
+									.type(MediaType.APPLICATION_JSON)
+									.entity(responseBody)
+									.status(Response.Status.OK);
+							LOG.debug("Exit from getStagedFiles service.");
+							serviceResponse = builder.build();	
+					}						
+					
+					return serviceResponse ;				
 				
-				} catch (Exception e) {
+				} catch (MailBoxServicesException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException(e.getMessage());
+				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

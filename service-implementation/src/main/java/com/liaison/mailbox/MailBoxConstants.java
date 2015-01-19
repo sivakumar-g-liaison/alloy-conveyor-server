@@ -159,7 +159,8 @@ public interface MailBoxConstants {
 	public static final String COMMON_LOCATION = "payload or file write";
 	
 	// added for Dropbox file transfer
-	public static final String AUTH_TOKEN = "token";
+	public static final String UM_AUTH_TOKEN = "um-auth-token";
+	public static final String LOGIN_ID = "loginId";
 	public static final String ACL_MANIFEST_HEADER = "acl-manifest";
 
 	public static final String DROPBOX_AUTH_TOKEN = "dropbox-auth-token";
@@ -175,4 +176,6 @@ public interface MailBoxConstants {
 	//charsetname
 	public static final String CHARSETNAME = "UTF-8";
 
+	// token separator
+	public final static String TOKEN_SEPARATOR = "::";
 }

@@ -11,13 +11,13 @@ import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 public class GetTransferProfilesResponseDTO extends CommonResponseDTO {
 
 	private static final long serialVersionUID = 1L;
-	private List <ProfileDTO> tranferProfiles;
+	private List <ProfileDTO> transferProfiles;
 	
-	public List<ProfileDTO> getTranferProfiles() {
-		return tranferProfiles;
+	public List<ProfileDTO> getTransferProfiles() {
+		return transferProfiles;
 	}
-	public void setTranferProfiles(List<ProfileDTO> tranferProfiles) {
-		this.tranferProfiles = tranferProfiles;
+	public void setTransferProfiles(List<ProfileDTO> transferProfiles) {
+		this.transferProfiles = transferProfiles;
 	}
 
 }
