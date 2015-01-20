@@ -196,7 +196,8 @@ public class DropboxAuthenticationService {
 			// if authenticated successfully get manifest from GEM for the given loginId
 			GEMACLClient gemClient = new GEMACLClient();
 			
-			ManifestRequestDTO manifestRequestDTO = gemClient.constructACLManifestRequest();
+			ManifestRequestDTO manifestRequestDTO = gemClient.constructACLManifestRequest(); //TODO this is still wrong. you should ONLY set the user 
+			//ID and the platform in the request. If you use constructACLManifestRequest it will set DOMAIN ,ROLE ETC.  You better construct your own manifestRequestDTO
 			manifestRequestDTO.getAcl().getEnvelope().setUserId(serviceRequest.getLoginId());
             
 			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
@@ -211,7 +212,7 @@ public class DropboxAuthenticationService {
 			
 			response = Response.ok(responseEntity)
 							   .header("Content-Type", MediaType.APPLICATION_JSON)
-							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedAuthTokenWithLoginId) //re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
+							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedAuthTokenWithLoginId) //TODO please use the same name as in TT "token"//re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
 							   .header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestFromGEM.getManifest())
 							   .header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestFromGEM.getSignature())
 							   .header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,manifestFromGEM.getPublicKeyGuid()).build();
