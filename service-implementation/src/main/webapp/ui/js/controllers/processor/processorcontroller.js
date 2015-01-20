@@ -1554,14 +1554,8 @@ var rest = myApp.controller(
 				if (otherReqIndex !== -1) {
 					if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
 						$scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
-					} else if ($scope.processor.protocol === 'SWEEPER') {
-<<<<<<< HEAD
-						$scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1);
-					} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR' ) {
-=======
-						//$scope.sweeperMandatoryProperties.splice(otherReqIndex - 1, 1); //GMB 371
-					} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
->>>>>>> origin
+					}  else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR' ) {
+
                         $scope.httpListenerMandatoryProperties.splice(otherReqIndex - 1, 1);
                     } else {
 						$scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
