@@ -112,7 +112,7 @@ public class DropboxManifestResource extends AuditedResource {
                 return dropboxService.authenticateAndGetManifest(serviceRequest);
             }
         };
-        worker.actionLabel = "DropboxAuthenticateAndManifestResource.authenticateAndGetManifest()";
+        worker.actionLabel = "DropboxManifestResource.authenticateAndGetManifest()";
 
         // hand the delegate to the framework for calling
         try {

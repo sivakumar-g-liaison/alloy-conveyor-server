@@ -1,18 +1,18 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,22 +30,21 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
-import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
+import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("/dropbox/transferContent")
-public class DropboxFileTransferResource extends AuditedResource {
+@Path("/dropbox/stagedFiles/{stagedFileId}")
+public class DropboxFileDownloadResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferResource.class);
+	private static final Logger LOG = LogManager.getLogger(DropboxFileDownloadResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -55,23 +54,21 @@ public class DropboxFileTransferResource extends AuditedResource {
 	
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
-	public DropboxFileTransferResource() throws IOException {
+	public DropboxFileDownloadResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 	
-	@POST
-	@ApiOperation(value = "upload content to spectrum",
-	notes = "update details of existing mailbox",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
+	@GET
+	@ApiOperation(value = "download staged file",
+	notes = "download staged file",
+	position = 1)
 
 	@ApiResponses({
 		@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
-	public Response uploadContentAsync(@Context final HttpServletRequest serviceRequest,
-								@QueryParam(value = "transferProfileId") final String transferProfileId) {
-		
+	public Response downloadStagedFile(@Context final HttpServletRequest serviceRequest, 
+			@PathParam(value = "stagedfileid") @ApiParam(name = "stagedfileid", required = true, value = "staged file id") final String stagedFileId) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -79,7 +76,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				LOG.debug("Entering uploadContentAsync");
+				LOG.debug("Entering into download staged file service");
 				try {
 					Response serviceResponse = null;
 					validateRequestSize(serviceRequest);
@@ -94,10 +91,18 @@ public class DropboxFileTransferResource extends AuditedResource {
 							serviceResponse =  authResponse;
 							break;
 						case MailBoxConstants.AUTH_SUCCESS_CODE:
-							DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
-							if (StringUtil.isNullOrEmptyAfterTrim(transferProfileId)) {
-								throw new MailBoxServicesException("Transfer Profile Id is Mandatory", Response.Status.BAD_REQUEST);
+							DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
+							if (StringUtil.isNullOrEmptyAfterTrim(stagedFileId)) {
+								throw new MailBoxServicesException("Staged file id is Mandatory", Response.Status.BAD_REQUEST);
 							}
+							
+							//validate file id belongs to user organisation
+							if(!stagedFileService.validateFileId(stagedFileId)) {
+								throw new MailBoxServicesException("Staged file id does not belong to user organisation.", Response.Status.BAD_REQUEST);
+							} 
+							
+							//getting the file stream from spectrum for the given file id
+							InputStream fileStream = stagedFileService.getStagedFileStream(stagedFileId);
 							
 							// retrieving headers from auth response
 							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
@@ -105,31 +110,24 @@ public class DropboxFileTransferResource extends AuditedResource {
 							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
 							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 							
-							DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService.uploadContentAsyncToSpectrum(serviceRequest, transferProfileId, aclManifest);
-							String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
 							// response message construction
 							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
 									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
 									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
 									.type(MediaType.APPLICATION_JSON)
-									.entity(responseBody)
+									.entity(fileStream)
 									.status(Response.Status.OK);
-							LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
+							LOG.debug("Exit from download staged file service.");
 							return builder.build();	
-												
-					
 					}
-					return serviceResponse;																	
+					return serviceResponse;		
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
-				} catch (IOException | JAXBException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}
 		};
-		worker.actionLabel = "DropboxFileTransferResource.uploadContentAsync()";
+		worker.actionLabel = "DropboxFileTransferResource.downloadStagedFile()";
 
 		// hand the delegate to the framework for calling
 		try {
@@ -140,6 +138,26 @@ public class DropboxFileTransferResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
+	}
+
+	@Override
+	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+	}
+
+	@Override
+	protected void beginMetricsCollection() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void endMetricsCollection(boolean success) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	/**
@@ -161,25 +179,4 @@ public class DropboxFileTransferResource extends AuditedResource {
 					+ maxRequestSize);
 		}
 	}
-	
-	@Override
-	protected AuditStatement getInitialAuditStatement(String actionLabel) {
-		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-	}
-
-	@Override
-	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

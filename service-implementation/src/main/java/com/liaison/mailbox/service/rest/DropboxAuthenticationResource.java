@@ -36,7 +36,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
-import com.liaison.mailbox.service.dto.configuration.request.AuthenticateUserRequestDTO;
+import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -104,14 +104,14 @@ public class DropboxAuthenticationResource extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.addAndGet(1);
-				AuthenticateUserRequestDTO serviceRequest;
+				DropboxAuthAndGetManifestRequestDTO serviceRequest;
 
 				try {
 
 					String requestString = getRequestBody(request);
 
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(
-							requestString, AuthenticateUserRequestDTO.class);
+							requestString, DropboxAuthAndGetManifestRequestDTO.class);
 
 					DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 					return dropboxService.authenticateAccount(serviceRequest);
