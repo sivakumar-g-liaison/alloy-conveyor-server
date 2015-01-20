@@ -18,7 +18,10 @@ myApp.factory('RESTService',
                     if(status === 403) {
 						$rootScope.block.unblockUI();
 						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
-					} else {
+					} else if (status === 401) {
+						$rootScope.block.unblockUI();
+                        showSaveMessage('Session expired, please log in to SOA Proxy to re-activate session', 'error');
+                    } else {
 						callback(data, status);
 					}
                 });
@@ -39,7 +42,10 @@ myApp.factory('RESTService',
 					if(status === 403) {
 						$rootScope.block.unblockUI();
 						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
-					} else {
+					} else if (status === 401) {
+						$rootScope.block.unblockUI();
+                        showSaveMessage('Session expired, please log in to SOA Proxy to re-activate session', 'error');
+                    } else {
 						callback(data, status);
 					}
                 });
@@ -60,7 +66,10 @@ myApp.factory('RESTService',
 					if(status === 403) {
 						$rootScope.block.unblockUI();
 						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
-					} else {
+					} else if (status === 401) {
+						$rootScope.block.unblockUI();
+                        showSaveMessage('Session expired, please log in to SOA Proxy to re-activate session', 'error');
+                    } else {
 						callback(data, status);
 					}
                 });
@@ -79,7 +88,10 @@ myApp.factory('RESTService',
 					if(status === 403) {
 						$rootScope.block.unblockUI();
 						showSaveMessage('You do not have sufficient privilege to invoke the service', 'error');
-					} else {
+					} else if (status === 401) {
+						$rootScope.block.unblockUI();
+                        showSaveMessage('Session expired, please log in to SOA Proxy to re-activate session', 'error');
+                    } else {
 						callback(data, status);
 					}
                 });

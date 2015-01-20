@@ -193,8 +193,8 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Customized search function for select component.
         $scope.selectSearch = function () {
 
-            console.info("MailboxName : " + $scope.mailBoxName);
-            console.info("ProfileName : " + $scope.profile);
+            //console.info("MailboxName : " + $scope.mailBoxName);
+            //console.info("ProfileName : " + $scope.profile);
             $scope.pagingOptions.currentPage = 1;
             if ($scope.profile == null && ($scope.mailBoxName == null || $scope.mailBoxName == "")) {
                 $scope.reset();
