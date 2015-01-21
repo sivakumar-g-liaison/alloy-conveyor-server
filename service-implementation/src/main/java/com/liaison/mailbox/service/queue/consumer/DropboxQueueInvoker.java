@@ -1,7 +1,13 @@
 package com.liaison.mailbox.service.queue.consumer;
 
+import java.io.IOException;
+
+import javax.xml.bind.JAXBException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.mailbox.service.dropbox.DropboxService;
 
@@ -24,7 +30,12 @@ public class DropboxQueueInvoker implements Runnable {
 
 		logger.info("ServiceBrokerToDropboxWorkTicket Request with id:"+request+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		
-		getService().invokeDropboxQueue(request);
+		try {
+			getService().invokeDropboxQueue(request);
+		} catch (JAXBException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		logger.info("ServiceBrokerToDropboxWorkTicket with id:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 

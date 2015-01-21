@@ -5,8 +5,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,6 +30,7 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
+import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -34,6 +38,8 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import com.wordnik.swagger.annotations.ApiImplicitParam;
+import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -48,23 +54,68 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
+
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
 	public DropboxFileStagedResource() throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
-	@GET
-	@ApiOperation(value = "get list of staged files",
-	notes = "retrieve the list of staged files",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 
-	@ApiResponses({
-		@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
+	/**
+	 * REST method to add staged file.
+	 * 
+	 * @param request
+	 *            HttpServletRequest, injected with context annotation
+	 * 
+	 * @return Response Object
+	 */
+	@POST
+	@ApiOperation(value = "Create a staged file", notes = "create a new staged file entry", position = 1, response = com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO.class)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new processor", required = true, dataType = "com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	public Response addStagedFile(@Context final HttpServletRequest request) {
+
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call() {
+
+				serviceCallCounter.addAndGet(1);
+
+				String requestString;
+				try {
+					requestString = getRequestBody(request);
+					StagePayloadRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							StagePayloadRequestDTO.class);
+					// create the new staged file
+					DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
+					return stagedFileService.addStagedFile(serviceRequest);
+
+				} catch (IOException | JAXBException e) {
+					LOG.error(e.getMessage(), e);
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}
+			}
+		};
+		worker.actionLabel = "DropboxFileStagedResource.addStagedFile()";
+
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}
+	}
+
+	@GET
+	@ApiOperation(value = "get list of staged files", notes = "retrieve the list of staged files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response getStagedFiles(@Context final HttpServletRequest serviceRequest) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -75,43 +126,44 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 				LOG.debug("Entering getStagedFiles");
 				try {
-						
+
 					Response serviceResponse = null;
 					Response authResponse = DropboxAuthenticatorUtil.authenticateAndGetManifest(serviceRequest);
-					Map <String, String> responseHeaders = DropboxAuthenticatorUtil.retrieveResponseHeaders(authResponse);
+					Map<String, String> responseHeaders = DropboxAuthenticatorUtil
+							.retrieveResponseHeaders(authResponse);
 					switch (authResponse.getStatus()) {
-					
-						case MailBoxConstants.ACL_RETRIVAL_FAILURE_CODE:
-							serviceResponse =  authResponse;
-							break;
-						case MailBoxConstants.AUTH_FAILURE_CODE:
-							serviceResponse =  authResponse;
-							break;
-						case MailBoxConstants.AUTH_SUCCESS_CODE:
-							
-							DropboxStagedFilesService fileStagedService = new DropboxStagedFilesService();
-							
-							// retrieving headers from auth response
-							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
-							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
-							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
-							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
-							
-							GetStagedFilesResponseDTO getStagedFilesResponseDTO =  fileStagedService.getStagedFiles(serviceRequest);
-							String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
-							// response message construction
-							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
-									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
-									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
-									.type(MediaType.APPLICATION_JSON)
-									.entity(responseBody)
-									.status(Response.Status.OK);
-							LOG.debug("Exit from getStagedFiles service.");
-							serviceResponse = builder.build();	
-					}	
+
+					case MailBoxConstants.ACL_RETRIVAL_FAILURE_CODE:
+						serviceResponse = authResponse;
+						break;
+					case MailBoxConstants.AUTH_FAILURE_CODE:
+						serviceResponse = authResponse;
+						break;
+					case MailBoxConstants.AUTH_SUCCESS_CODE:
+
+						DropboxStagedFilesService fileStagedService = new DropboxStagedFilesService();
+
+						// retrieving headers from auth response
+						String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
+						String aclSignature = responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
+						String aclSignerGuid = responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
+						String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+
+						GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService
+								.getStagedFiles(serviceRequest);
+						String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
+						// response message construction
+						ResponseBuilder builder = Response.ok()
+								.header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
+								.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature)
+								.header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
+								.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token).type(MediaType.APPLICATION_JSON)
+								.entity(responseBody).status(Response.Status.OK);
+						LOG.debug("Exit from getStagedFiles service.");
+						serviceResponse = builder.build();
+					}
 					return serviceResponse;
-							
-				
+
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
@@ -145,12 +197,12 @@ public class DropboxFileStagedResource extends AuditedResource {
 	@Override
 	protected void beginMetricsCollection() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
