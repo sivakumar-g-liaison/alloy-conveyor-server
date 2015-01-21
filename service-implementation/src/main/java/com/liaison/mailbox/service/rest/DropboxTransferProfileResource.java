@@ -94,7 +94,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
 							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 							
-							GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(serviceRequest);
+							GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(serviceRequest, aclManifest);
 							String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
 							// response message construction
 							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)

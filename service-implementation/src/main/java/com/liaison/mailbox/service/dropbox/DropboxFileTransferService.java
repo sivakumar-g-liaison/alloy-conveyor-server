@@ -1,5 +1,6 @@
 package com.liaison.mailbox.service.dropbox;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +16,11 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -88,17 +92,55 @@ public class DropboxFileTransferService {
 		
 	}
 	
-	public GetTransferProfilesResponseDTO getTransferProfiles(HttpServletRequest request) {
+	public GetTransferProfilesResponseDTO getTransferProfiles(HttpServletRequest request, String aclManifest) throws IOException {
 		
 		GetTransferProfilesResponseDTO serviceResponse = new GetTransferProfilesResponseDTO();
 		List <ProfileDTO> transferProfiles = new ArrayList<ProfileDTO>();
+		
+		String tenancyKey = null;
+		LOG.info("Retrieving tenancy keys from acl-manifest");
+		
+		// retrieve the tenancy key from acl manifest
+		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		if (tenancyKeys.isEmpty()) {
+			LOG.error("retrieval of tenancy key from acl manifest failed");
+			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
+		}
+		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
+			
+			tenancyKey = tenancyKeyDTO.getGuid();
+			List <String> specificProcessorTypes = new ArrayList<String>();
+			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
+			
+			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
+			List <ScheduleProfilesRef> scheduleProfiles = profileDAO.findTransferProfilesSpecificProcessorTypeByTenancyKey(tenancyKey, specificProcessorTypes);
+			
+			// if there are no dropbox processors available for this tenancy key continue to next one.
+			if (scheduleProfiles.isEmpty()) {
+				LOG.error("There are no transfer profiles available for  tenancykey - {}", tenancyKey);
+				continue;
+			}
+			
+			// constructing transferProfileDTO from scheduleProfiles
+			for (ScheduleProfilesRef profile : scheduleProfiles)  {
+				
+				ProfileDTO transferProfile = new ProfileDTO();
+				transferProfile.copyFromEntity(profile);
+				transferProfiles.add(transferProfile);
+			}
+		}
+		if (transferProfiles.isEmpty()) {
+			LOG.error("There are no transfer profiles available");
+			throw new MailBoxServicesException("There are no Transfer Profiles available", Response.Status.NOT_FOUND);
+		}
+		
 		// Dummy json holding 4 records
-		for (int i = 0; i < 5; i++)  {
+		/*for (int i = 0; i < 5; i++)  {
 			ProfileDTO transferProfile = new ProfileDTO();
 			transferProfile.setId("Dummy Profile id" + i);
 			transferProfile.setName("Dummy Profile Name" +  i);
 			transferProfiles.add(transferProfile);
-		}
+		}*/
 		
 		serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));
 		serviceResponse.setTransferProfiles(transferProfiles);
@@ -116,7 +158,8 @@ public class DropboxFileTransferService {
 		// generate workticket
 		WorkTicket workTicket = WorkTicketUtil.createWorkTicket(request, mailboxPguid, properties);
 		//store payload to spectrum
-		WorkTicketUtil.storePayload(request, workTicket, properties);		
+		WorkTicketUtil.storePayload(request, workTicket, properties);	
+		//workTicket.setProcessMode(ProcessMode.MFT);
 		WorkTicketUtil.constructMetaDataJson(workTicket);
 	}
 

@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
+import java.util.List;
+
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
@@ -30,6 +32,8 @@ public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef>
 	public static final String GET_ALL = "getAll";
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String GET_PROFILE_BY_NAME = "getProfileByName";
+	public static final String STATUS = "status";
+	public static final String TENANCY_KEY = "tenancy_key";
 	
     /**
      * Find by profileName.
@@ -38,5 +42,14 @@ public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef>
      * @return ScheduleProfilesRef
      */
 	public ScheduleProfilesRef findProfileByName(String profileName);
+	
+	/**
+	 * Method to retrieve profiles by given processor type and tenancykey
+	 * 
+	 * @param tenancyKey
+	 * @param specificProcessorTypes
+	 * @return list of scheduleProfilesRef
+	 */
+	public List<ScheduleProfilesRef> findTransferProfilesSpecificProcessorTypeByTenancyKey(String tenancyKey, List<String> specificProcessorTypes);
 	
 }
