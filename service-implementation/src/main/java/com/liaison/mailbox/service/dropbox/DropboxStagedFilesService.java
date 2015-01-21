@@ -144,11 +144,40 @@ public class DropboxStagedFilesService {
 		LOG.debug("Entering into add staged file.");
 
 		StagePayloadResponseDTO serviceResponse = new StagePayloadResponseDTO();
+		
+		try {
 
-		StagedFileDTO stagedFileDTO = request.getStagedFile();
-		if (stagedFileDTO == null) {
-			throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+			StagedFileDTO stagedFileDTO = request.getStagedFile();
+			if (stagedFileDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+			}
+	
+			// validation
+			GenericValidator validator = new GenericValidator();
+			validator.validate(stagedFileDTO);
+	
+			DropboxDAO dropboxDao = new DropboxDAOBase();
+	
+			StagedFile stagedFile = new StagedFile();
+			stagedFileDTO.copyToEntity(stagedFile);
+	
+			dropboxDao.persist(stagedFile);
+	
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
+			serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
+	
+			LOG.debug("Exit from add staged file.");
+			return serviceResponse;
+			
+		} catch (MailBoxConfigurationServicesException e) {
+	
+			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+	
 		}
+<<<<<<< Updated upstream
 
 		// validation
 		GenericValidator validator = new GenericValidator();
@@ -166,5 +195,7 @@ public class DropboxStagedFilesService {
 
 		LOG.debug("Exit from add staged file.");
 		return serviceResponse;
+=======
+>>>>>>> Stashed changes
 	}
 }

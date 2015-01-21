@@ -35,20 +35,15 @@ public class DropboxService {
 
 		LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 		
-		try {
-			
-			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
-			
-			DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
-			StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
-			StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket.getAdditionalContext()
-					.get(FILE_PATH_KEY).toString(), workTicket.getPayloadSize().toString(), workTicket.getAdditionalContext().get(
-							MAILBOX_GUID_KEY).toString(), workTicket.getPayloadURI());
-			dtoReq.setStagedFile(stageFileReqDTO);
-			
-			stageFileService.addStagedFile(dtoReq);
-		} catch(Exception e) {
-			LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
-		}
+		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+		
+		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
+		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
+		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket.getAdditionalContext()
+				.get(FILE_PATH_KEY).toString(), workTicket.getPayloadSize().toString(), workTicket.getAdditionalContext().get(
+						MAILBOX_GUID_KEY).toString(), workTicket.getPayloadURI());
+		dtoReq.setStagedFile(stageFileReqDTO);
+		
+		stageFileService.addStagedFile(dtoReq);
 	}
 }
