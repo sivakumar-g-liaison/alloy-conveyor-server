@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
@@ -181,7 +182,7 @@ public class DropboxFileTransferService {
 		WorkTicket workTicket = WorkTicketUtil.createWorkTicket(request, mailboxPguid, properties);
 		//store payload to spectrum
 		WorkTicketUtil.storePayload(request, workTicket, properties);	
-		//workTicket.setProcessMode(ProcessMode.MFT);
+		workTicket.setProcessMode(ProcessMode.MFT);
 		WorkTicketUtil.constructMetaDataJson(workTicket);
 	}
 

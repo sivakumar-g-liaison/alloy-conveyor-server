@@ -11,7 +11,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 
 public class DropboxService {

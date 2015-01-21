@@ -7,13 +7,8 @@
  * with Liaison Technologies.
  */
 
-package com.liaison.mailbox.service.dto.configuration;
+package com.liaison.mailbox.service.dto.dropbox;
 
-import java.io.IOException;
-
-import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.validation.Mandatory;
 
 public class StagedFileDTO {
 	
@@ -62,7 +57,7 @@ public class StagedFileDTO {
 		this.fileSize = fileSize;
 	}
 	
-	@Mandatory(errorMessage = "MailBox guid is mandatory.")
+	
 	public String getMailboxGuid() {
 		return mailboxGuid;
 	}
@@ -70,7 +65,7 @@ public class StagedFileDTO {
 		this.mailboxGuid = mailboxGuid;
 	}
 	
-	@Mandatory(errorMessage = "Spectrun uri is mandatory.")
+	
 	public String getSpectrumUri() {
 		return spectrumUri;
 	}
@@ -78,34 +73,4 @@ public class StagedFileDTO {
 		this.spectrumUri = spectrumUri;
 	}
 	
-	/**
-	 * Copies all data from DTO to entity except PGUID.
-	 * 
-	 * @param stagedFile
-	 *            The StagedFile Entity
-	 * @throws IOException 
-	 */
-	public void copyToEntity(StagedFile stagedFile) throws IOException {
-
-		stagedFile.setPguid(MailBoxUtil.getGUID());
-		stagedFile.setMailboxId(this.getMailboxGuid());
-		stagedFile.setSpectrumUri(this.getSpectrumUri());
-		stagedFile.setFileName(this.getFileName());
-		stagedFile.setFilePath(this.getFilePath());
-		stagedFile.setFileSize(this.getFileSize());
-	}
-	
-	/**
-	 * Copies required data from entity to DTO
-	 * 
-	 * @param stagedFile
-	 * 			The StagedFileEntity
-	 */
-	public void copyFromEntity(StagedFile stagedFile) {
-		
-		this.setFilePguid(stagedFile.getPguid());
-		this.setFileName(stagedFile.getFileName());
-		this.setFilePath(stagedFile.getFilePath());
-		this.setFileSize(stagedFile.getFileSize());
-	}
 }

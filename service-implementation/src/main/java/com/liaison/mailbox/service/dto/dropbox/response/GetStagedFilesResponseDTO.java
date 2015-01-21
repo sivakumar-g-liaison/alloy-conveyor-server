@@ -3,7 +3,7 @@ package com.liaison.mailbox.service.dto.dropbox.response;
 import java.util.List;
 
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 
 public class GetStagedFilesResponseDTO extends CommonResponseDTO {
 

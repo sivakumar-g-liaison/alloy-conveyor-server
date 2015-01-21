@@ -30,7 +30,7 @@ allprojects {
     apply plugin: 'eclipse' //provides tasks for eclipse. If you don't use eclipse, simply don't use these tasks :)
     apply plugin: 'idea' 
 	
-    group = 'com.liaison.nucleus'
+    group = 'com.liaison.commons.mailbox'
 		
 	    // Define the Semantic Version number as the first line of RELEASE_NOTES.md
 	    file("${rootDir}/RELEASE_NOTES.md").withReader {
@@ -78,8 +78,6 @@ task showMeCache << {
 }
 
 subprojects {
-
-    group = "com.netflix.${githubProjectName}" // TEMPLATE: Set to organization of project
 
     // TODO should move dependencies to subprojects?
     dependencies {

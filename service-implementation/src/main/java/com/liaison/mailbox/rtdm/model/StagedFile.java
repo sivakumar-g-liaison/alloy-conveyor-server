@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.rtdm.model;
 
+import java.io.IOException;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,6 +20,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * The persistent class for the STAGED_FILES database table.
@@ -108,5 +112,36 @@ public class StagedFile implements Identifiable {
 	@Transient
 	public Class getEntityClass() {
 		return this.getClass();
+	}
+	
+	/**
+	 * Copies all data from DTO to entity except PGUID.
+	 * 
+	 * @param stagedFile
+	 *            The StagedFile Entity
+	 * @throws IOException 
+	 */
+	public void copyToDto(StagedFileDTO stagedFileDto) throws IOException {
+		
+		stagedFileDto.setMailboxGuid(this.getMailboxId());
+		stagedFileDto.setSpectrumUri(this.getSpectrumUri());
+		stagedFileDto.setFileName(this.getFileName());
+		stagedFileDto.setFilePath(this.getFilePath());
+		stagedFileDto.setFileSize(this.getFileSize());
+	}
+	
+	/**
+	 * Copies required data from entity to DTO
+	 * 
+	 * @param stagedFile
+	 * 			The StagedFileEntity
+	 */
+	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {		
+		if(isCreate){
+			this.setPguid(MailBoxUtil.getGUID()); 
+		}
+		this.setFileName(stagedFileDto.getFileName());
+		this.setFilePath(stagedFileDto.getFilePath());
+		this.setFileSize(stagedFileDto.getFileSize());
 	}
 }

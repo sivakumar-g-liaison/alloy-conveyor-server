@@ -227,7 +227,7 @@ dependencies {
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
 	}
 
-	workTicket 'com.liaison.dto:dto:2.0.0'
+	workTicket 'com.liaison.dto:dto:2.0.1-SNAPSHOT'
 	
 	compile ("com.liaison.commons.message.glass:glass-message-lib:4.+")
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
@@ -478,6 +478,42 @@ task enhance()  << {
 
 
 classes.dependsOn('enhance')
+
+
+def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"
+def dtoArchiveDestRoot = "${projectDir}/build/libs/"
+def dtoArchiveName = "dropbox-client.jar"
+task jarDto << {
+	copy {
+		from ("${projectDir}/build/classes/main")  {
+			include 'com/liaison/mailbox/service/dto/dropbox/*/**',
+					'com/liaison/mailbox/service/dto/*',
+					'com/liaison/mailbox/enums/Messages.class'
+					}
+		into "${projectDir}/build/tmp/jar-dto"
+		includeEmptyDirs false
+	}
+	copy {
+		from ("${projectDir}/src/main/java")  {
+			include 'com/liaison/mailbox/service/dto/dropbox/*/**',
+					'com/liaison/mailbox/service/dto/*',
+					'com/liaison/mailbox/enums/Messages.java'
+		}
+		into "${projectDir}/build/tmp/jar-dto"
+		includeEmptyDirs false
+	}
+
+	// using ant because it doesn't get polluted by the war task the way gradle jar task does
+	ant.jar(destFile: (dtoArchiveDestRoot + dtoArchiveName), basedir: dtoArchiveSourceRoot)
+}
+
+war.dependsOn('jarDto')
+artifacts {
+	archives( file(dtoArchiveDestRoot + dtoArchiveName) ) {
+		name 'dropbox-client'
+		type 'jar'
+	}
+}
 
 
 // jettyRun configuration properties

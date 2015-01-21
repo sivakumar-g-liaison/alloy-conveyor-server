@@ -18,8 +18,8 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
@@ -157,7 +157,7 @@ public class DropboxStagedFilesService {
 		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
 		StagedFile stagedFile = new StagedFile();
-		stagedFileDTO.copyToEntity(stagedFile);
+		stagedFile.copyFromDto(stagedFileDTO, true);
 
 		dropboxDao.persist(stagedFile);
 

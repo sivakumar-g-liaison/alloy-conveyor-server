@@ -26,6 +26,22 @@ allprojects {
             snapshotRepository(url: snapshotsArtifactRepoURL) {
                 authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
+			
+			addFilter('commonlib') {artifact, file ->
+				artifact.name == 'dropbox-client'
+			}
+			
+			pom('commonlib').whenConfigured{pom ->
+				pom.dependencies.removeAll { it.scope == "compile" }
+			}
+			
+			pom('commonlib').whenConfigured{pom ->
+				pom.dependencies.removeAll { it.scope == "test" }
+			}
+			
+			pom('commonlib').whenConfigured{pom ->
+				pom.dependencies.removeAll { it.scope == "runtime" }
+			}
         }
     }
 }
