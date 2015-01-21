@@ -35,8 +35,11 @@ private static final Logger logger = LogManager.getLogger(DummyDropboxQueueClien
 			//spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
 			WorkTicket ticketRequest = new WorkTicket();
 			ticketRequest.setPayloadURI(spectrumURL);
+			ticketRequest.setPayloadSize(1024l);
+			ticketRequest.setFileName("Dummy name");
 			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_ID, mailboxId);
-			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_OVERWRITE, Boolean.FALSE);		
+			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_OVERWRITE, Boolean.FALSE);	
+			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, "Dummy Path");
 			String payloadTicket = JAXBUtility.marshalToJSON(ticketRequest);
 			DummyDropboxQueue.getInstance().sendMessages(payloadTicket);
 			return Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity("Posted to Queue Successfully").build();

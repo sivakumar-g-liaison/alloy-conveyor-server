@@ -131,6 +131,7 @@ public interface MailBoxConstants {
 	public final static String KEY_FILE_MODIFIED_NAME = "modifiedTime";
 	public final static String KEY_MAILBOX_ID = "mailboxId";
 	public final static String KEY_OVERWRITE = "overwrite";
+	public final static String KEY_FILE_PATH = "path";
 
 	//GITURI
 	public static final String PROPERTY_GITLAB_ACTIVITY_PROJECT_ID = "com.liaison.gitlab.mailbox.script.project.id";

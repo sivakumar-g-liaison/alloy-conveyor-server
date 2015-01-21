@@ -11,14 +11,13 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 
 public class DropboxService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxService.class);
-	private static final String FILE_PATH_KEY = "path";
-	private static final String MAILBOX_GUID_KEY = "path";
 
 	/**
 	 * Method which will consume request from dropbox queue and log a staged
@@ -40,8 +39,8 @@ public class DropboxService {
 		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
 		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket.getAdditionalContext()
-				.get(FILE_PATH_KEY).toString(), workTicket.getPayloadSize().toString(), workTicket.getAdditionalContext().get(
-						MAILBOX_GUID_KEY).toString(), workTicket.getPayloadURI());
+				.get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize().toString(), workTicket.getAdditionalContext().get(
+						MailBoxConstants.KEY_MAILBOX_ID).toString(), workTicket.getPayloadURI());
 		dtoReq.setStagedFile(stageFileReqDTO);
 		
 		stageFileService.addStagedFile(dtoReq);

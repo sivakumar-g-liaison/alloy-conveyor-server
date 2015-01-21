@@ -19,14 +19,11 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagedFileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 
@@ -113,7 +110,6 @@ public class DropboxStagedFilesService {
 	}
 
 	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys) {
-
 		
 		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
@@ -156,11 +152,9 @@ public class DropboxStagedFilesService {
 			GenericValidator validator = new GenericValidator();
 			validator.validate(stagedFileDTO);
 	
-			DropboxDAO dropboxDao = new DropboxDAOBase();
-	
+			StagedFileDAO dropboxDao = new StagedFileDAOBase();
 			StagedFile stagedFile = new StagedFile();
 			stagedFileDTO.copyToEntity(stagedFile);
-	
 			dropboxDao.persist(stagedFile);
 	
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
@@ -177,25 +171,5 @@ public class DropboxStagedFilesService {
 			return serviceResponse;
 	
 		}
-<<<<<<< Updated upstream
-
-		// validation
-		GenericValidator validator = new GenericValidator();
-		validator.validate(stagedFileDTO);
-
-		StagedFileDAO dropboxDao = new StagedFileDAOBase();
-
-		StagedFile stagedFile = new StagedFile();
-		stagedFileDTO.copyToEntity(stagedFile);
-
-		dropboxDao.persist(stagedFile);
-
-		serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
-		serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
-
-		LOG.debug("Exit from add staged file.");
-		return serviceResponse;
-=======
->>>>>>> Stashed changes
 	}
 }

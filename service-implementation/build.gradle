@@ -227,7 +227,7 @@ dependencies {
 		exclude group: "bouncycastle" , module:"bcprov-jdk16"
 	}
 
-	workTicket 'com.liaison.dto:dto:2.0.0'
+	workTicket 'com.liaison.dto:dto:2.0.1-SNAPSHOT'
 	
 	compile ("com.liaison.commons.message.glass:glass-message-lib:4.+")
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
