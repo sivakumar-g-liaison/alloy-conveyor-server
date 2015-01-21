@@ -136,6 +136,7 @@ public enum Messages {
 	// DropBox Processor
 	CONTENT_QUEUED_FOR_TRANSFER_SUCCESSFUL("Content queued for transfer successfully."),
 	CONTENT_QUEUED_FOR_TRANSFER_FAILED("Content queued for transfer got failed."),
+	STAGED_FILEID_DOES_NOT_EXIST("Staged file with the given id %s does not exist."),
 	
 	// processing of token for the retrieval of login id or authentication token failed.
 	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed.");

@@ -2,6 +2,8 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,8 +32,12 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
+import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -69,7 +75,8 @@ public class DropboxFileDownloadResource extends AuditedResource {
 	})
 	public Response downloadStagedFile(@Context final HttpServletRequest serviceRequest, 
 			@PathParam(value = "stagedfileid") @ApiParam(name = "stagedfileid", required = true, value = "staged file id") final String stagedFileId) {
-		// create the worker delegate to perform the business logic
+		
+		//create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() throws Exception {
@@ -96,26 +103,39 @@ public class DropboxFileDownloadResource extends AuditedResource {
 								throw new MailBoxServicesException("Staged file id is Mandatory", Response.Status.BAD_REQUEST);
 							}
 							
-							//validate file id belongs to user organisation
-							if(!stagedFileService.validateFileId(stagedFileId)) {
-								throw new MailBoxServicesException("Staged file id does not belong to user organisation.", Response.Status.BAD_REQUEST);
-							} 
-							
-							//getting the file stream from spectrum for the given file id
-							InputStream fileStream = stagedFileService.getStagedFileStream(stagedFileId);
-							
 							// retrieving headers from auth response
 							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
 							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
 							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
 							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 							
+							List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+							if (tenancyKeys.isEmpty()) {
+								LOG.error("retrieval of tenancy key from acl manifest failed");
+								throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
+							}
+							
+							List<String> tenancyKeysArray = new ArrayList<String>();
+							
+							for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
+								tenancyKeysArray.add(tenancyKeyDTO.getGuid());
+							}
+							
+							//validate file id belongs to any user organisation
+							String spectrumUrl = stagedFileService.validateIfFileIdBelongsToAnyOrganisation(stagedFileId, tenancyKeysArray);
+							if(spectrumUrl == null) {
+								throw new MailBoxServicesException("Given staged file id does not belong to any user organisation.", Response.Status.BAD_REQUEST);
+							} 
+							
+							//getting the file stream from spectrum for the given file id
+							InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
+							
 							// response message construction
 							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
 									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
 									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
-									.type(MediaType.APPLICATION_JSON)
-									.entity(fileStream)
+									.type(MediaType.APPLICATION_OCTET_STREAM)
+									.entity(payload)
 									.status(Response.Status.OK);
 							LOG.debug("Exit from download staged file service.");
 							return builder.build();	
@@ -127,7 +147,7 @@ public class DropboxFileDownloadResource extends AuditedResource {
 				}
 			}
 		};
-		worker.actionLabel = "DropboxFileTransferResource.downloadStagedFile()";
+		worker.actionLabel = "DropboxFileDownloadResource.downloadStagedFile()";
 
 		// hand the delegate to the framework for calling
 		try {

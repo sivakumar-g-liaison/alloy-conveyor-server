@@ -14,6 +14,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -30,11 +33,16 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.acl.manifest.dto.NestedServiceDependencyContraint;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.gem.service.client.GEMManifestResponse;
+import com.liaison.gem.service.dto.EnvelopeDTO;
 import com.liaison.gem.service.dto.request.ManifestRequestDTO;
+import com.liaison.gem.service.dto.request.ManifestRequestDomain;
+import com.liaison.gem.service.dto.request.ManifestRequestGEM;
+import com.liaison.gem.service.dto.request.ManifestRequestPlatform;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.gem.util.GEMUtil;
 import com.liaison.mailbox.MailBoxConstants;
@@ -55,6 +63,7 @@ public class DropboxAuthenticationService {
 
 	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationService.class);
+	private static final String PROPERTY_PLATFORM_NAME = "com.liaison.acl.request.runtime.platform.name";
 
 	/**
 	 * Method to authenticate user Account by given serviceRequest.
@@ -69,7 +78,7 @@ public class DropboxAuthenticationService {
 		AuthenticateUserAccountResponseDTO response = new AuthenticateUserAccountResponseDTO();
 
 		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getPassword());
+		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getPassword(), serviceRequest.getToken());
 		
 		UMClient.authenticate();
 		
@@ -77,7 +86,7 @@ public class DropboxAuthenticationService {
 			response.setResponse(new AuthenticationResponseDTO(com.liaison.usermanagement.enums.Messages.AUTHENTICATION_FAILED,
 															   com.liaison.usermanagement.enums.Messages.STATUS_FAILURE,
 															   UMClient.getAuthenticationToken(),
-															   UMClient.getSessionDate(), ""));
+															   UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
 			LOG.debug("Auth failed");
 			return response;
 		}
@@ -85,7 +94,7 @@ public class DropboxAuthenticationService {
 		response.setResponse(new AuthenticationResponseDTO(com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
 															   com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS,
 															   UMClient.getAuthenticationToken(),
-															   UMClient.getSessionDate(), ""));
+															   UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
 		
 		LOG.debug("Exit from user authentication for dropbox.");
 		return response;
@@ -181,7 +190,7 @@ public class DropboxAuthenticationService {
 		UserManagementClient UMClient = new UserManagementClient();
 		try {
 			
-			UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getToken());
+			UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getPassword(), serviceRequest.getToken());
 			
 			// Calling UM for authentication
 			UMClient.authenticate();
@@ -195,16 +204,10 @@ public class DropboxAuthenticationService {
 	
 			// if authenticated successfully get manifest from GEM for the given loginId
 			GEMACLClient gemClient = new GEMACLClient();
-			
-			ManifestRequestDTO manifestRequestDTO = gemClient.constructACLManifestRequest(); //TODO this is still wrong. you should ONLY set the user 
-			//ID and the platform in the request. If you use constructACLManifestRequest it will set DOMAIN ,ROLE ETC.  You better construct your own manifestRequestDTO
-			manifestRequestDTO.getAcl().getEnvelope().setUserId(serviceRequest.getLoginId());
-            
+			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId()); 
 			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
             String signedDocument = gemClient.signRequestData(unsignedDocument);
-            
             String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-            
             GEMManifestResponse manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
             
 			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_SUCCESS,Messages.SUCCESS);
@@ -212,7 +215,7 @@ public class DropboxAuthenticationService {
 			
 			response = Response.ok(responseEntity)
 							   .header("Content-Type", MediaType.APPLICATION_JSON)
-							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedAuthTokenWithLoginId) //TODO please use the same name as in TT "token"//re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
+							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedAuthTokenWithLoginId) //re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
 							   .header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestFromGEM.getManifest())
 							   .header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestFromGEM.getSignature())
 							   .header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,manifestFromGEM.getPublicKeyGuid()).build();
@@ -227,4 +230,27 @@ public class DropboxAuthenticationService {
 
 		return response;
 	}
+	
+	private ManifestRequestDTO constructACLManifestRequest(String loginID) {
+
+        LOG.debug("Constructing the gem manifest request with default values");
+        // Construct Envelope
+        EnvelopeDTO envelope = new EnvelopeDTO();
+        envelope.setUserId(loginID);
+
+        // Construct Platform
+        ManifestRequestPlatform platform = new ManifestRequestPlatform();
+        platform.setName(configuration.getString(PROPERTY_PLATFORM_NAME));
+
+        // Construct ManifestRequestGEM
+        ManifestRequestGEM manifestRequestGEM = new ManifestRequestGEM();
+        manifestRequestGEM.setEnvelope(envelope);
+        manifestRequestGEM.getPlatforms().add(platform);
+
+        // Construct ManifestRequestDTO
+        ManifestRequestDTO manifestRequest = new ManifestRequestDTO();
+        manifestRequest.setAcl(manifestRequestGEM);
+
+        return manifestRequest;
+    }
 }

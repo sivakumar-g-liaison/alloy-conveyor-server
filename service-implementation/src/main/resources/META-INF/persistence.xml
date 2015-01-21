@@ -55,6 +55,7 @@
 		<class>com.liaison.mailbox.rtdm.model.FSMStateValue</class>
 		<class>com.liaison.mailbox.rtdm.model.FSMTransitionState</class>
 		<class>com.liaison.mailbox.rtdm.model.ProcessorExecutionState</class>
+		<class>com.liaison.mailbox.rtdm.model.StagedFile</class>
 		<properties>
 			  <property name="javax.persistence.transactionType" value="JTA" />
 			<!--  <property name="javax.persistence.jtaDataSource" value="g2:/oracleDS" /> -->

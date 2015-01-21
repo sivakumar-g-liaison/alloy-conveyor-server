@@ -10,11 +10,17 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.rtdm.dao.DropboxDAO;
+import com.liaison.mailbox.rtdm.dao.DropboxDAOBase;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 
 public class DropboxStagedFilesService {
@@ -41,19 +47,26 @@ public class DropboxStagedFilesService {
 		return serviceResponse;
 	}
 	
-	public InputStream getStagedFileStream(String fileId) {
+	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys) {
 		
-		//TODO getting spectrum url for the given fileId
-		String payloadURI = "Payload uri from db";
+		DropboxDAO dropboxDao = new DropboxDAOBase();
+		StagedFile stagedFile = dropboxDao.find(StagedFile.class, fileId);
+		if(stagedFile == null) {
+			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, fileId, Response.Status.BAD_REQUEST);
+		}
 		
-		//get payload from spectrum
-		InputStream payload = StorageUtilities.retrievePayload(payloadURI);
+		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
+		MailBox mailbox = mailboxDao.find(MailBox.class, stagedFile.getMailboxId());
+		if(mailbox == null) {
+			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, stagedFile.getMailboxId(), Response.Status.BAD_REQUEST);
+		}
 		
-		return payload;
-	}
-	
-	public boolean validateFileId(String fileId) {
+		for(String tkey : tenancyKeys) {
+			if(mailbox.getTenancyKey().equals(tkey)) {
+				return stagedFile.getSpectrumUri();
+			}
+		}
 		
-		return false;
+		return null;
 	}
 }
