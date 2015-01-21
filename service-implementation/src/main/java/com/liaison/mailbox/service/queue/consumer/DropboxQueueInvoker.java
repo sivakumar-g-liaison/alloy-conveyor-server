@@ -32,10 +32,10 @@ public class DropboxQueueInvoker implements Runnable {
 		
 		try {
 			getService().invokeDropboxQueue(request);
-		} catch (JAXBException | IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (JAXBException | IOException e) {
+			logger.error("Stage file failed", e);
 		}
+		
 		
 		logger.info("ServiceBrokerToDropboxWorkTicket with id:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 

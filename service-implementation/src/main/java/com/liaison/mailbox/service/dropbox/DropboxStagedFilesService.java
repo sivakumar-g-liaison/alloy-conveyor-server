@@ -18,15 +18,12 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagedFileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 
@@ -113,7 +110,6 @@ public class DropboxStagedFilesService {
 	}
 
 	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys) {
-
 		
 		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
@@ -144,27 +140,37 @@ public class DropboxStagedFilesService {
 		LOG.debug("Entering into add staged file.");
 
 		StagePayloadResponseDTO serviceResponse = new StagePayloadResponseDTO();
+		
+		try {
 
-		StagedFileDTO stagedFileDTO = request.getStagedFile();
-		if (stagedFileDTO == null) {
-			throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+			StagedFileDTO stagedFileDTO = request.getStagedFile();
+			if (stagedFileDTO == null) {
+				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
+			}
+	
+			// validation
+			GenericValidator validator = new GenericValidator();
+			validator.validate(stagedFileDTO);
+	
+			StagedFileDAO dropboxDao = new StagedFileDAOBase();
+			StagedFile stagedFile = new StagedFile();
+			stagedFile.copyToDto(stagedFileDTO);			
+			dropboxDao.persist(stagedFile);
+	
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
+			serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
+	
+			LOG.debug("Exit from add staged file.");
+			return serviceResponse;
+			
+		} catch (MailBoxConfigurationServicesException e) {
+	
+			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE, Messages.FAILURE, e
+					.getMessage()));
+			return serviceResponse;
+	
 		}
-
-		// validation
-		GenericValidator validator = new GenericValidator();
-		validator.validate(stagedFileDTO);
-
-		StagedFileDAO dropboxDao = new StagedFileDAOBase();
-
-		StagedFile stagedFile = new StagedFile();
-		stagedFile.copyFromDto(stagedFileDTO, true);
-
-		dropboxDao.persist(stagedFile);
-
-		serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
-		serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
-
-		LOG.debug("Exit from add staged file.");
-		return serviceResponse;
 	}
 }
+
