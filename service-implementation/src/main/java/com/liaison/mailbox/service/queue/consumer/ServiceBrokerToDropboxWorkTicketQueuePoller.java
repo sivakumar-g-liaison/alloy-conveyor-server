@@ -10,9 +10,9 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 
-public class ServiceBrokerToMailboxWorkTicketPoller {
+public class ServiceBrokerToDropboxWorkTicketQueuePoller {
 	
-	private static final Logger logger = LogManager.getLogger(ServiceBrokerToMailboxWorkTicketPoller.class);
+	private static final Logger logger = LogManager.getLogger(ServiceBrokerToDropboxWorkTicketQueuePoller.class);
 
     private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
@@ -23,17 +23,17 @@ public class ServiceBrokerToMailboxWorkTicketPoller {
 
 
     private static final long DEFAULT_INITIAL_DELAY = 10000;
-    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INITIALDELAY = "com.liaison.processedPayload.queue.poller.initialdelay";
+    public static final String PROPERTY_DROPBOX_QUEUE_POLLER_INITIALDELAY = "com.liaison.dropboxQueue.queue.poller.initialdelay";
 
     private static final long DEFAULT_INTERVAL_DELAY = 1000;
-    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_INTERVAL_DELAY = "com.liaison.processedPayload.queue.poller.intervaldelay";
+    public static final String PROPERTY_DROPBOX_QUEUE_POLLER_INTERVAL_DELAY = "com.liaison.dropboxQueue.queue.poller.intervaldelay";
 
     private static final String DEFAULT_TIME_UNIT_NAME = TimeUnit.MILLISECONDS.name();
-    public static final String PROPERTY_WATCHDOG_QUEUE_POLLER_TIMEUNIT = "com.liaison.processedPayload.queue.poller.timeunit";
+    public static final String PROPERTY_DROPBOX_QUEUE_POLLER_TIMEUNIT = "com.liaison.dropboxQueue.queue.poller.timeunit";
 
-    private static final long INITIAL_DELAY = configuration.getLong(PROPERTY_WATCHDOG_QUEUE_POLLER_INITIALDELAY, DEFAULT_INITIAL_DELAY);
-    private static final long INTERVAL_DELAY = configuration.getLong(PROPERTY_WATCHDOG_QUEUE_POLLER_INTERVAL_DELAY, DEFAULT_INTERVAL_DELAY);
-    private static final TimeUnit DELAY_TIME_UNIT = TimeUnit.valueOf(configuration.getString(PROPERTY_WATCHDOG_QUEUE_POLLER_TIMEUNIT,DEFAULT_TIME_UNIT_NAME));
+    private static final long INITIAL_DELAY = configuration.getLong(PROPERTY_DROPBOX_QUEUE_POLLER_INITIALDELAY, DEFAULT_INITIAL_DELAY);
+    private static final long INTERVAL_DELAY = configuration.getLong(PROPERTY_DROPBOX_QUEUE_POLLER_INTERVAL_DELAY, DEFAULT_INTERVAL_DELAY);
+    private static final TimeUnit DELAY_TIME_UNIT = TimeUnit.valueOf(configuration.getString(PROPERTY_DROPBOX_QUEUE_POLLER_TIMEUNIT,DEFAULT_TIME_UNIT_NAME));
 
     private static boolean started = false;
 
@@ -45,13 +45,13 @@ public class ServiceBrokerToMailboxWorkTicketPoller {
         final Runnable messageProcessor = new Runnable() {
             public void run() {
                 logger.debug("Polling message Process");
-                String message = ServiceBrokerToMailboxWorkTicket.getInstance().receiveMessage();
+                String message = ServiceBrokerToDropboxWorkTicketQueue.getInstance().receiveMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);
                     
                     try {
-                    	ServiceBrokerToMailboxWorkTicketConsumer qconsumer = ServiceBrokerToMailboxWorkTicketConsumer.getMailboxWatchDogQueueConsumerInstance();
-                        qconsumer.invokeWatchDog(message);
+                    	ServiceBrokerToDropboxWorkTicketQueueConsumer qconsumer = ServiceBrokerToDropboxWorkTicketQueueConsumer.getDropboxQueueConsumerInstance();
+                        qconsumer.invokeDropboxQueue(message);
                     } catch (Exception e) {
                         logger.error("Recovering from processing error", e);
                     }

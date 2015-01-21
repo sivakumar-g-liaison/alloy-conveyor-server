@@ -31,6 +31,7 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.queue.consumer.ProcessorQueuePoller;
+import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxWorkTicketQueuePoller;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTicketPoller;
 
 
@@ -60,6 +61,7 @@ public class InitializationServlet extends HttpServlet {
         
         ProcessorQueuePoller.startPolling();
         ServiceBrokerToMailboxWorkTicketPoller.startPolling();
+        ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();       
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
     	//OracleDataSource.initOracleDataSource(); // TODO

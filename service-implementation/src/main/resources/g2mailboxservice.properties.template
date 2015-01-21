@@ -43,6 +43,23 @@ com.liaison.jms.receive.attempts.processedPayload=-1
 #-1 is infinite
 com.liaison.jms.send.attempts.processedPayload=-1
 
+## AHOY! HEY! Not for your desktop!
+#DO NOT USE THIS QUEUE OUTSIDE OF LITHIA SPRINGS or UNHAPPY RACE CONDITIONS WILL OCCUR
+com.liaison.jms.queuename.dropboxQueue=jms.queue.DEVINTServiceBrokerToDropboxWorkTicketQueue
+###############################################################################
+
+#SSL Settings
+com.liaison.jms.ssl.enable.dropboxQueue=false
+com.liaison.jms.ssl.truststore.path.dropboxQueue=/secure/tomcat/hornetq-ssl/my.cacerts
+
+
+com.liaison.jms.hostname.dropboxQueue=10.146.16.148
+com.liaison.jms.port.dropboxQueue=5046
+#-1 is infinite
+com.liaison.jms.receive.attempts.dropboxQueue=1
+#-1 is infinite
+com.liaison.jms.send.attempts.dropboxQueue=-1
+
 #\\\###########################///#
 #\\\###########################///#
 ########################################################DATABASE CONFIGURATIONS############################################################
@@ -190,6 +207,8 @@ mailbox.sla.time.configuration.unit=MINUTES
 mailbox.processor.queue.consumer.thread.count=5
 #Thread Count for watchdog
 mailbox.processedPayload.queue.consumer.thread.count=5
+#Thread Count for Dropbox Queue
+mailbox.dropboxQueue.queue.consumer.thread.count=5
 
 # fs2 client properties for payloads
 fs2.storage.spectrum.ip=10.146.16.118
