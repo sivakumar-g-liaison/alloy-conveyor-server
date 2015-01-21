@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
+import java.util.List;
+
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 
@@ -18,6 +20,14 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
  * 
  */
 
-public interface DropboxDAO extends GenericDAO<StagedFile> {
+public interface StagedFileDAO extends GenericDAO<StagedFile> {
+	
+	/**
+	 * Method to retrieve the list of all staged files of given mailbox ids
+	 * 
+	 * @param mailboxIds
+	 * @return list of stagedFiles
+	 */
+	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds);
 	
 }

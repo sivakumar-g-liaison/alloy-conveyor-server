@@ -94,4 +94,18 @@ public class StagedFileDTO {
 		stagedFile.setFilePath(this.getFilePath());
 		stagedFile.setFileSize(this.getFileSize());
 	}
+	
+	/**
+	 * Copies required data from entity to DTO
+	 * 
+	 * @param stagedFile
+	 * 			The StagedFileEntity
+	 */
+	public void copyFromEntity(StagedFile stagedFile) {
+		
+		this.setFilePguid(stagedFile.getPguid());
+		this.setFileName(stagedFile.getFileName());
+		this.setFilePath(stagedFile.getFilePath());
+		this.setFileSize(stagedFile.getFileSize());
+	}
 }

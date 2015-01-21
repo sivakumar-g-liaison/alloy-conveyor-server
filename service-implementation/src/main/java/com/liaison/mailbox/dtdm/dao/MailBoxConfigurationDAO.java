@@ -50,4 +50,11 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys);
 	public List<MailBox> findByName(String mbxName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
 	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName);
+	
+	/**
+	 * Method to retrieve all mailbox guids linked to a given tenancy keys
+	 * @param tenancyKey
+	 * @return List of Mailbox Ids linked to given tenancykeys
+	 */
+	public List<String> findAllMailboxesLinkedToTenancyKeys(List<String> tenancyKeys);
 }

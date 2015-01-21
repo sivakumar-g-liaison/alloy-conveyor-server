@@ -14,17 +14,21 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.rtdm.dao.DropboxDAO;
-import com.liaison.mailbox.rtdm.dao.DropboxDAOBase;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.StagedFileDTO;
+import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagedFileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
+
 
 public class DropboxStagedFilesService {
 
@@ -33,27 +37,86 @@ public class DropboxStagedFilesService {
 	public static final String STAGED_FILES = "Staged Files";
 	public static final String STAGED_FILE = "Staged File";
 
-	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request) {
 
+	
+	/**
+	 * Method to retrieve all staged files of the mailboxes linked to 
+	 * tenancykeys available in the manifest
+	 * 
+	 * @param request
+	 * @param aclManifest
+	 * @return list of StagedFiles
+	 * @throws IOException
+	 */
+	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request, String aclManifest) throws IOException {
+		
 		GetStagedFilesResponseDTO serviceResponse = new GetStagedFilesResponseDTO();
-		List<StagedFileDTO> stagedFiles = new ArrayList<StagedFileDTO>();
+		List <StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
+		
+		LOG.info("Retrieving tenancy keys from acl-manifest");
+		
+		//TODO: Facing problem while fetching the staged files need to resolve so currently implementation is commented out
+		
+		// retrieve the tenancy key from acl manifest
+		/*List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		if (tenancyKeys.isEmpty()) {
+			LOG.error("retrieval of tenancy key from acl manifest failed");
+			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
+		}
+		
+		LOG.debug("retrieve tenancyKey Values from tenancyKeyDTO");
+		List <String> tenancyKeyValues = new ArrayList<String>();
+		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
+			tenancyKeyValues.add(tenancyKeyDTO.getGuid());
+		}
+		LOG.debug("The retrieved tenancykey values are {}", tenancyKeyValues);
+		
+		// retrieve corresponding mailboxes of the available tenancyKeys.
+		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
+		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeyValues);
+		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeyValues);
+		
+		if (mailboxIds.isEmpty()) {
+			LOG.error("There are no mailboxes linked to the tenancyKeys");
+			throw new MailBoxServicesException("There are no mailboxes available for tenancykeys", Response.Status.NOT_FOUND);
+		}
+		
+		// retrieve all staged files of mailboxes.
+		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
+		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds);
+		
+		if (stagedFiles.isEmpty()) {
+			LOG.error("There are no staged files available for linked mailboxes");
+			throw new MailBoxServicesException("There are no staged Files available", Response.Status.NOT_FOUND);
+		}
+		
+		for (StagedFile stagedFile : stagedFiles) {
+			
+			StagedFileDTO stagedFileDTO = new StagedFileDTO();
+			stagedFileDTO.copyFromEntity(stagedFile);
+			stagedFileDTOs.add(stagedFileDTO);
+		}	*/
 		// Dummy json holding 4 records
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++)  {
+
 			StagedFileDTO stagedFile = new StagedFileDTO();
 			stagedFile.setFilePguid("Dummy staged file id" + i);
 			stagedFile.setFileName("Dummy staged file Name" + i);
 			stagedFile.setFilePath("Dummy staged file path" + i);
-			stagedFiles.add(stagedFile);
+			stagedFileDTOs.add(stagedFile);
+
 		}
 
-		serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, STAGED_FILES, Messages.SUCCESS));
-		serviceResponse.setStagedFiles(stagedFiles);
+		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, STAGED_FILES, Messages.SUCCESS));
+		serviceResponse.setStagedFiles(stagedFileDTOs);
 		return serviceResponse;
 	}
 
 	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys) {
 
-		DropboxDAO dropboxDao = new DropboxDAOBase();
+		
+		StagedFileDAO dropboxDao = new StagedFileDAOBase();
+
 		StagedFile stagedFile = dropboxDao.find(StagedFile.class, fileId);
 		if (stagedFile == null) {
 			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, fileId,
@@ -91,7 +154,7 @@ public class DropboxStagedFilesService {
 		GenericValidator validator = new GenericValidator();
 		validator.validate(stagedFileDTO);
 
-		DropboxDAO dropboxDao = new DropboxDAOBase();
+		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
 		StagedFile stagedFile = new StagedFile();
 		stagedFileDTO.copyToEntity(stagedFile);

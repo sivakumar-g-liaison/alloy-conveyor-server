@@ -38,6 +38,13 @@ public class DropboxFileTransferService {
 	
 	public static final String TRANSFER_PROFILE = "Tranfer Profiles";
 	
+	/**
+	 * @param request
+	 * @param profileId
+	 * @param aclManifest
+	 * @return
+	 * @throws Exception
+	 */
 	public DropboxTransferContentResponseDTO uploadContentAsyncToSpectrum(HttpServletRequest request, String profileId, String aclManifest) throws Exception {
 		
 		LOG.debug("Entering into uploadContentAsyncToSpectrum service.");
@@ -46,6 +53,7 @@ public class DropboxFileTransferService {
 		String tenancyKey = null;
 		List <Processor> dropboxProcessors = new ArrayList<Processor>();
 		LOG.info("Retrieving tenancy keys from acl-manifest");
+		
 		// retrieve the tenancy key from acl manifest
 		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
 		if (tenancyKeys.isEmpty()) {
@@ -92,6 +100,12 @@ public class DropboxFileTransferService {
 		
 	}
 	
+	/**
+	 * @param request
+	 * @param aclManifest
+	 * @return
+	 * @throws IOException
+	 */
 	public GetTransferProfilesResponseDTO getTransferProfiles(HttpServletRequest request, String aclManifest) throws IOException {
 		
 		GetTransferProfilesResponseDTO serviceResponse = new GetTransferProfilesResponseDTO();
@@ -142,11 +156,19 @@ public class DropboxFileTransferService {
 			transferProfiles.add(transferProfile);
 		}*/
 		
-		serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));
+		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));
 		serviceResponse.setTransferProfiles(transferProfiles);
 		return serviceResponse;
 	}
 	
+	/**
+	 * @param request
+	 * @param mailboxPguid
+	 * @param isSecurePayload
+	 * @param pipeLineId
+	 * @param serviceInstanceId
+	 * @throws Exception
+	 */
 	private void generateWorkTicketAndPostToQueue(HttpServletRequest request, String mailboxPguid, boolean isSecurePayload, String pipeLineId, String serviceInstanceId) throws Exception {
 		
 		Map <String, String>properties = new HashMap <String, String>();

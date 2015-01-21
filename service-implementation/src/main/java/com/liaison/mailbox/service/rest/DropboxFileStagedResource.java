@@ -149,8 +149,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 						String aclSignerGuid = responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
 						String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 
-						GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService
-								.getStagedFiles(serviceRequest);
+						GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService.getStagedFiles(serviceRequest, aclManifest);
 						String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 						// response message construction
 						ResponseBuilder builder = Response.ok()

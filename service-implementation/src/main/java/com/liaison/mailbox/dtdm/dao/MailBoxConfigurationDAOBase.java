@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.dtdm.dao;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -18,6 +20,7 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -268,6 +271,36 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 
 		return appEntity;
+	}
+	
+	@Override
+	public List<String> findAllMailboxesLinkedToTenancyKeys(List<String> tenancyKeys) {
+		
+		List <String> linkedMailboxIds = new ArrayList<String>();
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		
+		try {
+			
+			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
+							.append(" where mailbox.tenancyKey in (" +collectionToSqlString(tenancyKeys) + ")");
+			List<?> mailboxIds = entityManager.createQuery(query.toString()).getResultList();
+			
+			Iterator<?> iter = mailboxIds.iterator();
+			
+			while (iter.hasNext()) {
+				
+				String mailboxId = (String)iter.next();
+				linkedMailboxIds.add(mailboxId);		
+			}
+			
+		} finally {
+			if (null != entityManager) {
+				entityManager.close();				
+			}
+		}
+		
+		return linkedMailboxIds;
+		
 	}
 
 }
