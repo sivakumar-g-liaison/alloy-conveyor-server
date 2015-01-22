@@ -31,6 +31,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
@@ -106,7 +107,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 							// retrieving headers from auth response
 							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
 							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
-							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
+							String aclSignerGuid =responseHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
 							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 							
 							List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
@@ -132,7 +133,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 							
 							// response message construction
 							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
-									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
+									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, aclSignerGuid)
 									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
 									.type(MediaType.APPLICATION_OCTET_STREAM)
 									.entity(payload)

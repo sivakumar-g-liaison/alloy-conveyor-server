@@ -16,12 +16,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.datanucleus.util.Base64;
 
+import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.EncryptionUtil;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class DropboxAuthenticatorUtil {
 	
@@ -29,17 +31,10 @@ public class DropboxAuthenticatorUtil {
 	
 	public static Response authenticateAndGetManifest(HttpServletRequest request) {
 		
-		
 		// retrieve request headers from request
-		LOGGER.info("get request headers");
-		String aclManifest = MailBoxUtil.getEnvironmentProperties().getString("dummy.acl.manifest.json");//request.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-		String aclSignature = "dummy-signature";//request.getHeader(MailBoxConstants.ACL_SIGNATURE_HEADER);
-		String aclSignerGuid = "dummy-signer-guid";//request.getHeader(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
-		String mailboxToken = "dummy-token";//request.getHeader(MailBoxConstants.AUTH_TOKEN);
-		
-		//TODO: Remove the comments once UMClient is modified to support authentication using authenticationToken.
-		// retrieve login id from mailbox token
-		/*String loginId = getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
+		LOGGER.info("get mailbox token from request header");
+		String mailboxToken = request.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+		String loginId = getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 		
 		// retrieve authentication token from mailbox token
 		String authenticationToken = getPartofToken(mailboxToken, MailBoxConstants.UM_AUTH_TOKEN);
@@ -49,13 +44,8 @@ public class DropboxAuthenticatorUtil {
 				
 		DropboxAuthenticationService authService = new DropboxAuthenticationService();
 		DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = constructAuthenticationRequest(loginId, null, authenticationToken);
-		authResponse = authService.authenticateAndGetManifest(dropboxAuthAndGetManifestRequestDTO); */
-		
-		// Dummy Response always returning success is sent 
-		Response authResponse =  Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
-				.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
-				.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, mailboxToken)
-				.status(Response.Status.OK).build();
+		authResponse = authService.authenticateAndGetManifest(dropboxAuthAndGetManifestRequestDTO); 
+
 		return authResponse;
 		
 	}
@@ -75,11 +65,11 @@ public class DropboxAuthenticatorUtil {
 		MultivaluedMap<String, Object> metadata = response.getMetadata();
 		String aclManifest = metadata.get(MailBoxConstants.ACL_MANIFEST_HEADER).get(0).toString();
 		String aclSignature = metadata.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER).get(0).toString();
-		String aclSignerGuid = metadata.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER).get(0).toString();
+		String aclSignerGuid = metadata.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID).get(0).toString();
 		String token = metadata.get(MailBoxConstants.DROPBOX_AUTH_TOKEN).get(0).toString();
 		headers.put(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest);
 		headers.put(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature);
-		headers.put(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid);
+		headers.put(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, aclSignerGuid);
 		headers.put(MailBoxConstants.DROPBOX_AUTH_TOKEN, token);
 		return headers;
 	}
@@ -87,7 +77,8 @@ public class DropboxAuthenticatorUtil {
 	public static String [] retrieveAuthTokenDetails(String token) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException  {
 
 		LOGGER.debug("Retrieval of Token Details");
-		String decryptedToken = EncryptionUtil.decrypt(token.getBytes(MailBoxConstants.CHARSETNAME), true);
+		byte[] decodedToken = Base64.decode(token);
+		String decryptedToken = EncryptionUtil.decrypt(decodedToken, true);
 		LOGGER.debug("decryptedToken token {} ",decryptedToken);
 		// Retrieval of recent revision date from token
 		return decryptedToken.split(MailBoxConstants.TOKEN_SEPARATOR);

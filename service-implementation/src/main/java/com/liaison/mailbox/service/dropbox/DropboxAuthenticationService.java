@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.datanucleus.util.Base64;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
@@ -206,12 +207,12 @@ public class DropboxAuthenticationService {
             String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
             GEMManifestResponse manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
             
-			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL,Messages.SUCCESS);
-			String encryptedAuthTokenWithLoginId = new String(EncryptionUtil.encrypt(new StringBuilder(UMClient.getAuthenticationToken()).append("::").append(serviceRequest.getLoginId()).toString(), true));
-			
-			ResponseBuilder builder = Response.ok().entity(responseEntity).status(Response.Status.OK)
-							   .header("Content-Type", MediaType.APPLICATION_JSON)
-							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedAuthTokenWithLoginId) //re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
+			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_SUCCESS,Messages.SUCCESS);
+			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::").append(serviceRequest.getLoginId()).toString();
+			String encryptedEncodedToken = new String(Base64.encode(EncryptionUtil.encrypt(mailboxTokenWithLoginId, true)));
+
+			ResponseBuilder builder = Response.ok().entity(responseEntity).status(Response.Status.OK)							   .header("Content-Type", MediaType.APPLICATION_JSON)
+							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedEncodedToken) //re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
 							   .header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestFromGEM.getManifest())
 							   .header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestFromGEM.getSignature())
 							   .header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,manifestFromGEM.getPublicKeyGuid());

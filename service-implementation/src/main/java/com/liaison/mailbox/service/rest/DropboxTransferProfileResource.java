@@ -25,6 +25,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
@@ -91,14 +92,14 @@ public class DropboxTransferProfileResource extends AuditedResource {
 							// retrieving headers from auth response
 							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
 							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
-							String aclSignerGuid =responseHeaders.get(MailBoxConstants.ACL_SIGNER_GUID_HEADER);
+							String aclSignerGuid =responseHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
 							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 							
 							GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(serviceRequest, aclManifest);
 							String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
 							// response message construction
 							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
-									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(MailBoxConstants.ACL_SIGNER_GUID_HEADER, aclSignerGuid)
+									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, aclSignerGuid)
 									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
 									.type(MediaType.APPLICATION_JSON)
 									.entity(responseBody)
