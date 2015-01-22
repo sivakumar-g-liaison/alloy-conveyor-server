@@ -1670,7 +1670,7 @@ var rest = myApp.controller(
 						folderURI: data.getProcessorResponse.processor.folders[i].folderURI,
 						folderType: $scope.getFolderTypeDuringProcessorEdit(data.getProcessorResponse.processor.folders[i].folderType),
 						folderDesc: data.getProcessorResponse.processor.folders[i].folderDesc,
-						isMandatory: (($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'FILEWRITER') && (data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION' || data.getProcessorResponse.processor.folders[i].folderType === 'FILE_WRITE_LOCATION')) ? true : false,
+						isMandatory: (($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'FILEWRITER') && (data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION' || data.getProcessorResponse.processor.folders[i].folderType === 'FILE_WRITE_LOCATION')) ? true : false,
 						allowAdd: false
 					});
 					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,
@@ -2231,8 +2231,8 @@ var rest = myApp.controller(
                 //console.log(commaSplit);
                 var lenFolderProps = $scope.processorFolderProperties.length;
 				
-				//Removed empty folder row for sweeper , HTTP Async Processor and File Writer
-				if ($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'FILEWRITER') lenFolderProps = 2;
+				//Removed empty folder row for sweeper and File Writer
+				if ($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'FILEWRITER') lenFolderProps = 2;
 				
                 for (var i = 0; i < lenFolderProps - 1; i++) {
                     $scope.processor.folders.push({
@@ -2651,7 +2651,7 @@ var rest = myApp.controller(
                 $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
             };
             $scope.setFolderData = function () {
-                if ($scope.procsrType.id === "SWEEPER" || $scope.procsrType.id === "HTTPASYNCPROCESSOR") {
+                if ($scope.procsrType.id === "SWEEPER") {
                     $scope.processorFolderProperties = [{
                         folderURI: '',
                         folderType: 'Payload Location',

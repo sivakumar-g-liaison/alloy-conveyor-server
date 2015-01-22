@@ -65,22 +65,13 @@
           <label for="tenancykey">
             Tenancy key*
           </label>
-
-            <input class="form-control" type="text" id="tenancykey" ng-model="tenancyKey.name" name="tenancykey"
-                   ng-minLength=3 ng-maxLength=80 typeahead="tenancykeyObj as tenancykeyObj.name for tenancykeyObj in tenancyKeys"
-				   typeahead-loading="loadingLocations" class="form-control" typeahead-min-length="typeaheadMinLength" typeahead-wait-ms="typeaheadWaitMS" typeahead-on-select="onTenancyKeySelected($item)" required ng-disabled = "isMailBoxEdit"/>
-            <div ng-show="formAddMbx.tenancykey.$dirty && formAddMbx.tenancykey.$invalid">
-			<span id="mbx-add-tenancykeyRequired" class="customHide" ng-class="{'help-block-custom' : formAddMbx.tenancykey.$error.required }" ng-show="formAddMbx.tenancykey.$error.required">Tenancy Key is Mandatory.</span>
-            <span id="mbx-add-tenancykeyInvalid-minlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.tenancykey.$error.minlength }" ng-show="formAddMbx.tenancykey.$error.minlength">
-            <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Tenancy Key cannot be shorter than {{typeaheadMinLength}} characters.</span>
-		    <span id="mbx-add-tenancykeyInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.key.$error.maxlength }" ng-show="formAddMbx.key.$error.maxlength">
-		    <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Tenancy Key cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
-            </div>
-          
-          
-        </div>
+		  <select class="form-control" ng-model="tenancyKey" id="tenancykey" ng-options="tenancykeyObj as tenancykeyObj.name for tenancykeyObj in tenancyKeys" ng-change="onTenancyKeySelected(tenancyKey)" ng-hide= "isMailBoxEdit">
+          <option value="" ng-hide = isEnable>-- Select --</option>
+		  </select>
+            <input class="form-control" type="text" id="tenancykey" ng-model="tenancyKey.name" name="tenancykey" ng-show = "isMailBoxEdit" ng-disabled = "isMailBoxEdit"/>
+         </div>
         
-      </div>
+   </div>
       
       <div class="col-md-6">
         <div class="form-group">
@@ -135,7 +126,7 @@
     <button id="mbx-add-cancel" class="btn btn-primary" data-toggle="modal" data-target="#cancelAction">
       Cancel
     </button>
-    <button id="mbx-add-save" class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid">
+    <button id="mbx-add-save" class="btn btn-primary" ng-click="saveMailbox()" ng-disabled="formAddMbx.$invalid || !isEnable">
       Save
     </button>
     <button id="mbx-add-procsr" class="btn btn-primary" ng-click="navigateToProcessorScreen()" ng-disabled="(!isProcessorsAvailable && !isMailBoxSaved && !isMailBoxEdit) || (formAddMbx.$invalid)">
