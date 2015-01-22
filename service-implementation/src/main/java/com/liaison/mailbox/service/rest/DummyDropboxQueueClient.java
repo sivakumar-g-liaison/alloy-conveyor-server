@@ -19,7 +19,7 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.queue.DummyDropboxQueue;
 
-@Path("/dummydropboxqueueclient")
+@Path("dummydropboxqueueclient")
 public class DummyDropboxQueueClient {
 private static final Logger logger = LogManager.getLogger(DummyDropboxQueueClient.class);
 	

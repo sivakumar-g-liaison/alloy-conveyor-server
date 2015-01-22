@@ -43,7 +43,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("/dropbox/transferContent")
+@Path("dropbox/transferContent")
 public class DropboxFileTransferResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferResource.class);

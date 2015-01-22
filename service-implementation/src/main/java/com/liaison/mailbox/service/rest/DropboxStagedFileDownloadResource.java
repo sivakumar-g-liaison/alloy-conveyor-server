@@ -48,7 +48,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("/dropbox/stagedFiles/{stagedFileId}")
+@Path("dropbox/stagedFiles/{stagedFileId}")
 public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxStagedFileDownloadResource.class);

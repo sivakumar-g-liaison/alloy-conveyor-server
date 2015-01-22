@@ -219,7 +219,8 @@ public class DropboxAuthenticationService {
 			response = builder.build();
 			
 		} catch (Exception e) {
-			LOG.error("Dropbox - getting manifest after authentication failed.");
+			e.printStackTrace();
+			LOG.error("Dropbox - getting manifest after authentication failed.",e);
 			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,Messages.FAILURE);
 			response = Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 		}

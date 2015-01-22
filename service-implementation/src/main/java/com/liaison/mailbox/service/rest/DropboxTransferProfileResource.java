@@ -40,7 +40,7 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 
-@Path("/dropbox/transferProfiles")
+@Path("dropbox/transferProfiles")
 public class DropboxTransferProfileResource extends AuditedResource {
 	
 	private static final Logger LOG = LogManager.getLogger(DropboxTransferProfileResource.class);
