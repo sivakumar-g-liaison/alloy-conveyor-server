@@ -74,7 +74,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 		@ApiResponse(code = 500, message = "Unexpected Service failure.")
 	})
 	public Response downloadStagedFile(@Context final HttpServletRequest serviceRequest, 
-			@PathParam(value = "stagedfileid") @ApiParam(name = "stagedfileid", required = true, value = "staged file id") final String stagedFileId) {
+			@PathParam(value = "stagedFileId") @ApiParam(name = "stagedfileid", required = true, value = "staged file id") final String stagedFileId) {
 		
 		//create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {

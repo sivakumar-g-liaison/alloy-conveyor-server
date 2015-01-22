@@ -131,10 +131,11 @@ public class StagedFile implements Identifiable {
 	}
 	
 	/**
-	 * Copies all data from DTO to entity except PGUID.
+	 * Copies all data from entity to DTO except PGUID.
 	 * 
-	 * @param stagedFile
-	 *            The StagedFile Entity
+	 * @param stagedFileDTO
+	 *            The StagedFile DTO
+	 * @param copyAll - boolean           
 	 * @throws IOException 
 	 * @throws JAXBException 
 	 */
@@ -156,22 +157,26 @@ public class StagedFile implements Identifiable {
 	}
 	
 	/**
-	 * Copies required data from entity to DTO
+	 * Copies required data from DTO to Entity
 	 * 
-	 * @param stagedFile
-	 * 			The StagedFileEntity
+	 * @param stagedFileDTO
+	 * 			The StagedFileDTO
+	 * @param boolean isCreate
 	 * @throws IOException 
 	 * @throws JAXBException 
 	 * @throws JsonMappingException 
 	 * @throws JsonGenerationException 
 	 */
 	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) throws JsonGenerationException, JsonMappingException, JAXBException, IOException {		
+		
 		if(isCreate){
 			this.setPguid(MailBoxUtil.getGUID()); 
 		}
 		this.setFileName(stagedFileDto.getFileName());
 		this.setFilePath(stagedFileDto.getFilePath());
 		this.setFileSize(stagedFileDto.getFileSize());
+		this.setMailboxId(stagedFileDto.getMailboxGuid());
+		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
 		
 		if (null != stagedFileDto.getMeta()) {
 			String metaDataJson = JAXBUtility.marshalToJSON(stagedFileDto.getMeta());

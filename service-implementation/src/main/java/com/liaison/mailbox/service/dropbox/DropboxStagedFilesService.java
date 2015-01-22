@@ -157,7 +157,7 @@ public class DropboxStagedFilesService {
 	
 			StagedFileDAO dropboxDao = new StagedFileDAOBase();
 			StagedFile stagedFile = new StagedFile();
-			stagedFile.copyToDto(stagedFileDTO, true);			
+			stagedFile.copyFromDto(stagedFileDTO, true);			
 			dropboxDao.persist(stagedFile);
 	
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
