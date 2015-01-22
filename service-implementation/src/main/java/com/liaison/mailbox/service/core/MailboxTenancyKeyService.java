@@ -28,7 +28,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 public class MailboxTenancyKeyService {
 
-	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationService.class);
+	private static final Logger LOG = LogManager.getLogger(MailboxTenancyKeyService.class);
 	private static final String TENANCY_KEYS = "Tenancy Keys";
 	
 	
