@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
  * @author OFS
@@ -39,7 +40,7 @@ public class StagedFileDAOBase extends  GenericDAOBase<StagedFile> implements St
 		try {
 			
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-							.append(" where sf.mailboxId in (" +collectionToSqlString(mailboxIds) + ")");
+							.append(" where sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
 			
 			List<?> files = entityManager.createQuery(query.toString()).getResultList();
 			
@@ -59,23 +60,5 @@ public class StagedFileDAOBase extends  GenericDAOBase<StagedFile> implements St
 		return stagedFiles;
 	}
 	
-	/**
-	 * Generate "in" clause string from the list.
-	 *
-	 * @param mailboxIds list of mailboxIds
-	 * @return String
-	 */
-	private String collectionToSqlString(List<String> mailboxIds) {
 
-		if (null == mailboxIds || mailboxIds.isEmpty()) {
-			return null;
-		}
-
-		StringBuilder s = new StringBuilder();
-		for (final String str : mailboxIds) {
-			s.append("'").append(str).append("'").append(",");
-		}
-
-		return s.toString().substring(0, s.toString().length() - 1);
-	}
 }

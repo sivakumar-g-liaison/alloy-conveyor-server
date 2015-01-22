@@ -13,6 +13,7 @@ import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileMetaDataDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 
 public class DropboxService {
@@ -41,6 +42,9 @@ public class DropboxService {
 		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket.getAdditionalContext()
 				.get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize().toString(), workTicket.getAdditionalContext().get(
 						MailBoxConstants.KEY_MAILBOX_ID).toString(), workTicket.getPayloadURI());
+		// set meta data in the staged file dto
+		StagedFileMetaDataDTO stagedFileMetaDataDto = new StagedFileMetaDataDTO(workTicket.getPayloadSize().toString());
+		stageFileReqDTO.setMeta(stagedFileMetaDataDto);
 		dtoReq.setStagedFile(stageFileReqDTO);
 		
 		stageFileService.addStagedFile(dtoReq);

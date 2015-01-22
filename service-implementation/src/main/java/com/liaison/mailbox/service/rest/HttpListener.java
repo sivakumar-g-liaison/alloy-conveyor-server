@@ -72,6 +72,7 @@ import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
+import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.MonitorRegistry;
@@ -180,7 +181,7 @@ public class HttpListener extends AuditedResource {
 						authenticateRequestor(request);
 					}
 					logger.debug("constructed workticket");
-					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
+					WorkTicket workTicket  = WorkTicketUtil.createWorkTicket(request, mailboxPguid, httpListenerProperties);
 
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 
@@ -280,10 +281,10 @@ public class HttpListener extends AuditedResource {
 					if (isAuthenticationCheckRequired(httpListenerProperties)) {
 						authenticateRequestor(request);
 					}
-					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
-					storePayload(request, workTicket, httpListenerProperties);
+					WorkTicket workTicket = WorkTicketUtil.createWorkTicket(request, mailboxPguid, httpListenerProperties);
+					WorkTicketUtil.storePayload(request, workTicket, httpListenerProperties);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
-					constructMetaDataJson(request, workTicket);
+					WorkTicketUtil.constructMetaDataJson(workTicket);
 
 					//GLASS LOGGING BEGINS//
 					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
@@ -396,7 +397,7 @@ public class HttpListener extends AuditedResource {
 	 * @param httpListenerProperties
 	 * @return WorkTicket
 	 */
-	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
+/*	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
 		WorkTicket workTicket = new WorkTicket();
 		workTicket.setAdditionalContext("httpMethod", request.getMethod());
 		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
@@ -424,7 +425,7 @@ public class HttpListener extends AuditedResource {
 	 *        workTicket
 	 *
 	 */
-	protected void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{
+	/*protected void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{
 
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements())
@@ -448,7 +449,7 @@ public class HttpListener extends AuditedResource {
 	 *
 	 * @param workTicket
 	 */
-	protected void assignGlobalProcessId(WorkTicket workTicket) {
+	/*protected void assignGlobalProcessId(WorkTicket workTicket) {
 		UUIDGen uuidGen = new UUIDGen();
 		String uuid = uuidGen.getUUID();
 		workTicket.setGlobalProcessId(uuid);
@@ -465,7 +466,7 @@ public class HttpListener extends AuditedResource {
 	 * @param workTicket
 	 * @throws IOException
 	 */
-	protected void storePayload(HttpServletRequest request,
+	/*protected void storePayload(HttpServletRequest request,
 			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws Exception {
 
 	  try (InputStream payloadToPersist = request.getInputStream()) {
@@ -490,7 +491,7 @@ public class HttpListener extends AuditedResource {
         SweeperQueue.getInstance().sendMessages(message);
         logger.debug("HttpListener postToQueue, message: {}", message);
 
-	}
+	}*/
 
 	/**
 	 * This method will persist payload in spectrum.
@@ -506,7 +507,7 @@ public class HttpListener extends AuditedResource {
 		logger.info("Starting to forward request...");
 
 		//persist payload in spectrum
-		storePayload(request, workTicket, httpListenerProperties);
+		WorkTicketUtil.storePayload(request, workTicket, httpListenerProperties);
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);
@@ -733,7 +734,7 @@ public class HttpListener extends AuditedResource {
 	 *
 	 *
 	 */
-	private String retrievePipelineId(Map <String, String> httpListenerProperties) {
+	/*private String retrievePipelineId(Map <String, String> httpListenerProperties) {
 
 		String pipelineId = null;
 		pipelineId = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
@@ -749,7 +750,7 @@ public class HttpListener extends AuditedResource {
 	 * @throws IOException
 	 * @throws MailBoxServicesException
 	 */
-	private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket, Map <String, String> httpListenerProperties) {
+	/*private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket, Map <String, String> httpListenerProperties) {
 
 		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
@@ -758,7 +759,7 @@ public class HttpListener extends AuditedResource {
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, (MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 		return fs2Header;
-	}
+	}*/
 
 
 	@Override

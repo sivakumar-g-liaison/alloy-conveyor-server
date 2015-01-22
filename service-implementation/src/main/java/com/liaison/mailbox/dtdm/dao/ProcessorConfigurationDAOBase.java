@@ -31,6 +31,7 @@ import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
  * @author OFS
@@ -243,7 +244,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(" inner join processor.mailbox mbx")
 						.append(" where processor.procsrStatus = :" + STATUS)
 						.append(" and mbx.mbxStatus = :" + STATUS)
-						.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
@@ -283,7 +284,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(" where mbx.pguid = :" + PGUID)
 						.append(" and mbx.mbxStatus = :" + STATUS)
 						.append(" and processor.procsrStatus = :" + STATUS)
-						.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PGUID, mbxGuid)
@@ -325,7 +326,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(" and processor.mailbox.tenancyKey = :" + ProcessorConfigurationDAO.TENANCY_KEY)
 						.append(" and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS)
 						.append(" and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS)
-						.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
 			
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(ProcessorConfigurationDAO.PROFILE_ID, profileId)
@@ -444,29 +445,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			}
 		}
 		return processors;
-	}
-	
-	/**
-	 * This method will construct a string of processor types appended by OR operator instead of using IN Clause 
-	 * because using IN clause along with TYPE operator is having issues
-	 * 
-	 * @param specificProcessorTypes
-	 * @return
-	 */
-	private String constructSqlStringForTypeOperator(List <String> specificProcessorTypes) {
-		
-		StringBuilder s = new StringBuilder();
-		
-		for (int i = 0; i < specificProcessorTypes.size(); i++) {
-			
-			if (i == 0) {
-				s.append(" TYPE(processor) = " + specificProcessorTypes.get(i));
-			} else {
-				s.append(" or TYPE(processor) = " + specificProcessorTypes.get(i));
-			}
-		}
-		return s.toString();
-		
 	}
 
 }

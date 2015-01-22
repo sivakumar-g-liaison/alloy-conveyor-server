@@ -18,9 +18,15 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.JAXBException;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileMetaDataDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -41,6 +47,7 @@ public class StagedFile implements Identifiable {
 	private String fileName;
 	private String filePath;
 	private String spectrumUri;
+	private String fileMetaData;
 	
 	
 	public StagedFile() {
@@ -65,7 +72,7 @@ public class StagedFile implements Identifiable {
 		this.fileSize = fileSize;
 	}
 
-	@Column(name = "MAILBOX_ID", nullable = false, length = 32)
+	@Column(name = "MAILBOX_GUID", nullable = false, length = 32)
 	public String getMailboxId() {
 		return mailboxId;
 	}
@@ -100,6 +107,15 @@ public class StagedFile implements Identifiable {
 	public void setSpectrumUri(String spectrumUri) {
 		this.spectrumUri = spectrumUri;
 	}
+	
+	@Column(name = "META", length = 512)
+	public String getFileMetaData() {
+		return fileMetaData;
+	}
+
+	public void setFileMetaData(String fileMetaData) {
+		this.fileMetaData = fileMetaData;
+	}
 
 	@Override
 	@Transient
@@ -120,14 +136,23 @@ public class StagedFile implements Identifiable {
 	 * @param stagedFile
 	 *            The StagedFile Entity
 	 * @throws IOException 
+	 * @throws JAXBException 
 	 */
-	public void copyToDto(StagedFileDTO stagedFileDto) throws IOException {
+	public void copyToDto(StagedFileDTO stagedFileDto, boolean copyAll) throws IOException, JAXBException {
 		
-		stagedFileDto.setMailboxGuid(this.getMailboxId());
-		stagedFileDto.setSpectrumUri(this.getSpectrumUri());
+		// if copyAll is false, mailboxguid and spectrum uri will not be set in StagedFileDTO
+		if (copyAll) {
+			stagedFileDto.setMailboxGuid(this.getMailboxId());
+			stagedFileDto.setSpectrumUri(this.getSpectrumUri());
+		}	
 		stagedFileDto.setFileName(this.getFileName());
 		stagedFileDto.setFilePath(this.getFilePath());
 		stagedFileDto.setFileSize(this.getFileSize());
+		
+		if (null != this.getFileMetaData()) {
+			StagedFileMetaDataDTO metaDataDto = JAXBUtility.unmarshalFromJSON(this.getFileMetaData(), StagedFileMetaDataDTO.class);
+			stagedFileDto.setMeta(metaDataDto);
+		}
 	}
 	
 	/**
@@ -135,13 +160,25 @@ public class StagedFile implements Identifiable {
 	 * 
 	 * @param stagedFile
 	 * 			The StagedFileEntity
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws JsonMappingException 
+	 * @throws JsonGenerationException 
 	 */
-	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {		
+	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) throws JsonGenerationException, JsonMappingException, JAXBException, IOException {		
 		if(isCreate){
 			this.setPguid(MailBoxUtil.getGUID()); 
 		}
 		this.setFileName(stagedFileDto.getFileName());
 		this.setFilePath(stagedFileDto.getFilePath());
 		this.setFileSize(stagedFileDto.getFileSize());
+		
+		if (null != stagedFileDto.getMeta()) {
+			String metaDataJson = JAXBUtility.marshalToJSON(stagedFileDto.getMeta());
+			this.setFileMetaData(metaDataJson);
+		}
+		
 	}
+
+
 }

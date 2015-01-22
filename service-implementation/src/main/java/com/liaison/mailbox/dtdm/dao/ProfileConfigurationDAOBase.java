@@ -23,6 +23,7 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
  * @author OFS
@@ -89,7 +90,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 							.append(" where processor.mailbox.tenancyKey = :" + ProfileConfigurationDAO.TENANCY_KEY)
 							.append(" and processor.mailbox.mbxStatus = :" + ProfileConfigurationDAO.STATUS)
 							.append(" and processor.procsrStatus = :" + ProfileConfigurationDAO.STATUS)
-							.append(" and ( " + constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+							.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
 						
 				
 				List<?> proc = entityManager.createQuery(query.toString())
@@ -113,29 +114,6 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 				}
 			}
 			return processors;
-		}
-
-	/**
-	 * This method will construct a string of processor types appended by OR operator instead of using IN Clause 
-	 * because using IN clause along with TYPE operator is having issues
-	 * 
-	 * @param specificProcessorTypes
-	 * @return
-	 */
-	private String constructSqlStringForTypeOperator(List <String> specificProcessorTypes) {
-		
-		StringBuilder s = new StringBuilder();
-		
-		for (int i = 0; i < specificProcessorTypes.size(); i++) {
-			
-			if (i == 0) {
-				s.append(" TYPE(processor) = " + specificProcessorTypes.get(i));
-			} else {
-				s.append(" or TYPE(processor) = " + specificProcessorTypes.get(i));
-			}
-		}
-		return s.toString();
-		
-	}
+		}	
 
 }

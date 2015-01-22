@@ -18,6 +18,7 @@ public class StagedFileDTO {
 	private String fileSize;
 	private String mailboxGuid;
 	private String spectrumUri;
+	private StagedFileMetaDataDTO meta;
 	
 	public StagedFileDTO() {
 		
@@ -57,7 +58,6 @@ public class StagedFileDTO {
 		this.fileSize = fileSize;
 	}
 	
-	
 	public String getMailboxGuid() {
 		return mailboxGuid;
 	}
@@ -65,12 +65,20 @@ public class StagedFileDTO {
 		this.mailboxGuid = mailboxGuid;
 	}
 	
-	
 	public String getSpectrumUri() {
 		return spectrumUri;
 	}
 	public void setSpectrumUri(String spectrumUri) {
 		this.spectrumUri = spectrumUri;
 	}
-	
+
+	public StagedFileMetaDataDTO getMeta() {
+		return meta;
+	}
+
+	public void setMeta(StagedFileMetaDataDTO meta) {
+		this.meta = meta;
+	}
+
+		
 }

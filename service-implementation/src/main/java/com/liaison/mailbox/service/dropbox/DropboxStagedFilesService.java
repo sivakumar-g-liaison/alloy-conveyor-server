@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,12 +19,15 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagedFileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 
@@ -44,18 +48,17 @@ public class DropboxStagedFilesService {
 	 * @param aclManifest
 	 * @return list of StagedFiles
 	 * @throws IOException
+	 * @throws JAXBException 
 	 */
-	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request, String aclManifest) throws IOException {
+	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request, String aclManifest) throws IOException, JAXBException {
 		
 		GetStagedFilesResponseDTO serviceResponse = new GetStagedFilesResponseDTO();
 		List <StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
 		
 		LOG.info("Retrieving tenancy keys from acl-manifest");
-		
-		//TODO: Facing problem while fetching the staged files need to resolve so currently implementation is commented out
-		
+			
 		// retrieve the tenancy key from acl manifest
-		/*List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
@@ -90,11 +93,11 @@ public class DropboxStagedFilesService {
 		for (StagedFile stagedFile : stagedFiles) {
 			
 			StagedFileDTO stagedFileDTO = new StagedFileDTO();
-			stagedFileDTO.copyFromEntity(stagedFile);
+			stagedFile.copyToDto(stagedFileDTO, false);
 			stagedFileDTOs.add(stagedFileDTO);
-		}	*/
+		}	
 		// Dummy json holding 4 records
-		for (int i = 0; i < 5; i++)  {
+		/*for (int i = 0; i < 5; i++)  {
 
 			StagedFileDTO stagedFile = new StagedFileDTO();
 			stagedFile.setFilePguid("Dummy staged file id" + i);
@@ -102,7 +105,7 @@ public class DropboxStagedFilesService {
 			stagedFile.setFilePath("Dummy staged file path" + i);
 			stagedFileDTOs.add(stagedFile);
 
-		}
+		}*/
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, STAGED_FILES, Messages.SUCCESS));
 		serviceResponse.setStagedFiles(stagedFileDTOs);
@@ -135,7 +138,7 @@ public class DropboxStagedFilesService {
 		return null;
 	}
 
-	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request) throws IOException {
+	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request) throws IOException, JAXBException {
 
 		LOG.debug("Entering into add staged file.");
 
@@ -154,7 +157,7 @@ public class DropboxStagedFilesService {
 	
 			StagedFileDAO dropboxDao = new StagedFileDAOBase();
 			StagedFile stagedFile = new StagedFile();
-			stagedFile.copyToDto(stagedFileDTO);			
+			stagedFile.copyToDto(stagedFileDTO, true);			
 			dropboxDao.persist(stagedFile);
 	
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));

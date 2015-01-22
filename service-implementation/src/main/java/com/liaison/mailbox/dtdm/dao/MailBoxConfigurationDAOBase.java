@@ -20,8 +20,8 @@ import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.dtdm.model.MailBox;
-import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
  * @author OFS
@@ -56,7 +56,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")")
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 
 			totalItems = (Long)em
@@ -95,7 +95,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")")
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
@@ -148,7 +148,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")");
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
 			totalItems = (Long)entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
 					.getSingleResult();
@@ -181,7 +181,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + collectionToSqlString(tenancyKeys).toLowerCase() + ")");
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
 
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 
@@ -214,26 +214,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		}
 
 		return mailboxList;
-	}
-
-	/**
-	 * Generate "in" clause string from the list.
-	 *
-	 * @param sids list of service instance ids
-	 * @return String
-	 */
-	private String collectionToSqlString(List<String> sids) {
-
-		if (null == sids || sids.isEmpty()) {
-			return null;
-		}
-
-		StringBuilder s = new StringBuilder();
-		for (final String str : sids) {
-			s.append("'").append(str).append("'").append(",");
-		}
-
-		return s.toString().substring(0, s.toString().length() - 1);
 	}
 
 	/**
@@ -282,7 +262,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 			
 			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
-							.append(" where mailbox.tenancyKey in (" +collectionToSqlString(tenancyKeys) + ")");
+							.append(" where mailbox.tenancyKey in (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys) + ")");
 			List<?> mailboxIds = entityManager.createQuery(query.toString()).getResultList();
 			
 			Iterator<?> iter = mailboxIds.iterator();
