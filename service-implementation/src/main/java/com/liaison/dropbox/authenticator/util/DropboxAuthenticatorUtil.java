@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.EncryptionUtil;

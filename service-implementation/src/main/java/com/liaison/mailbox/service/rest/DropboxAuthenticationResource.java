@@ -52,7 +52,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 /**
  * This is the gateway for the mailbox processor configuration services.
  *
- * @author santoshc
+ * @author OFS
  */
 @Path("dropbox/authenticate")
 @Api(value = "dropbox/authenticate",
