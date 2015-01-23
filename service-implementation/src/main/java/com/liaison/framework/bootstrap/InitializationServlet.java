@@ -50,10 +50,8 @@ public class InitializationServlet extends HttpServlet {
 
 
 	private static final long serialVersionUID = -8418412083748649428L;
-	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);
-	
-	DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
-    public static final String PROPERTY_USE_MOCK_ACL_SIGNATURE_VERIFIER = "com.liaison.acl.use.mock.verifier";
+	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
+	DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();  
 
 
     public void init(ServletConfig config) throws ServletException {
@@ -68,16 +66,8 @@ public class InitializationServlet extends HttpServlet {
         UUIDGen.init();
         
       //Set ACL Filter Signature Verifier
-      SignatureVerifier aclSignatureVerifier; 
-      if (configuration.getBoolean(PROPERTY_USE_MOCK_ACL_SIGNATURE_VERIFIER, false)){
-          aclSignatureVerifier = new ExampleBase64EncodedSignatureVerifier();
-          logger.warn("###############################################################################################################");
-          logger.warn("#### Signature Verifier still set to hardcoded dev example, please update to proper signature verifier /n#### that loads public keys from key manager. EEEEEK! Pay attention to this!");
-          logger.warn("###############################################################################################################");
-      } else {
-          aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
-      }
-      
+      SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();; 
+        
       ACLUtil.setSignatureVerifier(aclSignatureVerifier);
       logger.info(new DefaultAuditStatement(Status.SUCCEED, "ACL Filter Signature Verifier Set: " + aclSignatureVerifier.getClass().getName(), com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
       logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
