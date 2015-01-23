@@ -95,8 +95,8 @@ public class DropboxStagedFilesService {
 			StagedFileDTO stagedFileDTO = new StagedFileDTO();
 			stagedFile.copyToDto(stagedFileDTO, false);
 			stagedFileDTOs.add(stagedFileDTO);
-		}	
 		// Dummy json holding 4 records
+		}	
 		/*for (int i = 0; i < 5; i++)  {
 
 			StagedFileDTO stagedFile = new StagedFileDTO();

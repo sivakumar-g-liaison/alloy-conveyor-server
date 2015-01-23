@@ -146,8 +146,9 @@ public class StagedFile implements Identifiable {
 			stagedFileDto.setMailboxGuid(this.getMailboxId());
 			stagedFileDto.setSpectrumUri(this.getSpectrumUri());
 		}	
-		stagedFileDto.setFileName(this.getFileName());
-		stagedFileDto.setFilePath(this.getFilePath());
+		stagedFileDto.setId(this.getPguid());
+		stagedFileDto.setName(this.getFileName());
+		stagedFileDto.setPath(this.getFilePath());
 		stagedFileDto.setFileSize(this.getFileSize());
 		
 		if (null != this.getFileMetaData()) {
@@ -172,8 +173,8 @@ public class StagedFile implements Identifiable {
 		if(isCreate){
 			this.setPguid(MailBoxUtil.getGUID()); 
 		}
-		this.setFileName(stagedFileDto.getFileName());
-		this.setFilePath(stagedFileDto.getFilePath());
+		this.setFileName(stagedFileDto.getName());
+		this.setFilePath(stagedFileDto.getPath());
 		this.setFileSize(stagedFileDto.getFileSize());
 		this.setMailboxId(stagedFileDto.getMailboxGuid());
 		this.setSpectrumUri(stagedFileDto.getSpectrumUri());

@@ -141,7 +141,8 @@ public enum Messages {
 	USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL("User authenticated and manifest retrieved successfully"),
 	
 	// processing of token for the retrieval of login id or authentication token failed.
-	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed.");
+	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed."),
+	REQUEST_HEADER_PROPERTIES_MISSING("Request header properties are missing");
 	
 	
 	private String value;

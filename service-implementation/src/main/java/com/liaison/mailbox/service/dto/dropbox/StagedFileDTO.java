@@ -9,65 +9,74 @@
 
 package com.liaison.mailbox.service.dto.dropbox;
 
-
 public class StagedFileDTO {
-	
-	private String fileName;
-	private String filePguid;
-	private String filePath;
+
+	private String name;
+	private String id;
+	private String path;
 	private String fileSize;
 	private String mailboxGuid;
 	private String spectrumUri;
 	private StagedFileMetaDataDTO meta;
-	
+
 	public StagedFileDTO() {
-		
+
 	}
-	
-	public StagedFileDTO(String fileName, String filePguid, String filePath, String fileSize, String mailboxGuid, String spectrumUri) {
-		this.setFileName(fileName);
-		this.setFilePguid(filePguid);
-		this.setFilePath(filePath);
+
+	public StagedFileDTO(String fileName, String filePguid, String filePath, String fileSize, String mailboxGuid,
+			String spectrumUri) {
+		this.setName(fileName);
+		this.setId(filePguid);
+		this.setPath(filePath);
 		this.setFileSize(fileSize);
 		this.setMailboxGuid(mailboxGuid);
 		this.setSpectrumUri(spectrumUri);
 	}
-	
-	public String getFileName() {
-		return fileName;
+
+	public String getId() {
+		return id;
 	}
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+
+	public void setId(String id) {
+		this.id = id;
 	}
-	public String getFilePguid() {
-		return filePguid;
+
+	public String getName() {
+		return name;
 	}
-	public void setFilePguid(String filePguid) {
-		this.filePguid = filePguid;
+
+	public void setName(String name) {
+		this.name = name;
 	}
-	public String getFilePath() {
-		return filePath;
+
+	public String getPath() {
+		return path;
 	}
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
+
+	public void setPath(String path) {
+		this.path = path;
 	}
+
 	public String getFileSize() {
 		return fileSize;
 	}
+
 	public void setFileSize(String fileSize) {
 		this.fileSize = fileSize;
 	}
-	
+
 	public String getMailboxGuid() {
 		return mailboxGuid;
 	}
+
 	public void setMailboxGuid(String mailboxGuid) {
 		this.mailboxGuid = mailboxGuid;
 	}
-	
+
 	public String getSpectrumUri() {
 		return spectrumUri;
 	}
+
 	public void setSpectrumUri(String spectrumUri) {
 		this.spectrumUri = spectrumUri;
 	}
@@ -80,5 +89,4 @@ public class StagedFileDTO {
 		this.meta = meta;
 	}
 
-		
 }
