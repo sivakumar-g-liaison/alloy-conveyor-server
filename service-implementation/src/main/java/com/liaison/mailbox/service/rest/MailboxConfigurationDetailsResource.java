@@ -39,8 +39,10 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -118,8 +120,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					LOG.info("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					if (MailBoxUtil.isEmpty(manifestJson)) {
-						LOG.info("ACL Manifest not available in the request header");
-						manifestJson =  MailBoxUtil.getDummyManifestJson();
+						LOG.error("ACL Manifest not available in the request header");
+						throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,  Response.Status.BAD_REQUEST);
 					} else {
 						LOG.info("ACL Manifest available in the request header");
 					}
@@ -183,8 +185,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					LOG.info("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					if (MailBoxUtil.isEmpty(manifestJson)) {
-						LOG.info("ACL Manifest not available in the request header");
-						manifestJson =  MailBoxUtil.getDummyManifestJson();
+					    LOG.error("ACL Manifest not available in the request header");
+                        throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,  Response.Status.BAD_REQUEST);
 					} else {
 						LOG.info("ACL Manifest available in the request header");
 					}
@@ -250,8 +252,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					LOG.info("Retrieving acl manifest json from request header");
 					String manifestJson = request.getHeader("acl-manifest");
 					if (MailBoxUtil.isEmpty(manifestJson)) {
-						LOG.info("ACL Manifest not available in the request header");
-						manifestJson =  MailBoxUtil.getDummyManifestJson();
+					    LOG.error("ACL Manifest not available in the request header");
+                        throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,  Response.Status.BAD_REQUEST);
 					} else {
 						LOG.info("ACL Manifest available in the request header");
 					}
