@@ -14,9 +14,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -26,7 +32,6 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,9 +48,7 @@ import com.liaison.gem.service.dto.request.ManifestRequestPlatform;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.gem.util.GEMUtil;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
-import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.util.EncryptionUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
@@ -176,58 +179,31 @@ public class DropboxAuthenticationService {
 	 * @param serviceRequest
 	 * @return AuthenticateUserAccountResponseDTO
 	 */
-	public Response authenticateAndGetManifest(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
+	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
 
 		LOG.debug("Entering into user authentication and get manifest service for dropbox.");
 
-		Response response = null;
-		DropboxAuthAndGetManifestResponseDTO responseEntity = null;
-       
+		GEMManifestResponse manifestFromGEM = null;
 		
-		UserManagementClient UMClient = new UserManagementClient();
 		try {
-			
-			UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getPassword(), serviceRequest.getToken());
-			
-			// Calling UM for authentication
-			UMClient.authenticate();
-	
-			// handling UM authentication response
-			if (!UMClient.isSuccessful()) {	
-				LOG.error("Dropbox - user authentication failed");	
-				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,Messages.FAILURE);
-				return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
-			} 
-	
-			// if authenticated successfully get manifest from GEM for the given loginId
+
+			// get manifest from GEM for the given loginId
 			GEMACLClient gemClient = new GEMACLClient();
 			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId()); 
 			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
             String signedDocument = gemClient.signRequestData(unsignedDocument);
             String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-            GEMManifestResponse manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
+            manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
             
-			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_SUCCESS,Messages.SUCCESS);
-			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::").append(serviceRequest.getLoginId()).toString();
-			String encryptedEncodedToken = new String(Base64.encode(EncryptionUtil.encrypt(mailboxTokenWithLoginId, true)));
-
-			ResponseBuilder builder = Response.ok().entity(responseEntity).status(Response.Status.OK)							   .header("Content-Type", MediaType.APPLICATION_JSON)
-							   .header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedEncodedToken) //re encrypted token like E(UMClient.getAuthenticationToken()::loginId) 
-							   .header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestFromGEM.getManifest())
-							   .header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestFromGEM.getSignature())
-							   .header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,manifestFromGEM.getPublicKeyGuid());
-			response = builder.build();
+			return manifestFromGEM;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOG.error("Dropbox - getting manifest after authentication failed.",e);
-			responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,Messages.FAILURE);
-			response = Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(responseEntity).build();
 		}
 		
 		LOG.debug("Exiting from user authentication and get manifest service for dropbox.");
-
-		return response;
+		return manifestFromGEM;
 	}
 	
 	private ManifestRequestDTO constructACLManifestRequest(String loginID) {
@@ -252,4 +228,21 @@ public class DropboxAuthenticationService {
 
         return manifestRequest;
     }
+	
+	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
+		
+		UserManagementClient UMClient = new UserManagementClient();
+		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(), serviceRequest.getPassword(), serviceRequest.getToken());
+		UMClient.authenticate();
+		
+		if(UMClient.isSuccessful()) {
+			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::")
+					.append(serviceRequest.getLoginId()).toString();
+			String encryptedEncodedToken = new String(Base64.encode(EncryptionUtil.encrypt(mailboxTokenWithLoginId,
+					true)));
+			return encryptedEncodedToken;
+		}
+
+		return null;
+	}
 }

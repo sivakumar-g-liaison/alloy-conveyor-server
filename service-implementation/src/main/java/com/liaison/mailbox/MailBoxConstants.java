@@ -166,6 +166,7 @@ public interface MailBoxConstants {
 	public static final String UM_AUTH_TOKEN = "um-auth-token";
 	public static final String LOGIN_ID = "loginId";
 	public static final String ACL_MANIFEST_HEADER = "acl-manifest";
+	public static final String DBX_WORK_TICKET_PROFILE_NAME = "profileName";
 
 	public static final String DROPBOX_AUTH_TOKEN = "token";
 	public static final String ACL_SIGNED_MANIFEST_HEADER = "acl-signature";

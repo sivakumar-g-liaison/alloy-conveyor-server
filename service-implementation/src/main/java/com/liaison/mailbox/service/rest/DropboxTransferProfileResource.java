@@ -1,7 +1,6 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,10 +24,15 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
+import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -39,10 +43,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-
 @Path("dropbox/transferProfiles")
 public class DropboxTransferProfileResource extends AuditedResource {
-	
+
 	private static final Logger LOG = LogManager.getLogger(DropboxTransferProfileResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -55,15 +58,10 @@ public class DropboxTransferProfileResource extends AuditedResource {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	@GET
-	@ApiOperation(value = "get list of transferprofiles",
-	notes = "retrieve the list of transferprofiles",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 
-	@ApiResponses({
-		@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
+	@GET
+	@ApiOperation(value = "get list of transferprofiles", notes = "retrieve the list of transferprofiles", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response getTransferProfiles(@Context final HttpServletRequest serviceRequest) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -73,43 +71,60 @@ public class DropboxTransferProfileResource extends AuditedResource {
 				serviceCallCounter.incrementAndGet();
 
 				LOG.debug("Entering getTransferProfiles");
+
+				DropboxAuthAndGetManifestResponseDTO responseEntity;
+				DropboxAuthenticationService authService = new DropboxAuthenticationService();
+				DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
+
 				try {
-					Response serviceResponse = null;
-					Response authResponse = DropboxAuthenticatorUtil.authenticateAndGetManifest(serviceRequest);
-					Map <String, String> responseHeaders = DropboxAuthenticatorUtil.retrieveResponseHeaders(authResponse);
-					switch (authResponse.getStatus()) {
+
+					// get login id and auth token from mailbox token
+					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
+					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
+					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
+							MailBoxConstants.UM_AUTH_TOKEN);
+
+					// constructing authenticate and get manifest request
+					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil
+							.constructAuthenticationRequest(loginId, null, authenticationToken);
+
+					// authenticating
+					String encryptedMbxToken = authService
+							.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
+					if (encryptedMbxToken == null) {
+						LOG.error("Dropbox - user authentication failed");
+						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
+								Messages.FAILURE);
+						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON)
+								.entity(responseEntity).build();
+					}
+
+					// getting manifest
+					GEMManifestResponse manifestResponse = authService
+							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					if (manifestResponse == null) {
+						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
+								Messages.FAILURE);
+						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
+								.entity(responseEntity).build();
+					}
+
+					GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService
+							.getTransferProfiles(serviceRequest, manifestResponse.getManifest());
+					String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
 					
-						case MailBoxConstants.ACL_RETRIVAL_FAILURE_CODE:
-							serviceResponse =  authResponse;
-							break;
-						case MailBoxConstants.AUTH_FAILURE_CODE:
-							serviceResponse =  authResponse;
-							break;
-						case MailBoxConstants.AUTH_SUCCESS_CODE:
-							
-							DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
-							
-							// retrieving headers from auth response
-							String aclManifest = responseHeaders.get(MailBoxConstants.ACL_MANIFEST_HEADER);
-							String aclSignature =responseHeaders.get(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER);
-							String aclSignerGuid =responseHeaders.get(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-							String token = responseHeaders.get(MailBoxConstants.DROPBOX_AUTH_TOKEN);
-							
-							GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(serviceRequest, aclManifest);
-							String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
-							// response message construction
-							ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, aclManifest)
-									.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, aclSignature).header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, aclSignerGuid)
-									.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, token)
-									.type(MediaType.APPLICATION_JSON)
-									.entity(responseBody)
-									.status(Response.Status.OK);
-							LOG.debug("Exit from getStagedFiles service.");
-							serviceResponse = builder.build();	
-					}						
-					
-					return serviceResponse ;				
-				
+					// response message construction
+					ResponseBuilder builder = Response
+							.ok()
+							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
+							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
+							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+									manifestResponse.getPublicKeyGuid())
+							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
+							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
+					LOG.debug("Exit from getStagedFiles service.");
+					return builder.build();
+
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
@@ -131,7 +146,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-	
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
@@ -143,12 +158,12 @@ public class DropboxTransferProfileResource extends AuditedResource {
 	@Override
 	protected void beginMetricsCollection() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
