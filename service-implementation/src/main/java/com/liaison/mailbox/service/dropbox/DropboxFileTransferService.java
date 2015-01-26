@@ -183,6 +183,8 @@ public class DropboxFileTransferService {
 	 * @param serviceInstanceId
 	 * @throws Exception
 	 */
+	//TODO too many arguments why cant you pass a work ticket object with these params already set in it ?
+	//Again why pass request object do deep inside
 	private void generateWorkTicketAndPostToQueue(HttpServletRequest request, String mailboxPguid, boolean isSecurePayload, String pipeLineId, String serviceInstanceId, String profileName) throws Exception {
 		
 		Map <String, String>properties = new HashMap <String, String>();

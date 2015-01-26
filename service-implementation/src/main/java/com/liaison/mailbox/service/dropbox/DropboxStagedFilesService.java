@@ -87,7 +87,8 @@ public class DropboxStagedFilesService {
 		
 		if (stagedFiles.isEmpty()) {
 			LOG.error("There are no staged files available for linked mailboxes");
-			throw new MailBoxServicesException("There are no staged Files available", Response.Status.NOT_FOUND);
+			throw new MailBoxServicesException("There are no staged Files available", Response.Status.NOT_FOUND); //TODO need not fail the operation .
+			//It is just that you did not find any result which is valid case. So still return a success , but with empty list and this message.
 		}
 		
 		for (StagedFile stagedFile : stagedFiles) {
@@ -95,17 +96,9 @@ public class DropboxStagedFilesService {
 			StagedFileDTO stagedFileDTO = new StagedFileDTO();
 			stagedFile.copyToDto(stagedFileDTO, false);
 			stagedFileDTOs.add(stagedFileDTO);
-		// Dummy json holding 4 records
+		
 		}	
-		/*for (int i = 0; i < 5; i++)  {
-
-			StagedFileDTO stagedFile = new StagedFileDTO();
-			stagedFile.setFilePguid("Dummy staged file id" + i);
-			stagedFile.setFileName("Dummy staged file Name" + i);
-			stagedFile.setFilePath("Dummy staged file path" + i);
-			stagedFileDTOs.add(stagedFile);
-
-		}*/
+		
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, STAGED_FILES, Messages.SUCCESS));
 		serviceResponse.setStagedFiles(stagedFileDTOs);
