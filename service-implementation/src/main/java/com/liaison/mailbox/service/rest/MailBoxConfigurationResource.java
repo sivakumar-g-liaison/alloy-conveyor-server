@@ -115,13 +115,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 
 					// retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
-					String manifestJson = request.getHeader("acl-manifest");
-					if (MailBoxUtil.isEmpty(manifestJson)) {
-					    LOG.error("ACL Manifest not available in the request header");
-                        throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,  Response.Status.BAD_REQUEST);
-					} else {
-						LOG.info("ACL Manifest available in the request header");
-					}
+					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
 					// creates new mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 					return mailbox.createMailBox(serviceRequest, serviceInstanceId, manifestJson);
@@ -188,13 +182,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 					//retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
-					String manifestJson = request.getHeader("acl-manifest");
-					if (MailBoxUtil.isEmpty(manifestJson)) {
-					    LOG.error("ACL Manifest not available in the request header");
-                        throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,  Response.Status.BAD_REQUEST);
-					} else {
-						LOG.info("ACL Manifest available in the request header");
-					}
+					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));					
                     //search the mailbox based on the given query parameters
 					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(mbxName, serviceInstanceId, profileName, manifestJson, page, pageSize, sortField, sortDirection);
 					serviceResponse.setHitCounter(hitCounter);

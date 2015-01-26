@@ -245,7 +245,7 @@ public class MailBoxUtil {
 		// check the value of property "use.dummy.manifest"
 		// if it is true use dummy manifest else throw an error due to the
 		// non-availability of manifest in header
-		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DUMMY_MANIFEST_USAGE_PROPERTY))) {
+		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DUMMY_MANIFEST_USAGE_PROPERTY,"false"))) {
 
 			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
 			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DUMMY_MANIFEST_PROPERTY);
@@ -304,6 +304,17 @@ public class MailBoxUtil {
 		if (response != null) {
 		    response.close();
 		}
+	}
+	
+	public static String getManifest(String manifestFromRequestHeader) throws MailBoxConfigurationServicesException, IOException{
+		
+		if (MailBoxUtil.isEmpty(manifestFromRequestHeader)) {
+			LOGGER.debug("ACL Manifest not available in the request header");
+			return MailBoxUtil.getDummyManifestJson();
+		} 
+		
+		return manifestFromRequestHeader;
+
 	}
 
 
