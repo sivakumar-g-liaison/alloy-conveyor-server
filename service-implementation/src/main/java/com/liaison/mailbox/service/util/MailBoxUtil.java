@@ -66,7 +66,6 @@ public class MailBoxUtil {
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final Object lock = new Object();
 	private static final Properties properties = new Properties();
-	
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -208,13 +207,9 @@ public class MailBoxUtil {
 
 				tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
-				// if domainInternalName is not available then domainName will be used
-				// only if acl manifest backward compatibility mode is on otherwise exception will be thrown.
+				// if domainInternalName is not available then exception will be thrown.
 				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ) {
-					if (!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
-						throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
-					}
-					tenancyKey.setGuid(rbac.getDomainName());
+					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
 				} else {
 					tenancyKey.setGuid(rbac.getDomainInternalName());
 				}

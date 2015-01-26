@@ -104,7 +104,6 @@ public class HttpListener extends AuditedResource {
 
 	protected static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
-	protected static final String CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR = "com.liaison.mailbox.http.async.payload.dir";
 	protected static final String CONFIGURATION_QUEUE_PROVIDER_URL = "g2.queueing.server.url";
 	protected static final String CONFIGURATION_QUEUE_NAME = "directory.sweeper.queue.name";
 	protected static final String HTTP_HEADER_BASIC_AUTH = "Authorization";

@@ -104,7 +104,7 @@ public enum Messages {
 	//retrieving tenancy key from acl manifest
 	TENANCY_KEY_RETRIEVAL_FAILED("Manifest does not contain the Tenancy Key for mailbox."),
 	TENANCY_KEY_MISMATCH("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox."),
-	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the %s."),
+	ACL_MANIFEST_NOT_AVAILABLE("ACL Manifest is not available in the request header."),
 
 	READ_SECRET_FAILED("Key manager failed to retrieve stored secret"),
 

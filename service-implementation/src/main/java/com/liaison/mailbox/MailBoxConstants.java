@@ -139,12 +139,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_HOST = "com.liaison.gitlab.mailbox.script.server.host";
 	public static final String PROPERTY_GITLAB_ACTIVITY_SERVER_FOLDER = "com.liaison.gitlab.mailbox.script.folder";
 
-	// ACL Manifest
-	public final static int GUID_LENGTH = 32;
-	public static final String ACL_BACKWARD_COMPATABILITY_PROPERTY = "mailbox.acl.manifest.backward.compatibility.mode";
-
 	//Empty script file
-
 	public static final String DEFAULT_SCRIPT_TMPLATE_CONTENT = "// Scripts File is empty.";
 
 	//DEFAULTVALUE_FOR_REQUIRED_PROPS
