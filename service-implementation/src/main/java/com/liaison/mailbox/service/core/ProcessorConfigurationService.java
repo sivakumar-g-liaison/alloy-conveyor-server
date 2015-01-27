@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.core;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -387,6 +389,13 @@ public class ProcessorConfigurationService {
 			String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 			JSONObject jsonRequest = new JSONObject(request);
 			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
+			
+			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+			Calendar cal = Calendar.getInstance();			
+			jsonRequest.put("validityDateFrom", dateFormat.format(cal.getTime()));
+			cal.add(Calendar.YEAR, 1);
+			jsonRequest.put("validityDateTo", dateFormat.format(cal.getTime()));
+			jsonRequest.put("containerPassphrase", System.currentTimeMillis());
 
 			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")
 					+ "upload/truststore");
