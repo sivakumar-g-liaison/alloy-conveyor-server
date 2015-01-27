@@ -2971,6 +2971,8 @@ var rest = myApp.controller(
                 );
             };
             $scope.linkTrustStoreWithCertificate = function (pkGuid, trustStoreId, trustStoreGroupId) {
+            	
+            	$scope.linkKeyTs['serviceInstanceId'] = Date.now().toString();
                 // To put public key is association json to TrustStore
                 $scope.linkKeyTs['dataTransferObject']['trustStoreMemberships'][0]['publicKey']['pguid'] = pkGuid;
                 $scope.restService.put($scope.url_link_key_store + trustStoreId, angular.toJson($scope.linkKeyTs),
