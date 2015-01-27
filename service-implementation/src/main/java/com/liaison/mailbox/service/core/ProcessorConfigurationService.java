@@ -30,12 +30,14 @@ import javax.xml.bind.JAXBException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -387,31 +389,31 @@ public class ProcessorConfigurationService {
 		try {
 
 			String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
-			JSONObject jsonRequest = new JSONObject(request);
-			jsonRequest.put("serviceInstanceId", System.currentTimeMillis());
 			
+			JSONObject jsonRequest = new JSONObject(request);
+			JSONObject dataTransferObject = jsonRequest.getJSONObject("dataTransferObject");
+			jsonRequest.put("serviceInstanceId", MailBoxUtil.getGUID());//Some random string			
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Calendar cal = Calendar.getInstance();			
-			jsonRequest.put("validityDateFrom", dateFormat.format(cal.getTime()));
+			dataTransferObject.put("validityDateFrom", dateFormat.format(cal.getTime()));
+			dataTransferObject.put("name", "MailBxRt"+cal.getTime()); //Some random string
 			cal.add(Calendar.YEAR, 1);
-			jsonRequest.put("validityDateTo", dateFormat.format(cal.getTime()));
-			jsonRequest.put("containerPassphrase", System.currentTimeMillis());
-
-			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")
-					+ "upload/truststore");
-			DefaultHttpClient httpclient = new DefaultHttpClient();
-
+			dataTransferObject.put("validityDateTo", dateFormat.format(cal.getTime()));
+			dataTransferObject.put("containerPassphrase", MailBoxUtil.getGUID()); //Some random string
+			
+			
+			LOGGER.debug("Request  to key manager new deploy {}",jsonRequest.toString());
+			
+			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+ "upload/truststore");             
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
 			FileBody trustStore = new FileBody(new File(MailBoxUtil.getEnvironmentProperties().getString("certificateDirectory")));
 
-			HttpEntity reqEntity = MultipartEntityBuilder.create()
-					.addPart("request", jsonRequestBody)
-					.addPart("key", trustStore)
-					.build();
-
+			HttpEntity reqEntity = MultipartEntityBuilder.create().addPart("request", jsonRequestBody).addPart("key", trustStore).build();
 			httpPost.setEntity(reqEntity);
-			HttpResponse response = httpclient.execute(httpPost);
-
+			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+			HttpClient httpClient = httpClientBuilder.build();
+			HttpResponse response = httpClient.execute(httpPost);
+		
 			// TODO Check for 200 Status code, Consume entity then get GUID and return
 
 			if ((response.getStatusLine().getStatusCode() >= 200) && (response.getStatusLine().getStatusCode() < 300)) {
@@ -886,4 +888,6 @@ public class ProcessorConfigurationService {
 		return httpListenerProperties;
 
 	}
+	
+		
 }
