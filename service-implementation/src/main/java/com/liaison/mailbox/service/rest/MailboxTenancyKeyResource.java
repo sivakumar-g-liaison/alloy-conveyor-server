@@ -31,7 +31,9 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.MailboxTenancyKeyService;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -87,23 +89,18 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 			public Object call() {
 				
 				serviceCallCounter.addAndGet(1);				
-				try {
-					// retrieving acl manifest from header
-					LOG.info("Retrieving acl manifest json from request header");
-					String manifestJson = request.getHeader("acl-manifest");
-					if (MailBoxUtil.isEmpty(manifestJson)) {
-						LOG.info("ACL Manifest not available in the request header");
-						manifestJson =  MailBoxUtil.getDummyManifestJson();
-					} else {
-						LOG.info("ACL Manifest available in the request header");
-					}
-					//retrieve TenancyKeys
-					MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
-					return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(manifestJson);					
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
+				// retrieving acl manifest from header
+                LOG.info("Retrieving acl manifest json from request header");
+                String manifestJson = request.getHeader("acl-manifest");
+                if (MailBoxUtil.isEmpty(manifestJson)) {
+                    LOG.error("ACL Manifest not available in the request header");
+                    throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,  Response.Status.BAD_REQUEST);
+                } else {
+                	LOG.info("ACL Manifest available in the request header");
+                }
+                //retrieve TenancyKeys
+                MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
+                return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(manifestJson);				
 				
 			}
 		};

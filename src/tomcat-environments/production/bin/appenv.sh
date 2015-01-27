@@ -2,7 +2,7 @@
 # ==================================================================
 # Set application specific system properties in this script
 # ==================================================================
-export APP_ENV="dev-int"
+export APP_ENV="production"
 export APP_NAME="g2mailboxservice"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$APP_ENV"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_NAME"
@@ -26,38 +26,38 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$APP_ENV.xml"
 # Shortcode for APP_NAME:
 export SYSLOG_APPNAME="g2mailboxservice"
-export SYSLOG_HOST="audit-syslog-server"
-export SYSLOG_PORT="514"
+export SYSLOG_HOST=[REQUIRED]
+export SYSLOG_PORT=[REQUIRED]
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
 export SYSLOG_ID="App"
 export SYSLOG_MESSAGE_ID="AUDIT"
 export SYSLOG_FACILITY="Local0"
  
-export GLASS_SPECTRUM_PORT=10010
-export GLASS_SPECTRUM_IP=192.168.0.67
-export GLASS_SPECTRUM_USER=g2seattle
-export GLASS_SPECTRUM_PASSWORD=g2seattle
-export GLASS_SPECTRUM_DATASPACE=g2-seattle
+export GLASS_SPECTRUM_PORT=[REQUIRED]
+export GLASS_SPECTRUM_IP=[REQUIRED]
+export GLASS_SPECTRUM_USER=[REQUIRED]
+export GLASS_SPECTRUM_PASSWORD=[REQUIRED]
+export GLASS_SPECTRUM_DATASPACE=[REQUIRED]
 export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
  
  
-export GLASS_METRIC_PORT=10010
-export GLASS_METRIC_IP=192.168.0.67
-export GLASS_METRIC_USER=g2tampere
-export GLASS_METRIC_PASSWORD=g2tampere
-export GLASS_METRIC_DATASPACE=g2-tampere
+export GLASS_METRIC_PORT=[REQUIRED]
+export GLASS_METRIC_IP=[REQUIRED]
+export GLASS_METRIC_USER=[REQUIRED]
+export GLASS_METRIC_PASSWORD=[REQUIRED]
+export GLASS_METRIC_DATASPACE=[REQUIRED]
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
-export GSA_LENS_IP=192.168.0.10
+export GSA_LENS_IP=[REQUIRED]
  
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
 export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
-export LOGSTASHPORT=4560
+export LOGSTASHMACHINE=[REQUIRED]
+export LOGSTASHPORT=[REQUIRED]
 export LOGSTASH_LOG_DIR=/opt/liaison/
 # ==================================================================
 # log overrides
@@ -67,8 +67,8 @@ export JAVA_OPTS="$JAVA_OPTS -XX:-UseSplitVerifier"
 
 # discourage address map swapping by setting Xms and Xmx to the same value
 # http://confluence.atlassian.com/display/DOC/Garbage+Collector+Performance+Issues
-export CATALINA_OPTS="$CATALINA_OPTS -Xms6g"
-export CATALINA_OPTS="$CATALINA_OPTS -Xmx6g"
+export CATALINA_OPTS="$CATALINA_OPTS -Xms6g" #
+export CATALINA_OPTS="$CATALINA_OPTS -Xmx6g" #
 
 # Increase maximum perm size for web base applications to 4x the default amount
 # http://wiki.apache.org/tomcat/FAQ/Memoryhttp://wiki.apache.org/tomcat/FAQ/Memory
