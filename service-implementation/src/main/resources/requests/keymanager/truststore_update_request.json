@@ -1,20 +1,19 @@
 {
-       "activityId": "123451ZW22A340376029392 67890",
+       "activityId": "NA",
        "dataTransferObject": {
               "@class": "com.liaison.keymanage.grammar.dto.TrustStore",
-              "pguid": "0C3A3BC50A0037B00665D98D2D86079D",
+              "pguid": "dynamic",
               "trustStoreMemberships": [{
                      "@class": "com.liaison.keymanage.grammar.dto.TrustStoreMembership",
-            		 "pguid": "",
-                     "publicKey": {
+            		 "publicKey": {
                            "@class": "com.liaison.keymanage.grammar.dto.PublicKey",
-                           "pguid": "0CB517DF0A0037B00665D98DEBC90082"
+                           "pguid": "dynamic"
                      }
               }]
        },
        "membershipAction": "ADD",
-       "pipelineId": "1234567890",
-       "serviceInstanceId": "servid_test_rest1",
-       "taskId": "1234567890",
-       "userId": "userId"
+       "pipelineId": "NA",
+       "serviceInstanceId": "dynamic",
+       "taskId": "NA",
+       "userId": "mailboxrt@liaison.com"
 }
