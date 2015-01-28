@@ -2957,7 +2957,7 @@ var rest = myApp.controller(
                 }
             }
             $scope.uploadToSelfSignedTrustStore = function (pkGuid) {
-                $scope.restService.post($scope.base_url + '/uploadkey', //Get mail box Data
+                $scope.restService.post($scope.base_url + '/processor/uploadkey','POST Self signed key to key manager',
                     function (data, status) {
                         if (status === 200 && data.getTrustStoreResponse.response.status === 'success') {
                             $scope.linkTrustStoreWithCertificate(pkGuid, data.getTrustStoreResponse.trustStore.trustStoreId,
@@ -2971,6 +2971,8 @@ var rest = myApp.controller(
                 );
             };
             $scope.linkTrustStoreWithCertificate = function (pkGuid, trustStoreId, trustStoreGroupId) {
+            	
+            	$scope.linkKeyTs['serviceInstanceId'] = Date.now().toString();
                 // To put public key is association json to TrustStore
                 $scope.linkKeyTs['dataTransferObject']['trustStoreMemberships'][0]['publicKey']['pguid'] = pkGuid;
                 $scope.restService.put($scope.url_link_key_store + trustStoreId, angular.toJson($scope.linkKeyTs),
