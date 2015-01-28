@@ -44,6 +44,7 @@ public abstract class BaseServiceTest {
 	private HTTPStringOutputStream output;
 	private static String BASE_URL;
 	private static String KMS_BASE_URL;
+	private static String BASE_URL_DROPBOX;
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
@@ -60,6 +61,7 @@ public abstract class BaseServiceTest {
 
 			setBASE_URL(prop.getProperty("BASE_URL"));
 			setKMS_BASE_URL(prop.getProperty("KMS_BASE_URL"));
+			setBASE_URL_DROPBOX(prop.getProperty("BASE_URL_DROPBOX"));
 			System.setProperty("archaius.deployment.applicationId", prop.getProperty("APPLICATION_ID"));
             System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
 			// close the stream
@@ -92,6 +94,14 @@ public abstract class BaseServiceTest {
 		KMS_BASE_URL = kMS_BASE_URL;
 	}
 	
+	public static String getBASE_URL_DROPBOX() {
+		return BASE_URL_DROPBOX;
+	}
+
+	public static void setBASE_URL_DROPBOX(String bASE_URL_DROPBOX) {
+		BASE_URL_DROPBOX = bASE_URL_DROPBOX;
+	}
+
 	@AfterMethod
 	public void finalCleanUp() {
 
