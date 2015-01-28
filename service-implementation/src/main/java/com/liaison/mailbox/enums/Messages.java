@@ -139,6 +139,7 @@ public enum Messages {
 	STAGED_FILEID_DOES_NOT_EXIST("Staged file with the given id %s does not exist."),
 	RETRIEVE_SUCCESSFUL("%s retrieved successfully."),
 	USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL("User authenticated and manifest retrieved successfully"),
+	STAGE_FILEID_NOT_BELONG_TO_ORGANISATION("Given staged file id does not belong to any user organisation."),
 	
 	// processing of token for the retrieval of login id or authentication token failed.
 	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed."),

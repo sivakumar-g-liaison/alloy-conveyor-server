@@ -341,7 +341,7 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-show="!isProcessorTypeDropbox">
                 <div>
                     <h4>Folders</h4>
                     <div class="gridStyle" ng-grid="gridOptionsForProcessorFolder">
@@ -350,7 +350,7 @@
                 <br>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-show="!isProcessorTypeDropbox">
 
                 <div>
                     <h4>Credentials</h4>
@@ -451,15 +451,23 @@
                 </div>
                 <br>
             </div>
-            <h3>
+            <h3 ng-show="!isProcessorTypeDropbox">
                 Scheduling
+            </h3>
+			<h3 ng-show="isProcessorTypeDropbox">
+                Transfer Profiles
             </h3>
 
             <div class="row well multipleSelectionListBoundary">
                 <div class="col-sm-6 col-md-6">
-                    <label>
+                    <label ng-show="!isProcessorTypeDropbox">
                         <i>
                         all available schedules
+                        </i>
+                    </label>
+					<label ng-show="isProcessorTypeDropbox">
+                        <i>
+                        all available transfer profiles
                         </i>
                     </label>
                     <select id="mbx-procsr-availableSchedule" ng-disabled="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" multiple="multiple" ng-model="profilesSelectedinAllProfile" ng-options="profile.name for profile in allProfiles" class="form-control">
@@ -480,9 +488,14 @@
                     </div>
                 </div>
                 <div class="col-sm-5 col-md-5">
-                    <label>
+                    <label ng-show="!isProcessorTypeDropbox">
                         <i>
                         linked schedules
+                        </i>
+                    </label>
+					<label ng-show="isProcessorTypeDropbox">
+                        <i>
+                        linked transfer profiles
                         </i>
                     </label>
                     <select id="mbx-procsr-linkedSchedules"  multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-options="selected.name for selected in selectedProfiles" class="form-control">

@@ -30,7 +30,6 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
-
 public class DropboxStagedFilesService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxStagedFilesService.class);
@@ -38,79 +37,81 @@ public class DropboxStagedFilesService {
 	public static final String STAGED_FILES = "Staged Files";
 	public static final String STAGED_FILE = "Staged File";
 
-
-	
 	/**
-	 * Method to retrieve all staged files of the mailboxes linked to 
+	 * Method to retrieve all staged files of the mailboxes linked to
 	 * tenancykeys available in the manifest
 	 * 
 	 * @param request
 	 * @param aclManifest
 	 * @return list of StagedFiles
 	 * @throws IOException
-	 * @throws JAXBException 
+	 * @throws JAXBException
 	 */
-	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request, String aclManifest) throws IOException, JAXBException {
+	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request, String aclManifest) throws IOException,
+			JAXBException {
 		
+		LOG.debug("Entering into get staged files service.");
+
 		GetStagedFilesResponseDTO serviceResponse = new GetStagedFilesResponseDTO();
-		List <StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
-		
+		List<StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
+
 		LOG.info("Retrieving tenancy keys from acl-manifest");
-			
+
 		// retrieve the tenancy key from acl manifest
 		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
-		
+
 		LOG.debug("retrieve tenancyKey Values from tenancyKeyDTO");
-		List <String> tenancyKeyValues = new ArrayList<String>();
+		List<String> tenancyKeyValues = new ArrayList<String>();
 		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
 			tenancyKeyValues.add(tenancyKeyDTO.getGuid());
 		}
 		LOG.debug("The retrieved tenancykey values are {}", tenancyKeyValues);
-		
+
 		// retrieve corresponding mailboxes of the available tenancyKeys.
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
 		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeyValues);
 		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeyValues);
-		
+
 		if (mailboxIds.isEmpty()) {
 			LOG.error("There are no mailboxes linked to the tenancyKeys");
-			throw new MailBoxServicesException("There are no mailboxes available for tenancykeys", Response.Status.NOT_FOUND);
+			throw new MailBoxServicesException("There are no mailboxes available for tenancykeys",
+					Response.Status.NOT_FOUND);
 		}
-		
+
 		// retrieve all staged files of mailboxes.
 		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
 		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds);
-		
+
 		if (stagedFiles.isEmpty()) {
-			LOG.error("There are no staged files available for linked mailboxes");
-			throw new MailBoxServicesException("There are no staged Files available", Response.Status.NOT_FOUND); //TODO need not fail the operation .
-			//It is just that you did not find any result which is valid case. So still return a success , but with empty list and this message.
+			LOG.info("There are no staged files available for linked mailboxes");
 		}
-		
+
 		for (StagedFile stagedFile : stagedFiles) {
-			
+
 			StagedFileDTO stagedFileDTO = new StagedFileDTO();
 			stagedFile.copyToDto(stagedFileDTO, false);
 			stagedFileDTOs.add(stagedFileDTO);
-		
-		}	
-		
+		}
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, STAGED_FILES, Messages.SUCCESS));
 		serviceResponse.setStagedFiles(stagedFileDTOs);
+		
+		LOG.debug("Exit from get staged files service.");
+		
 		return serviceResponse;
 	}
 
 	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys) {
-		
+
 		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
 		StagedFile stagedFile = dropboxDao.find(StagedFile.class, fileId);
 		if (stagedFile == null) {
+			LOG.error("Staged file id missing.");
 			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, fileId,
 					Response.Status.BAD_REQUEST);
 		}
@@ -118,6 +119,7 @@ public class DropboxStagedFilesService {
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
 		MailBox mailbox = mailboxDao.find(MailBox.class, stagedFile.getMailboxId());
 		if (mailbox == null) {
+			LOG.error("Given mailbox id doesn't exists.");
 			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, stagedFile.getMailboxId(),
 					Response.Status.BAD_REQUEST);
 		}
@@ -136,37 +138,37 @@ public class DropboxStagedFilesService {
 		LOG.debug("Entering into add staged file.");
 
 		StagePayloadResponseDTO serviceResponse = new StagePayloadResponseDTO();
-		
+
 		try {
 
 			StagedFileDTO stagedFileDTO = request.getStagedFile();
 			if (stagedFileDTO == null) {
+				LOG.error("Invalid request json.");
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
-	
+
 			// validation
 			GenericValidator validator = new GenericValidator();
 			validator.validate(stagedFileDTO);
-	
+
 			StagedFileDAO dropboxDao = new StagedFileDAOBase();
 			StagedFile stagedFile = new StagedFile();
-			stagedFile.copyFromDto(stagedFileDTO, true);			
+			stagedFile.copyFromDto(stagedFileDTO, true);
 			dropboxDao.persist(stagedFile);
-	
+
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
 			serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
-	
+
 			LOG.debug("Exit from add staged file.");
 			return serviceResponse;
-			
+
 		} catch (MailBoxConfigurationServicesException e) {
-	
+
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE,
+					Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
-	
+
 		}
 	}
 }
-

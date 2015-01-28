@@ -12,10 +12,6 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,21 +50,15 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
-import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.fs2.api.FS2MetaSnapshot;
-import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.queue.sender.SweeperQueue;
-import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -180,7 +170,7 @@ public class HttpListener extends AuditedResource {
 						authenticateRequestor(request);
 					}
 					logger.debug("constructed workticket");
-					WorkTicket workTicket  = WorkTicketUtil.createWorkTicket(request, mailboxPguid, httpListenerProperties);
+					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 
@@ -280,8 +270,8 @@ public class HttpListener extends AuditedResource {
 					if (isAuthenticationCheckRequired(httpListenerProperties)) {
 						authenticateRequestor(request);
 					}
-					WorkTicket workTicket = WorkTicketUtil.createWorkTicket(request, mailboxPguid, httpListenerProperties);
-					WorkTicketUtil.storePayload(request, workTicket, httpListenerProperties);
+					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
+					WorkTicketUtil.storePayload(request.getInputStream(), workTicket, httpListenerProperties);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					WorkTicketUtil.constructMetaDataJson(workTicket);
 
@@ -506,7 +496,7 @@ public class HttpListener extends AuditedResource {
 		logger.info("Starting to forward request...");
 
 		//persist payload in spectrum
-		WorkTicketUtil.storePayload(request, workTicket, httpListenerProperties);
+		WorkTicketUtil.storePayload(request.getInputStream(), workTicket, httpListenerProperties);
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);

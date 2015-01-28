@@ -106,6 +106,10 @@ var rest = myApp.controller(
                 	});
                 } else if ($scope.procsrType.id === "FILEWRITER" || $scope.procsrType.id === "DROPBOXPROCESSOR") {
                      $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [];
+					 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
+                		"name": "add new -->",
+                        "id": "add new -->"
+                	});
                 } else {
                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{
                         "name": "add new -->",
@@ -2559,9 +2563,9 @@ var rest = myApp.controller(
                       $scope.isProcessorTypeDropbox = true;
 	                  $scope.processor.protocol = "DROPBOXPROCESSOR";
 	                  $scope.setFolderData();
-	                  $scope.processorProperties = $scope.httpListenerMandatoryProperties;
+	                  $scope.processorProperties = $scope.dropboxMandatoryProperties;
 						for(i = 0; i < $scope.processorProperties.length; i++) {
-	                      if ($scope.processorProperties[i].name === 'HTTP Listener PipelineId') {
+	                      if ($scope.processorProperties[i].name === 'PipelineId') {
 								$scope.processorProperties[i].value = $rootScope.pipelineId;
 								$scope.disableHTTPListenerPipeLineId = true;
 	                     }
@@ -2805,13 +2809,13 @@ var rest = myApp.controller(
                     isMandatory: false
                 }];
                 
-                $scope.httpListenerMandatoryProperties = [{
-                    name: 'HTTP Listener PipelineId',
+                $scope.dropboxMandatoryProperties = [{
+                    name: 'PipelineId',
                     value: '',
                     allowAdd: false,
                     isMandatory: true
                 }, {
-                	 name: 'Secure Payload',
+                	 name: 'Encrypt Payload',
                      value: true,
                      allowAdd: false,
                      isMandatory: true

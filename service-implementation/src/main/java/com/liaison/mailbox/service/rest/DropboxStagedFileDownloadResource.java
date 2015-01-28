@@ -95,8 +95,10 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if(StringUtil.isNullOrEmptyAfterTrim(mailboxToken) || StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
-						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
+							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
+								Response.Status.BAD_REQUEST);
 					}
 					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
@@ -121,6 +123,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					GEMManifestResponse manifestResponse = authService
 							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
 					if (manifestResponse == null) {
+						LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 								Messages.FAILURE);
 						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
@@ -128,10 +131,12 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					}
 
 					if (StringUtil.isNullOrEmptyAfterTrim(stagedFileId)) {
+						LOG.error("Dropbox - stage file id is missing");
 						throw new MailBoxServicesException("Staged file id is Mandatory", Response.Status.BAD_REQUEST);
 					}
 
-					List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(manifestResponse.getManifest());
+					List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(manifestResponse
+							.getManifest());
 					if (tenancyKeys.isEmpty()) {
 						LOG.error("retrieval of tenancy key from acl manifest failed");
 						throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
@@ -147,8 +152,8 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					String spectrumUrl = stagedFileService.validateIfFileIdBelongsToAnyOrganisation(stagedFileId,
 							tenancyKeysArray);
 					if (spectrumUrl == null) {
-						throw new MailBoxServicesException(
-								"Given staged file id does not belong to any user organisation.",
+						LOG.error("Given staged file id does not belong to any user organisation.");
+						throw new MailBoxServicesException(Messages.STAGE_FILEID_NOT_BELONG_TO_ORGANISATION,
 								Response.Status.BAD_REQUEST);
 					}
 
@@ -157,9 +162,12 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
 
 					// response message construction
-					ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
+					ResponseBuilder builder = Response
+							.ok()
+							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
 							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
+							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 							.type(MediaType.APPLICATION_OCTET_STREAM).entity(payload).status(Response.Status.OK);
 					LOG.debug("Exit from download staged file service.");
