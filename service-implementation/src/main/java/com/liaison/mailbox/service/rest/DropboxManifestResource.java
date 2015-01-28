@@ -35,6 +35,8 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.acl.annotation.AccessDescriptor;
 import com.liaison.commons.audit.AuditStatement;
@@ -44,6 +46,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
@@ -104,7 +107,7 @@ public class DropboxManifestResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
+					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, JsonGenerationException, JsonMappingException, JAXBException, IOException {
 				
 				LOG.debug("Entering into authenticate and get manifest service");
 				
@@ -149,7 +152,7 @@ public class DropboxManifestResource extends AuditedResource {
 
 				ResponseBuilder builder = Response
 						.ok()
-						.entity(responseEntity)
+						.entity(MailBoxUtil.marshalToJSON(responseEntity))
 						.status(Response.Status.OK)
 						.header("Content-Type", MediaType.APPLICATION_JSON)
 						.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)

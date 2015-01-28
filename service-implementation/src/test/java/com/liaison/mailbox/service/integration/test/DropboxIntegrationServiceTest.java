@@ -21,6 +21,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
