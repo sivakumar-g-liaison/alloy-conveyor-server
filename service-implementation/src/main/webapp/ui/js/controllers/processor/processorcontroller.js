@@ -3323,6 +3323,7 @@ var rest = myApp.controller(
 			$scope.script = '';
 			$scope.scriptIsEdit = false;
 			$scope.scriptUrlIsValid = false;
+			$scope.disable = true;	
 			$scope.scriptTemplateIsExist = false;		
 			$scope.editor = '';
 			$scope.loader = false;
@@ -3359,6 +3360,7 @@ var rest = myApp.controller(
 				    }
                 );				   
 				 }
+				 $scope.disable = false;	 
 			 };			  
 			 $scope.populateScriptOnModel = function () {			  
 			  var modalInstance = $modal.open({
