@@ -145,7 +145,7 @@
             </filters>
         </GlassMessageSpectrum>
 
-        <File name="FileSyslogLogFile" fileName="/opt/liaison/filesyslog.log" append="true" >
+        <File name="FileSyslogLogFile" fileName="/tmp/filesyslog.log" append="true" >
         <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
         <filters>
         <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
