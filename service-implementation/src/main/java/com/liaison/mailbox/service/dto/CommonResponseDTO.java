@@ -23,7 +23,7 @@ public abstract class CommonResponseDTO implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private ResponseDTO response;
+	public ResponseDTO response;
 	
 	public ResponseDTO getResponse() {
 		return response;

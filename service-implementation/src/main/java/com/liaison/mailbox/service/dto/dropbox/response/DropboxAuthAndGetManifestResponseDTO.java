@@ -18,9 +18,12 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 
 @JsonRootName("authAndGetACLResponse")
 public class DropboxAuthAndGetManifestResponseDTO extends CommonResponseDTO {
+	
+	public DropboxAuthAndGetManifestResponseDTO() {
+	}
 
 	public DropboxAuthAndGetManifestResponseDTO(Messages message, Messages status) {
-		setResponse(new ResponseDTO(message,status,""));
+		this.setResponse(new ResponseDTO(message,status,""));
 	}
 
 	/**
