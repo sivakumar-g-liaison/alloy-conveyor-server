@@ -28,6 +28,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
@@ -79,7 +80,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				LOG.debug("Entering uploadContentAsync");
+				LOG.debug("Entering into uploadContentAsyncToSpectrum service.");
 
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
@@ -121,9 +122,12 @@ public class DropboxFileTransferResource extends AuditedResource {
 						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
 								.entity(responseEntity).build();
 					}
-
+					
+					//creating work ticket
+					WorkTicket workTicket = createWorkTicket(serviceRequest, "", null);
+					
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService
-							.uploadContentAsyncToSpectrum(serviceRequest, transferProfileId,
+							.uploadContentAsyncToSpectrum(workTicket, serviceRequest.getInputStream(), transferProfileId,
 									manifestResponse.getManifest());
 					String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
 
@@ -136,7 +140,9 @@ public class DropboxFileTransferResource extends AuditedResource {
 									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
+					
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
+					
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);

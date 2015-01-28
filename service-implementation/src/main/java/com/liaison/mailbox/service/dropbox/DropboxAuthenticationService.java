@@ -64,7 +64,6 @@ public class DropboxAuthenticationService {
 	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationService.class);
 	private static final String PROPERTY_PLATFORM_NAME = "com.liaison.acl.request.runtime.platform.name";
-	
 
 	/**
 	 * Method to authenticate user Account by given serviceRequest.
@@ -79,29 +78,30 @@ public class DropboxAuthenticationService {
 		AuthenticateUserAccountResponseDTO response = new AuthenticateUserAccountResponseDTO();
 
 		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),serviceRequest.getPassword(), serviceRequest.getToken());
+		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
+				serviceRequest.getPassword(), serviceRequest.getToken());
 		UMClient.authenticate();
-		
+
 		if (!UMClient.isSuccessful()) {
-			response.setResponse(new AuthenticationResponseDTO(com.liaison.usermanagement.enums.Messages.AUTHENTICATION_FAILED,
-															   com.liaison.usermanagement.enums.Messages.STATUS_FAILURE,
-															   UMClient.getAuthenticationToken(),
-															   UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
+			response.setResponse(new AuthenticationResponseDTO(
+					com.liaison.usermanagement.enums.Messages.AUTHENTICATION_FAILED,
+					com.liaison.usermanagement.enums.Messages.STATUS_FAILURE, UMClient.getAuthenticationToken(),
+					UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
 			LOG.debug("Auth failed");
 			return response;
 		}
-		
-		response.setResponse(new AuthenticationResponseDTO(com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
-															   com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS,
-															   UMClient.getAuthenticationToken(),
-															   UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
-		
+
+		response.setResponse(new AuthenticationResponseDTO(
+				com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
+				com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS, UMClient.getAuthenticationToken(), UMClient
+						.getSessionDate(), UMClient.getSessionValidTillDate()));
+
 		LOG.debug("Exit from user authentication for dropbox.");
 		return response;
 	}
 
 	/**
-	 * getting manifest from GEMClient and construct multipart response 
+	 * getting manifest from GEMClient and construct multipart response
 	 * 
 	 * @param request
 	 * @return
@@ -110,6 +110,8 @@ public class DropboxAuthenticationService {
 	 */
 	public Response getManifest() throws MessagingException, IOException {
 
+		LOG.debug("Entering into get manifest service.");
+
 		Response response = null;
 		MimeMultipart multiPartResponse = new MimeMultipart();
 		Session session = Session.getDefaultInstance(new Properties());
@@ -117,7 +119,7 @@ public class DropboxAuthenticationService {
 		ByteArrayOutputStream rawMimeBAOS = new ByteArrayOutputStream(4096);
 		InputStream mimeStreamResponse = null;
 		GEMManifestResponse gemManifestFromGEM = null;
-		
+
 		try {
 			// get gem manifest response from GEM
 			GEMACLClient gemClient = new GEMACLClient();
@@ -143,19 +145,26 @@ public class DropboxAuthenticationService {
 			mm.writeTo(rawMimeBAOS);
 			mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
 
-			response = Response.ok(mimeStreamResponse).header("Content-Type", MediaType.MULTIPART_FORM_DATA)
-					.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, gemManifestFromGEM.getPublicKeyGuid()).build();
+			response = Response
+					.ok(mimeStreamResponse)
+					.header("Content-Type", MediaType.MULTIPART_FORM_DATA)
+					.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+							gemManifestFromGEM.getPublicKeyGuid()).build();
 
 			rawMimeBAOS.close();
 			mimeStreamResponse.close();
 
+			LOG.debug("Exit from get manifest service.");
+
 			return response;
 
 		} catch (Exception e) {
-			
+
+			LOG.error("Get manifest failed.");
+
 			BodyPart responseMessage = new MimeBodyPart();
-			responseMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(MailBoxConstants.ACL_MANIFEST_FAILURE_MESSAGE,
-					"text/plain")));
+			responseMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(
+					MailBoxConstants.ACL_MANIFEST_FAILURE_MESSAGE, "text/plain")));
 
 			multiPartResponse.addBodyPart(responseMessage);
 
@@ -163,12 +172,15 @@ public class DropboxAuthenticationService {
 			mm.writeTo(rawMimeBAOS);
 			mimeStreamResponse = new ByteArrayInputStream(rawMimeBAOS.toByteArray());
 
-			response = Response.ok(mimeStreamResponse).header("Content-Type", MediaType.MULTIPART_FORM_DATA)
-					.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, gemManifestFromGEM.getPublicKeyGuid()).build();
+			response = Response
+					.ok(mimeStreamResponse)
+					.header("Content-Type", MediaType.MULTIPART_FORM_DATA)
+					.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+							gemManifestFromGEM.getPublicKeyGuid()).build();
 
 			rawMimeBAOS.close();
 			mimeStreamResponse.close();
-			
+
 			return response;
 		}
 	}
@@ -181,61 +193,68 @@ public class DropboxAuthenticationService {
 	 */
 	public GEMManifestResponse getManifestAfterAuthentication(DropboxAuthAndGetManifestRequestDTO serviceRequest) {
 
-		LOG.debug("Entering into user authentication and get manifest service for dropbox.");
-
 		GEMManifestResponse manifestFromGEM = null;
+
+		LOG.debug("Entering into retrieve manifest service using GEM client");
 		
 		try {
 
 			// get manifest from GEM for the given loginId
 			GEMACLClient gemClient = new GEMACLClient();
-			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId()); 
+			ManifestRequestDTO manifestRequestDTO = constructACLManifestRequest(serviceRequest.getLoginId());
 			String unsignedDocument = GEMUtil.marshalToJSON(manifestRequestDTO);
-            String signedDocument = gemClient.signRequestData(unsignedDocument);
-            String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
-            manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid, unsignedDocument);
-            
-			return manifestFromGEM;
-			
+			String signedDocument = gemClient.signRequestData(unsignedDocument);
+			String publicKeyGuid = configuration.getString(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID);
+			manifestFromGEM = gemClient.getACLManifest(unsignedDocument, signedDocument, publicKeyGuid,
+					unsignedDocument);
+
 		} catch (Exception e) {
+			LOG.error("Dropbox - getting manifest after authentication failed.", e);
 			e.printStackTrace();
-			LOG.error("Dropbox - getting manifest after authentication failed.",e);
 		}
 		
-		LOG.debug("Exiting from user authentication and get manifest service for dropbox.");
+		LOG.debug("Exit from retrieve manifest service using GEM client");
+
 		return manifestFromGEM;
 	}
-	
+
 	private ManifestRequestDTO constructACLManifestRequest(String loginID) {
 
-        LOG.debug("Constructing the gem manifest request with default values");
-        // Construct Envelope
-        EnvelopeDTO envelope = new EnvelopeDTO();
-        envelope.setUserId(loginID);
+		LOG.debug("Constructing the gem manifest request with default values");
+		// Construct Envelope
+		EnvelopeDTO envelope = new EnvelopeDTO();
+		envelope.setUserId(loginID);
 
-        // Construct Platform
-        ManifestRequestPlatform platform = new ManifestRequestPlatform();
-        platform.setName(configuration.getString(PROPERTY_PLATFORM_NAME));
+		// Construct Platform
+		ManifestRequestPlatform platform = new ManifestRequestPlatform();
+		platform.setName(configuration.getString(PROPERTY_PLATFORM_NAME));
 
-        // Construct ManifestRequestGEM
-        ManifestRequestGEM manifestRequestGEM = new ManifestRequestGEM();
-        manifestRequestGEM.setEnvelope(envelope);
-        manifestRequestGEM.getPlatforms().add(platform);
+		// Construct ManifestRequestGEM
+		ManifestRequestGEM manifestRequestGEM = new ManifestRequestGEM();
+		manifestRequestGEM.setEnvelope(envelope);
+		manifestRequestGEM.getPlatforms().add(platform);
 
-        // Construct ManifestRequestDTO
-        ManifestRequestDTO manifestRequest = new ManifestRequestDTO();
-        manifestRequest.setAcl(manifestRequestGEM);
+		// Construct ManifestRequestDTO
+		ManifestRequestDTO manifestRequest = new ManifestRequestDTO();
+		manifestRequest.setAcl(manifestRequestGEM);
 
-        return manifestRequest;
-    }
-	
-	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
+		return manifestRequest;
+	}
+
+	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest)
+			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
 		
+		LOG.debug("Entering into user authentication using UM client.");
+
 		UserManagementClient UMClient = new UserManagementClient();
-		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(), serviceRequest.getPassword(), serviceRequest.getToken());
+		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
+				serviceRequest.getPassword(), serviceRequest.getToken());
 		UMClient.authenticate();
 		
-		if(UMClient.isSuccessful()) {
+		LOG.debug("Exit from user authentication using UM client.");
+
+		if (UMClient.isSuccessful()) {
 			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::")
 					.append(serviceRequest.getLoginId()).toString();
 			String encryptedEncodedToken = new String(Base64.encode(EncryptionUtil.encrypt(mailboxTokenWithLoginId,

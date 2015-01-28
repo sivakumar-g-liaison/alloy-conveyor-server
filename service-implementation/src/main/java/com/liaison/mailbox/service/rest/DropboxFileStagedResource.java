@@ -89,7 +89,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-
+				
 				serviceCallCounter.addAndGet(1);
 
 				String requestString;
@@ -131,7 +131,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				LOG.debug("Entering getStagedFiles");
+				LOG.debug("Entering into getStagedFiles service.");
 				
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
@@ -185,7 +185,9 @@ public class DropboxFileStagedResource extends AuditedResource {
 							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken).type(MediaType.APPLICATION_JSON)
 							.entity(responseBody).status(Response.Status.OK);
+					
 					LOG.debug("Exit from getStagedFiles service.");
+					
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {

@@ -12,7 +12,10 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +36,11 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.StreamUtil;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.liaison.spectrum.client.model.KeyValuePair;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
@@ -50,7 +55,7 @@ public class BaseResource {
 	private static final Logger kpi = LogManager.getLogger("com.liaison.mailbox.metrics.KPI");
 	public static final String HEADER_X_GATE_GATEWAYID = "x-gate-gatewayid";
 	public static final String HEADER_USER_ID = "UserId";
-
+	
 	protected void auditAttempt(String message) {
 
 		AuditStatement auditStatement = new DefaultAuditStatement(Status.ATTEMPT,
@@ -253,4 +258,60 @@ public class BaseResource {
 
         return userId;
     }
+    
+	/**
+	 * Copies all the request header from HttpServletRequest to WorkTicket.
+	 *
+	 * @param request
+	 *        HttpServletRequest
+	 * @param request
+	 *        workTicket
+	 *
+	 */
+	public static void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{
+
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements())
+		{
+			String headerName = headerNames.nextElement();
+			List<String> headerValues = new ArrayList<>();
+			Enumeration<String> values = request.getHeaders(headerName);
+
+			while (values.hasMoreElements())
+			{
+				headerValues.add(values.nextElement());
+			}
+
+			workTicket.addHeaders(headerName,  headerValues);
+		}
+
+	}
+	
+	/**
+	 * This method will create workTicket by given request.
+	 *
+	 * @param request
+	 * @param mailboxPguid
+	 * @param httpListenerProperties
+	 * @return WorkTicket
+	 */
+	public static WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
+		WorkTicket workTicket = new WorkTicket();
+		workTicket.setAdditionalContext("httpMethod", request.getMethod());
+		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
+		workTicket.setAdditionalContext("httpRemotePort", request.getRemotePort());
+		workTicket.setAdditionalContext("httpCharacterEncoding", (request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
+		workTicket.setAdditionalContext("httpRemoteUser", (request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
+		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
+		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
+		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
+		workTicket.setAdditionalContext("httpContentType", request.getContentType());
+		copyRequestHeadersToWorkTicket(request, workTicket);
+		if(null != httpListenerProperties)
+			workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(httpListenerProperties));
+		WorkTicketUtil.assignGlobalProcessId(workTicket);
+		WorkTicketUtil.assignTimestamp(workTicket);
+
+		return workTicket;
+	}
 }

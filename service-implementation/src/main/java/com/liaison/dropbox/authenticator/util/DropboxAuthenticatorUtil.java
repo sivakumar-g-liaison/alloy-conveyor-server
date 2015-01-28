@@ -20,10 +20,10 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.EncryptionUtil;
 
 public class DropboxAuthenticatorUtil {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(DropboxAuthenticatorUtil.class);
-	
-	public static String getPartofToken(String mailboxToken, String detailString)  {
+
+	public static String getPartofToken(String mailboxToken, String detailString) {
 
 		String[] tokenDetails;
 		try {
@@ -34,33 +34,36 @@ public class DropboxAuthenticatorUtil {
 			}
 
 			switch (detailString) {
-				case MailBoxConstants.UM_AUTH_TOKEN:
-					return tokenDetails[0];
-				case MailBoxConstants.LOGIN_ID:
-					return tokenDetails[1];
-				default:
-					return null;
+			case MailBoxConstants.UM_AUTH_TOKEN:
+				return tokenDetails[0];
+			case MailBoxConstants.LOGIN_ID:
+				return tokenDetails[1];
+			default:
+				return null;
 			}
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException
-				| NoSuchAlgorithmException | NoSuchPaddingException
-				| IllegalBlockSizeException | BadPaddingException
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException
+				| NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
 				| UnsupportedEncodingException e) {
-			throw new MailBoxServicesException("Token cannot be processed." + e.getMessage(), Response.Status.BAD_REQUEST);
+			throw new MailBoxServicesException("Token cannot be processed." + e.getMessage(),
+					Response.Status.BAD_REQUEST);
 		}
 	}
-	
-	public static String [] retrieveAuthTokenDetails(String token) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException  {
+
+	public static String[] retrieveAuthTokenDetails(String token) throws InvalidKeyException,
+			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
 		LOGGER.debug("Retrieval of Token Details");
 		byte[] decodedToken = Base64.decode(token);
 		String decryptedToken = EncryptionUtil.decrypt(decodedToken, true);
-		LOGGER.debug("decryptedToken token {} ",decryptedToken);
+		LOGGER.debug("decryptedToken token {} ", decryptedToken);
 		// Retrieval of recent revision date from token
 		return decryptedToken.split(MailBoxConstants.TOKEN_SEPARATOR);
 	}
-	
-	public static DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest(String UserName, String password, String authenticationToken) {
-		
+
+	public static DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest(String UserName, String password,
+			String authenticationToken) {
+
 		DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = new DropboxAuthAndGetManifestRequestDTO();
 		dropboxAuthAndGetManifestRequestDTO.setLoginId(UserName);
 		dropboxAuthAndGetManifestRequestDTO.setPassword(password);

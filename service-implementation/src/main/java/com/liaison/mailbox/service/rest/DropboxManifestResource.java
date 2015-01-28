@@ -105,7 +105,9 @@ public class DropboxManifestResource extends AuditedResource {
 			@Override
 			public Object call() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
-
+				
+				LOG.debug("Entering into authenticate and get manifest service");
+				
 				serviceCallCounter.addAndGet(1);
 				DropboxAuthAndGetManifestRequestDTO serviceRequest;
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
@@ -134,6 +136,7 @@ public class DropboxManifestResource extends AuditedResource {
 				// getting manifest
 				GEMManifestResponse manifestResponse = dropboxService.getManifestAfterAuthentication(serviceRequest);
 				if (manifestResponse == null) {
+					LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
 					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 							Messages.FAILURE);
 					return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
@@ -142,6 +145,7 @@ public class DropboxManifestResource extends AuditedResource {
 				
 				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL,
 						Messages.SUCCESS);
+				
 
 				ResponseBuilder builder = Response
 						.ok()
@@ -153,6 +157,9 @@ public class DropboxManifestResource extends AuditedResource {
 						.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
 						.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
 								manifestResponse.getPublicKeyGuid());
+				
+				LOG.debug("Exit from authenticate and get manifest service.");
+				
 				return builder.build();
 			}
 		};

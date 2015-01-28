@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletInputStream;
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
@@ -46,10 +46,9 @@ public class DropboxFileTransferService {
 	 * @return
 	 * @throws Exception
 	 */
-	public DropboxTransferContentResponseDTO uploadContentAsyncToSpectrum(HttpServletRequest request, String profileId,
+	public DropboxTransferContentResponseDTO uploadContentAsyncToSpectrum(WorkTicket workTicket, ServletInputStream stream, String profileId,
 			String aclManifest) throws Exception {
 
-		LOG.debug("Entering into uploadContentAsyncToSpectrum service.");
 		DropboxTransferContentResponseDTO transferContentResponse = null;
 
 		String tenancyKey = null;
@@ -69,6 +68,7 @@ public class DropboxFileTransferService {
 		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
 
 			tenancyKey = tenancyKeyDTO.getGuid();
+			LOG.debug("The retrieved tenancy key is %s", tenancyKey);
 			List<String> specificProcessorTypes = new ArrayList<String>();
 			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
@@ -95,8 +95,21 @@ public class DropboxFileTransferService {
 				boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
-
-				generateWorkTicketAndPostToQueue(request, mailboxPguid, isSecuredPayload, pipeLineId, serviceInstanceId, profile.getSchProfName());
+				
+				
+				Map <String, String>properties = new HashMap <String, String>();
+				properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
+				properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+				properties.put(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
+				if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
+				
+				workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(properties));
+				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
+				
+				//store payload to spectrum
+				WorkTicketUtil.storePayload(stream, workTicket, properties);	
+				workTicket.setProcessMode(ProcessMode.MFT);
+				WorkTicketUtil.constructMetaDataJson(workTicket);
 			}
 		}
 		if (dropboxProcessors.isEmpty()) {
@@ -117,8 +130,10 @@ public class DropboxFileTransferService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetTransferProfilesResponseDTO getTransferProfiles(HttpServletRequest request, String aclManifest)
+	public GetTransferProfilesResponseDTO getTransferProfiles(String aclManifest)
 			throws IOException {
+		
+		LOG.debug("Entering getTransferProfiles");
 
 		GetTransferProfilesResponseDTO serviceResponse = new GetTransferProfilesResponseDTO();
 		List<ProfileDTO> transferProfiles = new ArrayList<ProfileDTO>();
@@ -135,6 +150,7 @@ public class DropboxFileTransferService {
 		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
 
 			tenancyKey = tenancyKeyDTO.getGuid();
+			LOG.debug("DropboxFileTransferService - retrieved tenancy key is %s", tenancyKey);
 			List<String> specificProcessorTypes = new ArrayList<String>();
 			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 
@@ -159,46 +175,13 @@ public class DropboxFileTransferService {
 		}
 		if (transferProfiles.isEmpty()) {
 			LOG.error("There are no transfer profiles available");
-			throw new MailBoxServicesException("There are no Transfer Profiles available", Response.Status.NOT_FOUND);
 		}
-
-		// Dummy json holding 4 records
-		/*
-		 * for (int i = 0; i < 5; i++) { ProfileDTO transferProfile = new
-		 * ProfileDTO(); transferProfile.setId("Dummy Profile id" + i);
-		 * transferProfile.setName("Dummy Profile Name" + i);
-		 * transferProfiles.add(transferProfile); }
-		 */
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));
 		serviceResponse.setTransferProfiles(transferProfiles);
-		return serviceResponse;
-	}
-
-	/**
-	 * @param request
-	 * @param mailboxPguid
-	 * @param isSecurePayload
-	 * @param pipeLineId
-	 * @param serviceInstanceId
-	 * @throws Exception
-	 */
-	//TODO too many arguments why cant you pass a work ticket object with these params already set in it ?
-	//Again why pass request object do deep inside
-	private void generateWorkTicketAndPostToQueue(HttpServletRequest request, String mailboxPguid, boolean isSecurePayload, String pipeLineId, String serviceInstanceId, String profileName) throws Exception {
 		
-		Map <String, String>properties = new HashMap <String, String>();
+		LOG.debug("Exit from getTransferProfiles");
 
-		properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecurePayload));
-		properties.put(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profileName);
-		if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
-
-		// generate workticket
-		WorkTicket workTicket = WorkTicketUtil.createWorkTicket(request, mailboxPguid, properties);
-		//store payload to spectrum
-		WorkTicketUtil.storePayload(request, workTicket, properties);	
-		workTicket.setProcessMode(ProcessMode.MFT);
-		WorkTicketUtil.constructMetaDataJson(workTicket);
+		return serviceResponse;
 	}
 }

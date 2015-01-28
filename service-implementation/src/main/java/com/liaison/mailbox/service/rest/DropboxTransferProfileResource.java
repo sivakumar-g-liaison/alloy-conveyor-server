@@ -72,8 +72,6 @@ public class DropboxTransferProfileResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				LOG.debug("Entering getTransferProfiles");
-
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxFileTransferService fileTransferService = new DropboxFileTransferService();
@@ -84,6 +82,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
 					if(StringUtil.isNullOrEmptyAfterTrim(mailboxToken) || StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+						LOG.error("ACL manifest or mailbox token missing.");
 						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
 					}
 					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
@@ -109,6 +108,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					GEMManifestResponse manifestResponse = authService
 							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
 					if (manifestResponse == null) {
+						LOG.error("Dropbox - authenticated but failed to retrieve manifest");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 								Messages.FAILURE);
 						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
@@ -116,7 +116,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					}
 
 					GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService
-							.getTransferProfiles(serviceRequest, manifestResponse.getManifest());
+							.getTransferProfiles(manifestResponse.getManifest());
 					String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
 					
 					// response message construction
@@ -128,7 +128,6 @@ public class DropboxTransferProfileResource extends AuditedResource {
 									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
-					LOG.debug("Exit from getStagedFiles service.");
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {
