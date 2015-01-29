@@ -218,3 +218,6 @@ client.key-management.baseUrl=https://kms-d.liaison.dev/key-management/
 
 #default script template name
 mailbox.script.default.template=defaultScriptTemplate.js
+
+#Passphrase of self signed Truststore
+mailbox.self.signed.trustore.passphrase=passmein

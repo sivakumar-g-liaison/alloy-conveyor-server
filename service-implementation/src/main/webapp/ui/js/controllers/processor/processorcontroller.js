@@ -1756,9 +1756,13 @@ var rest = myApp.controller(
 									var editProcessor = false;
 									for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
 										$scope.credType = data.getProcessorResponse.processor.credentials[i].credentialType;
+										$scope.secret = data.getProcessorResponse.processor.credentials[i].password;
 										
-										if($scope.credType === 'LOGIN_CREDENTIAL') {
-											readSecretFromKM($scope.url_secret_service + data.getProcessorResponse.processor.credentials[i].password, i, data, profData, processorId, blockuiFlag);
+										// read secret should be called only if password is available in the login credential
+										// for sftp processor with keys, password will not be available and hence 
+										// read secret call to KMS is not applicable for this case
+										if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
+											readSecretFromKM($scope.url_secret_service + $scope.secret, i, data, profData, processorId, blockuiFlag);
 											editProcessor = true;
 											break;
 										}
@@ -2228,10 +2232,8 @@ var rest = myApp.controller(
                     $scope.processor.credentials.push({
                         credentialURI: $scope.processorCredProperties[i].credentialURI,
                         credentialType: credentialType,
-                        //credentialType: getId($scope.allCredentialTypes, $scope.processorCredProperties[i].credentialType),
                         userId: $scope.processorCredProperties[i].userId,
                         password: $scope.processorCredProperties[i].password,
-                       // idpType: getId($scope.allStaticPropertiesForProcessorCredentialIdp, $scope.processorCredProperties[i].idpType),
                         idpType: $scope.processorCredProperties[i].idpType,
                         idpURI: $scope.processorCredProperties[i].idpURI
                     });
@@ -2266,7 +2268,11 @@ var rest = myApp.controller(
 							$scope.secret = editRequest.reviseProcessorRequest.processor.credentials[i].password;
 							
 							$scope.secretName = '';
-							if($scope.credType === 'LOGIN_CREDENTIAL') {
+							
+							// revise secret should be called only if password is available in the login credential
+							// for sftp processor with keys, password will not be available and hence 
+							// revise secret call to KMS is not applicable for this case
+							if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
 								$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
 								base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
 								$scope.secretUrl = $scope.url_secret_service + encodeURIComponent($scope.secretName);
@@ -2295,7 +2301,10 @@ var rest = myApp.controller(
 							$scope.secret = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].password;
 							
 							$scope.secretName = '';
-							if($scope.credType === 'LOGIN_CREDENTIAL') {
+							// store secret should be called only if password is available in the login credential
+							// for sftp processor with keys, password will not be available and hence 
+							// store secret call to KMS is not applicable for this case
+							if($scope.credType === 'LOGIN_CREDENTIAL' && ($scope.secret != null && $scope.secret != "" && typeof $scope.secret != 'undefined')) {
 							
 								$scope.secretName = $scope.mailboxName + $scope.procName + $scope.credUsrName;
 								base64EncodedSecret = $scope.base64EncodedSecret = $.base64.encode($scope.secret);
@@ -3221,7 +3230,7 @@ var rest = myApp.controller(
                     credentialURI: $scope.sshkeyModal.sshPrivateKeyURI,
                     credentialType: 'SSH_KEYPAIR',
                     userId: '',
-                    password: $scope.sshkeyModal.sshKeyPairPassphrase,
+                    password: '',
                     idpURI: $scope.sshkeyModal.sshKeyPairPguid,
                     idpType: 'PRIVATE',
                     allowAdd: false
@@ -3229,7 +3238,7 @@ var rest = myApp.controller(
                     credentialURI: $scope.sshkeyModal.sshPublicKeyURI,
                     credentialType: 'SSH_KEYPAIR',
                     userId: '',
-                    password: $scope.sshkeyModal.sshKeyPairPassphrase,
+                    password: '',
                     idpURI: $scope.sshkeyModal.sshKeyPairPguid,
                     idpType: 'PUBLIC',
                     allowAdd: false

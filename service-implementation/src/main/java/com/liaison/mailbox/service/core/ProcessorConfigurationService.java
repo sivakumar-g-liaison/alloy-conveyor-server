@@ -49,6 +49,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
@@ -393,18 +394,20 @@ public class ProcessorConfigurationService {
 			JSONObject jsonRequest = new JSONObject(request);
 			JSONObject dataTransferObject = jsonRequest.getJSONObject("dataTransferObject");
 			jsonRequest.put("serviceInstanceId", MailBoxUtil.getGUID());//Some random string			
-			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-			Calendar cal = Calendar.getInstance();			
-			dataTransferObject.put("validityDateFrom", dateFormat.format(cal.getTime()));
+			ISO8601Util isoDateUtil = new ISO8601Util();
+			Calendar cal = Calendar.getInstance();
+			dataTransferObject.put("validityDateFrom", isoDateUtil.fromCalendar(cal));
 			dataTransferObject.put("name", "MailBxRt"+cal.getTime()); //Some random string
 			cal.add(Calendar.YEAR, 1);
-			dataTransferObject.put("validityDateTo", dateFormat.format(cal.getTime()));
-			dataTransferObject.put("containerPassphrase", MailBoxUtil.getGUID()); //Some random string
+			dataTransferObject.put("validityDateTo", isoDateUtil.fromCalendar(cal));
 			
+			// read the container passphrase from properties file for the self signed trustore
+			String containerPassphrase = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SELF_SIGNED_TRUSTORE_PASSPHRASE);
+			dataTransferObject.put("containerPassphrase", containerPassphrase);
 			
 			LOGGER.debug("Request  to key manager new deploy {}",jsonRequest.toString());
 			
-			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+ "upload/truststore");             
+			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+ "upload/truststore");                 
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
 			FileBody trustStore = new FileBody(new File(MailBoxUtil.getEnvironmentProperties().getString("certificateDirectory")));
 
