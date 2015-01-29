@@ -10,12 +10,19 @@
 
 package com.liaison.mailbox.service.integration.test;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -24,8 +31,22 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPResponse;
+import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
+import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
+import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
@@ -46,6 +67,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 	
 	private static String USER_ID = "demouserjan22@liaison.dev";
 	private static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
+	private String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 	
 	@BeforeClass
 	public void setUp() throws Exception {
@@ -79,6 +101,156 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		
 		GetStagedFilesResponseDTO getStagedFilesResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetStagedFilesResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getStagedFilesResponseDTO.getResponse().getStatus());
+	}
+	
+	@Test
+	public void testUploadContentAsync() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
+		
+		//createMailBox		
+		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
+		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
+
+		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+		requestDTO.setMailBox(mbxDTO);
+		
+		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
+		
+		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddMailBoxResponseDTO mailboxResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, mailboxResponseDTO.getResponse().getStatus());
+		//create Profile
+		String profileName = "once" + System.currentTimeMillis();
+		AddProfileResponseDTO profileResponseDTO = addProfile(profileName);
+		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
+		
+		//createProcesser
+		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
+				"RESPONSE_LOCATION", "Sample", "ACTIVE", "DROPBOXPROCESSOR" ,"Dummy_DESCRIPTION", false, "DROPBOXPROCESSOR", profileName, mailboxResponseDTO.getMailBox().getGuid());
+		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
+
+		String addProcessor = "/" + mailboxResponseDTO.getMailBox().getGuid() + "/processor" + "?sid=" +serviceInstanceId;
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
+				AddProcessorToMailboxResponseDTO.class);
+		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
+		
+		//authenticate user account
+		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
+		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
+		
+		String authAndManifestURL = getBASE_URL_DROPBOX() + "/authAndGetACL";
+		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
+		HTTPResponse authResponse = request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);		
+		//DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
+		//Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
+		
+		//getStaged files
+		request = constructHTTPRequest(getBASE_URL() + addProcessor, HTTP_METHOD.POST, jsonRequest, logger);
+		String getStagedFilesURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+profileResponseDTO.getProfile().getGuId();
+		request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.POST, "", logger);
+		request.addHeader(MailBoxConstants.ACL_MANIFEST_HEADER, authResponse.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER));
+		request.addHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN, authResponse.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN));
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+		
+	}
+	
+	private Object getProcessorRequest(String folderTye, String folderURI, String processorStatus,
+			String processorType, String processorDescription, boolean isRevise, String protocolType, String profileName, String mailboxPguid) throws JsonParseException,
+			JsonMappingException,
+			JsonGenerationException,
+			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
+
+		ProcessorDTO processorDTO = new ProcessorDTO();
+		
+		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
+		processorDTO.setCredentials(credetnialList);
+		
+		List<FolderDTO> folderList = new ArrayList<FolderDTO>();
+		FolderDTO folderDto = new FolderDTO();		
+		folderDto.setFolderType(folderTye);
+		folderDto.setFolderURI(folderURI);
+		folderDto.setFolderDesc("someDesc");
+		folderList.add(folderDto);		
+		processorDTO.setFolders(folderList);
+		
+		processorDTO.setStatus(processorStatus);
+		processorDTO.setName(System.currentTimeMillis() + "");		
+		processorDTO.setDescription(processorDescription);
+		
+		processorDTO.setType(processorType);
+		processorDTO.setProtocol(protocolType);
+		processorDTO.setLinkedMailboxId(mailboxPguid);
+
+		List<String> profiles = new ArrayList<>();
+		profiles.add(profileName);
+		processorDTO.setLinkedProfiles(profiles);
+		List<PropertyDTO> dynamicProperties = new ArrayList<>();
+		PropertyDTO dynamicProperty1 = new PropertyDTO();
+		dynamicProperty1.setName("PipelineId");
+		dynamicProperty1.setValue("GJHGJ678HG");
+		PropertyDTO dynamicProperty2 = new PropertyDTO();
+		dynamicProperty2.setName("Encrypt Payload");
+		dynamicProperty2.setValue("true");
+		dynamicProperties.add(dynamicProperty1);
+		dynamicProperties.add(dynamicProperty2);
+		processorDTO.setDynamicProperties(dynamicProperties);
+
+		if (isRevise) {
+			ReviseProcessorRequestDTO reviseDTO = new ReviseProcessorRequestDTO();
+			reviseDTO.setProcessor(processorDTO);
+			return reviseDTO;
+		} else {
+			AddProcessorToMailboxRequestDTO addProcessorDTO = new AddProcessorToMailboxRequestDTO();
+			addProcessorDTO.setProcessor(processorDTO);
+			return addProcessorDTO;
+		}
+	}
+	
+	/**
+	 * Method to constructs profile.
+	 * 
+	 * @param profileName
+	 * @return AddProfileResponseDTO
+	 * @throws JAXBException
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 * @throws LiaisonException
+	 * @throws JsonParseException
+	 */
+	private AddProfileResponseDTO addProfile(String profileName) throws JAXBException, JsonGenerationException,
+			JsonMappingException, IOException, MalformedURLException, FileNotFoundException, LiaisonException, JsonParseException {
+
+		ProfileDTO profile = new ProfileDTO();
+		profile.setName(profileName);
+		AddProfileRequestDTO profileRequstDTO = new AddProfileRequestDTO();
+		profileRequstDTO.setProfile(profile);
+
+		jsonRequest = MailBoxUtil.marshalToJSON(profileRequstDTO);
+		request = constructHTTPRequest(getBASE_URL() + "/profile", HTTP_METHOD.POST, jsonRequest, logger);
+		request.execute();
+		jsonResponse = getOutput().toString();
+		logger.info(jsonResponse);
+
+		AddProfileResponseDTO profileResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddProfileResponseDTO.class);
+
+		return profileResponseDTO;
 	}
 	
 	private DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest() {
