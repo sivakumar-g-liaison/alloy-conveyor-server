@@ -40,6 +40,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
@@ -181,6 +182,15 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 					for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()){
 						glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
 						glassMessage.setStatus(ExecutionState.STAGED);
+						
+						if(inputLocation.contains("ftps")){
+							glassMessage.setInAgent(GatewayType.FTPS);
+						}if(inputLocation.contains("sftp")){
+							glassMessage.setInAgent(GatewayType.SSH);
+						}else if(inputLocation.contains("ftp")){
+							glassMessage.setInAgent(GatewayType.FTP);
+						}
+						
 						glassLogger.logToGlass(glassMessage);
 					}
 				}

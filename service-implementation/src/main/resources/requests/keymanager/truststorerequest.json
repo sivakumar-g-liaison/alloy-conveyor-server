@@ -1,26 +1,18 @@
-/**
- * Copyright 2014 Liaison Technologies, Inc.
- * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall
- * not disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Liaison Technologies.
- */
-     {
-       "pipelineId" : "1234567890",
-       "activityId" : "123451ZW22A340376029392 67890",
-       "taskId" : "1234567890",
-       "serviceInstanceId" : "servid_test_restp9d",
-       "userId" : "userId",
+   {
+       "pipelineId" : "NA",
+       "activityId" : "NA",
+       "taskId" : "NA",
+       "serviceInstanceId" : "dynamic",
+       "userId" : "mailboxrt@liaison.com",
        "dataTransferObject" :
        {
           "@class": "com.liaison.keymanage.grammar.dto.TrustStore",
-		  "keyScope": "CUSTOMER",
+		  "keyScope": "SYSTEM",
 		  "keyStatus": "ACTIVE",
-		  "name": "test_httpclient_store_2",
-		  "notificationEmail": "GRamamurthy@liaison.com",
-		  "validityDateFrom": "2013-12-19T00:00:00.000Z",
-		  "validityDateTo": "2014-12-19T00:00:00.000Z",
-		  "containerPassphrase": "passmein"
+		  "name": "dynamic",
+		  "notificationEmail": "mailboxrt@liaison.com",
+		  "validityDateFrom": "dynamic",
+		  "validityDateTo": "dynamic",
+		  "containerPassphrase": "dynamic"
        }
      }

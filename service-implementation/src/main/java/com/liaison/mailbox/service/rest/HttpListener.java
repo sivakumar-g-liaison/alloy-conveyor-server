@@ -54,6 +54,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
@@ -105,7 +106,6 @@ public class HttpListener extends AuditedResource {
 
 	protected static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
-	protected static final String CONFIGURATION_HTTP_ASYNC_PAYLOAD_DIR = "com.liaison.mailbox.http.async.payload.dir";
 	protected static final String CONFIGURATION_QUEUE_PROVIDER_URL = "g2.queueing.server.url";
 	protected static final String CONFIGURATION_QUEUE_NAME = "directory.sweeper.queue.name";
 	protected static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
@@ -194,6 +194,7 @@ public class HttpListener extends AuditedResource {
 					glassMessage.setMailboxId(mailboxPguid);
 					glassMessage.setStatus(ExecutionState.STAGED);
 					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassMessage.setInAgent(GatewayType.REST);
 					glassLogger.logToGlass(glassMessage);
 					//GLASS LOGGING ENDS//
 
@@ -294,6 +295,7 @@ public class HttpListener extends AuditedResource {
 					glassMessage.setMailboxId(mailboxPguid);
 					glassMessage.setStatus(ExecutionState.STAGED);
 					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassMessage.setInAgent(GatewayType.REST);
 					glassLogger.logToGlass(glassMessage);
 					//GLASS LOGGING ENDS//
 

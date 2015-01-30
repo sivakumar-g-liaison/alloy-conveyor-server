@@ -786,32 +786,41 @@ public class MailboxSLAWatchDogService {
 	 */
 	private boolean doCustomerSLAVerification (Processor processor, List <String> slaViolatedMailboxes) throws Exception {
 
-		LOG.info("Entering Customer SLA Verification check");
-		boolean isCustomerSLAViolated = false;
-		
-		// check if the file exists in the configured file write location
-		// for processors  of type FileWriter if file exists then customer
-		// sla is violated
-		if (processor instanceof FileWriter) {
-			isCustomerSLAViolated = checkFileExistenceOfFileWriter(processor);
-		} else {
-			MailBoxProcessorI uploaderProcessor = MailBoxProcessorFactory.getInstance(processor);
+	    LOG.info("Entering Customer SLA Verification check");
+        boolean isCustomerSLAViolated = false;
+        
+        try {
+            // check if the file exists in the configured file write location
+            // for processors  of type FileWriter if file exists then customer
+            // sla is violated
+            if (processor instanceof FileWriter) {
+                isCustomerSLAViolated = checkFileExistenceOfFileWriter(processor);
+            } else {
+                MailBoxProcessorI uploaderProcessor = MailBoxProcessorFactory.getInstance(processor);
 
-			// check if file exist in the configured payload location 
-			// for processors of type uploader if file exists then
-			// customer sla is violated 
-			if (uploaderProcessor instanceof FTPSRemoteUploader) {
+                // check if file exist in the configured payload location 
+                // for processors of type uploader if file exists then
+                // customer sla is violated 
+                if (uploaderProcessor instanceof FTPSRemoteUploader) {
 
-				FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
-				isCustomerSLAViolated = ftpsRemoteUploader.checkFileExistence();
+                    FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
+                    isCustomerSLAViolated = ftpsRemoteUploader.checkFileExistence();
 
-			} else if (uploaderProcessor instanceof SFTPRemoteUploader) {
+                } else if (uploaderProcessor instanceof SFTPRemoteUploader) {
 
-				SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
-				isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();
-			} 
-		}		
-		return isCustomerSLAViolated;
+                    SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
+                    isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();
+                } 
+            }       
+            return isCustomerSLAViolated;
+        } catch (Exception e) {
+            
+            LOG.error("Error occured during file existence check of processor {} , {}", processor.getProcsrName(), e.getMessage());
+            // if any exception occurs during file existence check, a notification will be send to the user
+            // and the mailbox corresponding to this processor will not be considered for sla validation
+            notifyUser(processor, processor.getMailbox().getPguid(), e);
+            return isCustomerSLAViolated;
+        }       
 		
 	}
 	

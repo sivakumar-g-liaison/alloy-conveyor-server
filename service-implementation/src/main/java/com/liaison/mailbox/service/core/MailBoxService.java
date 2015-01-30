@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
@@ -251,7 +252,14 @@ public class MailBoxService {
 			glassMessage.setMailboxId(processor.getMailbox().getPguid());
 			glassMessage.setProcessorId(processor.getPguid());
 			glassMessage.setServiceInstandId(processor.getServiceInstance().getPguid());
-			glassMessage.setTenancyKey(processor.getMailbox().getTenancyKey());			
+			glassMessage.setTenancyKey(processor.getMailbox().getTenancyKey());	
+			if(processor.getProcsrProtocol().equalsIgnoreCase("ftp")){
+				glassMessage.setInAgent(GatewayType.FTP);
+			}else if(processor.getProcsrProtocol().equalsIgnoreCase("ftps")){
+				glassMessage.setInAgent(GatewayType.FTPS);
+			}else if(processor.getProcsrProtocol().equalsIgnoreCase("sftp")){
+				glassMessage.setInAgent(GatewayType.SSH);
+			}
 			//GLASS LOGGING ENDS//
 			
 			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processorExecutionState.getExecutionStatus())) {

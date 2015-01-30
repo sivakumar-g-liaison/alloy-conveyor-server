@@ -29,6 +29,7 @@ import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
@@ -69,7 +70,11 @@ public class SftpClient {
 
 			if ((loginCredential != null)) {
 
-				String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
+			    // password has to be retrieved from KMS only if password is present in login credential
+			    // in case of sftp using keys, password will not be available and hence retrieval of 
+			    // password from KMS is not valid in this case.
+				String passwordFromKMS = (!StringUtil.isNullOrEmptyAfterTrim(loginCredential.getCredsPassword())) ?
+				                        KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword()) : null;
 
 				if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
 					sftpRequest.setUser(loginCredential.getCredsUsername());

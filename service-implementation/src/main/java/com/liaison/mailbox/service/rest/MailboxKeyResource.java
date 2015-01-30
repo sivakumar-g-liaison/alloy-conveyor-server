@@ -51,7 +51,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  */
 @Path("mailbox/processor/uploadkey")
-@Api(value = "mailbox/uploadkey", 
+@Api(value = "mailbox/processor/uploadkey", 
 description = "Gateway for the mailbox upload self signed trust store services.")
 public class MailboxKeyResource extends AuditedResource{
 	

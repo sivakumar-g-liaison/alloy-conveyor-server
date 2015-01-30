@@ -3,6 +3,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
+		$scope.isEnable = false;
 
 		$scope.addProcessorBtnValue = 'Add Processors';
 		
@@ -97,6 +98,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             if ($location.search().mailBoxId !== '' && typeof $location.search().mailBoxId !== 'undefined') { // Edit Mode On
 
                 $scope.isMailBoxEdit = true;
+                $scope.isEnable = true;	
                 $scope.mailBoxId = $location.search().mailBoxId;
                 block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + true + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
@@ -484,8 +486,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         };
         
         $scope.onTenancyKeySelected = function(tenancyKey) {
-            $scope.tenancyKey = angular.copy(tenancyKey);
             $scope.mailBox.tenancyKey = tenancyKey.guid;
+			$scope.isEnable = true;			
         };
         
 }]);

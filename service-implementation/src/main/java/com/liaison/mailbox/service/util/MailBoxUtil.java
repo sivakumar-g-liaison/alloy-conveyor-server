@@ -64,13 +64,10 @@ public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final String REQUEST_HEADER = "Request Header";
-	private static final String PROPERTIES_FILE = "Properties file";
+
 	private static final Object lock = new Object();
 	private static final Properties properties = new Properties();
-	private static final String DUMMY_MANIFEST_USAGE_PROPERTY = "use.dummy.manifest.as.backup";
-	private static final String DUMMY_MANIFEST_PROPERTY = "dummy.acl.manifest.json";
-
+	
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
 	 *
@@ -211,13 +208,9 @@ public class MailBoxUtil {
 
 				tenancyKey = new TenancyKeyDTO();
 				tenancyKey.setName(rbac.getDomainName());
-				// if domainInternalName is not available then domainName will be used
-				// only if acl manifest backward compatibility mode is on otherwise exception will be thrown.
+				// if domainInternalName is not available then exception will be thrown.
 				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ) {
-					if (!Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ACL_BACKWARD_COMPATABILITY_PROPERTY))) {
-						throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
-					}
-					tenancyKey.setGuid(rbac.getDomainName());
+					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
 				} else {
 					tenancyKey.setGuid(rbac.getDomainInternalName());
 				}
@@ -237,39 +230,6 @@ public class MailBoxUtil {
 		return tenancyKeyGuids;
 
 	}
-
-	/**
-	 * Method to retrieve the dummy acl manifest json from properties file
-	 *
-	 * @param manifestJson
-	 * @return
-	 * @throws IOException
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	public static String getDummyManifestJson() throws IOException, MailBoxConfigurationServicesException {
-
-		String dummyManifestJson = null;
-
-		// check the value of property "use.dummy.manifest"
-		// if it is true use dummy manifest else throw an error due to the
-		// non-availability of manifest in header
-		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(DUMMY_MANIFEST_USAGE_PROPERTY))) {
-
-			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(DUMMY_MANIFEST_PROPERTY);
-			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
-				LOGGER.error("dummy acl manifest is not available in the properties file");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, PROPERTIES_FILE, Response.Status.BAD_REQUEST);
-			}
-
-		} else {
-			LOGGER.error("acl manifest is not available in the request header");
-			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, REQUEST_HEADER, Response.Status.BAD_REQUEST);
-		}
-
-		return dummyManifestJson;
-	}
-
 
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid

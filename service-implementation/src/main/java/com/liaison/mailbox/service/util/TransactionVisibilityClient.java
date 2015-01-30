@@ -1,5 +1,12 @@
 package com.liaison.mailbox.service.util;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,6 +22,8 @@ public class TransactionVisibilityClient {
 	
 	 public static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
 	 public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
+	 public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
+	 final String DEFAULT_SENDER_PGUID = "00000000000000000000000000000000";
 
 	 protected static DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 	 private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
@@ -25,6 +34,10 @@ public class TransactionVisibilityClient {
 		 visibilityAPI = new TransactionVisibilityAPI();
 		 visibilityAPI.setGlassMessageId(glassMessageId);
 		 visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
+		 visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
+		 visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
+		 visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
+		
 	 }
 	 
 	 
@@ -78,9 +91,37 @@ public class TransactionVisibilityClient {
 			 visibilityAPI.setStatus(StatusCode.G);
 		 }
 		 
+		 visibilityAPI.setInAgent(message.getInAgent());
+		 XMLGregorianCalendar t = toXmlGregorianCalendar(new Date().getTime());
+	     visibilityAPI.setArrivalTime(t);
+	     visibilityAPI.setStatusDate(t);
+		
 				  
 		 logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		 logger.debug("TransactionVisibilityAPI with status {} logged for execution :{}",message.getStatus().value(),message.getExecutionId());	 
 		 
 	 }
+	 
+	 /**
+	     * Converts a given time in milliseconds into a {@link XMLGregorianCalendar} object.
+	     * <p>
+	     * The input milliseconds value represents the specified number of milliseconds since the standard base time known
+	     * as "the epoch", namely January 1, 1970, 00:00:00 GMT.
+	     *
+	     * @param date
+	     *            A given time corresponding to the number of milliseconds since January 1, 1970, 00:00:00 GMT
+	     * @return A new instance of <code>XMLGregorianCalendar</code> representing the input time
+	     */
+	    public  XMLGregorianCalendar toXmlGregorianCalendar(final long date) {
+	        try {
+	            final GregorianCalendar calendar = new GregorianCalendar();
+	            calendar.setTimeInMillis(date);
+	            return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+	                calendar);
+	        }
+	        catch (final DatatypeConfigurationException ex) {
+	            System.out.println("Unable to convert date '%s' to an XMLGregorianCalendar object");
+	        }
+			return null;
+	    }
 }

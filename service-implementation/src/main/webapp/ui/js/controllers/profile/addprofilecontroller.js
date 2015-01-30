@@ -218,7 +218,7 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 			if($scope.editEntity && $scope.editEntity.name != $scope.reviseProfile.name && $scope.editEntity.id == $scope.reviseProfile.id) {
 
 				$scope.reviseRequest.reviseProfileRequest.profile = $scope.reviseProfile;
-				$scope.restService.put($rootScope.base_url + "/profile", $filter('json')(reviseRequest), "")
+				$scope.restService.put($rootScope.base_url + "/profile", $filter('json')(reviseRequest), function() {} )
 					 .success(function (data, status) {
 						showSaveMessage(data.reviseProfileResponse.response.message, 'success');
 						$scope.loadProfiles();

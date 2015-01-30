@@ -59,7 +59,7 @@ myApp.controller('TriggerProfileCntrlr', ['$rootScope', '$scope', '$location', '
             $scope.restService.post($scope.base_url + "/trigger/profile"
             		+ '?name=' + profName
             		+ '&excludeMailbox=' + mbxName
-            		+ '&shardKey=' + shardKey, "{}")
+            		+ '&shardKey=' + shardKey, "", function() {} )
                 .success(function (data) {
                      var messageType = (data.triggerProfileResponse.response.status == 'success')?'success':'error';
                 	 showSaveMessage(data.triggerProfileResponse.response.message, messageType);
