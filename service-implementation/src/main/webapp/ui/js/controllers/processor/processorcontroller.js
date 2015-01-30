@@ -572,6 +572,13 @@ var rest = myApp.controller(
                 	"name": "Secure Payload",
                 	"id": "securedPayload"
                 }];	
+				$scope.allMandatoryDropboxProperties = [{
+                    "name": "PipelineId",
+                    "id": "httpListenerPipeLineId"
+                }, {
+                	"name": "Encrypt Payload",
+                	"id": "securedPayload"
+                }];	
                 $scope.allMandatoryFileWriterProperties =[];
 				$scope.allStaticPropertiesForDownloaderProcessorFolder = [{
                     "name": "Remote Payload Location",
@@ -970,6 +977,19 @@ var rest = myApp.controller(
                 if (row.getProperty('name') === '') {
                     return '';
                 }
+                
+                if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+                	var dbxVal = getId($scope.allMandatoryDropboxProperties, row.getProperty('name'));
+              		if (dbxVal.length > 0) {
+                    	return dbxVal;
+                	}
+                } else {
+                	var httpListenerVal = getId($scope.allMandatoryHttpListenerProperties, row.getProperty('name'));
+                	if (httpListenerVal.length > 0) {
+                    	return httpListenerVal;
+                	}
+                }
+                
                 var ftpVal = getId($scope.allMandatoryFtpProperties, row.getProperty('name'));
                 if (ftpVal.length > 0) {
                     return ftpVal;
@@ -982,10 +1002,7 @@ var rest = myApp.controller(
                 if (sweeperVal.length > 0) {
                     return sweeperVal;
                 }
-                var httpListenerVal = getId($scope.allMandatoryHttpListenerProperties, row.getProperty('name'));
-                if (httpListenerVal.length > 0) {
-                    return httpListenerVal;
-                }
+                
                 var val = getId(objArray, row.getProperty('name'));
                 if (val.length > 0) {
                     return val;
@@ -993,7 +1010,20 @@ var rest = myApp.controller(
                 return "Dor%^7#@";
             };
             $scope.getIdValue = function (name) {
-                var ftpVal = getId($scope.allMandatoryFtpProperties, name);
+            
+            	if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+            		var dbxVal = getId($scope.allMandatoryDropboxProperties, name);
+               		 if (dbxVal.length > 0) {
+             		   return dbxVal;
+              		  }
+            	} else {
+            		var httpListenerVal = getId($scope.allMandatoryHttpListenerProperties, name);
+               		 if (httpListenerVal.length > 0) {
+                 	   return httpListenerVal;
+               		 }
+            	}
+            	
+            	var ftpVal = getId($scope.allMandatoryFtpProperties, name);
                 if (ftpVal.length > 0) {
                     return ftpVal;
                 }
@@ -1005,13 +1035,23 @@ var rest = myApp.controller(
                 if (sweeperVal.length > 0) {
                     return sweeperVal;
                 }
-                var httpListenerVal = getId($scope.allMandatoryHttpListenerProperties, name);
-                if (httpListenerVal.length > 0) {
-                    return httpListenerVal;
-                }
+				
                 return getId($scope.allStaticProperties, name);
             };
             $scope.getNameValue = function (id) {
+			
+				if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+					var dbxVal = getName($scope.allMandatoryDropboxProperties, id);
+					if (dbxVal.length > 0) {
+						return dbxVal;
+					}
+				} else {
+					var httpListenerVal = getName($scope.allMandatoryHttpListenerProperties, id);
+					if (httpListenerVal.length > 0) {
+						return httpListenerVal;
+					}
+				}
+				
                 var ftpVal = getName($scope.allMandatoryFtpProperties, id);
                 if (ftpVal.length > 0) {
                     return ftpVal;
@@ -1024,10 +1064,8 @@ var rest = myApp.controller(
                 if (sweeperVal.length > 0) {
                     return sweeperVal;
                 }
-                var httpListenerVal = getName($scope.allMandatoryHttpListenerProperties, id);
-                if (httpListenerVal.length > 0) {
-                    return httpListenerVal;
-                }
+				
+				
                 return getName($scope.allStaticProperties, id);
             };
              $scope.gridOptionsForProcessorFolder = {
@@ -1389,14 +1427,15 @@ var rest = myApp.controller(
 				} else {
 					$scope.disableCertificates = true;
 				}
-				$scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
-
+				$scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true; 
+                 
 				// Pushing out dynamis props
 				$scope.processorProperties = []; //Removing now so that the add new option always shows below the available properties
 				$scope.httpMandatoryProperties = [];
 				$scope.ftpMandatoryProperties = [];
 				$scope.sweeperMandatoryProperties = [];
                 $scope.httpListenerMandatoryProperties = [];
+				$scope.dropboxMandatoryProperties = [];
                 $scope.fileWriterMandatoryProperties = [];
 				$scope.modifyStaticPropertiesBasedOnProtocol();
 				$scope.modifyStaticPropertiesBasedOnProcessorType();
@@ -1492,7 +1531,7 @@ var rest = myApp.controller(
 							});
 							 }
 																	
-						} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR') {
+						} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                              if (prop === 'otherRequestHeader') {
 								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
 								
@@ -1523,12 +1562,31 @@ var rest = myApp.controller(
 								allowAdd: false,
 								isMandatory: (getIndexOfId($scope.allMandatoryHttpListenerProperties, prop) === -1) ? false : true
 							});
-							 }
+							}
                         
                         }  else if ($scope.processor.protocol === 'FILEWRITER') {
                         	
                         	$scope.fileWriterMandatoryProperties = [];
-                        } else {
+                        } else if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+							if (prop === 'httpListenerPipeLineId') {
+								propertyValue = $rootScope.pipelineId;
+								$scope.dropboxMandatoryProperties.push({
+								name: $scope.getNameValue(prop),
+								value: propertyValue,
+								allowAdd: false,
+								isMandatory: (getIndexOfId($scope.allMandatoryDropboxProperties, prop) === -1) ? false : true
+								});
+							 } 	
+							if (prop === 'securedPayload') {
+								propertyValue = json_data[prop];
+								$scope.dropboxMandatoryProperties.push({
+								name: $scope.getNameValue(prop),
+								value: propertyValue,
+								allowAdd: false,
+								isMandatory: (getIndexOfId($scope.allMandatoryDropboxProperties, prop) === -1) ? false : true
+								});
+							}
+						} else {
 							 if (prop === 'otherRequestHeader') {
 								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
 							 } else if (prop === 'port') {
@@ -1558,13 +1616,15 @@ var rest = myApp.controller(
 				if (otherReqIndex !== -1) {
 					if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
 						$scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
-					}  else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR' ) {
+					}  else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
 
                         $scope.httpListenerMandatoryProperties.splice(otherReqIndex - 1, 1);
+                    } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR' ) {
+                        $scope.dropboxMandatoryProperties.splice(otherReqIndex - 1, 1);
                     } else {
 						$scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
 					}
-					 if ($scope.processor.protocol !== 'HTTPSYNCPROCESSOR' && $scope.processor.protocol !== 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR') {
+					 if ($scope.processor.protocol !== 'HTTPSYNCPROCESSOR' && $scope.processor.protocol !== 'HTTPASYNCPROCESSOR' && $scope.processor.protocol !== 'DROPBOXPROCESSOR') {
 	                        $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
 	                            "name": "OtherRequest Header",
 	                            "id": "otherRequestHeader"
@@ -1604,14 +1664,12 @@ var rest = myApp.controller(
                     } else if ($scope.processor.protocol === 'FILEWRITER') {
                     	$scope.fileWriterMandatoryProperties = [];
                     } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
-                        if (data.getProcessorResponse.processor.dynamicProperties[i].name === 'httplistenerauthcheckrequired' && data.getProcessorResponse.processor.dynamicProperties[i].value != "false") {
-                        	$scope.httpListenerMandatoryProperties.push({
-    							name: dynamicPropertyName,
-    							value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-    							allowAdd: false,
-    							isMandatory: false
-    						});
-                        } 
+						$scope.dropboxMandatoryProperties.push({
+							name: dynamicPropertyName,
+							value: data.getProcessorResponse.processor.dynamicProperties[i].value,
+							allowAdd: false,
+							isMandatory: false
+						});
                     } else {
 						$scope.ftpMandatoryProperties.push({
 							name: dynamicPropertyName,
@@ -1648,7 +1706,7 @@ var rest = myApp.controller(
 					$scope.processorProperties = $scope.sweeperMandatoryProperties;
 					$scope.disablePipeLineId = true;
 
-				} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR') {
+				} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
 					$scope.httpListenerMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
 						name: '',
 						value: '',
@@ -1656,6 +1714,15 @@ var rest = myApp.controller(
 						isMandatory: false
 					});
 					$scope.processorProperties = $scope.httpListenerMandatoryProperties;
+					$scope.disableHTTPListenerPipeLineId = true;
+                 } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+					$scope.dropboxMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
+						name: '',
+						value: '',
+						allowAdd: true,
+						isMandatory: false
+					});
+					$scope.processorProperties = $scope.dropboxMandatoryProperties;
 					$scope.disableHTTPListenerPipeLineId = true;
                  } else if ($scope.processor.protocol === 'FILEWRITER') {
 					$scope.processorProperties = $scope.fileWriterMandatoryProperties;				
@@ -2097,6 +2164,19 @@ var rest = myApp.controller(
                 var colonSplit;
             };
             $scope.getIndex = function (name) {
+            	
+            	if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+            		var dbxVal = getIndex($scope.allMandatoryDropboxProperties, name);
+					if (dbxVal !== -1) {
+                    	return dbxVal;
+                	}
+            	} else {
+            		var httpListenerVal = getIndex($scope.allMandatoryHttpListenerProperties, name);
+					if (httpListenerVal !== -1) {
+                  	  return httpListenerVal;
+               		 }	
+            	}
+            	
                 var ftpVal = getIndex($scope.allMandatoryFtpProperties, name);
                 if (ftpVal !== -1) {
                     return ftpVal;
@@ -2109,10 +2189,7 @@ var rest = myApp.controller(
                 if (sweeperVal !== -1) {
                     return sweeperVal;
                 }			
-				var httpListenerVal = getIndex($scope.allMandatoryHttpListenerProperties, name);
-				if (httpListenerVal !== -1) {
-                    return httpListenerVal;
-                }	
+				
                 return getId($scope.allStaticProperties, name);
             };
             $scope.save = function () {
@@ -2196,8 +2273,10 @@ var rest = myApp.controller(
                         indexMandatory = getIndex($scope.allMandatoryHttpProperties, $scope.processorProperties[i].name);
                     } else if ($scope.processor.protocol === 'SWEEPER') {
                         indexMandatory = getIndex($scope.allMandatorySweeperProperties, $scope.processorProperties[i].name);
-                    } else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR') {
+                    } else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
                         indexMandatory = getIndex($scope.allMandatoryHttpListenerProperties, $scope.processorProperties[i].name);
+                    } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+                        indexMandatory = getIndex($scope.allMandatoryDropboxProperties, $scope.processorProperties[i].name);
                     } else if ($scope.processor.protocol === 'FILEWRITER') {
                         indexMandatory = getIndex($scope.allMandatoryFileWriterProperties, $scope.processorProperties[i].name);
                     } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
@@ -2628,8 +2707,11 @@ var rest = myApp.controller(
                 } else if ($scope.processor.protocol === "SWEEPER") {
                     $scope.processorProperties = $scope.sweeperMandatoryProperties;
                     $scope.setFolderData();
-                } else if ($scope.processor.protocol === "HTTPSYNCPROCESSOR" || $scope.processor.protocol === "HTTPASYNCPROCESSOR" || $scope.processor.protocol === "DROPBOXPROCESSOR") {
+                } else if ($scope.processor.protocol === "HTTPSYNCPROCESSOR" || $scope.processor.protocol === "HTTPASYNCPROCESSOR") {
                 	$scope.processorProperties = $scope.httpListenerMandatoryProperties;
+                    $scope.setFolderData();
+                } else if ($scope.processor.protocol === "DROPBOXPROCESSOR") {
+                	$scope.processorProperties = $scope.dropboxMandatoryProperties;
                     $scope.setFolderData();
                 }  else if ($scope.processor.protocol === "FILEWRITER") {
               	  	 $scope.processorProperties = $scope.fileWriterMandatoryProperties;

@@ -170,6 +170,10 @@ public interface MailBoxConstants {
 	public static final int AUTH_SUCCESS_CODE = 200;
 	public static final int AUTH_FAILURE_CODE = 401;
 	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;	
+	public static final String TTL = "ttl";
+	public static final String TTL_FROM_PROPERTY_FILE = "dropbox.file.ttp";
+	public static final String FS2_STORAGE_DEFAULT_USE = "fs2.storage.file.default.use";
+
 	//charsetname
 	public static final String CHARSETNAME = "UTF-8";
 	public final static String TOKEN_SEPARATOR = "::";

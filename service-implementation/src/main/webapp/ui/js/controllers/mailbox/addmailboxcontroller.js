@@ -53,9 +53,9 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
-            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}];
+            {"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, {"name":"TTL", "id":"ttl"}];
 
-        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}];
+        $scope.allStaticProperties = [{"name":"Email Notification Ids","id":"emailnotificationids"}, {"name":"Time to Pickup File Posted to Mailbox","id":"timetopickupfilepostedtomailbox"}, {"name":"Time to Pickup File Posted By Mailbox","id":"timetopickupfilepostedbymailbox"}, {"name":"TTL", "id":"ttl"}];
 		//Data from server
         $scope.mailBoxProperties = [{
             name: '',

@@ -237,3 +237,7 @@ client.key-management.baseUrl=https://kms-d.liaison.dev/key-management/
 
 #default script template name
 mailbox.script.default.template=defaultScriptTemplate.js
+
+#for dropbox
+dropbox.file.ttp=200
+fs2.storage.file.default.use=false

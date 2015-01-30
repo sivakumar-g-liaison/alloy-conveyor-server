@@ -12,6 +12,8 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -20,6 +22,7 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.Messages;
@@ -38,6 +41,7 @@ public class DropboxFileTransferService {
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferService.class);
 
 	public static final String TRANSFER_PROFILE = "Tranfer Profiles";
+	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
 	/**
 	 * @param request
@@ -96,7 +100,6 @@ public class DropboxFileTransferService {
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
 				
-				
 				Map <String, String>properties = new HashMap <String, String>();
 				properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
 				properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
@@ -105,6 +108,16 @@ public class DropboxFileTransferService {
 				
 				workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(properties));
 				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
+				
+				//set ttl value from mailbox property or else from property file
+				String ttl = configuration.getString(MailBoxConstants.TTL_FROM_PROPERTY_FILE);
+				for(MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
+					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
+						ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
+						break;
+					}
+				}
+				workTicket.setTtlDays(Integer.parseInt(ttl));
 				
 				//store payload to spectrum
 				WorkTicketUtil.storePayload(stream, workTicket, properties);	
