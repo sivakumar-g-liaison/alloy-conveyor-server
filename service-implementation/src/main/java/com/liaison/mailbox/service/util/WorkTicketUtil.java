@@ -15,6 +15,7 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
+import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
@@ -102,7 +103,9 @@ public class WorkTicketUtil {
 				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
+		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()*24 * 60 *60));
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
+		
 		return fs2Header;
 	}
 }

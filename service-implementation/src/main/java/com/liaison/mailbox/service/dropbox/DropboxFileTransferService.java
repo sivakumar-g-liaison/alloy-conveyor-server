@@ -110,7 +110,7 @@ public class DropboxFileTransferService {
 				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 				
 				//set ttl value from mailbox property or else from property file
-				String ttl = configuration.getString(MailBoxConstants.TTL_FROM_PROPERTY_FILE);
+				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS);
 				for(MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
 					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
 						ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();

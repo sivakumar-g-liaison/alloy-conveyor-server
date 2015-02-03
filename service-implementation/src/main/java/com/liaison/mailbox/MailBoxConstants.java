@@ -171,7 +171,7 @@ public interface MailBoxConstants {
 	public static final int AUTH_FAILURE_CODE = 401;
 	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;	
 	public static final String TTL = "ttl";
-	public static final String TTL_FROM_PROPERTY_FILE = "dropbox.file.ttl";
+	public static final String DROPBOX_PAYLOAD_TTL_DAYS = "com.liaison.dropbox.payload.ttl.days";
 	public static final String FS2_STORAGE_DEFAULT_USE = "fs2.storage.file.default.use";
 
 	//charsetname
