@@ -60,17 +60,17 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 
 @Path("mailbox/git/content")
-@Api(value = "mailbox/git/content", 
+@Api(value = "mailbox/git/content",
 description = "Gateway for the user script services")
-public class MailBoxScriptConfigurationResource extends AuditedResource {	
-	
+public class MailBoxScriptConfigurationResource extends AuditedResource {
+
 	private static final Logger LOG = LogManager.getLogger(MailBoxScriptConfigurationResource.class);
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);	
-	
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
+
 	private Stopwatch stopwatch;
 	private static final StatsTimer statsTimer = new StatsTimer(MonitorConfig.builder("MailBoxScriptConfigurationResource_statsTimer")
 			.build(), new StatsConfig.Builder().build());
@@ -78,10 +78,10 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 	static {
 		DefaultMonitorRegistry.getInstance().register(statsTimer);
 	}
-	
+
 	/**
 	 * Rest method to create a script file to git
-	 * 
+	 *
 	 * @param request
 	 * @return Response
 	 * @throws Exception
@@ -98,9 +98,9 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 	 @ApiResponses({
 	 @ApiResponse( code = 500, message = "Unexpected Service failure." )
 	 })
-	
+
      public Response createScript(@Context final HttpServletRequest request) throws Exception {
-		 
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
@@ -108,20 +108,22 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.addAndGet(1);
-				
+
 				ScriptServiceRequestDTO serviceRequest;
-				ScriptService scriptService = new ScriptService();
+				final String userId = getUserIdFromHeader(request);
+                String serviceIp = request.getLocalAddr();
+				ScriptService scriptService = new ScriptService(serviceIp, userId);
 				try(InputStream requestStream = request.getInputStream()) {
-					
+
 					String requestString = new String(StreamUtil.streamToBytes(requestStream), "UTF-8");
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ScriptServiceRequestDTO.class);
 					return scriptService.createScript(serviceRequest.getScript());
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}       
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "MailBoxScriptConfigurationResource.createScript()";
@@ -136,10 +138,10 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
     }
-	 
+
     /**
 	 * Rest method to revise a script file to git
-	 * 
+	 *
 	 * @param request
 	 * @return Response
 	 * @throws Exception
@@ -156,9 +158,9 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 	 @ApiResponses({
 	 @ApiResponse( code = 500, message = "Unexpected Service failure." )
 	 })
-	 
+
      public Response updateScript(@Context final HttpServletRequest request) throws Exception {
-		 
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
@@ -166,20 +168,22 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.addAndGet(1);
-				
+
 				ScriptServiceRequestDTO serviceRequest;
-				ScriptService scriptService = new ScriptService();
+				final String userId = getUserIdFromHeader(request);
+                String serviceIp = request.getLocalAddr();
+				ScriptService scriptService = new ScriptService(serviceIp, userId);
 				try(InputStream requestStream = request.getInputStream()) {
-					
+
 					String requestString = new String(StreamUtil.streamToBytes(requestStream), "UTF-8");
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ScriptServiceRequestDTO.class);
 					return scriptService.updateScript(serviceRequest.getScript());
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}       
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "MailBoxScriptConfigurationResource.updateScript()";
@@ -193,8 +197,8 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-    }	 
-	 
+    }
+
    @Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
