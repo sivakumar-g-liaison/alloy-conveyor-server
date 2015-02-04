@@ -475,8 +475,8 @@ public class HttpListener extends AuditedResource {
               FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
                             fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
               logger.info("The received path uri is {} ", metaSnapShot.getURI().toString());
-              //Hack
-              workTicket.setPayloadSize(Long.valueOf(metaSnapShot.getHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE)[0]));
+
+              workTicket.setPayloadSize(metaSnapShot.getPayloadSize());
               workTicket.setPayloadURI(metaSnapShot.getURI().toString());
 	    }
 	}

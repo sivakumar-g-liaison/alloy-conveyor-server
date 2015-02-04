@@ -9,15 +9,12 @@
 
 package com.liaison.mailbox.service.storage.util;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +35,6 @@ import com.liaison.fs2.api.exceptions.FS2PayloadNotFoundException;
 import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
 import com.liaison.fs2.storage.spectrum.FS2DefaultSpectrumStorageConfig;
 import com.liaison.fs2.storage.spectrum.SpectrumConfigBuilder;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -83,7 +79,7 @@ public class StorageUtilities {
 	/**
 	 * FS2 URI path for mailbox. There is no difference between sync and async
 	 */
-	public static final String FS2_URI_MBX_PAYLOAD = "/mailbox/payload/1.0/";
+	public static final String FS2_URI_MBX_PAYLOAD = "/mbx/payload/1.0/";
 
 	private static FlexibleStorageSystem FS2 = null;
 
@@ -132,28 +128,10 @@ public class StorageUtilities {
 			//persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
-			//FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, payload);
+			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, payload);
 
-			// create object
-	        FS2.createObjectEntry(requestUri);
-
-	        // write the payload
-	        long size = 0;
-			if (payload != null) {
-				try (OutputStream outputStream = FS2.getFS2PayloadOutputStream(requestUri)) {
-					size = IOUtils.copy(payload, outputStream);
-				} catch (IOException e) {
-					throw new MailBoxServicesException(
-							"Created object but failed to write payload to URI (object is not cleaned up) = "
-									+ requestUri.toString(), Response.Status.INTERNAL_SERVER_ERROR);
-				}
-			}
-
-			//updating headers
-			FS2.updateHeaders(requestUri, fs2Headers);
-			//adding the payloadsize
-			FS2MetaSnapshot metaSnapshot = FS2.addHeader(requestUri, MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, String.valueOf(size));
-
+			//fetch the metdata includes payload size
+			metaSnapshot = FS2.fetchObject(metaSnapshot.getURI());
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return metaSnapshot;
 		} catch (FS2Exception  e) {
@@ -266,11 +244,21 @@ public class StorageUtilities {
 				if (type.equals(SECURE_MONIKER)) {
 					config = new FS2DefaultSpectrumStorageConfig(
 			        		new FS2StorageIdentifier(type, location), SpectrumConfigBuilder.buildFromConfiguration(
-			        				identifier, configuration), encryptionProvider, kekProvider);
+			        				identifier, configuration), encryptionProvider, kekProvider) {
+					    @Override
+					    public boolean doCalcPayloadSize() {
+					    	return true;
+					    }
+					};
 				} else {
 					config = new FS2DefaultSpectrumStorageConfig(
 		        		new FS2StorageIdentifier(type, location), SpectrumConfigBuilder.buildFromConfiguration(
-		        				identifier, configuration), null, null);
+		        				identifier, configuration), null, null) {
+						@Override
+					    public boolean doCalcPayloadSize() {
+							return true;
+					    }
+					};
 				}
 				spectrumConfigs[i] = config;
 				i++;
