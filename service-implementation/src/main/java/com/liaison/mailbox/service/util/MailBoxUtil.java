@@ -306,6 +306,22 @@ public class MailBoxUtil {
 		}
 	}
 	
+	/**
+	 * Method to calculate the elapsed time between two given time limits
+	 * 
+	 * @param startTime
+	 * @param endTime
+	 * @param taskToCalulateElapsedTime
+	 */
+	public static void calculateElapsedTime(long startTime, long endTime) {
+		
+		LOGGER.debug("start time - {}", startTime);
+		LOGGER.debug("end time - {}", endTime);
+		Long elapsedTime = endTime - startTime;
+		LOGGER.debug("elapsed time is {}",  elapsedTime);
+		
+	}
+	
 	public static String getManifest(String manifestFromRequestHeader) throws MailBoxConfigurationServicesException, IOException{
 		
 		if (MailBoxUtil.isEmpty(manifestFromRequestHeader)) {
@@ -316,6 +332,5 @@ public class MailBoxUtil {
 		return manifestFromRequestHeader;
 
 	}
-
 
 }

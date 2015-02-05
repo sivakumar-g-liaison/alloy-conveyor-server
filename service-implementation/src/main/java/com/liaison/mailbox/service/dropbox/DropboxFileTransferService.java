@@ -54,20 +54,39 @@ public class DropboxFileTransferService {
 			String aclManifest) throws Exception {
 
 		DropboxTransferContentResponseDTO transferContentResponse = null;
+		long startTime = 0;
+		long endTime = 0;
 
 		String tenancyKey = null;
 		List<Processor> dropboxProcessors = new ArrayList<Processor>();
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 
+		// start time to calculate elapsed time for retrieving tenancy keys from manifest
+		startTime = System.currentTimeMillis();
+		
 		// retrieve the tenancy key from acl manifest
 		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
+		
+		// end time to calculate elapsed time for getting manifest
+		endTime = System.currentTimeMillis();
+		LOG.debug("Calculating elapsed time for retrieving tenancy keys from manifest");
+		MailBoxUtil.calculateElapsedTime(startTime, endTime);
+		
+		// start time to calculate elapsed time for retrieving profile name by given Id from DB
+		startTime = System.currentTimeMillis();
+		
 		//for getting profile name
 		ProfileConfigurationDAO profileDao  = new ProfileConfigurationDAOBase();
 		ScheduleProfilesRef profile = profileDao.find(ScheduleProfilesRef.class, profileId);
+		
+		// end time to calculate elapsed time for getting manifest
+		endTime = System.currentTimeMillis();
+		LOG.debug("Calculating elapsed time for retrieving profile name by given Id from DB");
+		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 		
 		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
 
@@ -76,8 +95,19 @@ public class DropboxFileTransferService {
 			List<String> specificProcessorTypes = new ArrayList<String>();
 			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+			
+			// start time to calculate elapsed time for retrieving dropbox processors linked to given profile Id and tenancyKey in manifest
+			startTime = System.currentTimeMillis();
+			
+			// retrieve dropbox processors linked to given profile Id and tenancyKey in manifest
 			List<Processor> processors = processorDAO.findProcessorsOfSpecificTypeByProfileAndTenancyKey(profileId,
 					tenancyKey, specificProcessorTypes);
+			
+			// end time to calculate elapsed time for dropbox processors linked to given profile Id and tenancyKey in manifest
+			endTime = System.currentTimeMillis();
+			LOG.debug("Calculating elapsed time for dropbox processors linked to given profile Id and tenancyKey in manifest");
+			MailBoxUtil.calculateElapsedTime(startTime, endTime);
+			
 			dropboxProcessors.addAll(processors);
 
 			// if there are no dropbox processors available for this tenancy key
@@ -119,8 +149,17 @@ public class DropboxFileTransferService {
 				}
 				workTicket.setTtlDays(Integer.parseInt(ttl));
 				
+				// start time to calculate elapsed time for storing payload in spectrum
+				startTime = System.currentTimeMillis();				
+				
 				//store payload to spectrum
 				WorkTicketUtil.storePayload(stream, workTicket, properties);	
+				
+				// end time to calculate elapsed time for storing payload in spectrum
+				endTime = System.currentTimeMillis();
+				LOG.debug("Calculating elapsed time for storing payload in spectrum");
+				MailBoxUtil.calculateElapsedTime(startTime, endTime);
+				
 				workTicket.setProcessMode(ProcessMode.MFT);
 				WorkTicketUtil.constructMetaDataJson(workTicket);
 			}
