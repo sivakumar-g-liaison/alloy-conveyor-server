@@ -1298,21 +1298,21 @@ var rest = myApp.controller(
                 columnDefs: [{
                     field: 'name',
                     displayName: 'Name',
-                    width: "400px"
+                    width: "40%"
                 }, {
                     field: 'type',
                     displayName: 'Type',
-                    width: "400px",
+                    width: "20%",
                     cellTemplate: $scope.manageType
                 }, {
                     field: 'status',
                     displayName: 'Status',
-                    width: "250px",
+                    width: "20%",
                     cellTemplate: $scope.manageStatus
                 }, {
                     displayName: 'Action',
                     sortable: false,
-                    width: "77px",
+                    width: "20%",
                     cellTemplate: $scope.editableInPopup
                 }],
                 data: 'processorList',
