@@ -81,7 +81,7 @@ public class StorageUtilities {
 	/**
 	 * FS2 URI path for mailbox. There is no difference between sync and async
 	 */
-	public static final String FS2_URI_MBX_PAYLOAD = "/mbx/payload/1.0/";
+	public static final String FS2_URI_MBX_PAYLOAD = "/mailbox/payload/1.0/";
 
 	private static FlexibleStorageSystem FS2 = null;
 
