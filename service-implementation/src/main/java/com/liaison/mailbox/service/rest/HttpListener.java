@@ -61,7 +61,6 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -71,6 +70,7 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
+import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -472,12 +472,12 @@ public class HttpListener extends AuditedResource {
 	  try (InputStream payloadToPersist = request.getInputStream()) {
 
               FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+              PayloadDetail payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
                             fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-              logger.info("The received path uri is {} ", metaSnapShot.getURI().toString());
+              logger.info("The received path uri is {} ", (payloadDetail.getMetaSnapshot().getURI().toString()));
 
-              workTicket.setPayloadSize(metaSnapShot.getPayloadSize());
-              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+              workTicket.setPayloadSize(payloadDetail.getPayloadSize());
+              workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 	    }
 	}
 

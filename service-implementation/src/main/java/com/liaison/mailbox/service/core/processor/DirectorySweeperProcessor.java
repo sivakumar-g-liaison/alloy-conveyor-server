@@ -45,7 +45,6 @@ import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
-import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
@@ -60,6 +59,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
+import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -182,7 +182,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 					for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()){
 						glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
 						glassMessage.setStatus(ExecutionState.STAGED);
-						
+
 						if(inputLocation.contains("ftps")){
 							glassMessage.setInAgent(GatewayType.FTPS);
 						}if(inputLocation.contains("sftp")){
@@ -190,7 +190,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 						}else if(inputLocation.contains("ftp")){
 							glassMessage.setInAgent(GatewayType.FTP);
 						}
-						
+
 						glassLogger.logToGlass(glassMessage);
 					}
 				}
@@ -372,7 +372,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		Path target = null;
 		Path oldPath = null;
 		Path newPath = null;
-		FS2MetaSnapshot metaSnapShot = null;
+		PayloadDetail payloadDetail = null;
 
 		if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
 			target = Paths.get(sweepedFileLocation);
@@ -391,7 +391,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
-				metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,
+				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,
 						fs2Header, this.getProperties().isSecuredPayload());
 				payloadToPersist.close();
 			}
@@ -405,7 +405,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
             }
 			//GSB-1353- After discussion with Joshua and Sean
-			workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 		}
 
 		LOGGER.info("Renaming the processed files - done");
