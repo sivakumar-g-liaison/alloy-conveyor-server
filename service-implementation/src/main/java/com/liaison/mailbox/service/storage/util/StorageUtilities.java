@@ -132,7 +132,7 @@ public class StorageUtilities {
 			//persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
-			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, payload);
+			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
 
 			//fetch the metdata includes payload size
 			PayloadDetail detail = null;
