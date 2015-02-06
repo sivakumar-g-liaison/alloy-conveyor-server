@@ -69,6 +69,8 @@ public class StorageUtilities {
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE = "fs2.storage.file.default.type";
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION = "fs2.storage.file.default.location";
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT = "fs2.storage.file.default.mount";
+	public static final String DEFAULT_VALUE_FOR_FILE_LOCATION = "local";
+	public static final String DEFAULT_VALUE_FOR_FILE_TYPE = "file";
 
 	/**
 	 * Moniker to identify secure and unsecure
@@ -156,8 +158,8 @@ public class StorageUtilities {
 		boolean defaultFileuse = configuration.getBoolean(PROPERTY_FS2_STORAGE_FILE_DEFAULT_USE, false);
 
 		if (defaultFileuse) {
-			String defaultFileLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, "local");
-			String defaultFileType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, "file");
+			String defaultFileLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, DEFAULT_VALUE_FOR_FILE_LOCATION);
+			String defaultFileType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, DEFAULT_VALUE_FOR_FILE_TYPE);
 			uri = createSpectrumURI(path, defaultFileType, defaultFileLocation);
 			return uri;
 		}

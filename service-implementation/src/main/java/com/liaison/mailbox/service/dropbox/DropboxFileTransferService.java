@@ -140,13 +140,15 @@ public class DropboxFileTransferService {
 				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 				
 				//set ttl value from mailbox property or else from property file
-				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS, "30");
+				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
 				for(MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
 					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
 						ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
+						LOG.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
 						break;
 					}
 				}
+				
 				workTicket.setTtlDays(Integer.parseInt(ttl));
 				
 				// start time to calculate elapsed time for storing payload in spectrum
