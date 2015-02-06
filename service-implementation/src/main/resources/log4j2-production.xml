@@ -104,7 +104,7 @@
             </Failovers>
         </Failover>
 
-
+<!--
         <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData">
             <GSAMessageXMLLayout/>
             <filters>
@@ -120,7 +120,6 @@
          </GSAMessageLENS>
 
 
-        <!-- Logs ONLY Glass Messages to Spectrum -->
         <GlassMessageSpectrum name="GlassMessageSpectrumREST"
                               ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
                               password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
@@ -144,13 +143,14 @@
                 <MarkerFilter marker="METRICS_GM_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
             </filters>
         </GlassMessageSpectrum>
+-->
 
-        <File name="FileSyslogLogFile" fileName="/var/log/tomcat/filesyslog.log" append="true" >
+       <File name="FileSyslogLogFile" fileName="/var/log/tomcat/filesyslog.log" append="true" >
         <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
         <filters>
         <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
         </filters>
-        </File>
+       </File>
         
 
 
@@ -168,18 +168,19 @@
 	    	<appender-ref ref="LogStashFailover"/>
 	    	
 	               
-             <!--  logs MessageBus popped messages -->
-             <!--  <appender-ref ref="MBPopLogFile" /> -->
+            <!--  logs MessageBus popped messages -->
+            <!--  <appender-ref ref="MBPopLogFile" /> -->
          
 	        <!-- logs to console (not necessarily for production) -->
-	        <!--   <appender-ref ref="Console" /> -->
+	        <appender-ref ref="Console" /> 
 	       
 	        <!-- logs syslog formatted audit messages to local file (not for production) -->
             <appender-ref ref="FileSyslogLogFile" />
-
+<!--
              <appender-ref ref="OrgGSALENSAppender"/>
 
              <appender-ref ref="PairwiseGSALENSAppender" />
+-->
 	     </root>
 	</loggers>
 </configuration>
