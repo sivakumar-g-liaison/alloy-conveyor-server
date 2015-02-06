@@ -20,9 +20,9 @@ import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.util.StreamUtil;
-import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 
 /**
@@ -49,9 +49,9 @@ public class StorageUtilitiesTest {
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
-		FS2MetaSnapshot meta = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, false);
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, false);
 
-		try (InputStream is = StorageUtilities.retrievePayload(meta.getURI().toString())) {
+		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
 			logger.info("The received payload is \"{}\"", paylaod);
@@ -74,9 +74,9 @@ public class StorageUtilitiesTest {
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
-		FS2MetaSnapshot meta = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, true);
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, true);
 
-		try (InputStream is = StorageUtilities.retrievePayload(meta.getURI().toString())) {
+		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
 			logger.info("The received payload is \"{}\"", paylaod);

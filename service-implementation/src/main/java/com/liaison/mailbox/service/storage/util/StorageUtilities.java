@@ -9,12 +9,14 @@
 
 package com.liaison.mailbox.service.storage.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -123,7 +125,7 @@ public class StorageUtilities {
 	 * @param isSecure
 	 * @return
 	 */
-	public static FS2MetaSnapshot persistPayload(InputStream payload, String globalProcessId, FS2ObjectHeaders fs2Headers, boolean isSecure) {
+	public static PayloadDetail persistPayload(InputStream payload, String globalProcessId, FS2ObjectHeaders fs2Headers, boolean isSecure) {
 
 		try {
 
@@ -133,10 +135,17 @@ public class StorageUtilities {
 			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, payload);
 
 			//fetch the metdata includes payload size
-			metaSnapshot = FS2.fetchObject(metaSnapshot.getURI());
+			PayloadDetail detail = null;
+			try (CountingInputStream inputStream = new CountingInputStream(payload)) {
+
+				detail = new PayloadDetail();
+				FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
+				detail.setMetaSnapshot(metaSnapshot);
+				detail.setPayloadSize(inputStream.getCount());
+			}
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
-			return metaSnapshot;
-		} catch (FS2Exception  e) {
+			return detail;
+		} catch (FS2Exception | IOException e) {
 			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
 			throw new MailBoxServicesException("Failed to write payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		}
@@ -249,7 +258,7 @@ public class StorageUtilities {
 			        				identifier, configuration), encryptionProvider, kekProvider) {
 					    @Override
 					    public boolean doCalcPayloadSize() {
-					    	return true;
+					    	return false;
 					    }
 					};
 				} else {
@@ -258,7 +267,7 @@ public class StorageUtilities {
 		        				identifier, configuration), null, null) {
 						@Override
 					    public boolean doCalcPayloadSize() {
-							return true;
+							return false;
 					    }
 					};
 				}
