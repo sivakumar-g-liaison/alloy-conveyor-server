@@ -157,8 +157,8 @@ public class StorageUtilities {
 
 		if (defaultFileuse) {
 			String defaultFileLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, "local");
-	        String defaultFileMountPoint = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT, "/tmp");
-			uri = createSpectrumURI(path, defaultFileLocation, defaultFileMountPoint);
+			String defaultFileType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, "file");
+			uri = createSpectrumURI(path, defaultFileType, defaultFileLocation);
 			return uri;
 		}
 
