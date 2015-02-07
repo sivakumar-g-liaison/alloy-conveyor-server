@@ -1,3 +1,7 @@
+1.1.2
+-------------------------------
+prod property updates
+
 1.1.1
 -------------------------------
 hornetq properties changes
