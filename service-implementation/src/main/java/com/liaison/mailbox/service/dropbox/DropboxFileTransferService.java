@@ -33,6 +33,7 @@ import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
@@ -155,7 +156,7 @@ public class DropboxFileTransferService {
 				startTime = System.currentTimeMillis();				
 				
 				//store payload to spectrum
-				WorkTicketUtil.storePayload(stream, workTicket, properties);	
+				StorageUtilities.storePayload(stream, workTicket, properties);	
 				
 				// end time to calculate elapsed time for storing payload in spectrum
 				endTime = System.currentTimeMillis();

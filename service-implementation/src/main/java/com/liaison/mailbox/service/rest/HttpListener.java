@@ -274,7 +274,7 @@ public class HttpListener extends AuditedResource {
 						authenticateRequestor(request);
 					}
 					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
-					WorkTicketUtil.storePayload(request.getInputStream(), workTicket, httpListenerProperties);
+					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					WorkTicketUtil.constructMetaDataJson(workTicket);
 
@@ -499,7 +499,7 @@ public class HttpListener extends AuditedResource {
 		logger.info("Starting to forward request...");
 
 		//persist payload in spectrum
-		WorkTicketUtil.storePayload(request.getInputStream(), workTicket, httpListenerProperties);
+		StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties);
 		workTicket.setProcessMode(ProcessMode.SYNC);
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		HttpPost httpRequest = createHttpRequest(request);

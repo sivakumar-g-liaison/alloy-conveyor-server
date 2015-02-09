@@ -1,11 +1,7 @@
 package com.liaison.mailbox.service.util;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
-
-import javax.servlet.ServletInputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,13 +9,8 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.fs2.api.FS2ObjectHeaders;
-import com.liaison.fs2.api.FlexibleStorageSystem;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
-import com.liaison.mailbox.service.storage.util.PayloadDetail;
-import com.liaison.mailbox.service.storage.util.StorageUtilities;
 
 public class WorkTicketUtil {
 
@@ -61,51 +52,5 @@ public class WorkTicketUtil {
 
 	public static void assignTimestamp(WorkTicket workTicket) {
 		workTicket.setCreatedTime(new Date());
-	}
-
-	/**
-	 * This method will persist payload in spectrum.
-	 *
-	 * @param request
-	 * @param workTicket
-	 * @throws IOException
-	 */
-	public static void storePayload(ServletInputStream stream, WorkTicket workTicket,
-			Map<String, String> httpListenerProperties) throws Exception {
-
-		try (InputStream payloadToPersist = stream) {
-
-			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,
-					workTicket.getGlobalProcessId(), fs2Header,
-					Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-			LOGGER.info("The received path uri is {} ", detail.getMetaSnapshot().getURI().toString());
-
-			workTicket.setPayloadSize( detail.getPayloadSize());
-			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
-		}
-	}
-
-	/**
-	 * Method to construct FS2ObjectHeaders from the given workTicket
-	 *
-	 * @param workTicket
-	 * @return FS2ObjectHeaders
-	 * @throws IOException
-	 * @throws MailBoxServicesException
-	 */
-	public static FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket, Map<String, String> httpListenerProperties) {
-
-		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
-		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
-		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
-		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID,
-				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
-				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()*24 * 60 *60));
-		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
-
-		return fs2Header;
 	}
 }
