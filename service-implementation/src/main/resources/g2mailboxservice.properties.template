@@ -246,3 +246,7 @@ fs2.storage.file.default.use=false
 fs2.storage.file.default.type=file
 fs2.storage.file.default.location=local
 fs2.storage.file.default.mount=/tmp
+
+#Passphrase of self signed Truststore
+mailbox.self.signed.trustore.passphrase=passmein
+

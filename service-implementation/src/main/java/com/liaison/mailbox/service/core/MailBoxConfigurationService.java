@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -584,14 +583,12 @@ public class MailBoxConfigurationService {
 
 		try {
 
-			Properties prop = MailBoxUtil.getEnvProperties();
-
-			dto.setTrustStoreId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
-			dto.setTrustStoreGroupId(prop.getProperty(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
-			dto.setListJobsIntervalInHours(prop.getProperty(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
-			dto.setFsmEventCheckIntervalInSeconds(prop.getProperty(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
-			dto.setMailboxPguidDisplayPrefix(prop.getProperty(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX));
-			dto.setDefaultScriptTemplateName(prop.getProperty(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+			dto.setTrustStoreId(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
+			dto.setTrustStoreGroupId(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
+			dto.setListJobsIntervalInHours(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+			dto.setFsmEventCheckIntervalInSeconds(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
+			dto.setMailboxPguidDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX));
+			dto.setDefaultScriptTemplateName(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
@@ -599,7 +596,7 @@ public class MailBoxConfigurationService {
 			LOG.debug("Exit from getValuesFromPropertiesFile.");
 			return serviceResponse;
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse

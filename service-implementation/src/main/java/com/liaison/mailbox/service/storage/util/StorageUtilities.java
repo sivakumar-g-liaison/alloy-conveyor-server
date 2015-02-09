@@ -132,6 +132,7 @@ public class StorageUtilities {
 			//persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
+
 			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
 
 			//fetch the metdata includes payload size
@@ -143,6 +144,7 @@ public class StorageUtilities {
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(inputStream.getCount());
 			}
+
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
 		} catch (FS2Exception | IOException e) {
@@ -258,7 +260,7 @@ public class StorageUtilities {
 			        				identifier, configuration), encryptionProvider, kekProvider) {
 					    @Override
 					    public boolean doCalcPayloadSize() {
-					    	return false;
+					    	return true;
 					    }
 					};
 				} else {
@@ -267,7 +269,7 @@ public class StorageUtilities {
 		        				identifier, configuration), null, null) {
 						@Override
 					    public boolean doCalcPayloadSize() {
-							return false;
+							return true;
 					    }
 					};
 				}

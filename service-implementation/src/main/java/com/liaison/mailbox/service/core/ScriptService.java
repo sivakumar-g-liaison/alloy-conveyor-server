@@ -43,7 +43,7 @@ public class ScriptService {
 	private static final Map<String, String> cache = new HashMap<>();
 	private static final String SCRIPT = "Script File";
 
-	public ScriptService() throws IOException {
+	public ScriptService(String serviceIp, String userId) throws IOException {
 
 		String gitlabServerHost = MailBoxUtil.getEnvironmentProperties().getString(
 				MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_SERVER_HOST);
@@ -52,7 +52,7 @@ public class ScriptService {
 		String gitlabProjectId = MailBoxUtil.getEnvironmentProperties().getString(
 				MailBoxConstants.PROPERTY_GITLAB_ACTIVITY_PROJECT_ID);
 
-		gitlab = new GitLabService(gitlabServerHost, gitlabPrivateToken, gitlabProjectId);
+		gitlab = new GitLabService(gitlabServerHost, gitlabPrivateToken, gitlabProjectId, serviceIp, userId);
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class ScriptService {
 		try {
 
 			validator.validate(scriptRequest);
-			
+
 			if (StringUtil.isNullOrEmptyAfterTrim(scriptRequest.getData())) {
 				scriptRequest.setData(MailBoxConstants.DEFAULT_SCRIPT_TMPLATE_CONTENT);
 			}
@@ -132,6 +132,15 @@ public class ScriptService {
 			}
 			script = cache.get(uri);
 			if (MailBoxUtil.isEmpty(script)) {
+				// if specific commit is chosen
+	            if (commitSha != null && !commitSha.isEmpty()) {
+	            	script = gitlab.getFileContent(commitSha, uri);
+	            }
+	            // else get latest file
+	            else {
+	                String latestCommit = gitlab.getCommitHistory().get(0).getShortId();
+	                script = gitlab.getFileContent(latestCommit, uri);
+	            }
 				script = gitlab.getFileContent(commitSha, uri);
 				cache.put(uri, script);
 				LOGGER.info("Not available in cache, so loading it from GIT.");

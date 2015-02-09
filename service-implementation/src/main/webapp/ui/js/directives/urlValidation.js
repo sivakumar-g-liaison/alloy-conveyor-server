@@ -15,6 +15,7 @@ angular.module(
 				if(typeof scope.scriptURL == "undefined" || scope.scriptURL.length == 0) {
 				   ngModel.$setValidity('allowed', true);
 					    scope.$parent.scriptUrlIsValid = false;
+					    scope.$parent.disable = true;	
                         scope.$apply();
                         return undefined;			  
 				} else {				
@@ -44,12 +45,14 @@ angular.module(
 						   }
 						);	
 					}
+					scope.$parent.disable = false;
 					ngModel.$setValidity('allowed', true);
 					    scope.$parent.scriptUrlIsValid = true;
                         scope.$apply();
                         return ngModel.$modelValue;
 				    }
                     else {
+                    	scope.$parent.disable = true;
                         ngModel.$setValidity('allowed', false);
 						scope.$parent.scriptUrlIsValid = false;
                         scope.$apply();

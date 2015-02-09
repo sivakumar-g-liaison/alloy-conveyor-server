@@ -13,6 +13,7 @@ package com.liaison.mailbox.service.rest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,12 +54,15 @@ import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
+import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -153,7 +157,6 @@ public class HttpListener extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
-				InputStream responseInputStream = null;
 
 				logger.debug("Starting sync processing");
 				try {
@@ -188,13 +191,13 @@ public class HttpListener extends AuditedResource {
 					//GLASS LOGGING ENDS//
 
 					ResponseBuilder builder = Response.ok();
-					responseInputStream = httpResponse.getEntity().getContent();
-					copyResponseInfo(httpResponse, builder, responseInputStream);
+					copyResponseInfo(request, httpResponse, builder);
 
 					return builder.build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
 
 			}
@@ -464,8 +467,8 @@ public class HttpListener extends AuditedResource {
               FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
                             fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
               logger.info("The received path uri is {} ", metaSnapShot.getURI().toString());
-              //Hack
-              workTicket.setPayloadSize(Long.valueOf(metaSnapShot.getHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE)[0]));
+
+              workTicket.setPayloadSize(metaSnapShot.getPayloadSize());
               workTicket.setPayloadURI(metaSnapShot.getURI().toString());
 	    }
 	}
@@ -540,64 +543,71 @@ public class HttpListener extends AuditedResource {
 	 * @param builder
 	 * @throws IllegalStateException
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
-	protected void copyResponseInfo(HttpResponse httpResponse,
-			ResponseBuilder builder, InputStream responseInputStream) throws IllegalStateException, IOException {
+	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
+			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
 
+		if (httpResponse.getStatusLine().getStatusCode() > 299) {
 
-		Header contentLength = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
-		Header transferEncoding = httpResponse.getFirstHeader(HTTP_HEADER_TRANSFER_ENCODING);
+			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
+			builder.status(result.getStatus());
 
-		//If the transfer encoding is chunked, then the Content-Length field will not be set
-		if ("chunked".equals(transferEncoding.getValue())) {
-
-			responseInputStream = httpResponse.getEntity().getContent();
-            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
-
-            if (responseInputStream != null) {
-                builder.entity(responseInputStream);
-            }
-
-            if (contentType != null) {
-                builder.header(contentType.getName(), contentType.getValue());
-            }
-
-		} else {
-
-			int iContentLength = 0;
-
-			if (contentLength != null) {
-				logger.debug("Response from Service Broker contained content length header with value: {}",
-						contentLength.getValue());
-				iContentLength = Integer.parseInt(contentLength.getValue());
-			} else {
-				logger.debug("Response from Service Broker did not contain a content length header");
+			//Sets the headers
+			Set<String> headers = result.getHeaderNames();
+			for (String name : headers) {
+				builder.header(name, result.getHeader(name));
 			}
 
-		    if (iContentLength > 0) {
+			//If payload URI avail, reads payload from spectrum. Mostly it would be an error message payload
+			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+				if (responseInputStream != null) {
+					builder.entity(responseInputStream);
+				}
+			} else {
+				if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+					builder.entity(result.getErrorMessage());
+				} else {
+					builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
+				}
+			}
 
-	            responseInputStream = httpResponse.getEntity().getContent();
-	            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+			//Content type
+			String contentType = result.getHeader(HTTP_HEADER_CONTENT_TYPE);
+			if (contentType == null) {
+				builder.header(HTTP_HEADER_CONTENT_TYPE, request.getContentType());
+			}
 
-	            if (responseInputStream != null) {
-	                builder.entity(responseInputStream);
-	            }
+	   	} else {
 
-	            if (contentType != null) {
-	                builder.header(contentType.getName(), contentType.getValue());
-	            }
+			InputStream responseInputStream = httpResponse.getEntity().getContent();
+			WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
 
-	            if (contentLength != null) {
-	                builder.header(contentLength.getName(),
-	                        contentLength.getValue());
-	            }
+			//sets status code from work result
+			builder.status(result.getStatus());
 
+			//Sets the headers
+			Set<String> headers = result.getHeaderNames();
+			for (String name : headers) {
+				builder.header(name, result.getHeader(name));
+			}
 
-	        }
+			//reads paylaod from spectrum
+			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+			   responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+			   if (responseInputStream != null) {
+			       builder.entity(responseInputStream);
+			   }
+			}
 
-		}
+		   //Content type
+		   String contentType = result.getHeader(HTTP_HEADER_CONTENT_TYPE);
+		   if (contentType == null) {
+		       builder.header(HTTP_HEADER_CONTENT_TYPE, request.getContentType());
+		   }
 
-        copyResponseHeaders(httpResponse, builder);
+	   	}
 
 	}
 

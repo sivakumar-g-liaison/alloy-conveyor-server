@@ -184,4 +184,6 @@ public interface MailBoxConstants {
 	public static final String REQUEST_HEADER = "Request Header";
 	public static final String PROPERTIES_FILE = "Properties file";
 
+	// added for self signed truststore
+	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
 }
