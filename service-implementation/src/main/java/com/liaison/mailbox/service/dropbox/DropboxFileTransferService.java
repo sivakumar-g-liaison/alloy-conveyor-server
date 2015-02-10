@@ -132,13 +132,14 @@ public class DropboxFileTransferService {
 				String serviceInstanceId = processor.getServiceInstance().getName();
 				
 				Map <String, String>properties = new HashMap <String, String>();
-				properties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-				properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
-				properties.put(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
 				if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
 				
 				workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(properties));
+				
 				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
+				workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
+				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+				workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
 				
 				//set ttl value from mailbox property or else from property file
 				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
