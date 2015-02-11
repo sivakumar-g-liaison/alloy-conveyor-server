@@ -75,8 +75,6 @@ public class StorageUtilities {
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE = "fs2.storage.file.default.type";
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION = "fs2.storage.file.default.location";
 	public static final String PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT = "fs2.storage.file.default.mount";
-	public static final String DEFAULT_VALUE_FOR_FILE_LOCATION = "local";
-	public static final String DEFAULT_VALUE_FOR_FILE_TYPE = "file";
 
 	/**
 	 * Moniker to identify secure and unsecure
@@ -136,7 +134,6 @@ public class StorageUtilities {
 			//persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
-
 			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
 
 			//fetch the metdata includes payload size
@@ -148,14 +145,13 @@ public class StorageUtilities {
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(inputStream.getCount());
 			}
-
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
+
 		} catch (FS2Exception | IOException e) {
 			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
 			throw new MailBoxServicesException("Failed to write payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		}
-
 	}
 
 	/**
@@ -173,9 +169,9 @@ public class StorageUtilities {
 		boolean defaultFileuse = configuration.getBoolean(PROPERTY_FS2_STORAGE_FILE_DEFAULT_USE, false);
 
 		if (defaultFileuse) {
-			String defaultFileLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, DEFAULT_VALUE_FOR_FILE_LOCATION);
-			String defaultFileType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, DEFAULT_VALUE_FOR_FILE_TYPE);
-			uri = createSpectrumURI(path, defaultFileType, defaultFileLocation);
+			String defaultType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, "file");
+			String defaultFileLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, "local");
+			uri = createSpectrumURI(path, defaultType, defaultFileLocation);
 			return uri;
 		}
 
@@ -264,7 +260,7 @@ public class StorageUtilities {
 			        				identifier, configuration), encryptionProvider, kekProvider) {
 					    @Override
 					    public boolean doCalcPayloadSize() {
-					    	return true;
+					    	return false;
 					    }
 					};
 				} else {
@@ -273,7 +269,7 @@ public class StorageUtilities {
 		        				identifier, configuration), null, null) {
 						@Override
 					    public boolean doCalcPayloadSize() {
-							return true;
+							return false;
 					    }
 					};
 				}
@@ -334,7 +330,7 @@ public class StorageUtilities {
 			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
 		}
 	}
-
+	
 	/**
 	 * Method to construct FS2ObjectHeaders from the given workTicket
 	 *
@@ -358,3 +354,6 @@ public class StorageUtilities {
 		return fs2Header;
 	}
 }
+
+
+

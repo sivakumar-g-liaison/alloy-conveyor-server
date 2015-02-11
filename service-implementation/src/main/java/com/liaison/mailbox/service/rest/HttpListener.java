@@ -464,12 +464,12 @@ public class HttpListener extends AuditedResource {
 	  try (InputStream payloadToPersist = request.getInputStream()) {
 
               FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+              PayloadDetail payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
                             fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-              logger.info("The received path uri is {} ", metaSnapShot.getURI().toString());
+              logger.info("The received path uri is {} ", (payloadDetail.getMetaSnapshot().getURI().toString()));
 
-              workTicket.setPayloadSize(metaSnapShot.getPayloadSize());
-              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+              workTicket.setPayloadSize(payloadDetail.getPayloadSize());
+              workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 	    }
 	}
 

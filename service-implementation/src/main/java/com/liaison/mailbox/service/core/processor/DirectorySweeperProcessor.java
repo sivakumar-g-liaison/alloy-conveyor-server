@@ -372,7 +372,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		Path target = null;
 		Path oldPath = null;
 		Path newPath = null;
-		PayloadDetail detail = null;
+		PayloadDetail payloadDetail = null;
+
 
 		if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
 			target = Paths.get(sweepedFileLocation);
@@ -391,8 +392,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
-				detail = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,
-						fs2Header, this.getProperties().isSecuredPayload());
+				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,fs2Header, this.getProperties().isSecuredPayload());
 				payloadToPersist.close();
 			}
 
@@ -405,7 +405,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
             }
 			//GSB-1353- After discussion with Joshua and Sean
-			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
+			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
+
 		}
 
 		LOGGER.info("Renaming the processed files - done");
