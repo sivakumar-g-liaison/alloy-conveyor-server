@@ -11,6 +11,8 @@
 package com.liaison.mailbox.service.integration.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -81,6 +83,31 @@ public class StorageUtilitiesTest {
 			String paylaod = new String(StreamUtil.streamToBytes(is));
 			logger.info("The received payload is \"{}\"", paylaod);
 		}
+
+	}
+
+	@Test(enabled = false)
+	public void testWriteAndReadSecurePayload_LocalPayload() throws IOException {
+
+		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
+		System.setProperty("archaius.deployment.environment", "test");
+
+		File file = new File("\\opt\\100mbfile.txt");
+		InputStream stream = new FileInputStream(file);
+
+		//Dummy headers
+		long globalProcessId = System.currentTimeMillis();
+		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
+		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
+		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
+
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, false);
+		System.out.println(detail.getMetaSnapshot().getURI());
+		/*try (InputStream is = StorageUtilities.retrievePayload("fs2://secure@dev-int/mailbox/payload/1.0/1423693504486")) {
+
+			String paylaod = new String(StreamUtil.streamToBytes(is));
+			System.out.println("The received payload is \"{}\"" + paylaod);
+		}*/
 
 	}
 
