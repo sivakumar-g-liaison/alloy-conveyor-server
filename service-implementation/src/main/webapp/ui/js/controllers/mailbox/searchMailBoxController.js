@@ -37,26 +37,18 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
 
-            if (typeof($scope.mailBoxName) !== 'undefined' && $scope.mailBoxName !== null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
-            	
-            	
+           if (($scope.mailBoxName != null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount && $scope.mailBoxName != null)  || typeof($scope.mailBoxName) == 'undefined' || $scope.mailBoxName == null || $scope.mailBoxName == "") {
+            	            	
             	$scope.pagingOptions.currentPage = 1;
                 $scope.search();
 
-            } else if ($scope.profile !== null && $scope.mailBoxName.length === 0) {
-
-            
-            	$scope.pagingOptions.currentPage = 1;
-                $scope.search();
-            } else {
-                $scope.reset();
-            }
+            } 
         });
 
         /**
 		 * Remove all the data in grid and disable the info message.
 		 */
-        $scope.reset = function () {
+       /* $scope.reset = function () {
 
             $scope.mailboxes = [];
             $scope.totalServerItems = 0;
@@ -67,7 +59,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             if ($scope.pagingOptions.currentPage !== 1) {
                 $scope.pagingOptions.currentPage = 1;
             }
-        };
+        }; */
 
         // Paging set up
         $scope.totalServerItems = 0;
@@ -85,9 +77,9 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Set the paging data to grid from server object
         $scope.setPagingData = function (data) {
 
-           if ($scope.profile === null && ($scope.mailBoxName === null || $scope.mailBoxName.length === 0)) {
+           /* if ($scope.profile === null && ($scope.mailBoxName === null || $scope.mailBoxName.length === 0)) {
                 data = [];
-            } 
+            }  */
 
             $scope.mailboxes = data.mailBox;
             $scope.totalServerItems = data.totalItems;
@@ -196,11 +188,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             //console.info("MailboxName : " + $scope.mailBoxName);
             //console.info("ProfileName : " + $scope.profile);
             $scope.pagingOptions.currentPage = 1;
-            if ($scope.profile == null && ($scope.mailBoxName == null || $scope.mailBoxName == "")) {
-                $scope.reset();
-            } else {
-                $scope.search();
-            }
+            $scope.search();
 
         };
 
@@ -213,7 +201,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         	if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
                 $scope.search();
             }
-        	if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize && (($scope.mailBoxName !== null && $scope.mailBoxName !== "")  || $scope.profile !== null)) {
+        	if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
                 $scope.search();
                 newVal.currentPage = 1;
             }
@@ -295,6 +283,6 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.goto = function (hash) {
             $location.path(hash);
         };
-
+		$scope.search();
     }
 ]);

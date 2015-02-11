@@ -500,7 +500,7 @@ public class MailBoxConfigurationService {
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 
-			} else if (MailBoxUtil.isEmpty(profName) && !MailBoxUtil.isEmpty(mbxName)) {
+			} else {
 
 				// If the profile name is empty it will use findByName
 				totalCount = configDao.getMailboxCountByName(mbxName, tenancyKeyGuids);
@@ -510,9 +510,6 @@ public class MailBoxConfigurationService {
 				retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
-
-			} else if (MailBoxUtil.isEmpty(profName) && MailBoxUtil.isEmpty(mbxName)) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA, Response.Status.BAD_REQUEST);
 			}
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
