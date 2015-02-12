@@ -83,6 +83,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
             $scope.mailboxes = data.mailBox;
             $scope.totalServerItems = data.totalItems;
+            if ( $scope.mailboxes.length === 0)
+			{
+			showSaveMessage("No Results Found", 'error');
+			}
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
