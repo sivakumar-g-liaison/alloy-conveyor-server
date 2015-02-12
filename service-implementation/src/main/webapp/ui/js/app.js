@@ -7,6 +7,7 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.directiveCustomCell', // custom directives
     'myApp.dynamicComponentDirectiveForName',
     'myApp.passwordDirective',
+    'myApp.dynamicFieldDirective',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'ngGrid', // angular grid
@@ -151,6 +152,12 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.initialProcessorData;
     $rootScope.restService.get('data/initialProcessorDetails_json.json', function (data) {
         $rootScope.initialProcessorData = data;
+    });
+    
+    // testing purpose
+    $rootScope.testJson = [];
+    $rootScope.restService.get('data/sweeper.json', function (data) {
+        $rootScope.testJson = data;
     });
 	
 	

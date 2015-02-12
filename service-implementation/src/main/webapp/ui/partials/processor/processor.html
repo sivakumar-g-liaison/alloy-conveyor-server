@@ -494,7 +494,17 @@
                     <select id="mbx-procsr-linkedSchedules"  multiple="multiple" ng-model="profilesSelectedinProcessorProfile" ng-disabled="isProcessorTypeHTTPListener|| isProcessorTypeFileWriter" ng-options="selected.name for selected in selectedProfiles" class="form-control">
                     </select>
                 </div>
+              
+            </div>
+            
+           <div class="form-group">
+                <div>
+                    <h4>Testing</h4>
 
+                    <div class="gridStyle" ng-grid="gridOptionsTesting">
+                    </div>
+                </div>
+                <br>
             </div>
         </form>
         <div>

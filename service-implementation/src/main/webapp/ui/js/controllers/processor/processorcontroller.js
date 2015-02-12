@@ -3457,7 +3457,35 @@ var rest = myApp.controller(
 				            scope: $scope,
 							resolve: {}
 				        });
-			};		   
+			};	
+			
+            $scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
+            $scope.firstcolumn = '';
+            $scope.gridOptionsTesting = {
+                data: 'jsonProperties',
+                displaySelectionCheckbox: false,
+                enableRowSelection: false,
+                enableCellEditOnFocus: true,
+                enablePaging: false,
+                showFooter: false,
+                rowHeight: 80,
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
+                columnDefs: [{
+                    field: "name",
+                    width: "50%",
+                    displayName: "Name*",
+                    enableCellEdit: false,
+                    cellTemplate: '<select ng-model="firstcolumn" ng-options="property.name for property in jsonProperties" class="form-control"><option>--select--</option></select>'
+                }, {
+                     field: "name",
+                     width: "50%",
+                     displayName: "Value*",
+                     enableCellEdit: false,
+                     cellTemplate: '<div class="dynamicFieldDirective" custom-object = row.entity/>'
+                 }
+                ]
+    }; 
         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
