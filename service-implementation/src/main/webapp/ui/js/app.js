@@ -146,7 +146,14 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.listData = [];
     $rootScope.restService.get('data/generic-list.json', function (data) {
         $rootScope.listData = data;
+    });	
+	//  load initial Processor Data
+    $rootScope.initialProcessorData;
+    $rootScope.restService.get('data/initialProcessorDetails_json.json', function (data) {
+        $rootScope.initialProcessorData = data;
     });
+	
+	
     // *****
     // Initialize authentication
     // *****
