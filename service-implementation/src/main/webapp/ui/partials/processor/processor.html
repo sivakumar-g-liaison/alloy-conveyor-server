@@ -170,7 +170,7 @@
                         <label>
                             {{initialProcessorData.supportedStatus.displayName}}
                         </label>
-                        <select id="mbx-procsr-status" ng-init="status = initialProcessorData.supportedStatus.options[0]" ng-model="status" ng-options="e.key for e in initialProcessorData.supportedStatus.options" class="form-control">
+                        <select id="mbx-procsr-status" ng-model="status" ng-options="e.key for e in initialProcessorData.supportedStatus.options" class="form-control">
                         </select>
 
                     </div>					
@@ -196,7 +196,7 @@
                         <label>
                          {{initialProcessorData.supportedProcessors.displayName}}
                         </label>
-                        <select id="mbx-procsr-type" ng-disabled="isEdit" ng-init="procsrType = initialProcessorData.supportedProcessors.options[0]" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control">
+                        <select id="mbx-procsr-type" ng-disabled="isEdit" ng-change="resetProcessorType(procsrType)" ng-model="procsrType" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -206,7 +206,7 @@
                         <label>
                             {{initialProcessorData.supportedProtocols.displayName}}
                         </label>
-                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-init="processor.protocol = initialProcessorData.supportedProtocols.options[0]" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -281,27 +281,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Modal Certificate Path -->
-            <!-- <div class="modal fade" id="myCertificateModal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
-                        <h4 class="modal-title">Choose your file</h4>
-                    </div>
-                    <div class="modal-body">
-                        <div data-angular-treeview="true" data-tree-model="certificateModal.certificates" data-node-id="roleName" data-node-label="roleId" data-node-children="children">
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="certificateModal.certificateURI=currentNode.roleName">choose</button>
-                    </div>
-                </div>
-            </div>
-        </div>  -->
-
             <div class="form-group">
                 <div>
                     <h4>Properties</h4>

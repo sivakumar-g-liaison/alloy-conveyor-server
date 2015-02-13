@@ -49,14 +49,6 @@
 	  "value":"",  
       "options":[
          {
-            "key":"HTTP",
-            "value":"HTTP"
-         },
-         {
-            "key":"HTTPS",
-            "value":"HTTPS"
-         },
-         {
             "key":"FTP",
             "value":"FTP"
          },
@@ -64,6 +56,14 @@
             "key":"FTPS",
             "value":"FTPS"
          },
+		 {
+            "key":"HTTP",
+            "value":"HTTP"
+         },
+         {
+            "key":"HTTPS",
+            "value":"HTTPS"
+         },         
          {
             "key":"SFTP",
             "value":"SFTP"
