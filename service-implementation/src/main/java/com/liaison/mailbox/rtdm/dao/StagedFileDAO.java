@@ -22,12 +22,15 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 
 public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	
+	public static final String FILE_NAME = "fileName";
+	
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
 	 * 
 	 * @param mailboxIds
 	 * @return list of stagedFiles
 	 */
-	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds);
-	
+	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
+			int pagingCount, String sortField, String sortDirection);
+	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName);
 }

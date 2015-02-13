@@ -18,6 +18,7 @@ import javax.persistence.EntityManager;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -25,34 +26,52 @@ import com.liaison.mailbox.service.util.QueryBuilderUtil;
  * @author OFS
  * 
  */
-public class StagedFileDAOBase extends  GenericDAOBase<StagedFile> implements StagedFileDAO, MailboxRTDMDAO {
+public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements StagedFileDAO, MailboxRTDMDAO {
 
 	public StagedFileDAOBase() {
 		super(PERSISTENCE_UNIT_NAME);
 	}
 
+	/**
+	 *Method to get list of staged files based on search criteria 
+	 * 
+	 */
 	@Override
-	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds) {
-		
-		List <StagedFile> stagedFiles = new ArrayList<StagedFile>();
+	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
+			int pagingCount, String sortField, String sortDirection) {
+
+		List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		
+
 		try {
-			
+
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-							.append(" where sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
 			
-			List<?> files = entityManager.createQuery(query.toString()).getResultList();
+			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
+				sortDirection = sortDirection.toUpperCase();
+				query.append(" order by sf.fileName " + sortDirection);
+			}else {
+				query.append(" order by sf.fileName");
+			}
 			
+			List<?> files = entityManager
+					.createQuery(query.toString())
+					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+					.setFirstResult(pagingOffset)
+					.setMaxResults(pagingCount)
+					.getResultList();
+
 			Iterator<?> iterator = files.iterator();
-			
+
 			while (iterator.hasNext()) {
-				StagedFile stagedFile = (StagedFile)iterator.next();
+				StagedFile stagedFile = (StagedFile) iterator.next();
 				stagedFiles.add(stagedFile);
-			}				
-			
+			}
+
 		} finally {
-			
+
 			if (null != entityManager) {
 				entityManager.close();
 			}
@@ -60,5 +79,36 @@ public class StagedFileDAOBase extends  GenericDAOBase<StagedFile> implements St
 		return stagedFiles;
 	}
 	
+	/**
+	 *Method to number of staged files based on search criteria 
+	 * 
+	 */
+	@Override
+	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName) {
 
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		Long totalItems = null;
+		int count = 0;
+
+		try {
+
+			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
+					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+			
+			totalItems = (Long)entityManager
+					.createQuery(query.toString())
+					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+					.getSingleResult();
+			
+			count = totalItems.intValue();
+			return count;
+
+		} finally {
+
+			if (null != entityManager) {
+				entityManager.close();
+			}
+		}
+	}
 }

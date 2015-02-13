@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -48,6 +49,7 @@ import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
@@ -89,7 +91,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
 
 				String requestString;
@@ -123,7 +125,14 @@ public class DropboxFileStagedResource extends AuditedResource {
 	@GET
 	@ApiOperation(value = "get list of staged files", notes = "retrieve the list of staged files", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO.class)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-	public Response getStagedFiles(@Context final HttpServletRequest serviceRequest) {
+	public Response getStagedFiles(
+			@Context final HttpServletRequest serviceRequest,
+			@QueryParam(value = "fileName") @ApiParam(name = "fileName", required = false, value = "Name of the staged file searched.") final String stageFileName,
+			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
+			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+			@QueryParam(value = "pageSize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -132,18 +141,20 @@ public class DropboxFileStagedResource extends AuditedResource {
 				serviceCallCounter.incrementAndGet();
 
 				LOG.debug("Entering into getStagedFiles service.");
-				
+
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxStagedFilesService fileStagedService = new DropboxStagedFilesService();
-				
+
 				try {
 
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if(StringUtil.isNullOrEmptyAfterTrim(mailboxToken) || StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
-						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
+							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
+								Response.Status.BAD_REQUEST);
 					}
 					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
@@ -174,20 +185,24 @@ public class DropboxFileStagedResource extends AuditedResource {
 								.entity(responseEntity).build();
 					}
 
-					//getting staged files based on manifest
-					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService.getStagedFiles(serviceRequest, manifestResponse.getManifest());
+					// getting staged files based on manifest
+					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService
+							.getStagedFiles(manifestResponse.getManifest(), stageFileName, page, pageSize, sortField, sortDirection);
+					getStagedFilesResponseDTO.setHitCounter(hitCounter);
 					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
-					
+
 					// response message construction
-					ResponseBuilder builder = Response.ok()
+					ResponseBuilder builder = Response
+							.ok()
 							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
 							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid())
-							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken).type(MediaType.APPLICATION_JSON)
-							.entity(responseBody).status(Response.Status.OK);
-					
+							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
+									manifestResponse.getPublicKeyGuid())
+							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
+							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
+
 					LOG.debug("Exit from getStagedFiles service.");
-					
+
 					return builder.build();
 
 				} catch (MailBoxServicesException e) {

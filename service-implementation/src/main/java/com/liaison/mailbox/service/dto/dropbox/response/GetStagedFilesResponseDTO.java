@@ -12,6 +12,8 @@ public class GetStagedFilesResponseDTO extends CommonResponseDTO {
 	 */
 	private static final long serialVersionUID = 1L;
 	private List<StagedFileDTO> stagedFiles;
+	private String hitCounter;
+	private int totalItems;
 
 	public List<StagedFileDTO> getStagedFiles() {
 		return stagedFiles;
@@ -20,5 +22,20 @@ public class GetStagedFilesResponseDTO extends CommonResponseDTO {
 	public void setStagedFiles(List<StagedFileDTO> stagedFiles) {
 		this.stagedFiles = stagedFiles;
 	}
-	
+
+	public String getHitCounter() {
+		return hitCounter;
+	}
+
+	public void setHitCounter(String hitCounter) {
+		this.hitCounter = hitCounter;
+	}
+
+	public int getTotalItems() {
+		return totalItems;
+	}
+
+	public void setTotalItems(int totalItems) {
+		this.totalItems = totalItems;
+	}
 }

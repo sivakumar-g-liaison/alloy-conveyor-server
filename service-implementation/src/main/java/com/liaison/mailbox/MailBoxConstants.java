@@ -186,4 +186,7 @@ public interface MailBoxConstants {
 
 	// added for self signed truststore
 	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
+	
+	public static final String PAGING_OFFSET = "pagingoffset";
+	public static final String PAGING_COUNT = "pagingcount";
 }

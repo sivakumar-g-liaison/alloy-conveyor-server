@@ -18,7 +18,9 @@ import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.ws.rs.core.Response;
@@ -333,4 +335,47 @@ public class MailBoxUtil {
 
 	}
 
+	/**
+	 * Method to get pagingOffsetDetails
+	 * @param page
+	 * @param pageSize
+	 * @param totalCount
+	 * @return Map
+	 */
+	public static Map<String, Integer> getPagingOffsetDetails(String page, String pageSize, int totalCount) {
+
+		Map <String, Integer> pageParameters = new HashMap<String, Integer>();
+		//Calculate page size parameters
+		Integer pageValue = 1;
+		Integer pageSizeValue = 10;
+		if (page != null && !page.isEmpty()) {
+			pageValue = Integer.parseInt(page);
+			if (pageValue < 0) {
+				pageValue = 1;
+			}
+		} else {
+			pageValue = 1;
+		}
+		if (pageSize != null && !pageSize.isEmpty()) {
+			pageSizeValue = Integer.parseInt(pageSize);
+			if (pageSizeValue < 0) {
+				pageSizeValue = 10;
+			}
+		} else {
+			pageSizeValue = 100;
+		}
+
+		Integer fromIndex = (pageValue - 1) * pageSizeValue;
+		pageParameters.put(MailBoxConstants.PAGING_OFFSET, fromIndex);
+
+		int toIndex = fromIndex + pageSizeValue;
+		if (toIndex > totalCount) {
+			toIndex = (totalCount - fromIndex);
+		} else {
+			toIndex = pageSizeValue;
+		}
+		pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
+		
+		return pageParameters;
+	}
 }
