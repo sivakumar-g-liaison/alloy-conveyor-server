@@ -7,7 +7,9 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.directiveCustomCell', // custom directives
     'myApp.dynamicComponentDirectiveForName',
     'myApp.passwordDirective',
-    'myApp.dynamicFieldDirective',
+    'myApp.dynamicPropertyNameFieldDirective',
+    'myApp.dynamicPropertyValueFieldDirective',
+    'myApp.dynamicActionFieldDirective',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'ngGrid', // angular grid

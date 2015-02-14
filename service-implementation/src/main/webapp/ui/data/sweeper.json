@@ -4,11 +4,24 @@
       "displayName":"SWEEPER",
       "protocolsDetails":null,
       "staticProperties":[
+          {
+            "name":"add new -->",
+            "displayName" : "add new -->",
+            "value":"",
+            "type":"textarea",
+            "readOnly":"false",
+            "isMandatory":"false",
+            "validationRules": null        
+            
+         },
          {
             "name":"pipelineId",
+            "displayName" : "pipelineId",
+            "value":"",
             "type":"textarea",
             "readOnly":"true",
             "isMandatory":"true",
+            "isCustomized":"false",
             "validationRules":{
                "pattern":"",
                "maxLength":2048
@@ -16,8 +29,11 @@
          },
          {
             "name":"securedPayload",
+            "displayName" : "securedPayload",
+            "value":"",
             "type":"select",
             "isMandatory":"true",
+            "isCustomized":"false",
             "validationRules": null,
             "options":[
                {
@@ -32,8 +48,11 @@
          },
          {
             "name":"deleteFileAfterSweep",
+            "displayName" : "deleteFileAfterSweep",
+            "value":"",
             "type":"select",
             "isMandatory":"true",
+            "isCustomized":"false",
             "validationRules": null,
             "options":[
                {
@@ -48,8 +67,11 @@
          },
          {
             "name":"fileRenameFormat",
+            "displayName" : "fileRenameFormat",
+            "value":"",
             "type":"textarea",
             "isMandatory":"false",
+            "isCustomized":"false",
             "validationRules":{
                "format":"",
                "required":false
@@ -57,8 +79,11 @@
          },
          {
             "name":"numOfFilesThreshold",
+            "displayName" : "numOfFilesThreshold",
+            "value":"",
             "type":"textarea",
             "isMandatory":"false",
+            "isCustomized":"false",
             "validationRules":{
                "format":"numberPattern",
                "maxLength":512,
@@ -67,8 +92,11 @@
          },
          {
             "name":"payloadSizeThreshold",
+            "displayName" : "payloadSizeThreshold",
+            "value":"",
             "type":"textarea",
             "isMandatory":"false",
+            "isCustomized":"false",
             "validationRules":{
                "format":"",
                "required":false
@@ -76,8 +104,11 @@
          },
          {
             "name":"sweepedFileLocation",
+            "displayName" : "sweepedFileLocation",
+            "value":"",
             "type":"textarea",
             "isMandatory":"false",
+            "isCustomized":"false",
             "validationRules":{
                "format":"",
                "required":false

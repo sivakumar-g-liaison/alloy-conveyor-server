@@ -3476,10 +3476,45 @@ var rest = myApp.controller(
 				        });
 			};	
 			
-            $scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
-            $scope.firstcolumn = '';
+            $scope.separateProperties = function() {
+                for (var i = 0; i < $scope.jsonProperties.length; i++) {
+                    var property = $scope.jsonProperties[i];
+                    if (property.hasOwnProperty('isMandatory') && (property.isMandatory === "true")) {
+                        $scope.propertiesAddedToProcessor.push(property);
+                    } else if (property.hasOwnProperty('isMandatory') && (property.isMandatory === "false")){
+                        $scope.availableProperties.push(property);
+                    }
+                }
+                
+                // push empty object to enable additional
+                $scope.propertiesAddedToProcessor.push({
+                    "name":"",
+                    "displayName" : "",
+                    "value":"",
+                    "type":"textarea",
+                    "readOnly":"",
+                    "isMandatory":false,
+                    "validationRules": {}
+                 });              
+            };
+            $scope.initialSetUp = function() {
+                       $scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
+                $scope.propertiesAddedToProcessor = [];
+                $scope.availableProperties = [];         
+                $scope.separateProperties();
+                $scope.propertyToBeModified = {value:''};
+                $scope.selectedProperty = {value:''};
+                $scope.showAddNewComponent = {value:false};
+            }
+           $scope.cleanup = function() {
+               $scope.propertyToBeModified.value = '';
+               $scope.selectedProperty.value = '';
+               $scope.showAddNewComponent.value = false;
+               
+           }
+            $scope.initialSetUp();
             $scope.gridOptionsTesting = {
-                data: 'jsonProperties',
+                data: 'propertiesAddedToProcessor',
                 displaySelectionCheckbox: false,
                 enableRowSelection: false,
                 enableCellEditOnFocus: true,
@@ -3490,19 +3525,33 @@ var rest = myApp.controller(
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "name",
-                    width: "50%",
+                    width: "40%",
                     displayName: "Name*",
                     enableCellEdit: false,
-                    cellTemplate: '<select ng-model="firstcolumn" ng-options="property.name for property in jsonProperties" class="form-control"><option>--select--</option></select>'
+                    cellTemplate: '<div class="dynamicPropertyNameFieldDirective" sort-name="sorting"  all-props=availableProperties selected-value=selectedProperty show-add-new-component="showAddNewComponent" added-property=propertyToBeModified current-row-object= {{row.entity}} prop-name=row.getProperty(col.field)/>'
+                   
                 }, {
-                     field: "name",
-                     width: "50%",
+                     field: "value",
+                     width: "40%",
                      displayName: "Value*",
                      enableCellEdit: false,
-                     cellTemplate: '<div class="dynamicFieldDirective" custom-object = row.entity/>'
+                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = row.entity></dynamic-property-value-field-directive>'
+                 }, {
+                     field: "isMandatory",
+                     width: "20%",
+                     displayName: "Action*",
+                     enableCellEdit: false,
+                     cellTemplate: '<div class="dynamicActionFieldDirective" available-properties = availableProperties added-properties = propertiesAddedToProcessor is-mandatory = row.getProperty(col.field) property-to-be-modified = propertyToBeModified  current-row-object = {{row.entity}}/>',
+                     dataUpdated: function () {
+                        console.log("selection changed");
+                     }
                  }
                 ]
     }; 
+       // listen to property modified notification and do clean up
+        $rootScope.$on("propertyModificationActionEvent", function() {
+               $scope.cleanup(); 
+        });
         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
