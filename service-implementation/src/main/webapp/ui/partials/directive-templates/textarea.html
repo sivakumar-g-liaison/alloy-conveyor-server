@@ -1,0 +1,3 @@
+ <textarea class="form-control" name = "{{currentRowObject.name}}" ng-model="COL_FIELD" ng-input="currentRowObject.value" style="width:90%;height: 45px" placeholder="required" ng-minLength = {{currentRowObject.validationRules.minLength}} ng-maxLength = {{currentRowObject.validationRules.maxLength}} ng-disabled = "{{currentRowObject.readOnly}}" ng-pattern = "{{currentRowObject.validationRules.pattern}}" ng-blur="setPropertyValue(currentRowObject.value, COL_FIELD)" required/>
+
+ 

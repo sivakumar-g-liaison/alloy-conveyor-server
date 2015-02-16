@@ -30,6 +30,11 @@ angular.module(
                     // function which handles addition of properties to grid 
                     // and modifies the datasource array accordingly
                      scope.addGridProperty = function() {
+                     
+                        if (scope.propertyToBeModified.value.name === "" || scope.propertyToBeModified.value.value === "") {
+                             showAlert('It is mandatory to set the name and value of the property being added.', 'error');
+                             return;
+                        }
                         var propertyToBeAdded = null;
                         var isPropertyFound = false;
                         // remove the empty property at the last and add it again once addition is done

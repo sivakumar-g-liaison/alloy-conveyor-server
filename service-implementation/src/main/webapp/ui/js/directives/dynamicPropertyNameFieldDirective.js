@@ -31,8 +31,9 @@ angular.module(
                     <textarea class="form-control alignDynamicTextarea" ng-input="COL_FIELD" ng-show="showAddNewComponent.value" ng-model="addedProperty.value.name" placeholder="required" ng-blur="handlePropertyConstructionForAddNew(addedProperty.value.name)" style="width:47%;height:45px;"></textarea></div>\n\
                   </div>',
             link: function (scope) {
-              
-                scope.isAdditionAllowed = function() {
+            
+                
+                scope.isAdditionAllowed = function() {  
                     var currentRowObj = angular.copy(angular.fromJson(scope.currentRowObject));
                     if(!currentRowObj.isMandatory && currentRowObj.value === "") return true;
                     return false;

@@ -3513,6 +3513,9 @@ var rest = myApp.controller(
                
            }
             $scope.initialSetUp();
+            $scope.saveJson = function() {
+                console.log("addedProperties"+$scope.propertiesAddedToProcessor);
+            }
             $scope.gridOptionsTesting = {
                 data: 'propertiesAddedToProcessor',
                 displaySelectionCheckbox: false,
@@ -3535,7 +3538,7 @@ var rest = myApp.controller(
                      width: "40%",
                      displayName: "Value*",
                      enableCellEdit: false,
-                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = row.entity></dynamic-property-value-field-directive>'
+                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = row.entity  available-properties = availableProperties added-properties = propertiesAddedToProcessor property-to-be-modified = propertyToBeModified></dynamic-property-value-field-directive>'
                  }, {
                      field: "isMandatory",
                      width: "20%",
