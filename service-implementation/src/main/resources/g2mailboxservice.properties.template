@@ -250,3 +250,13 @@ fs2.storage.file.default.mount=/tmp
 #Passphrase of self signed Truststore
 mailbox.self.signed.trustore.passphrase=passmein
 
+########DROBBOXQUEUE#######
+com.liaison.jms.queuename.dropboxQueue=jms.queue.DEVINTServiceBrokerToDropBox
+com.liaison.jms.hostname.dropboxQueue=localhost
+com.liaison.jms.port.dropboxQueue=5445
+#-1 is infinite
+com.liaison.jms.receive.attempts.dropboxQueue=-1
+com.liaison.jms.receive.timeout.dropboxQueue
+#-1 is infinite
+com.liaison.jms.send.attempts.dropboxQueue=-1
+########DROBBOXQUEUE####### 

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2Configuration;
 import com.liaison.fs2.api.FS2Factory;
@@ -127,14 +128,28 @@ public class StorageUtilities {
 	 * @param isSecure
 	 * @return
 	 */
-	public static PayloadDetail persistPayload(InputStream payload, String globalProcessId, FS2ObjectHeaders fs2Headers, boolean isSecure) {
+	public static PayloadDetail persistPayload(InputStream payload, WorkTicket workTicket, Map<String, String> httpListenerProperties) {
 
 		try {
+			
+			String tenancyKey = httpListenerProperties.get(MailBoxConstants.KEY_TENANCY_KEY);
+			String loginId = httpListenerProperties.get(MailBoxConstants.LOGIN_ID);
+			String globalProcessorId = workTicket.getGlobalProcessId();
+			String localProcessorId = workTicket.getGlobalProcessId();
+			boolean isSecure = Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+			String message = MailBoxUtil.getGUID();
+			
+			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
+			
+			String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId;
+			if(workTicket.getProcessMode() != null && workTicket.getProcessMode().equals(ProcessMode.MFT)) {
+				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_" + message + "/";
+			}
 
 			//persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
-			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
-			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
+			URI requestUri = createSpectrumURI(uri, isSecure);
+			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, null);
 
 			//fetch the metdata includes payload size
 			PayloadDetail detail = null;
@@ -319,11 +334,8 @@ public class StorageUtilities {
 			Map<String, String> httpListenerProperties) throws Exception {
 
 		try (InputStream payloadToPersist = stream) {
-
-			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,
-					workTicket.getGlobalProcessId(), fs2Header,
-					Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
+			
+			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,  workTicket, httpListenerProperties);
 			LOGGER.info("The received path uri is {} ", detail.getMetaSnapshot().getURI().toString());
 
 			workTicket.setPayloadSize( detail.getPayloadSize());

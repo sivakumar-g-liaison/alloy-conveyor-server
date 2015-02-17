@@ -16,12 +16,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.Test;
 
 import com.liaison.commons.util.StreamUtil;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.storage.util.PayloadDetail;
@@ -51,7 +54,12 @@ public class StorageUtilitiesTest {
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, false);
+		WorkTicket wTicket = new WorkTicket();
+		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
+		Map <String, String>properties = new HashMap <String, String>();
+		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
+		
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties);
 
 		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
@@ -75,9 +83,13 @@ public class StorageUtilitiesTest {
 		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
-
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, true);
-
+		
+		WorkTicket wTicket = new WorkTicket();
+		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
+		Map <String, String>properties = new HashMap <String, String>();
+		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
+		
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties);
 		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
@@ -101,7 +113,12 @@ public class StorageUtilitiesTest {
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, String.valueOf(globalProcessId), fs2Header, false);
+		WorkTicket wTicket = new WorkTicket();
+		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
+		Map <String, String>properties = new HashMap <String, String>();
+		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
+		
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties);
 		System.out.println(detail.getMetaSnapshot().getURI());
 		/*try (InputStream is = StorageUtilities.retrievePayload("fs2://secure@dev-int/mailbox/payload/1.0/1423693504486")) {
 

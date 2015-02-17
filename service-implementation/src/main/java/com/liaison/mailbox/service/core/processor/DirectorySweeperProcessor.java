@@ -389,10 +389,12 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
 
+			Map <String, String>properties = new HashMap <String, String>();
+			properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(this.getProperties().isSecuredPayload()));
+			
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
-				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
-				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,fs2Header, this.getProperties().isSecuredPayload());
+				payloadDetail = StorageUtilities.persistPayload(payloadToPersist,workTicket, properties);
 				payloadToPersist.close();
 			}
 

@@ -95,6 +95,8 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// start time to calculate elapsed time for retrieving necessary details from headers 
 					startTime = System.currentTimeMillis();
 					
+					String fileName = serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME);
+					
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
@@ -114,7 +116,6 @@ public class DropboxFileTransferResource extends AuditedResource {
 					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil
 							.constructAuthenticationRequest(loginId, null, authenticationToken);
 
-					
 					// to calculate elapsed time for authentication
 					startTime = System.currentTimeMillis();
 					
@@ -170,7 +171,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// calling service to upload content to spectrum
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService
 							.uploadContentAsyncToSpectrum(workTicket, serviceRequest.getInputStream(), transferProfileId,
-									manifestResponse.getManifest());
+									manifestResponse.getManifest(), fileName, loginId);
 					
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();

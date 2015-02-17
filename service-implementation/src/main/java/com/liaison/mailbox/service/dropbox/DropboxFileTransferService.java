@@ -52,7 +52,7 @@ public class DropboxFileTransferService {
 	 * @throws Exception
 	 */
 	public DropboxTransferContentResponseDTO uploadContentAsyncToSpectrum(WorkTicket workTicket, ServletInputStream stream, String profileId,
-			String aclManifest) throws Exception {
+			String aclManifest, String fileName, String loginId) throws Exception {
 
 		DropboxTransferContentResponseDTO transferContentResponse = null;
 		long startTime = 0;
@@ -132,6 +132,8 @@ public class DropboxFileTransferService {
 				String serviceInstanceId = processor.getServiceInstance().getName();
 				
 				Map <String, String>properties = new HashMap <String, String>();
+				properties.put(MailBoxConstants.LOGIN_ID, loginId);
+				properties.put(MailBoxConstants.KEY_TENANCY_KEY, tenancyKey);
 				if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
 				
 				workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(properties));
@@ -152,6 +154,8 @@ public class DropboxFileTransferService {
 				}
 				
 				workTicket.setTtlDays(Integer.parseInt(ttl));
+				workTicket.setFileName(fileName);
+				workTicket.setProcessMode(ProcessMode.MFT);
 				
 				// start time to calculate elapsed time for storing payload in spectrum
 				startTime = System.currentTimeMillis();				
@@ -164,7 +168,6 @@ public class DropboxFileTransferService {
 				LOG.debug("Calculating elapsed time for storing payload in spectrum");
 				MailBoxUtil.calculateElapsedTime(startTime, endTime);
 				
-				workTicket.setProcessMode(ProcessMode.MFT);
 				WorkTicketUtil.constructMetaDataJson(workTicket);
 			}
 		}

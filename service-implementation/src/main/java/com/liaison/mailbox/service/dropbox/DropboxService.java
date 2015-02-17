@@ -34,19 +34,25 @@ public class DropboxService {
 			IOException {
 
 		LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
-		
+
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
-		
+
 		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
-		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket.getAdditionalContext()
-				.get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize().toString(), workTicket.getAdditionalContext().get(
-						MailBoxConstants.KEY_MAILBOX_ID).toString(), workTicket.getPayloadURI());
+		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket
+				.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize()
+				.toString(), workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString(),
+				workTicket.getPayloadURI());
+
 		// set meta data in the staged file dto
-		StagedFileMetaDataDTO stagedFileMetaDataDto = new StagedFileMetaDataDTO(workTicket.getPayloadSize().toString());
+		String from = workTicket.getHeaders(MailBoxConstants.FROM_HEADER).toString();
+		String comment = workTicket.getHeaders(MailBoxConstants.COMMENT_HEADER).toString();
+		StagedFileMetaDataDTO stagedFileMetaDataDto = new StagedFileMetaDataDTO(workTicket.getPayloadSize().toString(),
+				from, comment);
+
 		stageFileReqDTO.setMeta(stagedFileMetaDataDto);
 		dtoReq.setStagedFile(stageFileReqDTO);
-		
+
 		stageFileService.addStagedFile(dtoReq);
 	}
 }

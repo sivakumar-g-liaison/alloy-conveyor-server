@@ -56,6 +56,8 @@ public interface MailBoxConstants {
 
 	public final static String FOLDER_HEADER = "folderlocation";
 	public final static String FILE_NAME_HEADER = "filename";
+	public final static String COMMENT_HEADER = "comment";
+	public final static String FROM_HEADER = "from";
 
 	public final static String URL = "resturl";
 
@@ -162,6 +164,8 @@ public interface MailBoxConstants {
 	public static final String LOGIN_ID = "loginId";
 	public static final String ACL_MANIFEST_HEADER = "acl-manifest";
 	public static final String DBX_WORK_TICKET_PROFILE_NAME = "profileName";
+	public static final String UPLOAD_FILE_NAME = "filename";
+	public static final String UPLOAD_META = "meta";
 
 	public static final String DROPBOX_AUTH_TOKEN = "token";
 	public static final String ACL_SIGNED_MANIFEST_HEADER = "acl-signature";
