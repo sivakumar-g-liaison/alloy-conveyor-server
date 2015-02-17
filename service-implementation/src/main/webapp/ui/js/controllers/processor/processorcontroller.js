@@ -3479,9 +3479,9 @@ var rest = myApp.controller(
             $scope.separateProperties = function() {
                 for (var i = 0; i < $scope.jsonProperties.length; i++) {
                     var property = $scope.jsonProperties[i];
-                    if (property.hasOwnProperty('isMandatory') && (property.isMandatory === "true")) {
+                    if (property.hasOwnProperty('isMandatory') && (property.isMandatory === true)) {
                         $scope.propertiesAddedToProcessor.push(property);
-                    } else if (property.hasOwnProperty('isMandatory') && (property.isMandatory === "false")){
+                    } else if (property.hasOwnProperty('isMandatory') && (property.isMandatory === false)){
                         $scope.availableProperties.push(property);
                     }
                 }
@@ -3498,23 +3498,25 @@ var rest = myApp.controller(
                  });              
             };
             $scope.initialSetUp = function() {
-                       $scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
+                $scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
                 $scope.propertiesAddedToProcessor = [];
                 $scope.availableProperties = [];         
                 $scope.separateProperties();
-                $scope.propertyToBeModified = {value:''};
                 $scope.selectedProperty = {value:''};
                 $scope.showAddNewComponent = {value:false};
             }
            $scope.cleanup = function() {
-               $scope.propertyToBeModified.value = '';
                $scope.selectedProperty.value = '';
                $scope.showAddNewComponent.value = false;
                
            }
             $scope.initialSetUp();
+            $scope.displayJson = false;
             $scope.saveJson = function() {
-                console.log("addedProperties"+$scope.propertiesAddedToProcessor);
+                for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
+                     console.log("addedProperties"+$scope.propertiesAddedToProcessor[i].name + '|'+$scope.propertiesAddedToProcessor[i].value);
+                }
+               
             }
             $scope.gridOptionsTesting = {
                 data: 'propertiesAddedToProcessor',
@@ -3531,30 +3533,27 @@ var rest = myApp.controller(
                     width: "40%",
                     displayName: "Name*",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicPropertyNameFieldDirective" sort-name="sorting"  all-props=availableProperties selected-value=selectedProperty show-add-new-component="showAddNewComponent" added-property=propertyToBeModified current-row-object= {{row.entity}} prop-name=row.getProperty(col.field)/>'
+                    cellTemplate: '<div class="dynamicPropertyNameFieldDirective" sort-name="sorting"  all-props=availableProperties selected-value=selectedProperty show-add-new-component="showAddNewComponent" current-row-object= propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>'
                    
                 }, {
                      field: "value",
                      width: "40%",
                      displayName: "Value*",
                      enableCellEdit: false,
-                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = row.entity  available-properties = availableProperties added-properties = propertiesAddedToProcessor property-to-be-modified = propertyToBeModified></dynamic-property-value-field-directive>'
+                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = propertiesAddedToProcessor[row.rowIndex]></dynamic-property-value-field-directive>'
                  }, {
                      field: "isMandatory",
                      width: "20%",
                      displayName: "Action*",
                      enableCellEdit: false,
-                     cellTemplate: '<div class="dynamicActionFieldDirective" available-properties = availableProperties added-properties = propertiesAddedToProcessor is-mandatory = row.getProperty(col.field) property-to-be-modified = propertyToBeModified  current-row-object = {{row.entity}}/>',
-                     dataUpdated: function () {
-                        console.log("selection changed");
-                     }
+                     cellTemplate: '<div class="dynamicActionFieldDirective" available-properties = availableProperties added-properties = propertiesAddedToProcessor current-row-object = propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>{{row}}',
                  }
                 ]
-    }; 
-       // listen to property modified notification and do clean up
-        $rootScope.$on("propertyModificationActionEvent", function() {
+            }; 
+            // listen to property modified notification and do clean up
+            $rootScope.$on("propertyModificationActionEvent", function() {
                $scope.cleanup(); 
-        });
+            });
         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {

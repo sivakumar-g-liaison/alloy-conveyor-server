@@ -9,19 +9,19 @@
             "displayName" : "add new -->",
             "value":"",
             "type":"textarea",
-            "readOnly":"false",
-            "isMandatory":"false",
+            "readOnly":false,
+            "isMandatory":false,
             "validationRules": null        
             
          },
          {
             "name":"pipelineId",
             "displayName" : "pipelineId",
-            "value":"",
+            "value":"test",
             "type":"textarea",
-            "readOnly":"true",
-            "isMandatory":"true",
-            "isCustomized":"false",
+            "readOnly":true,
+            "isMandatory":true,
+            "isCustomized":false,
             "validationRules":{
                "pattern":"",
                "maxLength":2048
@@ -30,48 +30,31 @@
          {
             "name":"securedPayload",
             "displayName" : "securedPayload",
-            "value":"",
+            "value":true,
             "type":"select",
-            "isMandatory":"true",
-            "isCustomized":"false",
+            "isMandatory":true,
+            "isCustomized":false,
             "validationRules": null,
-            "options":[
-               {
-                  "name":false,
-                  "displayName":false
-               },
-               {
-                  "name":true,
-                  "displayName":true
-               }
-            ]
+            "options":[false,true]
+             
          },
          {
             "name":"deleteFileAfterSweep",
             "displayName" : "deleteFileAfterSweep",
-            "value":"",
+            "value":false,
             "type":"select",
-            "isMandatory":"true",
-            "isCustomized":"false",
+            "isMandatory":true,
+            "isCustomized":false,
             "validationRules": null,
-            "options":[
-               {
-                  "name":false,
-                  "displayName":false
-               },
-               {
-                  "name":true,
-                  "displayName":true
-               }
-            ]
+            "options":[false,true]
          },
          {
             "name":"fileRenameFormat",
             "displayName" : "fileRenameFormat",
             "value":"",
             "type":"textarea",
-            "isMandatory":"false",
-            "isCustomized":"false",
+            "isMandatory":false,
+            "isCustomized":false,
             "validationRules":{
                "format":"",
                "required":false
@@ -82,8 +65,8 @@
             "displayName" : "numOfFilesThreshold",
             "value":"",
             "type":"textarea",
-            "isMandatory":"false",
-            "isCustomized":"false",
+            "isMandatory":false,
+            "isCustomized":false,
             "validationRules":{
                "format":"numberPattern",
                "maxLength":512,
@@ -95,8 +78,8 @@
             "displayName" : "payloadSizeThreshold",
             "value":"",
             "type":"textarea",
-            "isMandatory":"false",
-            "isCustomized":"false",
+            "isMandatory":false,
+            "isCustomized":false,
             "validationRules":{
                "format":"",
                "required":false
@@ -107,8 +90,8 @@
             "displayName" : "sweepedFileLocation",
             "value":"",
             "type":"textarea",
-            "isMandatory":"false",
-            "isCustomized":"false",
+            "isMandatory":false,
+            "isCustomized":false,
             "validationRules":{
                "format":"",
                "required":false
