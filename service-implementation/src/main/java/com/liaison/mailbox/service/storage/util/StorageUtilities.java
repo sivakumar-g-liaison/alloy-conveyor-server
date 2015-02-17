@@ -137,13 +137,13 @@ public class StorageUtilities {
 			String globalProcessorId = workTicket.getGlobalProcessId();
 			String localProcessorId = workTicket.getGlobalProcessId();
 			boolean isSecure = Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
-			String message = MailBoxUtil.getGUID();
+			String messageName = MailBoxUtil.getGUID();
 			
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
 			
 			String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId;
 			if(workTicket.getProcessMode() != null && workTicket.getProcessMode().equals(ProcessMode.MFT)) {
-				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_" + message + "/";
+				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_" + messageName;
 			}
 
 			//persists the message in spectrum.
