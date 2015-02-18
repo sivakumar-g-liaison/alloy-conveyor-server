@@ -3340,7 +3340,9 @@ var rest = myApp.controller(
                     allowAdd: false
                 });
                 $scope.processorCredProperties = $scope.processorCredProperties.slice();
-                $scope.$apply();
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                };
                 block.unblockUI();
             }
             $scope.removeSSHKeyDetails = function () {
@@ -3494,11 +3496,14 @@ var rest = myApp.controller(
                     "type":"textarea",
                     "readOnly":"",
                     "isMandatory":false,
+                    "isDynamic":false,
+                    "isValueProvided":false,
                     "validationRules": {}
                  });              
             };
             $scope.initialSetUp = function() {
-                $scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
+                //$scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
+                $scope.jsonProperties = $rootScope.httpdownloaderJson.processorDefinition.staticProperties;             
                 $scope.propertiesAddedToProcessor = [];
                 $scope.availableProperties = [];         
                 $scope.separateProperties();
@@ -3533,20 +3538,20 @@ var rest = myApp.controller(
                     width: "40%",
                     displayName: "Name*",
                     enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicPropertyNameFieldDirective" sort-name="sorting"  all-props=availableProperties selected-value=selectedProperty show-add-new-component="showAddNewComponent" current-row-object= propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>'
+                    cellTemplate: '<dynamic-property-name-field-directive sort-name="sorting"  all-props=availableProperties selected-value=selectedProperty show-add-new-component="showAddNewComponent" current-row-object= propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}} added-props=propertiesAddedToProcessor/>'
                    
                 }, {
                      field: "value",
                      width: "40%",
                      displayName: "Value*",
                      enableCellEdit: false,
-                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = propertiesAddedToProcessor[row.rowIndex]></dynamic-property-value-field-directive>'
+                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = propertiesAddedToProcessor[row.rowIndex]/>'
                  }, {
                      field: "isMandatory",
                      width: "20%",
                      displayName: "Action*",
                      enableCellEdit: false,
-                     cellTemplate: '<div class="dynamicActionFieldDirective" available-properties = availableProperties added-properties = propertiesAddedToProcessor current-row-object = propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>{{row}}',
+                     cellTemplate: '<dynamic-action-field-directive available-properties = availableProperties added-properties = propertiesAddedToProcessor current-row-object = propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>',
                  }
                 ]
             }; 

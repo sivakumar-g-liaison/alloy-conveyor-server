@@ -11,17 +11,21 @@
             "type":"textarea",
             "readOnly":false,
             "isMandatory":false,
+            "isValueProvided":false,
+            "defaultValue":"",
             "validationRules": null        
             
          },
          {
             "name":"pipelineId",
             "displayName" : "pipelineId",
-            "value":"test",
+            "value":"testpipeline",
             "type":"textarea",
             "readOnly":true,
             "isMandatory":true,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"",
             "validationRules":{
                "pattern":"",
                "maxLength":2048
@@ -33,7 +37,9 @@
             "value":true,
             "type":"select",
             "isMandatory":true,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"",
             "validationRules": null,
             "options":[false,true]
              
@@ -44,7 +50,9 @@
             "value":false,
             "type":"select",
             "isMandatory":true,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"",
             "validationRules": null,
             "options":[false,true]
          },
@@ -54,7 +62,9 @@
             "value":"",
             "type":"textarea",
             "isMandatory":false,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"",
             "validationRules":{
                "format":"",
                "required":false
@@ -63,10 +73,12 @@
          {
             "name":"numOfFilesThreshold",
             "displayName" : "numOfFilesThreshold",
-            "value":"",
+            "value":"10",
             "type":"textarea",
             "isMandatory":false,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"10",
             "validationRules":{
                "format":"numberPattern",
                "maxLength":512,
@@ -76,10 +88,13 @@
          {
             "name":"payloadSizeThreshold",
             "displayName" : "payloadSizeThreshold",
-            "value":"",
+            "isDefaultValueProvided":true,
+            "value":"123456",
             "type":"textarea",
             "isMandatory":false,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"123456",
             "validationRules":{
                "format":"",
                "required":false
@@ -91,7 +106,10 @@
             "value":"",
             "type":"textarea",
             "isMandatory":false,
-            "isCustomized":false,
+            "isDynamic":false,
+            "isValueProvided":false,
+            "defaultValue":"",
+            "isDefaultValueProvided":false,
             "validationRules":{
                "format":"",
                "required":false

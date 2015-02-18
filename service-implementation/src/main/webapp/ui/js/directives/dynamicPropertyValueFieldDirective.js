@@ -2,7 +2,7 @@ angular.module(
     'myApp.dynamicPropertyValueFieldDirective', []
     ).directive (
        'dynamicPropertyValueFieldDirective', 
-        function($compile, $rootScope) {
+        function($compile, $rootScope, $timeout) {
             console.log("Directive");
             
             var getTemplateUrl = function(currentRowObject) {
@@ -19,6 +19,7 @@ angular.module(
                 }
                 return templateUrl;
             };
+            
 
             return {
                 restrict: 'E',
@@ -32,10 +33,9 @@ angular.module(
                     $rootScope.restService.get(templateUrl, function (data) {
                           elem.html(data);
                           $compile(elem.contents())(scope);
-                    });   
-                    
+                    }); 
+
                     scope.optionSelected = function(selectedOption) {
-                        var selectedOptionIndex = scope.currentRowObject.options.indexOf(selectedOption);
                         scope.currentRowObject.value = selectedOption;
                     };
                    

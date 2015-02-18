@@ -1,0 +1,225 @@
+{
+"processorDefinition":{
+	  "staticProperties":[
+           {
+            "name":"add new -->",
+            "displayName" : "add new -->",
+            "value":"",
+            "type":"textarea",
+            "readOnly":false,
+            "isMandatory":false,
+            "isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+            "validationRules": null        
+            
+         },
+		   {
+			"name": "url",
+			"displayName": "URL",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": true,
+			"isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxVal": 0
+			}
+		  },
+		  {
+			"name": "port",
+			"displayName": "Port",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": true,
+			"isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxVal": 0
+			}
+		  },
+		  {
+			 "name":"httpVersion",
+			 "displayName":"HTTP Version",	
+			 "type": "textarea",
+			 "value": "",
+			 "readOnly": false,
+			"isMandatory": true,
+			"isDynamic": false,
+             "isValueProvided":false,
+             "defaultValue":"",
+			 "validationRules":{
+				"pattern":"",
+				"minVal":0,
+				"maxVal":0
+			 }
+		  },
+		  {
+			 "name":"httpVerb",
+			 "displayName":"HTTP Verb",
+			 "value":"DELETE",
+             "type":"select",
+			"isMandatory": true,
+			"isDynamic": false,
+            "validationRules": null,
+            "isValueProvided":false,
+            "defaultValue":"DELETE",
+			"options":[
+				  "DELETE",
+			       "GET",
+				   "POST",
+                   "PUT"
+               ]
+		  },
+		  {
+			 "name":"contentType",
+			 "displayName":"Content Type",
+			 "value":"application/atom+xml",
+             "type":"select",             
+			 "isMandatory": true,
+			 "isDynamic": false,
+             "isValueProvided":false,
+             "validationRules": null,
+             "defaultValue":"application/atom+xml",
+			 "options":[
+				 "application/atom+xml",
+				 "application/EDIFACT",
+				 "application/edi-consent",
+				 "application/EDI-X12",
+				 "application/json",
+				 "application/octet-stream",
+				 "application/PKCS7-mime",
+				 "application/PKCS7-signature",
+				 "application/svg+xml",
+				 "application/xhtml+xml",
+				 "application/xml",
+                 "application/x-www-form-urlencoded",
+				 "message/disposition-notification",
+				 "multipart/form-data",  
+				 "multipart/report",
+				 "multipart/signed",                                 
+                 "text/html",
+                 "text/plain",
+                 "text/xml"
+			 ]
+		  },
+		  {
+			 "name":"chunkedEncoding",
+			 "displayName":"Chunked Encoding",	
+			 "value":false,
+             "type":"select",
+			 "isMandatory": false,
+			 "isDynamic": false,
+             "isValueProvided":false,
+             "validationRules": null, 
+             "defaultValue":"",             
+			 "options":[false,true]
+		  },
+		  {
+			"name": "connectionTimeout",
+			"displayName": "Connection Timeout",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": false,
+			"isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxVal": 0
+			}
+         },
+		 {
+			"name": "encodingFormat",
+			"displayName": "Encoding Format",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": false,
+			"isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxLength": 512
+			}
+         }, 
+		 {
+			"name": "retryAttempts",
+			"displayName": "Retry Attempts",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": false,
+			"isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxLength": 0
+			}
+         },
+		 {
+			"name": "socketTimeout",
+			"displayName": "Socket Timeout",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": false,
+			"isDynamic": false,
+            "isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxLength": 0
+			}
+         },		 
+		 {
+			"name": "errorFileLocation",
+			"displayName": "Error File Location",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": false,
+			"isDynamic": false,
+			"isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxLength": 2048
+			}
+          },
+		  {
+			"name": "processedFileLocation",
+			"displayName": "Processed File Location",
+			"type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"isMandatory": false,
+			"isDynamic": false,
+			"isValueProvided":false,
+            "defaultValue":"",
+			"validationRules": {
+			  "pattern": "",
+			  "minVal": 0,
+			  "maxLength": 2048
+			}
+         }
+	  
+	  ]
+   }
+}

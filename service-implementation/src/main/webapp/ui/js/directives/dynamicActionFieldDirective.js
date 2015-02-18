@@ -5,7 +5,7 @@ angular.module(
         function($rootScope) {
             console.log("Action Directive");
              return {
-                restrict: 'C', 
+                restrict: 'E', 
                 scope:{
                     availableProperties : '=',
                     addedProperties : '=',
@@ -25,6 +25,7 @@ angular.module(
                         }
                         console.log("addedProperties"+scope.addedProperties);
                          var isPropertyFound = false;
+                         scope.currentRowObject.isValueProvided = true;
                         for (var i = 0; i < scope.availableProperties.length; i ++) {
                             var propertyToBeChanged = scope.availableProperties[i];
                             if (propertyToBeChanged.name === scope.currentRowObject.name) {
@@ -43,7 +44,12 @@ angular.module(
                          for (var i = 0; i < scope.addedProperties.length; i ++) {
                             var propertyToBeRemoved = scope.addedProperties[i];
                             if (propertyToBeRemoved.name === scope.currentRowObject.name) {
-                                scope.currentRowObject.value = "";
+                                if (scope.currentRowObject.defaultValue !== "") {
+                                    scope.currentRowObject.value = scope.currentRowObject.defaultValue;
+                                } else {
+                                    scope.currentRowObject.value = "";
+                                }                               
+                                scope.currentRowObject.isValueProvided = false;
                                 if(scope.currentRowObject.isCustomized === false) {
                                     scope.availableProperties.push(scope.currentRowObject);
                                 }    
@@ -58,7 +64,7 @@ angular.module(
                      // funtion that determines whether + icon to be displayed or not in the Action column
                      scope.isAdditionAllowed = function() {
                         var initialStateObject = angular.copy(angular.fromJson(scope.initialStateObject));
-                        if(!initialStateObject.isMandatory &&  initialStateObject.value === "") return true;
+                        if(!initialStateObject.isMandatory && !initialStateObject.isValueProvided ) return true;
                         return false;
                      };
                                         
@@ -71,6 +77,8 @@ angular.module(
                             "type":"textarea",
                             "readOnly":"",
                             "isMandatory":false,
+                            "isCustomized":false,
+                            "isValueProvided":false,
                             "validationRules": {}
                             }); 
                      };
