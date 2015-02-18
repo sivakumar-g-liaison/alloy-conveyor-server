@@ -191,7 +191,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
-					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE");
+					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}",workTicket.getFileName(),endTime-actualStartTime);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
 					

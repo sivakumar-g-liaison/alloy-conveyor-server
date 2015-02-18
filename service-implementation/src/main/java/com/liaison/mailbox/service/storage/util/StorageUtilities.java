@@ -163,7 +163,7 @@ public class StorageUtilities {
 				endTime = System.currentTimeMillis();				;
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(inputStream.getCount());
-				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",workTicket.getFileName(),detail.getPayloadSize(),startTime-endTime);
+				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",workTicket.getFileName(),detail.getPayloadSize(),endTime-startTime);
 				
 			}
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
@@ -343,7 +343,7 @@ public class StorageUtilities {
 			
 			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,  workTicket, httpListenerProperties);
 			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(),detail.getMetaSnapshot().getURI().toString());
-			LOGGER.info("FILE SIZE IN BYTES  ", detail.getPayloadSize());
+			LOGGER.info("FILE SIZE IN BYTES {} ", detail.getPayloadSize());
 
 			workTicket.setPayloadSize( detail.getPayloadSize());
 			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
