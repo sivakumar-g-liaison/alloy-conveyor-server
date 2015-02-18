@@ -138,6 +138,8 @@ public class StorageUtilities {
 			String localProcessorId = workTicket.getGlobalProcessId();
 			boolean isSecure = Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
 			String messageName = MailBoxUtil.getGUID();
+			long startTime = 0;
+			long endTime = 0;
 			
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
 			
@@ -156,9 +158,13 @@ public class StorageUtilities {
 			try (CountingInputStream inputStream = new CountingInputStream(payload)) {
 
 				detail = new PayloadDetail();
+				startTime = System.currentTimeMillis();
 				FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
+				endTime = System.currentTimeMillis();				;
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(inputStream.getCount());
+				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",workTicket.getFileName(),detail.getPayloadSize(),startTime-endTime);
+				
 			}
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
@@ -336,7 +342,8 @@ public class StorageUtilities {
 		try (InputStream payloadToPersist = stream) {
 			
 			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,  workTicket, httpListenerProperties);
-			LOGGER.info("The received path uri is {} ", detail.getMetaSnapshot().getURI().toString());
+			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(),detail.getMetaSnapshot().getURI().toString());
+			LOGGER.info("FILE SIZE IN BYTES  ", detail.getPayloadSize());
 
 			workTicket.setPayloadSize( detail.getPayloadSize());
 			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());

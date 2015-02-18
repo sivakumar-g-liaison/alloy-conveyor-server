@@ -170,12 +170,12 @@ public class DropboxFileTransferResource extends AuditedResource {
 					
 					// calling service to upload content to spectrum
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService
-							.uploadContentAsyncToSpectrum(workTicket, serviceRequest.getInputStream(), transferProfileId,
+							.transferFile(workTicket, serviceRequest.getInputStream(), transferProfileId,
 									manifestResponse.getManifest(), fileName, loginId);
 					
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
-					LOG.debug("Calculating elapsed time for service to upload content to spectrum");
+					LOG.debug("TIME SPENT IN SERVICE LAYER -  RETRIVE PROCESSOR PROPS + POST TO SPECTRUM + BUILD WORK TICKET + POST TO QUEUE");
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
 					String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
 
@@ -191,7 +191,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
-					LOG.debug("Calculating elapsed time of uploadContentAsyncToSpectrum rest call");
+					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE");
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
 					

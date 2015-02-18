@@ -51,7 +51,7 @@ public class DropboxFileTransferService {
 	 * @return
 	 * @throws Exception
 	 */
-	public DropboxTransferContentResponseDTO uploadContentAsyncToSpectrum(WorkTicket workTicket, ServletInputStream stream, String profileId,
+	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream, String profileId,
 			String aclManifest, String fileName, String loginId) throws Exception {
 
 		DropboxTransferContentResponseDTO transferContentResponse = null;
@@ -164,8 +164,8 @@ public class DropboxFileTransferService {
 				StorageUtilities.storePayload(stream, workTicket, properties);	
 				
 				// end time to calculate elapsed time for storing payload in spectrum
-				endTime = System.currentTimeMillis();
-				LOG.debug("Calculating elapsed time for storing payload in spectrum");
+				endTime = System.currentTimeMillis();				
+				LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
 				MailBoxUtil.calculateElapsedTime(startTime, endTime);
 				
 				WorkTicketUtil.constructMetaDataJson(workTicket);

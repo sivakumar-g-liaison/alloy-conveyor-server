@@ -13,8 +13,10 @@ package com.liaison.mailbox.service.integration.test;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +68,30 @@ public class StorageUtilitiesTest {
 			String paylaod = new String(StreamUtil.streamToBytes(is));
 			logger.info("The received payload is \"{}\"", paylaod);
 		}
+
+	}
+	
+	//@Test
+	public void readAPalyload() throws Exception {
+
+		System.setProperty("archaius.deployment.applicationId","g2mailboxservice");
+		System.setProperty("archaius.deployment.environment", "test");
+		String payloadURI = "fs2://unsecure@dev-int/SERVICE_BROKER/dropboxadmin@liaison.dev/B4535568ACA745E59C984169B5B5C5E0.B4535568ACA745E59C984169B5B5C5E0_35010B085CE74611B35964598D028ADD";
+		try (InputStream is = StorageUtilities.retrievePayload(payloadURI)) {
+
+			try (OutputStream outputStream = new FileOutputStream(new File("spectrumPayload.txt"))) {
+				int read = 0;
+				byte[] bytes = new byte[1024];
+				System.out.println("Started writing!");
+				while ((read = is.read(bytes)) != -1) {
+					outputStream.write(bytes, 0, read);
+
+				}
+			}
+
+		}
+
+		System.out.println("Done writing!");
 
 	}
 
