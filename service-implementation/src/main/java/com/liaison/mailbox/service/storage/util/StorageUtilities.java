@@ -137,7 +137,7 @@ public class StorageUtilities {
 			String globalProcessorId = workTicket.getGlobalProcessId();
 			String localProcessorId = workTicket.getGlobalProcessId();
 			boolean isSecure = Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
-			String messageName = MailBoxUtil.getGUID();
+			String messageName = workTicket.getFileName() + MailBoxUtil.getGUID();
 			long startTime = 0;
 			long endTime = 0;
 			
@@ -367,7 +367,8 @@ public class StorageUtilities {
 				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()*24 * 60 *60));
+		
+		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()));
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
 		return fs2Header;

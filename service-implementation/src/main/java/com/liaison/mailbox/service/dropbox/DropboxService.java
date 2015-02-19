@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
@@ -44,13 +45,11 @@ public class DropboxService {
 				.toString(), workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString(),
 				workTicket.getPayloadURI());
 
-		// set meta data in the staged file dto
-		String from = workTicket.getHeaders(MailBoxConstants.FROM_HEADER).toString();
-		String comment = workTicket.getHeaders(MailBoxConstants.COMMENT_HEADER).toString();
-		StagedFileMetaDataDTO stagedFileMetaDataDto = new StagedFileMetaDataDTO(workTicket.getPayloadSize().toString(),
-				from, comment);
+		//getting meta data from meta json
+		String metadata = workTicket.getHeader(MailBoxConstants.UPLOAD_META);
+        StagedFileMetaDataDTO metadataDto = new ObjectMapper().readValue(metadata, StagedFileMetaDataDTO.class);
 
-		stageFileReqDTO.setMeta(stagedFileMetaDataDto);
+		stageFileReqDTO.setMeta(metadataDto);
 		dtoReq.setStagedFile(stageFileReqDTO);
 
 		stageFileService.addStagedFile(dtoReq);

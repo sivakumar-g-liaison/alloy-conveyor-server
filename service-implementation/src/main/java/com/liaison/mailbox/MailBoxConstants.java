@@ -165,7 +165,7 @@ public interface MailBoxConstants {
 	public static final String ACL_MANIFEST_HEADER = "acl-manifest";
 	public static final String DBX_WORK_TICKET_PROFILE_NAME = "profileName";
 	public static final String UPLOAD_FILE_NAME = "filename";
-	public static final String UPLOAD_META = "meta";
+	public static final String UPLOAD_META = "meta-data";
 
 	public static final String DROPBOX_AUTH_TOKEN = "token";
 	public static final String ACL_SIGNED_MANIFEST_HEADER = "acl-signature";
@@ -175,9 +175,16 @@ public interface MailBoxConstants {
 	public static final int AUTH_FAILURE_CODE = 401;
 	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;	
 	public static final String TTL = "ttl";
+	public static final String TTL_UNIT = "ttlunit";
 	public static final String DROPBOX_PAYLOAD_TTL_DAYS = "com.liaison.dropbox.payload.ttl.days";
 	public static final String FS2_STORAGE_DEFAULT_USE = "fs2.storage.file.default.use";
 	public static final String VALUE_FOR_DEFAULT_TTL = "30";
+	public static final String TTL_UNIT_SECONDS = "Seconds";
+	public static final String TTL_UNIT_MINUTES = "Minutes";
+	public static final String TTL_UNIT_DAYS = "Days";
+	public static final String TTL_UNIT_WEEKS = "Weeks";
+	public static final String TTL_UNIT_MONTHS = "Months";
+	public static final String TTL_UNIT_YEARS = "Years";
 
 	//charsetname
 	public static final String CHARSETNAME = "UTF-8";

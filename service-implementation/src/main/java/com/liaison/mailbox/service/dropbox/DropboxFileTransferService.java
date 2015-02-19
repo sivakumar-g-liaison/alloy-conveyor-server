@@ -145,15 +145,35 @@ public class DropboxFileTransferService {
 				
 				//set ttl value from mailbox property or else from property file
 				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
+				String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
 				for(MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
 					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
 						ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
 						LOG.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
-						break;
+					}
+					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
+						ttlUnit = (mbp.getMbxPropValue() == null) ? ttlUnit : mbp.getMbxPropValue();
+						LOG.debug("TTL Unit in uploadContentAsyncToSpectrum() is %s", ttlUnit);
 					}
 				}
 				
-				workTicket.setTtlDays(Integer.parseInt(ttl));
+				Integer ttlNumber = Integer.parseInt(ttl);
+				
+				if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
+					ttlNumber = ttlNumber * 365 * 24 * 60 * 60;
+				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
+					ttlNumber = ttlNumber * 30 * 24 * 60 * 60;
+				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
+					ttlNumber = ttlNumber * 7 * 24 * 60 * 60;
+				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
+					ttlNumber = ttlNumber * 24 * 60 * 60;
+				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
+					ttlNumber = ttlNumber * 60 * 60;
+				} else {
+					//leave since its is given as seconds
+				}
+				
+				workTicket.setTtlDays(ttlNumber);
 				workTicket.setFileName(fileName);
 				workTicket.setProcessMode(ProcessMode.MFT);
 				
