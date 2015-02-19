@@ -50,7 +50,7 @@ angular.module(
                                     scope.currentRowObject.value = "";
                                 }                               
                                 scope.currentRowObject.isValueProvided = false;
-                                if(scope.currentRowObject.isCustomized === false) {
+                                if(scope.currentRowObject.isDynamic === false) {
                                     scope.availableProperties.push(scope.currentRowObject);
                                 }    
                                 scope.addedProperties.splice(i , 1);
@@ -77,7 +77,7 @@ angular.module(
                             "type":"textarea",
                             "readOnly":"",
                             "isMandatory":false,
-                            "isCustomized":false,
+                            "isDynamic":false,
                             "isValueProvided":false,
                             "validationRules": {}
                             }); 

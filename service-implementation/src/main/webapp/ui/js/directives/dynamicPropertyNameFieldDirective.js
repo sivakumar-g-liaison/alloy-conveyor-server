@@ -59,14 +59,14 @@ angular.module(
                         // used $timeout as a hack to push object to grid data array after the 
                         // UI rendering cycle gets completed                        
                         if (scope.currentRowObject.type !== property.type) {
-                            scope.currentRowObject = angular.copy(property);
+                        	angular.copy(property, scope.currentRowObject);
                             scope.addedProps.pop();
                             $timeout(function() {
                                 scope.addedProps.push(scope.currentRowObject);
                             });
                             
                          } else {
-                            scope.currentRowObject = angular.copy(property);
+                        	angular.copy(property, scope.currentRowObject);
                         }
                         
                     }
@@ -79,7 +79,7 @@ angular.module(
                        scope.currentRowObject = angular.copy(scope.selectedValue.value)
                        scope.currentRowObject.name = attrName;
                        scope.currentRowObject.displayName = attrName;
-                       scope.currentRowObject.isCustomized = true;
+                       scope.currentRowObject.isDynamic = true;
                        console.log("currentRowObject in onblur"+scope.currentRowObject);
                  };
             }
