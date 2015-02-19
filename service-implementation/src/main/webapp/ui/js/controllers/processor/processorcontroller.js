@@ -3503,7 +3503,7 @@ var rest = myApp.controller(
             };
             $scope.initialSetUp = function() {
                 //$scope.jsonProperties = $rootScope.testJson.processorDefinition.staticProperties;
-                $scope.jsonProperties = $rootScope.httpdownloaderJson.processorDefinition.staticProperties;             
+                $scope.jsonProperties = $rootScope.httpDownloaderJson.processorDefinition.staticProperties;             
                 $scope.propertiesAddedToProcessor = [];
                 $scope.availableProperties = [];         
                 $scope.separateProperties();
