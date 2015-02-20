@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2Configuration;
 import com.liaison.fs2.api.FS2Factory;
@@ -45,13 +44,13 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-
 /**
  * @author VNagarajan
- *
- * This utility class persists and retrieves the payload from various file systems.
- * Currently there spectrum(secure/unsecure) and flat file system.
- *
+ * 
+ *         This utility class persists and retrieves the payload from various
+ *         file systems. Currently there spectrum(secure/unsecure) and flat file
+ *         system.
+ * 
  */
 public class StorageUtilities {
 
@@ -100,78 +99,90 @@ public class StorageUtilities {
 	}
 
 	/**
-	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or file system.
-	 *
+	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or
+	 * file system.
+	 * 
 	 * @param payloadURL
 	 * @return
 	 * @throws MailBoxServicesException
 	 */
-	public static InputStream retrievePayload(String payloadURL) throws MailBoxServicesException  {
+	public static InputStream retrievePayload(String payloadURL) throws MailBoxServicesException {
 
 		try {
 			URI spectrumURI = new URI(payloadURL);
 			LOGGER.info("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
-		} catch (FS2PayloadNotFoundException | URISyntaxException  e) {
+		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
 			LOGGER.error("Failed to retrieve payload from spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to retrieve payload from spectrum due to error"+e.getMessage(), Response.Status.BAD_REQUEST);
+			throw new MailBoxServicesException(
+					"Failed to retrieve payload from spectrum due to error" + e.getMessage(),
+					Response.Status.BAD_REQUEST);
 		}
 	}
 
-
 	/**
-	 * A helper method to persist the payload into spectrum(secure/unsecure) and file system.
-	 *
+	 * A helper method to persist the payload into spectrum(secure/unsecure) and
+	 * file system.
+	 * 
 	 * @param payload
 	 * @param globalProcessId
 	 * @param fs2Headers
 	 * @param isSecure
 	 * @return
 	 */
-	public static PayloadDetail persistPayload(InputStream payload, WorkTicket workTicket, Map<String, String> httpListenerProperties) {
+	public static PayloadDetail persistPayload(InputStream payload, WorkTicket workTicket,
+			Map<String, String> httpListenerProperties, boolean isDropbox) {
 
 		try {
-			
+
 			String tenancyKey = httpListenerProperties.get(MailBoxConstants.KEY_TENANCY_KEY);
 			String loginId = httpListenerProperties.get(MailBoxConstants.LOGIN_ID);
 			String globalProcessorId = workTicket.getGlobalProcessId();
 			String localProcessorId = workTicket.getGlobalProcessId();
-			boolean isSecure = Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
 			String messageName = workTicket.getFileName() + MailBoxUtil.getGUID();
+
+			Map<String, Object> additionalContext = workTicket.getAdditionalContext();
+			boolean isSecure = Boolean.parseBoolean((String) additionalContext
+					.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+
 			long startTime = 0;
 			long endTime = 0;
-			
+
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-			
+
 			String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId;
-			if(workTicket.getProcessMode() != null && workTicket.getProcessMode().equals(ProcessMode.MFT)) {
-				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_" + messageName;
+			if (isDropbox) {
+				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_"
+						+ messageName;
 			}
 
-			//persists the message in spectrum.
+			// persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(uri, isSecure);
 			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, null);
 
-			//fetch the metdata includes payload size
+			// fetch the metdata includes payload size
 			PayloadDetail detail = null;
 			try (CountingInputStream inputStream = new CountingInputStream(payload)) {
 
 				detail = new PayloadDetail();
 				startTime = System.currentTimeMillis();
 				FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
-				endTime = System.currentTimeMillis();				;
+				endTime = System.currentTimeMillis();
+				;
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(inputStream.getCount());
-				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",workTicket.getFileName(),detail.getPayloadSize(),endTime-startTime);
-				
+				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
+						workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
+
 			}
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
 
 		} catch (FS2Exception | IOException e) {
 			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+			throw new MailBoxServicesException("Failed to write payload in spectrum : " + e.getMessage(),
+					Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -179,7 +190,7 @@ public class StorageUtilities {
 	 * A helper method to automatically create a spectrum URI in the format
 	 * needed to determine the secure spectrum or the unsecure spectrum at the
 	 * default location.
-	 *
+	 * 
 	 * @param path
 	 * @param secure
 	 * @return
@@ -197,7 +208,7 @@ public class StorageUtilities {
 		}
 
 		String defaultLocation = configuration.getString(PROPERTY_SPECTRUM_LOCATION_DEFAULT);
-		if(secure) {
+		if (secure) {
 			uri = createSpectrumURI(path, SECURE_MONIKER, defaultLocation);
 		} else {
 			uri = createSpectrumURI(path, UNSECURE_MONIKER, defaultLocation);
@@ -208,9 +219,9 @@ public class StorageUtilities {
 
 	/**
 	 * A helper method to automatically create a spectrum URI in the format
-	 * needed.  Throws an exception if the type and location don't
-	 * match a configured value.
-	 *
+	 * needed. Throws an exception if the type and location don't match a
+	 * configured value.
+	 * 
 	 * @param path
 	 * @param secure
 	 * @return
@@ -221,7 +232,7 @@ public class StorageUtilities {
 
 		// We need to ensure the path starts with a path or a format
 		// exception is thrown.
-		if(!path.startsWith("/")) {
+		if (!path.startsWith("/")) {
 			path = "/" + path;
 		}
 
@@ -240,7 +251,6 @@ public class StorageUtilities {
 					+ " exists for type [%s] and location [%s].", type, location), Response.Status.PRECONDITION_FAILED);
 		}
 
-
 		try {
 			uri = new URI("fs2", authority, path, null, null);
 		} catch (URISyntaxException e) {
@@ -249,14 +259,13 @@ public class StorageUtilities {
 		return uri;
 	}
 
-
 	/**
 	 * Configures specturm(secure/unsecure) providers
 	 */
 	protected static void configureSpectrum() {
 
-        FS2EncryptionProvider encryptionProvider = new SimpleEncryptionProvider();
-        FS2KEKProvider kekProvider = new KeyManagerKEKProvider();
+		FS2EncryptionProvider encryptionProvider = new SimpleEncryptionProvider();
+		FS2KEKProvider kekProvider = new KeyManagerKEKProvider();
 
 		String[] spectrumTypes = configuration.getStringArray(PROPERTY_SPECTRUM_TYPES);
 		String[] spectrumLocations = configuration.getStringArray(PROPERTY_SPECTRUM_LOCATIONS);
@@ -270,28 +279,27 @@ public class StorageUtilities {
 		int i = 0;
 
 		for (String type : spectrumTypes) {
-			for(String location : spectrumLocations) {
+			for (String location : spectrumLocations) {
 
 				String identifier = type + "." + location;
 				FS2Configuration config;
 
 				if (type.equals(SECURE_MONIKER)) {
-					config = new FS2DefaultSpectrumStorageConfig(
-			        		new FS2StorageIdentifier(type, location), SpectrumConfigBuilder.buildFromConfiguration(
-			        				identifier, configuration), encryptionProvider, kekProvider) {
-					    @Override
-					    public boolean doCalcPayloadSize() {
-					    	return false;
-					    }
+					config = new FS2DefaultSpectrumStorageConfig(new FS2StorageIdentifier(type, location),
+							SpectrumConfigBuilder.buildFromConfiguration(identifier, configuration),
+							encryptionProvider, kekProvider) {
+						@Override
+						public boolean doCalcPayloadSize() {
+							return false;
+						}
 					};
 				} else {
-					config = new FS2DefaultSpectrumStorageConfig(
-		        		new FS2StorageIdentifier(type, location), SpectrumConfigBuilder.buildFromConfiguration(
-		        				identifier, configuration), null, null) {
+					config = new FS2DefaultSpectrumStorageConfig(new FS2StorageIdentifier(type, location),
+							SpectrumConfigBuilder.buildFromConfiguration(identifier, configuration), null, null) {
 						@Override
-					    public boolean doCalcPayloadSize() {
+						public boolean doCalcPayloadSize() {
 							return false;
-					    }
+						}
 					};
 				}
 				spectrumConfigs[i] = config;
@@ -307,52 +315,54 @@ public class StorageUtilities {
 
 		final String defaultType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, "file");
 		final String defaultLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, "local");
-        final String defaultFileMountPoint = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT, "/tmp");
+		final String defaultFileMountPoint = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT, "/tmp");
 
-        filesystemConfigs = new FS2Configuration[1];
+		filesystemConfigs = new FS2Configuration[1];
 		filesystemConfigs[0] = new FS2DefaultFileConfig(new FS2StorageIdentifier(defaultType, defaultLocation)) {
 
-            @Override
-            public boolean shouldDeleteExistingData() {
-                return false;
-            }
+			@Override
+			public boolean shouldDeleteExistingData() {
+				return false;
+			}
 
-            @Override
-            public String getMountPoint() {
-                return defaultFileMountPoint;
-            }
-        };
+			@Override
+			public String getMountPoint() {
+				return defaultFileMountPoint;
+			}
+		};
 
 	}
 
 	public static FS2Configuration[] getConfigs() {
 		return ArrayUtils.addAll(spectrumConfigs, filesystemConfigs);
 	}
-	
+
 	/**
 	 * This method will persist payload in spectrum.
-	 *
+	 * 
 	 * @param request
 	 * @param workTicket
 	 * @throws IOException
 	 */
 	public static void storePayload(ServletInputStream stream, WorkTicket workTicket,
-			Map<String, String> httpListenerProperties) throws Exception {
+			Map<String, String> httpListenerProperties, boolean isDropbox) throws Exception {
 
 		try (InputStream payloadToPersist = stream) {
-			
-			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,  workTicket, httpListenerProperties);
-			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(),detail.getMetaSnapshot().getURI().toString());
+
+			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist, workTicket,
+					httpListenerProperties, isDropbox);
+			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(), detail.getMetaSnapshot()
+					.getURI().toString());
 			LOGGER.info("FILE SIZE IN BYTES {} ", detail.getPayloadSize());
 
-			workTicket.setPayloadSize( detail.getPayloadSize());
+			workTicket.setPayloadSize(detail.getPayloadSize());
 			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
 		}
 	}
-	
+
 	/**
 	 * Method to construct FS2ObjectHeaders from the given workTicket
-	 *
+	 * 
 	 * @param workTicket
 	 * @return FS2ObjectHeaders
 	 * @throws IOException
@@ -367,13 +377,10 @@ public class StorageUtilities {
 				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-		
+
 		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()));
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
 		return fs2Header;
 	}
 }
-
-
-

@@ -51,8 +51,8 @@ public class DropboxFileTransferService {
 	 * @return
 	 * @throws Exception
 	 */
-	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream, String profileId,
-			String aclManifest, String fileName, String loginId) throws Exception {
+	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream,
+			String profileId, String aclManifest, String fileName, String loginId) throws Exception {
 
 		DropboxTransferContentResponseDTO transferContentResponse = null;
 		long startTime = 0;
@@ -62,33 +62,35 @@ public class DropboxFileTransferService {
 		List<Processor> dropboxProcessors = new ArrayList<Processor>();
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 
-		// start time to calculate elapsed time for retrieving tenancy keys from manifest
+		// start time to calculate elapsed time for retrieving tenancy keys from
+		// manifest
 		startTime = System.currentTimeMillis();
-		
+
 		// retrieve the tenancy key from acl manifest
 		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
-		
+
 		// end time to calculate elapsed time for getting manifest
 		endTime = System.currentTimeMillis();
 		LOG.debug("Calculating elapsed time for retrieving tenancy keys from manifest");
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
-		
-		// start time to calculate elapsed time for retrieving profile name by given Id from DB
+
+		// start time to calculate elapsed time for retrieving profile name by
+		// given Id from DB
 		startTime = System.currentTimeMillis();
-		
-		//for getting profile name
-		ProfileConfigurationDAO profileDao  = new ProfileConfigurationDAOBase();
+
+		// for getting profile name
+		ProfileConfigurationDAO profileDao = new ProfileConfigurationDAOBase();
 		ScheduleProfilesRef profile = profileDao.find(ScheduleProfilesRef.class, profileId);
-		
+
 		// end time to calculate elapsed time for getting manifest
 		endTime = System.currentTimeMillis();
 		LOG.debug("Calculating elapsed time for retrieving profile name by given Id from DB");
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
-		
+
 		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
 
 			tenancyKey = tenancyKeyDTO.getGuid();
@@ -96,19 +98,22 @@ public class DropboxFileTransferService {
 			List<String> specificProcessorTypes = new ArrayList<String>();
 			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 			ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-			
-			// start time to calculate elapsed time for retrieving dropbox processors linked to given profile Id and tenancyKey in manifest
+
+			// start time to calculate elapsed time for retrieving dropbox
+			// processors linked to given profile Id and tenancyKey in manifest
 			startTime = System.currentTimeMillis();
-			
-			// retrieve dropbox processors linked to given profile Id and tenancyKey in manifest
+
+			// retrieve dropbox processors linked to given profile Id and
+			// tenancyKey in manifest
 			List<Processor> processors = processorDAO.findProcessorsOfSpecificTypeByProfileAndTenancyKey(profileId,
 					tenancyKey, specificProcessorTypes);
-			
-			// end time to calculate elapsed time for dropbox processors linked to given profile Id and tenancyKey in manifest
+
+			// end time to calculate elapsed time for dropbox processors linked
+			// to given profile Id and tenancyKey in manifest
 			endTime = System.currentTimeMillis();
 			LOG.debug("Calculating elapsed time for dropbox processors linked to given profile Id and tenancyKey in manifest");
 			MailBoxUtil.calculateElapsedTime(startTime, endTime);
-			
+
 			dropboxProcessors.addAll(processors);
 
 			// if there are no dropbox processors available for this tenancy key
@@ -130,64 +135,68 @@ public class DropboxFileTransferService {
 				boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
-				
-				Map <String, String>properties = new HashMap <String, String>();
+
+				Map<String, String> properties = new HashMap<String, String>();
 				properties.put(MailBoxConstants.LOGIN_ID, loginId);
 				properties.put(MailBoxConstants.KEY_TENANCY_KEY, tenancyKey);
-				if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
-				
-				workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(properties));
-				
-				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
+
+				workTicket.setPipelineId(pipeLineId);
+				workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
 				workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD,
+						String.valueOf(isSecuredPayload));
 				workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
-				
-				//set ttl value from mailbox property or else from property file
-				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS, MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
+
+				// set ttl value from mailbox property or else from property
+				// file
+				String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
+						MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
 				String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-				for(MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
-					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
+
+				for (MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
+					if (mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
 						ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
 						LOG.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
 					}
-					if(mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
+					if (mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
 						ttlUnit = (mbp.getMbxPropValue() == null) ? ttlUnit : mbp.getMbxPropValue();
 						LOG.debug("TTL Unit in uploadContentAsyncToSpectrum() is %s", ttlUnit);
 					}
 				}
-				
+
 				Integer ttlNumber = Integer.parseInt(ttl);
-				
-				if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
+
+				if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
 					ttlNumber = ttlNumber * 365 * 24 * 60 * 60;
-				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
+				} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
 					ttlNumber = ttlNumber * 30 * 24 * 60 * 60;
-				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
+				} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
 					ttlNumber = ttlNumber * 7 * 24 * 60 * 60;
-				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
+				} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
 					ttlNumber = ttlNumber * 24 * 60 * 60;
-				} else if(ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
+				} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
 					ttlNumber = ttlNumber * 60 * 60;
 				} else {
-					//leave since its is given as seconds
+					// leave since it is given as seconds
 				}
-				
+
 				workTicket.setTtlDays(ttlNumber);
 				workTicket.setFileName(fileName);
-				workTicket.setProcessMode(ProcessMode.MFT);
-				
-				// start time to calculate elapsed time for storing payload in spectrum
-				startTime = System.currentTimeMillis();				
-				
-				//store payload to spectrum
-				StorageUtilities.storePayload(stream, workTicket, properties);	
-				
-				// end time to calculate elapsed time for storing payload in spectrum
-				endTime = System.currentTimeMillis();				
+				workTicket.setProcessMode(ProcessMode.ASYNC);
+
+				// start time to calculate elapsed time for storing payload in
+				// spectrum
+				startTime = System.currentTimeMillis();
+
+				// store payload to spectrum
+				StorageUtilities.storePayload(stream, workTicket, properties, true);
+
+				// end time to calculate elapsed time for storing payload in
+				// spectrum
+				endTime = System.currentTimeMillis();
 				LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
 				MailBoxUtil.calculateElapsedTime(startTime, endTime);
-				
+
 				WorkTicketUtil.constructMetaDataJson(workTicket);
 			}
 		}
@@ -209,9 +218,8 @@ public class DropboxFileTransferService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetTransferProfilesResponseDTO getTransferProfiles(String aclManifest)
-			throws IOException {
-		
+	public GetTransferProfilesResponseDTO getTransferProfiles(String aclManifest) throws IOException {
+
 		LOG.debug("Entering getTransferProfiles");
 
 		GetTransferProfilesResponseDTO serviceResponse = new GetTransferProfilesResponseDTO();
@@ -258,7 +266,7 @@ public class DropboxFileTransferService {
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, TRANSFER_PROFILE, Messages.SUCCESS));
 		serviceResponse.setTransferProfiles(transferProfiles);
-		
+
 		LOG.debug("Exit from getTransferProfiles");
 
 		return serviceResponse;

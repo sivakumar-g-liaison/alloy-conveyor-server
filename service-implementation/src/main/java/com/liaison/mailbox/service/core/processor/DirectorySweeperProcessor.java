@@ -394,7 +394,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
-				payloadDetail = StorageUtilities.persistPayload(payloadToPersist,workTicket, properties);
+				payloadDetail = StorageUtilities.persistPayload(payloadToPersist,workTicket, properties, false);
 				payloadToPersist.close();
 			}
 

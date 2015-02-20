@@ -61,7 +61,7 @@ public class StorageUtilitiesTest {
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
 		
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties);
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 
 		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
@@ -115,7 +115,7 @@ public class StorageUtilitiesTest {
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
 		
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties);
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
 			String paylaod = new String(StreamUtil.streamToBytes(is));
@@ -144,7 +144,7 @@ public class StorageUtilitiesTest {
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
 		
-		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties);
+		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 		System.out.println(detail.getMetaSnapshot().getURI());
 		/*try (InputStream is = StorageUtilities.retrievePayload("fs2://secure@dev-int/mailbox/payload/1.0/1423693504486")) {
 
