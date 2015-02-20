@@ -30,14 +30,14 @@ angular.module(
                 },        
                 link: function(scope, elem, attrs) {
                 
-                   scope.$watch("currentRowObject.type", function() {
+                   scope.$watch("currentRowObject.name", function() {
                     var templateUrl = getTemplateUrl(scope.currentRowObject);                    
                         $rootScope.restService.get(templateUrl, function (data) {
                               elem.html(data);
                               $compile(elem.contents())(scope);
                         }); 
                    });
-
+                   scope.infoIconImgUrl = 'img/alert-triangle-red.png';
                                        
                     scope.optionSelected = function(selectedOption) {
                         scope.currentRowObject.value = selectedOption;

@@ -26,8 +26,8 @@
             "defaultValue":"",
 			"validationRules": {
 			  "pattern": "",
-			  "minVal": 0,
-			  "maxVal": 0
+			  "minLength": "3",
+			  "maxLength": "10"
 			}
 		  },
 		  {
@@ -41,9 +41,9 @@
             "isValueProvided":false,
             "defaultValue":"",
 			"validationRules": {
-			  "pattern": "",
-			  "minVal": 0,
-			  "maxVal": 0
+			  "pattern": "\/^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$\/",
+			  "minLength": "2",
+			  "maxLength": "5"
 			}
 		  },
 		  {
@@ -57,7 +57,7 @@
              "isValueProvided":false,
              "defaultValue":"",
 			 "validationRules":{
-				"pattern":"",
+				"pattern":"\/\\b1.1\\b\/",
 				"minVal":0,
 				"maxVal":0
 			 }
@@ -134,9 +134,9 @@
             "isValueProvided":false,
             "defaultValue":"",
 			"validationRules": {
-			  "pattern": "",
-			  "minVal": 0,
-			  "maxVal": 0
+			  "pattern": "\/^([1-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$\/",
+			  "minLength": "",
+			  "maxLength": ""
 			}
          },
 		 {
@@ -151,8 +151,8 @@
             "defaultValue":"",
 			"validationRules": {
 			  "pattern": "",
-			  "minVal": 0,
-			  "maxLength": 512
+			  "minLength": "",
+			  "maxLength": "512"
 			}
          }, 
 		 {
@@ -166,9 +166,9 @@
             "isValueProvided":false,
             "defaultValue":"",
 			"validationRules": {
-			  "pattern": "",
-			  "minVal": 0,
-			  "maxLength": 0
+			  "pattern": "\/^\\d+$\/",
+			  "minLength": "2",
+			  "maxLength": "5"
 			}
          },
 		 {
@@ -182,9 +182,9 @@
             "isValueProvided":false,
             "defaultValue":"",
 			"validationRules": {
-			  "pattern": "",
-			  "minVal": 0,
-			  "maxLength": 0
+			  "pattern": "\/^([1-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$\/",
+			  "minLength": "1",
+			  "maxLength": "3"
 			}
          },		 
 		 {
@@ -199,8 +199,8 @@
             "defaultValue":"",
 			"validationRules": {
 			  "pattern": "",
-			  "minVal": 0,
-			  "maxLength": 2048
+			  "minLength": "3",
+			  "maxLength": "10"
 			}
           },
 		  {
@@ -215,8 +215,8 @@
             "defaultValue":"",
 			"validationRules": {
 			  "pattern": "",
-			  "minVal": 0,
-			  "maxLength": 2048
+			  "minLength": "2",
+			  "maxLength": "5"
 			}
          }
 	  

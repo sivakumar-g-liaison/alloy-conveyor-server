@@ -10,6 +10,7 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.dynamicPropertyNameFieldDirective',
     'myApp.dynamicPropertyValueFieldDirective',
     'myApp.dynamicActionFieldDirective',
+    'myApp.dynamicValidationDirective',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'ngGrid', // angular grid
