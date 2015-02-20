@@ -3,9 +3,9 @@ angular.module(
     ).directive (
        'dynamicPropertyValueFieldDirective', 
         function($compile, $rootScope, $timeout) {
-            console.log("Directive");
             
             var getTemplateUrl = function(currentRowObject) {
+            
                 var type = currentRowObject.type;
                 var templateUrl = '';
 
@@ -22,19 +22,23 @@ angular.module(
             
 
             return {
+            
                 restrict: 'E',
                 replace: true,
                 scope : {
-                    currentRowObject: '=',                    
+                    currentRowObject: '='
                 },        
                 link: function(scope, elem, attrs) {
-                   
+                
+                   scope.$watch("currentRowObject.type", function() {
                     var templateUrl = getTemplateUrl(scope.currentRowObject);                    
-                    $rootScope.restService.get(templateUrl, function (data) {
-                          elem.html(data);
-                          $compile(elem.contents())(scope);
-                    }); 
+                        $rootScope.restService.get(templateUrl, function (data) {
+                              elem.html(data);
+                              $compile(elem.contents())(scope);
+                        }); 
+                   });
 
+                                       
                     scope.optionSelected = function(selectedOption) {
                         scope.currentRowObject.value = selectedOption;
                     };

@@ -120,7 +120,7 @@
 			 "isDynamic": false,
              "isValueProvided":false,
              "validationRules": null, 
-             "defaultValue":"",             
+             "defaultValue":false,             
 			 "options":[false,true]
 		  },
 		  {
