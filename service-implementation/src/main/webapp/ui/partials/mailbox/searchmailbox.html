@@ -59,13 +59,17 @@
 			</div>
 		</div>
 	</div>
-
+	<!-- Loading image will be shown until grid is loaded -->
+	<div  class="loadingSpinner"  id="loader" ng-cloak ng-hide="gridLoaded">
+        <h4>Loading Mailboxes...</h4>
+        <img height="96px" src="img/spinner.gif" />
+	</div>
 	<div>
-		<div class="gridStyle" ng-grid="gridOptions"></div>
+		<div class="gridStyle" ng-grid="gridOptions" ng-if="gridLoaded"></div>
 		<br>
 	</div>
 
 	<div>
-		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')">Add New</button>
+		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')" ng-if="gridLoaded">Add New</button>
 	</div>
 </div>

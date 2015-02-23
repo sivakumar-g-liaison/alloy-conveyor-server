@@ -83,6 +83,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
             $scope.mailboxes = data.mailBox;
             $scope.totalServerItems = data.totalItems;
+            if ( $scope.mailboxes.length === 0)
+			{
+			showSaveMessage("No Results Found", 'error');
+			}
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
@@ -154,6 +158,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             }
             
             $scope.hitCounter = $scope.hitCounter + 1;
+            $rootScope.gridLoaded = false;
             $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
             	if (status === 200 || status === 400) {
@@ -176,7 +181,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                              $scope.getPagedDataAsync(data);
                          }
                     }
-                   
+                    $rootScope.gridLoaded = true;
                     $scope.showprogressbar = false;
                 }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection}
             );
