@@ -159,5 +159,7 @@ public interface MailBoxConstants {
 	// added for self signed truststore
 	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
 
+	//added for http sync/async
+	public static final String GLOBAL_PROCESS_ID_KEY = "globalProcessId";
 
 }
