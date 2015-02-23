@@ -55,7 +55,6 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
-import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
@@ -114,9 +113,10 @@ public class HttpListener extends AuditedResource {
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	protected static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+	protected static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
 
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
-	
+
 	private static final int GLOBAL_PROCESS_ID_MINLENGTH = 3;
 	private static final int GLOBAL_PROCESS_ID_MAXLENGTH = 32;
 	private static final String GLOBAL_PROCESS_ID_PATTERN = "^[a-zA-Z0-9]*$";
@@ -204,14 +204,14 @@ public class HttpListener extends AuditedResource {
 					//GLASS LOGGING ENDS//
 
 					ResponseBuilder builder = Response.ok();
-					copyResponseInfo(request, httpResponse, builder, workTicket.getGlobalProcessId());
+					copyResponseInfo(request, httpResponse, builder);
 
 					return builder.build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-				} 
+				}
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
@@ -313,7 +313,7 @@ public class HttpListener extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} 
+				}
 			}
 		};
 		worker.actionLabel = "HttpListener.handleAsync()";
@@ -347,21 +347,6 @@ public class HttpListener extends AuditedResource {
 					+ " which exceeds the configured maximum size of "
 					+ maxRequestSize);
 		}
-	}
-	
-	/**
-	 * This method will validate the global process id in the request header.
-	 * Constrain - global process id must be 32 characters and must be alphanumeric
-	 * @param String global process id
-	 *            
-	 */
-	protected String validateglobalProcessId(String globalProcessId) {
-		if (globalProcessId.length() <= GLOBAL_PROCESS_ID_MAXLENGTH
-				&& globalProcessId.length() >= GLOBAL_PROCESS_ID_MINLENGTH
-				&& globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN)) {
-			return globalProcessId;
-		}
-		return "";
 	}
 
 	protected void authenticateRequestor(HttpServletRequest request) {
@@ -417,6 +402,7 @@ public class HttpListener extends AuditedResource {
 	 * @return WorkTicket
 	 */
 	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
+
 		WorkTicket workTicket = new WorkTicket();
 		workTicket.setAdditionalContext("httpMethod", request.getMethod());
 		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
@@ -428,16 +414,11 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
 		workTicket.setAdditionalContext("httpContentType", request.getContentType());
 		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
+		workTicket.setCreatedTime(new Date());
 		copyRequestHeadersToWorkTicket(request, workTicket);
-		
+
 		//If global Process Id is present in the request header, validate and set in the work ticket
-		String globalProcessId = request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_KEY); 
-		if(!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)) {
-			globalProcessId = validateglobalProcessId(globalProcessId); //validating globalProcessId
-		}
-		assignGlobalProcessId(workTicket, globalProcessId);
-		
-		assignTimestamp(workTicket);
+		setGlobalProcessId(workTicket, request.getHeader(GLOBAL_PROCESS_ID_HEADER));
 
 		return workTicket;
 	}
@@ -471,23 +452,25 @@ public class HttpListener extends AuditedResource {
 	}
 
 	/**
-	 * This method will set globalProcessId to workTicket. 
-	 * Global process id is not generated if it is got from request header
+	 * Validates the global process id if it is available in the header and set in the workticket.
+	 * Generates new guid if it is not available
+	 *
+	 * Note: Method won't complain about the global process id if it is invalid
+	 *
 	 * @param workTicket
-	 * @param globalProcessId - got from request header. 
+	 * @param globalProcessId - got from request header.
 	 */
-	protected void assignGlobalProcessId(WorkTicket workTicket, String globalProcessId) {
-		if(StringUtil.isNullOrEmptyAfterTrim(globalProcessId)){
-			UUIDGen uuidGen = new UUIDGen();
-			String uuid = uuidGen.getUUID();
-			workTicket.setGlobalProcessId(uuid);
-			return;
-		} 
-		workTicket.setGlobalProcessId(globalProcessId);
-	}
+	protected void setGlobalProcessId(WorkTicket workTicket, String globalProcessId) {
 
-	protected void assignTimestamp(WorkTicket workTicket) {
-		workTicket.setCreatedTime(new Date());
+			if (!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)
+					&& GLOBAL_PROCESS_ID_MAXLENGTH >= globalProcessId.length()
+					&& GLOBAL_PROCESS_ID_MINLENGTH <= globalProcessId.length()
+					&& globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN)) {
+				workTicket.setGlobalProcessId(globalProcessId);
+			} else {
+				workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+			}
+
 	}
 
 	/**
@@ -580,13 +563,13 @@ public class HttpListener extends AuditedResource {
 	 *
 	 * @param httpResponse
 	 * @param builder
-	 * @param globalProcessId 
+	 * @param globalProcessId
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
 	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
-			ResponseBuilder builder, String globalProcessId) throws IllegalStateException, IOException, JAXBException {
+			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
 
 		if (httpResponse.getStatusLine().getStatusCode() > 299) {
 
@@ -599,8 +582,8 @@ public class HttpListener extends AuditedResource {
 				builder.header(name, result.getHeader(name));
 			}
 			//set global process id in the header
-			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_KEY, globalProcessId);
-			
+			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+
 			//If payload URI avail, reads payload from spectrum. Mostly it would be an error message payload
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
 				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
@@ -635,8 +618,8 @@ public class HttpListener extends AuditedResource {
 				builder.header(name, result.getHeader(name));
 			}
 			//set global process id in the header
-			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_KEY, globalProcessId);
-			
+			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+
 			//reads paylaod from spectrum
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
 			   responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
