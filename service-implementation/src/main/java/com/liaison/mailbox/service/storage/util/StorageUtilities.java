@@ -33,6 +33,7 @@ import com.liaison.fs2.api.encryption.FS2KEKProvider;
 import com.liaison.fs2.api.encryption.impl.KeyManagerKEKProvider;
 import com.liaison.fs2.api.encryption.impl.SimpleEncryptionProvider;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.fs2.api.exceptions.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.exceptions.FS2PayloadNotFoundException;
 import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
 import com.liaison.fs2.storage.spectrum.FS2DefaultSpectrumStorageConfig;
@@ -144,9 +145,12 @@ public class StorageUtilities {
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
 
+		} catch(FS2ObjectAlreadyExistsException e) {
+			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
+			throw new MailBoxServicesException("Failed to write the payload in spectrum : "+ e.getMessage() + ". Becuase it already exists in the system.", Response.Status.CONFLICT);
 		} catch (FS2Exception | IOException e) {
 			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+			throw new MailBoxServicesException("Failed to write the payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
