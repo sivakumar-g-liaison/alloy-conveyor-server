@@ -412,7 +412,7 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
-		workTicket.setAdditionalContext("httpContentType", request.getContentType());
+		workTicket.setAdditionalContext("httpContentType", request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType());
 		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
 		workTicket.setCreatedTime(new Date());
 		copyRequestHeadersToWorkTicket(request, workTicket);
@@ -462,11 +462,16 @@ public class HttpListener extends AuditedResource {
 	 */
 	protected void setGlobalProcessId(WorkTicket workTicket, String globalProcessId) {
 
-			if (!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)
-					&& GLOBAL_PROCESS_ID_MAXLENGTH >= globalProcessId.length()
-					&& GLOBAL_PROCESS_ID_MINLENGTH <= globalProcessId.length()
-					&& globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN)) {
-				workTicket.setGlobalProcessId(globalProcessId);
+			if (!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)) {
+
+				if (GLOBAL_PROCESS_ID_MAXLENGTH < globalProcessId.length()
+					|| GLOBAL_PROCESS_ID_MINLENGTH > globalProcessId.length()
+					|| !(globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN))) {
+					throw new MailBoxServicesException("The global process id is invalid", Response.Status.BAD_REQUEST);
+				} else {
+					workTicket.setGlobalProcessId(globalProcessId);
+				}
+
 			} else {
 				workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 			}
