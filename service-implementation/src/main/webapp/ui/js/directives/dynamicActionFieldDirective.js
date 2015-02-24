@@ -25,7 +25,7 @@ angular.module(
                         }
                         console.log("addedProperties"+scope.addedProperties);
                          var isPropertyFound = false;
-                         scope.currentRowObject.isValueProvided = true;
+                         scope.currentRowObject.valueProvided = true;
                         for (var i = 0; i < scope.availableProperties.length; i ++) {
                             var propertyToBeChanged = scope.availableProperties[i];
                             if (propertyToBeChanged.name === scope.currentRowObject.name) {
@@ -49,8 +49,8 @@ angular.module(
                                 } else {
                                     scope.currentRowObject.value = "";
                                 }                               
-                                scope.currentRowObject.isValueProvided = false;
-                                if(scope.currentRowObject.isDynamic === false) {
+                                scope.currentRowObject.valueProvided = false;
+                                if(scope.currentRowObject.dynamic === false) {
                                     scope.availableProperties.push(scope.currentRowObject);
                                 }    
                                 scope.addedProperties.splice(i , 1);
@@ -64,7 +64,7 @@ angular.module(
                      // funtion that determines whether + icon to be displayed or not in the Action column
                      scope.isAdditionAllowed = function() {
                         var initialStateObject = angular.copy(angular.fromJson(scope.initialStateObject));
-                        if(!initialStateObject.isMandatory && !initialStateObject.isValueProvided ) return true;
+                        if(!initialStateObject.mandatory && !initialStateObject.valueProvided ) return true;
                         return false;
                      };
                                         
@@ -76,9 +76,9 @@ angular.module(
                             "value":"",
                             "type":"textarea",
                             "readOnly":"",
-                            "isMandatory":false,
-                            "isDynamic":false,
-                            "isValueProvided":false,
+                            "mandatory":false,
+                            "dynamic":false,
+                            "valueProvided":false,
                             "validationRules": {}
                             }); 
                      };

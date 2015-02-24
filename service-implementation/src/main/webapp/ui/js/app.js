@@ -159,12 +159,12 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     
     // testing purpose
     $rootScope.testJson = [];
-    $rootScope.restService.get('data/sweeper.json', function (data) {
+    $rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {
         $rootScope.testJson = data;
     });
     
     $rootScope.httpDownloaderJson = [];
-    $rootScope.restService.get('data/httpdownloader.json', function (data) {
+    $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {
         $rootScope.httpDownloaderJson = data;
     });
 	

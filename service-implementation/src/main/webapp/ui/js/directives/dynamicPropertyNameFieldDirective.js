@@ -31,6 +31,9 @@ angular.module(
                         case 'pipelineId':
                         scope.currentRowObject.value = $rootScope.pipelineId;
                         break;
+                        case 'httpListenerPipeLineId':
+                        scope.currentRowObject.value = $rootScope.pipelineId;
+                        break;
                     }
                  };
                 
@@ -40,7 +43,7 @@ angular.module(
                  scope.isAdditionAllowed = function() {
                  
                     var initialStateObject = angular.copy(angular.fromJson(scope.initialStateObject));
-                    if(!initialStateObject.isMandatory && !initialStateObject.isValueProvided) return true;
+                    if(!initialStateObject.mandatory && !initialStateObject.valueProvided) return true;
                     return false;
                  };
                  
@@ -54,14 +57,9 @@ angular.module(
                     if (property.name === "add new -->") {
                         scope.showAddNewComponent.value = true;
                     } else {
-                        scope.showAddNewComponent.value = false;
-                     
-                        if (scope.currentRowObject.type !== property.type) {
-                        	angular.copy(property, scope.currentRowObject);
-                         } else {
-                        	angular.copy(property, scope.currentRowObject);
-                        }                        
+                        scope.showAddNewComponent.value = false;                      
                     }
+                    angular.copy(property, scope.currentRowObject);
                     console.log("currentRowObject"+scope.currentRowObject);
                  };
                  
@@ -72,7 +70,7 @@ angular.module(
                        angular.copy(scope.selectedValue.value, scope.currentRowObject);
                        scope.currentRowObject.name = attrName;
                        scope.currentRowObject.displayName = attrName;
-                       scope.currentRowObject.isDynamic = true;
+                       scope.currentRowObject.dynamic = true;
                        console.log("currentRowObject in onblur"+scope.currentRowObject);
                  };
             }

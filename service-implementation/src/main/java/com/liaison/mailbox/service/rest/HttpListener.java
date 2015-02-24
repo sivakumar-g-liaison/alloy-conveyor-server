@@ -62,6 +62,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -715,8 +716,13 @@ public class HttpListener extends AuditedResource {
 	 * @param mailboxGuid mailbox Pguid
 	 * @param isSync boolean specifying
 	 * @return
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws MailBoxConfigurationServicesException 
 	 */
-	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) {
+	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
 		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();

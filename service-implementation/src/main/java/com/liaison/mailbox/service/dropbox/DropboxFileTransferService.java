@@ -35,6 +35,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfile
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
 public class DropboxFileTransferService {
@@ -126,8 +127,8 @@ public class DropboxFileTransferService {
 
 				// retrieving the httplistener pipeline id from remote processor
 				// properties
-				String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
-				boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
+				String pipeLineId = ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_PIPELINEID);
+				boolean isSecuredPayload = Boolean.getBoolean(ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
 				

@@ -3482,9 +3482,9 @@ var rest = myApp.controller(
             	
                 for (var i = 0; i < $scope.jsonProperties.length; i++) {
                     var property = $scope.jsonProperties[i];
-                    if (property.hasOwnProperty('isMandatory') && (property.isMandatory === true)) {
+                    if (property.hasOwnProperty('mandatory') && (property.mandatory === true)) {
                         $scope.propertiesAddedToProcessor.push(property);
-                    } else if (property.hasOwnProperty('isMandatory') && (property.isMandatory === false)){
+                    } else if (property.hasOwnProperty('mandatory') && (property.mandatory === false)){
                         $scope.availableProperties.push(property);
                     }
                 }
@@ -3497,9 +3497,9 @@ var rest = myApp.controller(
                     "value":"",
                     "type":"textarea",
                     "readOnly":"",
-                    "isMandatory":false,
-                    "isDynamic":false,
-                    "isValueProvided":false,
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
                     "validationRules": {}
                  });              
             };
@@ -3554,7 +3554,7 @@ var rest = myApp.controller(
                      enableCellEdit: false,
                      cellTemplate: '<dynamic-property-value-field-directive current-row-object = propertiesAddedToProcessor[row.rowIndex] test-attr=currentType/>'
                  }, {
-                     field: "isMandatory",
+                     field: "mandatory",
                      width: "20%",
                      displayName: "Action*",
                      enableCellEdit: false,

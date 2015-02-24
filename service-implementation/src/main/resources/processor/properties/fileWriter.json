@@ -1,0 +1,10 @@
+{
+  "processorDefinition": {
+    "type":"FILEWRITER",
+    "displayName":"FILEWRITER",
+    "protocol":"",
+    "handOverExecutionToJavaScript":false,
+    "staticProperties": [       
+    ]
+  }
+}

@@ -11,7 +11,7 @@
   }
  </style> 
 <form id="formTextArea" name="formTextArea"> 
- <textarea class="form-control" dynamic-validation-directive="currentRowObject.name" ng-model="currentRowObject.value" ng-input="{{currentRowObject.value}}" style="width:90%;height: 45px" placeholder="required" ng-minLength = {{currentRowObject.validationRules.minLength}} ng-maxLength = {{currentRowObject.validationRules.maxLength}} ng-disabled = "{{currentRowObject.readOnly}}" ng-pattern = "{{currentRowObject.validationRules.pattern}}"  required/> 
+ <textarea class="form-control" dynamic-validation-directive="currentRowObject.name" ng-model="currentRowObject.value" ng-input="{{currentRowObject.value}}" style="width:90%;height: 45px" placeholder="required" ng-minLength = {{currentRowObject.validationRules.minLength}} ng-maxLength = {{currentRowObject.validationRules.maxLength}} ng-disabled = "{{currentRowObject.readOnly}}" ng-pattern = "{{currentRowObject.validationRules.pattern}}"  ng-required = "currentRowObject.mandatory || currentRowObject.valueProvided"/> 
 <div ng-show="formTextArea[currentRowObject.name].$dirty && formTextArea[currentRowObject.name].$invalid">
 	<span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formTextArea[currentRowObject.name].$error.pattern}" ng-show="formTextArea[currentRowObject.name].$error.pattern">Invalid {{currentRowObject.displayName}}.</span>
 	<span id="mbx-procsr-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom': formTextArea[currentRowObject.name].$error.required}" ng-show="formTextArea[currentRowObject.name].$error.required">{{currentRowObject.displayName}} is mandatory.</span>

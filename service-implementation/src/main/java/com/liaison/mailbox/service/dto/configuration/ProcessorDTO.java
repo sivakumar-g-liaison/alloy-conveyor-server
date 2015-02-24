@@ -29,9 +29,12 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -49,7 +52,8 @@ public class ProcessorDTO {
 	private String name;
 	@ApiModelProperty( value = "Processor type", required = true)
 	private String type;
-	private RemoteProcessorPropertiesDTO remoteProcessorProperties;
+	//private RemoteProcessorPropertiesDTO remoteProcessorProperties;
+	private ProcessorPropertiesDefinitionDTO processorProperties;
 	private String javaScriptURI;
 	private String description;
 	@ApiModelProperty( value = "Processor status", required = true)
@@ -193,12 +197,13 @@ public class ProcessorDTO {
 		this.profiles = profiles;
 	}
 
-	public RemoteProcessorPropertiesDTO getRemoteProcessorProperties() {
-		return remoteProcessorProperties;
+	public ProcessorPropertiesDefinitionDTO getProcessorProperties() {
+		return processorProperties;
 	}
 
-	public void setRemoteProcessorProperties(RemoteProcessorPropertiesDTO remoteProcessorProperties) {
-		this.remoteProcessorProperties = remoteProcessorProperties;
+	public void setProcessorProperties(
+			ProcessorPropertiesDefinitionDTO processorProperties) {
+		this.processorProperties = processorProperties;
 	}
 
 	/**
@@ -224,9 +229,9 @@ public class ProcessorDTO {
 			//processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
 
-		RemoteProcessorPropertiesDTO propertiesDTO = this.getRemoteProcessorProperties();
+		ProcessorPropertiesDefinitionDTO propertiesDTO = this.getProcessorProperties();
 		if (null != propertiesDTO) {
-			String propertiesJSON = MailBoxUtil.marshalToJSON(this.getRemoteProcessorProperties());
+			String propertiesJSON = MailBoxUtil.marshalToJSON(this.getProcessorProperties());
 			processor.setProcsrProperties(propertiesJSON);
 		}
 
@@ -301,19 +306,50 @@ public class ProcessorDTO {
 	 * @throws JsonParseException
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException,
-			MailBoxConfigurationServicesException, SymmetricAlgorithmException {
+			MailBoxConfigurationServicesException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
 
 		String propertyJSON = processor.getProcsrProperties();
-		if (!MailBoxUtil.isEmpty(propertyJSON)) {
+		
+		// In order to provide backward compatability for older processor entities
+		// try to unmarshal the properties json with new class "ProcessorPropertiesDefinitionDTO"
+		// if the unmarshalling fails then try to unmarshal it with old class "RemoteProcessorPropertiesDTO"
+		try {
+			if (!MailBoxUtil.isEmpty(propertyJSON)) {
 
-			RemoteProcessorPropertiesDTO propertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJSON,
-					RemoteProcessorPropertiesDTO.class);
-			this.setRemoteProcessorProperties(propertiesDTO);
+				ProcessorPropertiesDefinitionDTO propertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJSON,
+						ProcessorPropertiesDefinitionDTO.class);
+				this.setProcessorProperties(propertiesDTO);
+			}
+		} catch (JAXBException | JsonMappingException | JsonParseException e) {
+			
+			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJSON, RemoteProcessorPropertiesDTO.class);
+			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
+			ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorPropertiesJSON(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
+			
+			// hanlding dynamic properties of already added processors
+			if (null != processor.getDynamicProperties()) {
+
+				ProcessorPropertyDTO propertyDTO = null;
+				for (ProcessorProperty property : processor.getDynamicProperties()) {
+					propertyDTO = new ProcessorPropertyDTO();
+					propertyDTO.setName(property.getProcsrPropName());
+					propertyDTO.setDisplayName(property.getProcsrPropName());
+					propertyDTO.setValue(property.getProcsrPropValue());
+					propertyDTO.setDynamic(true);
+					propertiesDTO.getStaticProperties().add(propertyDTO);
+				}
+			}			
+			this.setProcessorProperties(propertiesDTO);
+			
 		}
 
 		String status = processor.getProcsrStatus();
@@ -345,17 +381,6 @@ public class ProcessorDTO {
 				credentialDTO = new CredentialDTO();
 				credentialDTO.copyFromEntity(credential);
 				this.getCredentials().add(credentialDTO);
-			}
-		}
-
-		// Set properties
-		if (null != processor.getDynamicProperties()) {
-
-			PropertyDTO propertyDTO = null;
-			for (ProcessorProperty property : processor.getDynamicProperties()) {
-				propertyDTO = new PropertyDTO();
-				propertyDTO.copyFromEntity(property, false);
-				this.getDynamicProperties().add(propertyDTO);
 			}
 		}
 

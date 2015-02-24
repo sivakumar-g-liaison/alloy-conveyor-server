@@ -415,10 +415,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		profiles.add(profileName);
 		processorDTO.setLinkedProfiles(profiles);
 		
-		RemoteProcessorPropertiesDTO remoteProcessorProperties = new RemoteProcessorPropertiesDTO();
+		/*RemoteProcessorPropertiesDTO remoteProcessorProperties = new RemoteProcessorPropertiesDTO();
 		remoteProcessorProperties.setHttpListenerPipeLineId("HJRUIOIU8787HG");
 		remoteProcessorProperties.setSecuredPayload(true);
-		processorDTO.setRemoteProcessorProperties(remoteProcessorProperties);
+		processorDTO.setRemoteProcessorProperties(remoteProcessorProperties);*/
 		
 
 		if (isRevise) {

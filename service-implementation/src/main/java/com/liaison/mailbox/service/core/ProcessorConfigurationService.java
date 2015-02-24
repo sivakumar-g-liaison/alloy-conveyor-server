@@ -105,6 +105,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -336,9 +337,13 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public GetProcessorResponseDTO getProcessor(String mailBoxGuid, String processorGuid) throws JsonParseException,
-			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
@@ -823,8 +828,13 @@ public class ProcessorConfigurationService {
 	 * @param mailboxGuid
 	 * @param httpListenerType
 	 * @return a Map containing the HttpListenerSpecific Properties
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws MailBoxConfigurationServicesException 
 	 */
-	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) {
+	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Map <String, String>httpListenerProperties = new HashMap <String, String>();
 
@@ -853,8 +863,8 @@ public class ProcessorConfigurationService {
 				if (null != processorDTO) {
 
 					// retrieving the httplistener pipeline id from remote processor properties
-					String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
-					boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
+					String pipeLineId = ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_PIPELINEID);
+					boolean isSecuredPayload = Boolean.getBoolean(ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
 
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
 					//Commented by Veera -Not needed, because tenancy key format has changed as per service broker

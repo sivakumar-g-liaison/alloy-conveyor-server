@@ -1,0 +1,130 @@
+{
+   "processorDefinition":{
+      "type":"SWEEPER",
+      "displayName":"SWEEPER",
+      "protocol":"",
+      "handOverExecutionToJavaScript":false,
+      "staticProperties":[
+          {
+            "name":"add new -->",
+            "displayName" : "add new -->",
+            "value":"",
+            "type":"textarea",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic": true,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": null        
+            
+         },
+         {
+            "name":"pipelineId",
+            "displayName" : "pipelineId",
+            "value":"testpipeline",
+            "type":"textarea",
+            "readOnly":true,
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			  "maxLength": "2048"
+            }
+         },
+         {
+            "name":"securedPayload",
+            "displayName" : "securedPayload",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": null,
+            "options":["false","true"]
+             
+         },
+         {
+            "name":"deleteFileAfterSweep",
+            "displayName" : "deleteFileAfterSweep",
+            "value":"false",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": null,
+            "options":["false","true"]
+         },
+         {
+            "name":"fileRenameFormat",
+            "displayName" : "fileRenameFormat",
+            "value":"",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			   "maxLength": ""
+               "required":false
+            }
+         },
+         {
+            "name":"numOfFilesThreshold",
+            "displayName" : "numOfFilesThreshold",
+            "value":"10",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"10",
+            "validationRules":{
+               "pattern":"\/^\d+$\/",
+               "minLength": "",
+               "maxLength":"512",
+               "required":false
+            }
+         },
+         {
+            "name":"payloadSizeThreshold",
+            "displayName" : "payloadSizeThreshold",
+            "isDefaultValueProvided":true,
+            "value":"123456",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"123456",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+               "maxLength":"",
+               "required":false
+            }
+         },
+         {
+            "name":"sweepedFileLocation",
+            "displayName" : "sweepedFileLocation",
+            "value":"",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "isDefaultValueProvided":false,
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+               "maxLength":"",
+               "required":false
+            }
+         }
+      ]
+   }
+}
