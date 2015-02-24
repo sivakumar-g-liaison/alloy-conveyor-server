@@ -96,9 +96,9 @@ public interface MailBoxConstants {
 	public final static String ROLE_NAME = "MailboxAdmin";
 
 	// retrieval of httplistener specific properties
-	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
+	public static final String HTTPLISTENER_AUTH_CHECK = "httpListenerAuthCheckRequired";
 	public static final String HTTPLISTENER_PIPELINEID = "httpListenerPipeLineId";
-	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httplistenerpayload";
+	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
 	public static final String HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
 
 	// properties used to configure sla rules of an mailbox
@@ -186,4 +186,27 @@ public interface MailBoxConstants {
 
 	// added for self signed truststore
 	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
+	
+	// static properties
+	public static final String PROPERTY_URL = "url";
+	public static final String PROPERTY_PORT = "port";
+	public static final String PROPERTY_HTTP_VERSION = "httpVersion";
+	public static final String PROPERTY_HTTP_VERB = "httpVerb";
+	public static final String PROPERTY_CONTENT_TYPE = "contentType";
+	public static final String PROPERTY_CHUNKED_ENCODING = "chunkedEncoding";
+	public static final String PROPERTY_CONNECTION_TIMEOUT = "connectionTimeout";
+	public static final String PROPERTY_SOCKET_TIMEOUT = "socketTimeout";
+	public static final String PROPERTY_RETRY_ATTEMPTS = "retryAttempts";
+	public static final String PROPERTY_OTHER_REQUEST_HEADERS = "otherRequestHeaders";
+	public static final String PROPERTY_PASSIVE = "passive";
+	public static final String PROPERTY_BINARY = "binary";
+	public static final String PROPERTY_ERROR_FILE_LOCATION = "errorFileLocation";
+	public static final String PROPERTY_PROCESSED_FILE_LOCATION = "processedFileLocation";
+	public static final String PROPERTY_PIPELINEID = "pipelineId";
+	public static final String PROPERTY_DELETE_FILE_AFTER_SWEEP = "deleteFileAfterSweep";
+	public static final String PROPERTY_FILE_RENAME_FORMAT = "fileRenameFormat";
+	public static final String PROPERTY_NO_OF_FILES_THRESHOLD = "numOfFilesThreshold";
+	public static final String PROPERTY_PAYLOAD_SIZE_THRESHOLD = "payloadSizeThreshold";
+	public static final String PROPERTY_SWEEPED_FILE_LOCATION = "sweepedFileLocation";
+	
 }

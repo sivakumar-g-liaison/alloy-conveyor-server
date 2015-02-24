@@ -43,11 +43,13 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * Http remote downloader to perform pull operation, also it has support methods
@@ -76,7 +78,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		
 		try {			
 			// HTTPRequest executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
@@ -86,7 +88,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				executeRequest();
 			}
 			
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
 			throw new RuntimeException(e);
 		}
 	}
@@ -131,7 +133,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
-			    RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
+			    ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
 
 			    files = getFilesToUpload();
 				if (null != files) {
@@ -139,8 +141,9 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					for (File entry : files) {
 
 					    try (InputStream contentStream = FileUtils.openInputStream(entry)) {
-
-					        request.inputData(contentStream, remoteProcessorProperties.getContentType());
+					    	
+					    	String contentType = ProcessorPropertyJsonMapper.getProcessorProperty(processorProperties, MailBoxConstants.PROPERTY_CONTENT_TYPE);
+					        request.inputData(contentStream, contentType);
 
 		                    response = request.execute();
 		                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
@@ -170,7 +173,8 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		        writeResponseToMailBox(responseStream);
 			}
 
-		} catch(MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException e) {
+		} catch(MailBoxServicesException | IOException | JAXBException | LiaisonException 
+				| URISyntaxException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 

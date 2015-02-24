@@ -124,11 +124,18 @@ public class DropboxFileTransferService {
 
 				processorDTO = new ProcessorDTO();
 				processorDTO.copyFromEntity(processor);
-
-				// retrieving the httplistener pipeline id from remote processor
+				
+				ArrayList<String> propertyNames = new ArrayList<String>();
+				propertyNames.add(MailBoxConstants.HTTPLISTENER_PIPELINEID);
+				propertyNames.add(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD);
+				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorDTO.getProcessorProperties(), propertyNames);
+				
+				// retrieving the httplistener pipeline id  and secured payload properties from remote processor
 				// properties
-				String pipeLineId = ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_PIPELINEID);
-				boolean isSecuredPayload = Boolean.getBoolean(ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+				String pipeLineId = requiredProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
+				boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+
+
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
 				
@@ -139,7 +146,7 @@ public class DropboxFileTransferService {
 				
 				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 				workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
 				workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
 				
 				//set ttl value from mailbox property or else from property file

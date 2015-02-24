@@ -862,24 +862,24 @@ public class ProcessorConfigurationService {
 
 				if (null != processorDTO) {
 
-					// retrieving the httplistener pipeline id from remote processor properties
-					String pipeLineId = ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_PIPELINEID);
-					boolean isSecuredPayload = Boolean.getBoolean(ProcessorPropertyJsonMapper.getProcessorProperty(processorDTO, MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+					// retrieve required properties
+					ArrayList<String> propertyNames = new ArrayList<String>();
+					propertyNames.add(MailBoxConstants.HTTPLISTENER_PIPELINEID);
+					propertyNames.add(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD);
+					propertyNames.add(MailBoxConstants.HTTPLISTENER_AUTH_CHECK);
+					Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorDTO.getProcessorProperties(), propertyNames);
 
+					String pipeLineId = requiredProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
+					boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+					boolean authCheckRequired = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
+				
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
 					//Commented by Veera -Not needed, because tenancy key format has changed as per service broker
 					//httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());
-					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_AUTH_CHECK, String.valueOf(authCheckRequired));
 
 					if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
-
-					//retrieving httplistener authenctication check required property from dynamic properties of processor
-					for (PropertyDTO propertyDTO : processorDTO.getDynamicProperties()) {
-
-						if (propertyDTO.getName().equals(MailBoxConstants.HTTPLISTENER_AUTH_CHECK)) {
-							httpListenerProperties.put(propertyDTO.getName(), propertyDTO.getValue());
-						}
-					}
 					break;
 				}
 

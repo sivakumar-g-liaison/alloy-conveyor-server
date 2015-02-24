@@ -16,6 +16,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -34,11 +36,12 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author VNagarajan
@@ -57,16 +60,24 @@ public class FTPSClient {
 		try {
 
 			// Convert the json string to DTO
-			RemoteProcessorPropertiesDTO properties = processor.getProperties();
+			ProcessorPropertiesDefinitionDTO properties = processor.getProperties();
+			
+			// retrieve required properties
+			ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_URL);
+			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
+			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
+			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);
 
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
-			ftpsRequest.setURI(properties.getUrl());
+			ftpsRequest.setURI(requiredProperties.get(MailBoxConstants.PROPERTY_URL));
 			ftpsRequest.setDiagnosticLogger(LOGGER);
 			ftpsRequest.setCommandLogger(LOGGER);
-			ftpsRequest.setConnectionTimeout(properties.getConnectionTimeout());
+			ftpsRequest.setConnectionTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)).intValue());
 
-			ftpsRequest.setSocketTimeout(properties.getSocketTimeout());
-			ftpsRequest.setRetryCount(properties.getRetryAttempts());
+			ftpsRequest.setSocketTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT)).intValue());
+			ftpsRequest.setRetryCount(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS)).intValue());
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
@@ -111,7 +122,7 @@ public class FTPSClient {
 				| MailBoxServicesException | SymmetricAlgorithmException | CertificateException
 				| UnrecoverableKeyException | OperatorCreationException | KeyStoreException
 				| NoSuchAlgorithmException | JsonParseException | CMSException
-				| BootstrapingFailedException | JSONException e) {
+				| BootstrapingFailedException | JSONException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 

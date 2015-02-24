@@ -52,7 +52,6 @@ public class ProcessorDTO {
 	private String name;
 	@ApiModelProperty( value = "Processor type", required = true)
 	private String type;
-	//private RemoteProcessorPropertiesDTO remoteProcessorProperties;
 	private ProcessorPropertiesDefinitionDTO processorProperties;
 	private String javaScriptURI;
 	private String description;
@@ -319,39 +318,10 @@ public class ProcessorDTO {
 
 		String propertyJSON = processor.getProcsrProperties();
 		
-		// In order to provide backward compatability for older processor entities
-		// try to unmarshal the properties json with new class "ProcessorPropertiesDefinitionDTO"
-		// if the unmarshalling fails then try to unmarshal it with old class "RemoteProcessorPropertiesDTO"
-		try {
-			if (!MailBoxUtil.isEmpty(propertyJSON)) {
-
-				ProcessorPropertiesDefinitionDTO propertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJSON,
-						ProcessorPropertiesDefinitionDTO.class);
-				this.setProcessorProperties(propertiesDTO);
-			}
-		} catch (JAXBException | JsonMappingException | JsonParseException e) {
-			
-			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJSON, RemoteProcessorPropertiesDTO.class);
-			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
-			ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorPropertiesJSON(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
-			
-			// hanlding dynamic properties of already added processors
-			if (null != processor.getDynamicProperties()) {
-
-				ProcessorPropertyDTO propertyDTO = null;
-				for (ProcessorProperty property : processor.getDynamicProperties()) {
-					propertyDTO = new ProcessorPropertyDTO();
-					propertyDTO.setName(property.getProcsrPropName());
-					propertyDTO.setDisplayName(property.getProcsrPropName());
-					propertyDTO.setValue(property.getProcsrPropValue());
-					propertyDTO.setDynamic(true);
-					propertiesDTO.getStaticProperties().add(propertyDTO);
-				}
-			}			
-			this.setProcessorProperties(propertiesDTO);
-			
-		}
-
+		// set processor properties in DTO
+		ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorProperties(propertyJSON, processor);
+		this.setProcessorProperties(propertiesDTO);
+		
 		String status = processor.getProcsrStatus();
 		if (!MailBoxUtil.isEmpty(status)) {
 			MailBoxStatus foundStatus = MailBoxStatus.findByCode(status);

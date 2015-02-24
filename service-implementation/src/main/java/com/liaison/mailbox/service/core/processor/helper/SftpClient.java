@@ -15,6 +15,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -30,14 +32,17 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author VNagarajan
@@ -55,16 +60,24 @@ public class SftpClient {
 
 		try {
 
-			RemoteProcessorPropertiesDTO properties = processor.getProperties();
+			ProcessorPropertiesDefinitionDTO properties = processor.getProperties();
+			
+			// retrieve required properties
+			ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_URL);
+			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
+			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
+			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);
 
 			G2SFTPClient sftpRequest = new G2SFTPClient();
-			sftpRequest.setURI(properties.getUrl());
+			sftpRequest.setURI(requiredProperties.get(MailBoxConstants.PROPERTY_URL));
 			sftpRequest.setDiagnosticLogger(LOGGER);
 			sftpRequest.setCommandLogger(LOGGER);
-			sftpRequest.setTimeout(properties.getConnectionTimeout());
+			sftpRequest.setTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)).intValue());
 			sftpRequest.setStrictHostChecking(false);
-			sftpRequest.setRetryInterval(properties.getRetryInterval());
-			sftpRequest.setRetryCount(properties.getRetryAttempts());
+			//sftpRequest.setRetryInterval(properties.getRetryInterval());
+			sftpRequest.setRetryCount(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS)).intValue());
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
@@ -114,7 +127,7 @@ public class SftpClient {
 		} catch (JAXBException | IOException | LiaisonException | MailBoxServicesException
 				| SymmetricAlgorithmException | CertificateEncodingException | UnrecoverableKeyException
 				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException
-				| JSONException | CMSException | BootstrapingFailedException e) {
+				| JSONException | CMSException | BootstrapingFailedException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 

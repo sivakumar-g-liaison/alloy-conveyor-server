@@ -63,6 +63,7 @@ import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
@@ -110,16 +111,17 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			glassMessage.setProtocol(Protocol.SWEEPER.getCode());
 			glassMessage.setExecutionId(executionId);
 			glassMessage.setPipelineId(getPipeLineID());
+			
 			//GLASS LOGGING ENDS//
-
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			boolean handoverExecutionToJS = getProperties().isHandOverExecutionToJavaScript();
+			if (handoverExecutionToJS) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 			} else {
 				executeRequest();
 			}
-		} catch(JAXBException |IOException e) {
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -204,7 +206,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		}
 
 		} catch (MailBoxServicesException | IOException | URISyntaxException
-				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException | JSONException e) {
+				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException 
+				| JSONException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -365,9 +368,13 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws URISyntaxException
 	 * @throws JAXBException
 	 * @throws JsonParseException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public void markAsSweeped(List<WorkTicket> workTickets, String fileRenameFormat, String sweepedFileLocation)
-			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException {
+			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Path target = null;
 		Path oldPath = null;
@@ -387,16 +394,24 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
+			
+			// retrieve required properties
+			ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD);
+			propertyNames.add(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
 
+			boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+			boolean deleteAfterSweep = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP));
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
 				detail = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,
-						fs2Header, this.getProperties().isSecuredPayload());
+						fs2Header, securedPayload);
 				payloadToPersist.close();
 			}
 
-            if(this.getProperties().isDeleteFileAfterSweep()){
+            if(deleteAfterSweep){
             	LOGGER.debug("Deleting file after sweep");
             	 delete(oldPath);
              }else{

@@ -48,10 +48,12 @@ import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author OFS
@@ -63,7 +65,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	protected Processor configurationInstance;
 	public Properties mailBoxProperties;
-	public RemoteProcessorPropertiesDTO remoteProcessorProperties;
+	public ProcessorPropertiesDefinitionDTO processorProperties;
 
 	public AbstractProcessor() {
 	}
@@ -83,16 +85,20 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @return the remoteProcessorProperties
 	 * @throws IOException
 	 * @throws JAXBException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public RemoteProcessorPropertiesDTO getProperties() throws JAXBException, IOException {
+	public ProcessorPropertiesDefinitionDTO getProperties() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-		if (null == remoteProcessorProperties) {
-			remoteProcessorProperties = MailBoxUtil.unmarshalFromJSON(configurationInstance.getProcsrProperties(), RemoteProcessorPropertiesDTO.class);
+		if (null == processorProperties) {
+			processorProperties = ProcessorPropertyJsonMapper.retrieveProcessorProperties(configurationInstance.getProcsrProperties(), configurationInstance);
 		}
 
-		return remoteProcessorProperties;
+		return processorProperties;
 	}
 
 	/**

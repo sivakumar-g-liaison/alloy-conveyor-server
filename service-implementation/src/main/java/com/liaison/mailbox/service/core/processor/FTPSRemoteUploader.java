@@ -18,8 +18,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -44,9 +46,11 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  *
@@ -75,7 +79,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 			
 			// FTPSRequest executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
@@ -84,7 +88,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				executeRequest(executionId, fsm);
 			}
 			
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
 			throw new RuntimeException(e);
 		}
 		
@@ -124,11 +128,25 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			ftpsRequest.login();
 
 			//ftpsRequest.enableDataChannelEncryption();
-			if (getProperties() != null) {
+			
+			// retrieve required properties
+			ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			
+			if (processorProperties != null) {
+				
+				ArrayList<String> propertyNames = new ArrayList<String>();
+				propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
+				propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
+				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
 
-				ftpsRequest.setBinary(getProperties().isBinary());
-				ftpsRequest.setPassive(getProperties().isPassive());
+				boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
+				boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));
+			
+				ftpsRequest.setBinary(binary);
+				ftpsRequest.setPassive(passive);
+				
 			}
+
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given payload URI is Empty.");
@@ -151,7 +169,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm);
 			ftpsRequest.disconnect();
 
-		} catch (LiaisonException | JAXBException | IOException e) {
+		} catch (LiaisonException | JAXBException | IOException | NoSuchFieldException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -286,10 +304,22 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		ftpsRequest.login();
 
 		//ftpsRequest.enableDataChannelEncryption();
-		if (getProperties() != null) {
+		// retrieve required properties
+		ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+		
+		if (processorProperties != null) {
+			
+			ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
+			propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
 
-			ftpsRequest.setBinary(getProperties().isBinary());
-			ftpsRequest.setPassive(getProperties().isPassive());
+			boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
+			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));
+		
+			ftpsRequest.setBinary(binary);
+			ftpsRequest.setPassive(passive);
+			
 		}
 
 		String remotePath = getWriteResponseURI();

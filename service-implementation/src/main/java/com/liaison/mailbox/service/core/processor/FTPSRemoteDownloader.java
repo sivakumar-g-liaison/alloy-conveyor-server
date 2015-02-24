@@ -19,7 +19,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -38,6 +40,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -45,6 +48,7 @@ import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author OFS
@@ -69,7 +73,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	    try {
 
 		// FTPSRequest executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
@@ -77,7 +81,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				// FTPSRequest executed through Java
 				executeRequest();
 			}
-	   } catch(JAXBException |IOException e) {
+	   } catch(JAXBException |IOException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -114,12 +118,21 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			ftpsRequest.enableSessionReuse(true);
 			ftpsRequest.connect();
 			ftpsRequest.login();
-			//GMB-345 - Just a try
+			//GMB-345
 			//ftpsRequest.enableDataChannelEncryption();
+			
+			// retrieve required properties
+			ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
+			propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
+
+			boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
+			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));
 
 			if (getProperties() != null) {
-				ftpsRequest.setBinary(getProperties().isBinary());
-				ftpsRequest.setPassive(getProperties().isPassive());
+				ftpsRequest.setBinary(binary);
+				ftpsRequest.setPassive(passive);
 			}
 
 			String path = getPayloadURI();
@@ -151,7 +164,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			downloadDirectory(ftpsRequest, path, remotePath);
 			ftpsRequest.disconnect();
 
-		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException | URISyntaxException e) {
+		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException 
+				| URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}

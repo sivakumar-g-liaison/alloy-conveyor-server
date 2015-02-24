@@ -255,7 +255,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 			
 			// SFTPRequest executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
@@ -266,7 +266,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// SFTPRequest executed through Java
 				executeRequest(executionId, fsm);
 			}
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
 			throw new RuntimeException(e);
 		}
 	 }

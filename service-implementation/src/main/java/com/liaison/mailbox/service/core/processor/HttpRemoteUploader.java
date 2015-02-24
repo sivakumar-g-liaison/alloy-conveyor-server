@@ -19,7 +19,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -46,11 +48,13 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * Http remote uploader to perform push operation, also it has support methods for JavaScript.
@@ -102,12 +106,20 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		try {
 
-			RemoteProcessorPropertiesDTO remoteProcessorProperties = getProperties();
+			ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
 
 			// Set the pay load value to http client input data for POST & PUT request
 			File[] files = null;
-			if ("POST".equals(remoteProcessorProperties.getHttpVerb())
-					|| "PUT".equals(remoteProcessorProperties.getHttpVerb())) {
+			
+			// retrieve required properties
+			ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERB);
+			propertyNames.add(MailBoxConstants.PROPERTY_CONTENT_TYPE);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
+			String httpVerb = requiredProperties.get(MailBoxConstants.PROPERTY_HTTP_VERB);
+			String contentType = requiredProperties.get(MailBoxConstants.PROPERTY_CONTENT_TYPE);
+			
+			if ("POST".equals(httpVerb)	|| "PUT".equals(httpVerb)) {
 
 				files = getFilesToUpload();
 				if (null != files) {
@@ -136,8 +148,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 						    request = (HTTPRequest) getClient();
 		                    request.setOutputStream(responseStream);
-
-						    request.inputData(contentStream, remoteProcessorProperties.getContentType());
+						    request.inputData(contentStream, contentType);
 
 		                    response = request.execute();
 		                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
@@ -168,7 +179,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 					throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
 				}
 			}
-		} catch (JAXBException | IOException | LiaisonException e) {
+		} catch (JAXBException | IOException | LiaisonException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -198,7 +209,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 			
 			// HTTPRequest executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
@@ -207,7 +218,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 				executeRequest(executionId, fsm);
 			}
 			
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
 			throw new RuntimeException(e);
 		}
 		

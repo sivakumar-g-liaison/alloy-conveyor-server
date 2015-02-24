@@ -2,6 +2,9 @@ package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -11,9 +14,10 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
@@ -45,10 +49,30 @@ public class ProcessorPropertyJsonMapper {
 	 * @param propertyName
 	 * @return
 	 */
-	public static String getProcessorProperty(ProcessorDTO processorDTO, String propertyName) {
+	public static Map<String, String> getProcessorProperties(ProcessorPropertiesDefinitionDTO processorProperties, List<String> propertyNames) {
 		
 		String propertyValue = null;
-		for (ProcessorPropertyDTO property : processorDTO.getProcessorProperties().getStaticProperties()) {
+		HashMap<String, String> retrievedProperties = new HashMap<String, String>();
+		for (ProcessorPropertyDTO property : processorProperties.getStaticProperties()) {
+			if (propertyNames.contains(property.getName())) {
+				retrievedProperties.put(property.getName(), property.getValue());
+				LOGGER.debug("The property value is", propertyValue);
+			}
+		}
+		return retrievedProperties;
+	}
+	
+	/**
+	 * Method to retrieve specific processor property given name
+	 * 
+	 * @param processorDTO
+	 * @param propertyName
+	 * @return
+	 */
+	public static String getProcessorProperty(ProcessorPropertiesDefinitionDTO processorProperties, String propertyName) {
+		
+		String propertyValue = null;
+		for (ProcessorPropertyDTO property : processorProperties.getStaticProperties()) {
 			if (property.getName().equals(propertyName)) {
 				propertyValue = property.getValue();
 				LOGGER.debug("The property value is", propertyValue);
@@ -56,6 +80,42 @@ public class ProcessorPropertyJsonMapper {
 			}
 		}
 		return propertyValue;
+	}
+	
+	public static ProcessorPropertiesDefinitionDTO retrieveProcessorProperties(String propertyJson, Processor processor) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+		
+		ProcessorPropertiesDefinitionDTO propertiesDTO =  null;
+		
+		// In order to provide backward compatability for older processor entities
+		// try to unmarshal the properties json with new class "ProcessorPropertiesDefinitionDTO"
+		// if the unmarshalling fails then try to unmarshal it with old class "RemoteProcessorPropertiesDTO"
+		try {
+			if (!MailBoxUtil.isEmpty(propertyJson)) {
+
+				propertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, ProcessorPropertiesDefinitionDTO.class);
+
+			}
+		} catch (JAXBException | JsonMappingException | JsonParseException e) {
+			
+			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
+			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
+			propertiesDTO = retrieveProcessorPropertiesDTO(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
+			
+			// hanlding dynamic properties of already added processors
+			if (null != processor.getDynamicProperties()) {
+
+				ProcessorPropertyDTO propertyDTO = null;
+				for (ProcessorProperty property : processor.getDynamicProperties()) {
+					propertyDTO = new ProcessorPropertyDTO();
+					propertyDTO.setName(property.getProcsrPropName());
+					propertyDTO.setDisplayName(property.getProcsrPropName());
+					propertyDTO.setValue(property.getProcsrPropValue());
+					propertyDTO.setDynamic(true);
+					propertiesDTO.getStaticProperties().add(propertyDTO);
+				}
+			}			
+		}
+		return propertiesDTO;
 	}
 	
 	/**
@@ -75,7 +135,7 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static ProcessorPropertiesDefinitionDTO retrieveProcessorPropertiesJSON(RemoteProcessorPropertiesDTO remoteProcessorProperties, ProcessorType processorType,Protocol protocol ) throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public static ProcessorPropertiesDefinitionDTO retrieveProcessorPropertiesDTO(RemoteProcessorPropertiesDTO remoteProcessorProperties, ProcessorType processorType,Protocol protocol ) throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		
 		ProcessorPropertiesDefinitionDTO processorProperties = null;
 		String propertiesJson = null;
