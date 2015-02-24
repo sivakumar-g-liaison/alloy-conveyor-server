@@ -58,7 +58,7 @@
 		    "mandatory": false,
 		    "dynamic": false,
             "valueProvided":false,
-            "defaultValue":"",
+            "defaultValue":"false",
 			"validationRules": null,
 	        "options":["false","true"]
 	      },
@@ -118,7 +118,7 @@
 			"mandatory": true,
 			"dynamic": false,
             "valueProvided":false,
-            "defaultValue":"",
+            "defaultValue":"true",
             "validationRules": null,
             "options":["false","true"]
          },
@@ -130,7 +130,7 @@
 			"mandatory": false,
 			"dynamic": false,
             "valueProvided":false,
-            "defaultValue":"",
+            "defaultValue":"false",
             "validationRules": null,
             "options":["false","true"]
 		 }

@@ -124,7 +124,7 @@
 			 "dynamic": false,
              "valueProvided":false,
              "validationRules": null, 
-             "defaultValue":false,             
+             "defaultValue":"false",             
 			 "options":["false","true"]
 		  },
 		  {
@@ -143,22 +143,6 @@
 			  "maxLength": ""
 			}
          },
-		 {
-			"name": "encodingFormat",
-			"displayName": "Encoding Format",
-			"type": "textarea",
-			"value": "",
-			"readOnly": false,
-			"mandatory": false,
-			"dynamic": false,
-            "valueProvided":false,
-            "defaultValue":"",
-			"validationRules": {
-			  "pattern": "",
-			  "minLength": "",
-			  "maxLength": "512"
-			}
-         }, 
 		 {
 			"name": "retryAttempts",
 			"displayName": "Retry Attempts",

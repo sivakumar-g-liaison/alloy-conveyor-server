@@ -29,7 +29,7 @@
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
-            "defaultValue":"",
+            "defaultValue":"false",
             "validationRules": null,
             "options":["false","true"]           
         }

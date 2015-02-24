@@ -57,7 +57,7 @@
 	    "mandatory": false,
 	    "dynamic": false,
         "valueProvided":false,
-        "defaultValue":"",
+        "defaultValue":"false",
 		"validationRules": null,
         "options":["false","true"]
       },
@@ -75,22 +75,6 @@
           "pattern": "\/^([1-9][0-9]{0,3}|[1-5][0-9]{4}|60000)$\/",
 		  "minLength": "",
 		  "maxLength": ""
-        }
-      },
-      {
-        "name": "encodingFormat",
-        "displayName": "Encoding Format",
-        "type": "textarea",
-        "value": "",
-        "readOnly": false,
-	    "mandatory": false,
-	    "dynamic": false,
-        "valueProvided":false,
-        "defaultValue":"",
-        "validationRules": {
-          "pattern": "",
-		  "minLength": "",
-		  "maxLength": "512"
         }
       },
       {
