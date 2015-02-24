@@ -455,8 +455,6 @@ public class HttpListener extends AuditedResource {
 	 * Validates the global process id if it is available in the header and set in the workticket.
 	 * Generates new guid if it is not available
 	 *
-	 * Note: Method won't complain about the global process id if it is invalid
-	 *
 	 * @param workTicket
 	 * @param globalProcessId - got from request header.
 	 */
