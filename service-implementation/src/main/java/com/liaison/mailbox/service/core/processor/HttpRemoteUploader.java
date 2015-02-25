@@ -49,7 +49,6 @@ import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -158,13 +157,13 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 		                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
 
 		                        failedStatus = true;
-		                        delegateArchiveFile(entry, MailBoxConstants.ERROR_FILE_LOCATION, true);
+		                        delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
 		                        //continue;
 
 		                    } else {
 
 		                        if (null != entry) {
-		                            delegateArchiveFile(entry, MailBoxConstants.PROCESSED_FILE_LOCATION, false);
+		                            delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
 		                        }
 		                    }
 						}
@@ -192,10 +191,16 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @param locationName
 	 * @param isError
 	 * @throws IOException
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
-	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException {
+	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException, 
+							SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
-		String fileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(locationName));
+		String fileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), locationName));
 		if (MailBoxUtil.isEmpty(fileLocation)) {
 			archiveFile(file.getAbsolutePath(), isError);
 		} else {

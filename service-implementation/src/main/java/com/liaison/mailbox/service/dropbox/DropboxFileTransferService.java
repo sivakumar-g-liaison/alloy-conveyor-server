@@ -126,27 +126,27 @@ public class DropboxFileTransferService {
 				processorDTO.copyFromEntity(processor);
 				
 				ArrayList<String> propertyNames = new ArrayList<String>();
-				propertyNames.add(MailBoxConstants.HTTPLISTENER_PIPELINEID);
-				propertyNames.add(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD);
+				propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
+				propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
 				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorDTO.getProcessorProperties(), propertyNames);
 				
 				// retrieving the httplistener pipeline id  and secured payload properties from remote processor
 				// properties
-				String pipeLineId = requiredProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
-				boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+				String pipeLineId = requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
+				boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
 
 
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
 				
 				Map <String, String>properties = new HashMap <String, String>();
-				if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
+				if(!MailBoxUtil.isEmpty(pipeLineId)) properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
 				
 				workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(properties));
 				
 				workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 				workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+				workTicket.setAdditionalContext(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
 				workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
 				
 				//set ttl value from mailbox property or else from property file

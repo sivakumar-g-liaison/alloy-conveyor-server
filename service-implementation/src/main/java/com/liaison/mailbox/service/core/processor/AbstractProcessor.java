@@ -49,7 +49,6 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -365,7 +364,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	public Properties getCustomProperties() {
 
 		Properties properties = new Properties();
-
 		if (null != configurationInstance.getDynamicProperties()) {
 
 			for (ProcessorProperty property : configurationInstance.getDynamicProperties()) {

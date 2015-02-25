@@ -47,6 +47,7 @@ import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
@@ -136,7 +137,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			sftpRequest.disconnect();
 
 		} catch (LiaisonException | MailBoxServicesException | IOException
-				| SftpException | SymmetricAlgorithmException e) {
+				| SftpException | SymmetricAlgorithmException | NoSuchFieldException 
+				| SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -150,10 +152,15 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws SftpException
 	 * @throws MailBoxServicesException
 	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 *
 	 */
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, SftpException, MailBoxServicesException {
+			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -223,8 +230,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					// File Uploading done successfully so move the file to processed folder
 					if (replyCode == 0) {
 
-						String processedFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-								MailBoxConstants.PROCESSED_FILE_LOCATION));
+						String processedFileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION));
 						if (MailBoxUtil.isEmpty(processedFileLocation)) {
 							archiveFile(item.getAbsolutePath(), false);
 						} else {
@@ -233,8 +239,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					} else {
 
 						// File Uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-								MailBoxConstants.ERROR_FILE_LOCATION));
+						String errorFileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION));
 						if (MailBoxUtil.isEmpty(errorFileLocation)) {
 							archiveFile(item.getAbsolutePath(), true);
 						} else {
@@ -312,7 +317,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		G2SFTPClient sftpRequest = (G2SFTPClient)client;
 		try {
 			uploadDirectory(sftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException e) {
+		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException 
+				| NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
 			throw new RuntimeException(e);
 		}
 		

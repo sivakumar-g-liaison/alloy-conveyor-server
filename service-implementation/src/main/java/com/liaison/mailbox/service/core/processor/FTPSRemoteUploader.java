@@ -180,11 +180,16 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 * @throws SftpException
 	 *
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, MailBoxServicesException {
+			throws IOException, LiaisonException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -246,8 +251,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					// File Uploading done successfully so move the file to processed folder
 					if(replyCode == 226 || replyCode == 250) {
-						String processedFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-								MailBoxConstants.PROCESSED_FILE_LOCATION));
+						String processedFileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION));
 						if (MailBoxUtil.isEmpty(processedFileLocation)) {
 							archiveFile(item.getAbsolutePath(), false);
 						} else {
@@ -255,8 +259,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 						}
 					} else {
 						// File uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-								MailBoxConstants.ERROR_FILE_LOCATION));
+						String errorFileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION));
 						if (MailBoxUtil.isEmpty(errorFileLocation)) {
 							archiveFile(item.getAbsolutePath(), true);
 						} else {
@@ -351,7 +354,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException, SecurityException, 
+				IllegalArgumentException, IllegalAccessException, JAXBException {
 		G2FTPSClient ftpRequest = (G2FTPSClient)client;
 		try {
 			uploadDirectory(ftpRequest, localPayloadLocation, remoteTargetLocation, null, null);

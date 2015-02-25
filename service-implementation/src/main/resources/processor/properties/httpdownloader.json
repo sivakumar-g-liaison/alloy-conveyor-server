@@ -176,7 +176,7 @@
 			}
          },
          {
-			"name": "otherRequestHeaders",
+			"name": "otherRequestHeader",
 			"displayName": "other Request Headers",
 			"type": "textarea",
 			"value": "",

@@ -3,6 +3,7 @@ package com.liaison.mailbox.service.util;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -38,6 +40,10 @@ public class ProcessorPropertyJsonMapper {
 	public static final String FILE_WRITER_PROPERTIES_JSON = "processor/properties/fileWriter.json";
 	public static final String HTTP_LISTENER_PROPERTIES_JSON = "processor/properties/httpsyncAndAsync.json";
 	public static final String DROPBOX_PROCESSOR_PROPERTIES_JSON = "processor/properties/dropboxProcessor.json";
+	public static final String PROP_HANDOVER_EXECUTION_TO_JS = "handOverExecutionToJavaScript";
+	public static final String ADD_NEW_PROPERTY = "add new -->";
+	
+	private static Map <String, String> propertyMapper = new HashMap<String, String>();
 	
 	
 	
@@ -100,21 +106,9 @@ public class ProcessorPropertyJsonMapper {
 			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
 			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 			propertiesDTO = retrieveProcessorPropertiesDTO(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
-			
-			// hanlding dynamic properties of already added processors
-			if (null != processor.getDynamicProperties()) {
-
-				ProcessorPropertyDTO propertyDTO = null;
-				for (ProcessorProperty property : processor.getDynamicProperties()) {
-					propertyDTO = new ProcessorPropertyDTO();
-					propertyDTO.setName(property.getProcsrPropName());
-					propertyDTO.setDisplayName(property.getProcsrPropName());
-					propertyDTO.setValue(property.getProcsrPropValue());
-					propertyDTO.setDynamic(true);
-					propertiesDTO.getStaticProperties().add(propertyDTO);
-				}
-			}			
 		}
+		// handle dynamic properites also
+		handleDynamicProperties(processor, propertiesDTO);
 		return propertiesDTO;
 	}
 	
@@ -257,6 +251,9 @@ public class ProcessorPropertyJsonMapper {
 		
 		for (ProcessorPropertyDTO property : newProcessorPropertiesDto.getStaticProperties()) {
 			
+			if (property.getName().equals(ADD_NEW_PROPERTY)) {
+				continue;
+			}
 			Field field = oldProcessorPropertiesDto.getClass().getDeclaredField(property.getName());
 			String propertyValue = null;		
 			field.setAccessible(true);
@@ -264,8 +261,76 @@ public class ProcessorPropertyJsonMapper {
 			propertyValue = fieldValue.toString();
 			property.setValue(propertyValue);
 			
-		}		
+		}
+		
+		// handle handoverExecutionToJavascript from old processorproperties JSON
+		Field field = oldProcessorPropertiesDto.getClass().getDeclaredField(PROP_HANDOVER_EXECUTION_TO_JS);
+		field.setAccessible(true);
+		Object fieldValue = field.get(oldProcessorPropertiesDto);
+		newProcessorPropertiesDto.setHandOverExecutionToJavaScript(Boolean.getBoolean(fieldValue.toString()));
 		return newProcessorPropertiesDto;		
+	}
+	
+	/**
+	 * Method to retrieve the proper Name of dynamic Properties 
+	 * In older Implementation some properties like "nooffilesthreshold", "payloadsizethreshold", "filerenameformat"
+	 * "processedfilelocation", "errorfilelocation", "sweepedfilelocation", "httplistenerauthcheckrequired" are stored 
+	 * as dynamic properties but displayed to the user as static properties in dropdown. As per new implementation all properties which are
+	 * known priorly will be considered as static properties and the properties added by user through "addNew" will 
+	 * be considered as dynamic properties. The above mentioned properties needs to be mapped as static properties.
+	 * Those properties are in lowercase and needs to be converted to camel case. This method will return the camelCase version property Name
+	 * 
+	 * @param Name
+	 * @return String camelCase version of given propertyName
+	 */
+	private static String getPropertyNameOfDynamicProperty(String name) {
+		
+		if (propertyMapper.size() == 0) {
+			
+			propertyMapper.put(MailBoxConstants.HTTPLISTENER_AUTH_CHECK, MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK);
+			propertyMapper.put(MailBoxConstants.SWEEPED_FILE_LOCATION, MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
+			propertyMapper.put(MailBoxConstants.ERROR_FILE_LOCATION, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION);
+			propertyMapper.put(MailBoxConstants.PROCESSED_FILE_LOCATION, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION);
+			propertyMapper.put(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD, MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
+			propertyMapper.put(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD, MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
+			propertyMapper.put(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME, MailBoxConstants.PROPERTY_FILE_RENAME_FORMAT);
+		}
+		if (propertyMapper.keySet().contains(name)) {
+			return propertyMapper.get(name);
+		}
+		return name;		
+	}
+	
+	public static void handleDynamicProperties(Processor processor, ProcessorPropertiesDefinitionDTO propertiesDTO) {
+		
+		// hanlding dynamic properties of  processors
+		if (null != processor.getDynamicProperties()) {
+
+		    ProcessorPropertyDTO propertyDTO = null;
+		    for (ProcessorProperty property : processor.getDynamicProperties()) {
+		        propertyDTO = new ProcessorPropertyDTO();
+		        String propertyName = getPropertyNameOfDynamicProperty(property.getProcsrPropName());
+		        boolean isDynamic = (propertyMapper.keySet().contains(property.getProcsrPropName())) ? false : true;
+		        propertyDTO.setName(propertyName);
+		        propertyDTO.setDisplayName(propertyName);
+		        propertyDTO.setValue(property.getProcsrPropValue());
+		        propertyDTO.setDynamic(isDynamic);
+		        propertiesDTO.getStaticProperties().add(propertyDTO);
+		    }
+		}
+		
+	}
+	
+	public static void separateStaticAndDynamicProperties(List<ProcessorPropertyDTO> staticProperties, List<ProcessorPropertyDTO> dynamicProperties) {
+		
+		Iterator <ProcessorPropertyDTO> iterator = staticProperties.iterator();
+		while(iterator.hasNext()) {		
+			if (iterator.next().isDynamic()) {
+				iterator.remove();
+				dynamicProperties.add(iterator.next());
+			}
+		}
+		
 	}
 
 }

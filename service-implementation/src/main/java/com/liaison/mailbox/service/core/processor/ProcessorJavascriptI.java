@@ -101,6 +101,12 @@ public interface ProcessorJavascriptI {
 	 * Returns the list of custom properties of the processor known only to java script
 	 *
 	 * @return
+	 * @throws IOException 
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public Properties getCustomProperties();
 
@@ -162,6 +168,11 @@ public interface ProcessorJavascriptI {
 	
 	/**
 	 * Method to upload the file or folder for FTP/SFTP processor
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -169,7 +180,8 @@ public interface ProcessorJavascriptI {
 	 * @throws SftpException
 	 *
 	 */
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation);
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException, 
+						SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException;
 	
 	
 	/**

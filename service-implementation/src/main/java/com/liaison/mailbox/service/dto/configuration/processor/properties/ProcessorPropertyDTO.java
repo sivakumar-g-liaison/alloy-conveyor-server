@@ -2,6 +2,10 @@ package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 import java.util.List;
 
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
+import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+
 public class ProcessorPropertyDTO {
 	
 	private String name;
@@ -83,4 +87,18 @@ public class ProcessorPropertyDTO {
 		this.options = options;
 	}	
 
+	 /**
+     *  Copies name and value from property DTO to ProcessorProperty Entity. 
+     * 
+     * @param entity
+     *        The ProcessorProperty Entity
+     */
+	public void copyToEntity(Object entity) {
+
+		ProcessorProperty prop = (ProcessorProperty) entity;
+		prop.setPguid(MailBoxUtil.getGUID());
+		prop.setProcsrPropName(this.getName());
+		prop.setProcsrPropValue(this.getValue());
+
+	}
 }

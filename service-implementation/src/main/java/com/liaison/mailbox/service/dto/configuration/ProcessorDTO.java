@@ -31,7 +31,6 @@ import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
@@ -64,7 +63,6 @@ public class ProcessorDTO {
 	private List<String> linkedProfiles;
 	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
-	private List<PropertyDTO> dynamicProperties;
 	private List<ProfileDTO> profiles;
 
 	public ProcessorDTO() {
@@ -164,18 +162,6 @@ public class ProcessorDTO {
 		this.credentials = credentials;
 	}
 
-	public List<PropertyDTO> getDynamicProperties() {
-
-		if (dynamicProperties == null) {
-			dynamicProperties = new ArrayList<PropertyDTO>();
-		}
-		return dynamicProperties;
-	}
-
-	public void setDynamicProperties(List<PropertyDTO> dynamicProperties) {
-		this.dynamicProperties = dynamicProperties;
-	}
-
 	public List<String> getLinkedProfiles() {
 		return linkedProfiles;
 	}
@@ -227,10 +213,17 @@ public class ProcessorDTO {
 			processor.setPguid(MailBoxUtil.getGUID());
 			//processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
-
+		
 		ProcessorPropertiesDefinitionDTO propertiesDTO = this.getProcessorProperties();
+
+		// separate static and dynamic properties
+		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
+		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
+		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
+		
+		// set static properties into properties json to be stored in DB
 		if (null != propertiesDTO) {
-			String propertiesJSON = MailBoxUtil.marshalToJSON(this.getProcessorProperties());
+			String propertiesJSON = MailBoxUtil.marshalToJSON(staticPropertiesDTO);
 			processor.setProcsrProperties(propertiesJSON);
 		}
 
@@ -268,28 +261,26 @@ public class ProcessorDTO {
 		if (!credentialList.isEmpty()) {
 			processor.setCredentials(credentialList);
 		}
-
+		
 		// Setting the property
 		if (null != processor.getDynamicProperties()) {
 			processor.getDynamicProperties().clear();
 		}
 		ProcessorProperty property = null;
 		List<ProcessorProperty> properties = new ArrayList<>();
-		for (PropertyDTO propertyDTO : this.getDynamicProperties()) {
-
+		for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
 			property = new ProcessorProperty();
-			propertyDTO.copyToEntity(property, false);
+			propertyDTO.copyToEntity(property);;
 			properties.add(property);
 		}
 		if (!properties.isEmpty()) {
 			processor.setDynamicProperties(properties);
 		}
-
 		// Set the protocol
 		Protocol protocol = Protocol.findByName(this.getProtocol());
 		processor.setProcsrProtocol(protocol.getCode());
 		
-			// Set the status
+		// Set the status
 		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());
 		processor.setProcsrStatus(foundStatusType.value());
 
@@ -320,6 +311,7 @@ public class ProcessorDTO {
 		
 		// set processor properties in DTO
 		ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorProperties(propertyJSON, processor);
+		
 		this.setProcessorProperties(propertiesDTO);
 		
 		String status = processor.getProcsrStatus();

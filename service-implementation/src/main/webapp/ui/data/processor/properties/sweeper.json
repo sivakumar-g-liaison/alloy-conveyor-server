@@ -19,8 +19,8 @@
             
          },
          {
-            "name":"pipelineId",
-            "displayName" : "pipelineId",
+            "name":"pipeLineID",
+            "displayName" : "pipeLineID",
             "value":"testpipeline",
             "type":"textarea",
             "readOnly":true,

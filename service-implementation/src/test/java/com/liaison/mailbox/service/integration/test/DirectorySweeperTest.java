@@ -63,9 +63,13 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JAXBException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	@Test
-	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JAXBException {
+	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		String name = "Purchase.txt";
 		Path target = Paths.get(inbox + File.separator + name);
@@ -140,10 +144,14 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JAXBException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	@Test
 	public void testSweeperWithSpaceInFileName() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
-			JAXBException {
+			JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		String name = "Purchase Error.txt";
 		Path target = Paths.get(inbox + File.separator + name);
@@ -178,10 +186,14 @@ public class DirectorySweeperTest extends BaseServiceTest {
 	 * @throws FS2Exception
 	 * @throws JSONException
 	 * @throws JAXBException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	@Test
 	public void testMarkAsSweeped() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
-			JSONException, JAXBException {
+			JSONException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		String name = "Purchase Error.txt";
 		Path target = Paths.get(inbox + File.separator + name);

@@ -49,9 +49,6 @@ public interface MailBoxConstants {
 
 	public final static String GROUPING_JS_PROP_NAME = "filegroupingjspath";
 
-	public final static String FILE_RENAME_FORMAT_PROP_NAME = "filerenameformat";
-	public final static String SWEEPED_FILE_LOCATION = "sweepedfilelocation";
-	public final static String PROCESSED_FILE_LOCATION = "processedfilelocation";
 	public final static String LAST_MODIFIED_TOLERANCE = "last.modified.tolerance";
 
 	public final static String FOLDER_HEADER = "folderlocation";
@@ -67,9 +64,6 @@ public interface MailBoxConstants {
 	// processor name.
 	public final static String PROCESSOR = "PROCESSOR";
 
-	// Properties for sweeper grouping boundary condition
-	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
-	public final static String NUMER_OF_FILES_THRESHOLD = "numoffilesthreshold";
 
 	// Added for processing Mount Location from Folder Path given by User
 	public final static String MOUNT_LOCATION = "MOUNT_POINT";
@@ -77,7 +71,6 @@ public interface MailBoxConstants {
 
 	// Added for Error File Location
 	public final static String ERROR_FOLDER = "ERROR";
-	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
 
 	// Type of Credentials
 	public final static String TRUSTSTORE_CERT = "truststore_cert";
@@ -94,12 +87,6 @@ public interface MailBoxConstants {
 	public final static String PLATFORM_NAME = "SERVICE_BROKER";
 	public final static String SERVICE_NAME = "KEYMANAGER";
 	public final static String ROLE_NAME = "MailboxAdmin";
-
-	// retrieval of httplistener specific properties
-	public static final String HTTPLISTENER_AUTH_CHECK = "httpListenerAuthCheckRequired";
-	public static final String HTTPLISTENER_PIPELINEID = "httpListenerPipeLineId";
-	public static final String HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
-	public static final String HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
 
 	// properties used to configure sla rules of an mailbox
 	public final static String TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX = "timetopickupfilepostedtomailbox";
@@ -202,11 +189,26 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_BINARY = "binary";
 	public static final String PROPERTY_ERROR_FILE_LOCATION = "errorFileLocation";
 	public static final String PROPERTY_PROCESSED_FILE_LOCATION = "processedFileLocation";
-	public static final String PROPERTY_PIPELINEID = "pipelineId";
+	public static final String PROPERTY_PIPELINEID = "pipelineID";
 	public static final String PROPERTY_DELETE_FILE_AFTER_SWEEP = "deleteFileAfterSweep";
 	public static final String PROPERTY_FILE_RENAME_FORMAT = "fileRenameFormat";
 	public static final String PROPERTY_NO_OF_FILES_THRESHOLD = "numOfFilesThreshold";
 	public static final String PROPERTY_PAYLOAD_SIZE_THRESHOLD = "payloadSizeThreshold";
 	public static final String PROPERTY_SWEEPED_FILE_LOCATION = "sweepedFileLocation";
+	public static final String PROPERTY_HTTPLISTENER_AUTH_CHECK = "httpListenerAuthCheckRequired";
+	public static final String PROPERTY_HTTPLISTENER_PIPELINEID = "httpListenerPipeLineId";
+	public static final String PROPERTY_HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
+	public static final String PROPERTY_HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
+	
+	// Properties for sweeper grouping boundary condition
+	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
+	public final static String NUMBER_OF_FILES_THRESHOLD = "numoffilesthreshold";
+	public final static String FILE_RENAME_FORMAT_PROP_NAME = "filerenameformat";
+	public final static String SWEEPED_FILE_LOCATION = "sweepedfilelocation";
+	public final static String PROCESSED_FILE_LOCATION = "processedfilelocation";
+	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
+	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
+	
+	
 	
 }

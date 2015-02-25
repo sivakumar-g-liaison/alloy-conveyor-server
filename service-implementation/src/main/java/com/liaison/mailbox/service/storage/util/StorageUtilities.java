@@ -327,7 +327,7 @@ public class StorageUtilities {
 			FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
 			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist,
 					workTicket.getGlobalProcessId(), fs2Header,
-					Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
+					Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD)));
 			LOGGER.info("The received path uri is {} ", detail.getMetaSnapshot().getURI().toString());
 
 			workTicket.setPayloadSize( detail.getPayloadSize());
