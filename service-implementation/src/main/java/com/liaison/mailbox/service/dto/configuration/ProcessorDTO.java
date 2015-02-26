@@ -223,7 +223,7 @@ public class ProcessorDTO {
 		
 		// set static properties into properties json to be stored in DB
 		if (null != propertiesDTO) {
-			String propertiesJSON = MailBoxUtil.marshalToJSON(staticPropertiesDTO);
+			String propertiesJSON = MailBoxUtil.marshalToJSON(propertiesDTO);
 			processor.setProcsrProperties(propertiesJSON);
 		}
 
