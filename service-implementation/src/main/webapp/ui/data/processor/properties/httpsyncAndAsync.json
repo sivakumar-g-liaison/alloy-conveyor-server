@@ -24,7 +24,7 @@
          {
             "name":"securedPayload",
             "displayName" : "securedPayload",
-            "value":true,
+            "value":"true",
             "type":"select",
             "mandatory":true,
             "dynamic":false,

@@ -206,7 +206,7 @@
                         <label>
                             {{initialProcessorData.supportedProtocols.displayName}}
                         </label>
-                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor)" ng-model="processor.protocol" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
+                        <select id="mbx-procsr-type-protocol" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-change="resetProtocol(processor.protocol)" ng-model="processor.protocol" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
                         </select>
                     </div>
                 </div>
@@ -285,34 +285,11 @@
                 <div>
                     <h4>Properties</h4>
 
-                    <div class="gridStyle" ng-grid="gridOptionsForProcessor">
+                    <div class="gridStyle" ng-grid="gridOptionsTesting">
                     </div>
                 </div>
                 <br>
-            </div>
-
-            <div class="modal-custom fade" id="valueModal" role="dialog" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button id="mbx-procsr-properties-closeFile" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">Edit Value</h4>
-                        </div>
-                        <div class="modal-body">
-                            <div ui-ace="{onLoad : loadValueData,
-				  theme : 'monokai',
-				  useWrapMode : true,
-				  showGutter: true,
-				  mode: 'json'
-				}">
-                            </div>
-                            <div class="modal-footer">
-                                <button id="mbx-procsr-properties-close" type="button" class="btn btn-default" data-dismiss="modal" ng-click="close()">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </div>           
             <div class="form-group" ng-show="!isProcessorTypeDropbox">
                 <div>
                     <h4>Folders</h4>
@@ -474,22 +451,7 @@
                     </select>
                 </div>
               
-            </div>
-            
-           <div class="form-group">
-                <div>
-                    <h4>Testing</h4>
-
-                    <div class="gridStyle" ng-grid="gridOptionsTesting">
-                    </div>
-                </div>
-                <br>
-                 <div>
-                 <button id="mbx-procsr-save-test" class="btn btn-primary" ng-click="saveJson()">
-                    display json
-                </button>
-                </div>
-            </div>
+            </div>          
         </form>
         <div>
             <button id="mbx-procsr-backtoMailbox" class="btn btn-primary" data-toggle="modal" data-target="#backToMailboxAction">

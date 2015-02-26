@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -40,8 +40,8 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * 
- * 
+ *
+ *
  * @author OFS
  */
 @ApiModel(value = "processor")
@@ -194,7 +194,7 @@ public class ProcessorDTO {
 	/**
 	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
 	 * MailBoxSchedProfile and Processor. That step will be done in the service.
-	 * 
+	 *
 	 * @param processor
 	 *            The processor entity
 	 * @param isCreate
@@ -213,14 +213,14 @@ public class ProcessorDTO {
 			processor.setPguid(MailBoxUtil.getGUID());
 			//processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
-		
+
 		ProcessorPropertiesDefinitionDTO propertiesDTO = this.getProcessorProperties();
 
 		// separate static and dynamic properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
 		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
-		
+
 		// set static properties into properties json to be stored in DB
 		if (null != propertiesDTO) {
 			String propertiesJSON = MailBoxUtil.marshalToJSON(propertiesDTO);
@@ -230,7 +230,7 @@ public class ProcessorDTO {
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrName(this.getName());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
-	
+
 		// Setting the folders.
 		Folder folder = null;
 		List<Folder> folders = new ArrayList<>();
@@ -261,7 +261,7 @@ public class ProcessorDTO {
 		if (!credentialList.isEmpty()) {
 			processor.setCredentials(credentialList);
 		}
-		
+
 		// Setting the property
 		if (null != processor.getDynamicProperties()) {
 			processor.getDynamicProperties().clear();
@@ -279,7 +279,7 @@ public class ProcessorDTO {
 		// Set the protocol
 		Protocol protocol = Protocol.findByName(this.getProtocol());
 		processor.setProcsrProtocol(protocol.getCode());
-		
+
 		// Set the status
 		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());
 		processor.setProcsrStatus(foundStatusType.value());
@@ -288,7 +288,7 @@ public class ProcessorDTO {
 
 	/**
 	 * Copies the values from Entity to DTO.
-	 * 
+	 *
 	 * @param processor
 	 * @throws IOException
 	 * @throws JAXBException
@@ -296,10 +296,10 @@ public class ProcessorDTO {
 	 * @throws JsonParseException
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException,
 			MailBoxConfigurationServicesException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -308,12 +308,12 @@ public class ProcessorDTO {
 		this.setDescription(processor.getProcsrDesc());
 
 		String propertyJSON = processor.getProcsrProperties();
-		
+
 		// set processor properties in DTO
 		ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorProperties(propertyJSON, processor);
-		
+
 		this.setProcessorProperties(propertiesDTO);
-		
+
 		String status = processor.getProcsrStatus();
 		if (!MailBoxUtil.isEmpty(status)) {
 			MailBoxStatus foundStatus = MailBoxStatus.findByCode(status);

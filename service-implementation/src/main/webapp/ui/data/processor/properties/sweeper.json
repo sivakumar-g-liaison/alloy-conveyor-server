@@ -20,7 +20,7 @@
          },
          {
             "name":"pipeLineID",
-            "displayName" : "pipeLineID",
+            "displayName" : "PipelineId",
             "value":"testpipeline",
             "type":"textarea",
             "readOnly":true,
@@ -36,7 +36,7 @@
          },
          {
             "name":"securedPayload",
-            "displayName" : "securedPayload",
+            "displayName" : "SecuredPayload",
             "value":"true",
             "type":"select",
             "mandatory":true,
@@ -49,7 +49,7 @@
          },
          {
             "name":"deleteFileAfterSweep",
-            "displayName" : "deleteFileAfterSweep",
+            "displayName" : "DeleteFileAfterSweep",
             "value":"false",
             "type":"select",
             "mandatory":true,
@@ -61,7 +61,7 @@
          },
          {
             "name":"fileRenameFormat",
-            "displayName" : "fileRenameFormat",
+            "displayName" : "File Rename Format",
             "value":"",
             "type":"textarea",
             "mandatory":false,
@@ -71,13 +71,13 @@
             "validationRules":{
                "pattern":"",
                "minLength": "",
-			   "maxLength": ""
+			   "maxLength": "",
                "required":false
             }
          },
          {
             "name":"numOfFilesThreshold",
-            "displayName" : "numOfFilesThreshold",
+            "displayName" : "NumOfFilesThreshold",
             "value":"10",
             "type":"textarea",
             "mandatory":false,
@@ -85,7 +85,7 @@
             "valueProvided":false,
             "defaultValue":"10",
             "validationRules":{
-               "pattern":"\/^\d+$\/",
+               "pattern":"\/^\\d+$\/",
                "minLength": "",
                "maxLength":"512",
                "required":false
@@ -93,9 +93,9 @@
          },
          {
             "name":"payloadSizeThreshold",
-            "displayName" : "payloadSizeThreshold",
+            "displayName" : "PayloadSizeThreshold",
             "isDefaultValueProvided":true,
-            "value":"123456",
+            "value":"131072",
             "type":"textarea",
             "mandatory":false,
             "dynamic":false,
@@ -110,7 +110,7 @@
          },
          {
             "name":"sweepedFileLocation",
-            "displayName" : "sweepedFileLocation",
+            "displayName" : "SweepedFileLocation",
             "value":"",
             "type":"textarea",
             "mandatory":false,
