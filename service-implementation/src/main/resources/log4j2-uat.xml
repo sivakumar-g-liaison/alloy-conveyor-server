@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<configuration status="INFO"
+               packages="com.liaison.common.log4j2.plugins,com.liaison.commons.log4j2,net.logstash.logging.log4j2.core.layout,com.liaison.commons.audit.log4j2"
+               verbose="false"
+               monitorInterval="${sys:com.liaison.log4j2.configuration.refresh.interval.sec}">
+
+    <appenders>
+
+        <!--
+            LogStashSocket is a tcp socket dumping logstash spec 1.0 messages
+         you'll need to export LOGSTASHMACHINE=something and export LOGSTASHPORT=something
+         -->
+        <Socket name="LogStashSocket" host="${env:LOGSTASHMACHINE}" port="${env:LOGSTASHPORT}"
+                reconnectionDelay="500"
+                protocol="tcp"
+                ignoreExceptions="false">
+            <!-- exclude redundant log element -->
+            <LogStashJSONLayout excludeLog="true">
+
+                <!-- Provide ANY type of layout to expose the message, being mindful that if -->
+                <!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
+                <!-- produce a valid and escaped json element -->
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg"/>
+
+                <!-- helpful sort filter -->
+                <KeyValuePair key="layout" value="log4j2_event_json"/>
+
+
+                <!-- Archaius Properties -->
+                <KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
+                <KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
+                <KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
+                <KeyValuePair key="deployment_serverId" value="${sys:archaius.deployment.serverId}"/>
+                <KeyValuePair key="deployment_stack" value="${sys:archaius.deployment.stack}"/>
+                <KeyValuePair key="deployment_region" value="${sys:archaius.deployment.region}"/>
+
+                <!-- AppEnv set properties -->
+                <KeyValuePair key="host_ips" value="${env:HOST_IPS}"/>
+                <KeyValuePair key="hostname" value="${env:LOCAL_HOSTNAME}"/>
+                <KeyValuePair key="environment_user" value="${env:DAEMON_USER}"/>
+                <KeyValuePair key="login_user" value="${env:LOGIN_USER}"/>
+
+                <!-- jre properties -->
+                <KeyValuePair key="java_version" value="${sys:java.version}"/>
+
+            </LogStashJSONLayout>
+        </Socket>
+
+
+        <RollingFile name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
+                     filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <!-- exclude redundant log element -->
+            <LogStashJSONLayout excludeLog="true">
+
+                <!-- Provide ANY type of layout to expose the message, being mindful that if -->
+                <!-- subLayoutAsElement="true", your (likely custom) Layout will need to     -->
+                <!-- produce a valid and escaped json element -->
+                <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg"/>
+
+                <!-- helpful sort filter -->
+                <KeyValuePair key="layout" value="log4j2_event_json"/>
+
+
+                <!-- Archaius Properties -->
+                <KeyValuePair key="deployment_environment" value="${sys:archaius.deployment.environment}"/>
+                <KeyValuePair key="deployment_datacenter" value="${sys:archaius.deployment.datacenter}"/>
+                <KeyValuePair key="deployment_applicationId" value="${sys:archaius.deployment.applicationId}"/>
+                <KeyValuePair key="deployment_serverId" value="${sys:archaius.deployment.serverId}"/>
+                <KeyValuePair key="deployment_stack" value="${sys:archaius.deployment.stack}"/>
+                <KeyValuePair key="deployment_region" value="${sys:archaius.deployment.region}"/>
+
+                <!-- AppEnv set properties -->
+                <KeyValuePair key="host_ips" value="${env:HOST_IPS}"/>
+                <KeyValuePair key="hostname" value="${env:LOCAL_HOSTNAME}"/>
+                <KeyValuePair key="environment_user" value="${env:DAEMON_USER}"/>
+                <KeyValuePair key="login_user" value="${env:LOGIN_USER}"/>
+
+                <!-- jre properties -->
+                <KeyValuePair key="java_version" value="${sys:java.version}"/>
+
+            </LogStashJSONLayout>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+        </RollingFile>
+
+
+        <Failover name="LogStashFailover" primary="LogStashSocket">
+            <Failovers>
+                <AppenderRef ref="LogStashFailoverFile"/>
+            </Failovers>
+        </Failover>
+
+<!--
+        <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData">
+            <GSAMessageXMLLayout/>
+            <filters>
+                <MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+        </GSAMessageLENS>
+        
+         <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData">
+             <GSAMessageXMLLayout />
+             <filters>
+                 <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
+             </filters>
+         </GSAMessageLENS>
+
+
+        <GlassMessageSpectrum name="GlassMessageSpectrumREST"
+                              ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
+                              password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
+                              sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="630720000"
+                              dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}">
+            <GlassMessageJSONLayout compact="true"/>
+            <filters>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
+                              onMismatch="DENY"/>
+            </filters>
+        </GlassMessageSpectrum>
+
+
+        <GlassMessageSpectrum name="MetricsGMSpectrumAppender"
+                              ip="${env:GLASS_METRIC_IP}" port="${env:GLASS_METRIC_PORT}"
+                              password="${env:GLASS_METRIC_PASSWORD}" username="${env:GLASS_METRIC_USER}"
+                              dataSpaceName="${env:GLASS_METRIC_DATASPACE}" sourceName="${env:GLASS_METRIC_SOURCE_NAME}"
+                              messageTTL="630720000" dataObjectName="${env:GLASS_METRIC_DATAOBJECTNAME}">
+            <GlassMessageJSONLayout compact="true"/>
+            <filters>
+                <MarkerFilter marker="METRICS_GM_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+        </GlassMessageSpectrum>
+-->
+
+       <File name="FileSyslogLogFile" fileName="/var/log/tomcat/filesyslog.log" append="true" >
+        <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
+        <filters>
+        <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+        </filters>
+       </File>
+        
+
+
+       <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
+       <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+       </Console>
+        
+     </appenders>
+
+    <loggers>
+	     <root level="DEBUG">
+	     	 <!-- logstash
+	     	  Note: Ignore innocuous logged line "ERROR appender Failover has no parameter that matches element Failovers" during startup, this is actually normal.
+	     	  -->
+	    	<appender-ref ref="LogStashFailover"/>
+	    	
+	               
+            <!--  logs MessageBus popped messages -->
+            <!--  <appender-ref ref="MBPopLogFile" /> -->
+         
+	        <!-- logs to console (not necessarily for production) -->
+	        <appender-ref ref="Console" /> 
+	       
+	        <!-- logs syslog formatted audit messages to local file (not for production) -->
+            <appender-ref ref="FileSyslogLogFile" />
+<!--
+             <appender-ref ref="OrgGSALENSAppender"/>
+
+             <appender-ref ref="PairwiseGSALENSAppender" />
+-->
+	     </root>
+	</loggers>
+</configuration>
