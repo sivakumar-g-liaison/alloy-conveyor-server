@@ -105,8 +105,13 @@ public class HttpListener extends AuditedResource {
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	protected static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+	protected static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
 
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
+
+	private static final int GLOBAL_PROCESS_ID_MINLENGTH = 3;
+	private static final int GLOBAL_PROCESS_ID_MAXLENGTH = 32;
+	private static final String GLOBAL_PROCESS_ID_PATTERN = "^[a-zA-Z0-9]*$";
 
 	public HttpListener() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
@@ -199,7 +204,6 @@ public class HttpListener extends AuditedResource {
 					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
-
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
@@ -381,109 +385,6 @@ public class HttpListener extends AuditedResource {
 
 	}
 
-	/**
-	 * This method will create workTicket by given request.
-	 *
-	 * @param request
-	 * @param mailboxPguid
-	 * @param httpListenerProperties
-	 * @return WorkTicket
-	 */
-/*	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
-		WorkTicket workTicket = new WorkTicket();
-		workTicket.setAdditionalContext("httpMethod", request.getMethod());
-		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
-		workTicket.setAdditionalContext("httpRemotePort", request.getRemotePort());
-		workTicket.setAdditionalContext("httpCharacterEncoding", (request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
-		workTicket.setAdditionalContext("httpRemoteUser", (request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
-		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
-		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
-		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
-		workTicket.setAdditionalContext("httpContentType", request.getContentType());
-		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
-		copyRequestHeadersToWorkTicket(request, workTicket);
-		assignGlobalProcessId(workTicket);
-		assignTimestamp(workTicket);
-
-		return workTicket;
-	}
-
-	/**
-	 * Copies all the request header from HttpServletRequest to WorkTicket.
-	 *
-	 * @param request
-	 *        HttpServletRequest
-	 * @param request
-	 *        workTicket
-	 *
-	 */
-	/*protected void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)	{
-
-		Enumeration<String> headerNames = request.getHeaderNames();
-		while (headerNames.hasMoreElements())
-		{
-			String headerName = headerNames.nextElement();
-			List<String> headerValues = new ArrayList<>();
-			Enumeration<String> values = request.getHeaders(headerName);
-
-			while (values.hasMoreElements())
-			{
-				headerValues.add(values.nextElement());
-			}
-
-			workTicket.addHeaders(headerName,  headerValues);
-		}
-
-	}
-
-	/**
-	 * This method will set globalProcessId to workTicket.
-	 *
-	 * @param workTicket
-	 */
-	/*protected void assignGlobalProcessId(WorkTicket workTicket) {
-		UUIDGen uuidGen = new UUIDGen();
-		String uuid = uuidGen.getUUID();
-		workTicket.setGlobalProcessId(uuid);
-	}
-
-	protected void assignTimestamp(WorkTicket workTicket) {
-		workTicket.setCreatedTime(new Date());
-	}
-
-	/**
-	 * This method will persist payload in spectrum.
-	 *
-	 * @param request
-	 * @param workTicket
-	 * @throws IOException
-	 */
-	/*protected void storePayload(HttpServletRequest request,
-			WorkTicket workTicket, Map <String, String> httpListenerProperties) throws Exception {
-
-	  try (InputStream payloadToPersist = request.getInputStream()) {
-
-              FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-              PayloadDetail payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
-                            fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-              logger.info("The received path uri is {} ", (payloadDetail.getMetaSnapshot().getURI().toString()));
-
-              workTicket.setPayloadSize(payloadDetail.getPayloadSize());
-              workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
-	    }
-	}
-
-	protected void constructMetaDataJson(HttpServletRequest request,
-			WorkTicket workTicket) throws Exception {
-		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
-		postToQueue(workTicketJson);
-	}
-
-	protected void postToQueue(String message) throws Exception {
-        SweeperQueue.getInstance().sendMessages(message);
-        logger.debug("HttpListener postToQueue, message: {}", message);
-
-	}*/
 
 	/**
 	 * This method will persist payload in spectrum.
@@ -541,6 +442,7 @@ public class HttpListener extends AuditedResource {
 	 *
 	 * @param httpResponse
 	 * @param builder
+	 * @param globalProcessId
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 * @throws JAXBException
@@ -558,6 +460,8 @@ public class HttpListener extends AuditedResource {
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}
+			//set global process id in the header
+			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
 
 			//If payload URI avail, reads payload from spectrum. Mostly it would be an error message payload
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
@@ -592,6 +496,8 @@ public class HttpListener extends AuditedResource {
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}
+			//set global process id in the header
+			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
 
 			//reads paylaod from spectrum
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {

@@ -158,8 +158,7 @@ public interface MailBoxConstants {
 	public static final String PAYLOAD_LOCATION = "payload";
 	public static final String RESPONSE_LOCATION = "response";
 	public static final String FILEWRITE_LOCATION = "file write";
-	public static final String COMMON_LOCATION = "payload or file write";
-	
+	public static final String COMMON_LOCATION = "payload or file write";	
 	// added for Dropbox file transfer
 	public static final String UM_AUTH_TOKEN = "um-auth-token";
 	public static final String LOGIN_ID = "loginId";
@@ -201,4 +200,5 @@ public interface MailBoxConstants {
 	
 	public static final String PAGING_OFFSET = "pagingoffset";
 	public static final String PAGING_COUNT = "pagingcount";
+
 }
