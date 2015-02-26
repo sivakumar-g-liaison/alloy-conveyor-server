@@ -94,7 +94,7 @@ public class DropboxStagedFilesService {
 		pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
 		startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
 		count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-		serviceResponse.setTotalItems(count);
+		serviceResponse.setTotalItems(totalCount);
 		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, fileName, startOffset, count, sortField, sortDirection);
 
 		if (stagedFiles.isEmpty()) {
