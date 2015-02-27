@@ -147,7 +147,8 @@ public interface MailBoxConstants {
 	public static final String PAYLOAD_LOCATION = "payload";
 	public static final String RESPONSE_LOCATION = "response";
 	public static final String FILEWRITE_LOCATION = "file write";
-	public static final String COMMON_LOCATION = "payload or file write";	
+	public static final String COMMON_LOCATION = "payload or file write";
+
 	// added for Dropbox file transfer
 	public static final String UM_AUTH_TOKEN = "um-auth-token";
 	public static final String LOGIN_ID = "loginId";
@@ -162,7 +163,7 @@ public interface MailBoxConstants {
 
 	public static final int AUTH_SUCCESS_CODE = 200;
 	public static final int AUTH_FAILURE_CODE = 401;
-	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;	
+	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;
 	public static final String TTL = "ttl";
 	public static final String TTL_UNIT = "ttlunit";
 	public static final String DROPBOX_PAYLOAD_TTL_DAYS = "com.liaison.dropbox.payload.ttl.days";
@@ -178,7 +179,7 @@ public interface MailBoxConstants {
 	//charsetname
 	public static final String CHARSETNAME = "UTF-8";
 	public final static String TOKEN_SEPARATOR = "::";
-	
+
 	public static final String DUMMY_MANIFEST_USAGE_PROPERTY = "use.dummy.manifest.as.backup";
 	public static final String DUMMY_MANIFEST_PROPERTY = "dummy.acl.manifest.json";
 	public static final String REQUEST_HEADER = "Request Header";
@@ -186,7 +187,6 @@ public interface MailBoxConstants {
 
 	// added for self signed truststore
 	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
-	
 
 	// static properties
 	public static final String PROPERTY_URL = "url";
@@ -213,7 +213,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_HTTPLISTENER_PIPELINEID = "httpListenerPipeLineId";
 	public static final String PROPERTY_HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
 	public static final String PROPERTY_HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
-	
+
 	// Properties for sweeper grouping boundary condition
 	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
 	public final static String NUMBER_OF_FILES_THRESHOLD = "numoffilesthreshold";
@@ -222,10 +222,13 @@ public interface MailBoxConstants {
 	public final static String PROCESSED_FILE_LOCATION = "processedfilelocation";
 	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
 	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
-	
-	public static final String ADD_NEW_PROPERTY = "add new -->";	
+
+	public static final String ADD_NEW_PROPERTY = "add new -->";
 
 	public static final String PAGING_OFFSET = "pagingoffset";
 	public static final String PAGING_COUNT = "pagingcount";
+
+
+	public static final String PORT_PROPERTY = "port";
 
 }

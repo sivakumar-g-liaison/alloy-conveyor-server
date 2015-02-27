@@ -712,19 +712,21 @@ var rest = myApp.controller(
                         $scope.availableProperties.push(property);
                     }
 				}
-                $scope.propertiesAddedToProcessor.push({
-                	
-                    "name":"",
-                    "displayName" : "",
-                    "value":"",
-                    "type":"textarea",
-                    "readOnly":"",
-                    "mandatory":false,
-                    "dynamic":false,
-                    "valueProvided":false,
-                    "validationRules": {}
-                 });            
-
+                if ($scope.processor.protocol.value !== 'FILEWRITER') {
+                	$scope.propertiesAddedToProcessor.push({
+                    	
+                        "name":"",
+                        "displayName" : "",
+                        "value":"",
+                        "type":"textarea",
+                        "readOnly":"",
+                        "mandatory":false,
+                        "dynamic":false,
+                        "valueProvided":false,
+                        "validationRules": {}
+                     });               	
+                }
+                
 				
 				//var json_data = data.getProcessorResponse.processor.processorPropertiesInTemplateJson;
 				//$scope.propertiesAddedToProcessorpush(data.getProcessorResponse.processor.processorPropertiesInTemplateJson);						

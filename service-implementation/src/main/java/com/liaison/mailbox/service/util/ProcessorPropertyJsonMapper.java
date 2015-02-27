@@ -2,7 +2,6 @@ package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,11 +98,11 @@ public class ProcessorPropertyJsonMapper {
 		return propertyValue;
 	}
 
-	
+
 	/**
 	 * Method to retrieve staticproperties in format stored in Template JSON (ie ProcessorPropertiesDefinitionDTO) from the properties JSON stored in DB
 	 * This method will convert the json to ProcessorPropertiesDefinitionDTO format even if it is in older format (RemoteProcessorPropertiesDTO)
-	 * 
+	 *
 	 * @param propertyJson
 	 * @param processor
 	 * @return
@@ -115,20 +114,20 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws JAXBException
 	 */
 	public static ProcessorPropertiesDefinitionDTO retrieveProcessorPropertiesAsInJsonTemplate(String propertyJson, Processor processor) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-		
+
 		ProcessorPropertiesDefinitionDTO processorPropertyDefinitionInJsonTemplate =  null;
-		
+
 		// In order to provide backward compatability for older processor entities
 		// try to unmarshal the properties json with new class "ProcessorPropertiesDefinitionDTO"
 		// if the unmarshalling fails then try to unmarshal it with old class "RemoteProcessorPropertiesDTO"
 		try {
 			if (!MailBoxUtil.isEmpty(propertyJson)) {
-				
+
 				Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 				// unmarshal json from DB to staticProcessorPropertiesDTO object
-				StaticProcessorPropertiesDTO staticProcessorPropertiesDTOInDB = getStaticProcessorPropertiesDTOFromJson(propertyJson, processor.getProcessorType(), protocol);				
+				StaticProcessorPropertiesDTO staticProcessorPropertiesDTOInDB = getStaticProcessorPropertiesDTOFromJson(propertyJson, processor.getProcessorType(), protocol);
 				// retrieve actual JSON template from the staticProcessorPropertiesDTO object
-				processorPropertyDefinitionInJsonTemplate = ProcessorPropertyJsonMapper.retireveProcessorPropertiesDefinitionDTOFromStaticPropertiesDTOObject(staticProcessorPropertiesDTOInDB, processor.getProcessorType(), protocol);	
+				processorPropertyDefinitionInJsonTemplate = ProcessorPropertyJsonMapper.retireveProcessorPropertiesDefinitionDTOFromStaticPropertiesDTOObject(staticProcessorPropertiesDTOInDB, processor.getProcessorType(), protocol);
 
 			}
 		} catch (JAXBException | JsonMappingException | JsonParseException e) {
@@ -141,11 +140,11 @@ public class ProcessorPropertyJsonMapper {
 		handleDynamicProperties(processor, processorPropertyDefinitionInJsonTemplate);
 		return processorPropertyDefinitionInJsonTemplate;
 	}
-	
+
 	/**
 	 * Method to retrieve staticproperties in format stored in DB (ie StaticProcessorPropertiesDTO) from the properties JSON stored in DB
 	 * This method will convert the json to StaticProcessorPropertiesDTO format even if it is in older format (RemoteProcessorPropertiesDTO)
-	 * 
+	 *
 	 * @param propertyJson
 	 * @param processor
 	 * @return
@@ -157,27 +156,27 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalAccessException
 	 */
 	public static StaticProcessorPropertiesDTO getStaticProcessorPropertiesFromJson(String propertyJson, Processor processor) throws IOException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		StaticProcessorPropertiesDTO staticProcessorProperties = null;
-		
+
 		try {
 			staticProcessorProperties = MailBoxUtil.unmarshalFromJSON(propertyJson, StaticProcessorPropertiesDTO.class);
-			
+
 		} catch (JAXBException | JsonMappingException | JsonParseException e) {
-			
+
 			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
 			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 			staticProcessorProperties = retrieveStaticProcessorPropertyDTOFromRemoteProcessorPropertiesDTO(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
 			handleDynamicProperties(staticProcessorProperties, processor);
 		}
 		return staticProcessorProperties;
-		
+
 	}
-	
-	private static StaticProcessorPropertiesDTO getStaticProcessorPropertiesDTOFromJson(String propertyJson, ProcessorType processorType, Protocol protocol) throws JsonParseException, JsonMappingException, JAXBException, IOException {	
+
+	private static StaticProcessorPropertiesDTO getStaticProcessorPropertiesDTOFromJson(String propertyJson, ProcessorType processorType, Protocol protocol) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		 switch(processorType) {
-		 
+
 		 case REMOTEDOWNLOADER:
 			switch (protocol) {
 
@@ -224,23 +223,23 @@ public class ProcessorPropertyJsonMapper {
 
 			}
 			break;
-		 case SWEEPER:			 
+		 case SWEEPER:
 			SweeperPropertiesDTO sweeperPropertiesDTOInDB = MailBoxUtil.unmarshalFromJSON(propertyJson, SweeperPropertiesDTO.class);
 			return sweeperPropertiesDTOInDB;
-			
-		 case DROPBOXPROCESSOR:			
+
+		 case DROPBOXPROCESSOR:
 			DropboxProcessorPropertiesDTO dropboxProcessorPropertiesDTOInDB = MailBoxUtil.unmarshalFromJSON(propertyJson, DropboxProcessorPropertiesDTO.class);
 			return dropboxProcessorPropertiesDTOInDB;
-			
-		 case HTTPASYNCPROCESSOR:			
+
+		 case HTTPASYNCPROCESSOR:
 			HTTPListenerPropertiesDTO httpAsyncProcessorPropertiesDTOInDB = MailBoxUtil.unmarshalFromJSON(propertyJson, HTTPListenerPropertiesDTO.class);
 			return httpAsyncProcessorPropertiesDTOInDB;
-		
-		 case HTTPSYNCPROCESSOR:			
+
+		 case HTTPSYNCPROCESSOR:
 			HTTPListenerPropertiesDTO httpSyncProcessorPropertiesDTOInDB = MailBoxUtil.unmarshalFromJSON(propertyJson, HTTPListenerPropertiesDTO.class);
 			return httpSyncProcessorPropertiesDTOInDB;
-			
-		 case FILEWRITER :			
+
+		 case FILEWRITER :
 			FileWriterPropertiesDTO fileWriterPropertiesDTOInDB = MailBoxUtil.unmarshalFromJSON(propertyJson, FileWriterPropertiesDTO.class);
 			return fileWriterPropertiesDTOInDB;
 		 }
@@ -266,37 +265,37 @@ public class ProcessorPropertyJsonMapper {
 	 */
 
 	public static ProcessorPropertiesDefinitionDTO retrieveProcessorPropertiesDTO(RemoteProcessorPropertiesDTO remoteProcessorProperties, ProcessorType processorType, Protocol protocol ) throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		ProcessorPropertiesDefinitionDTO processorProperties = buildProcessorPropertiesDefinitionDTOFromTemplateJson(processorType, protocol);
 		processorProperties = buildPropertiesDTOByMappingValuesFromOlderFormat(processorProperties, remoteProcessorProperties);
 		return processorProperties;
 
 	}
-	
+
 	public static ProcessorPropertiesDefinitionDTO buildProcessorPropertiesDefinitionDTOFromTemplateJson(ProcessorType processorType, Protocol protocol) throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		ProcessorPropertiesDefinitionDTO processorProperties = null;
 		String propertiesJson = null;
 
 		switch(processorType) {
 			case REMOTEDOWNLOADER:
 				switch (protocol) {
-	
+
 				case FTPS:
 					propertiesJson = ServiceUtils.readFileFromClassPath(FTPS_DOWNLOADER_PROPERTIES_JSON);
 					processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertiesDefinitionDTO.class);
 					break;
-	
+
 				case FTP:
 					propertiesJson = ServiceUtils.readFileFromClassPath(FTP_DOWNLOADER_PROPERTIES_JSON);
 					processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertiesDefinitionDTO.class);
 					break;
-	
+
 				case SFTP:
 					propertiesJson = ServiceUtils.readFileFromClassPath(SFTP_DOWNLOADER_PROPERTIES_JSON);
 					processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertiesDefinitionDTO.class);
 					break;
-	
+
 				case HTTP:
 					propertiesJson = ServiceUtils.readFileFromClassPath(HTTP_DOWNLOADER_PROPERTIES_JSON);
 					processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertiesDefinitionDTO.class);
@@ -307,13 +306,13 @@ public class ProcessorPropertyJsonMapper {
 					break;
 				default:
 					break;
-	
+
 				}
 				break;
 			case REMOTEUPLOADER:
-	
+
 				switch (protocol) {
-	
+
 				case FTPS:
 					propertiesJson = ServiceUtils.readFileFromClassPath(FTPS_UPLOADER_PROPERTIES_JSON);
 					processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertiesDefinitionDTO.class);
@@ -336,7 +335,7 @@ public class ProcessorPropertyJsonMapper {
 					break;
 				default:
 					break;
-	
+
 				}
 				break;
 			case SWEEPER:
@@ -435,10 +434,10 @@ public class ProcessorPropertyJsonMapper {
 		return name;
 	}
 
-	
+
 	/**
 	 * Method to handle dynamic properties
-	 * 
+	 *
 	 * @param processor
 	 * @param propertiesDTO
 	 */
@@ -466,7 +465,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to separate static and dynamic properties
-	 * 
+	 *
 	 * @param staticProperties
 	 * @param dynamicProperties
 	 */
@@ -480,16 +479,16 @@ public class ProcessorPropertyJsonMapper {
 		staticProperties.removeAll(dynamicProperties);
 
 	}
-	
-	/**Method to retrieve StaticProcessorProperitesDTO from staticProperties in template json 
-	 * 
-	 * 
+
+	/**Method to retrieve StaticProcessorProperitesDTO from staticProperties in template json
+	 *
+	 *
 	 * @param staticProperties
 	 * @param processorType
 	 * @param protocol
-	 * 
+	 *
 	 * @return StaticProcessorProperitesDTO
-	 * 
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws JAXBException
@@ -504,7 +503,7 @@ public class ProcessorPropertyJsonMapper {
 		StaticProcessorPropertiesDTO propertiesDTO = null;
 
 		 switch(processorType) {
-		 
+
 		 case REMOTEDOWNLOADER:
 			switch (protocol) {
 
@@ -551,7 +550,7 @@ public class ProcessorPropertyJsonMapper {
 			case HTTP:
 				propertiesDTO = new HTTPUploaderPropertiesDTO();
 				retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
-				break;				
+				break;
 			case HTTPS:
 				propertiesDTO = new HTTPUploaderPropertiesDTO();
 				retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
@@ -561,71 +560,73 @@ public class ProcessorPropertyJsonMapper {
 
 			}
 			break;
-		 case SWEEPER:			 
+		 case SWEEPER:
 			propertiesDTO = new SweeperPropertiesDTO();
 			retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
 			break;
-			
-		 case DROPBOXPROCESSOR:			
+
+		 case DROPBOXPROCESSOR:
 			propertiesDTO = new DropboxProcessorPropertiesDTO();
 			retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
 			break;
-			
-		 case HTTPASYNCPROCESSOR:			
+
+		 case HTTPASYNCPROCESSOR:
 			propertiesDTO = new HTTPListenerPropertiesDTO();
 			retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
 			break;
-		
-		 case HTTPSYNCPROCESSOR:			
+
+		 case HTTPSYNCPROCESSOR:
 			propertiesDTO = new HTTPListenerPropertiesDTO();
 			retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
 			break;
-			
-		 case FILEWRITER :			
+
+		 case FILEWRITER :
 			propertiesDTO = new FileWriterPropertiesDTO();
 			retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(staticProperties, propertiesDTO);
 			break;
 		 }
 		return propertiesDTO;
-			
+
 		}
-	
+
 	/**
-	 * Method to retrieve the static properties DTO after mapping static properties in JSON template 
-	 * 
+	 * Method to retrieve the static properties DTO after mapping static properties in JSON template
+	 *
 	 * @param staticPropertiesInTemplateJson
 	 * @param staticPropertiesDTO
 	 * @return
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
 	 */
 	private static StaticProcessorPropertiesDTO retrieveStaticPropertiesDTOAfterMappingFromTemplateJsonProperties(List<ProcessorPropertyDTO> staticPropertiesInTemplateJson, StaticProcessorPropertiesDTO staticPropertiesDTO) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		for (ProcessorPropertyDTO property : staticPropertiesInTemplateJson) {
-			
+
 			if (property.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
 				continue;
 			}
-			Field field = staticPropertiesDTO.getClass().getDeclaredField(property.getName());	
+			Field field = staticPropertiesDTO.getClass().getDeclaredField(property.getName());
 			field.setAccessible(true);
 			String propertyValue = property.getValue();
-			if (field.getType().equals(Boolean.class)) {
+			if (field.getType().equals(Boolean.TYPE)) {
 				field.setBoolean(staticPropertiesDTO, Boolean.valueOf(propertyValue));
-			} else if (field.getType().equals(Integer.class)) {
-				field.setInt(staticPropertiesDTO, Integer.valueOf(propertyValue).intValue());
+			} else if (field.getType().equals(Integer.TYPE)) {
+				if (!MailBoxUtil.isEmpty(propertyValue)) {
+					field.setInt(staticPropertiesDTO, Integer.valueOf(propertyValue).intValue());
+				}
 			} else if (field.getType().equals(String.class)){
 				field.set(staticPropertiesDTO, propertyValue);
 			}
-		}	
+		}
 		return staticPropertiesDTO;
-		
+
 	}
-	
+
 	/**
 	 * Method to retrieve ProcessorPropertyDefinitionDTO from StaticPropertiesDTOObject
-	 * 
+	 *
 	 * @param staticPropertyDto
 	 * @param type
 	 * @param protocol
@@ -634,47 +635,53 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
 	public static ProcessorPropertiesDefinitionDTO retireveProcessorPropertiesDefinitionDTOFromStaticPropertiesDTOObject(StaticProcessorPropertiesDTO staticPropertyDto, ProcessorType type, Protocol protocol) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JsonParseException, JsonMappingException, JAXBException, IOException {
-		
+
 		ProcessorPropertiesDefinitionDTO processorPropertyDTOInTemplateJson = buildProcessorPropertiesDefinitionDTOFromTemplateJson(type, protocol);
 		processorPropertyDTOInTemplateJson.setHandOverExecutionToJavaScript(staticPropertyDto.isHandOverExecutionToJavaScript());
 		buildStaticPropertiesInJsonTemplateFormatAfterMappingFromStaticPropertiesDTO(staticPropertyDto, processorPropertyDTOInTemplateJson);
 		return processorPropertyDTOInTemplateJson;
 	}
-	
-	
+
+
 	/**
 	 * Method to retrieve list of static properties from staticPropertiesDTO object
-	 * 
+	 *
 	 * @param staticPropertiesDTO
 	 * @return list of static properties
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
 	 */
 	private static void buildStaticPropertiesInJsonTemplateFormatAfterMappingFromStaticPropertiesDTO (StaticProcessorPropertiesDTO staticPropertiesDTO, ProcessorPropertiesDefinitionDTO processorPropertiesDefinitionDto) throws IllegalArgumentException, IllegalAccessException, JsonParseException, JsonMappingException, NoSuchFieldException, SecurityException, JAXBException, IOException {
 
 		for (ProcessorPropertyDTO staticProperty : processorPropertiesDefinitionDto.getStaticProperties()) {
-			
+
 			if (staticProperty.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
 				continue;
+			}
+			if (staticProperty.getName().equals(MailBoxConstants.PORT_PROPERTY) && !MailBoxUtil.isEmpty(staticProperty.getValue())) {
+				staticProperty.setReadOnly(true);
 			}
 			Field field = staticPropertiesDTO.getClass().getDeclaredField(staticProperty.getName());
 			field.setAccessible(true);
 			Object fieldValue = field.get(staticPropertiesDTO);
 			String propertyValue = fieldValue.toString();
 			boolean isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
-			if (fieldValue instanceof Integer) {
+			if (field.getType().equals(Boolean.TYPE)) {
+				isValueAvailable =(Boolean.valueOf(propertyValue).equals(true)?true:false);
+			}
+			else if(field.getType().equals(Integer.TYPE)) {
 				if (Integer.parseInt(propertyValue) == 0) {
 					propertyValue = "";
 					isValueAvailable = false;
@@ -682,18 +689,18 @@ public class ProcessorPropertyJsonMapper {
 					propertyValue = fieldValue.toString();
 					isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
 				}
-			}	
+			}
 			staticProperty.setValue(propertyValue);
 			staticProperty.setValueProvided(isValueAvailable);
 		}
 	}
-	
+
 	private static StaticProcessorPropertiesDTO retrieveStaticProcessorPropertyDTOFromRemoteProcessorPropertiesDTO(RemoteProcessorPropertiesDTO remoteProcessorProperties, ProcessorType processorType, Protocol protocol) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		StaticProcessorPropertiesDTO propertiesDTO = null;
 
 		 switch(processorType) {
-		 
+
 		 case REMOTEDOWNLOADER:
 			switch (protocol) {
 
@@ -703,19 +710,19 @@ public class ProcessorPropertyJsonMapper {
 				break;
 			case FTP:
 				propertiesDTO = new FTPDownloaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			case SFTP:
 				propertiesDTO = new SFTPDownloaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			case HTTP:
 				propertiesDTO = new HTTPDownloaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			case HTTPS:
 				propertiesDTO = new HTTPDownloaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			default:
 				break;
@@ -727,61 +734,61 @@ public class ProcessorPropertyJsonMapper {
 
 			case FTPS:
 				propertiesDTO = new FTPUploaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			case FTP:
 				propertiesDTO = new FTPUploaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			case SFTP:
 				propertiesDTO = new SFTPUploaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			case HTTP:
 				propertiesDTO = new HTTPUploaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
-				break;				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
+				break;
 			case HTTPS:
 				propertiesDTO = new HTTPUploaderPropertiesDTO();
-				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);				
+				buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 				break;
 			default:
 				break;
 
 			}
 			break;
-		 case SWEEPER:			 
+		 case SWEEPER:
 			propertiesDTO = new SweeperPropertiesDTO();
-			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);			
+			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 			break;
-			
-		 case DROPBOXPROCESSOR:			
+
+		 case DROPBOXPROCESSOR:
 			propertiesDTO = new DropboxProcessorPropertiesDTO();
-			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);			
+			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 			break;
-			
-		 case HTTPASYNCPROCESSOR:			
+
+		 case HTTPASYNCPROCESSOR:
 			propertiesDTO = new HTTPListenerPropertiesDTO();
-			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);			
+			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 			break;
-		
-		 case HTTPSYNCPROCESSOR:			
+
+		 case HTTPSYNCPROCESSOR:
 			propertiesDTO = new HTTPListenerPropertiesDTO();
-			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);			
+			buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(remoteProcessorProperties, propertiesDTO);
 			break;
-			
-		 case FILEWRITER :			
+
+		 case FILEWRITER :
 			propertiesDTO = new FileWriterPropertiesDTO();
 			break;
 		 }
 		return propertiesDTO;
-		
+
 	}
-	
+
 	private static void buildStaticProcessorPropertiesByMappingValuesFromRemoteProcessorPropertiesDTO(RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO, StaticProcessorPropertiesDTO staticProcessorPropertiesDTO) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		for (Field field : staticProcessorPropertiesDTO.getClass().getDeclaredFields()) {
-			
+
 			Field fieldInOldJson = remoteProcessorPropertiesDTO.getClass().getDeclaredField(field.getName());
 			field.setAccessible(true);
 			fieldInOldJson.setAccessible(true);
@@ -789,23 +796,23 @@ public class ProcessorPropertyJsonMapper {
 			if (field.getName().equals(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS)) {
 				List <HttpOtherRequestHeaderDTO> otherRequestHeaders = (List<HttpOtherRequestHeaderDTO>)propertyValue;
 				propertyValue = handleOtherRequestHeaders(otherRequestHeaders);
-			} 
-			field.set(staticProcessorPropertiesDTO, propertyValue);		
+			}
+			field.set(staticProcessorPropertiesDTO, propertyValue);
 		}
-	
+
 	}
-	
+
 	private static String handleOtherRequestHeaders(List <HttpOtherRequestHeaderDTO> otherRequestHeaders) {
 		StringBuilder otherRequestHeader = new StringBuilder();
 		for (HttpOtherRequestHeaderDTO header : otherRequestHeaders) {
-			otherRequestHeader.append(header.getName()).append(":").append(header.getValue()).append(",");			
+			otherRequestHeader.append(header.getName()).append(":").append(header.getValue()).append(",");
 		}
 		String otherRequestHeaderStr = otherRequestHeader.toString();
 		return otherRequestHeaderStr.substring(0, otherRequestHeaderStr.length() - 2);
 	}
-	
+
 	private static void handleDynamicProperties(StaticProcessorPropertiesDTO staticProcessorPropertiesDTO, Processor processor) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		
+
 		if (null != processor.getDynamicProperties()) {
 
 		    for (ProcessorProperty property : processor.getDynamicProperties()) {
@@ -826,5 +833,5 @@ public class ProcessorPropertyJsonMapper {
 		    }
 		}
 	}
-	
+
 }

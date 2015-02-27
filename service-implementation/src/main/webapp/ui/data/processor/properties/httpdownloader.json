@@ -40,7 +40,7 @@
 			"type": "textarea",
 			"value": "",
 			"readOnly": false,
-			"mandatory": true,
+			"mandatory": false,
 			"dynamic": false,
             "valueProvided":false,
             "defaultValue":"",

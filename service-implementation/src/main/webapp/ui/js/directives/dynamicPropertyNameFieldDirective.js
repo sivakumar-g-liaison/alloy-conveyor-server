@@ -28,7 +28,7 @@ angular.module(
                  scope.handleReadOnlyProperty = function() { 
                  
                     switch(scope.currentRowObject.name) {
-                        case 'pipelineId':
+                        case 'pipeLineID':
                         scope.currentRowObject.value = $rootScope.pipelineId;
                         break;
                         case 'httpListenerPipeLineId':

@@ -50,7 +50,7 @@
          {
             "name":"deleteFileAfterSweep",
             "displayName" : "DeleteFileAfterSweep",
-            "value":"false",
+            "value":"true",
             "type":"select",
             "mandatory":true,
             "dynamic":false,
@@ -71,8 +71,7 @@
             "validationRules":{
                "pattern":"",
                "minLength": "",
-			   "maxLength": "",
-               "required":false
+			   "maxLength": ""
             }
          },
          {
@@ -87,14 +86,12 @@
             "validationRules":{
                "pattern":"\/^\\d+$\/",
                "minLength": "",
-               "maxLength":"512",
-               "required":false
+               "maxLength":"512"
             }
          },
          {
             "name":"payloadSizeThreshold",
             "displayName" : "PayloadSizeThreshold",
-            "isDefaultValueProvided":true,
             "value":"131072",
             "type":"textarea",
             "mandatory":false,
@@ -104,8 +101,7 @@
             "validationRules":{
                "pattern":"",
                "minLength": "",
-               "maxLength":"",
-               "required":false
+               "maxLength":""               
             }
          },
          {
@@ -117,12 +113,10 @@
             "dynamic":false,
             "valueProvided":false,
             "defaultValue":"",
-            "isDefaultValueProvided":false,
             "validationRules":{
                "pattern":"",
                "minLength": "",
-               "maxLength":"",
-               "required":false
+               "maxLength":""               
             }
          }
       ]
