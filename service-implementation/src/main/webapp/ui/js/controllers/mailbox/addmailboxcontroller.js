@@ -1,5 +1,16 @@
 var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filter', '$location', '$log', '$modal', '$blockUI', '$http',
     function ($rootScope, $scope, $filter, $location, $log, $modal, $blockUI, $http) {
+	
+		$scope.ttlDropdownValues = [
+			{"name":"Seconds","id":"seconds"},
+			{"name":"Minutes","id":"minutes"},
+			{"name":"Hours","id":"hours"},
+			{"name":"Days","id":"days"},
+			{"name":"Months","id":"months"},
+			{"name":"Years","id":"years"}
+		];
+		
+		$scope.ttlUnit = $scope.ttlDropdownValues[0];
 
         //Remove if not needed
         $scope.isMailBoxEdit = false;
@@ -91,6 +102,15 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         	 });               
         };
         $scope.getTenancyKeys();
+		
+		function selectTTLUnit(selectedTTLValue) {
+			for(var i = 0; i < $scope.ttlDropdownValues.length; i++) {
+				if($scope.ttlDropdownValues[i].name === selectedTTLValue) {
+					$scope.ttlUnit = $scope.ttlDropdownValues[i];
+					break;
+				}
+			}
+		}
         
         // Loads the details initially if edit
         $scope.load = function () {
@@ -128,6 +148,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 $scope.mailBox.tenancyKey = data.getMailBoxResponse.mailBox.tenancyKey;
                                 $scope.mailBoxProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
                                 for (var i = 0; i < data.getMailBoxResponse.mailBox.properties.length; i++) {
+								
+									if(data.getMailBoxResponse.mailBox.properties[i].name === "ttlunit") {
+										selectTTLUnit(data.getMailBoxResponse.mailBox.properties[i].value);
+										continue;
+									}
                                 					                          
                                     var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet,
                                         data.getMailBoxResponse.mailBox.properties[i].name);
@@ -166,6 +191,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         	block.blockUI();
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
             var len = $scope.mailBoxProperties.length;
+			
+			$scope.mailBox.properties.push({
+				name: "ttlunit",
+				value: $scope.ttlUnit.name
+			});
 
             for (var i = 0; i < len - 1; i++) {
                 var index =  getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
@@ -332,6 +362,14 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                             <div ng-switch-when="emailnotificationids">\n\
            										 <textarea class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=null" ng-input="COL_FIELD" name="emailnotificationids" style="width:94%;height: 45px" placeholder="required"/>\n\
                                             </div>\n\
+											<div ng-switch-when="ttl">\n\
+												<div class="input-group col-md-5">\n\
+													<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
+													<div class="input-group-btn">\n\
+														<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+													</div>\n\
+												</div>\n\
+											</div>\n\
                                             <div ng-switch-default>\n\
                                                 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:94%;height:45px" placeholder="required"/>\n\
                                             </div>\n\
@@ -353,7 +391,16 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
      								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedbymailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
      								 	<div ng-show="formAddMbx.timetopickupfilepostedbymailbox.$dirty && formAddMbx.timetopickupfilepostedbymailbox.$invalid">\n\
      								 		<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
-     								 	</div></div>\n\
+     								 	</div>\n\
+									</div>\n\
+									<div ng-switch-when="ttl">\n\
+										<div class="input-group col-md-5">\n\
+											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
+											<div class="input-group-btn">\n\
+												<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
+											</div>\n\
+										</div>\n\
+									</div>\n\
      							  <div ng-switch-default>\n\
                                         <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\
                                     </div>\n\
@@ -490,4 +537,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 			$scope.isEnable = true;			
         };
         
+		
+		$scope.onTTLUnitChanged = function(ttl) {
+			selectTTLUnit(ttl.name);
+		};
 }]);

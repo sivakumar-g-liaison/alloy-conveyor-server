@@ -3,14 +3,15 @@ package com.liaison.mailbox.service.dropbox;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
@@ -38,8 +39,8 @@ public class DropboxStagedFilesService {
 	public static final String STAGED_FILE = "Staged File";
 
 	/**
-	 * Method to retrieve all staged files of the mailboxes linked to
-	 * tenancykeys available in the manifest
+	 * Method to retrieve all staged files of the mailboxes linked to tenancy
+	 * keys available in the manifest
 	 * 
 	 * @param request
 	 * @param aclManifest
@@ -47,10 +48,15 @@ public class DropboxStagedFilesService {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public GetStagedFilesResponseDTO getStagedFiles(HttpServletRequest request, String aclManifest) throws IOException,
-			JAXBException {
+	public GetStagedFilesResponseDTO getStagedFiles(String aclManifest, String fileName, String page, String pageSize,
+			String sortField, String sortDirection) throws IOException, JAXBException {
 		
 		LOG.debug("Entering into get staged files service.");
+		
+		int totalCount = 0;
+		int startOffset = 0;
+		int count = 0;
+		Map <String, Integer> pageOffsetDetails = null;
 
 		GetStagedFilesResponseDTO serviceResponse = new GetStagedFilesResponseDTO();
 		List<StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
@@ -60,7 +66,7 @@ public class DropboxStagedFilesService {
 		// retrieve the tenancy key from acl manifest
 		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
 		if (tenancyKeys.isEmpty()) {
-			LOG.error("retrieval of tenancy key from acl manifest failed");
+			LOG.error("Retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
 
@@ -82,9 +88,14 @@ public class DropboxStagedFilesService {
 					Response.Status.NOT_FOUND);
 		}
 
-		// retrieve all staged files of mailboxes.
+		// retrieve searched staged files of mailboxes.
 		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
-		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds);
+		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, fileName);
+		pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
+		startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
+		count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
+		serviceResponse.setTotalItems(totalCount);
+		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, fileName, startOffset, count, sortField, sortDirection);
 
 		if (stagedFiles.isEmpty()) {
 			LOG.info("There are no staged files available for linked mailboxes");
@@ -99,9 +110,9 @@ public class DropboxStagedFilesService {
 
 		serviceResponse.setResponse(new ResponseDTO(Messages.RETRIEVE_SUCCESSFUL, STAGED_FILES, Messages.SUCCESS));
 		serviceResponse.setStagedFiles(stagedFileDTOs);
-		
+
 		LOG.debug("Exit from get staged files service.");
-		
+
 		return serviceResponse;
 	}
 

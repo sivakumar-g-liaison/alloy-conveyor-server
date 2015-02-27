@@ -406,7 +406,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		Path target = null;
 		Path oldPath = null;
 		Path newPath = null;
-		PayloadDetail detail = null;
+		PayloadDetail payloadDetail = null;
+
 
 		if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
 			target = Paths.get(sweepedFileLocation);
@@ -421,29 +422,18 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
 			String globalProcessId  = MailBoxUtil.getGUID();
 			workTicket.setGlobalProcessId(globalProcessId);
-			
-			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
-			propertyNames.add(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
 
-			boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
-			boolean deleteAfterSweep = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP));*/
+			Map <String, String>properties = new HashMap <String, String>();
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)this.getProperties();
+			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
 			
-			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
-						
-			boolean securedPayload = sweeperStaticProperties.isSecuredPayload();
-			boolean deleteAfterSweep = sweeperStaticProperties.isDeleteFileAfterSweep();
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
-				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
-				detail = StorageUtilities.persistPayload(payloadToPersist, globalProcessId,
-						fs2Header, securedPayload);
+				payloadDetail = StorageUtilities.persistPayload(payloadToPersist,workTicket, properties, false);
 				payloadToPersist.close();
 			}
 
-            if(deleteAfterSweep){
+            if(sweeperStaticProperties.isDeleteFileAfterSweep()){
             	LOGGER.debug("Deleting file after sweep");
             	 delete(oldPath);
              }else{
@@ -452,10 +442,12 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
             }
 			//GSB-1353- After discussion with Joshua and Sean
-			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
+			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
+
 		}
 
 		LOGGER.info("Renaming the processed files - done");
+
 
 	}
 

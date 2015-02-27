@@ -13,7 +13,6 @@ package com.liaison.mailbox.service.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,8 +71,6 @@ public class MailBoxConfigurationService {
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationService.class);
 	private static final String MAILBOX = "Mailbox";
 
-	private static String PAGING_OFFSET = "pagingoffset";
-	private static String PAGING_COUNT = "pagingcount";
 	/**
 	 * Creates Mail Box.
 	 *
@@ -493,26 +490,23 @@ public class MailBoxConfigurationService {
 			if (!MailBoxUtil.isEmpty(profName)) {
 
 				totalCount = configDao.getMailboxCountByProtocol(mbxName, profName, tenancyKeyGuids);
-				pageOffsetDetails = getPagingOffsetDetails(page, pageSize, totalCount);
-				startOffset = pageOffsetDetails.get(PAGING_OFFSET);
-				count = pageOffsetDetails.get(PAGING_COUNT);
+				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
+				startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
+				count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 				retrievedMailBoxes = configDao.find(mbxName, profName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 
-			} else if (MailBoxUtil.isEmpty(profName) && !MailBoxUtil.isEmpty(mbxName)) {
+			} else {
 
 				// If the profile name is empty it will use findByName
 				totalCount = configDao.getMailboxCountByName(mbxName, tenancyKeyGuids);
-				pageOffsetDetails = getPagingOffsetDetails(page, pageSize, totalCount);
-				startOffset = pageOffsetDetails.get(PAGING_OFFSET);
-				count = pageOffsetDetails.get(PAGING_COUNT);
+				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
+				startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
+				count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 				retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
-
-			} else if (MailBoxUtil.isEmpty(profName) && MailBoxUtil.isEmpty(mbxName)) {
-				throw new MailBoxConfigurationServicesException(Messages.INVALID_DATA, Response.Status.BAD_REQUEST);
 			}
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
@@ -605,46 +599,5 @@ public class MailBoxConfigurationService {
 			return serviceResponse;
 		}
 
-	}
-
-	/**
-	 * Method to get pagingOffsetDetails
-	 * @param page
-	 * @param pageSize
-	 * @param totalCount
-	 * @return Map
-	 */
-	private Map<String, Integer> getPagingOffsetDetails(String page, String pageSize, int totalCount) {
-
-		Map <String, Integer> pageParameters = new HashMap<String, Integer>();
-		//Calculate page size parameters
-		Integer pageValue = 1;
-		Integer pageSizeValue = 10;
-		if (page != null && !page.isEmpty()) {
-			pageValue = Integer.parseInt(page);
-			if (pageValue < 0) {
-				pageValue = 1;
-			}
-		}
-		if (pageSize != null && !pageSize.isEmpty()) {
-			pageSizeValue = Integer.parseInt(pageSize);
-			if (pageSizeValue < 0) {
-				pageSizeValue = 10;
-			}
-		}
-
-		Integer fromIndex = (pageValue - 1) * pageSizeValue;
-		pageParameters.put(PAGING_OFFSET, fromIndex);
-
-		if(page != null && pageSize != null) {
-			int toIndex = fromIndex + pageSizeValue;
-			if (toIndex > totalCount) {
-				toIndex = (totalCount - fromIndex);
-			} else {
-				toIndex = pageSizeValue;
-			}
-			pageParameters.put(PAGING_COUNT, toIndex);
-		}
-		return pageParameters;
 	}
 }

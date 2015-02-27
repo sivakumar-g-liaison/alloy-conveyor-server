@@ -40,6 +40,11 @@ supports grid feature
     margin-right: 2px;
 }
 
+.loadingSpinner {
+    height: 450px;
+    text-align: center;
+    padding-top: 150px;
+}
 .nglabel {
     display: block;
     float: left;

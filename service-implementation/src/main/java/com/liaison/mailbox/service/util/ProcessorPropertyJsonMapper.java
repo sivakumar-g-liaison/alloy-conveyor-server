@@ -686,15 +686,6 @@ public class ProcessorPropertyJsonMapper {
 			staticProperty.setValue(propertyValue);
 			staticProperty.setValueProvided(isValueAvailable);
 		}
-		/*for (Field field : staticPropertiesDTO.getClass().getDeclaredFields()) {
-			ProcessorPropertyDTO property = new ProcessorPropertyDTO();
-			field.setAccessible(true);
-			Object fieldValue = field.get(staticPropertiesDTO);
-			String propertyValue = fieldValue.toString();
-			property.setValue(propertyValue);
-			property.setValueProvided(true);;
-			processorPropertiesDefinitionDto.getStaticProperties().add(property);
-		}*/
 	}
 	
 	private static StaticProcessorPropertiesDTO retrieveStaticProcessorPropertyDTOFromRemoteProcessorPropertiesDTO(RemoteProcessorPropertiesDTO remoteProcessorProperties, ProcessorType processorType, Protocol protocol) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
