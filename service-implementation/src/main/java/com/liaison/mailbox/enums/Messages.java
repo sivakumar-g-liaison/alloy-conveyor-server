@@ -123,11 +123,14 @@ public enum Messages {
 
 	// Manifest validation
 	DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST("The acl manifest must contain the Domain Internal Name."),
-	
+
 	LOCATION_NOT_CONFIGURED("The %s location is not configured or empty."),
-	
+
 	//sync and async process
-	MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this id.");
+	MISSING_PROCESSOR("Either the mailbox is not available in the system or the %s is not found for this id."),
+
+	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details.");
+
 	private String value;
 
 	// some caching to provide a better search algorithm

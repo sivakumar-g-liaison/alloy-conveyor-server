@@ -56,17 +56,17 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 
 @Path("mailbox/git/content/{git.file.name}")
-@Api(value = "mailbox/git/content/{git.file.name}", 
+@Api(value = "mailbox/git/content/{git.file.name}",
 description = "Gateway for the script file details services")
-public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {	
+public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxScriptDetailsConfigurationResource.class);
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);	
-	
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
+
 	private Stopwatch stopwatch;
 	private static final StatsTimer statsTimer = new StatsTimer(MonitorConfig.builder("MailBoxScriptDetailsConfigurationResource_statsTimer")
 			.build(), new StatsConfig.Builder().build());
@@ -74,7 +74,7 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 	static {
 		DefaultMonitorRegistry.getInstance().register(statsTimer);
 	}
-	
+
 	/**
 	 *
 	 * Rest method to fetch script file from git
@@ -95,26 +95,26 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
    @ApiResponses({
 	@ApiResponse( code = 500, message = "Unexpected Service failure." )
 	})
-   
+
 	public Response readScript(
-			@Context final HttpServletRequest request,			
+			@Context final HttpServletRequest request,
 			@PathParam(value = "git.file.name") @ApiParam(name = "git.file.name", required = true, value = "URL where file is going to be fetch") final String gitFileName) throws Exception {
-      
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
 				try {
-					
-					ScriptService scriptService = new ScriptService();
-					return scriptService.getScript(gitFileName, "Unknow user");
+
+					ScriptService scriptService = new ScriptService(null, null);
+					return scriptService.getScript(gitFileName, "");
 				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
-				}       
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "MailBoxScriptDetailsConfigurationResource.readScript()";
@@ -129,7 +129,7 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-  } 
+  }
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {

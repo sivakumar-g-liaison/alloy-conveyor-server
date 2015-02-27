@@ -97,6 +97,10 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 						$scope.profiles = [];
 						$scope.totalServerItems = 0;
 					}
+					if ($scope.profiles.length === 0)
+					{
+					 showSaveMessage("No Results Found ", 'error');
+					 }
 				}, {pageSize: pageSize, page: page, filterText: filterText, sortInfo: sortInfo}
 			);
         };

@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,20 +55,22 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
-import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
+import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.fs2.api.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
+import com.liaison.mailbox.service.storage.util.PayloadDetail;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -110,8 +113,13 @@ public class HttpListener extends AuditedResource {
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	protected static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+	protected static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
 
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
+
+	private static final int GLOBAL_PROCESS_ID_MINLENGTH = 3;
+	private static final int GLOBAL_PROCESS_ID_MAXLENGTH = 32;
+	private static final String GLOBAL_PROCESS_ID_PATTERN = "^[a-zA-Z0-9]*$";
 
 	public HttpListener() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
@@ -162,7 +170,6 @@ public class HttpListener extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
-				InputStream responseInputStream = null;
 
 				logger.debug("Starting sync processing");
 				try {
@@ -197,15 +204,14 @@ public class HttpListener extends AuditedResource {
 					//GLASS LOGGING ENDS//
 
 					ResponseBuilder builder = Response.ok();
-					responseInputStream = httpResponse.getEntity().getContent();
-					copyResponseInfo(httpResponse, builder, responseInputStream);
+					copyResponseInfo(request, httpResponse, builder);
 
 					return builder.build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
-
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
@@ -396,6 +402,7 @@ public class HttpListener extends AuditedResource {
 	 * @return WorkTicket
 	 */
 	protected WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
+
 		WorkTicket workTicket = new WorkTicket();
 		workTicket.setAdditionalContext("httpMethod", request.getMethod());
 		workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
@@ -405,11 +412,13 @@ public class HttpListener extends AuditedResource {
 		workTicket.setAdditionalContext("mailboxId", mailboxPguid);
 		workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
 		workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
-		workTicket.setAdditionalContext("httpContentType", request.getContentType());
+		workTicket.setAdditionalContext("httpContentType", request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType());
 		workTicket.setPipelineId(retrievePipelineId(httpListenerProperties));
+		workTicket.setCreatedTime(new Date());
 		copyRequestHeadersToWorkTicket(request, workTicket);
-		assignGlobalProcessId(workTicket);
-		assignTimestamp(workTicket);
+
+		//If global Process Id is present in the request header, validate and set in the work ticket
+		setGlobalProcessId(workTicket, request.getHeader(GLOBAL_PROCESS_ID_HEADER));
 
 		return workTicket;
 	}
@@ -443,18 +452,28 @@ public class HttpListener extends AuditedResource {
 	}
 
 	/**
-	 * This method will set globalProcessId to workTicket.
+	 * Validates the global process id if it is available in the header and set in the workticket.
+	 * Generates new guid if it is not available
 	 *
 	 * @param workTicket
+	 * @param globalProcessId - got from request header.
 	 */
-	protected void assignGlobalProcessId(WorkTicket workTicket) {
-		UUIDGen uuidGen = new UUIDGen();
-		String uuid = uuidGen.getUUID();
-		workTicket.setGlobalProcessId(uuid);
-	}
+	protected void setGlobalProcessId(WorkTicket workTicket, String globalProcessId) {
 
-	protected void assignTimestamp(WorkTicket workTicket) {
-		workTicket.setCreatedTime(new Date());
+			if (!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)) {
+
+				if (GLOBAL_PROCESS_ID_MAXLENGTH < globalProcessId.length()
+					|| GLOBAL_PROCESS_ID_MINLENGTH > globalProcessId.length()
+					|| !(globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN))) {
+					throw new MailBoxServicesException("The global process id is invalid", Response.Status.BAD_REQUEST);
+				} else {
+					workTicket.setGlobalProcessId(globalProcessId);
+				}
+
+			} else {
+				workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+			}
+
 	}
 
 	/**
@@ -470,12 +489,12 @@ public class HttpListener extends AuditedResource {
 	  try (InputStream payloadToPersist = request.getInputStream()) {
 
               FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket, httpListenerProperties);
-              FS2MetaSnapshot metaSnapShot = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
+              PayloadDetail payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket.getGlobalProcessId(),
                             fs2Header, Boolean.valueOf(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD)));
-              logger.info("The received path uri is {} ", metaSnapShot.getURI().toString());
-              //Hack
-              workTicket.setPayloadSize(Long.valueOf(metaSnapShot.getHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE)[0]));
-              workTicket.setPayloadURI(metaSnapShot.getURI().toString());
+              logger.info("The received path uri is {} ", (payloadDetail.getMetaSnapshot().getURI().toString()));
+
+              workTicket.setPayloadSize(payloadDetail.getPayloadSize());
+              workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 	    }
 	}
 
@@ -547,66 +566,78 @@ public class HttpListener extends AuditedResource {
 	 *
 	 * @param httpResponse
 	 * @param builder
+	 * @param globalProcessId
 	 * @throws IllegalStateException
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
-	protected void copyResponseInfo(HttpResponse httpResponse,
-			ResponseBuilder builder, InputStream responseInputStream) throws IllegalStateException, IOException {
+	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
+			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
 
+		if (httpResponse.getStatusLine().getStatusCode() > 299) {
 
-		Header contentLength = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
-		Header transferEncoding = httpResponse.getFirstHeader(HTTP_HEADER_TRANSFER_ENCODING);
+			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
+			builder.status(result.getStatus());
 
-		//If the transfer encoding is chunked, then the Content-Length field will not be set
-		if ("chunked".equals(transferEncoding.getValue())) {
+			//Sets the headers
+			Set<String> headers = result.getHeaderNames();
+			for (String name : headers) {
+				builder.header(name, result.getHeader(name));
+			}
+			//set global process id in the header
+			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
 
-			responseInputStream = httpResponse.getEntity().getContent();
-            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
-
-            if (responseInputStream != null) {
-                builder.entity(responseInputStream);
-            }
-
-            if (contentType != null) {
-                builder.header(contentType.getName(), contentType.getValue());
-            }
-
-		} else {
-
-			int iContentLength = 0;
-
-			if (contentLength != null) {
-				logger.debug("Response from Service Broker contained content length header with value: {}",
-						contentLength.getValue());
-				iContentLength = Integer.parseInt(contentLength.getValue());
+			//If payload URI avail, reads payload from spectrum. Mostly it would be an error message payload
+			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+				if (responseInputStream != null) {
+					builder.entity(responseInputStream);
+				}
 			} else {
-				logger.debug("Response from Service Broker did not contain a content length header");
+				if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
+					builder.entity(result.getErrorMessage());
+				} else {
+					builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
+				}
 			}
 
-		    if (iContentLength > 0) {
+			//Content type
+			String contentType = result.getHeader(HTTP_HEADER_CONTENT_TYPE);
+			if (contentType == null) {
+				builder.header(HTTP_HEADER_CONTENT_TYPE, request.getContentType());
+			}
 
-	            responseInputStream = httpResponse.getEntity().getContent();
-	            Header contentType = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+	   	} else {
 
-	            if (responseInputStream != null) {
-	                builder.entity(responseInputStream);
-	            }
+			InputStream responseInputStream = httpResponse.getEntity().getContent();
+			WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
 
-	            if (contentType != null) {
-	                builder.header(contentType.getName(), contentType.getValue());
-	            }
+			//sets status code from work result
+			builder.status(result.getStatus());
 
-	            if (contentLength != null) {
-	                builder.header(contentLength.getName(),
-	                        contentLength.getValue());
-	            }
+			//Sets the headers
+			Set<String> headers = result.getHeaderNames();
+			for (String name : headers) {
+				builder.header(name, result.getHeader(name));
+			}
+			//set global process id in the header
+			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
 
+			//reads paylaod from spectrum
+			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
+			   responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+			   if (responseInputStream != null) {
+			       builder.entity(responseInputStream);
+			   }
+			}
 
-	        }
+		   //Content type
+		   String contentType = result.getHeader(HTTP_HEADER_CONTENT_TYPE);
+		   if (contentType == null) {
+		       builder.header(HTTP_HEADER_CONTENT_TYPE, request.getContentType());
+		   }
 
-		}
-
-        copyResponseHeaders(httpResponse, builder);
+	   	}
 
 	}
 

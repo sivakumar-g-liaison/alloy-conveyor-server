@@ -156,6 +156,7 @@ public interface MailBoxConstants {
 	public static final String FILEWRITE_LOCATION = "file write";
 	public static final String COMMON_LOCATION = "payload or file write";
 
-
+	// added for self signed truststore
+	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
 
 }

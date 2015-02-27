@@ -30,7 +30,7 @@
 	 </div>	
 	</div>
      </br> 
-		<div id="aceEditor" ui-ace="{onLoad : loadValueData,
+		<div id="aceEditor" readonly="{{disable}}" ui-ace="{onLoad : loadValueData,
 			  theme : 'monokai',
 			  useWrapMode : true,
 			  showGutter: true,
@@ -38,7 +38,7 @@
 			}">
 	   </div>	   
       <div class="modal-footer">
-	    <button class="btn btn-primary" type="button" ng-click="loadDefaultScript()" ng-disabled="loader">Load default template</button>
+	    <button class="btn btn-primary" type="button" ng-click="loadDefaultScript()" ng-disabled="saveScriptFileForm.scriptName.$invalid">Load default template</button>
 		<button class="btn btn-primary" type="button" ng-click="save()" ng-disabled="saveScriptFileForm.$invalid || loader">
 			<span class="glyphicon glyphicon-save glyphicon-white"></span> Save
 		</button>

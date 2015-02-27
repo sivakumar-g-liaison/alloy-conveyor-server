@@ -11,13 +11,12 @@ package com.liaison.mailbox.service.storage.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,11 +33,11 @@ import com.liaison.fs2.api.encryption.FS2KEKProvider;
 import com.liaison.fs2.api.encryption.impl.KeyManagerKEKProvider;
 import com.liaison.fs2.api.encryption.impl.SimpleEncryptionProvider;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.fs2.api.exceptions.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.exceptions.FS2PayloadNotFoundException;
 import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
 import com.liaison.fs2.storage.spectrum.FS2DefaultSpectrumStorageConfig;
 import com.liaison.fs2.storage.spectrum.SpectrumConfigBuilder;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -125,42 +124,34 @@ public class StorageUtilities {
 	 * @param isSecure
 	 * @return
 	 */
-	public static FS2MetaSnapshot persistPayload(InputStream payload, String globalProcessId, FS2ObjectHeaders fs2Headers, boolean isSecure) {
+	public static PayloadDetail persistPayload(InputStream payload, String globalProcessId, FS2ObjectHeaders fs2Headers, boolean isSecure) {
 
 		try {
 
 			//persists the message in spectrum.
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
-			//FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, payload);
+			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
 
-			// create object
-	        FS2.createObjectEntry(requestUri);
+			//fetch the metdata includes payload size
+			PayloadDetail detail = null;
+			try (CountingInputStream inputStream = new CountingInputStream(payload)) {
 
-	        // write the payload
-	        long size = 0;
-			if (payload != null) {
-				try (OutputStream outputStream = FS2.getFS2PayloadOutputStream(requestUri)) {
-					size = IOUtils.copy(payload, outputStream);
-				} catch (IOException e) {
-					throw new MailBoxServicesException(
-							"Created object but failed to write payload to URI (object is not cleaned up) = "
-									+ requestUri.toString(), Response.Status.INTERNAL_SERVER_ERROR);
-				}
+				detail = new PayloadDetail();
+				FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
+				detail.setMetaSnapshot(metaSnapshot);
+				detail.setPayloadSize(inputStream.getCount());
 			}
-
-			//updating headers
-			FS2.updateHeaders(requestUri, fs2Headers);
-			//adding the payloadsize
-			FS2MetaSnapshot metaSnapshot = FS2.addHeader(requestUri, MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, String.valueOf(size));
-
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
-			return metaSnapshot;
-		} catch (FS2Exception  e) {
-			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
-		}
+			return detail;
 
+		} catch(FS2ObjectAlreadyExistsException e) {
+			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
+			throw new MailBoxServicesException("Failed to write the payload in spectrum : "+ e.getMessage() + ". Becuase it already exists in the system.", Response.Status.CONFLICT);
+		} catch (FS2Exception | IOException e) {
+			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
+			throw new MailBoxServicesException("Failed to write the payload in spectrum : "+ e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	/**
@@ -178,9 +169,9 @@ public class StorageUtilities {
 		boolean defaultFileuse = configuration.getBoolean(PROPERTY_FS2_STORAGE_FILE_DEFAULT_USE, false);
 
 		if (defaultFileuse) {
+			String defaultType = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_TYPE, "file");
 			String defaultFileLocation = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_LOCATION, "local");
-	        String defaultFileMountPoint = configuration.getString(PROPERTY_FS2_STORAGE_FILE_DEFAULT_MOUNT, "/tmp");
-			uri = createSpectrumURI(path, defaultFileLocation, defaultFileMountPoint);
+			uri = createSpectrumURI(path, defaultType, defaultFileLocation);
 			return uri;
 		}
 
@@ -266,11 +257,21 @@ public class StorageUtilities {
 				if (type.equals(SECURE_MONIKER)) {
 					config = new FS2DefaultSpectrumStorageConfig(
 			        		new FS2StorageIdentifier(type, location), SpectrumConfigBuilder.buildFromConfiguration(
-			        				identifier, configuration), encryptionProvider, kekProvider);
+			        				identifier, configuration), encryptionProvider, kekProvider) {
+					    @Override
+					    public boolean doCalcPayloadSize() {
+					    	return false;
+					    }
+					};
 				} else {
 					config = new FS2DefaultSpectrumStorageConfig(
 		        		new FS2StorageIdentifier(type, location), SpectrumConfigBuilder.buildFromConfiguration(
-		        				identifier, configuration), null, null);
+		        				identifier, configuration), null, null) {
+						@Override
+					    public boolean doCalcPayloadSize() {
+							return false;
+					    }
+					};
 				}
 				spectrumConfigs[i] = config;
 				i++;
