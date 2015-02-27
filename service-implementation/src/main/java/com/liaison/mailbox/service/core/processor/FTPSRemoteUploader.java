@@ -46,6 +46,8 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -130,18 +132,18 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			//ftpsRequest.enableDataChannelEncryption();
 			
 			// retrieve required properties
-			ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			//ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
 			
-			if (processorProperties != null) {
+			if (ftpDownloaderStaticProperties != null) {
 				
-				ArrayList<String> propertyNames = new ArrayList<String>();
+				/*ArrayList<String> propertyNames = new ArrayList<String>();
 				propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
 				propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
-				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
+				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);*/
 
-				boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
-				boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));
-			
+				boolean binary = ftpDownloaderStaticProperties.isBinary();
+				boolean passive = ftpDownloaderStaticProperties.isPassive();
 				ftpsRequest.setBinary(binary);
 				ftpsRequest.setPassive(passive);
 				
@@ -248,10 +250,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 
 				if (null != item) {
-
+					
+					FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
 					// File Uploading done successfully so move the file to processed folder
 					if(replyCode == 226 || replyCode == 250) {
-						String processedFileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION));
+						
+						String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
 						if (MailBoxUtil.isEmpty(processedFileLocation)) {
 							archiveFile(item.getAbsolutePath(), false);
 						} else {
@@ -259,7 +263,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 						}
 					} else {
 						// File uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION));
+						String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
 						if (MailBoxUtil.isEmpty(errorFileLocation)) {
 							archiveFile(item.getAbsolutePath(), true);
 						} else {
@@ -308,17 +312,20 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		//ftpsRequest.enableDataChannelEncryption();
 		// retrieve required properties
-		ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+		FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
 		
-		if (processorProperties != null) {
+		if (ftpUploaderStaticProperties != null) {
 			
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
 			propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
 			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
 
 			boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
-			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));
+			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));*/
+			
+			boolean binary = ftpUploaderStaticProperties.isBinary();
+			boolean passive = ftpUploaderStaticProperties.isPassive();
 		
 			ftpsRequest.setBinary(binary);
 			ftpsRequest.setPassive(passive);

@@ -45,6 +45,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -122,15 +123,19 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			//ftpsRequest.enableDataChannelEncryption();
 			
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
 			propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
 			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
 
 			boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
-			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));
+			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));*/
+			
+			FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
+			boolean binary = ftpDownloaderStaticProperties.isBinary();
+			boolean passive = ftpDownloaderStaticProperties.isPassive();
 
-			if (getProperties() != null) {
+			if (ftpDownloaderStaticProperties != null) {
 				ftpsRequest.setBinary(binary);
 				ftpsRequest.setPassive(passive);
 			}

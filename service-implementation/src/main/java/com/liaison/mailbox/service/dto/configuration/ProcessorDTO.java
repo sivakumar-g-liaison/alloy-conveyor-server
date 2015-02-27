@@ -29,8 +29,10 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
@@ -51,7 +53,7 @@ public class ProcessorDTO {
 	private String name;
 	@ApiModelProperty( value = "Processor type", required = true)
 	private String type;
-	private ProcessorPropertiesDefinitionDTO processorProperties;
+	private ProcessorPropertiesDefinitionDTO processorPropertiesInTemplateJson;
 	private String javaScriptURI;
 	private String description;
 	@ApiModelProperty( value = "Processor status", required = true)
@@ -181,14 +183,15 @@ public class ProcessorDTO {
 	public void setProfiles(List<ProfileDTO> profiles) {
 		this.profiles = profiles;
 	}
+	
 
-	public ProcessorPropertiesDefinitionDTO getProcessorProperties() {
-		return processorProperties;
+	public ProcessorPropertiesDefinitionDTO getProcessorPropertiesInTemplateJson() {
+		return processorPropertiesInTemplateJson;
 	}
 
-	public void setProcessorProperties(
-			ProcessorPropertiesDefinitionDTO processorProperties) {
-		this.processorProperties = processorProperties;
+	public void setProcessorPropertiesInTemplateJson(
+			ProcessorPropertiesDefinitionDTO processorPropertiesInTemplateJson) {
+		this.processorPropertiesInTemplateJson = processorPropertiesInTemplateJson;
 	}
 
 	/**
@@ -205,25 +208,34 @@ public class ProcessorDTO {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException,
-			JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+			JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		if (isCreate) {
 			processor.setPguid(MailBoxUtil.getGUID());
-			//processor.setProcsrExecutionStatus(ExecutionState.READY.value());
 		}
+		// Set the protocol
+		Protocol protocol = Protocol.findByName(this.getProtocol());
+		processor.setProcsrProtocol(protocol.getCode());
+		
+		ProcessorPropertiesDefinitionDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
 
-		ProcessorPropertiesDefinitionDTO propertiesDTO = this.getProcessorProperties();
 
 		// separate static and dynamic properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
 		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
-
+		
+		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.retrieveStaticProcessorPropertiesDTO(staticPropertiesDTO, processor.getProcessorType(), protocol);
+		
 		// set static properties into properties json to be stored in DB
 		if (null != propertiesDTO) {
-			String propertiesJSON = MailBoxUtil.marshalToJSON(propertiesDTO);
+			String propertiesJSON = MailBoxUtil.marshalToJSON(staticPropertiesDTOInDB);
 			processor.setProcsrProperties(propertiesJSON);
 		}
 
@@ -269,6 +281,10 @@ public class ProcessorDTO {
 		ProcessorProperty property = null;
 		List<ProcessorProperty> properties = new ArrayList<>();
 		for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
+			
+			if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
+				continue;
+			}
 			property = new ProcessorProperty();
 			propertyDTO.copyToEntity(property);;
 			properties.add(property);
@@ -276,9 +292,6 @@ public class ProcessorDTO {
 		if (!properties.isEmpty()) {
 			processor.setDynamicProperties(properties);
 		}
-		// Set the protocol
-		Protocol protocol = Protocol.findByName(this.getProtocol());
-		processor.setProcsrProtocol(protocol.getCode());
 
 		// Set the status
 		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());
@@ -306,14 +319,7 @@ public class ProcessorDTO {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());
-
-		String propertyJSON = processor.getProcsrProperties();
-
-		// set processor properties in DTO
-		ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorProperties(propertyJSON, processor);
-
-		this.setProcessorProperties(propertiesDTO);
-
+		
 		String status = processor.getProcsrStatus();
 		if (!MailBoxUtil.isEmpty(status)) {
 			MailBoxStatus foundStatus = MailBoxStatus.findByCode(status);
@@ -346,8 +352,9 @@ public class ProcessorDTO {
 			}
 		}
 
+		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		// Set protocol
-		this.setProtocol(Protocol.findByCode(processor.getProcsrProtocol()).name());
+		this.setProtocol(protocol.name());
 
 		if (null != processor.getScheduleProfileProcessors()) {
 
@@ -359,7 +366,13 @@ public class ProcessorDTO {
 				this.getProfiles().add(profile);
 			}
 
-		}
+		}	
+		// set properties JSON as in JSON Template
+		String propertyJSON = processor.getProcsrProperties();
+		
+		// set processor properties in DTO
+		ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorPropertiesAsInJsonTemplate(propertyJSON, processor);		
+		this.setProcessorPropertiesInTemplateJson(propertiesDTO);
 	}
 
 }

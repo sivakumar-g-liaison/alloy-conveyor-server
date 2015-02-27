@@ -48,6 +48,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -105,18 +106,21 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		try {
 
-			ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
 
 			// Set the pay load value to http client input data for POST & PUT request
 			File[] files = null;
 			
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERB);
 			propertyNames.add(MailBoxConstants.PROPERTY_CONTENT_TYPE);
 			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
 			String httpVerb = requiredProperties.get(MailBoxConstants.PROPERTY_HTTP_VERB);
-			String contentType = requiredProperties.get(MailBoxConstants.PROPERTY_CONTENT_TYPE);
+			String contentType = requiredProperties.get(MailBoxConstants.PROPERTY_CONTENT_TYPE);*/
+			
+			String httpVerb = httpUploaderStaticProperties.getHttpVerb();
+			String contentType = httpUploaderStaticProperties.getContentType();
 			
 			if ("POST".equals(httpVerb)	|| "PUT".equals(httpVerb)) {
 
@@ -200,7 +204,10 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException, 
 							SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
-		String fileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), locationName));
+		HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
+    	String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION))?httpUploaderStaticProperties.getErrorFileLocation():httpUploaderStaticProperties.getProcessedFileLocation();
+        String fileLocation = replaceTokensInFolderPath(filePath);
+        
 		if (MailBoxUtil.isEmpty(fileLocation)) {
 			archiveFile(file.getAbsolutePath(), isError);
 		} else {

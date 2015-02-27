@@ -30,6 +30,9 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -125,7 +128,7 @@ public class DropboxFileTransferService {
 				processorDTO = new ProcessorDTO();
 				processorDTO.copyFromEntity(processor);
 				
-				ArrayList<String> propertyNames = new ArrayList<String>();
+				/*ArrayList<String> propertyNames = new ArrayList<String>();
 				propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
 				propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
 				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorDTO.getProcessorProperties(), propertyNames);
@@ -133,8 +136,11 @@ public class DropboxFileTransferService {
 				// retrieving the httplistener pipeline id  and secured payload properties from remote processor
 				// properties
 				String pipeLineId = requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
-				boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
-
+				boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));*/
+				
+				DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(processor.getProcsrProperties(), processor);
+				String pipeLineId = dropboxProcessorStaticProperties.getHttpListenerPipeLineId();
+				boolean securedPayload = dropboxProcessorStaticProperties.isSecuredPayload();
 
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();

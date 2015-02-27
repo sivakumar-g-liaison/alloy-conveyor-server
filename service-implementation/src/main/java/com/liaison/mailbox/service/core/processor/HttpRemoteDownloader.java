@@ -43,6 +43,8 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -132,7 +134,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
-			    ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			    HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO)getProperties();
 
 			    files = getFilesToUpload();
 				if (null != files) {
@@ -141,7 +143,7 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 					    try (InputStream contentStream = FileUtils.openInputStream(entry)) {
 					    	
-					    	String contentType = ProcessorPropertyJsonMapper.getProcessorProperty(processorProperties, MailBoxConstants.PROPERTY_CONTENT_TYPE);
+					    	String contentType = httpDownloaderStaticProperties.getContentType();
 					        request.inputData(contentStream, contentType);
 
 		                    response = request.execute();
@@ -199,8 +201,10 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws NoSuchFieldException 
      */
     private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-
-        String fileLocation = replaceTokensInFolderPath(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), locationName));
+    	
+    	HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
+    	String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION))?httpUploaderStaticProperties.getErrorFileLocation():httpUploaderStaticProperties.getProcessedFileLocation();
+        String fileLocation = replaceTokensInFolderPath(filePath);
         if (MailBoxUtil.isEmpty(fileLocation)) {
             archiveFile(file.getAbsolutePath(), isError);
         } else {

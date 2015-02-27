@@ -49,6 +49,7 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -64,7 +65,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	protected Processor configurationInstance;
 	public Properties mailBoxProperties;
-	public ProcessorPropertiesDefinitionDTO processorProperties;
+	public ProcessorPropertiesDefinitionDTO processorPropertiesTemplate;
+	public StaticProcessorPropertiesDTO staticProcessorProperties;
 
 	public AbstractProcessor() {
 	}
@@ -91,13 +93,33 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public ProcessorPropertiesDefinitionDTO getProperties() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	public ProcessorPropertiesDefinitionDTO getPropertiesInTemplateJsonFormat() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-		if (null == processorProperties) {
-			processorProperties = ProcessorPropertyJsonMapper.retrieveProcessorProperties(configurationInstance.getProcsrProperties(), configurationInstance);
+		if (null == processorPropertiesTemplate) {
+			processorPropertiesTemplate = ProcessorPropertyJsonMapper.retrieveProcessorPropertiesAsInJsonTemplate(configurationInstance.getProcsrProperties(), configurationInstance);
 		}
 
-		return processorProperties;
+		return processorPropertiesTemplate;
+	}
+	
+	/**
+	 * Method to return static properties stored in DB of a processor
+	 * 
+	 * @return StaticProcessorPropertiesDTO
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	public StaticProcessorPropertiesDTO getProperties() throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+		if (null == staticProcessorProperties) {
+			staticProcessorProperties = ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(configurationInstance.getProcsrProperties(), configurationInstance);
+		}
+
+		return staticProcessorProperties;
 	}
 
 	/**

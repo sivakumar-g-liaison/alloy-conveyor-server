@@ -36,7 +36,12 @@ import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHa
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -67,11 +72,48 @@ public class HttpClient {
 			HTTPRequest request = new HTTPRequest(null);
 			request.setLogger(LOGGER);
 
+	
 			// Convert the json string to DTO
-			ProcessorPropertiesDefinitionDTO properties = processor.getProperties();
+			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = null;
+			HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = null;
+			String url = null;
+			int connectionTimeout = 0;
+			int socketTimeout = 0;
+			int retryAttempts = 0;
+			String otherRequestHeaders = null;
+			boolean chunkedEncoding = false;
+			String httpVerb = null;
+			String httpVersion = null;
+			String contentType = null;
+			int port = 0;
+			
+			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
+				httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)processor.getProperties();
+				url = httpUploaderStaticProperties.getUrl();
+				connectionTimeout = httpUploaderStaticProperties.getConnectionTimeout();
+				socketTimeout = httpUploaderStaticProperties.getSocketTimeout();
+				retryAttempts = httpUploaderStaticProperties.getRetryAttempts();
+				otherRequestHeaders = httpUploaderStaticProperties.getOtherRequestHeader();
+				chunkedEncoding = httpUploaderStaticProperties.isChunkedEncoding();
+				httpVerb = httpUploaderStaticProperties.getHttpVerb();
+				httpVersion = httpUploaderStaticProperties.getHttpVersion();
+				contentType = httpUploaderStaticProperties.getContentType();
+				port = httpUploaderStaticProperties.getPort();
+			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+				httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO)processor.getProperties();
+				url = httpDownloaderStaticProperties.getUrl();
+				connectionTimeout = httpDownloaderStaticProperties.getConnectionTimeout();
+				socketTimeout = httpDownloaderStaticProperties.getSocketTimeout();
+				retryAttempts = httpDownloaderStaticProperties.getRetryAttempts();
+				otherRequestHeaders = httpDownloaderStaticProperties.getOtherRequestHeader();
+				chunkedEncoding = httpDownloaderStaticProperties.isChunkedEncoding();
+				httpVerb = httpDownloaderStaticProperties.getHttpVerb();
+				httpVersion = httpDownloaderStaticProperties.getHttpVersion();
+				port = httpDownloaderStaticProperties.getPort();
+			}
 			
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_URL);
 			propertyNames.add(MailBoxConstants.PROPERTY_PORT);
 			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
@@ -82,28 +124,25 @@ public class HttpClient {
 			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERB);
 			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERSION);
 			propertyNames.add(MailBoxConstants.PROPERTY_CONTENT_TYPE);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
 
 			// Set url to HTTPRequest
-			request.setUrl(requiredProperties.get(MailBoxConstants.PROPERTY_URL));
+			request.setUrl(url);
 
 			// Set configurations
-			request.setVersion(requiredProperties.get(MailBoxConstants.PROPERTY_HTTP_VERSION));
-			request.setMethod(requiredProperties.get(MailBoxConstants.PROPERTY_HTTP_VERB));
-			request.setNumberOfRetries(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS)).intValue());
-			request.setConnectionTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)).intValue());
-			request.setChunkedEncoding(Boolean.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_CHUNKED_ENCODING)).booleanValue());
+			request.setVersion(httpVersion);
+			request.setMethod(httpVerb);
+			request.setNumberOfRetries(retryAttempts);
+			request.setConnectionTimeout(connectionTimeout);
+			request.setChunkedEncoding(chunkedEncoding);
 			
-			int socketTimeout = Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT)).intValue();
 			if (socketTimeout > 0) {
 				request.setSocketTimeout(socketTimeout);
 			}
-			int port = Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_PORT)).intValue();
 			if (port > 0) {
 				request.setPort(port);
 			}
 
-			String otherRequestHeaders = requiredProperties.get(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS);
 			// Set the Other header to HttpRequest
 			if (otherRequestHeaders != null) {
 				for (String s : otherRequestHeaders.split(",") ) {
@@ -111,8 +150,7 @@ public class HttpClient {
 					if(headers.length == 2)request.addHeader(headers[0], headers[1]);
 				}
 			}
-			
-			String contentType = requiredProperties.get(MailBoxConstants.PROPERTY_CONTENT_TYPE);
+
 			// Set the content type header to HttpRequest
 			if (!MailBoxUtil.isEmpty(contentType)) {
 				request.addHeader("Content-Type", contentType);

@@ -86,7 +86,7 @@ var rest = myApp.controller(
                     linkedProfiles: [],
                     folders: [],
                     credentials: [],                    
-                    processorProperties: {
+                    processorPropertiesInTemplateJson: {
                     	type: "",
                     	displayName: "",
 						protocol: "",
@@ -653,7 +653,7 @@ var rest = myApp.controller(
 						$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
 				}	
 							
-				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorProperties.handOverExecutionToJavaScript;
+				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
 				
 							
 				$scope.processor.description = data.getProcessorResponse.processor.description;				
@@ -702,7 +702,7 @@ var rest = myApp.controller(
 				$scope.isPortDisabled = false;
 				$scope.propertiesAddedToProcessor = [];
 			    $scope.availableProperties = [];
-                $scope.staticProperties = data.getProcessorResponse.processor.processorProperties.staticProperties;
+                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
                 
                 for (var i = 0; i < $scope.staticProperties.length; i++) {				     
 					 var property = $scope.staticProperties[i];
@@ -726,8 +726,8 @@ var rest = myApp.controller(
                  });            
 
 				
-				//var json_data = data.getProcessorResponse.processor.processorProperties;
-				//$scope.propertiesAddedToProcessorpush(data.getProcessorResponse.processor.processorProperties);						
+				//var json_data = data.getProcessorResponse.processor.processorPropertiesInTemplateJson;
+				//$scope.propertiesAddedToProcessorpush(data.getProcessorResponse.processor.processorPropertiesInTemplateJson);						
 				$scope.processorFolderProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
 				for (var i = 0; i < data.getProcessorResponse.processor.folders.length; i++) {
 					$scope.processorFolderProperties.push({
@@ -827,7 +827,7 @@ var rest = myApp.controller(
 						$scope.scriptIsEdit = true;
 						}
 						
-						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorProperties.handOverExecutionToJavaScript;					
+						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;					
 						
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
@@ -1099,26 +1099,26 @@ var rest = myApp.controller(
 			
             $scope.saveProcessor = function () {		    
 			
-				$scope.processor.processorProperties.staticProperties = [];	
+				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];	
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
                      if ($scope.propertiesAddedToProcessor[i].name === "") {
 				    	 continue;				    	 
 				    }			
-					$scope.processor.processorProperties.staticProperties.push(property);				
+					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
                 }
 				for (var i = 0; i < $scope.availableProperties.length; i++) {
                     var property = $scope.availableProperties[i];
                     if ($scope.availableProperties[i].name === "") {
 				    	 continue;				    	 
 				     }					
-					$scope.processor.processorProperties.staticProperties.push(property);				
+					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
                 }  				
 				
-                $scope.processor.processorProperties.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
-				$scope.processor.processorProperties.type = $scope.procsrType.value;
-				$scope.processor.processorProperties.protocol = $scope.processor.protocol.value;
-				$scope.processor.processorProperties.displayName = $scope.procsrType.key;				
+                $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
+				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
+				$scope.processor.processorPropertiesInTemplateJson.protocol = $scope.processor.protocol.value;
+				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;				
                 //console.log(commaSplit);
                 var lenFolderProps = $scope.processorFolderProperties.length;
 				
@@ -1557,12 +1557,12 @@ var rest = myApp.controller(
 			    
 				var defaultPort = '';
 				var baseUrl = '';
-                for (var i = 0; i < $scope.processor.processorProperties.staticProperties.length; i++) {
-                    var portProperty = $scope.processor.processorProperties.staticProperties[i];
+                for (var i = 0; i < $scope.processor.processorPropertiesInTemplateJson.staticProperties.length; i++) {
+                    var portProperty = $scope.processor.processorPropertiesInTemplateJson.staticProperties[i];
 					if (portProperty.name === "port") {
 					   defaultPort = portProperty.value;				   
-					   for (var j = 0; j < $scope.processor.processorProperties.staticProperties.length; j++) {
-					       var urlProperty = $scope.processor.processorProperties.staticProperties[j];
+					   for (var j = 0; j < $scope.processor.processorPropertiesInTemplateJson.staticProperties.length; j++) {
+					       var urlProperty = $scope.processor.processorPropertiesInTemplateJson.staticProperties[j];
 						   if (urlProperty.name == "url") {
 						      baseUrl = urlProperty.value;							  
 							  if (typeof baseUrl !== 'undefined' && baseUrl !== '') {
@@ -1573,9 +1573,9 @@ var rest = myApp.controller(
 										var domain_name_parts = url_parts[2].split(':');
 										var domainWithPort = domain_name_parts[0].concat(':', defaultPort);
 										var newBaseUrl = baseUrl.replace(domain_name_parts[0], domainWithPort);
-										$scope.processor.processorProperties.staticProperties[j].value = newBaseUrl;
-										if ($scope.processor.processorProperties.staticProperties[i].readOnly === false) {						    
-										   $scope.processor.processorProperties.staticProperties[i].readOnly = true;
+										$scope.processor.processorPropertiesInTemplateJson.staticProperties[j].value = newBaseUrl;
+										if ($scope.processor.processorPropertiesInTemplateJson.staticProperties[i].readOnly === false) {						    
+										   $scope.processor.processorPropertiesInTemplateJson.staticProperties[i].readOnly = true;
 										}
 									}
 								}
@@ -2230,7 +2230,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 		 
      $scope.cancel = function () {
         if ($scope.$parent.scriptIsEdit) {
-		  $scope.revertScriptURL();
+		  $scope.revertScriptURL();s
 		}	 
         $scope.$dismiss();
      }; 

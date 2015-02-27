@@ -36,8 +36,13 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
+import com.liaison.mailbox.service.core.processor.SFTPRemoteDownloader;
+import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -58,25 +63,43 @@ public class SftpClient {
 	public static Object getClient(AbstractProcessor processor) {
 
 		try {
-
-			ProcessorPropertiesDefinitionDTO properties = processor.getProperties();
+			SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = null;
+			SFTPDownloaderPropertiesDTO sftpDownloaderStaticProperties = null;
+			String url = null;
+			int connectionTimeout = 0;
+			int socketTimeout = 0;
+			int retryAttempts = 0;
+			
+			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
+				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)processor.getProperties();
+				url = sftpUploaderStaticProperties.getUrl();
+				connectionTimeout = sftpUploaderStaticProperties.getConnectionTimeout();
+				socketTimeout = sftpUploaderStaticProperties.getSocketTimeout();
+				retryAttempts = sftpUploaderStaticProperties.getRetryAttempts();
+			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)processor.getProperties();
+				url = sftpDownloaderStaticProperties.getUrl();
+				connectionTimeout = sftpDownloaderStaticProperties.getConnectionTimeout();
+				socketTimeout = sftpDownloaderStaticProperties.getSocketTimeout();
+				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
+			}
 			
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_URL);
 			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
 			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
 			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
 
 			G2SFTPClient sftpRequest = new G2SFTPClient();
-			sftpRequest.setURI(requiredProperties.get(MailBoxConstants.PROPERTY_URL));
+			sftpRequest.setURI(url);
 			sftpRequest.setDiagnosticLogger(LOGGER);
 			sftpRequest.setCommandLogger(LOGGER);
-			sftpRequest.setTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)).intValue());
+			sftpRequest.setTimeout(connectionTimeout);
 			sftpRequest.setStrictHostChecking(false);
 			//sftpRequest.setRetryInterval(properties.getRetryInterval());
-			sftpRequest.setRetryCount(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS)).intValue());
+			sftpRequest.setRetryCount(retryAttempts);
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 

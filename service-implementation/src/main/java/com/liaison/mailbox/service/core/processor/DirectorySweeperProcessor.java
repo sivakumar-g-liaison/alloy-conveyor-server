@@ -39,6 +39,8 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import scala.runtime.Statics;
+
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.util.ISO8601Util;
@@ -55,6 +57,8 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
@@ -133,7 +137,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		String inputLocation = getPayloadURI();
 		
 		// retrieve required properties
-		ArrayList<String> propertyNames = new ArrayList<String>();
+		/*ArrayList<String> propertyNames = new ArrayList<String>();
 		propertyNames.add(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
 		propertyNames.add(MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
 		Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
@@ -141,6 +145,10 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		String fileRenameFormat = requiredProperties.get(MailBoxConstants.PROPERTY_FILE_RENAME_FORMAT);
 		String sweepedFileLocation = requiredProperties.get(MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
 		
+		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;*/
+		
+		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
 		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
@@ -161,7 +169,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			// Read from mailbox property - grouping js location
 			List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
-			sweepedFileLocation = replaceTokensInFolderPath(sweepedFileLocation);
+			String sweepedFileLocation = replaceTokensInFolderPath(sweeperStaticProperties.getSweepedFileLocation());
 			if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
                 LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
 
@@ -289,7 +297,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 							IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		if (MailBoxUtil.isEmpty(this.pipeLineID)) {
-			this.setPipeLineID(ProcessorPropertyJsonMapper.getProcessorProperty(getProperties(), MailBoxConstants.PROPERTY_PIPELINEID));
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+			this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
 		}
 
 		return this.pipeLineID;
@@ -414,13 +423,18 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			workTicket.setGlobalProcessId(globalProcessId);
 			
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
 			propertyNames.add(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP);
 			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
 
 			boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
-			boolean deleteAfterSweep = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP));
+			boolean deleteAfterSweep = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_DELETE_FILE_AFTER_SWEEP));*/
+			
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+						
+			boolean securedPayload = sweeperStaticProperties.isSecuredPayload();
+			boolean deleteAfterSweep = sweeperStaticProperties.isDeleteFileAfterSweep();
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				FS2ObjectHeaders fs2Header = constructFS2Headers(workTicket);
@@ -670,13 +684,17 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		try {
 
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
 			propertyNames.add(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
 			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
 
 			String payloadSize = requiredProperties.get(MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
-			String maxFile = requiredProperties.get(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
+			String maxFile = requiredProperties.get(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);*/
+			
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+			String payloadSize = sweeperStaticProperties.getPayloadSizeThreshold();
+			String maxFile = sweeperStaticProperties.getNumOfFilesThreshold();
 		
 			if (!MailBoxUtil.isEmpty(payloadSize)) {
 				maxPayloadSize = Long.parseLong(payloadSize);

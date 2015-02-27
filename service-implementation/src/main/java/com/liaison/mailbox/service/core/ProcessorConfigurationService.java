@@ -87,6 +87,7 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -132,9 +133,13 @@ public class ProcessorConfigurationService {
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JSONException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		LOGGER.debug("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
@@ -513,9 +518,13 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		LOGGER.debug("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
@@ -861,7 +870,7 @@ public class ProcessorConfigurationService {
 				if (null != processorDTO) {
 
 					// retrieve required properties
-					ArrayList<String> propertyNames = new ArrayList<String>();
+					/*ArrayList<String> propertyNames = new ArrayList<String>();
 					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
 					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
 					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK);
@@ -869,8 +878,14 @@ public class ProcessorConfigurationService {
 
 					String pipeLineId = requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
 					boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
-					boolean authCheckRequired = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));
-				
+					boolean authCheckRequired = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));*/
+					
+					HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(processor.getProcsrProperties(), processor);
+					
+					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
+					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
+					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
+					
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
 					//Commented by Veera -Not needed, because tenancy key format has changed as per service broker
 					//httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());

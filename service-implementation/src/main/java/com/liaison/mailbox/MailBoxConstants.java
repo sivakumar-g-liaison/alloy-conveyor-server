@@ -209,6 +209,5 @@ public interface MailBoxConstants {
 	public final static String ERROR_FILE_LOCATION = "errorfilelocation";
 	public static final String HTTPLISTENER_AUTH_CHECK = "httplistenerauthcheckrequired";
 	
-	
-	
+	public static final String ADD_NEW_PROPERTY = "add new -->";	
 }

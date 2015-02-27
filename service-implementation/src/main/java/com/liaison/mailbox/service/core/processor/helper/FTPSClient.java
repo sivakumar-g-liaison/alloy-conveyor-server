@@ -16,8 +16,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -35,13 +33,16 @@ import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author VNagarajan
@@ -60,24 +61,42 @@ public class FTPSClient {
 		try {
 
 			// Convert the json string to DTO
-			ProcessorPropertiesDefinitionDTO properties = processor.getProperties();
+			FTPUploaderPropertiesDTO ftpUploaderStaticProperties = null;
+			FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = null;
+			String url = null;
+			int connectionTimeout = 0;
+			int socketTimeout = 0;
+			int retryAttempts = 0;
 			
+			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
+				ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)processor.getProperties();
+				url = ftpUploaderStaticProperties.getUrl();
+				connectionTimeout = ftpUploaderStaticProperties.getConnectionTimeout();
+				socketTimeout = ftpUploaderStaticProperties.getSocketTimeout();
+				retryAttempts = ftpUploaderStaticProperties.getRetryAttempts();
+			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+				ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)processor.getProperties();
+				url = ftpDownloaderStaticProperties.getUrl();
+				connectionTimeout = ftpDownloaderStaticProperties.getConnectionTimeout();
+				socketTimeout = ftpDownloaderStaticProperties.getSocketTimeout();
+				retryAttempts = ftpDownloaderStaticProperties.getRetryAttempts();
+			}
 			// retrieve required properties
-			ArrayList<String> propertyNames = new ArrayList<String>();
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
 			propertyNames.add(MailBoxConstants.PROPERTY_URL);
 			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
 			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
 			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
 
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
-			ftpsRequest.setURI(requiredProperties.get(MailBoxConstants.PROPERTY_URL));
+			ftpsRequest.setURI(url);
 			ftpsRequest.setDiagnosticLogger(LOGGER);
 			ftpsRequest.setCommandLogger(LOGGER);
-			ftpsRequest.setConnectionTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT)).intValue());
+			ftpsRequest.setConnectionTimeout(connectionTimeout);
 
-			ftpsRequest.setSocketTimeout(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT)).intValue());
-			ftpsRequest.setRetryCount(Integer.valueOf(requiredProperties.get(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS)).intValue());
+			ftpsRequest.setSocketTimeout(socketTimeout);
+			ftpsRequest.setRetryCount(retryAttempts);
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
