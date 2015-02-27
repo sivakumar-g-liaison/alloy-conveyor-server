@@ -158,14 +158,13 @@ public class ProcessorPropertyJsonMapper {
 	public static StaticProcessorPropertiesDTO getStaticProcessorPropertiesFromJson(String propertyJson, Processor processor) throws IOException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		StaticProcessorPropertiesDTO staticProcessorProperties = null;
-
+		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		try {
-			staticProcessorProperties = MailBoxUtil.unmarshalFromJSON(propertyJson, StaticProcessorPropertiesDTO.class);
+			staticProcessorProperties = getStaticProcessorPropertiesDTOFromJson(propertyJson, processor.getProcessorType(), protocol);
 
 		} catch (JAXBException | JsonMappingException | JsonParseException e) {
 
-			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
-			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
+			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);		
 			staticProcessorProperties = retrieveStaticProcessorPropertyDTOFromRemoteProcessorPropertiesDTO(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
 			handleDynamicProperties(staticProcessorProperties, processor);
 		}
