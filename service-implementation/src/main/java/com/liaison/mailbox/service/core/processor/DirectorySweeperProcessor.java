@@ -149,7 +149,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		
 		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
 		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
-		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
+		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
 		// Validation of the necessary properties
