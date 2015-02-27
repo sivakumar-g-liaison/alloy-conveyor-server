@@ -40,7 +40,7 @@ public class ProcessorPropertyJsonMapper {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorPropertyJsonMapper.class);
 
-	public static final String FTP_DOWNLOADER_PROPERTIES_JSON = "processor/properties/httpdownloader.json";
+	public static final String FTP_DOWNLOADER_PROPERTIES_JSON = "processor/properties/ftpdownloader.json";
 	public static final String FTP_UPLOADER_PROPERTIES_JSON = "processor/properties/ftpuploader.json";
 	public static final String FTPS_DOWNLOADER_PROPERTIES_JSON = "processor/properties/ftpsdownloader.json";
 	public static final String FTPS_UPLOADER_PROPERTIES_JSON = "processor/properties/ftpsuploader.json";
@@ -673,10 +673,8 @@ public class ProcessorPropertyJsonMapper {
 			field.setAccessible(true);
 			Object fieldValue = field.get(staticPropertiesDTO);
 			String propertyValue = fieldValue.toString();
-			boolean isValueAvailable = false;
-			if (field.getType().equals(Boolean.class) || field.getType().equals(String.class)) {
-				isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
-			} else if (field.getType().equals(Integer.class)) {
+			boolean isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
+			if (fieldValue instanceof Integer) {
 				if (Integer.parseInt(propertyValue) == 0) {
 					propertyValue = "";
 					isValueAvailable = false;
