@@ -133,17 +133,17 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			
 			// retrieve required properties
 			//ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
-			FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
+			FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
 			
-			if (ftpDownloaderStaticProperties != null) {
+			if (ftpUploaderStaticProperties != null) {
 				
 				/*ArrayList<String> propertyNames = new ArrayList<String>();
 				propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
 				propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
 				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);*/
 
-				boolean binary = ftpDownloaderStaticProperties.isBinary();
-				boolean passive = ftpDownloaderStaticProperties.isPassive();
+				boolean binary = ftpUploaderStaticProperties.isBinary();
+				boolean passive = ftpUploaderStaticProperties.isPassive();
 				ftpsRequest.setBinary(binary);
 				ftpsRequest.setPassive(passive);
 				

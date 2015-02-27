@@ -129,7 +129,7 @@ angular.module(
 							for(i = 0; i < scope.$parent.$parent.propertiesAddedToProcessor.length; i++) {
 								if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
 									scope.$parent.$parent.propertiesAddedToProcessor[i].value = '';	
-                                    scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;						
+                                    //scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;						
 								}
 							}
 						}
