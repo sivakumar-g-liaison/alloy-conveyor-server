@@ -1,3 +1,7 @@
+1.1.3
+-------------------------------
+Mailbox bug fixes and properties update
+
 1.1.2
 -------------------------------
 prod property updates
