@@ -198,7 +198,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_CONNECTION_TIMEOUT = "connectionTimeout";
 	public static final String PROPERTY_SOCKET_TIMEOUT = "socketTimeout";
 	public static final String PROPERTY_RETRY_ATTEMPTS = "retryAttempts";
-	public static final String PROPERTY_OTHER_REQUEST_HEADERS = "otherRequestHeaders";
+	public static final String PROPERTY_OTHER_REQUEST_HEADERS = "otherRequestHeader";
 	public static final String PROPERTY_PASSIVE = "passive";
 	public static final String PROPERTY_BINARY = "binary";
 	public static final String PROPERTY_ERROR_FILE_LOCATION = "errorFileLocation";

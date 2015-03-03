@@ -1106,7 +1106,7 @@ var rest = myApp.controller(
                     var property = $scope.propertiesAddedToProcessor[i];
                      if ($scope.propertiesAddedToProcessor[i].name === "") {
 				    	 continue;				    	 
-				    } else if (property.valueProvided === false) {
+				    } else if (property.valueProvided === false && property.mandatory === false) {
 					      property.value = '';
 					}				
 					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
@@ -1115,7 +1115,7 @@ var rest = myApp.controller(
                     var property = $scope.availableProperties[i];
                     if ($scope.availableProperties[i].name === "") {
 				    	 continue;				    	 
-				     } else if (property.valueProvided === false) {
+				     } else if (property.valueProvided === false && property.mandatory === false) {
 					      property.value = '';
 					 }						
 					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				

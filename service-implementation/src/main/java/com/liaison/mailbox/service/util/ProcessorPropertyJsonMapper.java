@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
@@ -35,6 +45,11 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Sweepe
 import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 
+/**
+ * Utilities for ProcessorProperties.
+ *
+ * @author OFS
+ */
 public class ProcessorPropertyJsonMapper {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorPropertyJsonMapper.class);
@@ -164,7 +179,7 @@ public class ProcessorPropertyJsonMapper {
 
 		} catch (JAXBException | JsonMappingException | JsonParseException e) {
 
-			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);		
+			RemoteProcessorPropertiesDTO remoteProcessorPropertiesDTO = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
 			staticProcessorProperties = retrieveStaticProcessorPropertyDTOFromRemoteProcessorPropertiesDTO(remoteProcessorPropertiesDTO, processor.getProcessorType(), protocol);
 			handleDynamicProperties(staticProcessorProperties, processor);
 		}
@@ -456,6 +471,7 @@ public class ProcessorPropertyJsonMapper {
 		        propertyDTO.setValue(property.getProcsrPropValue());
 		        propertyDTO.setDynamic(isDynamic);
 		        propertyDTO.setValueProvided(true);
+		        propertyDTO.setType("textarea");
 		        propertiesDTO.getStaticProperties().add(propertyDTO);
 		    }
 		}
