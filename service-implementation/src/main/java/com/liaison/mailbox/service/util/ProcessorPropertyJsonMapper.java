@@ -472,6 +472,7 @@ public class ProcessorPropertyJsonMapper {
 		        propertyDTO.setDynamic(isDynamic);
 		        propertyDTO.setValueProvided(true);
 		        propertyDTO.setType("textarea");
+		        propertyDTO.setDefaultValue("");
 		        propertiesDTO.getStaticProperties().add(propertyDTO);
 		    }
 		}
@@ -685,13 +686,15 @@ public class ProcessorPropertyJsonMapper {
 			if (staticProperty.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
 				continue;
 			}
-			if (staticProperty.getName().equals(MailBoxConstants.PORT_PROPERTY) && !MailBoxUtil.isEmpty(staticProperty.getValue())) {
-				staticProperty.setReadOnly(true);
-			}
+
 			Field field = staticPropertiesDTO.getClass().getDeclaredField(staticProperty.getName());
 			field.setAccessible(true);
 			Object fieldValue = field.get(staticPropertiesDTO);
 			String propertyValue = fieldValue.toString();
+
+			if (staticProperty.getName().equals(MailBoxConstants.PORT_PROPERTY) && !MailBoxUtil.isEmpty((Integer.parseInt(propertyValue) == 0)? "":propertyValue)) {
+				staticProperty.setReadOnly(true);
+			}
 			boolean isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
 			if (field.getType().equals(Boolean.TYPE)) {
 				isValueAvailable =(Boolean.valueOf(propertyValue).equals(true)?true:false);
