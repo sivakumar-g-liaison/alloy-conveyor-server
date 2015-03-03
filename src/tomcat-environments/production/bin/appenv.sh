@@ -26,27 +26,27 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$APP_ENV.xml"
 # Shortcode for APP_NAME:
 export SYSLOG_APPNAME="g2mailboxservice"
-export SYSLOG_HOST=[REQUIRED]
-export SYSLOG_PORT=[REQUIRED]
+export SYSLOG_HOST="systemlogs.liaison.prod"
+export SYSLOG_PORT="6515"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
 export SYSLOG_ID="App"
 export SYSLOG_MESSAGE_ID="AUDIT"
 export SYSLOG_FACILITY="Local0"
  
-export GLASS_SPECTRUM_PORT=[REQUIRED]
-export GLASS_SPECTRUM_IP=[REQUIRED]
-export GLASS_SPECTRUM_USER=[REQUIRED]
-export GLASS_SPECTRUM_PASSWORD=[REQUIRED]
-export GLASS_SPECTRUM_DATASPACE=[REQUIRED]
+export GLASS_SPECTRUM_PORT=443
+export GLASS_SPECTRUM_IP=at4p-vpspectrum
+export GLASS_SPECTRUM_USER=g2prod
+export GLASS_SPECTRUM_PASSWORD=4Va2mHXK7bJPcbcjdWKc8QjVMa
+export GLASS_SPECTRUM_DATASPACE=g2-prod
 export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
  
  
-export GLASS_METRIC_PORT=[REQUIRED]
-export GLASS_METRIC_IP=[REQUIRED]
-export GLASS_METRIC_USER=[REQUIRED]
-export GLASS_METRIC_PASSWORD=[REQUIRED]
-export GLASS_METRIC_DATASPACE=[REQUIRED]
+export GLASS_METRIC_PORT=443
+export GLASS_METRIC_IP=at4p-vpspectrum
+export GLASS_METRIC_USER=g2prod
+export GLASS_METRIC_PASSWORD=4Va2mHXK7bJPcbcjdWKc8QjVMa
+export GLASS_METRIC_DATASPACE=g2-prod
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
 export GSA_LENS_IP=[REQUIRED]
@@ -56,9 +56,9 @@ export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=[REQUIRED]
-export LOGSTASHPORT=[REQUIRED]
-export LOGSTASH_LOG_DIR=/opt/liaison/
+export LOGSTASHMACHINE=at4p-vplstash
+export LOGSTASHPORT=4560
+export LOGSTASH_LOG_DIR=/tmp
 # ==================================================================
 # log overrides
 # ==================================================================
