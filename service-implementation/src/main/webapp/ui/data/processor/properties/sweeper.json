@@ -21,7 +21,7 @@
          {
             "name":"pipeLineID",
             "displayName" : "PipelineId",
-            "value":"testpipeline",
+            "value":"",
             "type":"textarea",
             "readOnly":true,
             "mandatory":true,
@@ -77,7 +77,7 @@
          {
             "name":"numOfFilesThreshold",
             "displayName" : "NumOfFilesThreshold",
-            "value":"10",
+            "value":"",
             "type":"textarea",
             "mandatory":false,
             "dynamic":false,
@@ -92,16 +92,16 @@
          {
             "name":"payloadSizeThreshold",
             "displayName" : "PayloadSizeThreshold",
-            "value":"131072",
+            "value":"",
             "type":"textarea",
             "mandatory":false,
             "dynamic":false,
             "valueProvided":false,
-            "defaultValue":"123456",
+            "defaultValue":"131072",
             "validationRules":{
-               "pattern":"",
+               "pattern":"\/^\\d+$\/",
                "minLength": "",
-               "maxLength":""               
+               "maxLength":"512"               
             }
          },
          {

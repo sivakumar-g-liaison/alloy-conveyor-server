@@ -57,6 +57,10 @@ angular.module(
                     if (property.name === "add new -->") {
                         scope.showAddNewComponent.value = true;
                     } else {
+                    	
+                    	if (property.defaultValue && !property.value) {
+ 					       property.value = property.defaultValue;
+ 					    }
                         scope.showAddNewComponent.value = false;                      
                     }
                     angular.copy(property, scope.currentRowObject);

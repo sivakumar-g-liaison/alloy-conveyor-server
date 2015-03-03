@@ -43,13 +43,9 @@ angular.module(
                      scope.removeGridProperty = function() {
                          for (var i = 0; i < scope.addedProperties.length; i ++) {
                             var propertyToBeRemoved = scope.addedProperties[i];
-                            if (propertyToBeRemoved.name === scope.currentRowObject.name) {
-                                if (scope.currentRowObject.defaultValue !== "") {
-                                    scope.currentRowObject.value = scope.currentRowObject.defaultValue;
-                                } else {
-                                    scope.currentRowObject.value = "";
-                                }                               
+                            if (propertyToBeRemoved.name === scope.currentRowObject.name) {                                                 
                                 scope.currentRowObject.valueProvided = false;
+								scope.currentRowObject.value = "";
                                 if(scope.currentRowObject.dynamic === false) {
                                     scope.availableProperties.push(scope.currentRowObject);
                                 }    

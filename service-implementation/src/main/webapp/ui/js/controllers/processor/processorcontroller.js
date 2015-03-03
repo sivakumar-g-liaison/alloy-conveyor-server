@@ -1106,14 +1106,18 @@ var rest = myApp.controller(
                     var property = $scope.propertiesAddedToProcessor[i];
                      if ($scope.propertiesAddedToProcessor[i].name === "") {
 				    	 continue;				    	 
-				    }			
+				    } else if (property.valueProvided === false) {
+					      property.value = '';
+					}				
 					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
                 }
 				for (var i = 0; i < $scope.availableProperties.length; i++) {
                     var property = $scope.availableProperties[i];
                     if ($scope.availableProperties[i].name === "") {
 				    	 continue;				    	 
-				     }					
+				     } else if (property.valueProvided === false) {
+					      property.value = '';
+					 }						
 					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
                 }  				
 				
@@ -2232,7 +2236,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 		 
      $scope.cancel = function () {
         if ($scope.$parent.scriptIsEdit) {
-		  $scope.revertScriptURL();s
+		  $scope.revertScriptURL();
 		}	 
         $scope.$dismiss();
      }; 
