@@ -13,8 +13,6 @@ package com.liaison.mailbox.service.core;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,7 +34,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -90,6 +87,7 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -105,6 +103,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -134,9 +133,13 @@ public class ProcessorConfigurationService {
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JSONException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		LOGGER.debug("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
@@ -336,9 +339,13 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public GetProcessorResponseDTO getProcessor(String mailBoxGuid, String processorGuid) throws JsonParseException,
-			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
@@ -511,9 +518,13 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 */
 	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException {
+			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		LOGGER.debug("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
@@ -669,6 +680,7 @@ public class ProcessorConfigurationService {
 		configDao.merge(processor);
 	}
 
+
 	/**
 	 * Validates the given processor is belongs to the given mailbox.
 	 *
@@ -823,8 +835,13 @@ public class ProcessorConfigurationService {
 	 * @param mailboxGuid
 	 * @param httpListenerType
 	 * @return a Map containing the HttpListenerSpecific Properties
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws MailBoxConfigurationServicesException 
 	 */
-	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) {
+	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Map <String, String>httpListenerProperties = new HashMap <String, String>();
 
@@ -852,24 +869,30 @@ public class ProcessorConfigurationService {
 
 				if (null != processorDTO) {
 
-					// retrieving the httplistener pipeline id from remote processor properties
-					String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
-					boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
+					// retrieve required properties
+					/*ArrayList<String> propertyNames = new ArrayList<String>();
+					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
+					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
+					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK);
+					Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorDTO.getProcessorProperties(), propertyNames);
 
+					String pipeLineId = requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
+					boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
+					boolean authCheckRequired = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));*/
+					
+					HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(processor.getProcsrProperties(), processor);
+					
+					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
+					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
+					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
+					
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
 					//Commented by Veera -Not needed, because tenancy key format has changed as per service broker
 					//httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());
-					httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(isSecuredPayload));
+					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK, String.valueOf(authCheckRequired));
 
-					if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.HTTPLISTENER_PIPELINEID, pipeLineId);
-
-					//retrieving httplistener authenctication check required property from dynamic properties of processor
-					for (PropertyDTO propertyDTO : processorDTO.getDynamicProperties()) {
-
-						if (propertyDTO.getName().equals(MailBoxConstants.HTTPLISTENER_AUTH_CHECK)) {
-							httpListenerProperties.put(propertyDTO.getName(), propertyDTO.getValue());
-						}
-					}
+					if(!MailBoxUtil.isEmpty(pipeLineId)) httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
 					break;
 				}
 

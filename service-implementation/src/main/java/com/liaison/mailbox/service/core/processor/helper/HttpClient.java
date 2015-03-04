@@ -16,6 +16,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -34,13 +36,18 @@ import com.liaison.commons.util.client.http.authentication.BasicAuthenticationHa
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
-import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author VNagarajan
@@ -65,36 +72,88 @@ public class HttpClient {
 			HTTPRequest request = new HTTPRequest(null);
 			request.setLogger(LOGGER);
 
+	
 			// Convert the json string to DTO
-			RemoteProcessorPropertiesDTO properties = processor.getProperties();
+			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = null;
+			HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = null;
+			String url = null;
+			int connectionTimeout = 0;
+			int socketTimeout = 0;
+			int retryAttempts = 0;
+			String otherRequestHeaders = null;
+			boolean chunkedEncoding = false;
+			String httpVerb = null;
+			String httpVersion = null;
+			String contentType = null;
+			int port = 0;
+			
+			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
+				httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)processor.getProperties();
+				url = httpUploaderStaticProperties.getUrl();
+				connectionTimeout = httpUploaderStaticProperties.getConnectionTimeout();
+				socketTimeout = httpUploaderStaticProperties.getSocketTimeout();
+				retryAttempts = httpUploaderStaticProperties.getRetryAttempts();
+				otherRequestHeaders = httpUploaderStaticProperties.getOtherRequestHeader();
+				chunkedEncoding = httpUploaderStaticProperties.isChunkedEncoding();
+				httpVerb = httpUploaderStaticProperties.getHttpVerb();
+				httpVersion = httpUploaderStaticProperties.getHttpVersion();
+				contentType = httpUploaderStaticProperties.getContentType();
+				port = httpUploaderStaticProperties.getPort();
+			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
+				httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO)processor.getProperties();
+				url = httpDownloaderStaticProperties.getUrl();
+				connectionTimeout = httpDownloaderStaticProperties.getConnectionTimeout();
+				socketTimeout = httpDownloaderStaticProperties.getSocketTimeout();
+				retryAttempts = httpDownloaderStaticProperties.getRetryAttempts();
+				otherRequestHeaders = httpDownloaderStaticProperties.getOtherRequestHeader();
+				chunkedEncoding = httpDownloaderStaticProperties.isChunkedEncoding();
+				httpVerb = httpDownloaderStaticProperties.getHttpVerb();
+				httpVersion = httpDownloaderStaticProperties.getHttpVersion();
+				port = httpDownloaderStaticProperties.getPort();
+			}
+			
+			// retrieve required properties
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_URL);
+			propertyNames.add(MailBoxConstants.PROPERTY_PORT);
+			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
+			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
+			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
+			propertyNames.add(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS);
+			propertyNames.add(MailBoxConstants.PROPERTY_CHUNKED_ENCODING);
+			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERB);
+			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERSION);
+			propertyNames.add(MailBoxConstants.PROPERTY_CONTENT_TYPE);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
 
 			// Set url to HTTPRequest
-			request.setUrl(properties.getUrl());
+			request.setUrl(url);
 
 			// Set configurations
-			request.setVersion(properties.getHttpVersion());
-			request.setMethod(properties.getHttpVerb());
-			request.setNumberOfRetries(properties.getRetryAttempts());
-			request.setConnectionTimeout(properties.getConnectionTimeout());
-			request.setChunkedEncoding(properties.isChunkedEncoding());
-
-			if (properties.getSocketTimeout() > 0) {
-				request.setSocketTimeout(properties.getSocketTimeout());
+			request.setVersion(httpVersion);
+			request.setMethod(httpVerb);
+			request.setNumberOfRetries(retryAttempts);
+			request.setConnectionTimeout(connectionTimeout);
+			request.setChunkedEncoding(chunkedEncoding);
+			
+			if (socketTimeout > 0) {
+				request.setSocketTimeout(socketTimeout);
 			}
-			if (properties.getPort() > 0) {
-				request.setPort(properties.getPort());
+			if (port > 0) {
+				request.setPort(port);
 			}
 
 			// Set the Other header to HttpRequest
-			if (properties.getOtherRequestHeader() != null) {
-				for (HttpOtherRequestHeaderDTO header : properties.getOtherRequestHeader()) {
-					request.addHeader(header.getName(), header.getValue());
+			if (otherRequestHeaders != null) {
+				for (String s : otherRequestHeaders.split(",") ) {
+					String headers [] = s.split(":");
+					if(headers.length == 2)request.addHeader(headers[0], headers[1]);
 				}
 			}
 
 			// Set the content type header to HttpRequest
-			if (!MailBoxUtil.isEmpty(properties.getContentType())) {
-				request.addHeader("Content-Type", properties.getContentType());
+			if (!MailBoxUtil.isEmpty(contentType)) {
+				request.addHeader("Content-Type", contentType);
 			}
 
 			// Set the basic auth header for http request
@@ -138,7 +197,8 @@ public class HttpClient {
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
 				| MailBoxServicesException | SymmetricAlgorithmException | UnrecoverableKeyException
 				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException
-				| JsonParseException | CMSException | BootstrapingFailedException | CertificateException | JSONException e) {
+				| JsonParseException | CMSException | BootstrapingFailedException | CertificateException 
+				| JSONException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}

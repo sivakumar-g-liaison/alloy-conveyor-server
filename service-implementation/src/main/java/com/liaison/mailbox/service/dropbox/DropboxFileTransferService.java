@@ -30,11 +30,15 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
 public class DropboxFileTransferService {
@@ -53,7 +57,6 @@ public class DropboxFileTransferService {
 	 */
 	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream,
 			String profileId, String aclManifest, String fileName, String loginId) throws Exception {
-
 		DropboxTransferContentResponseDTO transferContentResponse = null;
 		long startTime = 0;
 		long endTime = 0;
@@ -131,8 +134,9 @@ public class DropboxFileTransferService {
 
 				// retrieving the httplistener pipeline id from remote processor
 				// properties
-				String pipeLineId = processorDTO.getRemoteProcessorProperties().getHttpListenerPipeLineId();
-				boolean isSecuredPayload = processorDTO.getRemoteProcessorProperties().isSecuredPayload();
+				DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(processor.getProcsrProperties(), processor);
+				String pipeLineId = dropboxProcessorStaticProperties.getHttpListenerPipeLineId();
+				boolean securedPayload = dropboxProcessorStaticProperties.isSecuredPayload();
 				String mailboxPguid = processor.getMailbox().getPguid();
 				String serviceInstanceId = processor.getServiceInstance().getName();
 
@@ -143,8 +147,8 @@ public class DropboxFileTransferService {
 				workTicket.setPipelineId(pipeLineId);
 				workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
 				workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-				workTicket.setAdditionalContext(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD,
-						String.valueOf(isSecuredPayload));
+				workTicket.setAdditionalContext(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
+						String.valueOf(securedPayload));
 				workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
 
 				// set ttl value from mailbox property or else from property

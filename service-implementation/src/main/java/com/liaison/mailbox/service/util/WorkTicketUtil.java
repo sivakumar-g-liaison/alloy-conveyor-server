@@ -28,7 +28,7 @@ public class WorkTicketUtil {
 	public static String retrievePipelineId(Map<String, String> httpListenerProperties) {
 
 		String pipelineId = null;
-		pipelineId = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
+		pipelineId = httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
 		LOGGER.info("PIPELINE ID is set to be :" + pipelineId);
 		return pipelineId;
 	}

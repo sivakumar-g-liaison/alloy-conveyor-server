@@ -143,7 +143,7 @@ public class StorageUtilities {
 
 			Map<String, Object> additionalContext = workTicket.getAdditionalContext();
 			boolean isSecure = Boolean.parseBoolean((String) additionalContext
-					.get(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD));
+					.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
 
 			long startTime = 0;
 			long endTime = 0;

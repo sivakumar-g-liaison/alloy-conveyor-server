@@ -1,0 +1,38 @@
+{
+  "processorDefinition": {
+    "type":"DROPBOXPROCESSOR",
+    "displayName":"DROPBOXPROCESSOR",
+    "protocol":"",
+    "handOverExecutionToJavaScript":false,
+    "staticProperties": [
+       {
+            "name":"httpListenerPipeLineId",
+            "displayName" : "httpListenerPipeLineId",
+            "value":"",
+            "type":"textarea",
+            "readOnly":true,
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			  "maxLength": "2048"
+            }
+         },
+         {
+            "name":"securedPayload",
+            "displayName" : "securedPayload",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]           
+        }
+    ]
+  }
+}

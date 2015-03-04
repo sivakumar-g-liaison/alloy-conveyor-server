@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -34,7 +34,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 
 /**
  * The persistent class for the PROCESSORS database table.
- * 
+ *
  *  @author OFS
  */
 @Entity
@@ -63,7 +63,7 @@ public class Processor implements Identifiable {
 	private String procsrProtocol;
 	private MailBox mailbox;
 	private ServiceInstance serviceInstance;
-	
+
 	private List<Credential> credentials;
 	private List<Folder> folders;
 	private List<ProcessorProperty> dynamicProperties;
@@ -101,12 +101,12 @@ public class Processor implements Identifiable {
 	public void setJavaScriptUri(String javaScriptUri) {
 		this.javaScriptUri = javaScriptUri;
 	}
-	
+
 	@Column(name = "DESCRIPTION", length = 512)
 	public String getProcsrDesc() {
 		return this.procsrDesc;
 	}
-	
+
 	public void setProcsrDesc(String procsrDesc) {
 		this.procsrDesc = procsrDesc;
 	}
@@ -155,7 +155,7 @@ public class Processor implements Identifiable {
 	public void setProcsrProtocol(String procsrProtocol) {
 		this.procsrProtocol = procsrProtocol;
 	}
-	
+
 	// bi-directional many-to-one association to Credential
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
@@ -218,7 +218,7 @@ public class Processor implements Identifiable {
 	public void setMailbox(MailBox mailbox) {
 		this.mailbox = mailbox;
 	}
-	
+
 	// bi-directional many-to-one association to Service instance id
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
@@ -267,11 +267,11 @@ public class Processor implements Identifiable {
 	public Class getEntityClass() {
 		return this.getClass();
 	}
-	
+
 
 	/**
 	 * Method returns the processor type from the discriminator value.
-	 * 
+	 *
 	 * @return The Processor type
 	 */
 	@Transient
@@ -284,7 +284,7 @@ public class Processor implements Identifiable {
 
 	/**
 	 * Factory method returns Processor instance corresponding to the input value.
-	 * 
+	 *
 	 * @param processorType
 	 *            enumeration indicating the type of processor type.
 	 * @return a new instance of Processor of the give type.
@@ -314,7 +314,7 @@ public class Processor implements Identifiable {
 
 	/**
 	 * Gets the configured email receivers from the mailbox for the processor.
-	 * 
+	 *
 	 * @return List of receivers
 	 */
 	@Transient

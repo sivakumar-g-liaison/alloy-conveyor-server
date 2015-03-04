@@ -1,0 +1,50 @@
+{
+  "processorDefinition": {
+    "type":"HTTPSYNCASYNC",
+    "displayName":"HTTPSYNCASYNC",
+    "protocol":"",
+    "handOverExecutionToJavaScript":false,
+    "staticProperties": [
+       {
+            "name":"httpListenerPipeLineId",
+            "displayName" : "HTTP Listener PipelineId",
+            "value":"",
+            "type":"textarea",
+            "readOnly":true,
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			  "maxLength": "2048"
+            }
+         },
+         {
+            "name":"securedPayload",
+            "displayName" : "securedPayload",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]           
+        },
+        {
+            "name":"httpListenerAuthCheckRequired",
+            "displayName" : "HTTP Listener Auth Check Required",
+            "value":"false",
+            "type":"select",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]          
+        }
+    ]
+  }
+}

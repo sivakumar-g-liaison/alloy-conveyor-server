@@ -55,7 +55,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
@@ -110,16 +110,17 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			glassMessage.setProtocol(Protocol.SWEEPER.getCode());
 			glassMessage.setExecutionId(executionId);
 			glassMessage.setPipelineId(getPipeLineID());
-			//GLASS LOGGING ENDS//
 
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			//GLASS LOGGING ENDS//
+			boolean handoverExecutionToJS = getProperties().isHandOverExecutionToJavaScript();
+			if (handoverExecutionToJS) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 			} else {
 				executeRequest();
 			}
-		} catch(JAXBException |IOException e) {
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -130,8 +131,21 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
-		String fileRenameFormat = getCustomProperties().getProperty(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
-		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
+
+		// retrieve required properties
+		/*ArrayList<String> propertyNames = new ArrayList<String>();
+		propertyNames.add(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
+		propertyNames.add(MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
+		Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
+
+		String fileRenameFormat = requiredProperties.get(MailBoxConstants.PROPERTY_FILE_RENAME_FORMAT);
+		String sweepedFileLocation = requiredProperties.get(MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
+
+		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;*/
+
+		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
+		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
 		// Validation of the necessary properties
@@ -151,8 +165,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			// Read from mailbox property - grouping js location
 			List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
-			String sweepedFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-					MailBoxConstants.SWEEPED_FILE_LOCATION));
+			String sweepedFileLocation = replaceTokensInFolderPath(sweeperStaticProperties.getSweepedFileLocation());
 			if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
                 LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
 
@@ -204,7 +217,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		}
 
 		} catch (MailBoxServicesException | IOException | URISyntaxException
-				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException | JSONException e) {
+				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
+				| JSONException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -223,10 +237,14 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public List<WorkTicket> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
 			String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
-			MailBoxServicesException, FS2Exception, JAXBException {
+			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         LOGGER.debug("SweepingDirectory: {}", root);
 		Path rootPath = Paths.get(root);
@@ -266,14 +284,17 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	private String getPipeLineID() throws JAXBException, JsonParseException, JsonMappingException, IOException {
+	private String getPipeLineID() throws JAXBException, JsonParseException, JsonMappingException,
+							IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		if (MailBoxUtil.isEmpty(this.pipeLineID)) {
-
-			RemoteProcessorPropertiesDTO properties = MailBoxUtil.unmarshalFromJSON(configurationInstance.getProcsrProperties(),
-					RemoteProcessorPropertiesDTO.class);
-			this.setPipeLineID(properties.getPipeLineID());
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+			this.setPipeLineID(sweeperStaticProperties.getPipeLineID());
 		}
 
 		return this.pipeLineID;
@@ -290,9 +311,14 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws URISyntaxException
 	 * @throws NoSuchMethodException
 	 * @throws MailBoxServicesException
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	private List<WorkTicketGroup> groupingWorkTickets(List<WorkTicket> workTickets) throws ScriptException,
-	IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException {
+	IOException, URISyntaxException, NoSuchMethodException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		String groupingJsPath = configurationInstance.getJavaScriptUri();
 		List<WorkTicketGroup> workTicketGroups = new ArrayList<>();
@@ -365,9 +391,13 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws URISyntaxException
 	 * @throws JAXBException
 	 * @throws JsonParseException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public void markAsSweeped(List<WorkTicket> workTickets, String fileRenameFormat, String sweepedFileLocation)
-			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException {
+			throws IOException, JSONException, FS2Exception, URISyntaxException, JsonParseException, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Path target = null;
 		Path oldPath = null;
@@ -390,15 +420,16 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			workTicket.setGlobalProcessId(globalProcessId);
 
 			Map <String, String>properties = new HashMap <String, String>();
-			properties.put(MailBoxConstants.HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(this.getProperties().isSecuredPayload()));
-			
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)this.getProperties();
+			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
+
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist,workTicket, properties, false);
 				payloadToPersist.close();
 			}
 
-            if(this.getProperties().isDeleteFileAfterSweep()){
+            if(sweeperStaticProperties.isDeleteFileAfterSweep()){
             	LOGGER.debug("Deleting file after sweep");
             	 delete(oldPath);
              }else{
@@ -412,6 +443,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		}
 
 		LOGGER.info("Renaming the processed files - done");
+
 
 	}
 
@@ -473,8 +505,13 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	private List<WorkTicket> generateWorkTickets(List<Path> result) throws JAXBException, IOException {
+	private List<WorkTicket> generateWorkTickets(List<Path> result) throws JAXBException, IOException,
+								NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		List<WorkTicket> workTickets = new ArrayList<>();
 		WorkTicket workTicket = null;
@@ -567,9 +604,13 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @return list of file attribute dto
 	 * @throws JAXBException
 	 * @throws IOException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	private List<WorkTicket> validateInprogressFiles(List<Path> inprogressFiles, long timelimit)
-			throws JAXBException, IOException {
+			throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		List<Path> files = new ArrayList<>();
 		for (Path file : inprogressFiles) {
@@ -616,16 +657,33 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 *            The file attribute to be added in the group
 	 * @return true if it can be added false otherwise
 	 * @throws MailBoxServicesException
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket) throws MailBoxServicesException {
+	protected Boolean canAddToGroup(WorkTicketGroup workTicketGroup, WorkTicket workTicket) throws MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, IOException {
 
 		long maxPayloadSize = 0;
 		long maxNoOfFiles = 0;
 
 		try {
 
-			String payloadSize = getCustomProperties().getProperty(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD);
-			String maxFile = getCustomProperties().getProperty(MailBoxConstants.NUMER_OF_FILES_THRESHOLD);
+			// retrieve required properties
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
+			propertyNames.add(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
+
+			String payloadSize = requiredProperties.get(MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
+			String maxFile = requiredProperties.get(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);*/
+
+			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
+			String payloadSize = sweeperStaticProperties.getPayloadSizeThreshold();
+			String maxFile = sweeperStaticProperties.getNumOfFilesThreshold();
+
 			if (!MailBoxUtil.isEmpty(payloadSize)) {
 				maxPayloadSize = Long.parseLong(payloadSize);
 			}

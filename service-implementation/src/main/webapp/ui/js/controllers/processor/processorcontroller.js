@@ -14,133 +14,30 @@ var rest = myApp.controller(
             	} else {            		
             		$scope.isJavaScriptExecution = true;
             	} 	            	
-            }
-            
+            } 
+                       
              //ssh key implementation
             $scope.disableSSHKeys = true;
-            $scope.disableCertificates = true;
-    	    $scope.portRequired = true;
-            $scope.isPortDisabled = false;
-			//GMB-155
-			$scope.sftpDefaultPort = '22';
-			$scope.ftpDefaultPort = '21';
-			$scope.ftpsDefaultPort = '21';
-			
+            $scope.disableCertificates = true;    	    
+            $scope.isPortDisabled = false;		
 			//check directory path in choose file
 			$scope.isDirectoryPath = true;
 			
             // To be Populated
             $scope.mailBoxId;
-            var block = $rootScope.block;
-			
-            // Function to modify the static properties to have additional properties of "binary"
-            // and "passive" for FTP protocols.Incase of FTPS protocols  Passive is mandatory and binary is static property.
-            $scope.modifyStaticPropertiesBasedOnProtocol = function () {
-					
-					if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS") {
-						/*issue: Binary and passive is added twice for FTP protocol.Hence condition is checked before adding the values. */
-					var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
-					var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
-					if (indexOfBinary === -1){
-						$scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-							"name": "Binary",
-							"id": "binary"
-						});
+            var block = $rootScope.block;	
+            		
+			function getIndexOfValue(objArray, value) {
+				var pos = -1;
+				for (var i=0; i<objArray.length; i++) {
+					pos ++;
+					if(objArray[i].value === value) {
+						return pos;
 					}
-					//Only for FTP passive is static property and it is mandatory for FTPS
-					if($scope.processor.protocol === 'FTP' && indexOfPassive === -1) {
-						  $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-							"name": "Passive",
-							"id": "passive"
-						});
-					}
-					var indexOfBinaryForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'binary');
-					var indexOfPassiveForAllStaticProperties = getIndexOfId($scope.allStaticProperties, 'passive');	
-					if (indexOfBinaryForAllStaticProperties === -1){
-						$scope.allStaticProperties.push({
-							"name": "Binary",
-							"id": "binary"
-						});
-					 }
-					 //Only for FTP passive property is static property and it is mandatory for FTPS
-					if($scope.processor.protocol === 'FTP' && indexOfPassiveForAllStaticProperties === -1) {
-					  $scope.allStaticProperties.push({
-						"name": "Passive",
-						"id": "passive"
-					  });
-					}
-				}else {
-					// Remove binary and passive properties from the array allStaticPropertiesThatAreNotAssignedValuesYet
-					var indexOfBinary = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'binary');
-					if (indexOfBinary !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfBinary, 1);
-					var indexOfPassive = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'passive');
-					if (indexOfPassive !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPassive, 1);
-					// Remove binary and passive properties from the array allStaticProperties
-					indexOfBinary = getIndexOfId($scope.allStaticProperties, 'binary');
-					if (indexOfBinary !== -1) $scope.allStaticProperties.splice(indexOfBinary, 1);
-					indexOfPassive = getIndexOfId($scope.allStaticProperties, 'passive');
-					if (indexOfPassive !== -1) $scope.allStaticProperties.splice(indexOfPassive, 1);
-			}
-            };
-            // Function to modify the static properties to have additional properties specific for Directory Sweeper.
-            $scope.modifyStaticPropertiesBasedOnProcessorType = function () {
-                if ($scope.procsrType.id === "SWEEPER") {
-                    $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-                        "name": "File Rename Format",
-                        "id": "filerenameformat"
-                    }, {
-                        "name": "Swept File Location",
-                        "id": "sweepedfilelocation"
-                    }, {
-                        "name": "Payload Size Threshold",
-                        "id": "payloadsizethreshold"
-                    }, {
-                        "name": "Number of File Threshold",
-                        "id": "numoffilesthreshold"
-                    });
-                } else if ($scope.procsrType.id === "HTTPSYNCPROCESSOR" || $scope.procsrType.id === "HTTPASYNCPROCESSOR") {
-                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [];
-                	 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-                		"name": "HTTP Listener Auth Check Required",
-                		"id":"httplistenerauthcheckrequired"
-                	});
-                } else if ($scope.procsrType.id === "FILEWRITER" || $scope.procsrType.id === "DROPBOXPROCESSOR") {
-                     $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [];
-					 $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-                		"name": "add new -->",
-                        "id": "add new -->"
-                	});
-                } else {
-                    $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{
-                        "name": "add new -->",
-                        "id": "add new -->"
-                    }, {
-                        "name": "Socket Timeout",
-                        "id": "socketTimeout"
-                    }, {
-                        "name": "Connection Timeout",
-                        "id": "connectionTimeout"
-                    }, {
-                        "name": "Retry Attempts",
-                        "id": "retryAttempts"
-                    }, {
-                        "name": "Chunked Encoding",
-                        "id": "chunkedEncoding"
-                    }, {
-                        "name": "Encoding Format",
-                        "id": "encodingFormat"
-                    }, {
-                        "name": "OtherRequest Header",
-                        "id": "otherRequestHeader"
-                    }, {
-                        "name": "Processed File Location",
-                        "id": "processedfilelocation"
-                    }, {
-                        "name": "Error File Location",
-                        "id": "errorfilelocation"
-                    }];
-                }  
-            };
+				}
+				return -1
+		    };    
+		           
             $scope.loadOrigin = function () {
 				
 				//GMB-196
@@ -188,9 +85,14 @@ var rest = myApp.controller(
                     linkedMailboxId: "",
                     linkedProfiles: [],
                     folders: [],
-                    credentials: [],
-                    dynamicProperties: [],
-                    remoteProcessorProperties: {}
+                    credentials: [],                    
+                    processorPropertiesInTemplateJson: {
+                    	type: "",
+                    	displayName: "",
+						protocol: "",
+                    	handOverExecutionToJavaScript: false,
+                    	staticProperties: []
+                    }
                 };
                 $scope.modal = {
                     "roleList": '',
@@ -217,178 +119,10 @@ var rest = myApp.controller(
                     "privatekey":'',
                     "publickey":''
                 };
-                $scope.processor.remoteProcessorProperties = {
-                    otherRequestHeader: []
-                };
-                $scope.enumstats = [{
-                    "name": "Active",
-                    "id": "ACTIVE"
-                }, {
-                    "name": "Inactive",
-                    "id": "INACTIVE"
-                }];
-                $scope.status = $scope.enumstats[0];
-                // Enum for procsr type
-                $scope.enumprocsrtype = [{
-                    "name": "Remote Downloader",
-                    "id": "REMOTEDOWNLOADER",
-                    "type": "Client"
-                }, {
-                    "name": "Remote Uploader",
-                    "id": "REMOTEUPLOADER",
-                    "type": "Client"
-                }, {
-                    "name": "Directory Sweeper",
-                    "id": "SWEEPER",
-                    "type": "Other"
-                }, {
-                    "name": "File Writer",
-                    "id": "FILEWRITER",
-                    "type": "Other"
-                }, {
-                	"name": "HTTP Async Processor",
-                	"id": "HTTPASYNCPROCESSOR",
-                	"type": "Server"              	
-                }, {
-                	"name": "HTTP Sync Processor",
-                	"id": "HTTPSYNCPROCESSOR",
-                	"type": "Server"
-                } , {
-                	"name": "Dropbox Processor",
-                	"id": "DROPBOXPROCESSOR",
-                	"type": "Server"
-                }];
-                $scope.procsrType = $scope.enumprocsrtype[0];
-                // Enum for protocol type
-                $scope.enumprotocoltype = [
-                    'FTP',
-                    'FTPS',
-                    'HTTP',
-                    'HTTPS',
-                    'SFTP'
-                ];
-                $scope.enumHttpVerb = [
-                   'DELETE',
-			       'GET',
-				   'POST',
-                   'PUT'          
-                ];
-              $scope.enumContentType = [                                                                                  
-                 'application/atom+xml',
-				 'application/EDIFACT',
-				 'application/edi-consent',
-				 'application/EDI-X12',
-				 'application/json',
-				 'application/octet-stream',
-				 'application/PKCS7-mime',
-				 'application/PKCS7-signature',
-				 'application/svg+xml',
-				 'application/xhtml+xml',
-				 'application/xml',
-                 'application/x-www-form-urlencoded',
-				 'message/disposition-notification',
-				 'multipart/form-data',  
-				 'multipart/report',
-				 'multipart/signed',                                 
-                 'text/html',
-                 'text/plain',
-                 'text/xml'
-               ];                
-                $scope.verb = $scope.enumHttpVerb[0];
-                $scope.processor.protocol = $scope.enumprotocoltype[0];
-                $scope.content = $scope.enumContentType[0];
-                // applying boolean value for chunked encoding
-                $scope.booleanValues = [
-                    false,
-                    true
-                ];
-                // Procsr Dynamic Props
-                $scope.sweeperMandatoryProperties = [{
-                    name: 'PipeLine Id',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                	 name: 'Secure Payload',
-                     value: true,
-                     allowAdd: false,
-                     isMandatory: true
-                }, {
-               	 name: 'Delete file after sweep',
-                 value: true,
-                 allowAdd: false,
-                 isMandatory: true
-                },{
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                $scope.httpListenerMandatoryProperties = [{
-                    name: 'HTTP Listener PipelineId',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                	 name: 'Secure Payload',
-                     value: true,
-                     allowAdd: false,
-                     isMandatory: true
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                $scope.ftpMandatoryProperties = [{
-                    name: 'URL',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'Port',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                $scope.httpMandatoryProperties = [{
-                    name: 'URL',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                },{
-                    name: 'Port',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'HTTP Version',
-                    value: '1.1',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'HTTP Verb',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'Content Type',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                $scope.fileWriterMandatoryProperties = [];
-                $scope.processorProperties = $scope.ftpMandatoryProperties;
+                $scope.status = $scope.initialProcessorData.supportedStatus.options[0];                
+                $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[0];				
+                $scope.selectedProcessorType =  $scope.procsrType.value;               
+                $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];      
                 // Procsr Folder Props
                 $scope.processorFolderProperties = [{
                     folderURI: '',
@@ -410,176 +144,7 @@ var rest = myApp.controller(
                 }];
                 // Default values of payloadsize and no of files threshold
                 $scope.payloadSizeThreshold = 131072;
-                $scope.numberOfFilesThreshold = 10;
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{
-                    "name": "add new -->",
-                    "id": "add new -->"
-                }, {
-                    "name": "Socket Timeout",
-                    "id": "socketTimeout"
-                }, {
-                    "name": "Connection Timeout",
-                    "id": "connectionTimeout"
-                }, {
-                    "name": "Retry Attempts",
-                    "id": "retryAttempts"
-                }, {
-                    "name": "Chunked Encoding",
-                    "id": "chunkedEncoding"
-                }, {
-                    "name": "Encoding Format",
-                    "id": "encodingFormat"
-                }, {
-                    "name": "OtherRequest Header",
-                    "id": "otherRequestHeader"
-                }, {
-                    "name": "Processed File Location",
-                    "id": "processedfilelocation"
-                }, {
-                    "name": "Error File Location",
-                    "id": "errorfilelocation"
-                }];
-                $scope.allStaticProperties = [{
-                    "name": "Socket Timeout",
-                    "id": "socketTimeout"
-                }, {
-                    "name": "Connection Timeout",
-                    "id": "connectionTimeout"
-                }, {
-                    "name": "Retry Attempts",
-                    "id": "retryAttempts"
-                }, {
-                    "name": "Chunked Encoding",
-                    "id": "chunkedEncoding"
-                }, {
-                    "name": "Encoding Format",
-                    "id": "encodingFormat"
-                }, {
-                    "name": "OtherRequest Header",
-                    "id": "otherRequestHeader"
-                }];
-                $scope.dynamicPropertiesDisplayedAsStaticProperties = [{
-                    "name": "Processed File Location",
-                    "id": "processedfilelocation"
-                }, {
-                    "name": "File Rename Format",
-                    "id": "filerenameformat"
-                }, {
-                    "name": "Swept File Location",
-                    "id": "sweepedfilelocation"
-                }, {
-                    "name": "Payload Size Threshold",
-                    "id": "payloadsizethreshold"
-                }, {
-                    "name": "Number of File Threshold",
-                    "id": "numoffilesthreshold"
-                 }, {
-                	"name": "Error File Location",
-                    "id": "errorfilelocation"
-                },  {
-            		"name": "HTTP Listener Auth Check Required",
-            		"id":"httplistenerauthcheckrequired"
-            	}];
-                 $scope.allStaticAndDynamicProperties = [{
-                    "name": "Socket Timeout",
-                    "id": "socketTimeout"
-                }, {
-                    "name": "Connection Timeout",
-                    "id": "connectionTimeout"
-                }, {
-                    "name": "Retry Attempts",
-                    "id": "retryAttempts"
-                }, {
-                    "name": "Chunked Encoding",
-                    "id": "chunkedEncoding"
-                }, {
-                    "name": "Encoding Format",
-                    "id": "encodingFormat"
-                }, {
-                    "name": "Port",
-                    "id": "port"
-                }, {
-                    "name": "OtherRequest Header",
-                    "id": "otherRequestHeader"
-                }, {
-                    "name": "Processed File Location",
-                    "id": "processedfilelocation"
-                }, {
-                    "name": "File Rename Format",
-                    "id": "filerenameformat"
-                }, {
-                    "name": "Swept File Location",
-                    "id": "sweepedfilelocation"
-                }, {
-                    "name": "Payload Size Threshold",
-                    "id": "payloadsizethreshold"
-                }, {
-                    "name": "Number of File Threshold",
-                    "id": "numoffilesthreshold"
-                 }, {
-                    "name": "Error File Location",
-                    "id": "errorfilelocation"
-                }, {
-                    "name": "Binary",
-                    "id": "binary"
-                }, {
-                    "name": "Passive",
-                    "id": "passive"
-                }, {
-            		"name": "HTTP Listener Auth Check Required",
-            		"id":"httplistenerauthcheckrequired"
-            	}];
-
-                // function to modify the static properties if the protocol is FTP or FTPS
-                $scope.modifyStaticPropertiesBasedOnProtocol();
-                $scope.allMandatoryFtpProperties = [{
-                    "name": "URL",
-                    "id": "url"
-                }, {
-                    "name": "Port",
-                    "id": "port"
-                }];
-                $scope.allMandatorySweeperProperties = [{
-                    "name": "PipeLine Id",
-                    "id": "pipeLineID"
-                }, {
-                	"name": "Secure Payload",
-                	"id": "securedPayload"
-                }, {
-                	"name": "Delete file after sweep",
-                	"id": "deleteFileAfterSweep"
-                }];
-                $scope.allMandatoryHttpProperties = [{
-                    "name": "HTTP Version",
-                    "id": "httpVersion"
-                }, {
-                    "name": "HTTP Verb",
-                    "id": "httpVerb"
-                }, {
-                    "name": "URL",
-                    "id": "url"
-                }, {
-                    "name": "Content Type",
-                    "id": "contentType"
-                } , {
-                    "name": "Port",
-                    "id": "port"
-                }];
-                $scope.allMandatoryHttpListenerProperties = [{
-                    "name": "HTTP Listener PipelineId",
-                    "id": "httpListenerPipeLineId"
-                }, {
-                	"name": "Secure Payload",
-                	"id": "securedPayload"
-                }];	
-				$scope.allMandatoryDropboxProperties = [{
-                    "name": "PipelineId",
-                    "id": "httpListenerPipeLineId"
-                }, {
-                	"name": "Encrypt Payload",
-                	"id": "securedPayload"
-                }];	
-                $scope.allMandatoryFileWriterProperties =[];
+                $scope.numberOfFilesThreshold = 10;                         
 				$scope.allStaticPropertiesForDownloaderProcessorFolder = [{
                     "name": "Remote Payload Location",
                     "id": "PAYLOAD_LOCATION"
@@ -681,291 +246,8 @@ var rest = myApp.controller(
                 $scope.allProfiles = [];
                 $scope.selectedProfiles = [];
             };
-            $scope.loadOrigin();
-            
-            /*This function is used to identify the protocol and enable dynamic property accordingly in gridOptionsForProcessor grid */
-			$scope.getProtocolProperty = function() {
-			
-				if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-					return "httpMandatoryProperty";
-				}else if ($scope.processor.protocol === 'FTP') {
-					return "ftpMandatoryProperty";
-				}else if ($scope.processor.protocol === 'FTPS') {
-					return "ftpsMandatoryProperty";
-				}
-				return "sftpmandatoryProperty";
-				
-			};
-            
-            $scope.gridOptionsForProcessor = {
-                data: 'processorProperties',
-                displaySelectionCheckbox: false,
-                enableRowSelection: false,
-                enableCellEditOnFocus: true,
-                enablePaging: false,
-                showFooter: false,
-                rowHeight: 80,
-				enableColumnResize : true,
-				plugins: [new ngGridFlexibleHeightPlugin()],
-                columnDefs: [{
-                    field: "name",
-                    width: "50%",
-                    displayName: "Name*",
-                    enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicComponentDirectiveForName" sort-name="sorting" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYet" selected-value="valueSelectedinSelectionBox" prop-name={{row.getProperty(col.field)}} add-new="showAddNew" added-property="addedProperty" icon-color="glyphIconColorForProcessorProperties" />'
-                }, {
-                    field: "value",
-                    width: "43%",
-                    displayName: "Value*",
-                    enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="getId(allStaticAndDynamicProperties, row)">\n\
-                    	<div class="alignDiv" ng-switch-when="">\n\
-                            <div ng-switch on="valueSelectedinSelectionBox.value.id">\n\
-                                <div ng-switch-when="">\n\
-                                    <textarea  class="form-control"  ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:90%;height:45px" placeholder="required" />\n\
-                                    <a ng-click="isModal(row)" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#valueModal"  class="right">\n\
-                                    <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                                </div>\n\
-                                <div ng-switch-when="chunkedEncoding">\n\
-                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
-                                </div>\n\
-                    	        <div ng-switch-when="binary">\n\
-                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
-                                </div>\n\
-                                 <div ng-switch-when="passive">\n\
-                                    <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
-                                </div>\n\
-				            	<div ng-switch-when="httplistenerauthcheckrequired">\n\
-				                	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=false" ng-options="property for property in booleanValues"></select>\n\
-                    			</div>\n\
-                                <div ng-switch-when="payloadsizethreshold">\n\
-                                     <textarea   class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=payloadSizeThreshold" style="width:90%;height:45px" placeholder="required"/>\n\
-                                </div>\n\
-                                <div ng-switch-when="numoffilesthreshold">\n\
-                                      <textarea  class="form-control" ng-model="COL_FIELD" ng-init="COL_FIELD=numberOfFilesThreshold"  style="width:90%;height:45px" placeholder="required"/>\n\
-                                </div>\n\
-                                <div ng-switch-default>\n\
-                                    <textarea  class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=null" style="width:90%;height: 45px" placeholder="required" />\n\
-                                    <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                                    <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                                </div>\n\
-                            </div>\n\
-                        </div>\n\
-                        <div ng-switch-default>\n\
-                            <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i ng-disabled="true" class="glyphicon glyphicon-new-window"></i></a>\n\
-                        </div>\n\
-						 <div ng-switch-when="pipeLineID">\n\
-                            <textarea ng-disabled="disablePipeLineId" class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-                        </div>\n\
-                    	<div ng-switch-when="securedPayload">\n\
-                        	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                    	</div>\n\
-                    	<div ng-switch-when="deleteFileAfterSweep">\n\
-                    	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                	   </div>\n\
-                    	 <div ng-switch-when="httpListenerPipeLineId">\n\
-                    		<textarea class="form-control" ng-disabled="disableHTTPListenerPipeLineId" ng-model="COL_FIELD" required ng-init="COL_FIELD" ng-input="COL_FIELD"  style="width:94%;height:45px" ng-disabled=true placeholder="required"/>\n\
-                    	</div>\n\
-                        <div ng-switch-when="otherRequestHeader">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=512 required style="width:90%;height: 45px" placeholder="required" />\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                        </div>\n\
-                        <div ng-switch-when="encodingFormat">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=512 required style="width:90%;height: 45px" placeholder="required" />\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                        </div>\n\
-                        <div ng-switch-when="chunkedEncoding">\n\
-                            <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                        </div>\n\
-                        <div ng-switch-when="httplistenerauthcheckrequired">\n\
-                    		<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                    	</div>\n\
-                        <div ng-switch-when="binary">\n\
-                              <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
-                              	<div ng-switch-when="ftpMandatoryProperty">\n\
-                                      <select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                                </div>\n\
-                          		<div ng-switch-default>\n\
-                                      <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-                                      <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                                      <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                                </div>\n\
-                              </div>\n\
-                       </div>\n\
-                        <div ng-switch-when="passive">\n\
-                              <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
-                                      <div ng-switch-when="ftpMandatoryProperty">\n\
-                                      	<select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select>\n\
-                                      </div>\n\
-									  <div ng-switch-when="ftpsMandatoryProperty">\n\
-                                      	<div ng-switch on = "isEdit"><div ng-switch-when="false"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-init="COL_FIELD=true" ng-options="property for property in booleanValues"></select></div>\n\
-                                        <div ng-switch-when="true"><select ng-model="COL_FIELD" ng-input="COL_FIELD" ng-options="property for property in booleanValues"></select></div></div>\n\
-                                      </div>\n\
-									  <div ng-switch-default>\n\
-                                            <textarea   class="form-control" ng-model="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-                                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                                      </div>\n\
-                              </div>\n\
-                        </div>\n\
-                        <div ng-switch-when="httpVerb">\n\
-                              <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
-                                      <div ng-switch-when="httpMandatoryProperty">\n\
-                                      	<select ng-model="verb" ng-change="onVerbChange(verb)" ng-options="property for property in enumHttpVerb"></select>\n\
-                                      </div>\n\
-                          			  <div ng-switch-default>\n\
-                                          <textarea   class="form-control" ng-model="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-                                          <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                                          <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                                    </div>\n\
-                            </div>\n\
-                      </div>\n\
-                      <div ng-switch-when="contentType">\n\
-                              <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
-                                      <div ng-switch-when="httpMandatoryProperty">\n\
-                                      	<select ng-model="content" ng-change="onContentTypeChange(content)" ng-options="property for property in enumContentType"></select>\n\
-                                      </div>\n\
-                          			  <div ng-switch-default>\n\
-                                          <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-                                          <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                                          <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                                    </div>\n\
-                            </div>\n\
-                      </div>\n\
-                      <div ng-switch-when="httpVersion">\n\
-                                  <div class="alignDiv" ng-switch on = "getProtocolProperty()">\n\
-                                      <div ng-switch-when="httpMandatoryProperty">\n\
-				                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="httpVersion" ng-pattern="' + $scope.httpVersionPattern + '" required style="width:90%;height: 45px" placeholder="required" />\n\
-				                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-				                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-				                            <div ng-show="(formAddPrcsr.httpVersion.$dirty && formAddPrcsr.httpVersion.$invalid) || (formAddPrcsr.httpVersion.$invalid)">\n\
-				                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.httpVersion.$error.pattern}" ng-show=formAddPrcsr.httpVersion.$error.pattern>Version should be 1.1</span>\n\
-				                            </div>\n\
-			                            </div>\n\
-                          			    <div ng-switch-default>\n\
-	                                          <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-maxLength=2048 required style="width:90%;height: 45px" placeholder="required" />\n\
-	                                          <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-	                                          <i class="glyphicon glyphicon-new-window"></i></a>\n\
-	                                    </div>\n\
-	                            </div>\n\
-                        </div>\n\
-                        <div ng-switch-when="url">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="propUrl" ng-pattern="' + $scope.inputPatternForURL + '" required style="width:90%;height: 45px" placeholder="required" ng-change = "OnChangeUrl(row)"/>\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="(formAddPrcsr.propUrl.$dirty && formAddPrcsr.propUrl.$invalid) || (formAddPrcsr.propUrl.$invalid)">\n\
-                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.propUrl.$error.pattern}" ng-show=formAddPrcsr.propUrl.$error.pattern>Enter valid URL</span>\n\
-                            </div></div>\n\
-                        <div ng-switch-when="socketTimeout">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="socketTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="(formAddPrcsr.socketTimeout.$dirty && formAddPrcsr.socketTimeout.$invalid) || (formAddPrcsr.socketTimeout.$invalid)">\n\
-                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.socketTimeout.$error.pattern}" ng-show=formAddPrcsr.socketTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
-                            </div>\n\
-                        </div>\n\
-                        <div ng-switch-when="connectionTimeout">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="connectionTimeout" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberTimeOutPattern + '" />\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="(formAddPrcsr.connectionTimeout.$dirty && formAddPrcsr.connectionTimeout.$invalid) || (formAddPrcsr.connectionTimeout.$invalid)">\n\
-                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.connectionTimeout.$error.pattern}" ng-show=formAddPrcsr.connectionTimeout.$error.pattern>Must be a numeric value (1-60000).</span>\n\
-                            </div>\n\
-                        </div>\n\
-                        <div ng-switch-when="retryAttempts">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="retryAttempts" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.retryAttemptsPattern + '" />\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-                            <div ng-show="(formAddPrcsr.retryAttempts.$dirty && formAddPrcsr.retryAttempts.$invalid) || (formAddPrcsr.retryAttempts.$invalid)">\n\
-                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.retryAttempts.$error.pattern}" ng-show=formAddPrcsr.retryAttempts.$error.pattern>Must be a numeric value (0-4).</span>\n\
-                            </div>\n\
-                        </div>\n\
-                        <div ng-switch-when="port">\n\
-                        <div class="alignDiv" ng-switch on="portRequired">\n\
-                        <div ng-switch-when="true"><textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" required style="width:90%;height: 45px" placeholder="required" ng-pattern="' + $scope.inputPatternForPort + '" />\n\
-                            <div ng-show="(formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid) || (formAddPrcsr.port.$invalid)">\n\
-                                <span class="help-block-custom" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
-                            </div>\n\
-                            </div><div ng-switch-default>\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" ng-disabled="isPortDisabled" name="port" style="width:90%;height: 45px" ng-pattern="' + $scope.inputPatternForPort + '" />\n\<div ng-show="(formAddPrcsr.port.$dirty && formAddPrcsr.port.$invalid) || (formAddPrcsr.port.$invalid)">\n\
-                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.port.$error.pattern}" ng-show=formAddPrcsr.port.$error.pattern>Invalid Data.</span>\n\
-                            </div>\n\
-                            </div></div>\n\
-							<div ng-switch on="isPortDisabled">\n\
-							<div ng-switch-when="false">\n\
-                            <a ng-click="isModal(row)" data-toggle="modal" data-target="#valueModal" class="right">\n\
-                            <i class="glyphicon glyphicon-new-window"></i></a>\n\
-							</div></div>\n\
-						</div>\n\
-                        <div ng-switch-when="payloadsizethreshold">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name ="payloadSizeThreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=payloadSizeThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                <div ng-show="(formAddPrcsr.payloadSizeThreshold.$dirty && formAddPrcsr.payloadSizeThreshold.$invalid) || (formAddPrcsr.payloadSizeThreshold.$invalid)">\n\
-                                    <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.payloadSizeThreshold.$error.pattern}" ng-show=formAddPrcsr.payloadSizeThreshold.$error.pattern>Enter valid number</span>\n\
-                                </div>\n\
-                        </div>\n\
-                        <div ng-switch-when="numoffilesthreshold">\n\
-                            <textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="numoffilesthreshold" style="width:90%;height:45px" ng-maxLength=512 placeholder="required" required value=numberOfFilesThreshold ng-pattern="' + $scope.numberPattern + '"/>\n\
-                                <div ng-show="(formAddPrcsr.numoffilesthreshold.$dirty && formAddPrcsr.numoffilesthreshold.$invalid) || (formAddPrcsr.numoffilesthreshold.$invalid)">\n\
-                                    <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.numoffilesthreshold.$error.pattern}" ng-show=formAddPrcsr.numoffilesthreshold.$error.pattern>Enter valid number</span>\n\
-            					</div>\n\
-                        </div>\n\
-                    </div>'
-                }, {
-                    field: "allowAdd",
-                    width: "7%",
-                    enableCellEdit: false,
-                    displayName: "Action",
-                    sortable: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div class="alignButton" ng-switch-when="true">\n\
-                                            <button   ng-click="addRow(row,valueSelectedinSelectionBox,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,addedProperty)"><i class="glyphicon glyphicon-plus-sign" ng-class="glyphIconColorForProcessorProperties.color"></i></button></div>' +
-                        '<div ng-switch-when="false">\n\
-                                           <div ng-switch on="row.getProperty(\'isMandatory\')">' +
-                        '<div ng-switch-when="true">-NA-</div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeRow(row,allStaticAndDynamicProperties,allStaticPropertiesThatAreNotAssignedValuesYet,processorProperties,valueSelectedinSelectionBox)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
-                        '</div>\n\
-                                    </div>\n\
-                             </div>'
-                }]
-            };
-           $scope.isPortDisabled = false;
-            $scope.OnChangeUrl = function(row) {
-               
-			   var url = row.entity.value;
-			   if(typeof url !== 'undefined') {
-					var ip = url.split('/')[2].split(':')[0];
-					var port = url.split('/')[2].split(':')[1]; 
-                     for(i = 0; i < $scope.processorProperties.length; i++) {
-                        if ($scope.processorProperties[i].name === 'Port') {
-							if ($scope.inputPatternForPort.test(port)) {
-								$scope.isPortDisabled = true;
-							} else {
-                                $scope.isPortDisabled = false;    
-							}
-							if (typeof port !== 'undefined' && port !== '') {
-								$scope.processorProperties[i].value = port;
-							} else {
-								$scope.defaultPortValue();
-								$scope.isPortDisabled = false;
-							}
-                            if(port === '') $scope.isPortDisabled = false;
-                       }
-                    }
-				} else {
-                    for(i = 0; i < $scope.processorProperties.length; i++) {
-                        if ($scope.processorProperties[i].name === 'Port') {
-                            $scope.processorProperties[i].value = '';
-							$scope.defaultPortValue();
-                            $scope.isPortDisabled = false;
-                       }
-                    }
-                }
-                               
-           }     
+            $scope.loadOrigin();           
+            $scope.isPortDisabled = false;
             
             $scope.getFolderId = function (objArray, row) {
                 return getId(objArray, row.getProperty('folderType'));
@@ -978,7 +260,7 @@ var rest = myApp.controller(
                     return '';
                 }
                 
-                if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+                if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
                 	var dbxVal = getId($scope.allMandatoryDropboxProperties, row.getProperty('name'));
               		if (dbxVal.length > 0) {
                     	return dbxVal;
@@ -1011,7 +293,7 @@ var rest = myApp.controller(
             };
             $scope.getIdValue = function (name) {
             
-            	if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+            	if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
             		var dbxVal = getId($scope.allMandatoryDropboxProperties, name);
                		 if (dbxVal.length > 0) {
              		   return dbxVal;
@@ -1040,7 +322,7 @@ var rest = myApp.controller(
             };
             $scope.getNameValue = function (id) {
 			
-				if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+				if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
 					var dbxVal = getName($scope.allMandatoryDropboxProperties, id);
 					if (dbxVal.length > 0) {
 						return dbxVal;
@@ -1225,13 +507,7 @@ var rest = myApp.controller(
                         '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
                         '</div>'
                 }]
-            };
-            $scope.onVerbChange = function (httpVerb) {
-                $scope.verb = httpVerb;
-            };
-			$scope.onContentTypeChange = function (contentType) {
-                $scope.content = contentType;
-            };			
+            };					
             $scope.initialLoad = function () {
                 $scope.readAllProcessors();
                 $scope.readAllProfiles();
@@ -1357,12 +633,11 @@ var rest = myApp.controller(
                     return '';
                 }
             };
-			
+            $scope.staticProperties;			
 			$scope.editProcAfterReadSecret = function(data, profData, processorId, blockuiFlag) {
 				
 				$scope.isEdit = true;
-                var procsrId = processorId;
-                
+                var procsrId = processorId;                
 				if (blockuiFlag === true) {
 					block.unblockUI();
 				}
@@ -1376,16 +651,16 @@ var rest = myApp.controller(
 				if (data.getProcessorResponse.processor.javaScriptURI != null && data.getProcessorResponse.processor.javaScriptURI != "") {
 						$scope.modal.uri = data.getProcessorResponse.processor.javaScriptURI;
 						$scope.modal.uri = 'gitlab:/'+ $scope.modal.uri;
-				}
+				}	
+							
+				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
 				
-				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;
-				
-				
+							
 				$scope.processor.description = data.getProcessorResponse.processor.description;				
-				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
-				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
-				$scope.processor.protocol = data.getProcessorResponse.processor.protocol;
-				$scope.selectedProfiles = data.getProcessorResponse.processor.profiles;
+				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.initialProcessorData.supportedStatus.options[0] : $scope.status = $scope.initialProcessorData.supportedStatus.options[1];
+				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);				
+				$scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);				
+				$scope.selectedProfiles = data.getProcessorResponse.processor.profiles;				
 				//Schedules
 				for (var i = 0; i < $scope.selectedProfiles.length; i++) {
 					// To remove $$hashKey
@@ -1396,352 +671,72 @@ var rest = myApp.controller(
 							break;
 						}
 					}
-				}
-				 if($scope.processor.protocol === "FTP" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTPS") {
-					$scope.portRequired = true;
-				} else {
-					$scope.portRequired = false;
-				}
-                
-                if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
+				}                
+                if ($scope.processor.protocol.value === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol.value === 'HTTPASYNCPROCESSOR') {
                     $scope.isProcessorTypeHTTPListener = true;
                 } else {
                     $scope.isProcessorTypeHTTPListener = false;
                 }
                 
-                if ($scope.processor.protocol === 'FILEWRITER') {
+                if ($scope.processor.protocol.value === 'FILEWRITER') {
                     $scope.isProcessorTypeFileWriter = true;
                 } else {
                     $scope.isProcessorTypeFileWriter = false;
                 }
                 
-                if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+                if ($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
                     $scope.isProcessorTypeDropbox = true;
                 } else {
                     $scope.isProcessorTypeDropbox = false;
                 }
 				//GMB 221
-				if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
-					$scope.disableCertificates = false;
-					
+				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
+					$scope.disableCertificates = false;	
+									
 				} else {
 					$scope.disableCertificates = true;
 				}
-				$scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true; 
+				$scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true; 
                  
-				// Pushing out dynamis props
-				$scope.processorProperties = []; //Removing now so that the add new option always shows below the available properties
-				$scope.httpMandatoryProperties = [];
-				$scope.ftpMandatoryProperties = [];
-				$scope.sweeperMandatoryProperties = [];
-                $scope.httpListenerMandatoryProperties = [];
-				$scope.dropboxMandatoryProperties = [];
-                $scope.fileWriterMandatoryProperties = [];
-				$scope.modifyStaticPropertiesBasedOnProtocol();
-				$scope.modifyStaticPropertiesBasedOnProcessorType();
 				$scope.setFolderData();
 				$scope.isPortDisabled = false;
-				var json_data = data.getProcessorResponse.processor.remoteProcessorProperties;
-				
-				//for ftps protocol add passive as mandatory property
-				var indexOfPassive = getIndexOfId($scope.allMandatoryFtpProperties, "passive");
-				if($scope.processor.protocol === 'FTPS') {
-					if(indexOfPassive === -1 ) {
-						 $scope.allMandatoryFtpProperties.push({
-							"name": "Passive",
-							"id": "passive"
-						});
-					 }
-				}else {
-					if(indexOfPassive !== -1) {
-						$scope.allMandatoryFtpProperties.splice(indexOfPassive , 1);
-					}
-				}
-				var otherReqIndex = -1;
-				var i = 0;
-				for (var prop in json_data) {
-					var allowPort = false;
-					var allowFalseValues = false;					
-					if(prop === 'handOverExecutionToJavaScript') continue;		
-					if(prop === 'port' && json_data[prop] == 0) allowPort = true;
-					
-					 // the properties of type boolean will not be displayed in the grid if the value is set as false. 
-					// But Mandatory properties of type boolean will be displayed even if the value is false in the grid
-					if ((prop === 'passive' && json_data[prop] === false && $scope.processor.protocol === 'FTPS') || 
-                       (prop === 'securedPayload' && json_data[prop] === false && ($scope.processor.protocol === 'SWEEPER' || 
-                    		   $scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR' || $scope.processor.protocol === 'DROPBOXPROCESSOR')) ) {					   
-                        allowFalseValues = true;
+				$scope.propertiesAddedToProcessor = [];
+			    $scope.availableProperties = [];
+                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
+                
+                for (var i = 0; i < $scope.staticProperties.length; i++) {				     
+					 var property = $scope.staticProperties[i];
+					 if (property.mandatory === true || property.valueProvided === true) {
+                        $scope.propertiesAddedToProcessor.push(property);
+                    } else if (property.mandatory === false || property.valueProvided === false) {
+                        $scope.availableProperties.push(property);
                     }
-
-					if ((json_data[prop] !== 0 || allowPort) && (json_data[prop] !== false || allowFalseValues) && json_data[prop] !== null && json_data[prop] !== '') {
-						i++;
-						if (prop === 'otherRequestHeader' && json_data[prop].length === 0) {
-							otherReqIndex = i;
-						}
-						
-						var propertyValue = null;
-						if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-							 if (prop === 'otherRequestHeader' || prop === 'httpVerb' || prop === 'contentType') {
-								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
-							 } else if (prop === 'port') {
-								propertyValue = (json_data[prop] != 0)?json_data[prop]:$scope.getPortFromURL(json_data['url']);
-							 } else {
-								propertyValue = json_data[prop];
-							 }
-							$scope.httpMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatoryHttpProperties, prop) === -1) ? false : true
-							});
-							
-							if(prop === 'port' && json_data[prop] != 0 && $scope.getPortFromURL(json_data['url']).length > 0) $scope.isPortDisabled = true;
-							
-						} else if ($scope.processor.protocol === 'SWEEPER') {
-
-							 if (prop === 'otherRequestHeader') {
-								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
-								
-								if(json_data[prop].length > 0) {
-									$scope.sweeperMandatoryProperties.push({
-										name: $scope.getNameValue(prop),
-										value: propertyValue,
-										allowAdd: false,
-										isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
-									});
-								}
-						   
-							 } else if (prop === 'port') {
-								propertyValue = (json_data[prop] != 0)?json_data[prop]:$scope.getPortFromURL(json_data['url']);
-							 } else if (prop === 'pipeLineID') {
-								propertyValue = $rootScope.pipelineId;
-								$scope.sweeperMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
-								});
-							 } else {
-								propertyValue = json_data[prop];
-								$scope.sweeperMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatorySweeperProperties, prop) === -1) ? false : true
-							});
-							 }
-																	
-						} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
-                             if (prop === 'otherRequestHeader') {
-								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
-								
-								if(json_data[prop].length > 0) {
-									$scope.httpListenerMandatoryProperties.push({
-										name: $scope.getNameValue(prop),
-										value: propertyValue,
-										allowAdd: false,
-										isMandatory: (getIndexOfId($scope.allMandatoryHttpListenerProperties, prop) === -1) ? false : true
-									});
-								}
-						   
-							 } else if (prop === 'port') {
-								propertyValue = (json_data[prop] != 0)?json_data[prop]:$scope.getPortFromURL(json_data['url']);
-							 } else if (prop === 'httpListenerPipeLineId') {
-								propertyValue = $rootScope.pipelineId;
-								$scope.httpListenerMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatoryHttpListenerProperties, prop) === -1) ? false : true
-								});
-							 } else {
-								propertyValue = json_data[prop];
-								$scope.httpListenerMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatoryHttpListenerProperties, prop) === -1) ? false : true
-							});
-							}
-                        
-                        }  else if ($scope.processor.protocol === 'FILEWRITER') {
-                        	
-                        	$scope.fileWriterMandatoryProperties = [];
-                        } else if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
-							if (prop === 'httpListenerPipeLineId') {
-								propertyValue = $rootScope.pipelineId;
-								$scope.dropboxMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatoryDropboxProperties, prop) === -1) ? false : true
-								});
-							 } 	
-							if (prop === 'securedPayload') {
-								propertyValue = json_data[prop];
-								$scope.dropboxMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatoryDropboxProperties, prop) === -1) ? false : true
-								});
-							}
-						} else {
-							 if (prop === 'otherRequestHeader') {
-								propertyValue = $scope.setRemotePropData(json_data[prop], prop);
-							 } else if (prop === 'port') {
-								propertyValue = (json_data[prop] != 0)?json_data[prop]:$scope.getPortFromURL(json_data['url']);
-							 } else {
-								propertyValue = json_data[prop];
-							 }
-							$scope.ftpMandatoryProperties.push({
-								name: $scope.getNameValue(prop),
-								value: propertyValue,
-								allowAdd: false,
-								isMandatory: (getIndexOfId($scope.allMandatoryFtpProperties, prop) === -1) ? false : true
-							});
-							
-							if(prop === 'port' && json_data[prop] != 0 && $scope.getPortFromURL(json_data['url']).length > 0) $scope.isPortDisabled = true;
-						}
-						var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, prop);
-						if (indexOfElement !== -1) {
-							$scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-						}
-					}
 				}
-										
+                if ($scope.processor.protocol.value !== 'FILEWRITER') {
+                	$scope.propertiesAddedToProcessor.push({
+                    	
+                        "name":"",
+                        "displayName" : "",
+                        "value":"",
+                        "type":"textarea",
+                        "readOnly":"",
+                        "mandatory":false,
+                        "dynamic":false,
+                        "valueProvided":false,
+                        "validationRules": {}
+                     });               	
+                }
+                
 				
-				// Condition which executes only if OtherRequest Headers comes with an empty value
-				// So that there is no need to show it in the UI
-				if (otherReqIndex !== -1) {
-					if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-						$scope.httpMandatoryProperties.splice(otherReqIndex - 1, 1);
-					}  else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
-
-                        $scope.httpListenerMandatoryProperties.splice(otherReqIndex - 1, 1);
-                    } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR' ) {
-                        $scope.dropboxMandatoryProperties.splice(otherReqIndex - 1, 1);
-                    } else {
-						$scope.ftpMandatoryProperties.splice(otherReqIndex - 1, 1);
-					}
-					 if ($scope.processor.protocol !== 'HTTPSYNCPROCESSOR' && $scope.processor.protocol !== 'HTTPASYNCPROCESSOR' && $scope.processor.protocol !== 'DROPBOXPROCESSOR') {
-	                        $scope.allStaticPropertiesThatAreNotAssignedValuesYet.push({
-	                            "name": "OtherRequest Header",
-	                            "id": "otherRequestHeader"
-	                        });
-	                 }
-				}
-				
-				for (var i = 0; i < data.getProcessorResponse.processor.dynamicProperties.length; i++) {
-					// To get id as property value for the dynamic properties which are displayed as static properties
-					var dynamicPropertyIndex = getIndexOfId($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
-					var dynamicPropertyName = (dynamicPropertyIndex === -1) ? data.getProcessorResponse.processor.dynamicProperties[i].name : getName($scope.dynamicPropertiesDisplayedAsStaticProperties, data.getProcessorResponse.processor.dynamicProperties[i].name);
-					if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-                        $scope.httpMandatoryProperties.push({
-                            name: dynamicPropertyName,
-                            value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-                            allowAdd: false,
-                            isMandatory: false
-                        });
-						
-					} else if ($scope.processor.protocol === 'SWEEPER') {
-						$scope.sweeperMandatoryProperties.push({
-							name: dynamicPropertyName,
-							value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-							allowAdd: false,
-							isMandatory: false
-						});
-					} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
-                        if (data.getProcessorResponse.processor.dynamicProperties[i].name === 'httplistenerauthcheckrequired' && data.getProcessorResponse.processor.dynamicProperties[i].value != "false") {
-                            var propertyValue = Boolean(data.getProcessorResponse.processor.dynamicProperties[i].value);
-                            $scope.httpListenerMandatoryProperties.push({
-                                name: dynamicPropertyName,
-                                value: propertyValue,
-                                allowAdd: false,
-                                isMandatory: false
-                            });
-                        } 
-                    } else if ($scope.processor.protocol === 'FILEWRITER') {
-                    	$scope.fileWriterMandatoryProperties = [];
-                    } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
-						$scope.dropboxMandatoryProperties.push({
-							name: dynamicPropertyName,
-							value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-							allowAdd: false,
-							isMandatory: false
-						});
-                    } else {
-						$scope.ftpMandatoryProperties.push({
-							name: dynamicPropertyName,
-							value: data.getProcessorResponse.processor.dynamicProperties[i].value,
-							allowAdd: false,
-							isMandatory: false
-						});
-						
-						if (data.getProcessorResponse.processor.dynamicProperties[i].name == 'Port' && data.getProcessorResponse.processor.dynamicProperties[i].value !== '')
-							$scope.isPortDisabled = true;
-						
-					}
-					// To remove already value assigned properties from array allStaticPropertiesThatAreNotAssignedValuesYet
-					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, data.getProcessorResponse.processor.dynamicProperties[i].name);
-					if (indexOfElement !== -1 && data.getProcessorResponse.processor.dynamicProperties[i].value !== "false") {
-						$scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfElement, 1);
-					}
-				}
-				if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-					$scope.httpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
-						name: '',
-						value: '',
-						allowAdd: true,
-						isMandatory: false
-					});
-					$scope.processorProperties = $scope.httpMandatoryProperties;
-				} else if ($scope.processor.protocol === 'SWEEPER') {
-					$scope.sweeperMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
-						name: '',
-						value: '',
-						allowAdd: true,
-						isMandatory: false
-					});
-					$scope.processorProperties = $scope.sweeperMandatoryProperties;
-					$scope.disablePipeLineId = true;
-
-				} else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
-					$scope.httpListenerMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
-						name: '',
-						value: '',
-						allowAdd: true,
-						isMandatory: false
-					});
-					$scope.processorProperties = $scope.httpListenerMandatoryProperties;
-					$scope.disableHTTPListenerPipeLineId = true;
-                 } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
-					$scope.dropboxMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
-						name: '',
-						value: '',
-						allowAdd: true,
-						isMandatory: false
-					});
-					$scope.processorProperties = $scope.dropboxMandatoryProperties;
-					$scope.disableHTTPListenerPipeLineId = true;
-                 } else if ($scope.processor.protocol === 'FILEWRITER') {
-					$scope.processorProperties = $scope.fileWriterMandatoryProperties;				
-				} else {
-					$scope.ftpMandatoryProperties.push({ //Adding now so that the add new option always shows below the available properties
-						name: '',
-						value: '',
-						allowAdd: true,
-						isMandatory: false
-					});
-					$scope.processorProperties = $scope.ftpMandatoryProperties;
-				}
+				//var json_data = data.getProcessorResponse.processor.processorPropertiesInTemplateJson;
+				//$scope.propertiesAddedToProcessorpush(data.getProcessorResponse.processor.processorPropertiesInTemplateJson);						
 				$scope.processorFolderProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
 				for (var i = 0; i < data.getProcessorResponse.processor.folders.length; i++) {
 					$scope.processorFolderProperties.push({
 						folderURI: data.getProcessorResponse.processor.folders[i].folderURI,
 						folderType: $scope.getFolderTypeDuringProcessorEdit(data.getProcessorResponse.processor.folders[i].folderType),
 						folderDesc: data.getProcessorResponse.processor.folders[i].folderDesc,
-						isMandatory: (($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'FILEWRITER') && (data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION' || data.getProcessorResponse.processor.folders[i].folderType === 'FILE_WRITE_LOCATION')) ? true : false,
+						isMandatory: (($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'FILEWRITER') && (data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION' || data.getProcessorResponse.processor.folders[i].folderType === 'FILE_WRITE_LOCATION')) ? true : false,
 						allowAdd: false
 					});
 					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,
@@ -1795,7 +790,6 @@ var rest = myApp.controller(
 				  // To Properly set the sshkey modal and certificate modal values
 				$scope.processCredentialDetails();
 				
-				
 			}
 			
 			function readSecretFromKM(url, a, data, profData, procsrId, blockuiFlag) {
@@ -1835,7 +829,7 @@ var rest = myApp.controller(
 						$scope.scriptIsEdit = true;
 						}
 						
-						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;					
+						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;					
 						
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
@@ -1903,127 +897,28 @@ var rest = myApp.controller(
                 }
                 $scope.profilesSelectedinProcessorProfile = [];
             };
-            $scope.setTypeDuringProcessorEdit = function (protoId) {
-                //console.log(protoId);
-                //console.log(getIndexOfId($scope.enumprocsrtype, protoId));
-                $scope.procsrType = $scope.enumprocsrtype[getIndexOfId($scope.enumprocsrtype, protoId)];
+            $scope.setTypeDuringProcessorEdit = function (processorValue) {               
+                $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, processorValue)];
             };
+			$scope.setTypeDuringProtocolEdit = function (protocolValue) {               
+                $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[getIndexOfValue($scope.initialProcessorData.supportedProtocols.options, protocolValue)];
+				if (typeof($scope.processor.protocol) === "undefined") {
+				$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, protocolValue)];
+				}
+            };			
 			
 			$scope.getFolderTypeDuringProcessorEdit = function (folderID) {
 				//console.log(folderID);
-                if($scope.procsrType.id === 'REMOTEDOWNLOADER') {
+                if($scope.procsrType.value === 'REMOTEDOWNLOADER') {
 					return getName($scope.allStaticPropertiesForDownloaderProcessorFolder, folderID);
-				} else if ($scope.procsrType.id === 'REMOTEUPLOADER') {
+				} else if ($scope.procsrType.value === 'REMOTEUPLOADER') {
 					return getName($scope.allStaticPropertiesForUploaderProcessorFolder, folderID);
-				} else if ($scope.procsrType.id === 'FILEWRITER') {
+				} else if ($scope.procsrType.value === 'FILEWRITER') {
 					return getName($scope.allStaticPropertiesForFileWriterProcessorFolder, folderID);
 				} else {
 					return getName($scope.allStaticPropertiesForSweeperProcessorFolder, folderID);
 				}
-			};
-            // For Procsr Dynamic Props
-            $scope.addRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData, addedProperty) {
-            
-                if (valueSelectedinSelectionBox.value === null) {
-                    showAlert('It is mandatory to set the name and value of the property being added.', 'error');
-                    return;
-                }
-                var attrName = '';
-				if (valueSelectedinSelectionBox.value.id !== 'add new -->') {
-                    attrName = valueSelectedinSelectionBox.value.name;
-                } else if (addedProperty.value !== '') {
-                    attrName = addedProperty.value;
-                }				
-				var rowVal;
-                if (row.getProperty('value') === null) {
-                    rowVal = '';
-               } else if (typeof(row.getProperty('value')) === 'undefined') {			   
-				    rowVal = null;
-			   } else {
-                    // row.getProperty('value') is converted to string since the Propertyvalue may contain boolean value for the property
-                    // "chunkedEncoding" if the user has entered the value of "false", then checking the !row.getProperty('value')
-                    // will always be true and the below alert will be displayed.
-                   rowVal = row.getProperty('value').toString();
-                }				
-                 // console.log(row.getProperty('value').toString());
-                 if (!attrName || !rowVal) {
-                    showAlert('It is mandatory to set the name and value of the property being added.', 'error');
-                    return;
-                }
-                if (valueSelectedinSelectionBox.value.id === 'socketTimeout' || valueSelectedinSelectionBox.value.id === 'connectionTimeout' || valueSelectedinSelectionBox.value.id === 'retryAttempts' || valueSelectedinSelectionBox.value.id === 'port' || valueSelectedinSelectionBox.value.id === 'payloadsizethreshold' || valueSelectedinSelectionBox.value.id === 'numoffilesthreshold') {
-						if (!($scope.numberPattern.test(row.getProperty('value')))) {
-							showAlert('Value should be a number.', 'error');
-							return;
-						}
-						
-						if(valueSelectedinSelectionBox.value.id === 'retryAttempts') {
-							if(row.getProperty('value') < 0 || row.getProperty('value') > 4) {
-								showAlert('Value should be between 0 to 4.', 'error');
-								return;
-							}
-						}
-						
-						if(valueSelectedinSelectionBox.value.id === 'socketTimeout' || valueSelectedinSelectionBox.value.id === 'connectionTimeout') {
-							if(row.getProperty('value') < 1 || row.getProperty('value') > 60000) {
-								showAlert('Value should be between 1 to 60000.', 'error');
-								return;
-							}
-						}
-				   } 
-                 if (attrName.length > 128) {
-					showAlert('Property Name cannot be longer than 128 characters.', 'information');
-					return;
-                } 				
-				if (rowVal.length > 2048) {
-				   showAlert('Property  Value cannot be longer than 2048 characters.', 'information');
-                    return;			
-			    }		
-                if (checkNameDuplicate(gridData, attrName)) {
-                    showAlert('Name already added.', 'error');
-                    return;
-                }
-                var indexOfSelectedElement = getIndex(allPropsWithNovalue, attrName);
-                // Displays an alert if the dynamic property entered by user is already in static properties provided
-                if ((valueSelectedinSelectionBox.value.id === 'add new -->') && (indexOfSelectedElement !== -1)) {
-                    showAlert('The property is already available in dropdown provided.Please use the appropriate property from dropdown menu', 'error');
-                    return;
-                }
-                /*$scope.informer.inform("error message", "error");
-             $scope.informer.inform("info message", "info");
-             $scope.allInfos = $scope.informer.allInfos;
-             $scope.remove = $scope.informer.remove;*/
-                var index = gridData.indexOf(row.entity);
-                gridData.splice(index, 1);
-                gridData.push({
-                    name: attrName,
-                    value: row.getProperty('value'),
-                    allowAdd: false,
-                    isMandatory: false
-                });
-                if (indexOfSelectedElement !== -1) {
-                    allPropsWithNovalue.splice(indexOfSelectedElement, 1);
-                }
-                //}
-                gridData.push({
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                });
-                valueSelectedinSelectionBox.value = '';
-                addedProperty.value = '';
-				
-            };
-            // For Procsr Dynamic Props
-            $scope.removeRow = function (row, allProps, allPropsWithNovalue, gridData, valueSelectedinSelectionBox) {
-                var index = gridData.indexOf(row.entity);
-                gridData.splice(index, 1);
-                var removedProperty = row.getProperty('name');
-                var indexOfSelectedElement = getIndex(allProps, removedProperty);
-                if (indexOfSelectedElement > -1) {
-                    allPropsWithNovalue.push(allProps[indexOfSelectedElement]);
-                }
-            };
+			};           
             // For Procsr Folder Props
             $scope.addFolderRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
                 //$log.info(valueSelectedinSelectionBox.value.id);
@@ -2169,7 +1064,7 @@ var rest = myApp.controller(
             };
             $scope.getIndex = function (name) {
             	
-            	if($scope.processor.protocol === 'DROPBOXPROCESSOR') {
+            	if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
             		var dbxVal = getIndex($scope.allMandatoryDropboxProperties, name);
 					if (dbxVal !== -1) {
                     	return dbxVal;
@@ -2203,123 +1098,38 @@ var rest = myApp.controller(
                 $scope.formAddPrcsr.$setPristine();
                
             };
-            $scope.saveProcessor = function () {			
-					
-            	var lenDynamicProps = $scope.processorProperties.length;
-                var commaSplit = [];
-                var mandatoryArray = [];
-                for (var i = 0; i < lenDynamicProps - 1; i++) {
-                    var index = $scope.getIndex($scope.processorProperties[i].name);
-                    var name = (index === -1) ? $scope.processorProperties[i].name : $scope.getIdValue($scope.processorProperties[i].name);
-                    var value = $scope.processorProperties[i].value;
-                    if (name === 'url') {
-                        mandatoryArray.push({
-                            name: name,
-                            value: value
-                        });
-                    }
-                    if ((name === 'port') && ($scope.processor.type !== 'SWEEPER')) {
-                        mandatoryArray.push({
-                            name: name,
-                            value: value
-                        });
-                    }
-					
-					if((name === 'passive') && ($scope.processor.type !== 'FTPS')) {
-						 mandatoryArray.push({
-                            name: name,
-                            value: value
-                        });
-					}
-					
-                    if (name === 'pipeLineID' || name === 'httpListenerPipeLineId') {
-                        mandatoryArray.push({
-                            name: name,
-                            value: $rootScope.pipelineId
-                        });
-                    }
-                    
-                    if (name === 'securedPayload') {
-                    	mandatoryArray.push({
-                    		name: name,
-                    		value: value
-                    	});
-                    }
-                    
-                    if (name === 'deleteFileAfterSweep') {
-                    	mandatoryArray.push({
-                    		name: name,
-                    		value: value
-                    	});
-                    }
-                    
-                    if (name === 'httpVerb' && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
-                        mandatoryArray.push({
-                            name: name,
-                            value: $scope.verb
-                        });
-                    }
-                    if ((name === 'httpVersion') && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
-                        mandatoryArray.push({
-                            name: name,
-                            value: value
-                        });
-                    }
-					if (name === 'contentType' && ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS')) {
-                        mandatoryArray.push({
-                            name: name,
-                            value: $scope.content
-                        });
-                    }   
-                    var index = getIndex($scope.allStaticProperties, $scope.processorProperties[i].name);
-                    var indexMandatory;
-                    if ($scope.processor.protocol === 'HTTP' || $scope.processor.protocol === 'HTTPS') {
-                        indexMandatory = getIndex($scope.allMandatoryHttpProperties, $scope.processorProperties[i].name);
-                    } else if ($scope.processor.protocol === 'SWEEPER') {
-                        indexMandatory = getIndex($scope.allMandatorySweeperProperties, $scope.processorProperties[i].name);
-                    } else if ($scope.processor.protocol === 'HTTPSYNCPROCESSOR' || $scope.processor.protocol === 'HTTPASYNCPROCESSOR') {
-                        indexMandatory = getIndex($scope.allMandatoryHttpListenerProperties, $scope.processorProperties[i].name);
-                    } else if ($scope.processor.protocol === 'DROPBOXPROCESSOR') {
-                        indexMandatory = getIndex($scope.allMandatoryDropboxProperties, $scope.processorProperties[i].name);
-                    } else if ($scope.processor.protocol === 'FILEWRITER') {
-                        indexMandatory = getIndex($scope.allMandatoryFileWriterProperties, $scope.processorProperties[i].name);
-                    } else indexMandatory = getIndex($scope.allMandatoryFtpProperties, $scope.processorProperties[i].name);
-                    if (index === -1 && indexMandatory === -1) {
-                        // To set proper id for dynamic properties which are displayed as static properties
-                        var dynamicPropertyIndex = getIndex($scope.dynamicPropertiesDisplayedAsStaticProperties, $scope.processorProperties[i].name);
-                        var dynamicPropertyName = (dynamicPropertyIndex === -1) ? $scope.processorProperties[i].name : getId($scope.dynamicPropertiesDisplayedAsStaticProperties, $scope.processorProperties[i].name);
-                        $scope.processor.dynamicProperties.push({
-                            name: dynamicPropertyName,
-                            value: $scope.processorProperties[i].value
-                        });
-                    } else {
-                        if (name === 'otherRequestHeader') {
-                            commaSplit = $scope.processorProperties[i].value.split(",");
-                        } else {
-                            $scope.processor.remoteProcessorProperties[name] = $scope.processorProperties[i].value;
-                        }
-                    }
+			
+            $scope.saveProcessor = function () {		    
+			
+				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];	
+                for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
+                    var property = $scope.propertiesAddedToProcessor[i];
+                     if ($scope.propertiesAddedToProcessor[i].name === "") {
+				    	 continue;				    	 
+				    } else if (property.valueProvided === false && property.mandatory === false) {
+					      property.value = '';
+					}				
+					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
                 }
-                for (var i = 0; i < mandatoryArray.length; i++) {
-                    if (mandatoryArray[i].value === '' || typeof mandatoryArray[i].value === 'undefined') {
-                        if(!($scope.processor.protocol == 'HTTPS' || $scope.processor.protocol == 'HTTP') && (mandatoryArray[i].name == 'port')) {
-                            showAlert('Enter MandatoryProperties', 'error');
-                            return;
-                        }    
-                    } else $scope.processor.remoteProcessorProperties[mandatoryArray[i].name] = mandatoryArray[i].value;
-                }
-                for (var i = 0; i < commaSplit.length; i++) {
-                    var colonSplit = commaSplit[i].split(":");
-                    $scope.processor.remoteProcessorProperties.otherRequestHeader.push({
-                        name: colonSplit[0],
-                        value: colonSplit[1]
-                    });
-                }
+				for (var i = 0; i < $scope.availableProperties.length; i++) {
+                    var property = $scope.availableProperties[i];
+                    if ($scope.availableProperties[i].name === "") {
+				    	 continue;				    	 
+				     } else if (property.valueProvided === false && property.mandatory === false) {
+					      property.value = '';
+					 }						
+					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
+                }  				
+				
+                $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
+				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
+				$scope.processor.processorPropertiesInTemplateJson.protocol = $scope.processor.protocol.value;
+				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;				
                 //console.log(commaSplit);
                 var lenFolderProps = $scope.processorFolderProperties.length;
 				
 				//Removed empty folder row for sweeper and File Writer
-				if ($scope.processor.protocol === 'SWEEPER' || $scope.processor.protocol === 'FILEWRITER') lenFolderProps = 2;
+				if ($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'FILEWRITER') lenFolderProps = 2;
 				
                 for (var i = 0; i < lenFolderProps - 1; i++) {
                     $scope.processor.folders.push({
@@ -2346,8 +1156,7 @@ var rest = myApp.controller(
                 for (var i = 0; i < profileLen; i++) {
                     $scope.processor.linkedProfiles[i] = $scope.selectedProfiles[i].name;
                 }
-                $scope.processor.javaScriptURI = $scope.trimScriptTemplateName();
-                $scope.processor.remoteProcessorProperties["handOverExecutionToJavaScript"] = $scope.isJavaScriptExecution;
+                $scope.processor.javaScriptURI = $scope.trimScriptTemplateName();                
 				$scope.scriptIsEdit = false;
 				if ($scope.processor.javaScriptURI != null && 
 						$scope.processor.javaScriptURI != "") {
@@ -2358,8 +1167,9 @@ var rest = myApp.controller(
                 if ($scope.isEdit) {
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
 					$scope.appendPortToUrl();
-                    editRequest.reviseProcessorRequest.processor.status = $scope.status.id;
-                    editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.id;
+                    editRequest.reviseProcessorRequest.processor.status = $scope.status.value;
+                    editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.value;
+					editRequest.reviseProcessorRequest.processor.protocol = $scope.processor.protocol.value;
 					
 						var reviseProcessor = false;
 						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
@@ -2391,8 +1201,9 @@ var rest = myApp.controller(
 				
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
 					$scope.appendPortToUrl();
-                    addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
-                    addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
+                    addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.value;
+                    addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.value;
+					addRequest.addProcessorToMailBoxRequest.processor.protocol = $scope.processor.protocol.value;
 					
 						var saveProcessor = false;
 						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
@@ -2489,6 +1300,7 @@ var rest = myApp.controller(
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 						} else {
+						   $scope.setTypeDuringProtocolEdit($scope.processor.protocol);	
 							showSaveMessage("Error while saving processor", 'error');
 						}
 						block.unblockUI();
@@ -2517,6 +1329,7 @@ var rest = myApp.controller(
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'error');
 							}
 						} else {
+						    $scope.setTypeDuringProtocolEdit($scope.processor.protocol);	
 							showSaveMessage("Error while saving processor", 'error');
 						}
 						$scope.clearProps();
@@ -2526,10 +1339,9 @@ var rest = myApp.controller(
 			};
 			
             $scope.clearProps = function () {
-                $scope.processor.dynamicProperties = [];
                 $scope.processor.folders = [];
                 $scope.processor.credentials = [];
-                $scope.processor.remoteProcessorProperties.otherRequestHeader = [];
+                //$scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
             /*This function is used to notify passwordDirective to clear the password and error message*/
             $scope.doSend = function(){
@@ -2539,12 +1351,12 @@ var rest = myApp.controller(
 
                     $scope.formAddPrcsr.$setPristine();
                     $scope.loadOrigin();
+					$scope.resetProcessorType($scope.procsrType);
                     $scope.readAllProfiles();
                     $scope.closeDelete();
                     //To notify passwordDirective to clear the password and error message
                     $scope.doSend();
-                    $scope.isPortDisabled = false;
-					$scope.defaultPortValue();
+                    $scope.isPortDisabled = false;					
                     $scope.disableSSHKeys = true;
                     $scope.disableCertificates = true;
 					//GIT URL
@@ -2556,197 +1368,13 @@ var rest = myApp.controller(
                      // To reset the values in the file browser window
                     $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
                     $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
-            };
-            
+            };            
             // Close the modal
             $scope.closeDelete = function () {
                 $('#myModal').modal('hide')
-            };
-
-            $scope.handleFTPSSpecificProperties = function () {
-                var indexOfPassiveForFTPS = getIndexOfId($scope.allMandatoryFtpProperties, "passive");
-					// passive property is mandatory for ftps protocol
-					if($scope.processor.protocol === 'FTPS') {
-						 if(indexOfPassiveForFTPS === -1 ) {
-							 $scope.allMandatoryFtpProperties.push({
-								"name": "Passive",
-								"id": "passive"
-							});
-						 }
-						var indexOfPassive = getIndexOfId($scope.processorProperties, 'passive');
-						if(indexOfPassive === -1) {
-							$scope.processorProperties.splice(getIndexOfId($scope.processorProperties,""),0,{
-							name: 'Passive',
-							value: true,
-							allowAdd: false,
-							isMandatory: true
-							});
-						}
-					}else {
-						//splice the passive property for FTP protocol
-						if(indexOfPassiveForFTPS !== -1) {
-							 $scope.allMandatoryFtpProperties.splice(indexOfPassiveForFTPS , 1);
-						}
-					}
-
-            } 
-
-            $scope.resetProcessorType = function (model) {
-                $scope.resetStaticAndMandatoryProps();
-                if (model.id === 'SWEEPER') {
-                    $scope.isProcessorTypeSweeper = true;
-                    $scope.isProcessorTypeHTTPListener = false;
-                    $scope.isProcessorTypeFileWriter = false;
-                    $scope.isProcessorTypeDropbox = false;
-                    $scope.processor.protocol = "SWEEPER";
-                    $scope.setFolderData();
-                    $scope.processorProperties = $scope.sweeperMandatoryProperties;
-					for(i = 0; i < $scope.processorProperties.length; i++) {
-                        if ($scope.processorProperties[i].name === 'PipeLine Id') {
-							$scope.processorProperties[i].value = $rootScope.pipelineId;
-							$scope.disablePipeLineId = true;
-                       }
-                    }
-                }  else if (model.id === 'HTTPSYNCPROCESSOR') {
-                	  $scope.isProcessorTypeSweeper = false;
-                      $scope.isProcessorTypeHTTPListener = true;
-                      $scope.isProcessorTypeFileWriter = false;
-                      $scope.isProcessorTypeDropbox = false;
-                      $scope.processor.protocol = "HTTPSYNCPROCESSOR";
-                      $scope.setFolderData();
-                      $scope.processorProperties = $scope.httpListenerMandatoryProperties;
-  					for(i = 0; i < $scope.processorProperties.length; i++) {
-                          if ($scope.processorProperties[i].name === 'HTTP Listener PipelineId') {
-  							$scope.processorProperties[i].value = $rootScope.pipelineId;
-                            $scope.disableHTTPListenerPipeLineId = true;
-  							
-                         }
-                      }
-                }	else if (model.id === 'HTTPASYNCPROCESSOR') {
-	              	  $scope.isProcessorTypeSweeper = false;
-                      $scope.isProcessorTypeHTTPListener = true;
-                      $scope.isProcessorTypeFileWriter = false;
-                      $scope.isProcessorTypeDropbox = false;
-	                  $scope.processor.protocol = "HTTPASYNCPROCESSOR";
-	                  $scope.setFolderData();
-	                  $scope.processorProperties = $scope.httpListenerMandatoryProperties;
-						for(i = 0; i < $scope.processorProperties.length; i++) {
-	                      if ($scope.processorProperties[i].name === 'HTTP Listener PipelineId') {
-								$scope.processorProperties[i].value = $rootScope.pipelineId;
-								$scope.disableHTTPListenerPipeLineId = true;
-	                     }
-	                  }
-                } else if (model.id === 'FILEWRITER') {
-	              	  $scope.isProcessorTypeSweeper = false;
-                      $scope.isProcessorTypeHTTPListener = false;
-                      $scope.isProcessorTypeDropbox = false;
-                      $scope.isProcessorTypeFileWriter = true;
-	                  $scope.processor.protocol = "FILEWRITER";
-	                  $scope.setFolderData();
-	                  $scope.processorProperties = $scope.fileWriterMandatoryProperties;
-                } else if (model.id === 'DROPBOXPROCESSOR') {
-	              	  $scope.isProcessorTypeSweeper = false;
-                      $scope.isProcessorTypeHTTPListener = false;
-                      $scope.isProcessorTypeFileWriter = false;
-                      $scope.isProcessorTypeDropbox = true;
-	                  $scope.processor.protocol = "DROPBOXPROCESSOR";
-	                  $scope.setFolderData();
-	                  $scope.processorProperties = $scope.dropboxMandatoryProperties;
-						for(i = 0; i < $scope.processorProperties.length; i++) {
-	                      if ($scope.processorProperties[i].name === 'PipelineId') {
-								$scope.processorProperties[i].value = $rootScope.pipelineId;
-								$scope.disableHTTPListenerPipeLineId = true;
-	                     }
-	                  }
-                } else {
-                	if($scope.isProcessorTypeSweeper || $scope.isProcessorTypeHTTPListener || $scope.isProcessorTypeFileWriter || $scope.isProcessorTypeDropbox) {
-						$scope.processor.protocol = $scope.enumprotocoltype[0];
-					}
-                    $scope.isProcessorTypeSweeper = false;
-                    $scope.isProcessorTypeHTTPListener = false;
-                    $scope.isProcessorTypeFileWriter = false;
-                    $scope.isProcessorTypeDropbox = false;
-					if($scope.processor.protocol !== 'HTTP' && $scope.processor.protocol !== 'HTTPS') {
-						$scope.processorProperties = angular.copy($scope.ftpMandatoryProperties);
-                        $scope.handleFTPSSpecificProperties();
-					} else {
-                        $scope.processorProperties = $scope.httpMandatoryProperties;
-                    }
-                    $scope.setFolderData();
-                    var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
-                    if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
-					$scope.defaultPortValue();
-                }
-                // function to modify the static properties if the protocol is FTP or FTPS
-                $scope.modifyStaticPropertiesBasedOnProtocol();
-                // function to modify the static properties if the type is SWEEPER or HTTPSYNC/ASYNC
-                $scope.modifyStaticPropertiesBasedOnProcessorType();
-                  // function to clear the credential details if protocol is changed
-                $scope.resetProcessorCredentialDetails();
-                $scope.resetCredentialModal();
-                
-                //GMB-201
-                if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
-					$scope.disableCertificates = false;
-     			} else {
-					$scope.disableCertificates = true;
- 				}
-                $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
-            };
-            $scope.resetProtocol = function (model) {
-               // console.log(model);
-				$scope.isPortDisabled = false;
-                $scope.resetStaticAndMandatoryProps();
-                if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "FTPS" || $scope.processor.protocol === "SFTP") {
-                    if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
-                    var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
-                    if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
-                    $scope.processorProperties = angular.copy($scope.ftpMandatoryProperties);
-                    $scope.handleFTPSSpecificProperties();
-                    $scope.portRequired = true;
-                    $scope.setFolderData();
-					$scope.defaultPortValue();
-                } else if ($scope.processor.protocol === "HTTP" || $scope.processor.protocol === "HTTPS") {
-                    if ($scope.processor.type === "SWEEPER") $scope.processor.type = $scope.enumprocsrtype[0];
-                    var indexOfPort = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYet, 'port');
-                    if (indexOfPort !== -1) $scope.allStaticPropertiesThatAreNotAssignedValuesYet.splice(indexOfPort, 1);
-                    $scope.processorProperties = $scope.httpMandatoryProperties;
-                    $scope.portRequired = false;
-                    $scope.setFolderData();
-                } else if ($scope.processor.protocol === "SWEEPER") {
-                    $scope.processorProperties = $scope.sweeperMandatoryProperties;
-                    $scope.setFolderData();
-                } else if ($scope.processor.protocol === "HTTPSYNCPROCESSOR" || $scope.processor.protocol === "HTTPASYNCPROCESSOR") {
-                	$scope.processorProperties = $scope.httpListenerMandatoryProperties;
-                    $scope.setFolderData();
-                } else if ($scope.processor.protocol === "DROPBOXPROCESSOR") {
-                	$scope.processorProperties = $scope.dropboxMandatoryProperties;
-                    $scope.setFolderData();
-                }  else if ($scope.processor.protocol === "FILEWRITER") {
-              	  	 $scope.processorProperties = $scope.fileWriterMandatoryProperties;
-                     $scope.setFolderData();
-                } else {
-                    $scope.setFolderData();
-                    $scope.processor.type = $scope.enumprocsrtype[2];
-                }
-                // function to modify the static properties if the protocol is FTP or FTPS
-                $scope.modifyStaticPropertiesBasedOnProtocol();
-                // function to modify the static properties if the type is SWEEPER
-                $scope.modifyStaticPropertiesBasedOnProcessorType();
-                
-                // function to clear the credential details if protocol is changed
-                $scope.resetProcessorCredentialDetails();
-                $scope.resetCredentialModal();
-                //GMB-201
-                if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
-					$scope.disableCertificates = false;
-     			} else {
-					$scope.disableCertificates = true;
- 				}
-                $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
-            };
+            };           
             $scope.setFolderData = function () {
-                if ($scope.procsrType.id === "SWEEPER") {
+                if ($scope.procsrType.value === "SWEEPER") {
                     $scope.processorFolderProperties = [{
                         folderURI: '',
                         folderType: 'Payload Location',
@@ -2754,7 +1382,7 @@ var rest = myApp.controller(
                         isMandatory: true,
                         allowAdd: false
                     }];
-                } else if ($scope.procsrType.id === "FILEWRITER") {
+                } else if ($scope.procsrType.value === "FILEWRITER") {
                     $scope.processorFolderProperties = [{
                         folderURI: '',
                         folderType: 'File Write Location',
@@ -2762,7 +1390,7 @@ var rest = myApp.controller(
                         isMandatory: true,
                         allowAdd: false
                     }];
-                } else if ($scope.procsrType.id === "REMOTEDOWNLOADER"){
+                } else if ($scope.procsrType.value === "REMOTEDOWNLOADER"){
                     $scope.processorFolderProperties = [{
                         folderURI: '',
                         folderType: '',
@@ -2777,7 +1405,7 @@ var rest = myApp.controller(
 						"name": "Local Target Location",
 						"id": "RESPONSE_LOCATION"
 					}];
-                } else if ($scope.procsrType.id === "REMOTEUPLOADER") {
+                } else if ($scope.procsrType.value === "REMOTEUPLOADER") {
 					$scope.processorFolderProperties = [{
 							folderURI: '',
 							folderType: '',
@@ -2796,227 +1424,7 @@ var rest = myApp.controller(
 					$scope.processorFolderProperties = [];
 					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [];
 				}
-            };
-            $scope.resetStaticAndMandatoryProps = function () {
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{
-                    "name": "add new -->",
-                    "id": "add new -->"
-                }, {
-                    "name": "Socket Timeout",
-                    "id": "socketTimeout"
-                }, {
-                    "name": "Connection Timeout",
-                    "id": "connectionTimeout"
-                }, {
-                    "name": "Retry Attempts",
-                    "id": "retryAttempts"
-                }, {
-                    "name": "Chunked Encoding",
-                    "id": "chunkedEncoding"
-                }, {
-                    "name": "Encoding Format",
-                    "id": "encodingFormat"
-                }, {
-                    "name": "OtherRequest Header",
-                    "id": "otherRequestHeader"
-                }, {
-                    "name": "Processed File Location",
-                    "id": "processedfilelocation"
-                }, {
-                    "name": "Error File Location",
-                    "id": "errorfilelocation"
-                }];
-                // function to modify the static properties if the protocol is FTP or FTPS
-                // $scope.modifyStaticPropertiesBasedOnProtocol();
-                $scope.ftpMandatoryProperties = [{
-                    name: 'URL',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'Port',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-				
-                $scope.httpMandatoryProperties = [{
-                    name: 'URL',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'Port',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'HTTP Version',
-                    value: '1.1',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'HTTP Verb',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: 'Content Type',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                $scope.sweeperMandatoryProperties = [{
-                    name: 'PipeLine Id',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                	name: 'Secure Payload',
-                	value: true,
-                	allowAdd: false,
-                	isMandatory:true
-                	
-                }, {
-                	name: 'Delete file after sweep',
-                	value: true,
-                	allowAdd: false,
-                	isMandatory:true
-                	
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                
-                $scope.dropboxMandatoryProperties = [{
-                    name: 'PipelineId',
-                    value: '',
-                    allowAdd: false,
-                    isMandatory: true
-                }, {
-                	 name: 'Encrypt Payload',
-                     value: true,
-                     allowAdd: false,
-                     isMandatory: true
-                }, {
-                    name: '',
-                    value: '',
-                    allowAdd: true,
-                    isMandatory: false
-                }];
-                 $scope.fileWriterMandatoryProperties = [];
-            };
-            
-            // Editor Section Begins
-            var editor;
-            var rowObj;
-            
-            $scope.onCloseEditor = function (url) {
-            
-				if (url !== '' && $scope.inputPatternForURL.test(url)) {
-
-					var port = url.split('/')[2].split(':')[1];
-					for (i = 0; i < $scope.processorProperties.length; i++) {
-						if ($scope.processorProperties[i].name === 'Port') {
-							if ($scope.inputPatternForPort.test(port)) {
-								$scope.isPortDisabled = true;
-							} else {
-								$scope.isPortDisabled = false;
-							}
-							if (typeof port !== 'undefined' && port !== '') {
-								$scope.processorProperties[i].value = port;
-							} else {
-								$scope.defaultPortValue();
-								$scope.isPortDisabled = false;
-							}
-							if(port === '') $scope.isPortDisabled = false;
-						}
-					}
-				} else {
-					for(i = 0; i < $scope.processorProperties.length; i++) {
-						if ($scope.processorProperties[i].name === 'Port') {
-							$scope.processorProperties[i].value = '';
-							$scope.defaultPortValue();
-							$scope.isPortDisabled = false;
-						}
-					}
-				}
-			};
-            
-            $scope.loadValueData = function (_editor) {
-                editor = _editor;
-                _editor.getSession().setUseWorker(false);
-            };
-			
-            var enableAndFocusEditor = function() {
-				if (editor) {
-					editor.focus();
-					var session = editor.getSession();
-					//Get the number of lines
-					var count = session.getLength();
-					//Go to end of the last line
-					
-					if((typeof(editor.getValue()) === 'undefined') || (editor.getValue() === "")) {
-						editor.setValue(" "); 
-						editor.remove(" "); 
-                        editor.moveCursorTo(0,0);
-                    } else {
-						editor.setValue(editor.getValue(),0);
-					}
-					
-					editor.gotoLine(session.getLine(count-1).length);
-                }
-            };
-			
-            $scope.isModal = function (row) {
-            	
-            	editor.setValue('');
-            	
-                rowObj = row;
-				$timeout(enableAndFocusEditor,500);
-				
-				if (rowObj.entity.name === 'Retry Attempts' && !$scope.retryAttemptsPattern.test(rowObj.entity.value)) {
-                    rowObj.entity.value = '';
-                } else if ((rowObj.entity.name === 'Socket Timeout' || rowObj.entity.name === 'Connection Timeout')
-                			 && !$scope.numberTimeOutPattern.test(rowObj.entity.value)) {
-                    rowObj.entity.value = '';
-				} else if (rowObj.entity.name === 'URL' && !$scope.inputPatternForURL.test(rowObj.entity.value)) {
-					rowObj.entity.value = '';
-				} else if (rowObj.entity.name === 'HTTP Version' && !$scope.httpVersionPattern.test(rowObj.entity.value)) {
-					rowObj.entity.value = '';
-				} else if (rowObj.entity.name === 'Port' && !$scope.inputPatternForPort.test(rowObj.entity.value)) {
-                    rowObj.entity.value = '';
-				}
-				
-				if (typeof rowObj.entity.value === 'undefined' || rowObj.entity.value === '') {
-					editor.setValue('',0) 
-				} else {
-                	editor.setValue(row.getProperty('value').toString());
-				}
-            };
-			
-            $scope.close = function () {
-            
-                if (rowObj.entity.name === 'URL') {
-                    $scope.onCloseEditor(editor.getValue());
-                }
-                
-                rowObj.entity.value = editor.getValue();
-				
-            };
-			    
+            };			    
             // Editor Section Ends
 			    
             $scope.changeGlyphIconColor = function (icon, currentValue) {
@@ -3046,7 +1454,7 @@ var rest = myApp.controller(
                  block.blockUI();
                 var fd = new FormData();
                 $scope.pkObj['serviceInstanceId'] = Date.now().toString();
-				$scope.pkObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.name,'_',$scope.certificateModal.certificateURI);
+				$scope.pkObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.value,'_',$scope.certificateModal.certificateURI);
 				var currentDate = new Date();
 				var afterOneYear = new Date();
 				afterOneYear.setYear(currentDate.getFullYear() + 1);
@@ -3140,58 +1548,50 @@ var rest = myApp.controller(
             // File Upload Section Ends
             
             //GMB-201
-			if($scope.processor.protocol === "FTPS" || $scope.processor.protocol === "HTTPS") {
+			if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
 				$scope.disableCertificates = false;
 			} else {
                 $scope.disableCertificates = true;
 			}
-            $scope.disableSSHKeys = ($scope.processor.protocol === "SFTP")?false:true;
-
-			$scope.defaultPortValue = function() {
-				for (i = 0; i < $scope.processorProperties.length; i++) {
-					
-					if ($scope.processorProperties[i].name === 'Port') {
-						
-						if ($scope.processor.protocol === "FTP") {
-							$scope.processorProperties[i].value = $scope.ftpDefaultPort;
-						} else if ($scope.processor.protocol === "SFTP") {
-							$scope.processorProperties[i].value = $scope.sftpDefaultPort;
-						} else if ($scope.processor.protocol === "FTPS") {
-							$scope.processorProperties[i].value = $scope.ftpsDefaultPort;
-						}
-					}
-				}
-			}
-			
-            if ($scope.processor.protocol === "FTP" || $scope.processor.protocol === "SFTP" || $scope.processor.protocol === "FTPS") {
-				$scope.portRequired = true;
-				$scope.defaultPortValue();
-				
-            } else {
-                $scope.portRequired = false;
-            }
+            $scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
             
  			$scope.resetFiles = function() {
 				document.getElementById('mbx-procsr-certificatebrowse').value = null;
 			}
 
 			$scope.appendPortToUrl = function() {
-				var baseUrl = $scope.processor.remoteProcessorProperties.url;
-				if (typeof baseUrl !== 'undefined' && baseUrl !== '') {
-					var basePort = baseUrl.split('/')[2].split(':')[1]
-					if (basePort === '' || basePort === null || typeof basePort === 'undefined') {
-						var defaultPort = $scope.processor.remoteProcessorProperties.port;
-						if (defaultPort !== '') {
-							var url_parts = baseUrl.split('/');
-							var domain_name_parts = url_parts[2].split(':');
-							var domainWithPort = domain_name_parts[0].concat(':', defaultPort);
-							var newBaseUrl = baseUrl.replace(domain_name_parts[0], domainWithPort);
-							$scope.processor.remoteProcessorProperties.url = newBaseUrl;
-						}
-
-                    }
-				}
-			}
+			    
+				var defaultPort = '';
+				var baseUrl = '';
+                for (var i = 0; i < $scope.processor.processorPropertiesInTemplateJson.staticProperties.length; i++) {
+                    var portProperty = $scope.processor.processorPropertiesInTemplateJson.staticProperties[i];
+					if (portProperty.name === "port") {
+					   defaultPort = portProperty.value;				   
+					   for (var j = 0; j < $scope.processor.processorPropertiesInTemplateJson.staticProperties.length; j++) {
+					       var urlProperty = $scope.processor.processorPropertiesInTemplateJson.staticProperties[j];
+						   if (urlProperty.name == "url") {
+						      baseUrl = urlProperty.value;							  
+							  if (typeof baseUrl !== 'undefined' && baseUrl !== '') {
+								var basePort = baseUrl.split('/')[2].split(':')[1]
+								if (basePort === '' || basePort === null || typeof basePort === 'undefined') {
+									if (defaultPort !== '') {
+										var url_parts = baseUrl.split('/');
+										var domain_name_parts = url_parts[2].split(':');
+										var domainWithPort = domain_name_parts[0].concat(':', defaultPort);
+										var newBaseUrl = baseUrl.replace(domain_name_parts[0], domainWithPort);
+										$scope.processor.processorPropertiesInTemplateJson.staticProperties[j].value = newBaseUrl;
+										if ($scope.processor.processorPropertiesInTemplateJson.staticProperties[i].readOnly === false) {						    
+										   $scope.processor.processorPropertiesInTemplateJson.staticProperties[i].readOnly = true;
+										}
+									}
+								}
+							  }						  
+						    }
+					     }
+						 
+					  }
+			     }				
+			};
 			
              // SSHkeys Uploading section begins
              $scope.setSSHPrivateKey = function (element) {
@@ -3233,7 +1633,7 @@ var rest = myApp.controller(
                 formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
                 var fd = new FormData();
                 $scope.sshKeyObj['serviceInstanceId'] = Date.now().toString();
-				$scope.sshKeyObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.name,'_',$scope.sshkeyModal.sshkeyURI);
+				$scope.sshKeyObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.value,'_',$scope.sshkeyModal.sshkeyURI);
 				var currentDate = new Date();
 				var afterOneYear = new Date();
 				afterOneYear.setYear(currentDate.getFullYear() + 1);
@@ -3368,7 +1768,9 @@ var rest = myApp.controller(
                     allowAdd: false
                 });
                 $scope.processorCredProperties = $scope.processorCredProperties.slice();
-                $scope.$apply();
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                };
                 block.unblockUI();
             }
             $scope.removeSSHKeyDetails = function () {
@@ -3502,7 +1904,197 @@ var rest = myApp.controller(
 				            scope: $scope,
 							resolve: {}
 				        });
-			};		   
+			};
+			
+			$scope.resetProcessorType = function(proceesorType) {
+				  $scope.selectedProcessorType = proceesorType.value;
+				  $scope.initialSetUp();			  
+				if ($scope.selectedProcessorType === 'SWEEPER') {
+					$scope.isProcessorTypeSweeper = true;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.setFolderData();
+					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
+					$rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
+					  $scope.separateProperties(data.processorDefinition.staticProperties);
+					
+					});	
+				} else if ($scope.selectedProcessorType === 'HTTPSYNCPROCESSOR' || $scope.selectedProcessorType === 'HTTPASYNCPROCESSOR') {
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = true;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.setFolderData();
+					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
+					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
+					  $scope.separateProperties(data.processorDefinition.staticProperties);
+					});	
+				} else if ($scope.selectedProcessorType === 'FILEWRITER') {
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.isProcessorTypeFileWriter = true;
+					$scope.setFolderData();
+					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];					
+				} else if ($scope.selectedProcessorType === 'DROPBOXPROCESSOR') {
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = true;
+					$scope.setFolderData();
+					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
+					$rootScope.restService.get('data/processor/properties/dropboxProcessor.json', function (data) {					
+					  $scope.separateProperties(data.processorDefinition.staticProperties);
+					});	
+				} else  {
+					$scope.resetProtocol($scope.processor.protocol);
+				} 
+                // function to clear the credential details if protocol is changed
+                $scope.resetProcessorCredentialDetails();
+                $scope.resetCredentialModal();                         		
+			};
+			$scope.resetProtocol = function(potocolType) {
+			
+				 $scope.isProcessorTypeSweeper = false;
+				 $scope.isProcessorTypeHTTPListener = false;
+				 $scope.isProcessorTypeFileWriter = false;
+				 $scope.isProcessorTypeDropbox = false;
+				 var protocalName = potocolType.value;
+				 $scope.initialSetUp();
+				 $scope.setFolderData();
+				 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[getIndexOfValue($scope.initialProcessorData.supportedProtocols.options, protocalName)];
+				 if (!$scope.processor.protocol) {
+					 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];
+					 protocalName = $scope.processor.protocol.value;
+				 }	
+				if ($scope.selectedProcessorType == 'REMOTEDOWNLOADER') {                     				 
+					 if (protocalName == 'SFTP') {
+					    $rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
+						  $scope.separateProperties(data.processorDefinition.staticProperties);
+				       });	
+					 } else if (protocalName == 'FTP') {
+					    $rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
+							  $scope.separateProperties(data.processorDefinition.staticProperties);
+						});
+					 } else if (protocalName == 'FTPS') {
+					    $rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
+							  $scope.separateProperties(data.processorDefinition.staticProperties);
+						});
+					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
+					    $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {				        
+						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						});
+					 }			  			
+				} else if ($scope.selectedProcessorType == 'REMOTEUPLOADER') {					
+                    if (protocalName == 'SFTP') {
+					    $rootScope.restService.get('data/processor/properties/sftpuploader.json', function (data) {				        
+						  $scope.separateProperties(data.processorDefinition.staticProperties);
+				       });	
+					 } else if (protocalName == 'FTP') {
+					    $rootScope.restService.get('data/processor/properties/ftpuploader.json', function (data) {				        
+						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						});
+					 } else if (protocalName == 'FTPS') {
+					    $rootScope.restService.get('data/processor/properties/ftpsuploader.json', function (data) {					       
+						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						});
+					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
+					    $rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {					       
+						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						});
+					 }				 
+				}
+                //GMB-201
+                if(protocalName === "FTPS" || protocalName === "HTTPS") {
+					$scope.disableCertificates = false;
+     			} else {
+					$scope.disableCertificates = true;
+ 				}
+                $scope.disableSSHKeys = (protocalName === "SFTP")?false:true; 				
+			};			
+			
+            $scope.separateProperties = function(jsonProperties) {
+            	
+                for (var i = 0; i < jsonProperties.length; i++) {
+                    var property = jsonProperties[i];
+                   if (property.hasOwnProperty('mandatory') && (property.mandatory === true)) {
+                        $scope.propertiesAddedToProcessor.push(property);
+                    } else if (property.hasOwnProperty('mandatory') && (property.mandatory === false)){
+                        $scope.availableProperties.push(property);
+                    }
+                }
+                
+                // push empty object to enable additional
+             $scope.propertiesAddedToProcessor.push({
+            	
+                    "name":"",
+                    "displayName" : "",
+                    "value":"",
+                    "type":"textarea",
+                    "readOnly":"",
+                    "mandatory":false,
+                    "dynamic":false,
+                    "valueProvided":false,
+                    "validationRules": {}
+                 });              
+            };
+            
+            $scope.propertiesAddedToProcessor = [];
+			$scope.availableProperties = []; 
+			$scope.propertiesEditToProcessor = [];
+            $scope.initialSetUp = function() {            	          
+                $scope.propertiesAddedToProcessor = [];
+				$scope.propertiesEditToProcessor = [];
+                $scope.availableProperties = [];         
+                $scope.selectedProperty = {value:''};
+                $scope.showAddNewComponent = {value:false};
+            }
+            $scope.cleanup = function() {
+        	   
+               $scope.selectedProperty.value = '';
+               $scope.showAddNewComponent.value = false;
+               
+            }		   
+            $scope.resetProcessorType($scope.procsrType);            
+
+            $scope.gridOptionsTesting = {
+                data: 'propertiesAddedToProcessor',
+                displaySelectionCheckbox: false,
+                enableRowSelection: false,
+                enableCellEditOnFocus: true,
+                enablePaging: false,
+                showFooter: false,
+                rowHeight: 80,
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
+                columnDefs: [{
+                    field: "name",
+                    width: "40%",
+                    displayName: "Name*",
+                    enableCellEdit: false,
+                    cellTemplate: '<dynamic-property-name-field-directive sort-name="sorting"  all-props=availableProperties selected-value=selectedProperty show-add-new-component="showAddNewComponent" current-row-object= propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>'
+                   
+                }, {
+                     field: "value",
+                     width: "40%",
+                     displayName: "Value*",
+                     enableCellEdit: false,
+                     cellTemplate: '<dynamic-property-value-field-directive current-row-object = propertiesAddedToProcessor[row.rowIndex] test-attr=currentType/>'
+                 }, {
+                     field: "mandatory",
+                     width: "20%",
+                     displayName: "Action*",
+                     enableCellEdit: false,
+                     cellTemplate: '<dynamic-action-field-directive available-properties = availableProperties added-properties = propertiesAddedToProcessor current-row-object = propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>',
+                 }
+                ]
+            }; 
+            // listen to property modified notification and do clean up
+            $rootScope.$on("propertyModificationActionEvent", function() {
+               $scope.cleanup(); 
+            });
+
         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
@@ -3637,8 +2229,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	            	    showSaveMessage(data.scriptserviceResponse.response.message, 'error');
 	            	} else {
 	            		showSaveMessage("Error while File update to GitLab", 'error');	            		
-	            	}
-	            	
+	            	}	            	
 	            });
 				$scope.$dismiss();
 	     };	

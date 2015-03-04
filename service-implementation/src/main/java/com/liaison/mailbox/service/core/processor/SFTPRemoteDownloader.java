@@ -182,7 +182,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		LOGGER.debug("Entering in invoke.");
 		try {			
 			// G2SFTP executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 
@@ -194,7 +194,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				executeSFTPRequest();
 			}
 			
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
 			throw new RuntimeException(e);
 		}
 		

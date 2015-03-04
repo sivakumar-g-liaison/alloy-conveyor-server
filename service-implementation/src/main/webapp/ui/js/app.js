@@ -7,6 +7,10 @@ var myApp = angular.module('myApp', ['myApp.filters',
     'myApp.directiveCustomCell', // custom directives
     'myApp.dynamicComponentDirectiveForName',
     'myApp.passwordDirective',
+    'myApp.dynamicPropertyNameFieldDirective',
+    'myApp.dynamicPropertyValueFieldDirective',
+    'myApp.dynamicActionFieldDirective',
+    'myApp.dynamicValidationDirective',
     'myApp.urlValidation',
     'myApp.cellWithTextBox',
     'ngGrid', // angular grid
@@ -146,7 +150,25 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.listData = [];
     $rootScope.restService.get('data/generic-list.json', function (data) {
         $rootScope.listData = data;
+    });	
+	//  load initial Processor Data
+    $rootScope.initialProcessorData;
+    $rootScope.restService.get('data/initialProcessorDetails_json.json', function (data) {
+        $rootScope.initialProcessorData = data;
     });
+    
+    // testing purpose
+    $rootScope.testJson = [];
+    $rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {
+        $rootScope.testJson = data;
+    });
+    
+    $rootScope.httpDownloaderJson = [];
+    $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {
+        $rootScope.httpDownloaderJson = data;
+    });
+	
+	
     // *****
     // Initialize authentication
     // *****

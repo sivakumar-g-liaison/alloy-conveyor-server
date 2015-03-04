@@ -1,0 +1,11 @@
+<div ng-switch on="isAdditionAllowed()">
+    <div ng-switch-when="false">{{currentRowObject.displayName}}</div>
+    <div class="alignDiv" ng-switch-when="true">
+        <div ng-form="form">
+            <select ng-change="constructProperty(selectedValue.value)" ng-model="selectedValue.value" ng-options="property.displayName for property in allProps | orderBy:sortName ">
+                <option value="">-- select--</option>
+            </select><i>&nbsp</i>
+            <textarea class="form-control alignDynamicTextarea" ng-input="selectedValue.value.name" ng-show="showAddNewComponent.value" ng-model="COL_FIELD" placeholder="required" ng-blur="handlePropertyConstructionForAddNew(COL_FIELD)" style="width:47%;height:45px;"></textarea>
+        </div>
+    </div>
+</div>    

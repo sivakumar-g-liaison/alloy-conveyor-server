@@ -18,8 +18,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -44,9 +46,13 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  *
@@ -75,7 +81,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 			
 			// FTPSRequest executed through JavaScript
-			if (Boolean.valueOf(getProperties().isHandOverExecutionToJavaScript())) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 
@@ -84,7 +90,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				executeRequest(executionId, fsm);
 			}
 			
-		} catch(JAXBException |IOException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
 			throw new RuntimeException(e);
 		}
 		
@@ -124,11 +130,25 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			ftpsRequest.login();
 
 			//ftpsRequest.enableDataChannelEncryption();
-			if (getProperties() != null) {
+			
+			// retrieve required properties
+			//ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
+			
+			if (ftpUploaderStaticProperties != null) {
+				
+				/*ArrayList<String> propertyNames = new ArrayList<String>();
+				propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
+				propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
+				Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);*/
 
-				ftpsRequest.setBinary(getProperties().isBinary());
-				ftpsRequest.setPassive(getProperties().isPassive());
+				boolean binary = ftpUploaderStaticProperties.isBinary();
+				boolean passive = ftpUploaderStaticProperties.isPassive();
+				ftpsRequest.setBinary(binary);
+				ftpsRequest.setPassive(passive);
+				
 			}
+
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given payload URI is Empty.");
@@ -151,7 +171,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm);
 			ftpsRequest.disconnect();
 
-		} catch (LiaisonException | JAXBException | IOException e) {
+		} catch (LiaisonException | JAXBException | IOException | NoSuchFieldException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -162,11 +182,16 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 * @throws SftpException
 	 *
 	 */
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, MailBoxServicesException {
+			throws IOException, LiaisonException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
@@ -225,11 +250,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 
 				if (null != item) {
-
+					
+					FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
 					// File Uploading done successfully so move the file to processed folder
 					if(replyCode == 226 || replyCode == 250) {
-						String processedFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-								MailBoxConstants.PROCESSED_FILE_LOCATION));
+						
+						String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
 						if (MailBoxUtil.isEmpty(processedFileLocation)) {
 							archiveFile(item.getAbsolutePath(), false);
 						} else {
@@ -237,8 +263,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 						}
 					} else {
 						// File uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(getCustomProperties().getProperty(
-								MailBoxConstants.ERROR_FILE_LOCATION));
+						String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
 						if (MailBoxUtil.isEmpty(errorFileLocation)) {
 							archiveFile(item.getAbsolutePath(), true);
 						} else {
@@ -286,10 +311,25 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		ftpsRequest.login();
 
 		//ftpsRequest.enableDataChannelEncryption();
-		if (getProperties() != null) {
+		// retrieve required properties
+		FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
+		
+		if (ftpUploaderStaticProperties != null) {
+			
+			/*ArrayList<String> propertyNames = new ArrayList<String>();
+			propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
+			propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
+			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
 
-			ftpsRequest.setBinary(getProperties().isBinary());
-			ftpsRequest.setPassive(getProperties().isPassive());
+			boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
+			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));*/
+			
+			boolean binary = ftpUploaderStaticProperties.isBinary();
+			boolean passive = ftpUploaderStaticProperties.isPassive();
+		
+			ftpsRequest.setBinary(binary);
+			ftpsRequest.setPassive(passive);
+			
 		}
 
 		String remotePath = getWriteResponseURI();
@@ -321,7 +361,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException, SecurityException, 
+				IllegalArgumentException, IllegalAccessException, JAXBException {
 		G2FTPSClient ftpRequest = (G2FTPSClient)client;
 		try {
 			uploadDirectory(ftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
