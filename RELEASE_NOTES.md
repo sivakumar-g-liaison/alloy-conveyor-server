@@ -1,3 +1,9 @@
+1.1.4
+-------------------------------
+Updates to spectrum related proprties
+glass property updates
+LENS/Spectrum prod property updates
+
 1.1.3
 -------------------------------
 Mailbox bug fixes and properties update
