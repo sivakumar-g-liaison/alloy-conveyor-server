@@ -26,7 +26,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
-import com.liaison.mailbox.service.dto.dropbox.StagedFileMetaDataDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
@@ -150,11 +149,7 @@ public class StagedFile implements Identifiable {
 		stagedFileDto.setName(this.getFileName());
 		stagedFileDto.setPath(this.getFilePath());
 		stagedFileDto.setFileSize(this.getFileSize());
-		
-		if (null != this.getFileMetaData()) {
-			StagedFileMetaDataDTO metaDataDto = JAXBUtility.unmarshalFromJSON(this.getFileMetaData(), StagedFileMetaDataDTO.class);
-			stagedFileDto.setMeta(metaDataDto);
-		}
+		stagedFileDto.setMeta(this.getFileMetaData());
 	}
 	
 	/**

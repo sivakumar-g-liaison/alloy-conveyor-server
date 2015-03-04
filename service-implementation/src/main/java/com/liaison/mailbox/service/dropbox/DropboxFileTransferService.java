@@ -48,7 +48,7 @@ public class DropboxFileTransferService {
 	 * @param request
 	 * @param profileId
 	 * @param aclManifest
-	 * @return
+	 * @return DropboxTransferContentResponseDTO
 	 * @throws Exception
 	 */
 	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream,

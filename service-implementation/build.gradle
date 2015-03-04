@@ -378,9 +378,6 @@ task setDevProperties << {
 
 }
 
-
-
-
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: [
 	'stageTomcat',
@@ -403,6 +400,12 @@ task configureTomcat(dependsOn: [
 			include (name: '*.properties')
 			include (name: 'log4j2*.xml')
 		}
+	}
+}
+
+task setRespectivePropertyFile << {
+	if(${dropbox} == 'yes') {
+		ant.copy( file:"${projectDir}/build/resources/main/dropbox.properties", toFile:"${tomcatInstallPath}/lib/${rootProject.name}-dev-int.properties", overwrite:true )
 	}
 }
 

@@ -9,12 +9,10 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
-import com.liaison.mailbox.service.dto.dropbox.StagedFileMetaDataDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 
 public class DropboxService {
@@ -38,18 +36,17 @@ public class DropboxService {
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
+		// getting meta data from meta json
+		String metadata = workTicket.getHeader(MailBoxConstants.UPLOAD_META);
+
 		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
+
 		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket
 				.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize()
 				.toString(), workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString(),
-				workTicket.getPayloadURI());
+				workTicket.getPayloadURI(), metadata);
 
-		//getting meta data from meta json
-		String metadata = workTicket.getHeader(MailBoxConstants.UPLOAD_META);
-        StagedFileMetaDataDTO metadataDto = new ObjectMapper().readValue(metadata, StagedFileMetaDataDTO.class);
-
-		stageFileReqDTO.setMeta(metadataDto);
 		dtoReq.setStagedFile(stageFileReqDTO);
 
 		stageFileService.addStagedFile(dtoReq);
