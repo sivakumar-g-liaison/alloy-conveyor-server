@@ -49,7 +49,7 @@ export GLASS_METRIC_PASSWORD=4Va2mHXK7bJPcbcjdWKc8QjVMa
 export GLASS_METRIC_DATASPACE=g2-prod
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
-export GSA_LENS_IP=[REQUIRED]
+export GSA_LENS_IP=10.152.2.31
  
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
 export LOCAL_HOSTNAME=$(hostname)
