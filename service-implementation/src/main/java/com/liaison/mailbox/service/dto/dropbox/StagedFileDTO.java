@@ -17,20 +17,21 @@ public class StagedFileDTO {
 	private String fileSize;
 	private String mailboxGuid;
 	private String spectrumUri;
-	private StagedFileMetaDataDTO meta;
+	private String meta;
 
 	public StagedFileDTO() {
 
 	}
 
 	public StagedFileDTO(String fileName, String filePguid, String filePath, String fileSize, String mailboxGuid,
-			String spectrumUri) {
+			String spectrumUri, String meta) {
 		this.setName(fileName);
 		this.setId(filePguid);
 		this.setPath(filePath);
 		this.setFileSize(fileSize);
 		this.setMailboxGuid(mailboxGuid);
 		this.setSpectrumUri(spectrumUri);
+		this.setMeta(meta);
 	}
 
 	public String getId() {
@@ -81,12 +82,11 @@ public class StagedFileDTO {
 		this.spectrumUri = spectrumUri;
 	}
 
-	public StagedFileMetaDataDTO getMeta() {
+	public String getMeta() {
 		return meta;
 	}
 
-	public void setMeta(StagedFileMetaDataDTO meta) {
+	public void setMeta(String meta) {
 		this.meta = meta;
 	}
-
 }

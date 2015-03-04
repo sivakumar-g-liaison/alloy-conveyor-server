@@ -378,9 +378,6 @@ task setDevProperties << {
 
 }
 
-
-
-
 // This is for default config of Tomcat
 task configureTomcat(dependsOn: [
 	'stageTomcat',
