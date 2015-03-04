@@ -403,12 +403,6 @@ task configureTomcat(dependsOn: [
 	}
 }
 
-task setRespectivePropertyFile << {
-	if(${dropbox} == 'yes') {
-		ant.copy( file:"${projectDir}/build/resources/main/dropbox.properties", toFile:"${tomcatInstallPath}/lib/${rootProject.name}-dev-int.properties", overwrite:true )
-	}
-}
-
 // set properties before starting Jetty (via jettyRun or jettyRunWar)
 task jettyRunSetProperties {
 	logger.info "Setting jettyRun system properties"
