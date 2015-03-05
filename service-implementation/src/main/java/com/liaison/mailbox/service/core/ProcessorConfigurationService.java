@@ -159,6 +159,13 @@ public class ProcessorConfigurationService {
 			if (processorDTO == null) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
+			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
+			List<Processor> retrievedEntity = configDAO.findProcessorByMbx(mailBoxGuid, false);
+			for(Processor proc : retrievedEntity){
+				if(serviceRequest.getProcessor().getName().equals(proc.getProcsrName())){
+					throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST,PROCESSOR, Response.Status.CONFLICT);
+				}
+			}
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
@@ -194,7 +201,7 @@ public class ProcessorConfigurationService {
 			processor.setServiceInstance(serviceInstance);
 
 			// persist the processor.
-			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
+			
 			configDAO.persist(processor);
 
 			// persist the processor execution state with status READY
