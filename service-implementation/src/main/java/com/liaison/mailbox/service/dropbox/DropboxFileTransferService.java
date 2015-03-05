@@ -133,11 +133,11 @@ public class DropboxFileTransferService {
             	for (Processor processor : processors) {
 
             		processorDTO = new ProcessorDTO();
-            		processorDTO.copyFromEntity(processor);
+            		processorDTO.copyFromEntity(processor,false);
 
             		// retrieving the httplistener pipeline id from remote processor
             		// properties
-            		DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(processor.getProcsrProperties(), processor);
+            		DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(processor.getProcsrProperties(), processor);
             		String pipeLineId = dropboxProcessorStaticProperties.getHttpListenerPipeLineId();
             		boolean securedPayload = dropboxProcessorStaticProperties.isSecuredPayload();
             		String mailboxPguid = processor.getMailbox().getPguid();

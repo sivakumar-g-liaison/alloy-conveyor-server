@@ -48,7 +48,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -132,7 +132,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			//ftpsRequest.enableDataChannelEncryption();
 			
 			// retrieve required properties
-			//ProcessorPropertiesDefinitionDTO processorProperties = getProperties();
+			//ProcessorPropertyUITemplateDTO processorProperties = getProperties();
 			FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
 			
 			if (ftpUploaderStaticProperties != null) {

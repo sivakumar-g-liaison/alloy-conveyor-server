@@ -30,7 +30,7 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.ProcessorJavascriptI;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -53,7 +53,7 @@ public class ProcessorDTO {
 	private String name;
 	@ApiModelProperty( value = "Processor type", required = true)
 	private String type;
-	private ProcessorPropertiesDefinitionDTO processorPropertiesInTemplateJson;
+	private ProcessorPropertyUITemplateDTO processorPropertiesInTemplateJson;
 	private String javaScriptURI;
 	private String description;
 	@ApiModelProperty( value = "Processor status", required = true)
@@ -185,12 +185,12 @@ public class ProcessorDTO {
 	}
 	
 
-	public ProcessorPropertiesDefinitionDTO getProcessorPropertiesInTemplateJson() {
+	public ProcessorPropertyUITemplateDTO getProcessorPropertiesInTemplateJson() {
 		return processorPropertiesInTemplateJson;
 	}
 
 	public void setProcessorPropertiesInTemplateJson(
-			ProcessorPropertiesDefinitionDTO processorPropertiesInTemplateJson) {
+			ProcessorPropertyUITemplateDTO processorPropertiesInTemplateJson) {
 		this.processorPropertiesInTemplateJson = processorPropertiesInTemplateJson;
 	}
 
@@ -223,7 +223,7 @@ public class ProcessorDTO {
 		Protocol protocol = Protocol.findByName(this.getProtocol());
 		processor.setProcsrProtocol(protocol.getCode());
 		
-		ProcessorPropertiesDefinitionDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
+		ProcessorPropertyUITemplateDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
 
 
 		// separate static and dynamic properties
@@ -231,7 +231,7 @@ public class ProcessorDTO {
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
 		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
 		
-		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.retrieveStaticProcessorPropertiesDTO(staticPropertiesDTO, processor.getProcessorType(), protocol);
+		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.getProcessorSpecificStaticPropsFrmTemplt(staticPropertiesDTO, processor.getProcessorType(), protocol);
 		
 		// set static properties into properties json to be stored in DB
 		if (null != propertiesDTO) {
@@ -314,7 +314,7 @@ public class ProcessorDTO {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public void copyFromEntity(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException,
+	public void copyFromEntity(Processor processor,boolean includeUITemplate) throws JsonParseException, JsonMappingException, JAXBException, IOException,
 			MailBoxConfigurationServicesException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		this.setGuid(processor.getPguid());
@@ -367,12 +367,11 @@ public class ProcessorDTO {
 			}
 
 		}	
-		// set properties JSON as in JSON Template
-		String propertyJSON = processor.getProcsrProperties();
 		
-		// set processor properties in DTO
-		ProcessorPropertiesDefinitionDTO propertiesDTO = ProcessorPropertyJsonMapper.retrieveProcessorPropertiesAsInJsonTemplate(propertyJSON, processor);		
-		this.setProcessorPropertiesInTemplateJson(propertiesDTO);
+		if(includeUITemplate){
+			
+			this.setProcessorPropertiesInTemplateJson(ProcessorPropertyJsonMapper.getHydratedUIPropertyTemplate(processor.getProcsrProperties(), processor));
+ 		}
 	}
 
 }

@@ -372,7 +372,7 @@ public class ProcessorConfigurationService {
 			validateProcessorBelongToMbx(mailBoxGuid, processor);
 
 			ProcessorDTO dto = new ProcessorDTO();
-			dto.copyFromEntity(processor);
+			dto.copyFromEntity(processor,true);
 
 			serviceResponse.setProcessor(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
@@ -871,7 +871,7 @@ public class ProcessorConfigurationService {
 						|| ((processor instanceof HTTPAsyncProcessor) && (httpListenerType.getCode()
 								.equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())))) {
 					processorDTO = new ProcessorDTO();
-					processorDTO.copyFromEntity(processor);
+					processorDTO.copyFromEntity(processor,false);
 				} 
 
 				if (null != processorDTO) {
@@ -887,7 +887,7 @@ public class ProcessorConfigurationService {
 					boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
 					boolean authCheckRequired = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));*/
 					
-					HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getStaticProcessorPropertiesFromJson(processor.getProcsrProperties(), processor);
+					HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(processor.getProcsrProperties(), processor);
 					
 					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
 					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
