@@ -15,7 +15,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import javax.servlet.ServletInputStream;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.input.CountingInputStream;
@@ -344,7 +343,7 @@ public class StorageUtilities {
 	 * @param workTicket
 	 * @throws IOException
 	 */
-	public static void storePayload(ServletInputStream stream, WorkTicket workTicket,
+	public static void storePayload(InputStream stream, WorkTicket workTicket,
 			Map<String, String> httpListenerProperties, boolean isDropbox) throws Exception {
 
 		try (InputStream payloadToPersist = stream) {
