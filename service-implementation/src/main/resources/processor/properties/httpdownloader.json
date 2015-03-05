@@ -75,7 +75,7 @@
 			"dynamic": false,
             "validationRules": null,
             "valueProvided":false,
-            "defaultValue":"DELETE",
+            "defaultValue":"POST",
 			"options":[
 				  "DELETE",
 			       "GET",
@@ -92,7 +92,7 @@
 			 "dynamic": false,
              "valueProvided":false,
              "validationRules": null,
-             "defaultValue":"application/atom+xml",
+             "defaultValue":"text/plain",
 			 "options":[
 				 "application/atom+xml",
 				 "application/EDIFACT",
@@ -177,7 +177,7 @@
          },
          {
 			"name": "otherRequestHeader",
-			"displayName": "other Request Headers",
+			"displayName": "Other Request Headers",
 			"type": "textarea",
 			"value": "",
 			"readOnly": false,

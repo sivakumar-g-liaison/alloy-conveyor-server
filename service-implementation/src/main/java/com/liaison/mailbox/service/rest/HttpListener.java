@@ -448,14 +448,17 @@ public class HttpListener extends AuditedResource {
 	 */
 	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
 			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
-
+		
+		
+		
 		if (httpResponse.getStatusLine().getStatusCode() > 299) {
-
+			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}",httpResponse.getEntity().getContent());
 			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
 			builder.status(result.getStatus());
 
 			//Sets the headers
 			Set<String> headers = result.getHeaderNames();
+			
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}
