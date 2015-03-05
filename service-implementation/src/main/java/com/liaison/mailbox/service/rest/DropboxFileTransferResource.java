@@ -41,6 +41,7 @@ import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifes
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -158,7 +159,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					startTime = System.currentTimeMillis();
 					
 					//creating work ticket
-					WorkTicket workTicket = createWorkTicket(serviceRequest, "", null);
+					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(serviceRequest, "", null);
 					
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();

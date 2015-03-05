@@ -32,8 +32,6 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
