@@ -173,13 +173,6 @@ public class StagedFile implements Identifiable {
 		this.setFileSize(stagedFileDto.getFileSize());
 		this.setMailboxId(stagedFileDto.getMailboxGuid());
 		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
-		
-		if (null != stagedFileDto.getMeta()) {
-			String metaDataJson = JAXBUtility.marshalToJSON(stagedFileDto.getMeta());
-			this.setFileMetaData(metaDataJson);
-		}
-		
+		this.setFileMetaData(stagedFileDto.getMeta());
 	}
-
-
 }
