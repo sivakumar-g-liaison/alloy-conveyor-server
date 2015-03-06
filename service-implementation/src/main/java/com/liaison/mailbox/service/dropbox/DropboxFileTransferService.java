@@ -219,9 +219,8 @@ public class DropboxFileTransferService {
 
             return transferContentResponse;
         } finally {
-          if (null != stream) {
-              stream.close();
-          }
+          // close stream once we are done
+          try { if (null != stream) stream.close(); } catch (Exception e) { /*Ignore*/ };
         }
 
 	}
