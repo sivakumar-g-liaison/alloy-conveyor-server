@@ -40,7 +40,7 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 import com.liaison.mailbox.service.core.processor.SFTPRemoteDownloader;
 import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertiesDefinitionDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;

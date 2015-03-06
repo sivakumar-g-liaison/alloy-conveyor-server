@@ -106,13 +106,9 @@ public class HttpListener extends AuditedResource {
 	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 	protected static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
 	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-	protected static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
+	public static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
 
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
-
-	private static final int GLOBAL_PROCESS_ID_MINLENGTH = 3;
-	private static final int GLOBAL_PROCESS_ID_MAXLENGTH = 32;
-	private static final String GLOBAL_PROCESS_ID_PATTERN = "^[a-zA-Z0-9]*$";
 
 	public HttpListener() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
@@ -179,7 +175,8 @@ public class HttpListener extends AuditedResource {
 						authenticateRequestor(request);
 					}
 					logger.debug("constructed workticket");
-					WorkTicket workTicket  = createWorkTicket(request, mailboxPguid, httpListenerProperties);
+
+					WorkTicket workTicket  = new WorkTicketUtil().createWorkTicket(request, mailboxPguid, httpListenerProperties);
 
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 
@@ -278,7 +275,8 @@ public class HttpListener extends AuditedResource {
 					if (isAuthenticationCheckRequired(httpListenerProperties)) {
 						authenticateRequestor(request);
 					}
-					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
+
+					WorkTicket  workTicket = new WorkTicketUtil().createWorkTicket(request, mailboxPguid, httpListenerProperties);
 					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					WorkTicketUtil.constructMetaDataJson(workTicket);
@@ -450,14 +448,17 @@ public class HttpListener extends AuditedResource {
 	 */
 	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
 			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
-
+		
+		
+		
 		if (httpResponse.getStatusLine().getStatusCode() > 299) {
-
+			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}",httpResponse.getEntity().getContent());
 			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
 			builder.status(result.getStatus());
 
 			//Sets the headers
 			Set<String> headers = result.getHeaderNames();
+			
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}

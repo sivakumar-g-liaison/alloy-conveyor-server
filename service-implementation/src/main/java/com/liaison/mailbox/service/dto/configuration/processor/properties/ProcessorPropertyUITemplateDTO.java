@@ -5,7 +5,7 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 @JsonRootName("processorDefinition")
-public class ProcessorPropertiesDefinitionDTO {
+public class ProcessorPropertyUITemplateDTO {
 	
 	private String type;
 	private String displayName;
