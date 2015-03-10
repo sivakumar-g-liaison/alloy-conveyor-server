@@ -228,7 +228,23 @@ public interface MailBoxConstants {
 	public static final String PAGING_OFFSET = "pagingoffset";
 	public static final String PAGING_COUNT = "pagingcount";
 
-
 	public static final String PORT_PROPERTY = "port";
+
+	//HTTPLISTENER CONSTANTS
+	public static final String GATEWAY_HEADER_PREFIX = "x-gate-";
+	public static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
+    public static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
+    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
+
+	//WORKTICKET CONSTANTS
+	public static final String HTTP_METHOD = "httpMethod";
+	public static final String HTTP_QUERY_STRING = "httpQueryString";
+	public static final String HTTP_REMOTE_PORT = "httpRemotePort";
+	public static final String HTTP_CHARACTER_ENCODING = "httpCharacterEncoding";
+	public static final String HTTP_REMOTE_USER = "httpRemoteUser";
+	public static final String HTTP_REMOTE_ADDRESS = "httpRemoteAddress";
+	public static final String HTTP_REQUEST_PATH = "httpRequestPath";
+	public static final String HTTP_CONTENT_TYPE = "httpContentType";
 
 }

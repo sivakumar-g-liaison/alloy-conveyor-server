@@ -12,7 +12,11 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -33,6 +38,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.logging.LogTags;
 import com.liaison.commons.util.StreamUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -254,4 +260,53 @@ public class BaseResource {
         return userId;
     }
     
+    /**
+     * Returns header map from http request.
+     * 
+     * @param request The HTTPRequest
+     * @return Headers
+     */
+    protected Map<String, Object> getRequestHeaders(HttpServletRequest request) {
+
+        Map<String, Object> headers = new HashMap<>();
+
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements())
+        {
+            String headerName = headerNames.nextElement();
+            List<String> headerValues = new ArrayList<>();
+            Enumeration<String> values = request.getHeaders(headerName);
+
+            while (values.hasMoreElements())
+            {
+                headerValues.add(values.nextElement());
+            }
+
+            headers.put(headerName,  headerValues);
+        }
+
+        return headers;
+    }
+
+    /**
+     * Get workticket properties from the http request
+     *
+     * @param request HTTP request
+     * @return Map contains workticket properties
+     */
+    protected Map<String, Object> getRequestProperties(HttpServletRequest request) {
+
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(MailBoxConstants.HTTP_METHOD, request.getMethod());
+        headers.put(MailBoxConstants.HTTP_QUERY_STRING, request.getQueryString());
+        headers.put(MailBoxConstants.HTTP_REMOTE_PORT, request.getRemotePort());
+        headers.put(MailBoxConstants.HTTP_CHARACTER_ENCODING, (request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
+        headers.put(MailBoxConstants.HTTP_REMOTE_USER, (request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
+        headers.put(MailBoxConstants.HTTP_REMOTE_ADDRESS, request.getRemoteAddr());
+        headers.put(MailBoxConstants.HTTP_REQUEST_PATH, request.getRequestURL().toString());
+        headers.put(MailBoxConstants.HTTP_CONTENT_TYPE, (request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType()));
+        headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
+
+        return headers;
+    }
 }

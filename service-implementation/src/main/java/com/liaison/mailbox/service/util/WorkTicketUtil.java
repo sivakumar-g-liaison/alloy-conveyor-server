@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 
-import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +18,6 @@ import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
-import com.liaison.mailbox.service.rest.HttpListener;
 
 public class WorkTicketUtil {
 
@@ -89,23 +87,26 @@ public class WorkTicketUtil {
      * @param httpListenerProperties
      * @return WorkTicket
      */
-    public WorkTicket createWorkTicket(HttpServletRequest request, String mailboxPguid, Map <String, String> httpListenerProperties) {
+    public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, Object> requestHeaders,
+            String mailboxPguid, Map<String, String> httpListenerProperties) {
 
         WorkTicket workTicket = new WorkTicket();
-        workTicket.setAdditionalContext("httpMethod", request.getMethod());
-        workTicket.setAdditionalContext("httpQueryString", request.getQueryString());
-        workTicket.setAdditionalContext("httpRemotePort", request.getRemotePort());
-        workTicket.setAdditionalContext("httpCharacterEncoding", (request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
-        workTicket.setAdditionalContext("httpRemoteUser", (request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
-        workTicket.setAdditionalContext("mailboxId", mailboxPguid);
-        workTicket.setAdditionalContext("httpRemoteAddress", request.getRemoteAddr());
-        workTicket.setAdditionalContext("httpRequestPath", request.getRequestURL().toString());
-        workTicket.setAdditionalContext("httpContentType", (request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType()));
-        copyRequestHeadersToWorkTicket(request, workTicket);
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_METHOD, requestProp.get(MailBoxConstants.HTTP_METHOD));
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_QUERY_STRING, requestProp.get(MailBoxConstants.HTTP_QUERY_STRING));
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_PORT, requestProp.get(MailBoxConstants.HTTP_REMOTE_PORT));
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_CHARACTER_ENCODING, requestProp.get(MailBoxConstants.HTTP_CHARACTER_ENCODING));
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_USER, requestProp.get(MailBoxConstants.HTTP_REMOTE_USER));
+        workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_ADDRESS, requestProp.get(MailBoxConstants.HTTP_REMOTE_ADDRESS));
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REQUEST_PATH, requestProp.get(MailBoxConstants.HTTP_REQUEST_PATH));
+        workTicket.setAdditionalContext(MailBoxConstants.HTTP_CONTENT_TYPE, requestProp.get(MailBoxConstants.HTTP_CONTENT_TYPE));
+        workTicket.getAdditionalContext().putAll(requestHeaders);
         workTicket.setCreatedTime(new Date());
-        if(null != httpListenerProperties)
+
+        if (null != httpListenerProperties) {
             workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(httpListenerProperties));
-        setGlobalProcessId(workTicket, request.getHeader(HttpListener.GLOBAL_PROCESS_ID_HEADER));
+        }
+        setGlobalProcessId(workTicket, (String) requestProp.get(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
 
         return workTicket;
     }

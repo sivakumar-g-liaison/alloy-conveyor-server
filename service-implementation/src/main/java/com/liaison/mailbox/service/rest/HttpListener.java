@@ -102,12 +102,6 @@ public class HttpListener extends AuditedResource {
 	protected static final String CONFIGURATION_QUEUE_PROVIDER_URL = "g2.queueing.server.url";
 	protected static final String CONFIGURATION_QUEUE_NAME = "directory.sweeper.queue.name";
 	protected static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
-	protected static final String GATEWAY_HEADER_PREFIX = "x-gate-";
-	protected static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
-	protected static final String HTTP_HEADER_TRANSFER_ENCODING = "Transfer-Encoding";
-	protected static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-	public static final String GLOBAL_PROCESS_ID_HEADER = GATEWAY_HEADER_PREFIX + "globalprocessid";
-
 	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
 
 	public HttpListener() {
@@ -176,7 +170,8 @@ public class HttpListener extends AuditedResource {
 					}
 					logger.debug("constructed workticket");
 
-					WorkTicket workTicket  = new WorkTicketUtil().createWorkTicket(request, mailboxPguid, httpListenerProperties);
+					WorkTicket workTicket  = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
+					        getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 
@@ -276,7 +271,8 @@ public class HttpListener extends AuditedResource {
 						authenticateRequestor(request);
 					}
 
-					WorkTicket  workTicket = new WorkTicketUtil().createWorkTicket(request, mailboxPguid, httpListenerProperties);
+					WorkTicket  workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
+                            getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					WorkTicketUtil.constructMetaDataJson(workTicket);
@@ -463,7 +459,7 @@ public class HttpListener extends AuditedResource {
 				builder.header(name, result.getHeader(name));
 			}
 			//set global process id in the header
-			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
 
 			//If payload URI avail, reads payload from spectrum. Mostly it would be an error message payload
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
@@ -480,9 +476,9 @@ public class HttpListener extends AuditedResource {
 			}
 
 			//Content type
-			String contentType = result.getHeader(HTTP_HEADER_CONTENT_TYPE);
+			String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
 			if (contentType == null) {
-				builder.header(HTTP_HEADER_CONTENT_TYPE, request.getContentType());
+				builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, request.getContentType());
 			}
 
 	   	} else {
@@ -499,7 +495,7 @@ public class HttpListener extends AuditedResource {
 				builder.header(name, result.getHeader(name));
 			}
 			//set global process id in the header
-			builder.header(GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
 
 			//reads paylaod from spectrum
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
@@ -510,9 +506,9 @@ public class HttpListener extends AuditedResource {
 			}
 
 		   //Content type
-		   String contentType = result.getHeader(HTTP_HEADER_CONTENT_TYPE);
+		   String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
 		   if (contentType == null) {
-		       builder.header(HTTP_HEADER_CONTENT_TYPE, request.getContentType());
+		       builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, request.getContentType());
 		   }
 
 	   	}
@@ -526,7 +522,7 @@ public class HttpListener extends AuditedResource {
 	 * @return responsecontentLength
 	 */
 	protected int getResponseContentLength(HttpResponse httpResponse) {
-		Header header = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_LENGTH);
+		Header header = httpResponse.getFirstHeader(MailBoxConstants.HTTP_HEADER_CONTENT_LENGTH);
 
 		if (header == null) {
 			// TODO - this should be an error.
@@ -546,7 +542,7 @@ public class HttpListener extends AuditedResource {
 	 * @return ContentType
 	 */
 	protected ContentType getResponseContentType(HttpResponse httpResponse) {
-		Header header = httpResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
+		Header header = httpResponse.getFirstHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
 
 		if (header == null) {
 			// TODO - this should be an error.
@@ -571,10 +567,10 @@ public class HttpListener extends AuditedResource {
 		Header[] headers = httpResponse.getAllHeaders();
 
 		for (Header header : headers) {
-			if (header.getName().regionMatches(true, 0, GATEWAY_HEADER_PREFIX,
-					0, GATEWAY_HEADER_PREFIX.length())) {
+			if (header.getName().regionMatches(true, 0, MailBoxConstants.GATEWAY_HEADER_PREFIX,
+					0, MailBoxConstants.GATEWAY_HEADER_PREFIX.length())) {
 				String name = header.getName();
-				name = name.substring(GATEWAY_HEADER_PREFIX.length());
+				name = name.substring(MailBoxConstants.GATEWAY_HEADER_PREFIX.length());
 				builder.header(name, header.getValue());
 			}
 		}
