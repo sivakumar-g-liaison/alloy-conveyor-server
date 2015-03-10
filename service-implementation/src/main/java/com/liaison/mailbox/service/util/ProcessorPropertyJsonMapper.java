@@ -36,8 +36,8 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWr
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
@@ -68,9 +68,19 @@ public class ProcessorPropertyJsonMapper {
 	public static final String DROPBOX_PROCESSOR_PROPERTIES_JSON = "processor/properties/dropboxProcessor.json";
 	public static final String PROP_HANDOVER_EXECUTION_TO_JS = "handOverExecutionToJavaScript";
 
-	private static Map <String, String> propertyMapper = new HashMap<String, String>();
+	private static Map <String, String> propertyMapper = null;
 
+    static {
 
+		propertyMapper = new HashMap<String, String>();
+    	propertyMapper.put(MailBoxConstants.HTTPLISTENER_AUTH_CHECK, MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK);
+		propertyMapper.put(MailBoxConstants.SWEEPED_FILE_LOCATION, MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
+		propertyMapper.put(MailBoxConstants.ERROR_FILE_LOCATION, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION);
+		propertyMapper.put(MailBoxConstants.PROCESSED_FILE_LOCATION, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION);
+		propertyMapper.put(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD, MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
+		propertyMapper.put(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD, MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
+		propertyMapper.put(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME, MailBoxConstants.PROPERTY_FILE_RENAME_FORMAT);
+    }
 
 
 	/**
@@ -137,16 +147,16 @@ public class ProcessorPropertyJsonMapper {
 		// In order to provide backward compatibility for older processor entities
 		// try to unmarshal the properties json with new class "ProcessorPropertyUITemplateDTO"
 		// if the unmarshalling fails then try to unmarshal it with old class "RemoteProcessorPropertiesDTO"
-		try {			
-				StaticProcessorPropertiesDTO staticProperties = getProcessorBasedStaticProps(propertyJson, processor.getProcessorType(), protocol);					
+		try {
+				StaticProcessorPropertiesDTO staticProperties = getProcessorBasedStaticProps(propertyJson, processor.getProcessorType(), protocol);
 				uiPropTemplate.setHandOverExecutionToJavaScript(staticProperties.isHandOverExecutionToJavaScript());
-				hydrateTemplate(staticProperties, uiPropTemplate);				
+				hydrateTemplate(staticProperties, uiPropTemplate);
 
 			}catch (JAXBException | JsonMappingException | JsonParseException e) {
 
-			RemoteProcessorPropertiesDTO legacyProps = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);			
+			RemoteProcessorPropertiesDTO legacyProps = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
 			mapLegacyPropsToTemplate(uiPropTemplate, legacyProps);
-			
+
 		   }
 		}
 		// handle dynamic properites also
@@ -258,7 +268,7 @@ public class ProcessorPropertyJsonMapper {
 		return null;
 	}
 
-	
+
 
 	public static ProcessorPropertyUITemplateDTO getTemplate(ProcessorType processorType, Protocol protocol) throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
@@ -418,16 +428,6 @@ public class ProcessorPropertyJsonMapper {
 	 */
 	private static String getPropertyNameOfDynamicProperty(String name) {
 
-		if (propertyMapper.size() == 0) {
-
-			propertyMapper.put(MailBoxConstants.HTTPLISTENER_AUTH_CHECK, MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK);
-			propertyMapper.put(MailBoxConstants.SWEEPED_FILE_LOCATION, MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
-			propertyMapper.put(MailBoxConstants.ERROR_FILE_LOCATION, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION);
-			propertyMapper.put(MailBoxConstants.PROCESSED_FILE_LOCATION, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION);
-			propertyMapper.put(MailBoxConstants.NUMBER_OF_FILES_THRESHOLD, MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
-			propertyMapper.put(MailBoxConstants.PAYLOAD_SIZE_THRESHOLD, MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
-			propertyMapper.put(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME, MailBoxConstants.PROPERTY_FILE_RENAME_FORMAT);
-		}
 		if (propertyMapper.keySet().contains(name)) {
 			return propertyMapper.get(name);
 		}
@@ -505,7 +505,7 @@ public class ProcessorPropertyJsonMapper {
 		StaticProcessorPropertiesDTO propertiesDTO = null;
 
 		 switch(processorType) {
-		 
+
 
 		 case REMOTEDOWNLOADER:
 			switch (protocol) {
@@ -627,7 +627,7 @@ public class ProcessorPropertyJsonMapper {
 
 	}
 
-	
+
 	/**
 	 * Method to retrieve list of static properties from staticPropertiesDTO object
 	 *
@@ -770,16 +770,29 @@ public class ProcessorPropertyJsonMapper {
 
 		for (Field field : target.getClass().getDeclaredFields()) {
 
-			Field fieldInOldJson = source.getClass().getDeclaredField(field.getName());
-			field.setAccessible(true);
-			fieldInOldJson.setAccessible(true);
-			Object propertyValue = fieldInOldJson.get(source);
-			if (field.getName().equals(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS)) {
-				List <HttpOtherRequestHeaderDTO> otherRequestHeaders = (List<HttpOtherRequestHeaderDTO>)propertyValue;
-				propertyValue = handleOtherRequestHeaders(otherRequestHeaders);
-			}
-			field.set(target, propertyValue);
+			Field fieldInOldJson;
+            try {
+            	fieldInOldJson = source.getClass().getDeclaredField(field.getName());
+            } catch(NoSuchFieldException e) {
+	           	if ((propertyMapper.values().contains(field.getName()))) {
+	           	    LOGGER.debug("Dynamic Property is handled in another method ignore this exception",field.getName());
+	           	} else {
+	           		LOGGER.debug("The field {} is not available in legacy prop.so continuing..",field.getName());
+	           	}
+	           	continue;
+	        }
+
+			  field.setAccessible(true);
+			  fieldInOldJson.setAccessible(true);
+			  Object propertyValue = fieldInOldJson.get(source);
+			  if (field.getName().equals(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS)) {
+				  List <HttpOtherRequestHeaderDTO> otherRequestHeaders = (List<HttpOtherRequestHeaderDTO>)propertyValue;
+				  propertyValue = handleOtherRequestHeaders(otherRequestHeaders);
+			  }
+			  field.set(target, propertyValue);
+
 		}
+		target.setHandOverExecutionToJavaScript(source.isHandOverExecutionToJavaScript());
 
 	}
 
@@ -803,10 +816,12 @@ public class ProcessorPropertyJsonMapper {
 		        	Field field = staticProcessorPropertiesDTO.getClass().getDeclaredField(propertyName);
 		        	field.setAccessible(true);
 					String propertyValue = property.getProcsrPropValue();
-					if (field.getType().equals(Boolean.class)) {
+					if (field.getType().equals(Boolean.TYPE)) {
 						field.setBoolean(staticProcessorPropertiesDTO, Boolean.valueOf(propertyValue));
-					} else if (field.getType().equals(Integer.class)) {
-						field.setInt(staticProcessorPropertiesDTO, Integer.valueOf(propertyValue).intValue());
+					} else if (field.getType().equals(Integer.TYPE)) {
+						if (!MailBoxUtil.isEmpty(propertyValue)) {
+							field.setInt(staticProcessorPropertiesDTO, Integer.valueOf(propertyValue).intValue());
+						}
 					} else if (field.getType().equals(String.class)){
 						field.set(staticProcessorPropertiesDTO, propertyValue);
 					}
