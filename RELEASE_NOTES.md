@@ -1,3 +1,7 @@
+1.1.5
+-------------------------------
+Spectrum and Gitlab related UAT property updates.
+
 1.1.4
 -------------------------------
 Updates to spectrum related proprties
