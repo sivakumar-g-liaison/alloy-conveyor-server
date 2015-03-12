@@ -282,7 +282,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <div>
+                <div  ng-show="!isProcessorTypeFileWriter">
                     <h4>Properties</h4>
 
                     <div class="gridStyle" ng-grid="gridOptionsTesting">
@@ -290,7 +290,7 @@
                 </div>
                 <br>
             </div>           
-            <div class="form-group" ng-show="!isProcessorTypeDropbox">
+            <div class="form-group" ng-hide="isProcessorTypeDropbox || isProcessorTypeHTTPListener">
                 <div>
                     <h4>Folders</h4>
                     <div class="gridStyle" ng-grid="gridOptionsForProcessorFolder">
@@ -299,7 +299,7 @@
                 <br>
             </div>
 
-            <div class="form-group" ng-show="!isProcessorTypeDropbox">
+            <div class="form-group" ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeSweeper">
 
                 <div>
                     <h4>Credentials</h4>
@@ -400,14 +400,14 @@
                 </div>
                 <br>
             </div>
-            <h3 ng-show="!isProcessorTypeDropbox">
+            <h3 ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter ">
                 Scheduling
             </h3>
 			<h3 ng-show="isProcessorTypeDropbox">
                 Transfer Profiles
             </h3>
 
-            <div class="row well multipleSelectionListBoundary">
+            <div class="row well multipleSelectionListBoundary"  ng-hide ="isProcessorTypeHTTPListener || isProcessorTypeFileWriter" >
                 <div class="col-sm-6 col-md-6">
                     <label ng-show="!isProcessorTypeDropbox">
                         <i>
