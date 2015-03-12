@@ -361,6 +361,15 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 	}
 }
 
+task configDropboxBuild {
+	ant.replaceregexp(file:"src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dropboxqueues\\.start=)(.*)', replace:"\\1${startDropboxQueues}", byline:false)
+	
+	ant.replaceregexp(file:"src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlDTDM}", byline:false)
+	ant.replaceregexp(file:"src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserDTDM}", byline:false)
+	
+	ant.replaceregexp(file:"src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlRTDM}", byline:false)
+	ant.replaceregexp(file:"src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:false)
+}
 
 task setDevProperties << {
     /*ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )

@@ -1,0 +1,14 @@
+// The preferred way to make local modifications to your build environment is through the use of Gradle init scripts.
+//    * http://www.gradle.org/docs/current/userguide/init_scripts.html
+
+allprojects {
+
+ext.dbUrlDTDM='jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=lsildb23d.liaison.dev)(port= 2484))(connect_data=(service_name=G2DEV.liaison.dev)))'
+ext.dbUserDTDM='DBX_GATEWAY_DTDM_APPL'
+
+ext.dbUrlRTDM='jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=lsildb23d.liaison.dev)(port= 2484))(connect_data=(service_name=G2DEV.liaison.dev)))'
+ext.dbUserRTDM='DBX_GATEWAY_RTDM_APPL'
+
+ext.startDropboxQueues='true'
+
+}

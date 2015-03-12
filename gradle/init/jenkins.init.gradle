@@ -17,4 +17,11 @@ ext.dbSchemaNameRtdm='GATEWAY_RTDM'
 ext.dbSchemaNamePrefixRtdm='JEN'
 ext.dbaPasswordRtdm='12345678'
 
+ext.dbUrlDTDM='jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=lsildb23d.liaison.dev)(port= 2484))(connect_data=(service_name=G2DEV.liaison.dev)))'
+ext.dbUserDTDM='DEV1_GATEWAY_DTDM_APPL'
+
+ext.dbUrlRTDM='jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=lsildb23d.liaison.dev)(port= 2484))(connect_data=(service_name=G2DEV.liaison.dev)))'
+ext.dbUserRTDM='DEV1_GATEWAY_RTDM_APPL'
+
+ext.startDropboxQueues='false'
 }

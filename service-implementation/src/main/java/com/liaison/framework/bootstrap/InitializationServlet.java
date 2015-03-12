@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.acl.util.RemoteURLPublicKeyVerifier;
 import com.liaison.commons.acl.util.SignatureVerifier;
-import com.liaison.commons.acl.util.example.ExampleBase64EncodedSignatureVerifier;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
@@ -49,17 +48,20 @@ import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTick
  */
 public class InitializationServlet extends HttpServlet {
 
-
 	private static final long serialVersionUID = -8418412083748649428L;
 	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
 	DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();  
-
+	public static final String START_DROPBOX_QUEUE = "com.liaison.dropboxqueues.start";
 
     public void init(ServletConfig config) throws ServletException {
+    	
+    	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
+    		ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();       
+        } else {
+        	ProcessorQueuePoller.startPolling();
+        	ServiceBrokerToMailboxWorkTicketPoller.startPolling();
+        }
         
-        ProcessorQueuePoller.startPolling();
-        ServiceBrokerToMailboxWorkTicketPoller.startPolling();
-        ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();       
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
     	//OracleDataSource.initOracleDataSource(); // TODO
