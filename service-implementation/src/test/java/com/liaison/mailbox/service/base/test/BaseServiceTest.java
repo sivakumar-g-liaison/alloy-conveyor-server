@@ -10,6 +10,7 @@
 package com.liaison.mailbox.service.base.test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +32,6 @@ import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
-import com.liaison.mailbox.service.util.HTTPStringOutputStream;
 
 /**
  * Base Test class for initial setup and cleanup.
@@ -41,7 +41,7 @@ import com.liaison.mailbox.service.util.HTTPStringOutputStream;
  */
 public abstract class BaseServiceTest {
 
-	private HTTPStringOutputStream output;
+	private ByteArrayOutputStream output;
 	private static String BASE_URL;
 	private static String KMS_BASE_URL;
 	private static String BASE_URL_DROPBOX;
@@ -76,11 +76,11 @@ public abstract class BaseServiceTest {
 
 	}
 
-	public HTTPStringOutputStream getOutput() {
+	public ByteArrayOutputStream getOutput() {
 		return output;
 	}
 
-	public void setOutput(HTTPStringOutputStream output) {
+	public void setOutput(ByteArrayOutputStream output) {
 		this.output = output;
 	}
 	
@@ -136,7 +136,7 @@ public abstract class BaseServiceTest {
 		request.setLogger(logger);
 		request.setSocketTimeout(60000);
 		request.addHeader("Content-Type", "application/json");
-		output = new HTTPStringOutputStream();
+		output = new ByteArrayOutputStream(4096);
 		request.setOutputStream(output);
 		if (input != null) {
 			request.inputData(new HTTPStringData(input));

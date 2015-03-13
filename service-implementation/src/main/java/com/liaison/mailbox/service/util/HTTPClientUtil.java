@@ -9,6 +9,7 @@
 
 package com.liaison.mailbox.service.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,7 +46,7 @@ public final class HTTPClientUtil {
 	 */
 	public static String getHTTPResponseInString(Logger logger, String httpURL, Map<String, String> headers) throws MalformedURLException, LiaisonException, IOException {
 
-	    try (OutputStream output = new HTTPStringOutputStream()) {
+	    try (OutputStream output = new ByteArrayOutputStream(4096)) {
 	        
 	        String clientContent = null;
 	        URL url = new URL(httpURL);
