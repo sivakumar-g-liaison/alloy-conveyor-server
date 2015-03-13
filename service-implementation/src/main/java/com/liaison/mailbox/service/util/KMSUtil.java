@@ -79,7 +79,7 @@ public class KMSUtil {
 			String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
 			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
-			if (base64EncodedPassword == null || base64EncodedPassword == "") {
+			if (base64EncodedPassword == null || base64EncodedPassword.isEmpty()) {
 				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED, Response.Status.BAD_REQUEST);
 			} else {
 				String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
