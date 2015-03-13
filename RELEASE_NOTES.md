@@ -1,3 +1,7 @@
+1.1.6
+-------------------------------
+Fix for GMB-405 - UAT logstash property updates
+
 1.1.5
 -------------------------------
 Spectrum and Gitlab related UAT property updates.
