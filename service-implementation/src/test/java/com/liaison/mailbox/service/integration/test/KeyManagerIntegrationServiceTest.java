@@ -51,7 +51,6 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.util.HTTPClientUtil;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Test class to test mailbox configuration service.
  * 

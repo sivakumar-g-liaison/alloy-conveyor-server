@@ -1,3 +1,12 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
@@ -31,6 +40,11 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
+/**
+ * Class which has  Dropbox related operations.
+ *
+ * @author OFS
+ */
 public class DropboxStagedFilesService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxStagedFilesService.class);
@@ -41,7 +55,7 @@ public class DropboxStagedFilesService {
 	/**
 	 * Method to retrieve all staged files of the mailboxes linked to tenancy
 	 * keys available in the manifest
-	 * 
+	 *
 	 * @param request
 	 * @param aclManifest
 	 * @return list of StagedFiles
@@ -50,9 +64,9 @@ public class DropboxStagedFilesService {
 	 */
 	public GetStagedFilesResponseDTO getStagedFiles(String aclManifest, String fileName, String page, String pageSize,
 			String sortField, String sortDirection) throws IOException, JAXBException {
-		
+
 		LOG.debug("Entering into get staged files service.");
-		
+
 		int totalCount = 0;
 		int startOffset = 0;
 		int count = 0;

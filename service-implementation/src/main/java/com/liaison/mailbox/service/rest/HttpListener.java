@@ -444,9 +444,9 @@ public class HttpListener extends AuditedResource {
 	 */
 	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
 			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
-		
-		
-		
+
+
+
 		if (httpResponse.getStatusLine().getStatusCode() > 299) {
 			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}",httpResponse.getEntity().getContent());
 			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
@@ -454,7 +454,7 @@ public class HttpListener extends AuditedResource {
 
 			//Sets the headers
 			Set<String> headers = result.getHeaderNames();
-			
+
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}
@@ -619,11 +619,11 @@ public class HttpListener extends AuditedResource {
 	 * @param mailboxGuid mailbox Pguid
 	 * @param isSync boolean specifying
 	 * @return
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws MailBoxConfigurationServicesException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 * @throws MailBoxConfigurationServicesException
 	 */
 	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
@@ -632,43 +632,6 @@ public class HttpListener extends AuditedResource {
 		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
 
 	}
-
-	/**
-	 * retrieve the pipeline id configured in httplistener of mailbox
-	 *
-	 * @param mailboxpguid
-	 * @Param isSync boolean
-	 * @return String pipeline id
-	 *
-	 *
-	 */
-	/*private String retrievePipelineId(Map <String, String> httpListenerProperties) {
-
-		String pipelineId = null;
-		pipelineId = httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_PIPELINEID);
-		logger.info("PIPELINE ID is set to be :"+pipelineId);
-		return pipelineId;
-	}
-
-	/**
-	 * Method to construct FS2ObjectHeaders from the given workTicket
-	 *
-	 * @param workTicket
-	 * @return FS2ObjectHeaders
-	 * @throws IOException
-	 * @throws MailBoxServicesException
-	 */
-	/*private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket, Map <String, String> httpListenerProperties) {
-
-		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
-		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
-		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
-		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, (MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
-		return fs2Header;
-	}*/
-
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {

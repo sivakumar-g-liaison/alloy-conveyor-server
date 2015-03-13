@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -29,29 +29,31 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.queue.DummyJMSClientQueue;
 import com.wordnik.swagger.annotations.ApiParam;
 
+/**
+ * This is the gateway for the mailbox processor configuration services.
+ *
+ * @author OFS
+ */
 @Path("/jmsclient/{mailboxId}/{spectrumURL}/{targetFileName}")
 public class DummyJMSClient {
-	
+
 	private static final Logger logger = LogManager.getLogger(DummyJMSClient.class);
-	
+
 	@POST
 	public Response postDummyProcesssedPayload(
-			@Context HttpServletRequest request, 
+			@Context HttpServletRequest request,
 			@PathParam(value = "mailboxId") final @ApiParam(name = "mailboxId", required = true, value = "mailbox guid") String mailboxId,
-			@PathParam(value = "spectrumURL")  @ApiParam(name = "spectrumURL", required = true, value = "spectrum URL") String spectrumURL, 
+			@PathParam(value = "spectrumURL")  @ApiParam(name = "spectrumURL", required = true, value = "spectrum URL") String spectrumURL,
 			@PathParam(value = "targetFileName") final @ApiParam(name = "targetFileName", required = true, value = "target File Name") String targetFileName) {
-	
+
 		try {
-			//spectrumURL = URLEncoder.encode(spectrumURL, "UTF-8");
-			//spectrumURL = "fs2:/mailboxsweeper/payload/1.0/55FB3A3F0A0A000C0A774FB208B57192";
-			//spectrumURL = "sfs2:/mailboxsweeper/payload/1.0/13BD64360A0A007D0A180BCD85F93951";
+
 			spectrumURL = "fs2://secure@dev-int/mailbox/payload/1.0/BA2668600A0A01700A4DA3CDF9111849";
-			//spectrumURL = "fs2:/mllp/payload/1.0/A067FB260A0A11A611857541B17AC518"; //URLDecoder.decode(spectrumURL, "UTF-8");
 			WorkTicket ticketRequest = new WorkTicket();
 			ticketRequest.setPayloadURI(spectrumURL);
 			ticketRequest.setFileName(targetFileName);
 			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_MAILBOX_ID, mailboxId);
-			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_OVERWRITE, Boolean.FALSE);		
+			ticketRequest.setAdditionalContext(MailBoxConstants.KEY_OVERWRITE, Boolean.FALSE);
 			String payloadTicket = JAXBUtility.marshalToJSON(ticketRequest);
 			DummyJMSClientQueue.getInstance().sendMessages(payloadTicket);
 			return Response.status(200).header("Content-Type", MediaType.TEXT_PLAIN).entity("Posted to Queue Successfully").build();

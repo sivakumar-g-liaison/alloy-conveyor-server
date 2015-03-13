@@ -1,3 +1,12 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
@@ -15,6 +24,11 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 
+/**
+ * Class which has  Dropbox related operations.
+ *
+ * @author OFS
+ */
 public class DropboxService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxService.class);
@@ -22,7 +36,7 @@ public class DropboxService {
 	/**
 	 * Method which will consume request from dropbox queue and log a staged
 	 * event in StagedFiles Table in DB
-	 * 
+	 *
 	 * @param request
 	 * @throws IOException
 	 * @throws JAXBException

@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
@@ -52,6 +62,11 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+/**
+ * This is the gateway for the mailbox processor configuration services.
+ *
+ * @author santoshc
+ */
 @Path("dropbox/stagedFiles/{stagedFileId}")
 public class DropboxStagedFileDownloadResource extends AuditedResource {
 
@@ -213,7 +228,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 	/**
 	 * This method will validate the size of the request.
-	 * 
+	 *
 	 * @param request
 	 *            The HttpServletRequest
 	 */

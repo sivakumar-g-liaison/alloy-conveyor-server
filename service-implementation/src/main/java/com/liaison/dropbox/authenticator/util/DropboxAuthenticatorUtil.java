@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.dropbox.authenticator.util;
 
 import java.io.UnsupportedEncodingException;
@@ -19,6 +29,10 @@ import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifest
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.EncryptionUtil;
 
+/**
+ * @author OFS
+ *
+ */
 public class DropboxAuthenticatorUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(DropboxAuthenticatorUtil.class);

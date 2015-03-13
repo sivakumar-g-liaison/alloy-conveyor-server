@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
@@ -50,6 +60,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+/**
+ * This is the gateway for the mailbox processor configuration services.
+ *
+ * @author OFS
+ */
 @Path("dropbox/transferContent")
 public class DropboxFileTransferResource extends AuditedResource {
 
@@ -93,11 +108,11 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 				try {
 
-					// start time to calculate elapsed time for retrieving necessary details from headers 
+					// start time to calculate elapsed time for retrieving necessary details from headers
 					startTime = System.currentTimeMillis();
-					
+
 					String fileName = serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME);
-					
+
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
@@ -112,14 +127,14 @@ public class DropboxFileTransferResource extends AuditedResource {
 					endTime = System.currentTimeMillis();
 					LOG.debug("Calculating elapsed time for retrieving necessary details from headers");
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
-					
+
 					// constructing authenticate and get manifest request
 					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil
 							.constructAuthenticationRequest(loginId, null, authenticationToken);
 
 					// to calculate elapsed time for authentication
 					startTime = System.currentTimeMillis();
-					
+
 					// authenticating
 					String encryptedMbxToken = authService
 							.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
@@ -136,10 +151,10 @@ public class DropboxFileTransferResource extends AuditedResource {
 					LOG.debug("Calculating elapsed time for authentication");
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-					
+
 					// to calculate elapsed time for getting manifest
 					startTime = System.currentTimeMillis();
-					
+
 					// getting manifest
 					GEMManifestResponse manifestResponse = authService
 							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
@@ -149,32 +164,32 @@ public class DropboxFileTransferResource extends AuditedResource {
 						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
 								.entity(responseEntity).build();
 					}
-					
+
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
 					LOG.debug("Calculating elapsed time for getting manifest");
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
-					
+
 					// to calculate elapsed time for work ticket creation
 					startTime = System.currentTimeMillis();
-					
+
 					//creating work ticket
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(serviceRequest),
 					        getRequestHeaders(serviceRequest), "", null);
-					
+
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
 					LOG.debug("Calculating elapsed time for creating workticket");
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
-					
+
 					// to calculate elapsed time for work ticket creation
 					startTime = System.currentTimeMillis();
-					
+
 					// calling service to upload content to spectrum
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService
 							.transferFile(workTicket, serviceRequest.getInputStream(), transferProfileId,
 									manifestResponse.getManifest(), fileName, loginId);
-					
+
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
 					LOG.debug("TIME SPENT IN SERVICE LAYER -  RETRIVE PROCESSOR PROPS + POST TO SPECTRUM + BUILD WORK TICKET + POST TO QUEUE");
@@ -190,13 +205,13 @@ public class DropboxFileTransferResource extends AuditedResource {
 									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
 							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
-					
+
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
 					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}",workTicket.getFileName(),endTime-actualStartTime);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
-					
+
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
@@ -222,7 +237,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 	/**
 	 * This method will validate the size of the request.
-	 * 
+	 *
 	 * @param request
 	 *            The HttpServletRequest
 	 */

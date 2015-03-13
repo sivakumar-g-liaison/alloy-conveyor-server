@@ -9,6 +9,11 @@
 
 package com.liaison.mailbox.service.dto.dropbox;
 
+/**
+ *
+ * @author OFS
+ *
+ */
 public class StagedFileDTO {
 
 	private String name;

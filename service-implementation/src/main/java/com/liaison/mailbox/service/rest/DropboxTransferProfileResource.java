@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
@@ -45,6 +55,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+/**
+ * This is the gateway for the mailbox processor configuration services.
+ *
+ * @author santoshc
+ */
 @Path("dropbox/transferProfiles")
 public class DropboxTransferProfileResource extends AuditedResource {
 
@@ -118,7 +133,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService
 							.getTransferProfiles(manifestResponse.getManifest());
 					String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
-					
+
 					// response message construction
 					ResponseBuilder builder = Response
 							.ok()

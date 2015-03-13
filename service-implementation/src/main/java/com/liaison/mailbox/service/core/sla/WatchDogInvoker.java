@@ -14,6 +14,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTicketConsumer;
 
+/**
+ * @author OFS
+ *
+ */
 public class WatchDogInvoker implements Runnable {
 
 	private String request = null;

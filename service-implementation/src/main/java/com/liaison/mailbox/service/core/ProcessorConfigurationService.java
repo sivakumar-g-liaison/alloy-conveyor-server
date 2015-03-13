@@ -133,10 +133,10 @@ public class ProcessorConfigurationService {
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
 	 * @throws JSONException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid, AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, JSONException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -201,7 +201,7 @@ public class ProcessorConfigurationService {
 			processor.setServiceInstance(serviceInstance);
 
 			// persist the processor.
-			
+
 			configDAO.persist(processor);
 
 			// persist the processor execution state with status READY
@@ -346,10 +346,10 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public GetProcessorResponseDTO getProcessor(String mailBoxGuid, String processorGuid) throws JsonParseException,
 			JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -404,24 +404,24 @@ public class ProcessorConfigurationService {
 		try {
 
 			String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
-			
+
 			JSONObject jsonRequest = new JSONObject(request);
 			JSONObject dataTransferObject = jsonRequest.getJSONObject("dataTransferObject");
-			jsonRequest.put("serviceInstanceId", MailBoxUtil.getGUID());//Some random string			
+			jsonRequest.put("serviceInstanceId", MailBoxUtil.getGUID());//Some random string
 			ISO8601Util isoDateUtil = new ISO8601Util();
 			Calendar cal = Calendar.getInstance();
 			dataTransferObject.put("validityDateFrom", isoDateUtil.fromCalendar(cal));
 			dataTransferObject.put("name", "MailBxRt"+cal.getTime()); //Some random string
 			cal.add(Calendar.YEAR, 1);
 			dataTransferObject.put("validityDateTo", isoDateUtil.fromCalendar(cal));
-			
+
 			// read the container passphrase from properties file for the self signed trustore
 			String containerPassphrase = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.SELF_SIGNED_TRUSTORE_PASSPHRASE);
 			dataTransferObject.put("containerPassphrase", containerPassphrase);
-			
+
 			LOGGER.debug("Request  to key manager new deploy {}",jsonRequest.toString());
-			
-			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+ "upload/truststore");                 
+
+			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")+ "upload/truststore");
 			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
 			FileBody trustStore = new FileBody(new File(MailBoxUtil.getEnvironmentProperties().getString("certificateDirectory")));
 
@@ -430,7 +430,7 @@ public class ProcessorConfigurationService {
 			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 			HttpClient httpClient = httpClientBuilder.build();
 			HttpResponse response = httpClient.execute(httpPost);
-		
+
 			// TODO Check for 200 Status code, Consume entity then get GUID and return
 
 			if ((response.getStatusLine().getStatusCode() >= 200) && (response.getStatusLine().getStatusCode() < 300)) {
@@ -525,10 +525,10 @@ public class ProcessorConfigurationService {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId)
 			throws JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -842,11 +842,11 @@ public class ProcessorConfigurationService {
 	 * @param mailboxGuid
 	 * @param httpListenerType
 	 * @return a Map containing the HttpListenerSpecific Properties
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws MailBoxConfigurationServicesException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 * @throws MailBoxConfigurationServicesException
 	 */
 	public Map <String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType) throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
@@ -855,15 +855,15 @@ public class ProcessorConfigurationService {
 		// retrieve the list of processors of specific type
 		ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
 		List <Processor> processors = config.findProcessorByMbx(mailboxGuid, true);
-		
+
 		if(processors.isEmpty()) {
 			throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
 		}
 
 		try {
-			
+
 			ProcessorDTO processorDTO = null;
-			
+
 			for (Processor processor : processors) {
 
 				if (((processor instanceof HTTPSyncProcessor) && (httpListenerType.getCode()
@@ -872,27 +872,17 @@ public class ProcessorConfigurationService {
 								.equals(ProcessorType.HTTPASYNCPROCESSOR.getCode())))) {
 					processorDTO = new ProcessorDTO();
 					processorDTO.copyFromEntity(processor,false);
-				} 
+				}
 
 				if (null != processorDTO) {
 
 					// retrieve required properties
-					/*ArrayList<String> propertyNames = new ArrayList<String>();
-					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
-					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD);
-					propertyNames.add(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK);
-					Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorDTO.getProcessorProperties(), propertyNames);
-
-					String pipeLineId = requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID);
-					boolean securedPayload = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
-					boolean authCheckRequired = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));*/
-					
 					HTTPListenerPropertiesDTO httpListenerStaticProperties = (HTTPListenerPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(processor.getProcsrProperties(), processor);
-					
+
 					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
 					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
 					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
-					
+
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, processor.getServiceInstance().getName());
 					//Commented by Veera -Not needed, because tenancy key format has changed as per service broker
 					//httpListenerProperties.put(MailBoxConstants.KEY_TENANCY_KEY, processor.getMailbox().getTenancyKey());
@@ -904,13 +894,13 @@ public class ProcessorConfigurationService {
 				}
 
 			}
-			
+
 			if (null == processorDTO) {
 				throw new MailBoxServicesException(Messages.MISSING_PROCESSOR, httpListenerType.getCode(), Response.Status.NOT_FOUND);
 			}
 
 		} catch (JAXBException
-				| IOException 
+				| IOException
 				| SymmetricAlgorithmException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
 			LOGGER.error("Retrieval of processor failed", e);
@@ -921,6 +911,6 @@ public class ProcessorConfigurationService {
 		return httpListenerProperties;
 
 	}
-	
-		
+
+
 }

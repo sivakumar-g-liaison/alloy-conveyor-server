@@ -16,8 +16,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -38,16 +36,12 @@ import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author VNagarajan
@@ -72,7 +66,7 @@ public class HttpClient {
 			HTTPRequest request = new HTTPRequest(null);
 			request.setLogger(LOGGER);
 
-	
+
 			// Convert the json string to DTO
 			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = null;
 			HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = null;
@@ -86,7 +80,7 @@ public class HttpClient {
 			String httpVersion = null;
 			String contentType = null;
 			int port = 0;
-			
+
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)processor.getProperties();
 				url = httpUploaderStaticProperties.getUrl();
@@ -111,20 +105,6 @@ public class HttpClient {
 				httpVersion = httpDownloaderStaticProperties.getHttpVersion();
 				port = httpDownloaderStaticProperties.getPort();
 			}
-			
-			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_URL);
-			propertyNames.add(MailBoxConstants.PROPERTY_PORT);
-			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
-			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
-			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
-			propertyNames.add(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS);
-			propertyNames.add(MailBoxConstants.PROPERTY_CHUNKED_ENCODING);
-			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERB);
-			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERSION);
-			propertyNames.add(MailBoxConstants.PROPERTY_CONTENT_TYPE);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
 
 			// Set url to HTTPRequest
 			request.setUrl(url);
@@ -135,7 +115,7 @@ public class HttpClient {
 			request.setNumberOfRetries(retryAttempts);
 			request.setConnectionTimeout(connectionTimeout);
 			request.setChunkedEncoding(chunkedEncoding);
-			
+
 			if (socketTimeout > 0) {
 				request.setSocketTimeout(socketTimeout);
 			}
@@ -197,7 +177,7 @@ public class HttpClient {
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
 				| MailBoxServicesException | SymmetricAlgorithmException | UnrecoverableKeyException
 				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException
-				| JsonParseException | CMSException | BootstrapingFailedException | CertificateException 
+				| JsonParseException | CMSException | BootstrapingFailedException | CertificateException
 				| JSONException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}

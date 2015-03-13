@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.util;
 
 import java.util.Date;
@@ -18,8 +28,13 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.enums.ExecutionState;
 
+/**
+ *
+ * @author OFS
+ *
+ */
 public class TransactionVisibilityClient {
-	
+
 	 public static final String PROPERTY_COM_LIAISON_LENS_HUB = "com.liaison.lens.hub";
 	 public static final String MESSAGE_ERROR_INFO = "messageerrorinfo";
 	 public static final String DEFAULT_SENDER_NAME = "UNKNOWN";
@@ -29,7 +44,7 @@ public class TransactionVisibilityClient {
 	 private static final Logger logger = LogManager.getLogger(TransactionVisibilityClient.class);
 
 	 private TransactionVisibilityAPI visibilityAPI;
-	 
+
 	 public TransactionVisibilityClient (String glassMessageId){
 		 visibilityAPI = new TransactionVisibilityAPI();
 		 visibilityAPI.setGlassMessageId(glassMessageId);
@@ -37,42 +52,42 @@ public class TransactionVisibilityClient {
 		 visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 		 visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
 		 visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
-		
+
 	 }
-	 
-	 
+
+
 	 public void logToGlass(GlassMessage message){
-		 
+
 		 MapItemType item = new MapItemType();
 		 item.setKey("proc-exec-id");
 		 item.setValue(message.getExecutionId());
 		 visibilityAPI.getAdditionalInformation().add(item);
-		 
+
 		 item = new MapItemType();
 		 item.setKey("mailbox-id");
 		 item.setValue(message.getMailboxId());
 		 visibilityAPI.getAdditionalInformation().add(item);
-		 
+
 		 item = new MapItemType();
 		 item.setKey("processor-id");
 		 item.setValue(message.getProcessorId());
 		 visibilityAPI.getAdditionalInformation().add(item);
-		 
+
 		 item = new MapItemType();
 		 item.setKey("tenancy-key");
 		 item.setValue(message.getTenancyKey());
 		 visibilityAPI.getAdditionalInformation().add(item);
-		 
+
 		 item = new MapItemType();
 		 item.setKey("siid");
 		 item.setValue(message.getServiceInstandId());
 		 visibilityAPI.getAdditionalInformation().add(item);
-		 
+
 		 item = new MapItemType();
 		 item.setKey("pipeline-id");
 		 item.setValue(message.getPipelineId());
 		 visibilityAPI.getAdditionalInformation().add(item);
-		 
+
 		 visibilityAPI.setCategory(message.getProtocol()+":"+message.getCategory().getCode());
 		 visibilityAPI.setId(message.getGlobalPId());
 		 if(ExecutionState.PROCESSING.value().equals(message.getStatus().value())){
@@ -90,18 +105,18 @@ public class TransactionVisibilityClient {
 		 }else if (ExecutionState.STAGED.value().equals(message.getStatus().value())){
 			 visibilityAPI.setStatus(StatusCode.G);
 		 }
-		 
+
 		 visibilityAPI.setInAgent(message.getInAgent());
 		 XMLGregorianCalendar t = toXmlGregorianCalendar(new Date().getTime());
 	     visibilityAPI.setArrivalTime(t);
 	     visibilityAPI.setStatusDate(t);
-		
-				  
+
+
 		 logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
-		 logger.debug("TransactionVisibilityAPI with status {} logged for execution :{}",message.getStatus().value(),message.getExecutionId());	 
-		 
+		 logger.debug("TransactionVisibilityAPI with status {} logged for execution :{}",message.getStatus().value(),message.getExecutionId());
+
 	 }
-	 
+
 	 /**
 	     * Converts a given time in milliseconds into a {@link XMLGregorianCalendar} object.
 	     * <p>

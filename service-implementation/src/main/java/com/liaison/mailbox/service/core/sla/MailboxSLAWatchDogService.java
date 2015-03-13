@@ -7,6 +7,7 @@
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
  */
+
 package com.liaison.mailbox.service.core.sla;
 
 import java.io.File;
@@ -84,6 +85,10 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * @author OFS
+ *
+ */
 public class MailboxSLAWatchDogService {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxSLAWatchDogService.class);
@@ -366,7 +371,7 @@ public class MailboxSLAWatchDogService {
 				LOG.error("profile not configured for processor {}", processor.getProcsrName());
 				throw new MailBoxServicesException(Messages.PROFILE_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
-			
+
 			if (null == profileName && processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
 				profileName = MailBoxConstants.PROFILE_NOT_AVAILABLE;
 			}
@@ -376,15 +381,13 @@ public class MailboxSLAWatchDogService {
 			// write the payload retrieved from spectrum to the configured location of processor
 			MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
 			LOG.debug("Payload from spectrum is successfully written to given payload location");
-			
+
 			//Initiate FSM
 			ProcessorStateDTO processorStaged = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, profileName, ExecutionState.STAGED, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStaged);
-			//fsm.addDefaultStateTransitionRules(processorStaged);
 
 	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
 	        processorExecutionStateDAO.merge(processorExecutionState);
-		    //processorDAO.merge(processor);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 	        LOG.info("#################################################################");
 		} catch (JAXBException | JsonParseException | JsonMappingException e) {
@@ -392,10 +395,10 @@ public class MailboxSLAWatchDogService {
 			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 
 		} catch (MailBoxServicesException e) {
-			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null)? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE : 
+			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null)? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE :
 								processor.getPguid(), ExecutionState.STAGING_FAILED, (processor == null)? MailBoxConstants.PROCESSOR_NOT_AVAILABLE : processor.getProcsrName(),
-								(processor == null)?ProcessorType.REMOTEUPLOADER : processor.getProcessorType(), (mailboxId == null) ? 
-								MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ? 
+								(processor == null)?ProcessorType.REMOTEUPLOADER : processor.getProcessorType(), (mailboxId == null) ?
+								MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ?
 								MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
@@ -411,8 +414,8 @@ public class MailboxSLAWatchDogService {
 
 			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null) ? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE :
 								processor.getPguid(), ExecutionState.STAGING_FAILED, (processor == null)? MailBoxConstants.PROCESSOR_NOT_AVAILABLE : processor.getProcsrName(),
-								(processor == null)?ProcessorType.REMOTEUPLOADER : processor.getProcessorType(), (mailboxId == null) ? 
-								MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ? 
+								(processor == null)?ProcessorType.REMOTEUPLOADER : processor.getProcessorType(), (mailboxId == null) ?
+								MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ?
 								MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
@@ -556,28 +559,28 @@ public class MailboxSLAWatchDogService {
 		LOG.info("The Processed Folder Path is" + processedFolderPath);
 		return processedFolderPath;
 	}
-	
+
 	/**
 	 * Method to return a list of canonical names of specific processors
-	 * 
-	 * 
-	 * @return list of canonical names of processors of based on the type provided 
+	 *
+	 *
+	 * @return list of canonical names of processors of based on the type provided
 	 * type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
 	 */
 	private List<String> getCannonicalNamesofSpecificProcessors(String type) {
-		
+
 		List <String> specificProcessors = new ArrayList<String>();
 		switch(type) {
 			case MAILBOX_SLA:
 				specificProcessors.add(Sweeper.class.getCanonicalName());
-				break;			
+				break;
 			case CUSTOMER_SLA:
 				specificProcessors.add(RemoteUploader.class.getCanonicalName());
 				specificProcessors.add(FileWriter.class.getCanonicalName());
-				break;	
-			
+				break;
+
 		}
-		
+
 		return specificProcessors;
 	}
 
@@ -632,7 +635,7 @@ public class MailboxSLAWatchDogService {
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		LOG.debug("Retrieving processor of type file writer and uploaders");
 		List <Processor> processors = processorDAO.findProcessorsByType(getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));
-		
+
 		for (Processor procsr : processors) {
 
 			// get the mailbox of this processor to retrieve sla properties
@@ -670,7 +673,7 @@ public class MailboxSLAWatchDogService {
 
 			LOG.info("Finding non sla verified file staged events");
 			List<FSMState> nonSLAVerifiedFileStagedEvents = procDAO.findNonSLAVerifiedFileStagedEvents(procsr.getPguid(), processorLastExecutionTime, procsr.getProcessorType());
-			
+
 			// There are no non sla verified file staged events.
 			if (null != nonSLAVerifiedFileStagedEvents && nonSLAVerifiedFileStagedEvents.isEmpty()) {
 				LOG.info("There are no non sla verified file staged events for the processor {}", procsr.getProcsrName());
@@ -694,10 +697,10 @@ public class MailboxSLAWatchDogService {
 					LOG.debug("customer sla verification is not required");
 				}
 			}
-			
+
 			// send an email if there is a sla violation for the current iterating processor
 			if (isCustomerSLAViolated) {
-			 
+
 				String mailboxName = procsr.getMailbox().getMbxName();
 				slaViolatedMailboxes.add(mailboxName);
 				String emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
@@ -788,7 +791,7 @@ public class MailboxSLAWatchDogService {
 
 	    LOG.info("Entering Customer SLA Verification check");
         boolean isCustomerSLAViolated = false;
-        
+
         try {
             // check if the file exists in the configured file write location
             // for processors  of type FileWriter if file exists then customer
@@ -798,9 +801,9 @@ public class MailboxSLAWatchDogService {
             } else {
                 MailBoxProcessorI uploaderProcessor = MailBoxProcessorFactory.getInstance(processor);
 
-                // check if file exist in the configured payload location 
+                // check if file exist in the configured payload location
                 // for processors of type uploader if file exists then
-                // customer sla is violated 
+                // customer sla is violated
                 if (uploaderProcessor instanceof FTPSRemoteUploader) {
 
                     FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
@@ -810,30 +813,30 @@ public class MailboxSLAWatchDogService {
 
                     SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
                     isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();
-                } 
-            }       
+                }
+            }
             return isCustomerSLAViolated;
         } catch (Exception e) {
-            
+
             LOG.error("Error occured during file existence check of processor {} , {}", processor.getProcsrName(), e.getMessage());
             // if any exception occurs during file existence check, a notification will be send to the user
             // and the mailbox corresponding to this processor will not be considered for sla validation
             notifyUser(processor, processor.getMailbox().getPguid(), e);
             return isCustomerSLAViolated;
-        }       
-		
+        }
+
 	}
-	
+
 	/**
 	 * This method will get the file write location of filewriter and check if any file exist in that specified location
-	 * 
+	 *
 	 * @param processor
 	 * @return boolean - if the file exists it will return value of true otherwise a value of false.
 	 * @throws MailBoxServicesException
 	 * @throws IOException
 	 */
 	private boolean checkFileExistenceOfFileWriter(Processor processor) throws MailBoxServicesException, IOException {
-		
+
 		LOG.debug ("Entering file Existence check for File Writer processor");
 		boolean isFileExists = false;
 		String fileWriteLocation = getLocationToWritePayloadFromSpectrum(processor);
@@ -850,7 +853,7 @@ public class MailboxSLAWatchDogService {
 		}
 		LOG.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
 		return isFileExists;
-		
+
 	}
 
 }

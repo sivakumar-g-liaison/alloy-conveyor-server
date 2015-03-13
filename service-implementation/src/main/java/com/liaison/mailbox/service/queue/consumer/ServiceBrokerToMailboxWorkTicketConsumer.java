@@ -19,6 +19,11 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.mailbox.service.core.sla.WatchDogInvoker;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+*
+* @author OFS
+*
+*/
 public class ServiceBrokerToMailboxWorkTicketConsumer {
 
 	private static int threadCount;
@@ -29,8 +34,8 @@ public class ServiceBrokerToMailboxWorkTicketConsumer {
 		// defeat instantiation.
 	}
 
-	private LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<Runnable>();
-	private MailBoxThreadPoolExecutor execSrvc = new MailBoxThreadPoolExecutor(threadCount, threadCount,60L, TimeUnit.MILLISECONDS,linkedBlockingQueue,true);
+	private  LinkedBlockingQueue<Runnable> linkedBlockingQueue = new LinkedBlockingQueue<Runnable>();
+	private  MailBoxThreadPoolExecutor execSrvc = new MailBoxThreadPoolExecutor(threadCount, threadCount,60L, TimeUnit.MILLISECONDS,linkedBlockingQueue,true);
 
 	public void invokeWatchDog(String requestJSON) throws InterruptedException {
 		execSrvc.execute(new WatchDogInvoker(requestJSON));

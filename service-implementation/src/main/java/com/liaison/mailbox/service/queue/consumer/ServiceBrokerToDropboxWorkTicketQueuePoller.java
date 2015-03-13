@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.queue.consumer;
 
 import java.util.concurrent.Executors;
@@ -10,8 +20,13 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 
+/**
+*
+* @author OFS
+*
+*/
 public class ServiceBrokerToDropboxWorkTicketQueuePoller {
-	
+
 	private static final Logger logger = LogManager.getLogger(ServiceBrokerToDropboxWorkTicketQueuePoller.class);
 
     private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
@@ -43,12 +58,12 @@ public class ServiceBrokerToDropboxWorkTicketQueuePoller {
             return;
         }
         final Runnable messageProcessor = new Runnable() {
-            public void run() {
+			public void run() {
                 logger.debug("Polling message Process");
                 String message = ServiceBrokerToDropboxWorkTicketQueue.getInstance().receiveMessage();
                 if (message != null) {
                     logger.debug("Polling message found {}", message);
-                    
+
                     try {
                     	ServiceBrokerToDropboxWorkTicketQueueConsumer qconsumer = ServiceBrokerToDropboxWorkTicketQueueConsumer.getDropboxQueueConsumerInstance();
                         qconsumer.invokeDropboxQueue(message);

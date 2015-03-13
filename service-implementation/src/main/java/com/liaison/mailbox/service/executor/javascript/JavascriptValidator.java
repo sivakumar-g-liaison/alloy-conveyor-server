@@ -13,6 +13,8 @@ import javax.script.ScriptEngine;
 
 /**
  * Validates that a given Javascript is valid for execution by the Service Broker.
+ *
+ * @author OFS
  */
 public class JavascriptValidator
 {

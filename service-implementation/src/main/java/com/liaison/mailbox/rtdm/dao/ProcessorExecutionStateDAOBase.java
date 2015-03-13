@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.rtdm.dao;
 
 import java.util.ArrayList;
@@ -15,20 +25,24 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * @author OFS
+ *
+ */
 public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExecutionState> implements ProcessorExecutionStateDAO, MailboxRTDMDAO {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProcessorExecutionStateDAOBase.class);
-	
+
 	public ProcessorExecutionStateDAOBase () {
 		super(PERSISTENCE_UNIT_NAME);
 	}
-	
+
 	public ProcessorExecutionState findByProcessorId(String processorId) {
-		
+
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		ProcessorExecutionState processorExecutionState = null;
 		try {
-			
+
 			@SuppressWarnings("unchecked")
 			List<ProcessorExecutionState> processorExecutionStates = entityManager.createNamedQuery(FIND_BY_PROCESSOR_ID)
 					.setParameter(PROCESSOR_ID, processorId).getResultList();
@@ -43,11 +57,11 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 				entityManager.close();
 			}
 		}
-		
-		
-		
+
+
+
 		return processorExecutionState;
-		
+
 	}
 
 	@Override
@@ -56,18 +70,18 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 		prcsrExecution.setPguid(MailBoxUtil.getGUID());
 		prcsrExecution.setProcessorId(processorId);
 		prcsrExecution.setExecutionStatus(executionStatus);
-		
+
 		persist(prcsrExecution);
 		LOGGER.info("Processor Execution created with status READY initialy");
 	}
-	
+
 	public List <String> findNonExecutingProcessors() {
-		
+
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List <String> nonExecutionProcessors = new ArrayList<String>();
-		
+
 		try {
-			
+
 			List<?> nonExecutingsProcsrs = entityManager.createNamedQuery(FIND_NON_EXECUTING_PROCESSORS)
 					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getResultList();
 			Iterator<?> iter = nonExecutingsProcsrs.iterator();

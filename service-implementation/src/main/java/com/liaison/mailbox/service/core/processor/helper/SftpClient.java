@@ -15,8 +15,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
-import java.util.ArrayList;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -32,21 +30,16 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
-import com.liaison.mailbox.service.core.processor.SFTPRemoteDownloader;
-import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author VNagarajan
@@ -69,7 +62,7 @@ public class SftpClient {
 			int connectionTimeout = 0;
 			int socketTimeout = 0;
 			int retryAttempts = 0;
-			
+
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)processor.getProperties();
 				url = sftpUploaderStaticProperties.getUrl();
@@ -83,22 +76,14 @@ public class SftpClient {
 				socketTimeout = sftpDownloaderStaticProperties.getSocketTimeout();
 				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
 			}
-			
-			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_URL);
-			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
-			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
-			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
 
+			// retrieve required properties
 			G2SFTPClient sftpRequest = new G2SFTPClient();
 			sftpRequest.setURI(url);
 			sftpRequest.setDiagnosticLogger(LOGGER);
 			sftpRequest.setCommandLogger(LOGGER);
 			sftpRequest.setTimeout(connectionTimeout);
 			sftpRequest.setStrictHostChecking(false);
-			//sftpRequest.setRetryInterval(properties.getRetryInterval());
 			sftpRequest.setRetryCount(retryAttempts);
 
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
@@ -106,7 +91,7 @@ public class SftpClient {
 			if ((loginCredential != null)) {
 
 			    // password has to be retrieved from KMS only if password is present in login credential
-			    // in case of sftp using keys, password will not be available and hence retrieval of 
+			    // in case of sftp using keys, password will not be available and hence retrieval of
 			    // password from KMS is not valid in this case.
 				String passwordFromKMS = (!StringUtil.isNullOrEmptyAfterTrim(loginCredential.getCredsPassword())) ?
 				                        KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword()) : null;

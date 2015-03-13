@@ -48,7 +48,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUp
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods

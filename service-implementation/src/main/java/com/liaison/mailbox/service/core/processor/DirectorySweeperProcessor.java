@@ -80,7 +80,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeperProcessor.class);
 
 	private String pipeLineID;
-	private List<Path> inProgressFiles = new ArrayList<>();
+	private  List<Path> inProgressFiles = new ArrayList<>();
 
 	public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
@@ -133,16 +133,6 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		String inputLocation = getPayloadURI();
 
 		// retrieve required properties
-		/*ArrayList<String> propertyNames = new ArrayList<String>();
-		propertyNames.add(MailBoxConstants.FILE_RENAME_FORMAT_PROP_NAME);
-		propertyNames.add(MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
-		Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
-
-		String fileRenameFormat = requiredProperties.get(MailBoxConstants.PROPERTY_FILE_RENAME_FORMAT);
-		String sweepedFileLocation = requiredProperties.get(MailBoxConstants.PROPERTY_SWEEPED_FILE_LOCATION);
-
-		fileRenameFormat = (fileRenameFormat == null) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;*/
-
 		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
 		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
 		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
@@ -672,14 +662,6 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		try {
 
 			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
-			propertyNames.add(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
-
-			String payloadSize = requiredProperties.get(MailBoxConstants.PROPERTY_PAYLOAD_SIZE_THRESHOLD);
-			String maxFile = requiredProperties.get(MailBoxConstants.PROPERTY_NO_OF_FILES_THRESHOLD);*/
-
 			SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
 			String payloadSize = sweeperStaticProperties.getPayloadSizeThreshold();
 			String maxFile = sweeperStaticProperties.getNumOfFilesThreshold();

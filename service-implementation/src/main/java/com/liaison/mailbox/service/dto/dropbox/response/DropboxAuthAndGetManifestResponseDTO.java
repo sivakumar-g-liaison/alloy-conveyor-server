@@ -16,9 +16,14 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 
+/**
+ *
+ * @author OFS
+ *
+ */
 @JsonRootName("authAndGetACLResponse")
 public class DropboxAuthAndGetManifestResponseDTO extends CommonResponseDTO {
-	
+
 	public DropboxAuthAndGetManifestResponseDTO() {
 	}
 
@@ -27,11 +32,11 @@ public class DropboxAuthAndGetManifestResponseDTO extends CommonResponseDTO {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	
-	
-	
+
+
+
+
 }

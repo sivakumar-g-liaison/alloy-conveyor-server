@@ -1,7 +1,7 @@
 {
   "processorDefinition": {
-    "type":"HTTPSYNCASYNC",
-    "displayName":"HTTPSYNCASYNC",
+    "type":"HTTPSYNC",
+    "displayName":"HTTPSYNCPROCESSOR",
     "protocol":"",
     "handOverExecutionToJavaScript":false,
     "staticProperties": [

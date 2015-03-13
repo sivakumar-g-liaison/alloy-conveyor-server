@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.rtdm.model;
 
 import javax.persistence.Column;
@@ -8,12 +18,17 @@ import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
 
+/**
+ * The persistent class for the PROCESSOR_EXEC_STATE database table.
+ *
+ *  @author OFS
+ */
 @Entity
 @Table(name = "PROCESSOR_EXEC_STATE")
 public class ProcessorExecutionState implements Identifiable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	private String pguid;
 	private String processorId;
 	private String executionStatus;

@@ -1,9 +1,24 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
-import org.codehaus.jackson.map.annotate.JsonRootName;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
 
+/**
+ * @author OFS
+ *
+ */
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="staticProperties")
 public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
-	
+
 	private String url;
 	private int port;
 	private int retryAttempts;
@@ -14,6 +29,7 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean passive;
 	private boolean binary;
 	private int retryInterval;
+
 	public String getUrl() {
 		return url;
 	}

@@ -10,13 +10,18 @@ package com.liaison.mailbox.service.dto.dropbox.request;
 
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
+/**
+ *
+ * @author OFS
+ *
+ */
 @JsonRootName("authAndGetACLRequest")
 public class DropboxAuthAndGetManifestRequestDTO {
-	
+
 	private String loginId;
 	private String password;
 	private String token;
-	
+
 	public String getLoginId() {
 		return loginId;
 	}

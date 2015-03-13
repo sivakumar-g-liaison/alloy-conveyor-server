@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.rtdm.datasource;
 
 import java.util.Hashtable;
@@ -15,43 +25,43 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 
 /**
- * This class is a CustomDataSource Factory that can be used to configured at Tomcat Container or Tomcat WEB App Context Level.  
+ * This class is a CustomDataSource Factory that can be used to configured at Tomcat Container or Tomcat WEB App Context Level.
  * Through the container declaration, a JNDI name can be automatically bound and available for Application to use
- * 
+ *
  * HOW TO CONFIGURE/DEPLOY this class inside TOMCAT 7
  * (Assuming that you are building a FOO.WAR application)
- * 
+ *
  * 1. Put ojdbc*.jar and ucp*.jar in  {tomcat-home}/lib folder
  * 2. In your FOO.WAR app, add a context.xml file (see below)
- * 
- 
+ *
+
 <Context>
 	<!--  factory="oracle.ucp.jdbc.PoolDataSourceImpl" -->
-	<Resource  
+	<Resource
 		name="jdbc/UCPPool"
 		auth="Container"
-		 
-		factory="com.liaison.datasource.CustomDataSourceFactory" 
-		
+
+		factory="com.liaison.datasource.CustomDataSourceFactory"
+
 		type="oracle.ucp.jdbc.PoolDataSource"
 		connectionFactoryClassName="oracle.jdbc.pool.OracleDataSource"
-		
+
 		description="Pas testing UCP Pool in Tomcat"
-		
+
 		minPoolSize="2" maxPoolSize="5" inactiveConnectionTimeout="20"
 		user="ianh_kilimain_dba" password="12345678"
-		
+
 		url="jdbc:oracle:thin:@//lsildb23d.liaison.dev:1521/G2DEV.liaison.dev"
-		
+
 		connectionPoolName="UCPPool" validateConnectionOnBorrow="true"
 		sqlForValidateConnection="select 1 from DUAL" driverClassName="oracle.jdbc.OracleDriver" />
 </Context>
 
 
- * 
+ *
  */
 public class CustomDataSourceFactory
-    implements ObjectFactory 
+    implements ObjectFactory
 {
     protected static final String DB_URL_PROPERTY                           = "com.liaison.rtdm.DB_URL";
     protected static final String DB_USER_PROPERTY                          = "com.liaison.rtdm.DB_USER";
@@ -77,20 +87,20 @@ public class CustomDataSourceFactory
     protected static final String FALSE = "false";
     protected static final String TRUE = "true";
 
-    
+
 	@Override
-	public Object getObjectInstance (Object          object, 
-			                         Name            name, 
+	public Object getObjectInstance (Object          object,
+			                         Name            name,
 			                         Context         nameCtx,
 			                         Hashtable<?, ?> environment)
-        throws Exception 
+        throws Exception
     {
 		System.out.println("CustomDataSourceFactory.getObjectInstance(): start");
 
 		try
 		{
 			PoolDataSource poolDataSource = PoolDataSourceFactory.getPoolDataSource();
-	
+
 			getPoolConfiguration(poolDataSource);
 			dumpConnectionInfo(poolDataSource);
 
@@ -101,7 +111,7 @@ public class CustomDataSourceFactory
 			System.out.println("CustomDataSourceFactory.getObjectInstance(): end");
 		}
     }
-	
+
     protected void getPoolConfiguration (PoolDataSource poolDataSource)
         throws Exception
     {
@@ -112,14 +122,14 @@ public class CustomDataSourceFactory
 		// Required configuration
 		poolDataSource.setURL(getRequiredStringPoolConfig(configuration, DB_URL_PROPERTY));
 		poolDataSource.setUser(getRequiredStringPoolConfig(configuration, DB_USER_PROPERTY));
-		
+
 		if (!configuration.containsKey(DB_PASSWORD_PROPERTY))
 		{
 			throw new Exception("Required Configuration value '" + DB_PASSWORD_PROPERTY + "' not provided");
 		}
 		String pw = new String(configuration.getDecryptedCharArray(DB_PASSWORD_PROPERTY, false));
 		poolDataSource.setPassword(pw);
-		
+
 		poolDataSource.setConnectionFactoryClassName(getRequiredStringPoolConfig(configuration, DB_CONNECTIONFACTORYCLASSNAME_PROPERTY));
 		poolDataSource.setMinPoolSize(getRequiredIntPoolConfig(configuration, DB_MINPOOLSIZE_PROPERTY));
 		poolDataSource.setMaxPoolSize(getRequiredIntPoolConfig(configuration, DB_MAXPOOLSIZE_PROPERTY));
@@ -178,7 +188,7 @@ public class CustomDataSourceFactory
 		{
 			poolDataSource.setConnectionWaitTimeout(intValue);
 		}
-		
+
 		// TODO - make a getBooleanPoolConfig method
 		value = getStringPoolConfig(configuration, DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY);
 		if (value != null)
@@ -202,25 +212,25 @@ public class CustomDataSourceFactory
 		{
 			poolDataSource.setInitialPoolSize(intValue);
 		}
-		
+
 		intValue = getIntPoolConfig(configuration, DB_INACTIVECONNECTIONTIMEOUT_PROPERTY);
 		if (intValue != null)
 		{
 			poolDataSource.setInactiveConnectionTimeout(intValue);
 		}
-		
+
 		intValue = getIntPoolConfig(configuration, DB_MAXCONNECTIONREUSECOUNT_PROPERTY);
 		if (intValue != null)
 		{
 			poolDataSource.setMaxConnectionReuseCount(intValue);
 		}
-		
+
 		intValue = getIntPoolConfig(configuration, DB_MAXCONNECTIONREUSETIME_PROPERTY);
 		if (intValue != null)
 		{
 			poolDataSource.setMaxConnectionReuseTime(intValue);
 		}
-		
+
 		intValue = getIntPoolConfig(configuration, DB_MAXIDLETIME_PROPERTY);
 		if (intValue != null)
 		{
@@ -232,7 +242,7 @@ public class CustomDataSourceFactory
 		{
 			poolDataSource.setTimeoutCheckInterval(intValue);
 		}
-		
+
 		intValue = getIntPoolConfig(configuration, DB_TIMETOLIVECONNECTIONTIMEOUT_PROPERTY);
 		if (intValue != null)
 		{
@@ -246,12 +256,12 @@ public class CustomDataSourceFactory
 		try
 		{
 			String value = configuration.getString(configurationName);
-			
+
 			if ((value == null) || (value.trim().length() == 0))
 			{
 				throw new Exception("Required Configuration value '" + configurationName + "' not provided");
 			}
-			
+
 			return value;
 		}
 		catch (ConversionException e)
@@ -268,12 +278,12 @@ public class CustomDataSourceFactory
 			if (configuration.containsKey(configurationName))
 			{
 				int value = configuration.getInt(configurationName);
-				
+
 				if (value == 0)
 				{
 					throw new Exception("Required Configuration value '" + configurationName + "' has invalid value");
 				}
-				
+
 				return value;
 			}
 			else

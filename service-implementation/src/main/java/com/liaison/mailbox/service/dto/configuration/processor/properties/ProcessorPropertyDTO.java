@@ -1,13 +1,26 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 import java.util.List;
 
-import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * @author OFS
+ *
+ */
 public class ProcessorPropertyDTO {
-	
+
 	private String name;
 	private String displayName;
 	private String value;
@@ -19,7 +32,7 @@ public class ProcessorPropertyDTO {
 	private String defaultValue;
 	private ValidationRulesDTO validationRules;
 	private List<String> options;
-	
+
 	public String getName() {
 		return name;
 	}
@@ -85,11 +98,11 @@ public class ProcessorPropertyDTO {
 	}
 	public void setOptions(List<String> options) {
 		this.options = options;
-	}	
+	}
 
 	 /**
-     *  Copies name and value from property DTO to ProcessorProperty Entity. 
-     * 
+     *  Copies name and value from property DTO to ProcessorProperty Entity.
+     *
      * @param entity
      *        The ProcessorProperty Entity
      */

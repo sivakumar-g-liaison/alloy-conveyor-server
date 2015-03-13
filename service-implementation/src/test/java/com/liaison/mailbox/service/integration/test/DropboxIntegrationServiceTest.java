@@ -39,7 +39,6 @@ import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
@@ -56,30 +55,29 @@ import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifes
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * Test class to test mailbox configuration service.
- * 
+ *
  * @author OFS
  */
 
 public class DropboxIntegrationServiceTest extends BaseServiceTest {
-    
+
 	private Logger logger;
 	private String jsonResponse;
 	private String jsonRequest;
 	private HTTPRequest request;
-	
+
 	@BeforeClass
 	public void setUp() throws Exception {
 		logger = LogManager.getLogger(DropboxIntegrationServiceTest.class);
-	}	
-	
+	}
+
 	@Test
 	public void testDropboxServices() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
-		//createMailBox		
+
+		//createMailBox
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
@@ -91,12 +89,12 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		AddMailBoxResponseDTO mailboxResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, AddMailBoxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, mailboxResponseDTO.getResponse().getStatus());
-		
+
 		//create Profile
 		String profileName = "once" + System.currentTimeMillis();
 		AddProfileResponseDTO profileResponseDTO = addProfile(profileName);
 		Assert.assertEquals(SUCCESS, profileResponseDTO.getResponse().getStatus());
-		
+
 		//createProcesser
 		AddProcessorToMailboxRequestDTO addProcessorDTO = (AddProcessorToMailboxRequestDTO) getProcessorRequest(
 				"RESPONSE_LOCATION", "Sample", "ACTIVE", "DROPBOXPROCESSOR" ,"Dummy_DESCRIPTION", false, "DROPBOXPROCESSOR", profileName, mailboxResponseDTO.getMailBox().getGuid());
@@ -109,7 +107,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		AddProcessorToMailboxResponseDTO processorResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse,
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
-		
+
 		//authenticate user account
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
@@ -117,10 +115,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		HTTPResponse authResponse = request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
 		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
-		
+
 		//get transfer profiles
 		String getTransferProfilesURL = getBASE_URL_DROPBOX() + "/transferProfiles";
 		request = constructHTTPRequest(getTransferProfilesURL, HTTP_METHOD.GET, "", logger);
@@ -131,7 +129,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		GetTransferProfilesResponseDTO getTransferProfilesRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetTransferProfilesResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getTransferProfilesRespDTO.getResponse().getStatus());
-		
+
 		//upload payload
 		String uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+profileResponseDTO.getProfile().getGuId();
 		request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
@@ -142,7 +140,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		DropboxTransferContentResponseDTO uploadPayloadResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxTransferContentResponseDTO.class);
 		Assert.assertEquals(SUCCESS, uploadPayloadResponseDTO.getResponse().getStatus());
-		
+
 		//stage payload
 		StagePayloadRequestDTO stagePayloadReq = constructStagePayloadReq(mailboxResponseDTO.getMailBox().getGuid());
 		String stagePayloadReqBody = MailBoxUtil.marshalToJSON(stagePayloadReq);
@@ -155,7 +153,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		StagePayloadResponseDTO stagePayloadRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, StagePayloadResponseDTO.class);
 		Assert.assertEquals(SUCCESS, stagePayloadRespDTO.getResponse().getStatus());
-		
+
 		//getStaged files
 		String getStagedFilesURL = getBASE_URL_DROPBOX() + "/stagedFiles";
 		request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.GET, "", logger);
@@ -166,7 +164,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		GetStagedFilesResponseDTO getStagedFilesResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetStagedFilesResponseDTO.class);
 		Assert.assertEquals(SUCCESS, getStagedFilesResponseDTO.getResponse().getStatus());
-		
+
 		//download payload
 		String downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + stagePayloadRespDTO.getStagedFile().getGuid();
 		request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
@@ -177,10 +175,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		Assert.assertEquals(200, downloadPayloadResponse.getStatusCode());
 	}
-	
+
 	@Test
 	public void testDropboxAuthenticateS_InvalidData() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
+
 		//authenticate user account with invalid data
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		reqDTO.setLoginId("USERID"+System.currentTimeMillis()+"@liaison.dev");
@@ -190,11 +188,11 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DrpboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
 		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());	
-		
+		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
+
 		//authenticate user account with EmptyDta
 		reqDTO = constructAuthenticationRequest();
 		reqDTO.setLoginId("");
@@ -204,11 +202,11 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
 		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());	
-		
+		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
+
 		//authenticate user account with null
 		reqDTO = constructAuthenticationRequest();
 		reqDTO.setLoginId(null);
@@ -218,15 +216,15 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
 		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());	
+		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
 	}
-	
+
 	@Test
 	public void testGetTransferProfiles_InvalidAuthResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
+
 		//authenticate user account with invalid data
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		reqDTO.setLoginId("USERID"+System.currentTimeMillis()+"@liaison.dev");
@@ -236,11 +234,11 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		HTTPResponse authResponse = request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DrpboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
 		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());	
-		
+		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
+
 		//get transfer profiles with invalid authResponse
 		String getTransferProfilesURL = getBASE_URL_DROPBOX() + "/transferProfiles";
 		request = constructHTTPRequest(getTransferProfilesURL, HTTP_METHOD.GET, "", logger);
@@ -251,10 +249,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
 	}
-	
+
 	@Test
 	public void testDropboxUploadPayload_InvalidId() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
+
 		//authenticate user account
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
@@ -262,10 +260,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		HTTPResponse authResponse = request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
 		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
-		
+
 		//upload payload with invalid profile pguid
 		String processorMessage = "There are no Dropbox Processor available";
 		String uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+"123456789";
@@ -285,7 +283,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 		Assert.assertEquals(jsonResponse, processorMessage);
-		
+
 		//upload payload with null profile pguid
 		uploadPayloadURL = getBASE_URL_DROPBOX() + "/transferContent?transferProfileId="+null;
 		request = constructHTTPRequest(uploadPayloadURL, HTTP_METHOD.POST, "DUMMY DATA TO STORE IN SPECTRUM", logger);
@@ -294,12 +292,12 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, processorMessage);		
-    }	
-	
+		Assert.assertEquals(jsonResponse, processorMessage);
+    }
+
 	@Test
 	public void testDropboxStagePayload_InvalidData() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
+
 		//authenticate user account
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
@@ -307,10 +305,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		HTTPResponse authResponse = request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
 		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
-		
+
 		//stage payload with null stageFile
 		StagePayloadRequestDTO stagePayloadReq = constructStagePayloadReq("MailBox"+System.currentTimeMillis());
 		stagePayloadReq.setStagedFile(null);
@@ -323,12 +321,12 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 		StagePayloadResponseDTO stagePayloadRespDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, StagePayloadResponseDTO.class);
-		Assert.assertEquals(FAILURE, stagePayloadRespDTO.getResponse().getStatus());		
+		Assert.assertEquals(FAILURE, stagePayloadRespDTO.getResponse().getStatus());
 	}
-	
+
 	@Test
 	public void testGetStagedFiles_InvalidAuthResponse() throws JsonGenerationException, JsonMappingException, JAXBException, IOException, LiaisonException {
-		
+
 		//authenticate user account with invalid data
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		reqDTO.setLoginId("USERID"+System.currentTimeMillis()+"@liaison.dev");
@@ -338,11 +336,11 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		HTTPResponse authResponse = request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DrpboxResponseTest authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DrpboxResponseTest.class);
 		Assert.assertEquals(FAILURE, authResponseDTO.getStatus());
-		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());	
-		
+		Assert.assertEquals(Messages.AUTHENTICATION_FAILURE.value(), authResponseDTO.getMessage());
+
 		//getStaged files with invalid authResponse
 		String getStagedFilesURL = getBASE_URL_DROPBOX() + "/stagedFiles";
 		request = constructHTTPRequest(getStagedFilesURL, HTTP_METHOD.GET, "", logger);
@@ -351,12 +349,12 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request.execute();
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());		
+		Assert.assertEquals(jsonResponse, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value());
 	}
-	
+
 	@Test
 	public void testdownloadpayload_InvalidId() throws LiaisonException, IOException, JAXBException {
-		
+
 		//authenticate user account
 		DropboxAuthAndGetManifestRequestDTO reqDTO = constructAuthenticationRequest();
 		jsonRequest = MailBoxUtil.marshalToJSON(reqDTO);
@@ -364,10 +362,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		request = constructHTTPRequest(authAndManifestURL, HTTP_METHOD.POST, jsonRequest, logger);
 		HTTPResponse authResponse = request.execute();
 		jsonResponse = getOutput().toString();
-		logger.info(jsonResponse);		
+		logger.info(jsonResponse);
 		DropboxAuthAndGetManifestResponseDTO authResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, DropboxAuthAndGetManifestResponseDTO.class);
 		Assert.assertEquals(SUCCESS, authResponseDTO.getResponse().getStatus());
-		
+
 		//download payload with invalid Staged file id
 		String stageFileId = "123456789";
 		String downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + stageFileId;
@@ -378,7 +376,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 		Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", stageFileId));
-		
+
 		//download payload with null Staged file id
 	    downloadPayloadURL = getBASE_URL_DROPBOX() + "/stagedFiles/" + null;
 		request = constructHTTPRequest(downloadPayloadURL, HTTP_METHOD.GET, "", logger);
@@ -389,7 +387,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 		Assert.assertEquals(jsonResponse, Messages.STAGED_FILEID_DOES_NOT_EXIST.value().replaceAll("%s", "null"));
 	}
-	
+
 	private Object getProcessorRequest(String folderTye, String folderURI, String processorStatus,
 			String processorType, String processorDescription, boolean isRevise, String protocolType, String profileName, String mailboxPguid) throws JsonParseException,
 			JsonMappingException,
@@ -397,17 +395,17 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
 
 		ProcessorDTO processorDTO = new ProcessorDTO();
-		
+
 		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
 		processorDTO.setCredentials(credetnialList);
-		
+
 		List<FolderDTO> folderList = new ArrayList<FolderDTO>();
 		processorDTO.setFolders(folderList);
-		
+
 		processorDTO.setStatus(processorStatus);
-		processorDTO.setName(System.currentTimeMillis() + "");		
+		processorDTO.setName(System.currentTimeMillis() + "");
 		processorDTO.setDescription(processorDescription);
-		
+
 		processorDTO.setType(processorType);
 		processorDTO.setProtocol(protocolType);
 		processorDTO.setLinkedMailboxId(mailboxPguid);
@@ -415,12 +413,7 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		List<String> profiles = new ArrayList<>();
 		profiles.add(profileName);
 		processorDTO.setLinkedProfiles(profiles);
-		
-		/*RemoteProcessorPropertiesDTO remoteProcessorProperties = new RemoteProcessorPropertiesDTO();
-		remoteProcessorProperties.setHttpListenerPipeLineId("HJRUIOIU8787HG");
-		remoteProcessorProperties.setSecuredPayload(true);
-		processorDTO.setRemoteProcessorProperties(remoteProcessorProperties);*/
-		
+
 		if (isRevise) {
 			ReviseProcessorRequestDTO reviseDTO = new ReviseProcessorRequestDTO();
 			reviseDTO.setProcessor(processorDTO);
@@ -431,10 +424,10 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 			return addProcessorDTO;
 		}
 	}
-	
+
 	/**
 	 * Method to constructs profile.
-	 * 
+	 *
 	 * @param profileName
 	 * @return AddProfileResponseDTO
 	 * @throws JAXBException
@@ -464,9 +457,9 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 
 		return profileResponseDTO;
 	}
-	
+
 	private StagePayloadRequestDTO constructStagePayloadReq (String mbxGuid) {
-		
+
 		StagePayloadRequestDTO req = new StagePayloadRequestDTO();
 		StagedFileDTO stagedFile = new StagedFileDTO();
 		stagedFile.setFileSize("200");
@@ -474,12 +467,12 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 		stagedFile.setName("someName");
 		stagedFile.setPath("somePath");
 		stagedFile.setSpectrumUri(spectrumUri);
-		
+
 		req.setStagedFile(stagedFile);
-		
+
 		return req;
 	}
-	
+
 	private DropboxAuthAndGetManifestRequestDTO constructAuthenticationRequest() {
 		DropboxAuthAndGetManifestRequestDTO dto = new DropboxAuthAndGetManifestRequestDTO();
 		dto.setLoginId(USER_ID);

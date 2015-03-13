@@ -19,9 +19,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -40,7 +38,6 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -49,7 +46,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDow
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * @author OFS
@@ -121,16 +117,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			ftpsRequest.login();
 			//GMB-345
 			//ftpsRequest.enableDataChannelEncryption();
-			
-			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_BINARY);
-			propertyNames.add(MailBoxConstants.PROPERTY_PASSIVE);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(getProperties(), propertyNames);
 
-			boolean binary = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_BINARY));
-			boolean passive = Boolean.getBoolean(requiredProperties.get(MailBoxConstants.PROPERTY_PASSIVE));*/
-			
+			// retrieve required properties
 			FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
 			boolean binary = ftpDownloaderStaticProperties.isBinary();
 			boolean passive = ftpDownloaderStaticProperties.isPassive();
@@ -169,7 +157,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			downloadDirectory(ftpsRequest, path, remotePath);
 			ftpsRequest.disconnect();
 
-		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException 
+		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException
 				| URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
@@ -242,24 +230,24 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-		
+
 		G2FTPSClient ftpClient = (G2FTPSClient)client;
 		try {
 			downloadDirectory(ftpClient, remotePayloadLocation, localTargetLocation);
 		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException e) {
 			throw new RuntimeException(e);
-		}		
+		}
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargeLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cleanup() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

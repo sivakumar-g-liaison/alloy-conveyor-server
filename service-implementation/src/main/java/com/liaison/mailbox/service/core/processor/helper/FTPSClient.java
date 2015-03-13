@@ -37,8 +37,6 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.KMSUtil;
@@ -67,7 +65,7 @@ public class FTPSClient {
 			int connectionTimeout = 0;
 			int socketTimeout = 0;
 			int retryAttempts = 0;
-			
+
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)processor.getProperties();
 				url = ftpUploaderStaticProperties.getUrl();
@@ -82,13 +80,6 @@ public class FTPSClient {
 				retryAttempts = ftpDownloaderStaticProperties.getRetryAttempts();
 			}
 			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_URL);
-			propertyNames.add(MailBoxConstants.PROPERTY_CONNECTION_TIMEOUT);
-			propertyNames.add(MailBoxConstants.PROPERTY_SOCKET_TIMEOUT);
-			propertyNames.add(MailBoxConstants.PROPERTY_RETRY_ATTEMPTS);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(properties, propertyNames);*/
-
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
 			ftpsRequest.setURI(url);
 			ftpsRequest.setDiagnosticLogger(LOGGER);

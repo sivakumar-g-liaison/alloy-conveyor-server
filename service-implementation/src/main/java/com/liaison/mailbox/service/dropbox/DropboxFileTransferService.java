@@ -1,3 +1,12 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
 package com.liaison.mailbox.service.dropbox;
 
 import java.io.IOException;
@@ -40,6 +49,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
+/**
+ * Class which has  Dropbox File Transfer related operations.
+ *
+ * @author OFS
+ */
 public class DropboxFileTransferService {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferService.class);
@@ -56,7 +70,7 @@ public class DropboxFileTransferService {
 	 */
 	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream,
 			String profileId, String aclManifest, String fileName, String loginId) throws Exception {
-	    
+
 		try {
             DropboxTransferContentResponseDTO transferContentResponse = null;
             long startTime = 0;
@@ -192,11 +206,11 @@ public class DropboxFileTransferService {
             		// start time to calculate elapsed time for storing payload in
             		// spectrum
             		startTime = System.currentTimeMillis();
-            		
+
             		// GMB-385 Fix stream modified into closeshield inputstream in order to avoid Stream Closed IOException
             		// during iteration
             		CloseShieldInputStream clsInputStream = new CloseShieldInputStream(stream);
-            		
+
             		// store payload to spectrum
             		StorageUtilities.storePayload(clsInputStream, workTicket, properties, true);
 

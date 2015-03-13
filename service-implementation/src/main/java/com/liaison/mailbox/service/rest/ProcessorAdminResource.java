@@ -156,13 +156,12 @@ public class ProcessorAdminResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 
-				String requestString;
 				try {
-					requestString = getRequestBody(request);
+
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
 					// creates new execution event
 					return processor.interruptRunningProcessor(executionID);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
@@ -170,7 +169,7 @@ public class ProcessorAdminResource extends AuditedResource {
 		};
 		worker.actionLabel = "ProcessorAdminResource.interruptRunningProcessor()";
 		worker.queryParams.put("executionID", executionID);
-		
+
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

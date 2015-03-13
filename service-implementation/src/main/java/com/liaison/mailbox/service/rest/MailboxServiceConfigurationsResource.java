@@ -22,8 +22,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
@@ -50,8 +48,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "mailbox/serviceconfigurations",
 description = "Gateway for the mailbox helper services.")
 public class MailboxServiceConfigurationsResource extends AuditedResource {
-
-	private static final Logger LOG = LogManager.getLogger(MailboxServiceConfigurationsResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);

@@ -58,7 +58,6 @@ public class Processor implements Identifiable {
 	private String procsrDesc;
 	private String procsrProperties;
 	private String procsrStatus;
-	//private String procsrExecutionStatus;
 	private String procsrName;
 	private String procsrProtocol;
 	private MailBox mailbox;
@@ -128,15 +127,6 @@ public class Processor implements Identifiable {
 	public void setProcsrStatus(String procsrStatus) {
 		this.procsrStatus = procsrStatus;
 	}
-
-	/*@Column(name = "EXEC_STATUS", length = 128)
-	public String getProcsrExecutionStatus() {
-		return procsrExecutionStatus;
-	}
-
-	public void setProcsrExecutionStatus(String procsrExecutionStatus) {
-		this.procsrExecutionStatus = procsrExecutionStatus;
-	}*/
 
 	@Column(name = "NAME", nullable = false, length = 512)
 	public String getProcsrName() {

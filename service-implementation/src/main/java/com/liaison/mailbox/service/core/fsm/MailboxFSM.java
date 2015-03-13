@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -28,7 +28,7 @@ import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
 /**
- * 
+ *
  * @author OFS
  *
  */
@@ -63,8 +63,8 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 	public Event<ExecutionEvents> createEvent(ExecutionEvents eventType) {
 		return fsmDao.createEvent(eventType);
 	}
-	
-	
+
+
 	public void createEvent(ExecutionEvents eventType,String executionId) {
 		//TODO use this methods to create INTERRUPT SIGNAL REVICED EVENT AND INTERRUPTED EVENT FOR THE EXECUTION ID
 		FSMEventDAOBase configDao = new FSMEventDAOBase();
@@ -91,12 +91,12 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 
 		Transition<ProcessorStateDTO, ExecutionEvents> transition = null;
 		for (Transition<ProcessorStateDTO, ExecutionEvents> trans : transitions) {
-			
+
 			if (trans.getEvent().getEventType().equals(event.getEventType())) {
-				
+
 				boolean bMatch = true;
 				for (Entry<String, ProcessorStateDTO> entry : trans.getCriteria().entrySet()) {
-					
+
 					if (!entry.getValue().equals(fsmDao.getState(entry.getKey()))) {
 						bMatch = false;
 						break;
@@ -113,7 +113,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		if (transition != null) {
 			for (Entry<String, ProcessorStateDTO> entry : transition.getUpdate().entrySet()) {
 				/** TODO (RKOH): separate function for setState? */
-				
+
 				fsmDao.setState(entry.getKey(), entry.getValue());
 			}
 
@@ -144,7 +144,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		this.fsmDao = fsmDao;
 
 	}
-    
+
 	/**
 	 * Check TransitionRules.
 	 * @param processorQueued
@@ -153,31 +153,9 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 	 */
 	public boolean addDefaultStateTransitionRules(ProcessorStateDTO processorQueued) throws MailBoxFSMSetupException {
 
-		if (!processorQueued.getExecutionState().value().equals(ExecutionState.QUEUED.value()) /*&& !(ExecutionState.STAGED.value()).equals(processorQueued.getExecutionState().value())*/) {
+		if (!processorQueued.getExecutionState().value().equals(ExecutionState.QUEUED.value())) {
 			throw new MailBoxFSMSetupException("The Processor should be in the QUEUED status to use the default rules");
 		}
-		
-		/*if ((ExecutionState.STAGED.value()).equals(processorQueued.getExecutionState().value())) {
-			// Transition Rules - STAGED WHEN ExecutionEvents.FILE_STAGED
-			// is passed on
-			Transition<ProcessorStateDTO, ExecutionEvents> transition = this.createTransition();
-			transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
-			transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.FILE_STAGED));
-			ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.STAGED);
-			transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
-			this.addTransition(transition);
-		}
-		
-		if ((ExecutionState.STAGING_FAILED.value()).equals(processorQueued.getExecutionState().value())) {
-			// Transition Rules - STAGING_FAILED WHEN ExecutionEvents.FILE_STAGING_FAILED
-			// is passed on
-			Transition<ProcessorStateDTO, ExecutionEvents> transition = this.createTransition();
-			transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
-			transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.FILE_STAGING_FAILED));
-			ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.STAGING_FAILED);
-			transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
-			this.addTransition(transition);
-		}*/
 
 		// Transition Rules - QUEUED TO PROCESSING WHEN ExecutionEvents.PROCESSOR_EXECUTION_STARTED
 		// is passed on
@@ -187,7 +165,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.PROCESSING);
 		transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
 		this.addTransition(transition);
-		
+
 		// Transition Rules - QUEUED TO SKIPPED WHEN ExecutionEvents.PROCESSOR_EXECUTION_STARTED
 		// is passed on
 		transition = this.createTransition();
@@ -196,7 +174,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO skipProcessing = processorQueued.createACopyWithNewState(ExecutionState.SKIPPED);
 		transition.addUpdate(skipProcessing.getExecutionId(), skipProcessing);
 		this.addTransition(transition);
-		
+
 		// Transition Rules - PROCESSING TO INTERRUPTED WHEN
 		// ExecutionEvents.INTERRUPTED is passed on
 		transition = this.createTransition();
@@ -223,7 +201,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO processorFailed = processorProcessing.createACopyWithNewState(ExecutionState.FAILED);
 		transition.addUpdate(processorFailed.getExecutionId(), processorFailed);
 		this.addTransition(transition);
-		
+
 		// Transition Rules - PROCESSING TO HANDEDOVER TO JS WHEN
 		// ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS is passed on
 		transition = this.createTransition();
@@ -231,8 +209,8 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 		ProcessorStateDTO processorHandedOverToJS = processorProcessing.createACopyWithNewState(ExecutionState.HANDED_TO_JS);
 		transition.addUpdate(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
-		this.addTransition(transition);	
-		
+		this.addTransition(transition);
+
 		// Transition Rules - HANDEDOVER_TO_JS TO COMPLTED WHEN
 		// ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED is passed on
 		transition = this.createTransition();
@@ -241,7 +219,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO processorCompletedAfterJS = processorHandedOverToJS.createACopyWithNewState(ExecutionState.COMPLETED);
 		transition.addUpdate(processorCompletedAfterJS.getExecutionId(), processorCompletedAfterJS);
 		this.addTransition(transition);
-		
+
 		// Transition Rules - HANDEDOVER_TO_JS TO FAILED WHEN ExecutionEvents.PROCESSOR_EXECUTION_FAILED
 		// is passed on
 		transition = this.createTransition();
@@ -250,7 +228,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		ProcessorStateDTO processorFailedAfterJS = processorHandedOverToJS.createACopyWithNewState(ExecutionState.FAILED);
 		transition.addUpdate(processorFailedAfterJS.getExecutionId(), processorFailedAfterJS);
 		this.addTransition(transition);
-		
+
 		return true;
 	}
 

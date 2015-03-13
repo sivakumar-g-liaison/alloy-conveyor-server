@@ -15,11 +15,15 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.usermanagement.validation.Mandatory;
 
+/**
+ * @author OFS
+ *
+ */
 @JsonRootName("authenticateRequest")
 public class AuthenticateUserRequestDTO {
 	private String loginId;
     private String token;
-    
+
     @Mandatory(errorMessage = "Login id is mandatory")
     public String getLoginId() {
         return StringUtil.isNullOrEmptyAfterTrim(loginId) ? loginId :loginId.toLowerCase();

@@ -33,10 +33,10 @@ public class EncryptionUtil {
 
     static byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes(Charset.forName(MailBoxConstants.CHARSETNAME));
 	static byte[] DYNAMIC_KEY;
-    
+
 	/**
 	 *  Method to retrieve encoded decrypted Token.
-	 * 
+	 *
 	 * @param encryptString
 	 * @param isDefaultKey
 	 * @return byte
@@ -61,10 +61,10 @@ public class EncryptionUtil {
 		byte[] cipherbyte = cipher.doFinal(encryptString.getBytes(Charset.forName(MailBoxConstants.CHARSETNAME)));
 		return cipherbyte;
 	}
-    
+
 	/**
 	 * Method to retrieve decoded decrypted Token.
-	 * 
+	 *
 	 * @param encryptedBytes
 	 * @param isDefaultKey
 	 * @return String
@@ -82,7 +82,5 @@ public class EncryptionUtil {
 		byte[] cipherbyte = cipher.doFinal(encryptedBytes);
 		return new String(cipherbyte, MailBoxConstants.CHARSETNAME);
 	}
-	
+
 }
-
-

@@ -60,7 +60,7 @@ public class StorageUtilitiesTest {
 		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
-		
+
 		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 
 		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
@@ -70,7 +70,7 @@ public class StorageUtilitiesTest {
 		}
 
 	}
-	
+
 	//@Test
 	public void readAPalyload() throws Exception {
 
@@ -109,12 +109,12 @@ public class StorageUtilitiesTest {
 		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
 		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, String.valueOf(globalProcessId));
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
-		
+
 		WorkTicket wTicket = new WorkTicket();
 		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
-		
+
 		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 		try (InputStream is = StorageUtilities.retrievePayload(detail.getMetaSnapshot().getURI().toString())) {
 
@@ -143,14 +143,9 @@ public class StorageUtilitiesTest {
 		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
 		Map <String, String>properties = new HashMap <String, String>();
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
-		
+
 		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 		System.out.println(detail.getMetaSnapshot().getURI());
-		/*try (InputStream is = StorageUtilities.retrievePayload("fs2://secure@dev-int/mailbox/payload/1.0/1423693504486")) {
-
-			String paylaod = new String(StreamUtil.streamToBytes(is));
-			System.out.println("The received payload is \"{}\"" + paylaod);
-		}*/
 
 	}
 

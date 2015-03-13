@@ -1,9 +1,23 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.util;
 
 import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 
+/**
+ * @author OFS
+ *
+ */
 public class GlassMessage {
 
 	private ProcessorType category;
@@ -17,7 +31,7 @@ public class GlassMessage {
     private String protocol;
     private String pipelineId;
     private GatewayType inAgent;
-    
+
 
 	public GatewayType getInAgent() {
 		return inAgent;

@@ -1,3 +1,13 @@
+/**
+ * Copyright Liaison Technologies, Inc. All rights reserved.
+ *
+ * This software is the confidential and proprietary information of
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
+ * not disclose such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you entered into
+ * with Liaison Technologies.
+ */
+
 package com.liaison.mailbox.service.queue.consumer;
 
 import java.io.IOException;
@@ -9,6 +19,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.dropbox.DropboxService;
 
+/**
+*
+* @author OFS
+*
+*/
 public class DropboxQueueInvoker implements Runnable {
 
 	private String request = null;
@@ -18,7 +33,7 @@ public class DropboxQueueInvoker implements Runnable {
 	public DropboxQueueInvoker(String request){
 		this.request=request;
 	}
-	
+
 	public DropboxService getService(){
 	    return new DropboxService();
 	}
@@ -27,14 +42,14 @@ public class DropboxQueueInvoker implements Runnable {
 	public void run() {
 
 		logger.info("ServiceBrokerToDropboxWorkTicket Request with id:"+request+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
-		
+
 		try {
 			getService().invokeDropboxQueue(request);
 		} catch (JAXBException | IOException e) {
 			logger.error("Stage file failed", e);
 		}
-		
-		
+
+
 		logger.info("ServiceBrokerToDropboxWorkTicket with id:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 
 		  try {

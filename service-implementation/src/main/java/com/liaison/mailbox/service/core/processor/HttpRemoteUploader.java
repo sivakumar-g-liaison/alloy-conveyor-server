@@ -19,9 +19,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -49,12 +47,10 @@ import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 
 /**
  * Http remote uploader to perform push operation, also it has support methods for JavaScript.
@@ -110,18 +106,11 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			// Set the pay load value to http client input data for POST & PUT request
 			File[] files = null;
-			
+
 			// retrieve required properties
-			/*ArrayList<String> propertyNames = new ArrayList<String>();
-			propertyNames.add(MailBoxConstants.PROPERTY_HTTP_VERB);
-			propertyNames.add(MailBoxConstants.PROPERTY_CONTENT_TYPE);
-			Map<String, String> requiredProperties = ProcessorPropertyJsonMapper.getProcessorProperties(processorProperties, propertyNames);
-			String httpVerb = requiredProperties.get(MailBoxConstants.PROPERTY_HTTP_VERB);
-			String contentType = requiredProperties.get(MailBoxConstants.PROPERTY_CONTENT_TYPE);*/
-			
 			String httpVerb = httpUploaderStaticProperties.getHttpVerb();
 			String contentType = httpUploaderStaticProperties.getContentType();
-			
+
 			if ("POST".equals(httpVerb)	|| "PUT".equals(httpVerb)) {
 
 				files = getFilesToUpload();
@@ -195,19 +184,19 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @param locationName
 	 * @param isError
 	 * @throws IOException
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
-	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException, 
+	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException,
 							SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
     	String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION))?httpUploaderStaticProperties.getErrorFileLocation():httpUploaderStaticProperties.getProcessedFileLocation();
         String fileLocation = replaceTokensInFolderPath(filePath);
-        
+
 		if (MailBoxUtil.isEmpty(fileLocation)) {
 			archiveFile(file.getAbsolutePath(), isError);
 		} else {
@@ -217,9 +206,9 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {
-        
+
 		try {
-			
+
 			// HTTPRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -229,11 +218,11 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// HTTPRequest executed through Java
 				executeRequest(executionId, fsm);
 			}
-			
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
+
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	protected boolean checkFileExistence() {
@@ -249,18 +238,18 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cleanup() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
