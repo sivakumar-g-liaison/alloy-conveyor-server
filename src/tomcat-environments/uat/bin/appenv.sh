@@ -52,9 +52,9 @@ export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
+export LOGSTASHMACHINE=at4u-vplstash.liaison.prod
 export LOGSTASHPORT=4560
-export LOGSTASH_LOG_DIR=/tmp
+export LOGSTASH_LOG_DIR=/var/log/tomcat
 # ==================================================================
 # log overrides
 # ==================================================================
