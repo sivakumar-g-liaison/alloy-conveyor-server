@@ -70,8 +70,8 @@ public class InitializationServlet extends HttpServlet {
         UUIDGen.init();
         
       //Set ACL Filter Signature Verifier
-      SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();; 
-        
+      SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
+
       ACLUtil.setSignatureVerifier(aclSignatureVerifier);
       logger.info(new DefaultAuditStatement(Status.SUCCEED, "ACL Filter Signature Verifier Set: " + aclSignatureVerifier.getClass().getName(), com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
       logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));

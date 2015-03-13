@@ -47,7 +47,7 @@ public class ProcessorStateDTO {
 		this.setMailboxId(mailboxId);
 		this.setProfileName(profileName);
 		this.setStateNotes(stateNotes);
-		this.setSlaVerficationStatus(slaVerificationStatus);;
+		this.setSlaVerficationStatus(slaVerificationStatus);
 	}
 	
 	public ProcessorStateDTO(String executionId,String processorId,ExecutionState executionState){

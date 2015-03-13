@@ -155,7 +155,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 		Metric m = new Metric();
 		m.setMetricName("system.metrics.javascriptExecutor.processTime");
-		m.setPayloadByteLength(new BigInteger("0"));
+		m.setPayloadByteLength(BigInteger.ZERO);
 
 		MetricTag metricTag = new MetricTag();
 		metricTag.setName("scriptTime");

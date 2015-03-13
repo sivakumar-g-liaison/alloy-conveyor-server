@@ -128,11 +128,9 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
 
-			if(!(retreivedProfile.getSchProfName().equals(profileDTO.getName()))) {
-
-				if (configDao.findProfileByName(profileDTO.getName()) != null) {
-					throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS, Response.Status.BAD_REQUEST);
-				}
+			if((!retreivedProfile.getSchProfName().equals(profileDTO.getName()))
+			        && (configDao.findProfileByName(profileDTO.getName()) != null)) {
+			    throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS, Response.Status.BAD_REQUEST);
 			}
 
 			retreivedProfile.setSchProfName(profileDTO.getName());

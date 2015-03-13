@@ -286,7 +286,7 @@ public class ProcessorDTO {
 				continue;
 			}
 			property = new ProcessorProperty();
-			propertyDTO.copyToEntity(property);;
+			propertyDTO.copyToEntity(property);
 			properties.add(property);
 		}
 		if (!properties.isEmpty()) {
