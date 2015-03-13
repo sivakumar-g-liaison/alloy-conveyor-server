@@ -1,0 +1,124 @@
+{
+   "processorDefinition":{
+      "type":"SWEEPER",
+      "displayName":"SWEEPER",
+      "protocol":"",
+      "handOverExecutionToJavaScript":false,
+      "staticProperties":[
+          {
+            "name":"add new -->",
+            "displayName" : "add new -->",
+            "value":"",
+            "type":"textarea",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic": true,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": null        
+            
+         },
+         {
+            "name":"pipeLineID",
+            "displayName" : "Pipeline Id",
+            "value":"",
+            "type":"textarea",
+            "readOnly":true,
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			  "maxLength": "2048"
+            }
+         },
+         {
+            "name":"securedPayload",
+            "displayName" : "Secured Payload",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": null,
+            "options":["false","true"]
+             
+         },
+         {
+            "name":"deleteFileAfterSweep",
+            "displayName" : "Delete File After Sweep",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules": null,
+            "options":["false","true"]
+         },
+         {
+            "name":"fileRenameFormat",
+            "displayName" : "File Rename Format",
+            "value":"",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+			   "maxLength": ""
+            }
+         },
+         {
+            "name":"numOfFilesThreshold",
+            "displayName" : "File Group Threshold:# of files",
+            "value":"",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"10",
+            "validationRules":{
+               "pattern":"\/^\\d+$\/",
+               "minLength": "",
+               "maxLength":"512"
+            }
+         },
+         {
+            "name":"payloadSizeThreshold",
+            "displayName" : "File Group Threshold:group size",
+            "value":"",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"131072",
+            "validationRules":{
+               "pattern":"\/^\\d+$\/",
+               "minLength": "",
+               "maxLength":"512"               
+            }
+         },
+         {
+            "name":"sweepedFileLocation",
+            "displayName" : "Sweeped File Location",
+            "value":"",
+            "type":"textarea",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":{
+               "pattern":"",
+               "minLength": "",
+               "maxLength":""               
+            }
+         }
+      ]
+   }
+}
