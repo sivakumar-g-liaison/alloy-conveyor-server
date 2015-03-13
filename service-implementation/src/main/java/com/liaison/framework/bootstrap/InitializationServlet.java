@@ -27,6 +27,8 @@ import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.util.UUIDGen;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.service.queue.consumer.ProcessorQueuePoller;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToDropboxWorkTicketQueuePoller;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTicketPoller;
@@ -48,12 +50,17 @@ public class InitializationServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8418412083748649428L;
 	private static final Logger logger = LogManager.getLogger(InitializationServlet.class);	
+	DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();  
+	public static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
 
     public void init(ServletConfig config) throws ServletException {
     	
+    	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
     		ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();       
+        } else {
         	ProcessorQueuePoller.startPolling();
         	ServiceBrokerToMailboxWorkTicketPoller.startPolling();
+        }
         
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
