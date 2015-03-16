@@ -1,3 +1,7 @@
+1.1.7
+-------------------------------
+GMB-406 Archaius properties for Spectrum for UAT specify a wrong location, "prod".
+
 1.1.6
 -------------------------------
 Fix for GMB-405 - UAT logstash property updates
