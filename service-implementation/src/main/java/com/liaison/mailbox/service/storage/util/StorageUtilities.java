@@ -16,7 +16,6 @@ import java.net.URISyntaxException;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,9 +88,13 @@ public class StorageUtilities {
 	private static FS2Configuration[] filesystemConfigs;
 	
 
+	/**
+	 * Initialize FS2
+	 */
 	private static void initializeFS2() {
-		FlexibleStorageSystem FS2 = null;
-		if(FS2 == null) {
+
+        if (FS2 == null) {
+
 			LOGGER.info("Initializing FS2");
 			configureSpectrum();
 			configureFilesystem();
@@ -138,17 +141,24 @@ public class StorageUtilities {
 			initializeFS2();
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
-			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
+
+			PayloadDetail detail = null;
+			try (InputStream is = payload) {
+			    FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, payload);
+			    detail = new PayloadDetail();
+			    detail.setMetaSnapshot(metaSnapshot);
+                detail.setPayloadSize(metaSnapshot.getPayloadSize());
+			}
 
 			//fetch the metdata includes payload size
-			PayloadDetail detail = null;
+			/*PayloadDetail detail = null;
 			try (CountingInputStream inputStream = new CountingInputStream(payload)) {
 
 				detail = new PayloadDetail();
 				FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(inputStream.getCount());
-			}
+			}*/
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
 
