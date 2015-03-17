@@ -85,14 +85,19 @@ public class StorageUtilities {
 	public static final String FS2_URI_MBX_PAYLOAD = "/mailbox/payload/1.0/";
 
 	private static FlexibleStorageSystem FS2 = null;
-
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
+	
 
-	static {
-		configureSpectrum();
-		configureFilesystem();
-		FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
+	private static void initializeFS2() {
+		FlexibleStorageSystem FS2 = null;
+		if(FS2 == null) {
+			LOGGER.info("Initializing FS2");
+			configureSpectrum();
+			configureFilesystem();
+			FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
+			LOGGER.info("Initialized Successfully ");
+		}		
 	}
 
 	/**
@@ -105,6 +110,7 @@ public class StorageUtilities {
 	public static InputStream retrievePayload(String payloadURL) throws MailBoxServicesException  {
 
 		try {
+			initializeFS2();
 			URI spectrumURI = new URI(payloadURL);
 			LOGGER.info("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
@@ -129,6 +135,7 @@ public class StorageUtilities {
 		try {
 
 			//persists the message in spectrum.
+			initializeFS2();
 			LOGGER.debug("Persist the payload **");
 			URI requestUri = createSpectrumURI(FS2_URI_MBX_PAYLOAD + globalProcessId, isSecure);
 			FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Headers, null);
