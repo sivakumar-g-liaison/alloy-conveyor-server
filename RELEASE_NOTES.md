@@ -1,3 +1,7 @@
+1.1.8
+-------------------------------
+Fix for High priority issue - https://jira.liaison.tech/browse/GMB-407
+
 1.1.7
 -------------------------------
 GMB-406 Archaius properties for Spectrum for UAT specify a wrong location, "prod".
