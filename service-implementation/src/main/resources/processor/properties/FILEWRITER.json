@@ -5,6 +5,23 @@
     "protocol":"",
     "handOverExecutionToJavaScript":false,
     "staticProperties": [       
-    ]
+    ],
+    "folderProperties":[
+		  {
+			  "folderURI": "",
+			  "folderDisplayType": "File Write Location",
+			  "folderType": "FILE_WRITE_LOCATION",
+			  "folderDesc": "",			  
+			  "mandatory": true,
+			  "readOnly":true,
+			  "valueProvided":true,
+			  "validationRules":{
+				   "folderURIPattern":"\/^[a-zA-Z0-9_\\\/!@#\\$%^&()--+=\/{}.,;'~` ]+$\/",
+				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
+				   "minLength": "",
+				   "maxLength": "250"
+			  }
+		  }
+	]
   }
 }

@@ -1648,14 +1648,12 @@ var rest = myApp.controller(
                 $scope.availableProperties = [];         
                 $scope.selectedProperty = {value:''};
                 $scope.showAddNewComponent = {value:false};
-				$scope.selectedFolderProperty = {value:''};
-                $scope.showFolderAddNewComponent = {value:false};
+				$scope.selectedFolderProperty = {value:''};                
             }
             $scope.cleanup = function() {        	   
                $scope.selectedProperty.value = '';
                $scope.showAddNewComponent.value = false;
-			   $scope.selectedFolderProperty = '';
-               $scope.showFolderAddNewComponent = false;               
+			   $scope.selectedFolderProperty = '';                             
             }		   
             $scope.resetProcessorType($scope.procsrType);            
             
@@ -1683,7 +1681,7 @@ var rest = myApp.controller(
                     width: "20%",
                     displayName: "Type*",
                     enableCellEdit: false,
-                    cellTemplate: '<dynamic-folder-type-field-directive sort-name="sorting"  all-props=folderAvailableProperties selected-value=selectedFolderProperty show-add-new-component="showFolderAddNewComponent" current-row-object= folderAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>'
+                    cellTemplate: '<dynamic-folder-type-field-directive sort-name="sorting"  all-props=folderAvailableProperties selected-value=selectedFolderProperty current-row-object= folderAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>'
                 }, {
                     field: "folderDesc",
                     width: "40%",

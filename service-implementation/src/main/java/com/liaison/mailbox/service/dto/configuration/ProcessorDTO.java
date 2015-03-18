@@ -214,7 +214,7 @@ public class ProcessorDTO {
 		ProcessorPropertyUITemplateDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
 
 
-		// separate static and dynamic properties
+		// separate static and dynamic and folder properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
 		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
@@ -350,10 +350,8 @@ public class ProcessorDTO {
 
 		}
 
-		if(includeUITemplate){
-
+		if (includeUITemplate) {
 			this.setProcessorPropertiesInTemplateJson(ProcessorPropertyJsonMapper.getHydratedUIPropertyTemplate(processor.getProcsrProperties(), processor));
-			this.getProcessorPropertiesInTemplateJson().setFolderProperties(ProcessorPropertyJsonMapper.constructFolderTemplate(processor));
  		}
 	}
 

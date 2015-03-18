@@ -22,11 +22,8 @@ import javax.xml.bind.JAXBException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
@@ -41,7 +38,6 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Dropbo
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.processor.properties.FolderValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
@@ -66,8 +62,6 @@ public class ProcessorPropertyJsonMapper {
 
 	public static final String PROP_HANDOVER_EXECUTION_TO_JS = "handOverExecutionToJavaScript";
 	public static final String JSON_ROOT_PATH = "processor/properties/";
-	public static final String FOLDER_VALIDATION_RULES = "validationRules.json";
-
 
 	private static Map <String, String> propertyMapper = null;
 
@@ -106,10 +100,10 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve specific processor property given name
-	 *
+	 * 
 	 * @param processorDTO
 	 * @param propertyName
-	 * @return
+	 * @return String it should return property Value by given property Name
 	 */
 	public static String getProcessorPropertyByName(ProcessorPropertyUITemplateDTO processorProperties, String propertyName) {
 
@@ -126,12 +120,12 @@ public class ProcessorPropertyJsonMapper {
 
 
 	/**
-	 * Method to retrieve staticproperties in format stored in Template JSON (ie ProcessorPropertyUITemplateDTO) from the properties JSON stored in DB
+	 * Method to retrieve ProcessorPropertyUITemplateDTO in format stored in Template JSON from the properties JSON stored in DB
 	 * This method will convert the json to ProcessorPropertyUITemplateDTO format even if it is in older format (RemoteProcessorPropertiesDTO)
 	 *
 	 * @param propertyJson
 	 * @param processor
-	 * @return
+	 * @return ProcessorPropertyUITemplateDTO
 	 * @throws IOException
 	 * @throws NoSuchFieldException
 	 * @throws SecurityException
@@ -149,7 +143,7 @@ public class ProcessorPropertyJsonMapper {
 		// try to unmarshal the properties json with new class "ProcessorPropertyUITemplateDTO"
 		// if the unmarshalling fails then try to unmarshal it with old class "RemoteProcessorPropertiesDTO"
 		try {
-				StaticProcessorPropertiesDTO staticProperties = getProcessorBasedStaticProps(propertyJson, processor.getProcessorType(), protocol);
+				StaticProcessorPropertiesDTO staticProperties = getProcessorBasedStaticProps(propertyJson);
 				uiPropTemplate.setHandOverExecutionToJavaScript(staticProperties.isHandOverExecutionToJavaScript());
 				hydrateTemplate(staticProperties, uiPropTemplate);
 
@@ -162,6 +156,8 @@ public class ProcessorPropertyJsonMapper {
 		}
 		// handle dynamic properites also
 		setDynamicPropsinTemplate(processor, uiPropTemplate);
+		// handle folder properites also
+		constructFolderTemplate(processor, uiPropTemplate);
 		return uiPropTemplate;
 	}
 
@@ -184,7 +180,7 @@ public class ProcessorPropertyJsonMapper {
 		StaticProcessorPropertiesDTO staticProcessorProperties = null;
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		try {
-			staticProcessorProperties = getProcessorBasedStaticProps(propertyJson, processor.getProcessorType(), protocol);
+			staticProcessorProperties = getProcessorBasedStaticProps(propertyJson);
 
 		} catch (JAXBException | JsonMappingException | JsonParseException e) {
 
@@ -195,14 +191,42 @@ public class ProcessorPropertyJsonMapper {
 		return staticProcessorProperties;
 
 	}
-
-	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson, ProcessorType processorType, Protocol protocol) throws JsonParseException, JsonMappingException, JAXBException, IOException {
+    
+	/**
+	 * Method to retrieve StaticProcessorPropertiesDTO by given procsrProperties retrieved from db.
+	 * 
+	 * @param propertyJson
+	 * @return    The propertyJson is string of procsrProperties retrieved from db.
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson) throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		 ObjectMapper objectMapper = new ObjectMapper();
 		 StaticProcessorPropertiesDTO staticProperties = objectMapper.readValue(propertyJson, StaticProcessorPropertiesDTO.class);
 		 return staticProperties;
 	}
-
+    
+	/**
+	 * Method to retrieve ProcessorPropertyUITemplateDTO from JsonTemplate by
+	 * given processorType and protocol
+	 * 
+	 * @param processorType
+	 *            The processorType of the Processor
+	 * @param protocol
+	 *            The protocol of the Processor
+	 * @return ProcessorPropertyUITemplateDTO
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	public static ProcessorPropertyUITemplateDTO getTemplate(ProcessorType processorType, Protocol protocol) throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		ProcessorPropertyUITemplateDTO processorProperties = null;
@@ -216,7 +240,7 @@ public class ProcessorPropertyJsonMapper {
 		} else  {
 			jsonFileName = JSON_ROOT_PATH + processorType + dotSaparator + protocol + dotSaparator + fileFormate;
 		}
-
+		
 		propertiesJson = ServiceUtils.readFileFromClassPath(jsonFileName);
 		processorProperties = MailBoxUtil.unmarshalFromJSON(propertiesJson, ProcessorPropertyUITemplateDTO.class);
 		return processorProperties;
@@ -373,7 +397,7 @@ public class ProcessorPropertyJsonMapper {
          } else {
 
         	 Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
-			 switch(processor.getProcessorType()) {
+			 switch (processor.getProcessorType()) {
 
 			 case REMOTEDOWNLOADER:
 				switch (protocol) {
@@ -488,7 +512,7 @@ public class ProcessorPropertyJsonMapper {
 				if (!MailBoxUtil.isEmpty(propertyValue)) {
 					field.setInt(staticPropertiesDTO, Integer.valueOf(propertyValue).intValue());
 				}
-			} else if (field.getType().equals(String.class)){
+			} else if (field.getType().equals(String.class)) {
 				field.set(staticPropertiesDTO, propertyValue);
 			}
 		}
@@ -544,7 +568,21 @@ public class ProcessorPropertyJsonMapper {
 			staticProperty.setValueProvided(isValueAvailable);
 		}
 	}
-
+    
+	/**
+	 * Method to retrieve StaticProcessorProperitesDTO from
+	 * remoteProcessorProperties
+	 * 
+	 * @param remoteProcessorProperties
+	 *            The RemoteProcessorPropertiesDTO
+	 * @param processorType
+	 * @param protocol
+	 * @return StaticProcessorPropertiesDTO
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	private static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFrmLegacyProps(RemoteProcessorPropertiesDTO remoteProcessorProperties, ProcessorType processorType, Protocol protocol) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		StaticProcessorPropertiesDTO propertiesDTO = null;
@@ -634,7 +672,21 @@ public class ProcessorPropertyJsonMapper {
 		return propertiesDTO;
 
 	}
-
+    
+	/**
+	 * Method StaticProcessorPropertiesDTO from RemoteProcessorPropertiesDTO
+	 * object
+	 * 
+	 * @param source
+	 *            The RemoteProcessorPropertiesDTO
+	 * @param target
+	 *            The StaticProcessorPropertiesDTO
+	 * 
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	private static void mapLegacyProps(RemoteProcessorPropertiesDTO source, StaticProcessorPropertiesDTO target) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		for (Field field : target.getClass().getDeclaredFields()) {
@@ -664,7 +716,13 @@ public class ProcessorPropertyJsonMapper {
 		target.setHandOverExecutionToJavaScript(source.isHandOverExecutionToJavaScript());
 
 	}
-
+    
+	/**
+	 * Method to construct HttpOtherRequestHeaderDTO from template Json.
+	 * 
+	 * @param otherRequestHeaders
+	 * @return String Value of otherRequestHeader
+	 */
 	private static String handleOtherRequestHeaders(List <HttpOtherRequestHeaderDTO> otherRequestHeaders) {
 		StringBuilder otherRequestHeader = new StringBuilder();
 		for (HttpOtherRequestHeaderDTO header : otherRequestHeaders) {
@@ -673,7 +731,19 @@ public class ProcessorPropertyJsonMapper {
 		String otherRequestHeaderStr = otherRequestHeader.toString();
 		return otherRequestHeaderStr.substring(0, otherRequestHeaderStr.length() - 2);
 	}
-
+    
+	/**
+	 * Method retrieve dynamic properties from processor for construct
+	 * ProcessorPropertyUITemplate.
+	 * 
+	 * @param staticProcessorPropertiesDTO
+	 *            The staticProcessorPropertiesDTO of the processor
+	 * @param processor
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
 	private static void handleDynamicProperties(StaticProcessorPropertiesDTO staticProcessorPropertiesDTO, Processor processor) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		if (null != processor.getDynamicProperties()) {
@@ -698,12 +768,20 @@ public class ProcessorPropertyJsonMapper {
 		    }
 		}
 	}
-
-	public static List<FolderDTO> getFolderProperties (List <ProcessorFolderPropertyDTO> folderPropertiesDTO) {
+    
+	/**
+	 * 
+	 * @param folderPropertiesDTO
+	 *            The ProcessorFolderPropertyDTO
+	 * 
+	 * @return List<FolderDTO> return List of FolderDto's
+	 */
+	public static List<FolderDTO> getFolderProperties(
+			List<ProcessorFolderPropertyDTO> folderPropertiesDTO) {
 
 		List<FolderDTO> folderProperties = new ArrayList<FolderDTO>();
 		FolderDTO folder = null;
-		for (ProcessorFolderPropertyDTO folderProperty: folderPropertiesDTO) {
+		for (ProcessorFolderPropertyDTO folderProperty : folderPropertiesDTO) {
 			folder = new FolderDTO();
 			folder.setFolderURI(folderProperty.getFolderURI());
 			folder.setFolderType(folderProperty.getFolderType());
@@ -712,113 +790,99 @@ public class ProcessorPropertyJsonMapper {
 		}
 		return folderProperties;
 	}
+    
+	/**
+	 * Method to construct FolderTemplate by given processor which is to be
+	 * retrieved from db.
+	 * 
+	 * @param processor
+	 *            The Processor of the the mailBox
+	 * @param uiPropTemplate
+	 *            The ProcessorPropertyUITemplateDTO of the Processor
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	public static void constructFolderTemplate(Processor processor,
+			ProcessorPropertyUITemplateDTO processorPropertiesDefinitionDto)
+			throws JsonParseException, JsonMappingException, JAXBException,
+			IOException {
 
-	public static List <ProcessorFolderPropertyDTO> constructFolderTemplate(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException {
-
-		List <ProcessorFolderPropertyDTO> processorFolderProperties = new ArrayList<ProcessorFolderPropertyDTO>();
+		List<ProcessorFolderPropertyDTO> processorFolderProperties = new ArrayList<ProcessorFolderPropertyDTO>();
 		ProcessorFolderPropertyDTO property = null;
 		if (null != processor.getFolders()) {
 
 			for (Folder folderDTO : processor.getFolders()) {
 
-				property = new  ProcessorFolderPropertyDTO();
-				if (processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
+				property = new ProcessorFolderPropertyDTO();
+				property.setValidationRules(processorPropertiesDefinitionDto
+						.getFolderProperties().get(0).getValidationRules());
 
-					property.setFolderURI(folderDTO.getFldrUri());
-					property.setFolderType(folderDTO.getFldrType());
-					property.setFolderDesc(folderDTO.getFldrDesc());
+				switch (processor.getProcessorType()) {
+				case FILEWRITER:
+					handleFolderProperties(property, folderDTO);
 					property.setFolderDisplayType(MailBoxConstants.PROPERTY_FILEWRITE_DISPLAYTYPE);
-					property.setMandatory(true);
 					property.setReadOnly(true);
-					property.setValueProvided(true);
-					constructValidationRules(property);
-
-				} else if (processor.getProcessorType().equals(ProcessorType.DROPBOXPROCESSOR)) {
-					property.setFolderURI(folderDTO.getFldrUri());
-					property.setFolderType(folderDTO.getFldrType());
-					property.setFolderDesc(folderDTO.getFldrDesc());
+					break;
+				case SWEEPER:
+					handleFolderProperties(property, folderDTO);
 					property.setFolderDisplayType(MailBoxConstants.PROPERTY_SWEEPER_DISPLAYTYPE);
-					property.setMandatory(true);
 					property.setReadOnly(true);
-					property.setValueProvided(true);
-					constructValidationRules(property);
-				} else if (processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
+					break;
 
-					property.setFolderURI(folderDTO.getFldrUri());
-					property.setFolderType(folderDTO.getFldrType());
-					property.setFolderDesc(folderDTO.getFldrDesc());
-					property.setFolderDisplayType((folderDTO.getFldrType().equalsIgnoreCase(FolderType.PAYLOAD_LOCATION.name())?
-							MailBoxConstants.PROPERTY_LOCAL_PAYLOAD_LOCATION_DISPLAYTYPE:MailBoxConstants.PROPERTY_REMOTE_TARGET_LOCATION_DISPLAYTYPE));
-
-					if (MailBoxUtil.isEmpty(folderDTO.getFldrUri())) {
-						property.setMandatory(false);
-						property.setValueProvided(false);
-					} else {
-						property.setMandatory(true);
-						property.setValueProvided(true);
-					}
+				case REMOTEUPLOADER:
+					handleFolderProperties(property, folderDTO);
+					property.setFolderDisplayType((folderDTO.getFldrType()
+							.equalsIgnoreCase(
+									FolderType.PAYLOAD_LOCATION.name()) ? MailBoxConstants.PROPERTY_LOCAL_PAYLOAD_LOCATION_DISPLAYTYPE
+							: MailBoxConstants.PROPERTY_REMOTE_TARGET_LOCATION_DISPLAYTYPE));
 					property.setReadOnly(false);
-					constructValidationRules(property);
+					break;
 
-				} else {
-					property.setFolderURI(folderDTO.getFldrUri());
-					property.setFolderType(folderDTO.getFldrType());
-					property.setFolderDesc(folderDTO.getFldrDesc());
-					property.setFolderDisplayType((folderDTO.getFldrType().equalsIgnoreCase(FolderType.PAYLOAD_LOCATION.name())?
-							MailBoxConstants.PROPERTY_REMOTE_PAYLOAD_LOCATION_DISPLAYTYPE:MailBoxConstants.PROPERTY_LOCAL_TARGET_LOCATION_DISPLAYTYPE));
-
-					if (MailBoxUtil.isEmpty(folderDTO.getFldrUri())) {
-						property.setMandatory(false);
-						property.setValueProvided(false);
-					} else {
-						property.setMandatory(true);
-						property.setValueProvided(true);
-					}
+				case REMOTEDOWNLOADER:
+					handleFolderProperties(property, folderDTO);
+					property.setFolderDisplayType((folderDTO.getFldrType()
+							.equalsIgnoreCase(
+									FolderType.PAYLOAD_LOCATION.name()) ? MailBoxConstants.PROPERTY_REMOTE_PAYLOAD_LOCATION_DISPLAYTYPE
+							: MailBoxConstants.PROPERTY_LOCAL_TARGET_LOCATION_DISPLAYTYPE));
 					property.setReadOnly(false);
-					constructValidationRules(property);
+					break;
+
+				default:
+					break;
 				}
 				processorFolderProperties.add(property);
 			}
+			processorPropertiesDefinitionDto
+					.setFolderProperties(processorFolderProperties);
+		}
+	}
+    
+	/**
+	 * Method to construct ProcessorFolderPropertyDTO from Folder which is to be
+	 * retrieve from db.
+	 * 
+	 * @param property
+	 *            The ProcessorFolderPropertyDTO which is to be construct from
+	 *            Folder
+	 * @param folder
+	 *            The Folder for construct ProcessorFolderPropertyDTO
+	 */
+	private static void handleFolderProperties(
+			ProcessorFolderPropertyDTO property, Folder folder) {
+
+		property.setFolderURI(folder.getFldrUri());
+		property.setFolderType(folder.getFldrType());
+		property.setFolderDesc(folder.getFldrDesc());
+		if (MailBoxUtil.isEmpty(folder.getFldrUri())) {
+			property.setMandatory(false);
+			property.setValueProvided(false);
+		} else {
+			property.setMandatory(true);
+			property.setValueProvided(true);
 		}
 
-		return processorFolderProperties;
 	}
-
-	private static ProcessorFolderPropertyDTO constructValidationRules(ProcessorFolderPropertyDTO property) throws JsonParseException, JsonMappingException, JAXBException, IOException {
-
-		String validationRulesJson;
-		FolderValidationRulesDTO validationRulesDTO = null;
-		validationRulesJson = ServiceUtils.readFileFromClassPath(JSON_ROOT_PATH + FOLDER_VALIDATION_RULES);
-		validationRulesDTO = unmarshalFromJSON(validationRulesJson, FolderValidationRulesDTO.class);
-		property.setValidationRules(validationRulesDTO);
-
-		return property;
-	}
-
-	/**
-    *
-    * @param serializedJson
-    * @param clazz
-    *
-    * @return json
-    *
-    * @throws JAXBException
-    * @throws JsonParseException
-    * @throws JsonMappingException
-    * @throws IOException
-    */
-
-	  private static   <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
-       JsonMappingException, IOException {
-       ObjectMapper mapper = new ObjectMapper();
-       AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
-       AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
-       AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(
-       primary, secondary);
-       // make deserializer use JAXB annotations (only)
-       mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
-       T ummarshaledObject = mapper.readValue(serializedJson, clazz);
-       return ummarshaledObject;
-    }
 
 }

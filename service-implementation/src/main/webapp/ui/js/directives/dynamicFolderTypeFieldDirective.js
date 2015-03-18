@@ -14,8 +14,7 @@ angular.module(
             replace: true,
             scope: {
                 allProps: '=',
-                selectedValue: '=',
-                showAddNewComponent: '=',
+                selectedValue: '=',                
                 currentRowObject: '=',
                 initialStateObject: '@',
 				sortName: '='
@@ -23,9 +22,9 @@ angular.module(
             templateUrl: 'partials/directive-templates/folderTypeDirectiveTemplate.html',
             link: function (scope) {
 			
-                // function that determines whether + icon to be displayed or not in the Action column
-                 scope.isFolderTypeAllowed = function() {
-                 
+                 // function that determines whether selected option in the dropdown 
+				 // or currentRowObject to be displayed
+                 scope.isFolderTypeAllowed = function() {                 
                     var initialStateObject = angular.copy(angular.fromJson(scope.initialStateObject));
                     if(!initialStateObject.mandatory && !initialStateObject.valueProvided) return true;
                     return false;

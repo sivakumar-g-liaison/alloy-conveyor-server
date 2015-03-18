@@ -1,3 +1,8 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 angular.module(
     'myApp.dynamicFolderActionFieldDirective', []
     ).directive (
@@ -14,7 +19,7 @@ angular.module(
                 templateUrl: 'partials/directive-templates/folderActionDirectiveTemplate.html',
                 link: function(scope) {
                     
-                    // function which handles addition of properties to grid 
+                    // function which handles addition of folder properties to grid 
                     // and modifies the datasource array accordingly
                      scope.addGridProperty = function() {
                      
@@ -32,11 +37,10 @@ angular.module(
                             }
                         }
                          // add empty property
-                        scope.addEmptyProperty();
-                        $rootScope.$emit("propertyModificationActionEvent");
+                        scope.addEmptyProperty();                        
                       };
                      
-                     // function which handles removal of properties from grid
+                     // function which handles removal of folder properties from grid
                     // and modifies the datasource array accordingly
                      scope.removeGridProperty = function() {
                          for (var i = 0; i < scope.folderAddedProperties.length; i ++) {
@@ -45,15 +49,14 @@ angular.module(
                                 scope.currentRowObject.valueProvided = false;
 						        scope.currentRowObject.mandatory = false;
 								scope.currentRowObject.folderURI = "";
+								scope.currentRowObject.folderDesc = "";
                                 if(scope.currentRowObject.valueProvided === false) {
                                     scope.folderAvailableProperties.push(scope.currentRowObject);
                                 }    
                                 scope.folderAddedProperties.splice(i , 1);
                                 break;
                             }
-                        };
-                        console.log("added properties"+scope.folderAddedProperties);
-                        console.log("available properties"+scope.folderAvailableProperties);
+                        };                        
                      };
                      
                      // funtion that determines whether + icon to be displayed or not in the Action column
