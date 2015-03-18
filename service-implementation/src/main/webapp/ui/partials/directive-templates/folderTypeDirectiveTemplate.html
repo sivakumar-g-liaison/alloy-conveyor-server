@@ -1,0 +1,10 @@
+<div ng-switch on="isFolderTypeAllowed()">
+    <div ng-switch-when="false">{{currentRowObject.folderDisplayType}}</div>
+    <div class="alignDiv" ng-switch-when="true">
+        <div ng-form="form">
+            <select ng-change="constructProperty(selectedValue.value)" ng-model="selectedValue.value" ng-options="property.folderDisplayType for property in allProps | orderBy:sortName ">
+                <option value="">-- select--</option>
+            </select>           
+        </div>
+    </div>
+</div>    

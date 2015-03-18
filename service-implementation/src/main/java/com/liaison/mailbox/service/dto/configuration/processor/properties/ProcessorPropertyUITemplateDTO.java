@@ -26,7 +26,16 @@ public class ProcessorPropertyUITemplateDTO {
 	private String protocol;
 	private boolean handOverExecutionToJavaScript;
 	private List<ProcessorPropertyDTO> staticProperties;
+	private List<ProcessorFolderPropertyDTO> folderProperties;
 
+
+	public List<ProcessorFolderPropertyDTO> getFolderProperties() {
+		return folderProperties;
+	}
+	public void setFolderProperties(
+			List<ProcessorFolderPropertyDTO> folderProperties) {
+		this.folderProperties = folderProperties;
+	}
 	public String getType() {
 		return type;
 	}

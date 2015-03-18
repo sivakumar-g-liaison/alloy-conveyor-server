@@ -1,0 +1,9 @@
+<form id="formFolderUri" name="formFolderUri"> 
+    <textarea class="form-control" dynamic-validation-directive="currentRowObject.folderType" ng-model="currentRowObject.folderURI" ng-input="{{currentRowObject.folderURI}}" style="width:90%;height: 45px" placeholder="required" ng-maxLength = {{currentRowObject.validationRules.maxLength}}   ng-pattern = "{{currentRowObject.validationRules.folderURIPattern}}"  ng-required="currentRowObject.mandatory || currentRowObject.valueProvided" /> 
+	<div ng-show="formFolderUri[currentRowObject.folderType].$dirty && formFolderUri[currentRowObject.folderType].$invalid">		
+		<span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formFolderUri[currentRowObject.folderType].$error.pattern}" ng-show="formFolderUri[currentRowObject.folderType].$error.pattern">Invalid Folder URI.</span>
+		<span id="mbx-procsr-nameInvalid-required" class="customHide" ng-class = "{'help-block-custom': formFolderUri[currentRowObject.folderType].$error.required}" ng-show="formFolderUri[currentRowObject.folderType].$error.required">Folder URI is mandatory.</span>		
+		<span id="mbx-procsr-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formFolderUri[currentRowObject.folderType].$error.maxlength}" ng-show="formFolderUri[currentRowObject.folderType].$error.maxlength">
+		<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{currentRowObject.validationRules.maxLength}} characters.</span>
+	 </div>
+</form> 

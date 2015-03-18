@@ -83,7 +83,6 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
@@ -169,11 +168,7 @@ public class ProcessorConfigurationService {
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
-			if (null != processorDTO.getFolders()) {
-				for (FolderDTO folderDTO : processorDTO.getFolders()) {
-					validator.validate(folderDTO);
-				}
-			}
+
 			if (null != processorDTO.getCredentials()) {
 				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
 					validator.validate(credentialDTO);
@@ -554,11 +549,7 @@ public class ProcessorConfigurationService {
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
-			if (null != processorDTO.getFolders()) {
-				for (FolderDTO folderDTO : processorDTO.getFolders()) {
-					validator.validate(folderDTO);
-				}
-			}
+
 			if (null != processorDTO.getCredentials()) {
 				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
 					validator.validate(credentialDTO);

@@ -247,4 +247,12 @@ public interface MailBoxConstants {
 	public static final String HTTP_REQUEST_PATH = "httpRequestPath";
 	public static final String HTTP_CONTENT_TYPE = "httpContentType";
 
+	//FOLDER PROPERTIES
+	public static final String PROPERTY_FILEWRITE_DISPLAYTYPE = "File Write Location";
+	public static final String PROPERTY_SWEEPER_DISPLAYTYPE = "Payload Location";
+	public static final String PROPERTY_LOCAL_TARGET_LOCATION_DISPLAYTYPE = "Local Target Location";
+	public static final String PROPERTY_LOCAL_PAYLOAD_LOCATION_DISPLAYTYPE = "Local Payload Location";
+	public static final String PROPERTY_REMOTE_TARGET_LOCATION_DISPLAYTYPE = "Remote Target Location";
+	public static final String PROPERTY_REMOTE_PAYLOAD_LOCATION_DISPLAYTYPE = "Remote Payload Location";
+
 }

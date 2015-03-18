@@ -166,6 +166,38 @@
 			  "maxLength": "2048"
 			}
          }
-      ]
+      ],
+      "folderProperties":[
+		   {
+			  "folderURI": "",
+			  "folderDisplayType": "Remote Target Location",
+			  "folderType": "RESPONSE_LOCATION",
+			  "folderDesc": "",
+			  "mandatory": false,
+			  "readOnly":false,
+			  "valueProvided":false,
+			  "validationRules":{
+				   "folderURIPattern":"\/^[a-zA-Z0-9_\\\/!@#\\$%^&()--+=\/{}.,;'~` ]+$\/",
+				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
+				   "minLength": "",
+				   "maxLength": "250"
+			  } 
+		  },
+		  {
+			  "folderURI": "",
+			  "folderDisplayType": "Local Payload Location",
+			  "folderType": "PAYLOAD_LOCATION",
+			  "folderDesc": "",
+			  "mandatory": false,
+			  "readOnly":false,
+			  "valueProvided":false,
+			  "validationRules":{
+				   "folderURIPattern":"\/^[a-zA-Z0-9_\\\/!@#\\$%^&()--+=\/{}.,;'~` ]+$\/",
+				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
+				   "minLength": "",
+				   "maxLength": "250"
+			  } 
+		  }
+	   ]
    }
 }

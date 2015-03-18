@@ -1,0 +1,6 @@
+{
+   "folderURIPattern":"\/^[a-zA-Z0-9_\\\/!@#\\$%^&()--+=\/{}.,;'~` ]+$\/",
+   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
+   "minLength": "",
+   "maxLength": "250"
+ }   

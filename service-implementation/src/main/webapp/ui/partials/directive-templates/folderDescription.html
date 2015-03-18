@@ -1,0 +1,8 @@
+<form id="formFolderDesc" name="formFolderDesc">  
+    <textarea class="form-control" dynamic-validation-directive="currentRowObject.folderType" ng-model="currentRowObject.folderDesc" ng-input="{{currentRowObject.folderDesc}}" style="width:95%;height: 45px" ng-maxLength = {{currentRowObject.validationRules.maxLength}}  ng-pattern = "{{currentRowObject.validationRules.folderDescPattern}}" />	
+	<div ng-show="formFolderDesc[currentRowObject.folderType].$dirty && formFolderDesc[currentRowObject.folderType].$invalid">
+		<span id="mbx-procsr-nameInvalid-pattern" class="customHide" ng-class = "{'help-block-custom':formFolderDesc[currentRowObject.folderType].$error.pattern}" ng-show="formFolderDesc[currentRowObject.folderType].$error.pattern">Invalid Description.</span>		
+		<span id="mbx-procsr-nameInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formFolderDesc[currentRowObject.folderType].$error.maxlength}" ng-show="formFolderDesc[currentRowObject.folderType].$error.maxlength">
+		<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{currentRowObject.validationRules.maxLength}} characters.</span>
+	 </div>
+</form> 

@@ -4,7 +4,6 @@ var rest = myApp.controller(
         function ($rootScope, $modal, $scope, $timeout, $filter,
             $location, $log, $blockUI) {
 		
-			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;
             $scope.isJavaScriptExecution = false;
             //check JavaScriptExecutor
@@ -19,7 +18,6 @@ var rest = myApp.controller(
              //ssh key implementation
             $scope.disableSSHKeys = true;
             $scope.disableCertificates = true;    	    
-            $scope.isPortDisabled = false;		
 			//check directory path in choose file
 			$scope.isDirectoryPath = true;
 			
@@ -84,14 +82,14 @@ var rest = myApp.controller(
                     protocol: "",
                     linkedMailboxId: "",
                     linkedProfiles: [],
-                    folders: [],
                     credentials: [],                    
                     processorPropertiesInTemplateJson: {
                     	type: "",
                     	displayName: "",
 						protocol: "",
                     	handOverExecutionToJavaScript: false,
-                    	staticProperties: []
+                    	staticProperties: [],
+						folderProperties: []
                     }
                 };
                 $scope.modal = {
@@ -122,15 +120,7 @@ var rest = myApp.controller(
                 $scope.status = $scope.initialProcessorData.supportedStatus.options[0];                
                 $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[0];				
                 $scope.selectedProcessorType =  $scope.procsrType.value;               
-                $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];      
-                // Procsr Folder Props
-                $scope.processorFolderProperties = [{
-                    folderURI: '',
-                    folderType: '',
-                    folderDesc: '',
-                    isMandatory: false,
-                    allowAdd: 'true'
-                }];
+                $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];               
                 // Procsr Credential Props
                 $scope.processorCredProperties = [{
                     credentialURI: '',
@@ -141,61 +131,8 @@ var rest = myApp.controller(
                     idpURI: '',
                     allowAdd: 'true',
                     passwordDirtyState: ''
-                }];
-                // Default values of payloadsize and no of files threshold
-                $scope.payloadSizeThreshold = 131072;
-                $scope.numberOfFilesThreshold = 10;                         
-				$scope.allStaticPropertiesForDownloaderProcessorFolder = [{
-                    "name": "Remote Payload Location",
-                    "id": "PAYLOAD_LOCATION"
-                },{
-                    "name": "Local Target Location",
-                    "id": "RESPONSE_LOCATION"
-                }];
+                }];           
 				
-				$scope.allStaticPropertiesForUploaderProcessorFolder = [{
-                    "name": "Local Payload Location",
-                    "id": "PAYLOAD_LOCATION"
-                },{
-                    "name": "Remote Target Location",
-                    "id": "RESPONSE_LOCATION"
-                }];
-				
-				$scope.allStaticPropertiesForSweeperProcessorFolder = [{
-                    "name": "Payload Location",
-                    "id": "PAYLOAD_LOCATION"
-                }];
-				
-				$scope.allStaticPropertiesForFileWriterProcessorFolder = [{
-                    "name": "File Write Location",
-                    "id": "FILE_WRITE_LOCATION"
-                }];
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [{
-                    "name": "Remote Payload Location",
-                    "id": "PAYLOAD_LOCATION"
-                },{
-                    "name": "Local Target Location",
-                    "id": "RESPONSE_LOCATION"
-                }];
-                $scope.allStaticPropertiesForProcessorFolder = [{
-					"name": "Remote Payload Location",
-					"id": "PAYLOAD_LOCATION"
-				},{
-					"name": "Remote Target Location",
-					"id": "RESPONSE_LOCATION"
-				},{
-					"name": "Local Payload Location",
-					"id": "PAYLOAD_LOCATION"
-				},{
-					"name": "Local Target Location",
-					"id": "RESPONSE_LOCATION"
-				},{
-					"name": "Payload Location",
-					"id": "PAYLOAD_LOCATION"
-				},{
-					"name": "File Write Location",
-					"id": "FILE_WRITE_LOCATION"
-				}];
                 $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = [
 	                {
 	                    "name": "Login Credential",
@@ -220,20 +157,10 @@ var rest = myApp.controller(
                     name: "SFTP",
                     id: "SFTP"
                 }];
-                $scope.disableAddNewTextBox = 'true';
                 $scope.valueSelectedinSelectionBox = {
                     value: ''
-                };
-                $scope.showAddNew = {
-                    value: 'false'
-                };
-                $scope.addedProperty = {
-                    value: ''
-                };
-                /*Folder*/
-                $scope.valueSelectedinSelectionBoxForProcessorFolder = {
-                    value: ''
-                };
+                };                               
+                
                 /*Credential*/
                 $scope.valueSelectedinSelectionBoxForProcessorCredential = {
                     value: ''
@@ -246,194 +173,11 @@ var rest = myApp.controller(
                 $scope.allProfiles = [];
                 $scope.selectedProfiles = [];
             };
-            $scope.loadOrigin();           
-            $scope.isPortDisabled = false;
-            
-            $scope.getFolderId = function (objArray, row) {
-                return getId(objArray, row.getProperty('folderType'));
-            };
+            $scope.loadOrigin();
             $scope.getCredentialId = function (objArray, row) {
                 return getId(objArray, row.getProperty('credentialType'));
             };
-            $scope.getId = function (objArray, row) {
-                if (row.getProperty('name') === '') {
-                    return '';
-                }
-                
-                if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
-                	var dbxVal = getId($scope.allMandatoryDropboxProperties, row.getProperty('name'));
-              		if (dbxVal.length > 0) {
-                    	return dbxVal;
-                	}
-                } else {
-                	var httpListenerVal = getId($scope.allMandatoryHttpListenerProperties, row.getProperty('name'));
-                	if (httpListenerVal.length > 0) {
-                    	return httpListenerVal;
-                	}
-                }
-                
-                var ftpVal = getId($scope.allMandatoryFtpProperties, row.getProperty('name'));
-                if (ftpVal.length > 0) {
-                    return ftpVal;
-                }
-                var httpVal = getId($scope.allMandatoryHttpProperties, row.getProperty('name'));
-                if (httpVal.length > 0) {
-                    return httpVal;
-                }
-                var sweeperVal = getId($scope.allMandatorySweeperProperties, row.getProperty('name'));
-                if (sweeperVal.length > 0) {
-                    return sweeperVal;
-                }
-                
-                var val = getId(objArray, row.getProperty('name'));
-                if (val.length > 0) {
-                    return val;
-                }
-                return "Dor%^7#@";
-            };
-            $scope.getIdValue = function (name) {
             
-            	if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
-            		var dbxVal = getId($scope.allMandatoryDropboxProperties, name);
-               		 if (dbxVal.length > 0) {
-             		   return dbxVal;
-              		  }
-            	} else {
-            		var httpListenerVal = getId($scope.allMandatoryHttpListenerProperties, name);
-               		 if (httpListenerVal.length > 0) {
-                 	   return httpListenerVal;
-               		 }
-            	}
-            	
-            	var ftpVal = getId($scope.allMandatoryFtpProperties, name);
-                if (ftpVal.length > 0) {
-                    return ftpVal;
-                }
-                var httpVal = getId($scope.allMandatoryHttpProperties, name);
-                if (httpVal.length > 0) {
-                    return httpVal;
-                }
-                var sweeperVal = getId($scope.allMandatorySweeperProperties, name);
-                if (sweeperVal.length > 0) {
-                    return sweeperVal;
-                }
-				
-                return getId($scope.allStaticProperties, name);
-            };
-            $scope.getNameValue = function (id) {
-			
-				if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
-					var dbxVal = getName($scope.allMandatoryDropboxProperties, id);
-					if (dbxVal.length > 0) {
-						return dbxVal;
-					}
-				} else {
-					var httpListenerVal = getName($scope.allMandatoryHttpListenerProperties, id);
-					if (httpListenerVal.length > 0) {
-						return httpListenerVal;
-					}
-				}
-				
-                var ftpVal = getName($scope.allMandatoryFtpProperties, id);
-                if (ftpVal.length > 0) {
-                    return ftpVal;
-                }
-                var httpVal = getName($scope.allMandatoryHttpProperties, id);
-                if (httpVal.length > 0) {
-                    return httpVal;
-                }
-                var sweeperVal = getName($scope.allMandatorySweeperProperties, id);
-                if (sweeperVal.length > 0) {
-                    return sweeperVal;
-                }
-				
-				
-                return getName($scope.allStaticProperties, id);
-            };
-             $scope.gridOptionsForProcessorFolder = {
-                data: 'processorFolderProperties',
-                displaySelectionCheckbox: false,
-                enableRowSelection: false,
-                enableCellEditOnFocus: true,
-                enablePaging: false,
-                showFooter: false,
-                rowHeight: 80,
-				enableColumnResize : true,
-				plugins: [new ngGridFlexibleHeightPlugin()],
-                columnDefs: [{
-                    field: "folderURI",
-                    width: "33%",
-                    displayName: "URI*",
-                    enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
-                        '<div class="alignDiv" ng-switch-when="false">' +
-                        '<div ng-switch on="getFolderId(allStaticPropertiesForProcessorFolder, row)">\n\
-                        <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" required  placeholder="required" name="folderuripayload" ng-pattern="' + $scope.inputPatternForFolderURI + '" ng-maxLength=250 />\n\
-                                <div ng-show="formAddPrcsr.folderuripayload.$dirty && formAddPrcsr.folderuripayload.$invalid">\n\
-                                    <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderuripayload.$error.pattern}" ng-show=formAddPrcsr.folderuripayload.$error.pattern>Invalid Folder URI.</span>\n\
-                                    <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderuripayload.$error.maxlength}" ng-show=formAddPrcsr.folderuripayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
-                           </div></div>\n\
-                        <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" required  placeholder="required" name="folderuriresponse" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
-                            <div ng-show="formAddPrcsr.folderuriresponse.$dirty && formAddPrcsr.folderuriresponse.$invalid">\n\
-                                <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderuriresponse.$error.pattern}" ng-show=formAddPrcsr.folderuriresponse.$error.pattern>Invalid Folder URI.</span>\n\
-                                <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderuriresponse.$error.maxlength}" ng-show=formAddPrcsr.folderuriresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
-                        <div ng-switch-when="FILE_WRITE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" required  placeholder="required" name="folderurifilewrite" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
-                        <div ng-show="formAddPrcsr.folderurifilewrite.$dirty && formAddPrcsr.folderurifilewrite.$invalid">\n\
-                            <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderurifilewrite.$error.pattern}" ng-show=formAddPrcsr.folderurifilewrite.$error.pattern>Invalid Folder URI.</span>\n\
-                            <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderurifilewrite.$error.maxlength}" ng-show=formAddPrcsr.folderurifilewrite.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
-                    </div></div>' +
-                        '<div ng-switch-when="true">' +
-                        '<textarea   class="form-control" name="folderuridefault" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" placeholder="required" ng-maxLength=250 ng-pattern="' + $scope.inputPatternForFolderURI + '"/>\n\
-                    <div ng-show="formAddPrcsr.folderuridefault.$dirty && formAddPrcsr.folderuridefault.$invalid">\n\
-                             <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.folderuridefault.$error.pattern}" ng-show=formAddPrcsr.folderuridefault.$error.pattern>Invalid Folder URI.</span>\n\
-                             <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.folderuridefault.$error.maxlength}" ng-show=formAddPrcsr.folderuridefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Folder URI cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
-                        </div></div></div>'
-                }, {
-                    field: "folderType",
-                    width: "20%",
-                    displayName: "Type*",
-                    enableCellEdit: false,
-                    cellTemplate: '<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder" selected-value="valueSelectedinSelectionBoxForProcessorFolder" prop-name={{row.getProperty(col.field)}}/>'
-                }, {
-                    field: "folderDesc",
-                    width: "40%",
-                    displayName: "Description",
-                    enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">' +
-                        '<div class="alignDiv" ng-switch-when="false">' +
-                        '<div ng-switch on="getFolderId(allStaticPropertiesForProcessorFolder, row)">\n\
-                        <div ng-switch-when="PAYLOAD_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionpayload" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
-                                <div ng-show="formAddPrcsr.descriptionpayload.$dirty && formAddPrcsr.descriptionpayload.$invalid">\n\
-                                    <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.descriptionpayload.$error.pattern}" ng-show=formAddPrcsr.descriptionpayload.$error.pattern>Invalid Description.</span>\n\
-                                    <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionpayload.$error.maxlength}" ng-show=formAddPrcsr.descriptionpayload.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
-                           </div></div>\n\
-                        <div ng-switch-when="RESPONSE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionresponse" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
-                            <div ng-show="formAddPrcsr.descriptionresponse.$dirty && formAddPrcsr.descriptionresponse.$invalid">\n\
-                                <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.descriptionresponse.$error.pattern}" ng-show=formAddPrcsr.descriptionresponse.$error.pattern>Invalid Description.</span>\n\
-                                <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionresponse.$error.maxlength}" ng-show=formAddPrcsr.descriptionresponse.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
-                        <div ng-switch-when="FILE_WRITE_LOCATION"><textarea   class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" name="descriptionfilewrite" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250 />\n\
-                        <div ng-show="formAddPrcsr.descriptionfilewrite.$dirty && formAddPrcsr.descriptionfilewrite.$invalid">\n\
-                            <span class="customHide" ng-class = "{\'help-block-custom\':formAddPrcsr.descriptionfilewrite.$error.pattern}" ng-show=formAddPrcsr.descriptionfilewrite.$error.pattern>Invalid Description.</span>\n\
-                            <span class="customHide" ng-class="{\'custom-info-block\':formAddPrcsr.descriptionfilewrite.$error.maxlength}" ng-show=formAddPrcsr.descriptionfilewrite.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span></div></div>\n\
-                    </div></div>' +
-                        '<div ng-switch-when="true">' +
-                        '<textarea   class="form-control" name="descriptiondefault" ng-model="COL_FIELD" ng-input="COL_FIELD" style="width:95%;height:45px" ng-pattern="' + $scope.userInputPattern + '" ng-maxLength=250/>\n\
-                    <div ng-show="formAddPrcsr.descriptiondefault.$dirty && formAddPrcsr.descriptiondefault.$invalid">\n\
-                        <span class="customHide" ng-class="{\'help-block-custom\':formAddPrcsr.descriptiondefault.$error.pattern}" ng-show=formAddPrcsr.descriptiondefault.$error.pattern>Invalid Description.</span>\n\
-                        <span class="customHide" ng-class = "{\'custom-info-block\':formAddPrcsr.descriptiondefault.$error.maxlength}" ng-show=formAddPrcsr.descriptiondefault.$error.maxlength><span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInGridForFolderDetails}} characters.</span>\n\
-                        </div></div></div>'
-                }, {
-                    field: "allowAdd",
-                    width: "7%",
-                    displayName: "Action",
-                    enableCellEdit: false,
-                    sortable: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div class="alignButton" ng-switch-when="true"><button ng-click="addFolderRow(row,valueSelectedinSelectionBoxForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                        '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'isMandatory\')"><div ng-switch-when="false"><button ng-click="removeFolderRow(row,allStaticPropertiesForProcessorFolder,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,processorFolderProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div><div ng-switch-when="true">-NA-</div></div></div>' +
-                        '</div>'
-                }]
-            };
             // Credentials for Grid Options
             $scope.gridOptionsForProcessorCredential = {
                 data: 'processorCredProperties',
@@ -604,36 +348,11 @@ var rest = myApp.controller(
 				enableColumnResize : true,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 totalServerItems: 'totalServerItems',
-            };
-            $scope.setRemotePropData = function (reqHeaderArray, value) {
-                if (value === 'otherRequestHeader') {
-                    var colonArray = [];
-                    for (var i = 0; i < reqHeaderArray.length; i++) {
-                        colonArray.push(reqHeaderArray[i].name + ':' + reqHeaderArray[i].value);
-                    }
-                    return colonArray.toString();
-                } else if (value === 'httpVerb') {
-
-                    $scope.verb = reqHeaderArray;
-                } else if (value === 'contentType') {
-					$scope.content = reqHeaderArray;
-				} 
-            };
-            $scope.getPortFromURL = function(url) {
-                if(typeof url !== 'undefined'  && url !== null && url !== '') {
-					var ip = url.split('/')[2].split(':')[0];
-					var port = url.split('/')[2].split(':')[1]; 
-                    if (typeof port !== 'undefined') {
-                        return port;
-                    } else {
-                        return '';
-                    }
-                        
-				} else {
-                    return '';
-                }
-            };
-            $scope.staticProperties;			
+            };            
+            
+            $scope.staticProperties;
+            $scope.folderProperties;
+            
 			$scope.editProcAfterReadSecret = function(data, profData, processorId, blockuiFlag) {
 				
 				$scope.isEdit = true;
@@ -696,13 +415,14 @@ var rest = myApp.controller(
 				} else {
 					$scope.disableCertificates = true;
 				}
-				$scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true; 
-                 
-				$scope.setFolderData();
-				$scope.isPortDisabled = false;
+				$scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
+				
 				$scope.propertiesAddedToProcessor = [];
 			    $scope.availableProperties = [];
-                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;
+			    $scope.folderAddedToProcessor = [];
+			    $scope.folderAvailableProperties = [];
+                $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;                
+                $scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
                 
                 for (var i = 0; i < $scope.staticProperties.length; i++) {				     
 					 var property = $scope.staticProperties[i];
@@ -727,32 +447,29 @@ var rest = myApp.controller(
                      });               	
                 }
                 
+                for (var i = 0; i < $scope.folderProperties.length; i++) {				     
+					 var property = $scope.folderProperties[i];
+					 if (property.mandatory === true || property.valueProvided === true) {
+                       $scope.folderAddedToProcessor.push(property);
+                   } else {
+                       $scope.folderAvailableProperties.push(property);
+                   }
+				}
 				
-				//var json_data = data.getProcessorResponse.processor.processorPropertiesInTemplateJson;
-				//$scope.propertiesAddedToProcessorpush(data.getProcessorResponse.processor.processorPropertiesInTemplateJson);						
-				$scope.processorFolderProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
-				for (var i = 0; i < data.getProcessorResponse.processor.folders.length; i++) {
-					$scope.processorFolderProperties.push({
-						folderURI: data.getProcessorResponse.processor.folders[i].folderURI,
-						folderType: $scope.getFolderTypeDuringProcessorEdit(data.getProcessorResponse.processor.folders[i].folderType),
-						folderDesc: data.getProcessorResponse.processor.folders[i].folderDesc,
-						isMandatory: (($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'FILEWRITER') && (data.getProcessorResponse.processor.folders[i].folderType === 'PAYLOAD_LOCATION' || data.getProcessorResponse.processor.folders[i].folderType === 'FILE_WRITE_LOCATION')) ? true : false,
-						allowAdd: false
-					});
-					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder,
-						data.getProcessorResponse.processor.folders[i].folderType);
-					if (indexOfElement !== -1) {
-						$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder.splice(indexOfElement, 1);
-					}
-					
-				};
-				
-				$scope.processorFolderProperties.push({
-					folderURI: '',
-					folderType: '',
-					folderDesc: '',
-					allowAdd: (data.getProcessorResponse.processor.type === 'SWEEPER' || data.getProcessorResponse.processor.type === 'HTTPASYNCPROCESSOR' || data.getProcessorResponse.processor.type === 'HTTPSYNCPROCESSOR' || data.getProcessorResponse.processor.type === 'FILEWRITER') ? 'false' : 'true'
-				});
+				if ($scope.folderProperties.length > 1) {
+				   $scope.folderAddedToProcessor.push({
+				   
+						  "folderURI": "",
+						  "folderDisplayType": "",
+						  "folderType": "",
+						  "folderDesc": "",
+						  "mandatory": false,
+						  "readOnly":false,
+						  "valueProvided":false,
+						  "validationRules":{}
+					  
+					 });      
+				}
 				
 				$scope.processorCredProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
 				for (var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
@@ -907,66 +624,6 @@ var rest = myApp.controller(
 				}
             };			
 			
-			$scope.getFolderTypeDuringProcessorEdit = function (folderID) {
-				//console.log(folderID);
-                if($scope.procsrType.value === 'REMOTEDOWNLOADER') {
-					return getName($scope.allStaticPropertiesForDownloaderProcessorFolder, folderID);
-				} else if ($scope.procsrType.value === 'REMOTEUPLOADER') {
-					return getName($scope.allStaticPropertiesForUploaderProcessorFolder, folderID);
-				} else if ($scope.procsrType.value === 'FILEWRITER') {
-					return getName($scope.allStaticPropertiesForFileWriterProcessorFolder, folderID);
-				} else {
-					return getName($scope.allStaticPropertiesForSweeperProcessorFolder, folderID);
-				}
-			};           
-            // For Procsr Folder Props
-            $scope.addFolderRow = function (row, valueSelectedinSelectionBox, allPropsWithNovalue, gridData) {
-                //$log.info(valueSelectedinSelectionBox.value.id);
-                // $log.info(row.getProperty('folderURI'));
-                if (valueSelectedinSelectionBox.value === null) {
-                    showAlert('It is mandatory to set the folder URI and Type.', 'error');
-                    return;
-                }
-                if (!valueSelectedinSelectionBox.value.id || !row.getProperty('folderURI')) {
-                    showAlert('It is mandatory to set the folder URI and Type.', 'error');
-                    return;
-                }
-                /*if (valueSelectedinSelectionBox.name === '' || row.getProperty('folderURI') === '' || typeof row.getProperty('folderURI') === 'undefined') {
-             showAlert('It is mandatory to set the folder URI and Type.');
-             return;
-             }*/
-                var index = gridData.indexOf(row.entity);
-                gridData.splice(index, 1);
-                gridData.push({
-                    folderURI: row.getProperty('folderURI'),
-                    folderType: valueSelectedinSelectionBox.value.name,
-                    folderDesc: row.getProperty('folderDesc'),
-                    isMandatory: false,
-                    allowAdd: false
-                });
-                var indexOfSelectedElement = getIndex(allPropsWithNovalue, valueSelectedinSelectionBox.value.name);
-                if (indexOfSelectedElement !== -1) {
-                    allPropsWithNovalue.splice(indexOfSelectedElement, 1);
-                }
-                //}
-                gridData.push({
-                    folderURI: '',
-                    folderType: '',
-                    folderDesc: '',
-                    allowAdd: 'true'
-                });
-                valueSelectedinSelectionBox.value = '';
-            };
-            // For Procsr Folder Props
-            $scope.removeFolderRow = function (row, allProps, allPropsWithNovalue, gridData) {
-                var index = gridData.indexOf(row.entity);
-                gridData.splice(index, 1);
-                var removedProperty = row.getProperty('folderType');
-                var indexOfSelectedElement = getIndex(allProps, removedProperty);
-                if (indexOfSelectedElement > -1) {
-                    allPropsWithNovalue.push(allProps[indexOfSelectedElement]);
-                }
-            };
             // For Procsr Credentials Props
             $scope.addCredentialRow = function (row, valueSelectedinSelectionBox, valueSelectedinSelectionBoxIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
                 if (valueSelectedinSelectionBox.value === null) {
@@ -1057,40 +714,8 @@ var rest = myApp.controller(
             };
 			$scope.backToMailboxeModalView = function () {
                  $('#backToMailboxAction').modal('hide')
-            };
-            $scope.processOtherHeaderValue = function (value) {
-                var commaSplit = val.split(",");
-                var colonSplit;
-            };
-            $scope.getIndex = function (name) {
-            	
-            	if($scope.processor.protocol.value === 'DROPBOXPROCESSOR') {
-            		var dbxVal = getIndex($scope.allMandatoryDropboxProperties, name);
-					if (dbxVal !== -1) {
-                    	return dbxVal;
-                	}
-            	} else {
-            		var httpListenerVal = getIndex($scope.allMandatoryHttpListenerProperties, name);
-					if (httpListenerVal !== -1) {
-                  	  return httpListenerVal;
-               		 }	
-            	}
-            	
-                var ftpVal = getIndex($scope.allMandatoryFtpProperties, name);
-                if (ftpVal !== -1) {
-                    return ftpVal;
-                }
-                var httpVal = getIndex($scope.allMandatoryHttpProperties, name);
-                if (httpVal !== -1) {
-                    return httpVal;
-                }
-                var sweeperVal = getIndex($scope.allMandatorySweeperProperties, name);
-                if (sweeperVal !== -1) {
-                    return sweeperVal;
-                }			
-				
-                return getId($scope.allStaticProperties, name);
-            };
+            };           
+            
             $scope.save = function () {
             	//To notify passwordDirective to clear the password and error message
                 $scope.doSend();
@@ -1101,7 +726,8 @@ var rest = myApp.controller(
 			
             $scope.saveProcessor = function () {		    
 			
-				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];	
+				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];
+                $scope.processor.processorPropertiesInTemplateJson.folderProperties = [];					
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
                      if ($scope.propertiesAddedToProcessor[i].name === "") {
@@ -1119,25 +745,26 @@ var rest = myApp.controller(
 					      property.value = '';
 					 }						
 					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
-                }  				
+                }
+				
+				for (var i = 0; i < $scope.folderAddedToProcessor.length; i++) {
+				     var property = $scope.folderAddedToProcessor[i];
+					 if ($scope.folderAddedToProcessor[i].folderURI === "") {
+				    	 continue;				    	 
+				    } else if (property.valueProvided === false && property.mandatory === false) {
+					      property.folderURI = '';
+					}
+                    $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);						
+				}
+				for (var i = 0; i < $scope.folderAvailableProperties.length; i++) {				     				  
+                    $scope.processor.processorPropertiesInTemplateJson.folderProperties.push($scope.folderAvailableProperties[i]);						
+				}
 				
                 $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
 				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
 				$scope.processor.processorPropertiesInTemplateJson.protocol = $scope.processor.protocol.value;
 				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;				
-                //console.log(commaSplit);
-                var lenFolderProps = $scope.processorFolderProperties.length;
-				
-				//Removed empty folder row for sweeper and File Writer
-				if ($scope.processor.protocol.value === 'SWEEPER' || $scope.processor.protocol.value === 'FILEWRITER') lenFolderProps = 2;
-				
-                for (var i = 0; i < lenFolderProps - 1; i++) {
-                    $scope.processor.folders.push({
-                        folderURI: $scope.processorFolderProperties[i].folderURI,
-                        folderType: getId($scope.allStaticPropertiesForProcessorFolder, $scope.processorFolderProperties[i].folderType),
-                        folderDesc: $scope.processorFolderProperties[i].folderDesc
-                    });
-                }
+                
                 var lenCredentialProps = $scope.processorCredProperties.length;
                 for (var i = 0; i < lenCredentialProps - 1; i++) {
                     var credentialType = ($scope.processorCredProperties[i].credentialType == 'Login Credential')?'LOGIN_CREDENTIAL':$scope.processorCredProperties[i].credentialType;
@@ -1339,7 +966,6 @@ var rest = myApp.controller(
 			};
 			
             $scope.clearProps = function () {
-                $scope.processor.folders = [];
                 $scope.processor.credentials = [];
                 //$scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
@@ -1356,7 +982,6 @@ var rest = myApp.controller(
                     $scope.closeDelete();
                     //To notify passwordDirective to clear the password and error message
                     $scope.doSend();
-                    $scope.isPortDisabled = false;					
                     $scope.disableSSHKeys = true;
                     $scope.disableCertificates = true;
 					//GIT URL
@@ -1372,68 +997,8 @@ var rest = myApp.controller(
             // Close the modal
             $scope.closeDelete = function () {
                 $('#myModal').modal('hide')
-            };           
-            $scope.setFolderData = function () {
-                if ($scope.procsrType.value === "SWEEPER") {
-                    $scope.processorFolderProperties = [{
-                        folderURI: '',
-                        folderType: 'Payload Location',
-                        folderDesc: '',
-                        isMandatory: true,
-                        allowAdd: false
-                    }];
-                } else if ($scope.procsrType.value === "FILEWRITER") {
-                    $scope.processorFolderProperties = [{
-                        folderURI: '',
-                        folderType: 'File Write Location',
-                        folderDesc: '',
-                        isMandatory: true,
-                        allowAdd: false
-                    }];
-                } else if ($scope.procsrType.value === "REMOTEDOWNLOADER"){
-                    $scope.processorFolderProperties = [{
-                        folderURI: '',
-                        folderType: '',
-                        folderDesc: '',
-                        isMandatory: false,
-                        allowAdd: 'true'
-                    }];
-                    $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [{
-						"name": "Remote Payload Location",
-						"id": "PAYLOAD_LOCATION"
-					},{
-						"name": "Local Target Location",
-						"id": "RESPONSE_LOCATION"
-					}];
-                } else if ($scope.procsrType.value === "REMOTEUPLOADER") {
-					$scope.processorFolderProperties = [{
-							folderURI: '',
-							folderType: '',
-							folderDesc: '',
-							isMandatory: false,
-							allowAdd: 'true'
-						}];
-					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [{
-						"name": "Local Payload Location",
-						"id": "PAYLOAD_LOCATION"
-					},{
-						"name": "Remote Target Location",
-						"id": "RESPONSE_LOCATION"
-					}];
-				} else {
-					$scope.processorFolderProperties = [];
-					$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorFolder = [];
-				}
-            };			    
-            // Editor Section Ends
-			    
-            $scope.changeGlyphIconColor = function (icon, currentValue) {
-                if (currentValue !== '') {
-                    icon.color = "glyphicon-red";
-                } else {
-                    icon.color = "glyphicon-white";
-                };
-            };
+            };		    
+            
             // File Upload Section Begins
             $scope.setFiles = function (element) {
                // console.log(element.value);
@@ -1914,18 +1479,16 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
-					$scope.setFolderData();
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
-					
+					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);					
 					});	
 				} else if ($scope.selectedProcessorType === 'HTTPSYNCPROCESSOR' || $scope.selectedProcessorType === 'HTTPASYNCPROCESSOR') {
 					$scope.isProcessorTypeSweeper = false;
 					$scope.isProcessorTypeHTTPListener = true;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = false;
-					$scope.setFolderData();
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
@@ -1935,17 +1498,18 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeDropbox = false;
 					$scope.isProcessorTypeFileWriter = true;
-					$scope.setFolderData();
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];					
+				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {				  
+					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+					});	
 				} else if ($scope.selectedProcessorType === 'DROPBOXPROCESSOR') {
 					$scope.isProcessorTypeSweeper = false;
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
 					$scope.isProcessorTypeDropbox = true;
-					$scope.setFolderData();
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/dropboxProcessor.json', function (data) {					
-					  $scope.separateProperties(data.processorDefinition.staticProperties);
+					  $scope.separateProperties(data.processorDefinition.staticProperties);					  
 					});	
 				} else  {
 					$scope.resetProtocol($scope.processor.protocol);
@@ -1962,7 +1526,6 @@ var rest = myApp.controller(
 				 $scope.isProcessorTypeDropbox = false;
 				 var protocalName = potocolType.value;
 				 $scope.initialSetUp();
-				 $scope.setFolderData();
 				 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[getIndexOfValue($scope.initialProcessorData.supportedProtocols.options, protocalName)];
 				 if (!$scope.processor.protocol) {
 					 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];
@@ -1972,36 +1535,44 @@ var rest = myApp.controller(
 					 if (protocalName == 'SFTP') {
 					    $rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 				       });	
 					 } else if (protocalName == 'FTP') {
 					    $rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
+							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 						});
 					 } else if (protocalName == 'FTPS') {
 					    $rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
+							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 						});
 					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
 					    $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {				        
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 						});
 					 }			  			
 				} else if ($scope.selectedProcessorType == 'REMOTEUPLOADER') {					
                     if (protocalName == 'SFTP') {
 					    $rootScope.restService.get('data/processor/properties/sftpuploader.json', function (data) {				        
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 				       });	
 					 } else if (protocalName == 'FTP') {
 					    $rootScope.restService.get('data/processor/properties/ftpuploader.json', function (data) {				        
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 						});
 					 } else if (protocalName == 'FTPS') {
 					    $rootScope.restService.get('data/processor/properties/ftpsuploader.json', function (data) {					       
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 						});
 					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
 					    $rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {					       
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
+						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
 						});
 					 }				 
 				}
@@ -2039,26 +1610,97 @@ var rest = myApp.controller(
                     "validationRules": {}
                  });              
             };
-            
+            $scope.separateFolderProperties = function(jsonProperties) {
+			  
+			  for (var i = 0; i < jsonProperties.length; i++) {
+                    var property = jsonProperties[i];
+                   if (property.hasOwnProperty('mandatory') && (property.mandatory === true)) {
+                        $scope.folderAddedToProcessor.push(property);
+                    } else if (property.hasOwnProperty('mandatory') && (property.mandatory === false)){
+                        $scope.folderAvailableProperties.push(property);
+                    }
+                }
+				// push empty object to enable additional
+				if (jsonProperties.length > 1) {
+				   $scope.folderAddedToProcessor.push({
+				   
+						  "folderURI": "",
+						  "folderDisplayType": "",
+						  "folderType": "",
+						  "folderDesc": "",
+						  "mandatory": false,
+						  "readOnly":false,
+						  "valueProvided":false,
+						  "validationRules":{}
+					  
+					 });      
+				}
+		   };
+		   
             $scope.propertiesAddedToProcessor = [];
 			$scope.availableProperties = []; 
 			$scope.propertiesEditToProcessor = [];
-            $scope.initialSetUp = function() {            	          
+            $scope.initialSetUp = function() {
+                $scope.folderAvailableProperties = []; 
+			    $scope.folderAddedToProcessor = [];			
                 $scope.propertiesAddedToProcessor = [];
 				$scope.propertiesEditToProcessor = [];
                 $scope.availableProperties = [];         
                 $scope.selectedProperty = {value:''};
                 $scope.showAddNewComponent = {value:false};
+				$scope.selectedFolderProperty = {value:''};
+                $scope.showFolderAddNewComponent = {value:false};
             }
-            $scope.cleanup = function() {
-        	   
+            $scope.cleanup = function() {        	   
                $scope.selectedProperty.value = '';
                $scope.showAddNewComponent.value = false;
-               
+			   $scope.selectedFolderProperty = '';
+               $scope.showFolderAddNewComponent = false;               
             }		   
             $scope.resetProcessorType($scope.procsrType);            
-
-            $scope.gridOptionsTesting = {
+            
+			//New folder section
+			$scope.folderAvailableProperties = []; 
+			$scope.folderAddedToProcessor = [];
+			$scope.gridOptionsForProcessorFolder = {
+                data: 'folderAddedToProcessor',
+                displaySelectionCheckbox: false,
+                enableRowSelection: false,
+                enableCellEditOnFocus: true,
+                enablePaging: false,
+                showFooter: false,
+                rowHeight: 80,
+				enableColumnResize : true,
+				plugins: [new ngGridFlexibleHeightPlugin()],
+                columnDefs: [{
+                    field: "folderURI",
+                    width: "33%",
+                    displayName: "URI*",
+                    enableCellEdit: false,
+                    cellTemplate: '<dynamic-folder-uri-value-field-directive current-row-object = folderAddedToProcessor[row.rowIndex] test-attr=currentType/>'                   
+                }, {
+                    field: "folderType",
+                    width: "20%",
+                    displayName: "Type*",
+                    enableCellEdit: false,
+                    cellTemplate: '<dynamic-folder-type-field-directive sort-name="sorting"  all-props=folderAvailableProperties selected-value=selectedFolderProperty show-add-new-component="showFolderAddNewComponent" current-row-object= folderAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>'
+                }, {
+                    field: "folderDesc",
+                    width: "40%",
+                    displayName: "Description",
+                    enableCellEdit: false,
+                    cellTemplate: '<dynamic-folder-desc-value-field-directive current-row-object = folderAddedToProcessor[row.rowIndex] test-attr=currentType/>'                   
+                }, {
+                    field: "allowAdd",
+                    width: "7%",
+                    displayName: "Action",
+                    enableCellEdit: false,
+                    sortable: false,
+                    cellTemplate: '<dynamic-folder-action-field-directive folder-available-properties = folderAvailableProperties folder-added-properties = folderAddedToProcessor current-row-object = folderAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>',
+                }]
+            };
+			
+            $scope.gridOptionsForProcessor = {
                 data: 'propertiesAddedToProcessor',
                 displaySelectionCheckbox: false,
                 enableRowSelection: false,

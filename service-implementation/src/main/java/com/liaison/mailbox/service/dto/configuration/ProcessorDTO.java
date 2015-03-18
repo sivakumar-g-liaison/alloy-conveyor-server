@@ -30,6 +30,7 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
@@ -63,7 +64,6 @@ public class ProcessorDTO {
 	@ApiModelProperty( value = "Mailbox id", required = true)
 	private String linkedMailboxId;
 	private List<String> linkedProfiles;
-	private List<FolderDTO> folders;
 	private List<CredentialDTO> credentials;
 	private List<ProfileDTO> profiles;
 
@@ -142,17 +142,6 @@ public class ProcessorDTO {
 		this.linkedMailboxId = linkedMailboxId;
 	}
 
-	public List<FolderDTO> getFolders() {
-		if (folders == null) {
-			folders = new ArrayList<FolderDTO>();
-		}
-		return folders;
-	}
-
-	public void setFolders(List<FolderDTO> folders) {
-		this.folders = folders;
-	}
-
 	public List<CredentialDTO> getCredentials() {
 		if (credentials == null) {
 			credentials = new ArrayList<CredentialDTO>();
@@ -228,6 +217,10 @@ public class ProcessorDTO {
 		// separate static and dynamic properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
+		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
+
+		//Construct FOLDER DTO LIST
+		List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
 		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
 
 		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.getProcessorSpecificStaticPropsFrmTemplt(staticPropertiesDTO, processor, isCreate);
@@ -246,7 +239,7 @@ public class ProcessorDTO {
 		// Setting the folders.
 		Folder folder = null;
 		List<Folder> folders = new ArrayList<>();
-		for (FolderDTO folderDTO : this.getFolders()) {
+		for (FolderDTO folderDTO : folderDTOList) {
 
 			folder = new Folder();
 			folderDTO.copyToEntity(folder);
@@ -330,17 +323,6 @@ public class ProcessorDTO {
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 		this.setName(processor.getProcsrName());
 
-		// Set folders
-		if (null != processor.getFolders()) {
-
-			FolderDTO folderDTO = null;
-			for (Folder folder : processor.getFolders()) {
-				folderDTO = new FolderDTO();
-				folderDTO.copyFromEntity(folder);
-				this.getFolders().add(folderDTO);
-			}
-		}
-
 		// Set credentials
 		if (null != processor.getCredentials()) {
 
@@ -371,6 +353,7 @@ public class ProcessorDTO {
 		if(includeUITemplate){
 
 			this.setProcessorPropertiesInTemplateJson(ProcessorPropertyJsonMapper.getHydratedUIPropertyTemplate(processor.getProcsrProperties(), processor));
+			this.getProcessorPropertiesInTemplateJson().setFolderProperties(ProcessorPropertyJsonMapper.constructFolderTemplate(processor));
  		}
 	}
 

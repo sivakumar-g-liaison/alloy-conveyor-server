@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.util;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,22 +22,30 @@ import javax.xml.bind.JAXBException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
+import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FolderValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
@@ -57,6 +66,7 @@ public class ProcessorPropertyJsonMapper {
 
 	public static final String PROP_HANDOVER_EXECUTION_TO_JS = "handOverExecutionToJavaScript";
 	public static final String JSON_ROOT_PATH = "processor/properties/";
+	public static final String FOLDER_VALIDATION_RULES = "validationRules.json";
 
 
 	private static Map <String, String> propertyMapper = null;
@@ -143,10 +153,10 @@ public class ProcessorPropertyJsonMapper {
 				uiPropTemplate.setHandOverExecutionToJavaScript(staticProperties.isHandOverExecutionToJavaScript());
 				hydrateTemplate(staticProperties, uiPropTemplate);
 
-			}catch (JAXBException | JsonMappingException | JsonParseException e) {
+			} catch (JAXBException | JsonMappingException | JsonParseException e) {
 
-			RemoteProcessorPropertiesDTO legacyProps = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
-			mapLegacyPropsToTemplate(uiPropTemplate, legacyProps);
+				RemoteProcessorPropertiesDTO legacyProps = MailBoxUtil.unmarshalFromJSON(propertyJson, RemoteProcessorPropertiesDTO.class);
+				mapLegacyPropsToTemplate(uiPropTemplate, legacyProps);
 
 		   }
 		}
@@ -362,9 +372,9 @@ public class ProcessorPropertyJsonMapper {
      		return propertiesDTO;
          } else {
 
-        	 Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());        	 
+        	 Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 			 switch(processor.getProcessorType()) {
-			 
+
 			 case REMOTEDOWNLOADER:
 				switch (protocol) {
 
@@ -688,5 +698,127 @@ public class ProcessorPropertyJsonMapper {
 		    }
 		}
 	}
+
+	public static List<FolderDTO> getFolderProperties (List <ProcessorFolderPropertyDTO> folderPropertiesDTO) {
+
+		List<FolderDTO> folderProperties = new ArrayList<FolderDTO>();
+		FolderDTO folder = null;
+		for (ProcessorFolderPropertyDTO folderProperty: folderPropertiesDTO) {
+			folder = new FolderDTO();
+			folder.setFolderURI(folderProperty.getFolderURI());
+			folder.setFolderType(folderProperty.getFolderType());
+			folder.setFolderDesc(folderProperty.getFolderDesc());
+			folderProperties.add(folder);
+		}
+		return folderProperties;
+	}
+
+	public static List <ProcessorFolderPropertyDTO> constructFolderTemplate(Processor processor) throws JsonParseException, JsonMappingException, JAXBException, IOException {
+
+		List <ProcessorFolderPropertyDTO> processorFolderProperties = new ArrayList<ProcessorFolderPropertyDTO>();
+		ProcessorFolderPropertyDTO property = null;
+		if (null != processor.getFolders()) {
+
+			for (Folder folderDTO : processor.getFolders()) {
+
+				property = new  ProcessorFolderPropertyDTO();
+				if (processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
+
+					property.setFolderURI(folderDTO.getFldrUri());
+					property.setFolderType(folderDTO.getFldrType());
+					property.setFolderDesc(folderDTO.getFldrDesc());
+					property.setFolderDisplayType(MailBoxConstants.PROPERTY_FILEWRITE_DISPLAYTYPE);
+					property.setMandatory(true);
+					property.setReadOnly(true);
+					property.setValueProvided(true);
+					constructValidationRules(property);
+
+				} else if (processor.getProcessorType().equals(ProcessorType.DROPBOXPROCESSOR)) {
+					property.setFolderURI(folderDTO.getFldrUri());
+					property.setFolderType(folderDTO.getFldrType());
+					property.setFolderDesc(folderDTO.getFldrDesc());
+					property.setFolderDisplayType(MailBoxConstants.PROPERTY_SWEEPER_DISPLAYTYPE);
+					property.setMandatory(true);
+					property.setReadOnly(true);
+					property.setValueProvided(true);
+					constructValidationRules(property);
+				} else if (processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
+
+					property.setFolderURI(folderDTO.getFldrUri());
+					property.setFolderType(folderDTO.getFldrType());
+					property.setFolderDesc(folderDTO.getFldrDesc());
+					property.setFolderDisplayType((folderDTO.getFldrType().equalsIgnoreCase(FolderType.PAYLOAD_LOCATION.name())?
+							MailBoxConstants.PROPERTY_LOCAL_PAYLOAD_LOCATION_DISPLAYTYPE:MailBoxConstants.PROPERTY_REMOTE_TARGET_LOCATION_DISPLAYTYPE));
+
+					if (MailBoxUtil.isEmpty(folderDTO.getFldrUri())) {
+						property.setMandatory(false);
+						property.setValueProvided(false);
+					} else {
+						property.setMandatory(true);
+						property.setValueProvided(true);
+					}
+					property.setReadOnly(false);
+					constructValidationRules(property);
+
+				} else {
+					property.setFolderURI(folderDTO.getFldrUri());
+					property.setFolderType(folderDTO.getFldrType());
+					property.setFolderDesc(folderDTO.getFldrDesc());
+					property.setFolderDisplayType((folderDTO.getFldrType().equalsIgnoreCase(FolderType.PAYLOAD_LOCATION.name())?
+							MailBoxConstants.PROPERTY_REMOTE_PAYLOAD_LOCATION_DISPLAYTYPE:MailBoxConstants.PROPERTY_LOCAL_TARGET_LOCATION_DISPLAYTYPE));
+
+					if (MailBoxUtil.isEmpty(folderDTO.getFldrUri())) {
+						property.setMandatory(false);
+						property.setValueProvided(false);
+					} else {
+						property.setMandatory(true);
+						property.setValueProvided(true);
+					}
+					property.setReadOnly(false);
+					constructValidationRules(property);
+				}
+				processorFolderProperties.add(property);
+			}
+		}
+
+		return processorFolderProperties;
+	}
+
+	private static ProcessorFolderPropertyDTO constructValidationRules(ProcessorFolderPropertyDTO property) throws JsonParseException, JsonMappingException, JAXBException, IOException {
+
+		String validationRulesJson;
+		FolderValidationRulesDTO validationRulesDTO = null;
+		validationRulesJson = ServiceUtils.readFileFromClassPath(JSON_ROOT_PATH + FOLDER_VALIDATION_RULES);
+		validationRulesDTO = unmarshalFromJSON(validationRulesJson, FolderValidationRulesDTO.class);
+		property.setValidationRules(validationRulesDTO);
+
+		return property;
+	}
+
+	/**
+    *
+    * @param serializedJson
+    * @param clazz
+    *
+    * @return json
+    *
+    * @throws JAXBException
+    * @throws JsonParseException
+    * @throws JsonMappingException
+    * @throws IOException
+    */
+
+	  private static   <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
+       JsonMappingException, IOException {
+       ObjectMapper mapper = new ObjectMapper();
+       AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+       AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+       AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(
+       primary, secondary);
+       // make deserializer use JAXB annotations (only)
+       mapper.getDeserializationConfig().setAnnotationIntrospector(introspector);
+       T ummarshaledObject = mapper.readValue(serializedJson, clazz);
+       return ummarshaledObject;
+    }
 
 }

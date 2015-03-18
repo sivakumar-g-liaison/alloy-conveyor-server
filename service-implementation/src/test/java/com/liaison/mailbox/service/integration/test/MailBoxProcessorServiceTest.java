@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -33,10 +33,11 @@ import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
-import com.liaison.mailbox.service.dto.configuration.FolderDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
@@ -51,7 +52,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
@@ -61,7 +62,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 	private Logger logger = null;
 	private AddMailBoxResponseDTO responseDTO;
-	private String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
+	private final String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 
 	/**
 	 * @throws java.lang.Exception
@@ -72,10 +73,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		// Adding the mailbox
 		responseDTO = createMailBox();
 	}
-    
+
 	/**
 	 * Method to test mailbox processor.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -119,10 +120,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(false, getResponseDTO.getProcessor().getProfiles().isEmpty());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor without profile.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -167,10 +168,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor without mailbox id.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -201,10 +202,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor with wrong mailbox id.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -234,10 +235,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor with wrong profile.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -268,10 +269,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor without protocol.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -301,10 +302,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor with wrong protocol.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -334,10 +335,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test mailbox processor with URI as null.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -361,10 +362,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
-	 * Method to test mailbox processor with mandotory values only. 
-	 * 
+	 * Method to test mailbox processor with mandotory values only.
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -392,10 +393,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
-	 * Method to test mailbox processor with invalid mandotory values only. 
-	 * 
+	 * Method to test mailbox processor with invalid mandotory values only.
+	 *
 	 * @throws JAXBException
 	 * @throws JsonGenerationException
 	 * @throws JsonMappingException
@@ -424,10 +425,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 	}
-    
+
 	/**
-	 * Method to test mailbox processor with mandotory values as null. 
-	 * 
+	 * Method to test mailbox processor with mandotory values as null.
+	 *
 	 * @throws JAXBException
 	 * @throws JsonGenerationException
 	 * @throws JsonMappingException
@@ -455,10 +456,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				AddProcessorToMailboxResponseDTO.class);
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 	}
-    
+
 	/**
-	 *  Method to test retrieve Processor. 
-	 * 
+	 *  Method to test retrieve Processor.
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -501,10 +502,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
 	}
-    
+
 	/**
 	 * Method to test retrieve Processor with invalid processor id.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -527,10 +528,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 
 		Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
 	}
-    
+
 	/**
 	 * Method to test retrieve Processor with invalid mailbox.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -589,10 +590,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(addProcessorDTO.getProcessor().getStatus(), getResponseDTO.getProcessor().getStatus());
 		Assert.assertEquals(addProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor().getJavaScriptURI());
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor with valid data.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -650,10 +651,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(reviseProcessorDTO.getProcessor().getJavaScriptURI(), getResponseDTO.getProcessor()
 				.getJavaScriptURI());
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor without protocol.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -681,10 +682,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseProcessorResponse"));
 
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor with invalid protocol.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -712,10 +713,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, getResponseStatus(jsonResponse, "reviseProcessorResponse"));
 
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor without mailbox id.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -747,10 +748,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor with URI as null.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -781,10 +782,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, processorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor with wrong mailbox id.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -832,10 +833,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, revProcessorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor without profile.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -906,10 +907,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(true, getResponseDTO.getProcessor().getProfiles().isEmpty());
 	}
-    
+
 	/**
 	 * Method to test revise operation for Processor with invalid profile.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -958,10 +959,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, revProcessorResponseDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test deactive processor.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonGenerationException
@@ -1013,10 +1014,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
 		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
 	}
-    
+
 	/**
 	 * Method to test deactive processor with wrong processor id.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonGenerationException
@@ -1044,10 +1045,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(FAILURE, responseDeactivateDTO.getResponse().getStatus());
 
 	}
-    
+
 	/**
 	 * Method to test deactive processor with URI as null.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonGenerationException
@@ -1073,11 +1074,11 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 				DeActivateProcessorResponseDTO.class);
 		Assert.assertEquals(FAILURE, responseDeactivateDTO.getResponse().getStatus());
 
-	} 
-    
+	}
+
 	/**
 	 * Method constructs Mailbox.
-	 * 
+	 *
 	 * @return AddMailBoxResponseDTO
 	 * @throws JAXBException
 	 * @throws JsonParseException
@@ -1105,10 +1106,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		Assert.assertEquals(SUCCESS, responseDTO.getResponse().getStatus());
 		return responseDTO;
 	}
-    
+
 	/**
 	 * Method retrieves processor request.
-	 * 
+	 *
 	 * @param folderTye
 	 * @param folderURI
 	 * @param credentialType
@@ -1134,22 +1135,23 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
 
 		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
-		List<FolderDTO> folderList = new ArrayList<FolderDTO>();
-
-		FolderDTO folderDto = new FolderDTO();
-		folderDto.setFolderType(folderTye);
-		folderDto.setFolderURI(folderURI);
-		folderDto.setFolderDesc("someDesc");
-		folderList.add(folderDto);
+		List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
+		ProcessorFolderPropertyDTO folderPropertyDto = new ProcessorFolderPropertyDTO();
+		folderPropertyDto.setFolderType(folderTye);
+		folderPropertyDto.setFolderURI(folderURI);
+		folderPropertyDto.setFolderDesc("someDesc");
+		folderList.add(folderPropertyDto);
 
 		ProcessorDTO processorDTO = new ProcessorDTO();
 		processorDTO.setCredentials(credetnialList);
-		processorDTO.setFolders(folderList);
+
+		processorDTO.setProcessorPropertiesInTemplateJson(new ProcessorPropertyUITemplateDTO());
+		processorDTO.getProcessorPropertiesInTemplateJson().setFolderProperties(folderList);
 		processorDTO.setStatus(processorStatus);
 		processorDTO.setName(System.currentTimeMillis() + "");
-		
+
 		processorDTO.setDescription(processorDescription);
-		
+
 		processorDTO.setType(processorType);
 		processorDTO.setProtocol(protocolType);
 		processorDTO.setLinkedMailboxId(responseDTO.getMailBox().getGuid());
@@ -1175,10 +1177,10 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			return addProcessorDTO;
 		}
 	}
-    
+
 	/**
 	 * Method to add profile.
-	 * 
+	 *
 	 * @param profileName
 	 * @return AddProfileResponseDTO
 	 * @throws JAXBException
