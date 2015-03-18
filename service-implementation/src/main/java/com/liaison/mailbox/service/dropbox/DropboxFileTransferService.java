@@ -201,12 +201,12 @@ public class DropboxFileTransferService {
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(MailBoxConstants.LOGIN_ID, loginId);
 		properties.put(MailBoxConstants.KEY_TENANCY_KEY, tenancyKey);
+		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
+                String.valueOf(securedPayload));
 
 		workTicket.setPipelineId(pipeLineId);
 		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
 		workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-		workTicket.setAdditionalContext(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
-				String.valueOf(securedPayload));
 		workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
 
 		// set ttl value from mailbox property or else from property file
