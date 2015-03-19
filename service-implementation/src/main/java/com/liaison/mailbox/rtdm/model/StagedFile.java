@@ -11,6 +11,7 @@
 package com.liaison.mailbox.rtdm.model;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,6 +47,8 @@ public class StagedFile implements Identifiable {
 	private String filePath;
 	private String spectrumUri;
 	private String fileMetaData;
+	private String stagedFileStatus;
+	private Timestamp timeToLive;
 	
 	
 	public StagedFile() {
@@ -114,6 +117,26 @@ public class StagedFile implements Identifiable {
 	public void setFileMetaData(String fileMetaData) {
 		this.fileMetaData = fileMetaData;
 	}
+	
+	@Column(name = "STATUS", nullable = false, length = 16)
+	public String getStagedFileStatus() {
+		return stagedFileStatus;
+	}
+
+	public void setStagedFileStatus(String stagedFileStatus) {
+		this.stagedFileStatus = stagedFileStatus;
+	}
+	
+	@Column(name = "TIMETOLIVE", nullable =false)
+	public Timestamp getTTLStatus() {
+		return timeToLive;
+	}
+
+	public void setTTLStatus(Timestamp timeToLive) {
+		this.timeToLive = timeToLive;
+	}
+	
+	
 
 	@Override
 	@Transient

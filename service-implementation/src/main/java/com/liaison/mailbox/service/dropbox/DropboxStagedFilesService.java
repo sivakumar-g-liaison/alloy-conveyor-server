@@ -24,12 +24,14 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DropBoxUnStagedFileResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
@@ -196,4 +198,61 @@ public class DropboxStagedFilesService {
 
 		}
 	}
+	
+	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid) throws IOException, JAXBException {
+
+		LOG.debug("Entering into drop staged files service.");
+		
+		LOG.info("Retrieving tenancy keys from acl-manifest");
+		// retrieve the tenancy key from acl manifest
+		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		if (tenancyKeys.isEmpty()) {
+			LOG.error("Retrieval of tenancy key from acl manifest failed");
+			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
+		}
+
+		LOG.debug("retrieve tenancyKey Values from tenancyKeyDTO");
+		List<String> tenancyKeyValues = new ArrayList<String>();
+		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
+			tenancyKeyValues.add(tenancyKeyDTO.getGuid());
+		}
+		LOG.debug("The retrieved tenancykey values are {}", tenancyKeyValues);
+
+		// retrieve corresponding mailboxes of the available tenancyKeys.
+		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
+		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeyValues);
+		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeyValues);
+
+		if (mailboxIds.isEmpty()) {
+			LOG.error("There are no mailboxes linked to the tenancyKeys");
+			throw new MailBoxServicesException("There are no mailboxes available for tenancykeys",
+					Response.Status.NOT_FOUND);
+		}
+
+		DropBoxUnStagedFileResponseDTO dropBoxUnStagedResponse = new DropBoxUnStagedFileResponseDTO();
+		StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+		// validation the ResponseDTO
+		GenericValidator validator = new GenericValidator();
+		validator.validate(dropBoxUnStagedResponse);
+		
+		//Find the staged file based on given GUID and mailboxIds
+		List<StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfMailboxesBasedonGUID(mailboxIds, guid);
+
+		if (stagedFiles.isEmpty()) {
+			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
+		}
+		
+		// UnStaging the stagedFile by changing its status to INACTIVE
+		StagedFile unStagingFile = stagedFiles.get(0);
+		unStagingFile.setStagedFileStatus(MailBoxStatus.INACTIVE.value());
+		stagedFileDAO.merge(unStagingFile);
+		
+		//Setting the necessary details to the response
+		dropBoxUnStagedResponse.setGUID(guid);
+		dropBoxUnStagedResponse.setResponse(new ResponseDTO(Messages.DELETE_ONDEMAND_SUCCESSFUL, STAGED_FILE, Messages.SUCCESS));
+		LOG.debug("Exit from drop staged files service.");
+
+		return dropBoxUnStagedResponse;
+	}
 }
+

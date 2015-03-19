@@ -24,6 +24,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	
 	public static final String FILE_NAME = "fileName";
 	
+	public static final String GUID = "file_guid";
+	
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
 	 * 
@@ -32,5 +34,6 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	 */
 	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
 			int pagingCount, String sortField, String sortDirection);
+	public List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName);
 }

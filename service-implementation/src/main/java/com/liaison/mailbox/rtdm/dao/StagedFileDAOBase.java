@@ -80,6 +80,42 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	}
 	
 	/**
+	 * Returns the stagedfileList based on the search done by given GUID and MAILBOXIDS
+	 */
+	@Override
+	public List<StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid) {
+
+		List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+
+			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
+					.append(" where (sf.pguid) = :" + StagedFileDAO.GUID)
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+			 
+			List<?> files = entityManager
+					.createQuery(query.toString())
+					.setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
+					.getResultList();
+
+			Iterator<?> iterator = files.iterator();
+			while (iterator.hasNext()) {
+				StagedFile stagedFile = (StagedFile) iterator.next();
+				stagedFiles.add(stagedFile);
+			}
+
+		} finally {
+			
+			if (null != entityManager) {
+				entityManager.close();
+			}
+		}
+		return stagedFiles;
+	}
+	
+	
+	/**
 	 *Method to number of staged files based on search criteria 
 	 * 
 	 */

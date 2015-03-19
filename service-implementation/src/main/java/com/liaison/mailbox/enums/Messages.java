@@ -138,6 +138,7 @@ public enum Messages {
 	CONTENT_QUEUED_FOR_TRANSFER_FAILED("Content queued for transfer got failed."),
 	STAGED_FILEID_DOES_NOT_EXIST("Staged file with the given id %s does not exist."),
 	RETRIEVE_SUCCESSFUL("%s retrieved successfully."),
+	DELETE_ONDEMAND_SUCCESSFUL("File unstaged successfully"),
 	USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL("User authenticated and manifest retrieved successfully"),
 	STAGE_FILEID_NOT_BELONG_TO_ORGANISATION("Given staged file id does not belong to any user organisation."),
 	
