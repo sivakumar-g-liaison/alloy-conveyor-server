@@ -189,10 +189,10 @@ dependencies {
 
 	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
 	compile 'net.logstash.log4j2:log4j2-logstash-jsonevent-layout:3.+'
-	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:1.4.1'
+	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
 	//TODO change to 2.+ after logging updATE
-	compile 'com.liaison.commons:lib_message_bus:2.4.1'
+	compile 'com.liaison.commons:lib_message_bus:2.+'
 
 	// inherited from NetFlix Karyon (TODO integrate with main UI)
 	//compile project(':karyon-admin-web')
