@@ -192,11 +192,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
             // $scope.mailBox.properties = $scope.mailBoxProperties; - DO NOT DO THIS THIS WILL IMPACT CURRENT UI VIEW
             var len = $scope.mailBoxProperties.length;
 			
-			$scope.mailBox.properties.push({
-				name: "ttlunit",
-				value: $scope.ttlUnit.name
-			});
-
             for (var i = 0; i < len - 1; i++) {
                 var index =  getIndex($scope.allStaticProperties, $scope.mailBoxProperties[i].name);
                 
@@ -206,6 +201,22 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                 });
             }
+			
+            //ttl and ttlunit have different properties.
+			if (getIndex($scope.mailBox.properties, "ttl") === -1) {			
+			   for (var i = 0; i < $scope.mailBox.properties.length; i++) {
+			     if ($scope.mailBox.properties[i].name === "ttlunit") {
+				     $scope.mailBox.properties.splice(i, 1);
+					 break;
+				 }			   
+			   }		    
+			} else {
+				  $scope.mailBox.properties.push({
+					name: "ttlunit",
+					value: $scope.ttlUnit.name
+				  });
+			}			
+			
             if ($scope.isMailBoxEdit) {
 
                 $scope.editReq.reviseMailBoxRequest.mailBox = $scope.mailBox;

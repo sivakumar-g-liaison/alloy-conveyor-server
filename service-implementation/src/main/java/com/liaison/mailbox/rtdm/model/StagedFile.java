@@ -48,7 +48,7 @@ public class StagedFile implements Identifiable {
 	private String spectrumUri;
 	private String fileMetaData;
 	private String stagedFileStatus;
-	private Timestamp timeToLive;
+	private Timestamp expirationTime;
 	
 	
 	public StagedFile() {
@@ -127,13 +127,13 @@ public class StagedFile implements Identifiable {
 		this.stagedFileStatus = stagedFileStatus;
 	}
 	
-	@Column(name = "TIMETOLIVE", nullable =false)
-	public Timestamp getTTLStatus() {
-		return timeToLive;
+	@Column(name = "AVAILABLE_UNTIL", nullable =false)
+	public Timestamp getExpirationTime() {
+		return expirationTime;
 	}
 
-	public void setTTLStatus(Timestamp timeToLive) {
-		this.timeToLive = timeToLive;
+	public void setExpirationTime(Timestamp timeToLive) {
+		this.expirationTime = timeToLive;
 	}
 	
 	
