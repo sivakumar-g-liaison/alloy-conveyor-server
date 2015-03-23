@@ -74,7 +74,8 @@ export LOGIN_USER=$(who am i | awk '{print $1}')
  
 export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
 export LOGSTASHPORT=4560
-export LOGSTASH_LOG_DIR=/opt/liaison/
+export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
+export LOGSTASH_RING_BUFFER_SIZE=128
 # ==================================================================
 # log overrides
 # ==================================================================
