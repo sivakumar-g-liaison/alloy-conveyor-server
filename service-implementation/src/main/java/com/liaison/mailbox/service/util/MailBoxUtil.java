@@ -395,8 +395,10 @@ public class MailBoxUtil {
 			return ttlNumber * 7 * 24 * 60 * 60;
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
 			return ttlNumber * 24 * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_HOURS)) {
 			return ttlNumber * 60 * 60;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
+			return ttlNumber * 60;
 		} else {
 			return ttlNumber;
 		}
