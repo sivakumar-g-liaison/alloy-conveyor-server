@@ -1,3 +1,8 @@
+1.1.9
+-------------------------------
+GMB-408:The trigger profile endpoint in Mailbox should consume any content type
+PROD syslog property updates
+
 1.1.8
 -------------------------------
 Fix for High priority issue - https://jira.liaison.tech/browse/GMB-407
