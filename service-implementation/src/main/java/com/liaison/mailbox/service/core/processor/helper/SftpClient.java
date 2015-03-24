@@ -60,20 +60,17 @@ public class SftpClient {
 			SFTPDownloaderPropertiesDTO sftpDownloaderStaticProperties = null;
 			String url = null;
 			int connectionTimeout = 0;
-			int socketTimeout = 0;
 			int retryAttempts = 0;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)processor.getProperties();
 				url = sftpUploaderStaticProperties.getUrl();
 				connectionTimeout = sftpUploaderStaticProperties.getConnectionTimeout();
-				socketTimeout = sftpUploaderStaticProperties.getSocketTimeout();
 				retryAttempts = sftpUploaderStaticProperties.getRetryAttempts();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)processor.getProperties();
 				url = sftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = sftpDownloaderStaticProperties.getConnectionTimeout();
-				socketTimeout = sftpDownloaderStaticProperties.getSocketTimeout();
 				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
 			}
 

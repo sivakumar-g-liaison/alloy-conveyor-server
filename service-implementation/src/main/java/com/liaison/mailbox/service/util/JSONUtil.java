@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import javax.xml.bind.JAXBException;
 
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -52,18 +53,19 @@ public class JSONUtil {
 	}
 	
 	/**
-     * 
-     * @param serializedJson
-     * @param clazz
-     * 
-     * @return json
-     * 
-     * @throws JAXBException
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     */
-    public <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
+	 * Method is used to unmarshal the string to Object
+	 * 
+	 * @param serializedJson
+	 * @param clazz
+	 * 
+	 * @return json
+	 * 
+	 * @throws JAXBException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+    public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException, JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
         AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
@@ -73,5 +75,28 @@ public class JSONUtil {
         T ummarshaledObject = (T) mapper.readValue(serializedJson, clazz);
         return ummarshaledObject;
     }
+    
+	/**
+	 * Method is used to marshal the Object to JSON.
+	 * 
+	 * @param object
+	 * @return String
+	 * @throws JAXBException
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
+	 */
+	public static String marshalToJSON(Object object) throws JAXBException, JsonGenerationException,
+			JsonMappingException, IOException {
+
+		ObjectMapper mapper = new ObjectMapper();
+		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
+		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();
+		AnnotationIntrospector introspector = new AnnotationIntrospector.Pair(primary, secondary);
+		// make deserializer use JAXB annotations (only)
+		mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
+		String jsonBuilt = mapper.writeValueAsString(object);
+		return jsonBuilt;
+	}
 
 }

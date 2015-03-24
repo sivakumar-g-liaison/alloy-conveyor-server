@@ -19,7 +19,6 @@ import javax.xml.bind.JAXBException;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.MailBoxConstants;
@@ -35,6 +34,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.JSONUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.DataValidation;
@@ -227,8 +227,7 @@ public class ProcessorDTO {
 
 		// set static properties into properties json to be stored in DB
 		if (null != propertiesDTO) {
-			 ObjectMapper objectMapper = new ObjectMapper();
-			 String propertiesJSON = objectMapper.writeValueAsString(staticPropertiesDTOInDB);
+			String propertiesJSON = JSONUtil.marshalToJSON(staticPropertiesDTOInDB);
 			processor.setProcsrProperties(propertiesJSON);
 		}
 

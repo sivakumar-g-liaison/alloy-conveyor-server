@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
@@ -202,11 +201,9 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson) throws JsonParseException, JsonMappingException, JAXBException, IOException {
-
-		 ObjectMapper objectMapper = new ObjectMapper();
-		 StaticProcessorPropertiesDTO staticProperties = objectMapper.readValue(propertyJson, StaticProcessorPropertiesDTO.class);
-		 return staticProperties;
+	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException {
+		return JSONUtil.unmarshalFromJSON(propertyJson, StaticProcessorPropertiesDTO.class);
 	}
     
 	/**
@@ -385,16 +382,16 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static StaticProcessorPropertiesDTO getProcessorSpecificStaticPropsFrmTemplt(List<ProcessorPropertyDTO> staticProperties, Processor processor, boolean isCreate ) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JsonParseException, JsonMappingException, IOException {
+	public static StaticProcessorPropertiesDTO getProcessorSpecificStaticPropsFrmTemplt(List<ProcessorPropertyDTO> staticProperties, Processor processor, boolean isCreate ) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JsonParseException, JsonMappingException, IOException, JAXBException {
 
 		StaticProcessorPropertiesDTO propertiesDTO = null;
 
-         if (!isCreate) {
-     		ObjectMapper objectMapper = new ObjectMapper();
-     	    propertiesDTO = objectMapper.readValue(processor.getProcsrProperties(), StaticProcessorPropertiesDTO.class);
-     	    getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-     		return propertiesDTO;
-         } else {
+		if (!isCreate) {
+			propertiesDTO = JSONUtil.unmarshalFromJSON(processor.getProcsrProperties(),
+					StaticProcessorPropertiesDTO.class);
+			getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
+			return propertiesDTO;
+		} else {
 
         	 Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 			 switch (processor.getProcessorType()) {
