@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -47,7 +48,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
+					.append(" and sf.expirationTime > :"+ CURRENT_TIME);
 			
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
 				sortDirection = sortDirection.toUpperCase();
@@ -59,6 +61,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+				    .setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
 					.setFirstResult(pagingOffset)
 					.setMaxResults(pagingCount)
 					.getResultList();
@@ -130,11 +133,13 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
+					.append(" and sf.expirationTime > :"+ CURRENT_TIME);
 			
 			totalItems = (Long)entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+					.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
 					.getSingleResult();
 			
 			count = totalItems.intValue();

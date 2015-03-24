@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -403,4 +404,20 @@ public class MailBoxUtil {
 			return ttlNumber;
 		}
 	}
+	
+	/**
+	 * Method to add given TimeToLive value in seconds to the CurrentTime
+	 * @param seconds
+	 * 
+	 * @return Timestamp
+	 */
+	public static Timestamp addTTLToCurrentTime(int seconds){
+		
+        Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(currentTimeStamp.getTime());
+        cal.add(Calendar.SECOND, seconds);
+        return new Timestamp(cal.getTime().getTime());
+	}
+	
 }

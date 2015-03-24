@@ -26,6 +26,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	
 	public static final String GUID = "file_guid";
 	
+	public static final String CURRENT_TIME = "current_time";
+	
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
 	 * 

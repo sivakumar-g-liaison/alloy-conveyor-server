@@ -176,6 +176,7 @@ public interface MailBoxConstants {
 	public static final String TTL_UNIT_WEEKS = "Weeks";
 	public static final String TTL_UNIT_MONTHS = "Months";
 	public static final String TTL_UNIT_YEARS = "Years";
+	public static final String FS2_OPTIONS_TTL="fs2.options.ttl";
 
 	//charsetname
 	public static final String CHARSETNAME = "UTF-8";

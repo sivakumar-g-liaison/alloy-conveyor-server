@@ -23,13 +23,15 @@ public class StagedFileDTO {
 	private String mailboxGuid;
 	private String spectrumUri;
 	private String meta;
+	private String status;
+	private String expirationTime;
 
 	public StagedFileDTO() {
 
 	}
 
 	public StagedFileDTO(String fileName, String filePguid, String filePath, String fileSize, String mailboxGuid,
-			String spectrumUri, String meta) {
+			String spectrumUri, String meta,String status,String timeToLive) {
 		this.setName(fileName);
 		this.setId(filePguid);
 		this.setPath(filePath);
@@ -37,6 +39,8 @@ public class StagedFileDTO {
 		this.setMailboxGuid(mailboxGuid);
 		this.setSpectrumUri(spectrumUri);
 		this.setMeta(meta);
+		this.setStatus(status);
+		this.setExpirationTime(timeToLive);
 	}
 
 	public String getId() {
@@ -93,5 +97,21 @@ public class StagedFileDTO {
 
 	public void setMeta(String meta) {
 		this.meta = meta;
+	}
+	
+	public String getExpirationTime() {
+		return expirationTime;
+	}
+
+	public void setExpirationTime(String expirationTime) {
+		this.expirationTime = expirationTime;
+	}
+	
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

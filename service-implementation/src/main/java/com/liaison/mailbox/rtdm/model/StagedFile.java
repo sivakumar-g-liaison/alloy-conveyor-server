@@ -25,6 +25,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -172,6 +173,8 @@ public class StagedFile implements Identifiable {
 		stagedFileDto.setPath(this.getFilePath());
 		stagedFileDto.setFileSize(this.getFileSize());
 		stagedFileDto.setMeta(this.getFileMetaData());
+		stagedFileDto.setStatus(this.getStagedFileStatus());
+		stagedFileDto.setExpirationTime(this.getExpirationTime()==null?"":this.getExpirationTime().toString());
 	}
 	
 	/**
@@ -196,5 +199,8 @@ public class StagedFile implements Identifiable {
 		this.setMailboxId(stagedFileDto.getMailboxGuid());
 		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
 		this.setFileMetaData(stagedFileDto.getMeta());
+		MailBoxStatus status = MailBoxStatus.findByCode(stagedFileDto.getStatus());
+		this.setStagedFileStatus(status.name());
+		this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
 	}
 }
