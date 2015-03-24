@@ -20,10 +20,9 @@ var rest = myApp.controller(
             $scope.disableCertificates = true;    	    
 			//check directory path in choose file
 			$scope.isDirectoryPath = true;
-			
+		
             // To be Populated
             $scope.mailBoxId;
-            var block = $rootScope.block;	
             		
 			function getIndexOfValue(objArray, value) {
 				var pos = -1;
@@ -81,15 +80,15 @@ var rest = myApp.controller(
                     status: "",
                     protocol: "",
                     linkedMailboxId: "",
-                    linkedProfiles: [],
-                    credentials: [],                    
+                    linkedProfiles: [],              
                     processorPropertiesInTemplateJson: {
                     	type: "",
                     	displayName: "",
 						protocol: "",
                     	handOverExecutionToJavaScript: false,
                     	staticProperties: [],
-						folderProperties: []
+						folderProperties: [],
+						credentialProperties:[]
                     }
                 };
                 $scope.modal = {
@@ -122,136 +121,18 @@ var rest = myApp.controller(
                 $scope.selectedProcessorType =  $scope.procsrType.value;               
                 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];               
                 // Procsr Credential Props
-                $scope.processorCredProperties = [{
-                    credentialURI: '',
-                    credentialType: '',
-                    userId: '',
-                    password: '',
-                    idpType: '',
-                    idpURI: '',
-                    allowAdd: 'true',
-                    passwordDirtyState: ''
-                }];           
+               $scope.processorCredProperties = [];           
 				
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential = [
-	                {
-	                    "name": "Login Credential",
-	                    "id": "LOGIN_CREDENTIAL"
-	                }];
-                $scope.allStaticPropertiesForProcessorCredential = [
-	                {
-	                    "name": "Login Credential",
-	                    "id": "LOGIN_CREDENTIAL"
-	                }];
-                $scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp = [{
-                    name: "FTPS",
-                    id: "FTPS"
-                }, {
-                    name: "SFTP",
-                    id: "SFTP"
-                }];
-                $scope.allStaticPropertiesForProcessorCredentialIdp = [{
-                    name: "FTPS",
-                    id: "FTPS"
-                }, {
-                    name: "SFTP",
-                    id: "SFTP"
-                }];
                 $scope.valueSelectedinSelectionBox = {
                     value: ''
                 };                               
                 
-                /*Credential*/
-                $scope.valueSelectedinSelectionBoxForProcessorCredential = {
-                    value: ''
-                };
-                /*Credential Idp*/
-                $scope.valueSelectedinSelectionBoxForProcessorCredentialIdp = {
-                    value: ''
-                };
                 // Profile Related Stuff.
                 $scope.allProfiles = [];
                 $scope.selectedProfiles = [];
             };
             $scope.loadOrigin();
-            $scope.getCredentialId = function (objArray, row) {
-                return getId(objArray, row.getProperty('credentialType'));
-            };
             
-            // Credentials for Grid Options
-            $scope.gridOptionsForProcessorCredential = {
-                data: 'processorCredProperties',
-                displaySelectionCheckbox: false,
-                enableRowSelection: false,
-                enableCellEditOnFocus: true,
-                enablePaging: false,
-                showFooter: false,
-                rowHeight: 100,
-				enableColumnResize : true,
-				plugins: [new ngGridFlexibleHeightPlugin()],
-                columnDefs: [{
-                    field: "credentialURI",
-                    width: "20%",
-                    displayName: "Name",
-                    enableCellEdit: false,
-                    cellTemplate: '<div>{{row.getProperty(\'credentialURI\')}}</div>'
-                }, {
-                    field: "credentialType",
-                    width: "20%",
-                    displayName: "Type*",
-                    enableCellEdit: false,
-                    cellTemplate: '<!--<div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/>-->'+
-                    '<div ng-switch on = row.getProperty(\'credentialType\')>'+
-                    '<div ng-switch-when="Login Credential"><div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/></div>'+
-                    '<div ng-switch-when="SSH_KEYPAIR"><div ng-switch on = row.getProperty(\'idpType\')>\n\
-                    <div ng-switch-when="PRIVATE">SSH Private Key</div><div ng-switch-when="PUBLIC">SSH Public Key</div></div></div>'+
-                    '<div ng-switch-when="TRUSTSTORE_CERT">TrustStore Certificate</div>'+
-                    '<div ng-switch-default><div class="dynamicComponentDirectiveForName" allow-add={{row.getProperty(\'allowAdd\')}} all-props="allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential" selected-value="valueSelectedinSelectionBoxForProcessorCredential" prop-name={{row.getProperty(col.field)}}/></div>'+
-                    '</div>'
-               }, {
-                    field: "userId",
-                    width: "20%",
-                    displayName: "UserId",
-                    enableCellEdit: false,
-                   cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">'+
-                    '<div ng-switch-when="true"><input type="text" ng-model="COL_FIELD" ng-input="COL_FIELD" class="textboxingrid"></div>'+
-                    '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'credentialType\')">'+
-                    '<div ng-switch-when="Login Credential"><input type="text" ng-model="COL_FIELD" ng-input="COL_FIELD" class="textboxingrid"></div>'+
-                    '<div ng-swith-default></div>'+
-                    '</div></div>'
-                }, {
-                    field: "password",
-                    width: "20%",
-                    displayName: "Password",
-                    enableCellEdit: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(\'allowAdd\')">'+
-                    '<div ng-switch-when="true"><div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field"/></div>'+
-                    '<div ng-switch-when="false"><div ng-switch on="row.getProperty(\'credentialType\')">'+
-                    '<div ng-switch-when="Login Credential"><div class="passwordDirective" password={{row.getProperty(col.field)}} row-entity="row.entity" col-filed="col.field"/></div>'+
-                    '<div ng-swith-default></div></div>'+
-                    '</div></div>'
-                }, {
-                    field: "idpURI",
-                    width: "0%",
-                    displayName: "IdpURI",
-                    enableCellEdit: false
-                }, {
-                    field: "idpType",
-                    width: "0%",
-                    displayName: "IdpType",
-                    enableCellEdit: false
-                }, {
-                    field: "allowAdd",
-                    width: "20%",
-                    displayName: "Action",
-                    enableCellEdit: false,
-                    sortable: false,
-                    cellTemplate: '<div ng-switch on="row.getProperty(col.field)">' +
-                        '<div ng-switch-when="true"><button ng-click="addCredentialRow(row,valueSelectedinSelectionBoxForProcessorCredential,valueSelectedinSelectionBoxForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-plus-sign glyphicon-white"></i></button></div>' +
-                        '<div ng-switch-when="false"><button ng-click="removeCredentialRow(row,allStaticPropertiesForProcessorCredential,allStaticPropertiesForProcessorCredentialIdp,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,processorCredProperties)"><i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>' +
-                        '</div>'
-                }]
-            };					
             $scope.initialLoad = function () {
                 $scope.readAllProcessors();
                 $scope.readAllProfiles();
@@ -309,11 +190,7 @@ var rest = myApp.controller(
                     $scope.readAllProcessors();
                 }
             }, true);
-            $scope.editableInPopup = '<button class="btn btn-default btn-xs" ng-click="editProcessor(row.getProperty(\'guid\'),true)"><i class="glyphicon glyphicon-wrench"></i></button>';
-            $scope.manageStatus = '<div ng-switch on="row.getProperty(\'status\')"><div ng-switch-when="ACTIVE">Active</div><div ng-switch-when="INACTIVE">Inactive</div></div>';
-            $scope.manageType = '<div ng-switch on="row.getProperty(\'type\')"><div ng-switch-when="REMOTEDOWNLOADER">Remote Downloader</div><div ng-switch-when="REMOTEUPLOADER">Remote Uploader</div>\n\
-            <div ng-switch-when="SWEEPER">Directory Sweeper</div><div ng-switch-when="HTTPASYNCPROCESSOR">HTTP Async Processor</div><div ng-switch-when="HTTPSYNCPROCESSOR">HTTP Sync Processor</div>\n\
-            	 <div ng-switch-when="FILEWRITER">File Writer</div><div ng-switch-when="DROPBOXPROCESSOR">Dropbox Processor</div></div>';
+
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
                     field: 'name',
@@ -323,20 +200,19 @@ var rest = myApp.controller(
                     field: 'type',
                     displayName: 'Type',
                     width: "20%",
-                    cellTemplate: $scope.manageType
+                    cellTemplate: 'partials/processor/processor_section_templates/processor_type_field_template.html'
                 }, {
                     field: 'status',
                     displayName: 'Status',
                     width: "20%",
-                    cellTemplate: $scope.manageStatus
+                    cellTemplate: 'partials/processor/processor_section_templates/processor_status_field_template.html'
                 }, {
                     displayName: 'Action',
                     sortable: false,
                     width: "20%",
-                    cellTemplate: $scope.editableInPopup
+                    cellTemplate: 'partials/processor/processor_section_templates/processor_action_field_template.html'
                 }],
                 data: 'processorList',
-                //rowTemplate: customRowTemplate,
                 enablePaging: true,
                 showFooter: true,
                 canSelectRows: true,
@@ -358,7 +234,7 @@ var rest = myApp.controller(
 				$scope.isEdit = true;
                 var procsrId = processorId;                
 				if (blockuiFlag === true) {
-					block.unblockUI();
+					$scope.block.unblockUI();
 				}
 				$scope.allProfiles = profData.getProfileResponse.profiles;
 				$scope.clearProps();
@@ -421,6 +297,7 @@ var rest = myApp.controller(
 			    $scope.availableProperties = [];
 			    $scope.folderAddedToProcessor = [];
 			    $scope.folderAvailableProperties = [];
+                $scope.processorCredProperties = [];
                 $scope.staticProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.staticProperties;                
                 $scope.folderProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.folderProperties;
                 
@@ -470,42 +347,10 @@ var rest = myApp.controller(
 					  
 					 });      
 				}
-				
-				$scope.processorCredProperties.splice(0, 1); //Removing now so that the add new option always shows below the available properties
-				for (var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
-					 var credentialType = (data.getProcessorResponse.processor.credentials[i].credentialType == 'LOGIN_CREDENTIAL')?getName($scope.allStaticPropertiesForProcessorCredential, data.getProcessorResponse.processor.credentials[i].credentialType): data.getProcessorResponse.processor.credentials[i].credentialType;
-					$scope.processorCredProperties.push({
-						credentialURI: data.getProcessorResponse.processor.credentials[i].credentialURI,
-						//credentialType: getName($scope.allStaticPropertiesForProcessorCredential, data.getProcessorResponse.processor.credentials[i].credentialType),
-						credentialType:credentialType,
-						userId: data.getProcessorResponse.processor.credentials[i].userId,
-						password: data.getProcessorResponse.processor.credentials[i].password,
-						idpType: data.getProcessorResponse.processor.credentials[i].idpType,
-						idpURI: data.getProcessorResponse.processor.credentials[i].idpURI,
-						allowAdd: false
-					});
-					var indexOfElement = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential,
-						data.getProcessorResponse.processor.credentials[i].credentialType);
-					if (indexOfElement !== -1) {
-						$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredential.splice(indexOfElement, 1);
-					}
-					var indexOfElementIdp = getIndexOfId($scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp,
-						data.getProcessorResponse.processor.credentials[i].idpType);
-					if (indexOfElementIdp !== -1) {
-						$scope.allStaticPropertiesThatAreNotAssignedValuesYetInProcessorCredentialIdp.splice(indexOfElementIdp, 1);
-					}
-				};
-				$scope.processorCredProperties.push({
-					credentialURI: '',
-					credentialType: '',
-					userId: '',
-					password: '',
-					idpType: '',
-					idpURI: '',
-					allowAdd: 'true'
-				});
-				  // To Properly set the sshkey modal and certificate modal values
-				$scope.processCredentialDetails();
+				$scope.processorCredProperties = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.slice();
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                };
 				
 			}
 			
@@ -514,10 +359,10 @@ var rest = myApp.controller(
 					function (secretData, status) {
 						if(status === 200) {
 							var decPwd = $.base64.decode($.base64.decode(secretData));
-							data.getProcessorResponse.processor.credentials[a].password = decPwd;
+							data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = decPwd;
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
-							block.unblockUI();
+							$scope.block.unblockUI();
 							showSaveMessage('Key manager failed to retrieve the stored secret', 'error');
 							return;
 						} 
@@ -528,8 +373,8 @@ var rest = myApp.controller(
             $scope.editProcessor = function (processorId, blockuiFlag) {
                 
 				if (blockuiFlag === true) {
-                    block.blockUI();
-                }
+					$scope.block.blockUI();
+				}
 				
 				$scope.formAddPrcsr.$setPristine();
                 $scope.loadOrigin();
@@ -555,9 +400,9 @@ var rest = myApp.controller(
 								//$log.info($filter('json')(profData));
 								
 									var editProcessor = false;
-									for(var i = 0; i < data.getProcessorResponse.processor.credentials.length; i++) {
-										$scope.credType = data.getProcessorResponse.processor.credentials[i].credentialType;
-										$scope.secret = data.getProcessorResponse.processor.credentials[i].password;
+									for(var i = 0; i < data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
+										$scope.credType = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
+										$scope.secret = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
 										
 										// read secret should be called only if password is available in the login credential
 										// for sftp processor with keys, password will not be available and hence 
@@ -624,80 +469,6 @@ var rest = myApp.controller(
 				}
             };			
 			
-            // For Procsr Credentials Props
-            $scope.addCredentialRow = function (row, valueSelectedinSelectionBox, valueSelectedinSelectionBoxIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
-                if (valueSelectedinSelectionBox.value === null) {
-                    showAlert('It is mandatory to set the folder URI and Type.', 'error');
-                    return;
-                }
-                var selectedIdp = '';
-                if (valueSelectedinSelectionBoxIdp.value !== null && valueSelectedinSelectionBoxIdp.value !== '') {
-                	selectedIdp = valueSelectedinSelectionBoxIdp.value.name;
-                }
-                if (!valueSelectedinSelectionBox.value.id) {
-                    showAlert('It is mandatory to set credential type', 'error');
-                    return;
-                }
-                if (row.getProperty('passwordDirtyState') === "nomatch") {
-                    showAlert('The password and confirm password do not match', 'error');
-                    return;
-                }
-               /*This condition is used to prevent the data from getting pushed to gridData array when maximum length of password is exceeded*/
-                if(row.getProperty('passwordDirtyState') === "maxlengthError"){
-					showAlert('The password cannot be longer than 63 characters', 'error');
-					return;
-				}
-                var index = gridData.indexOf(row.entity);
-                gridData.splice(index, 1);
-                gridData.push({
-                    credentialURI: row.getProperty('credentialURI'),
-                    credentialType: valueSelectedinSelectionBox.value.name,
-                    userId: row.getProperty('userId'),
-                    password: row.getProperty('password'),
-                    idpType: selectedIdp,
-                    idpURI: row.getProperty('idpURI'),
-                    allowAdd: false
-                });
-                var indexOfSelectedElement = getIndex(allPropsWithNovalue, valueSelectedinSelectionBox.value.name);
-                if (indexOfSelectedElement !== -1) {
-                    allPropsWithNovalue.splice(indexOfSelectedElement, 1);
-                }
-                var indexOfSelectedElementIdp = getIndex(allPropsWithNovalueIdp, selectedIdp);
-                if (indexOfSelectedElementIdp !== -1) {
-                    allPropsWithNovalueIdp.splice(indexOfSelectedElementIdp, 1);
-                }
-                //}
-                gridData.push({
-                    credentialURI: '',
-                    credentialType: '',
-                    userId: '',
-                    password: '',
-                    idpType: '',
-                    idpURI: '',
-                    allowAdd: 'true'
-                });
-                valueSelectedinSelectionBox.value = '';
-                valueSelectedinSelectionBoxIdp.value = '';
-            };
-            // For Procsr Credentials Props
-            $scope.removeCredentialRow = function (row, allProps, allPropsIdp, allPropsWithNovalue, allPropsWithNovalueIdp, gridData) {
-
-            	//To notify passwordDirective to clear the password and error message
-                $scope.doSend();
-            	var index = gridData.indexOf(row.entity);
-                gridData.splice(index, 1);
-                var removedProperty = row.getProperty('credentialType');
-                var indexOfSelectedElement = getIndex(allProps, removedProperty);
-                if (indexOfSelectedElement > -1) {
-                    allPropsWithNovalue.push(allProps[indexOfSelectedElement]);
-                }
-                if (row.getProperty("credentialType") == "SSH_KEYPAIR") {
-                    $scope.deleteSSHKeyCredential();
-                }
-                if (row.getProperty("credentialType") == "TRUSTSTORE_CERT") {
-                    $scope.deleteCertificateCredential();
-                }
-            };
             $scope.doCancel = function () {			
 				$scope.closeModalView(); 
 				$location.$$search = {};
@@ -763,19 +534,16 @@ var rest = myApp.controller(
                 $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
 				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
 				$scope.processor.processorPropertiesInTemplateJson.protocol = $scope.processor.protocol.value;
-				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;				
+				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;
                 
-                var lenCredentialProps = $scope.processorCredProperties.length;
-                for (var i = 0; i < lenCredentialProps - 1; i++) {
-                    var credentialType = ($scope.processorCredProperties[i].credentialType == 'Login Credential')?'LOGIN_CREDENTIAL':$scope.processorCredProperties[i].credentialType;
-                    $scope.processor.credentials.push({
-                        credentialURI: $scope.processorCredProperties[i].credentialURI,
-                        credentialType: credentialType,
-                        userId: $scope.processorCredProperties[i].userId,
-                        password: $scope.processorCredProperties[i].password,
-                        idpType: $scope.processorCredProperties[i].idpType,
-                        idpURI: $scope.processorCredProperties[i].idpURI
-                    });
+                for (var i = 0; i < $scope.processorCredProperties.length; i++) {
+                    var credObj = $scope.processorCredProperties[i];
+                    delete credObj.passwordDirtyState;
+                    if (credObj.credentialType === "LOGIN_CREDENTIAL" && credObj.userId !== "" && credObj.userId !== null && typeof credObj.userId !== "undefined") {
+                        $scope.processor.processorPropertiesInTemplateJson.credentialProperties.push(credObj);
+                    } else if (credObj.credentialType !== "LOGIN_CREDENTIAL"){
+                        $scope.processor.processorPropertiesInTemplateJson.credentialProperties.push(credObj);
+                    }
                 }
                 $scope.processor.linkedMailboxId = $location.search().mailBoxId;
                 //$scope.processor.linkedProfiles = $scope.selectedProfiles;
@@ -790,7 +558,7 @@ var rest = myApp.controller(
 						$scope.scriptIsEdit = true;
 				}				
 				
-                block.blockUI();
+                $scope.block.blockUI();
                 if ($scope.isEdit) {
                     editRequest.reviseProcessorRequest.processor = $scope.processor;
 					$scope.appendPortToUrl();
@@ -799,12 +567,12 @@ var rest = myApp.controller(
 					editRequest.reviseProcessorRequest.processor.protocol = $scope.processor.protocol.value;
 					
 						var reviseProcessor = false;
-						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
+						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
 						
-							$scope.credType = editRequest.reviseProcessorRequest.processor.credentials[i].credentialType;
+							$scope.credType = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
 							$scope.procName = editRequest.reviseProcessorRequest.processor.name;
-							$scope.credUsrName = editRequest.reviseProcessorRequest.processor.credentials[i].userId;
-							$scope.secret = editRequest.reviseProcessorRequest.processor.credentials[i].password;
+							$scope.credUsrName = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
+							$scope.secret = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
 							
 							$scope.secretName = '';
 							
@@ -833,12 +601,12 @@ var rest = myApp.controller(
 					addRequest.addProcessorToMailBoxRequest.processor.protocol = $scope.processor.protocol.value;
 					
 						var saveProcessor = false;
-						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
+						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
 						
-							$scope.credType = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].credentialType;
+							$scope.credType = addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].credentialType;
 							$scope.procName = addRequest.addProcessorToMailBoxRequest.processor.name;
-							$scope.credUsrName = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].userId;
-							$scope.secret = addRequest.addProcessorToMailBoxRequest.processor.credentials[i].password;
+							$scope.credUsrName = addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
+							$scope.secret = addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
 							
 							$scope.secretName = '';
 							// store secret should be called only if password is available in the login credential
@@ -868,24 +636,24 @@ var rest = myApp.controller(
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
 					if (status === 200) {
-							editRequest.reviseProcessorRequest.processor.credentials[a].password = data;
+							editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = data;
 							$scope.processorReviseAfterKM();
 							
 						} else if (status === 404) {
 							$scope.restService.post($scope.secretUrl, base64EncodedSecret,
 								function (crdata, status2) {
 									if (status2 === 201) {
-										editRequest.reviseProcessorRequest.processor.credentials[a].password = crdata;
+										editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = crdata;
 										$scope.processorReviseAfterKM();
 									} else {
-										block.unblockUI();
+										$scope.block.unblockUI();
 										showSaveMessage("Key manager failed to revise stored secret", 'error');
 										return;
 									}
 								}, {'Content-Type': 'application/octet-stream'}
 							);
 						} else {
-							block.unblockUI();
+							$scope.block.unblockUI();
 							showSaveMessage("Key manager failed to revise stored secret", 'error');
 							return;
 						}
@@ -898,10 +666,10 @@ var rest = myApp.controller(
 					function (secdata, status) {
 						//console.log('status and data = ' + secdata + ', '+ status);
 						if (status === 201) {
-							addRequest.addProcessorToMailBoxRequest.processor.credentials[a].password = secdata;
+							addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = secdata;
 							$scope.processorSaveAfterKM();
 						} else {
-							block.unblockUI();
+							$scope.block.unblockUI();
 							showSaveMessage("Key manager failed to add stored secret", 'error');
 							return;
 						}
@@ -930,7 +698,7 @@ var rest = myApp.controller(
 						   $scope.setTypeDuringProtocolEdit($scope.processor.protocol);	
 							showSaveMessage("Error while saving processor", 'error');
 						}
-						block.unblockUI();
+						$scope.block.unblockUI();
 						$scope.clearProps();
 					}
 				);
@@ -960,13 +728,13 @@ var rest = myApp.controller(
 							showSaveMessage("Error while saving processor", 'error');
 						}
 						$scope.clearProps();
-						block.unblockUI();
+						$scope.block.unblockUI();
 					}
 				);
 			};
 			
             $scope.clearProps = function () {
-                $scope.processor.credentials = [];
+                $scope.processor.processorPropertiesInTemplateJson.credentialProperties = [];
                 //$scope.processor.remoteProcessorProperties.otherRequestHeader = [];
             };
             /*This function is used to notify passwordDirective to clear the password and error message*/
@@ -989,128 +757,12 @@ var rest = myApp.controller(
 			        $scope.scriptIsEdit = false; 	
                     $scope.isJavaScriptExecution = false;
                     $scope.formAddPrcsr.scriptName.$setValidity('allowed', true);
-                    formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
-                     // To reset the values in the file browser window
-                    $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
-                    $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
+                    $scope.$broadcast("resetCredentialSection");
             };            
             // Close the modal
             $scope.closeDelete = function () {
                 $('#myModal').modal('hide')
             };		    
-            
-            // File Upload Section Begins
-            $scope.setFiles = function (element) {
-               // console.log(element.value);
-                $scope.$apply(function ($scope) {
-                    // Turn the FileList object into an Array
-                    $scope.files = [];
-                    for (var i = 0; i < element.files.length; i++) {
-                        $scope.files.push(element.files[i]);
-                    }
-                    //console.log('files:', $scope.files);
-                    $scope.certificateModal.certificateURI = $scope.files[0].name;
-                    $scope.isFileSelected = true;
-                    $scope.progressVisible = false;
-                });
-            };
-            $scope.uploadFile = function () {
-                //console.log('Entering upload event');
-                 block.blockUI();
-                var fd = new FormData();
-                $scope.pkObj['serviceInstanceId'] = Date.now().toString();
-				$scope.pkObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.value,'_',$scope.certificateModal.certificateURI);
-				var currentDate = new Date();
-				var afterOneYear = new Date();
-				afterOneYear.setYear(currentDate.getFullYear() + 1);
-				$("#yearFromNow").append(afterOneYear.toString());
-				$scope.pkObj.dataTransferObject['createdDate'] = currentDate.toISOString();
-				$scope.pkObj.dataTransferObject['validityDateFrom'] = currentDate.toISOString();
-				$scope.pkObj.dataTransferObject['validityDateTo'] = afterOneYear.toISOString();
-                fd.append("json", angular.toJson($scope.pkObj));
-                for (var i in $scope.files) {
-                    fd.append($scope.files[i].name, $scope.files[i]);
-                }
-                var xhr = new XMLHttpRequest();
-                xhr.addEventListener("load", uploadComplete, false);
-                xhr.addEventListener("error", uploadFailed, false);
-                xhr.addEventListener("abort", uploadCanceled, false);
-                xhr.open("POST", $scope.url_upload_key);
-                xhr.send(fd);
-            };
-
-            function uploadComplete(evt) {
-                /* This event is raised when the server send back a response */
-                if (evt.target.status === 201) {
-                    var resp = angular.fromJson(evt.target.responseText);
-                    var arr = resp['dataTransferObject']['keyGroupMemberships'];
-                    pkGuid = arr[0]['keyBase']['pguid'];
-                    // Public Key guid 
-                    //var pkGuid = 'testdata';
-                    pkGuid = pkGuid.toString();
-                    if ($scope.certificateModal.isGlobalTrustore === "0") {
-                        //console.log('creating self signed trust store');
-                        $scope.uploadToSelfSignedTrustStore(pkGuid);
-                    } else {
-                       // console.log('uploading to global trust store');
-                        $scope.linkTrustStoreWithCertificate(pkGuid, $rootScope.javaProperties.globalTrustStoreId, $rootScope.javaProperties.globalTrustStoreGroupId);
-                    }
-                } else {
-                    block.unblockUI();
-                    /*var msg = ($scope.isEdit === true) ? 'certificate uploading failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
-                    showSaveMessage('Certificate Uploading Failed', 'error');
-                    return;
-                }
-            }
-            $scope.uploadToSelfSignedTrustStore = function (pkGuid) {
-                $scope.restService.post($scope.base_url + '/processor/uploadkey','POST Self signed key to key manager',
-                    function (data, status) {
-                        if (status === 200 && data.getTrustStoreResponse.response.status === 'success') {
-                            $scope.linkTrustStoreWithCertificate(pkGuid, data.getTrustStoreResponse.trustStore.trustStoreId,
-                                data.getTrustStoreResponse.trustStore.trustStoreGroupId);
-                        } else {
-                            block.unblockUI();
-                            showSaveMessage('Certificate Uploading Failed', 'error');
-                            return;
-                        }
-                    }
-                );
-            };
-            $scope.linkTrustStoreWithCertificate = function (pkGuid, trustStoreId, trustStoreGroupId) {
-            	
-            	$scope.linkKeyTs['serviceInstanceId'] = Date.now().toString();
-                // To put public key is association json to TrustStore
-                $scope.linkKeyTs['dataTransferObject']['trustStoreMemberships'][0]['publicKey']['pguid'] = pkGuid;
-                $scope.restService.put($scope.url_link_key_store + trustStoreId, angular.toJson($scope.linkKeyTs),
-                    function (data, status) {
-                        if (status === 200) {
-                            $scope.certificateModal.trustStoreGroupId = trustStoreGroupId;
-                            $scope.addCertificateDetails();
-                            $scope.resetCredentialModal();
-                        } else {
-                            block.unblockUI();
-                           /* var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
-                            showSaveMessage('Certificate Uploading Failed', 'error');
-                            return;
-                        }
-                    }
-                );
-            };
-
-            function uploadFailed(evt) {
-                block.unblockUI();
-                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
-                showSaveMessage('Certificate Uploading Failed', 'error');
-                return;
-            }
-
-            function uploadCanceled(evt) {
-                block.unblockUI();
-                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the certificate' : 'Processor creation failed because there is an error while uploading the certificate';*/
-                showSaveMessage('Certificate Uploading Failed', 'error');
-                return;
-            }
-            // File Upload Section Ends
             
             //GMB-201
 			if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
@@ -1120,10 +772,6 @@ var rest = myApp.controller(
 			}
             $scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
             
- 			$scope.resetFiles = function() {
-				document.getElementById('mbx-procsr-certificatebrowse').value = null;
-			}
-
 			$scope.appendPortToUrl = function() {
 			    
 				var defaultPort = '';
@@ -1156,258 +804,7 @@ var rest = myApp.controller(
 						 
 					  }
 			     }				
-			};
-			
-             // SSHkeys Uploading section begins
-             $scope.setSSHPrivateKey = function (element) {
-                //console.log(element.value);
-                $scope.$apply(function ($scope) {
-                    // Turn the FileList object into an Array
-                    for (var i = 0; i < element.files.length; i++) {
-                         $scope.sshKeys.privatekey = element.files[i];
-                    }
-                    //console.log('sshKeys:', $scope.sshKeys);
-                    $scope.sshkeyModal.sshPrivateKeyURI = element.files[0].name;
-                    $scope.isPrivateKeySelected = true;
-                    $scope.progressVisible = false;
-                });
-             };
-             
-              $scope.setSSHPublicKey = function (element) {
-               // console.log(element.value);
-                $scope.$apply(function ($scope) {
-                    // Turn the FileList object into an Array
-                    for (var i = 0; i < element.files.length; i++) {
-                       $scope.sshKeys.publickey = element.files[i];
-                    }
-                   // console.log('sshKeys:', $scope.sshKeys);
-                    $scope.sshkeyModal.sshPublicKeyURI = element.files[0].name;
-                    $scope.isPublicKeySelected = true;
-                    $scope.progressVisible = false;
-                });
-             };
-            
-              $scope.uploadSSHKey = function () {
-                //console.log('Entering upload event of ssh keys');
-                if ($scope.sshkeyModal.sshKeyPairPassphrase !== $scope.sshkeyModal.sshKeyPairConfirmPassphrase) {
-    				showSaveMessage("Passwords does not match.", 'error');
-    				$(sshkeypassphrase).focus();
-    				return;
-    			}
-                block.blockUI();
-                formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
-                var fd = new FormData();
-                $scope.sshKeyObj['serviceInstanceId'] = Date.now().toString();
-				$scope.sshKeyObj.dataTransferObject['name'] = $scope.processor.name.concat('_',$scope.procsrType.value,'_',$scope.sshkeyModal.sshkeyURI);
-				var currentDate = new Date();
-				var afterOneYear = new Date();
-				afterOneYear.setYear(currentDate.getFullYear() + 1);
-				$("#yearFromNow").append(afterOneYear.toString());
-				$scope.sshKeyObj.dataTransferObject['createdDate'] = currentDate.toISOString();
-				$scope.sshKeyObj.dataTransferObject['validityDateFrom'] = currentDate.toISOString();
-				$scope.sshKeyObj.dataTransferObject['validityDateTo'] = afterOneYear.toISOString();
-                $scope.sshKeyObj.dataTransferObject['custodianPassphrase'] = $scope.sshkeyModal.sshKeyPairPassphrase;
-                fd.append("json", angular.toJson($scope.sshKeyObj));
-                //console.log(angular.toJson($scope.sshKeyObj));
-                fd.append($scope.sshKeys.privatekey.name, $scope.sshKeys.privatekey);
-                fd.append($scope.sshKeys.publickey.name, $scope.sshKeys.publickey);
-                var xhr = new XMLHttpRequest();
-                xhr.addEventListener("load", sshkeyUploadComplete, false);
-                xhr.addEventListener("error", sshkeyUploadFailed, false);
-                xhr.addEventListener("abort", sshkeyUploadCanceled, false);
-                xhr.open("POST", $scope.url_ssh_upload_key);
-                xhr.send(fd);
-            };
-              function sshkeyUploadComplete(evt) {
-                // To reset the values in the file browser window
-                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
-                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
-                /* This event is raised when the server send back a response */
-                if (evt.target.status === 201) {
-                   // console.log('ssh key uploaded successfully');
-                    var resp = angular.fromJson(evt.target.responseText);
-                    var pkGuid = resp['dataTransferObject']['pguid'];
-                    //var pkGuid = 'F45EE0F10A006FF106655CE31D400F66';
-                    // Keygroup guid 
-                    pkGuid = pkGuid.toString();
-                    $scope.sshkeyModal.sshKeyPairPguid = pkGuid;
-                    $scope.addSSHKeyDetails();
-                    $scope.resetCredentialModal();
-
-               } else {
-                    block.unblockUI();
-                    /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
-                    showSaveMessage('SSH KeyPair Uploading Failed', 'error');
-                    return;
-                }
-            }
-            
-             function sshkeyUploadFailed(evt) {
-                // To reset the values in the file browser window
-                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
-                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
-                block.unblockUI();
-                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
-                showSaveMessage('SSH KeyPair Uploading Failed', 'error');
-                return;
-            }
-
-            function sshkeyUploadCanceled(evt) {
-                // To reset the values in the file browser window
-                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
-                $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
-                block.unblockUI();
-                /*var msg = ($scope.isEdit === true) ? 'Processor revision failed because there is an error while uploading the sshkey' : 'Processor creation failed because there is an error while uploading the sshkey';*/
-                showSaveMessage('SSH KeyPair Uploading Failed', 'error');
-                return;
-            }
-           
-            $scope.resetSSHKeys = function (element) {
-                element.value = null;
-            }
-            // SSH Key Upload Section Ends
-            
-            $scope.processCredentialDetails = function() {
-                  for (var i = 0; i <  $scope.processorCredProperties.length; i++) {
-                    var credObj =  $scope.processorCredProperties[i];
-                    if(credObj.credentialType == 'SSH_KEYPAIR') {
-                        $scope.sshkeyModal.sshKeyPairPguid = credObj.idpURI;
-                        $scope.sshkeyModal.sshKeyPairPassphrase = '';
-                        $scope.sshkeyModal.sshKeyPairConfirmPassphrase = '';
-                        if(credObj.idpType == 'PRIVATE') {
-                             $scope.sshkeyModal.sshPrivateKeyURI = ''; 
-                        } else {
-                             $scope.sshkeyModal.sshPublicKeyURI = '';
-                        }                                                                        
-                    }
-                    if (credObj.credentialType == 'TRUSTSTORE_CERT') {
-                        $scope.certificateModal.certificateURI = '';
-                        $scope.certificateModal.trustStoreGroupId = credObj.idpURI;
-                        $scope.certificateModal.isGlobalTrustore = (credObj.idpType == 'GLOBAL')?"1":"0";
-                    }
-                }
-            }
-            $scope.addCertificateDetails = function() {
-                $scope.removeCertificateDetails();
-                var idpType = ($scope.certificateModal.isGlobalTrustore == '1' || $scope.certificateModal.isGlobalTrustore == 1)?'GLOBAL':'SELFSIGNED';
-                $scope.processorCredProperties.splice(0,0,{
-                                credentialURI: $scope.certificateModal.certificateURI,
-                                credentialType: 'TRUSTSTORE_CERT',
-                                userId: '',
-                                password:'',
-                                idpURI: $scope.certificateModal.trustStoreGroupId,
-                                idpType: idpType,
-                                allowAdd: false
-                            });
-                 $scope.processorCredProperties= $scope.processorCredProperties.slice();
-                 block.unblockUI();
-                
-            }
-            $scope.removeCertificateDetails = function() {
-                for(var i = ($scope.processorCredProperties.length - 1); i >= 0; i--) {
-                     var cred = $scope.processorCredProperties[i];
-                    if((cred.credentialType == 'TRUSTSTORE_CERT')) {
-                        $scope.processorCredProperties.splice(i, 1);
-                    }
-                }
-               
-            }
-
-            $scope.addSSHKeyDetails = function() {
-                 $scope.removeSSHKeyDetails();
-                 $scope.processorCredProperties.splice(0,0,{
-                    credentialURI: $scope.sshkeyModal.sshPrivateKeyURI,
-                    credentialType: 'SSH_KEYPAIR',
-                    userId: '',
-                    password: '',
-                    idpURI: $scope.sshkeyModal.sshKeyPairPguid,
-                    idpType: 'PRIVATE',
-                    allowAdd: false
-                }, {
-                    credentialURI: $scope.sshkeyModal.sshPublicKeyURI,
-                    credentialType: 'SSH_KEYPAIR',
-                    userId: '',
-                    password: '',
-                    idpURI: $scope.sshkeyModal.sshKeyPairPguid,
-                    idpType: 'PUBLIC',
-                    allowAdd: false
-                });
-                $scope.processorCredProperties = $scope.processorCredProperties.slice();
-                if (!$scope.$$phase) {
-                    $scope.$apply();
-                };
-                block.unblockUI();
-            }
-            $scope.removeSSHKeyDetails = function () {
-                for(var i = ($scope.processorCredProperties.length - 1); i >= 0; i--) {
-                    var cred = $scope.processorCredProperties[i];
-                    if((cred.credentialType == 'SSH_KEYPAIR')) {
-                        $scope.processorCredProperties.splice(i, 1);
-                    }
-                }
-              }
-            
-             $scope.deleteCertificateCredential = function() {			
-  			   $scope.certificateModal.certificateURI = "";
-               $scope.certificateModal.certificates = '';
-               $scope.certificateModal.isGlobalTrustore = "1";
-               $scope.certificateModal.trustStoreGroupId = '';
-               $scope.resetFiles();
-               $scope.removeCertificateDetails();
-  			}
-             $scope.deleteSSHKeyCredential = function() {			
-  			   $scope.sshkeyModal.sshKeyPairPguid = "";
-               $scope.sshkeyModal.sshPrivateKeyURI = "";
-               $scope.sshkeyModal.sshPublicKeyURI = "";
-               $scope.sshkeyModal.sshKeyPairPassphrase = "";
-               $scope.sshkeyModal.sshKeyPairConfirmPassphrase = "";
-               $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshpublickeyAdd"));
-               $scope.resetSSHKeys(document.getElementById("mbx-procsr-sshprivatekeyAdd"));
-               $scope.removeSSHKeyDetails();
-  			}
-            
-            $scope.resetProcessorCredentialDetails = function() {
-                  $scope.processorCredProperties = [{
-                    credentialURI: '',
-                    credentialType: '',
-                    userId: '',
-                    password: '',
-                    idpType: '',
-                    idpURI: '',
-                    allowAdd: 'true',
-                    passwordDirtyState: ''
-                }];    
-            }
-            $scope.resetCredentialModal = function() {
-                    $scope.certificateModal = {
-                    "certificates": '',
-                    "certificateURI": '',
-                    "isGlobalTrustore": '1',
-                    "trustStoreGroupId": ''
-                };
-                
-                $scope.sshkeyModal = {
-                    "sshKeys": '',
-                    "sshPrivateKeyURI": '',
-                    "sshPublicKeyURI": '',
-                    "sshKeyPairPguid": '',
-                    "sshKeyPairPassphrase":'',
-                    "sshKeyPairConfirmPassphrase":''
-                };
-                formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
-                $scope.isPrivateKeySelected = false;
-                $scope.isPublicKeySelected = false;
-            }
-            $scope.confirmPasswordColor = function () {		
-  			  if (typeof($scope.sshkeyModal.sshKeyPairConfirmPassphrase) === 'undefined' || $scope.sshkeyModal.sshKeyPairConfirmPassphrase === '') {
-  				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';	 	
-  			  } else if ($scope.sshkeyModal.sshKeyPairPassphrase === $scope.sshkeyModal.sshKeyPairConfirmPassphrase) {
-  				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '#78FA89';	
-  			  }	else {
-  				formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '#FA787E';
-  			  }
-           }
-		   
+			};            
 		   //whenever selection change in choose a file
 			$scope.$watch('currentNode.roleName', function () {
 				if(typeof ($scope.currentNode) !== 'undefined') {
@@ -1438,10 +835,10 @@ var rest = myApp.controller(
 			$scope.onScriptTypeSelected = function () {				  
 				  $scope.editScripTemplatetName = $scope.modal.uri;
 				  if ($scope.modal.uri) {	
-                      block.blockUI();			  
+                      $scope.block.blockUI();			  
 					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.trimScriptTemplateName(),
 					  function (data, status) { 
-                         block.unblockUI();
+                         $scope.block.unblockUI();
                         if (status === 200 || status === 400) {
 							if (data.scriptserviceResponse.response.status === 'success') {
 								 $scope.scriptIsEdit = true;					
@@ -1475,14 +872,15 @@ var rest = myApp.controller(
 				  $scope.selectedProcessorType = proceesorType.value;
 				  $scope.initialSetUp();			  
 				if ($scope.selectedProcessorType === 'SWEEPER') {
-					$scope.isProcessorTypeSweeper = true;
-					$scope.isProcessorTypeHTTPListener = false;
-					$scope.isProcessorTypeFileWriter = false;
-					$scope.isProcessorTypeDropbox = false;
-					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
-					$rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
-					  $scope.separateProperties(data.processorDefinition.staticProperties);
-					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);					
+                    $scope.isProcessorTypeSweeper = true;
+                    $scope.isProcessorTypeHTTPListener = false;
+                    $scope.isProcessorTypeFileWriter = false;
+                    $scope.isProcessorTypeDropbox = false;
+                    $scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options,$scope.selectedProcessorType)];
+                    $rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
+                    $scope.separateProperties(data.processorDefinition.staticProperties);
+                    $scope.separateFolderProperties(data.processorDefinition.folderProperties);	
+                    $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});	
 				} else if ($scope.selectedProcessorType === 'HTTPSYNCPROCESSOR' || $scope.selectedProcessorType === 'HTTPASYNCPROCESSOR') {
 					$scope.isProcessorTypeSweeper = false;
@@ -1492,6 +890,7 @@ var rest = myApp.controller(
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
+                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});	
 				} else if ($scope.selectedProcessorType === 'FILEWRITER') {
 					$scope.isProcessorTypeSweeper = false;
@@ -1501,6 +900,7 @@ var rest = myApp.controller(
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];					
 				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {				  
 					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});	
 				} else if ($scope.selectedProcessorType === 'DROPBOXPROCESSOR') {
 					$scope.isProcessorTypeSweeper = false;
@@ -1509,14 +909,13 @@ var rest = myApp.controller(
 					$scope.isProcessorTypeDropbox = true;
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/dropboxProcessor.json', function (data) {					
-					  $scope.separateProperties(data.processorDefinition.staticProperties);					  
+					  $scope.separateProperties(data.processorDefinition.staticProperties);		
+                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});	
 				} else  {
 					$scope.resetProtocol($scope.processor.protocol);
 				} 
-                // function to clear the credential details if protocol is changed
-                $scope.resetProcessorCredentialDetails();
-                $scope.resetCredentialModal();                         		
+                $scope.$broadcast("resetCredentialSection");
 			};
 			$scope.resetProtocol = function(potocolType) {
 			
@@ -1536,21 +935,25 @@ var rest = myApp.controller(
 					    $rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
 						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
 				       });	
 					 } else if (protocalName == 'FTP') {
 					    $rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
 							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                              $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
 						});
 					 } else if (protocalName == 'FTPS') {
 					    $rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
 							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                              $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
 						});
 					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
 					    $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {				        
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
 						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
 						});
 					 }			  			
 				} else if ($scope.selectedProcessorType == 'REMOTEUPLOADER') {					
@@ -1558,21 +961,25 @@ var rest = myApp.controller(
 					    $rootScope.restService.get('data/processor/properties/sftpuploader.json', function (data) {				        
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
 						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
 				       });	
 					 } else if (protocalName == 'FTP') {
 					    $rootScope.restService.get('data/processor/properties/ftpuploader.json', function (data) {				        
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
 						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 						});
 					 } else if (protocalName == 'FTPS') {
 					    $rootScope.restService.get('data/processor/properties/ftpsuploader.json', function (data) {					       
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
 						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 						});
 					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
 					    $rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {					       
 						  $scope.separateProperties(data.processorDefinition.staticProperties);
 						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 						});
 					 }				 
 				}
@@ -1582,7 +989,8 @@ var rest = myApp.controller(
      			} else {
 					$scope.disableCertificates = true;
  				}
-                $scope.disableSSHKeys = (protocalName === "SFTP")?false:true; 				
+                $scope.disableSSHKeys = (protocalName === "SFTP")?false:true; 
+                $scope.$broadcast("resetCredentialSection");				
 			};			
 			
             $scope.separateProperties = function(jsonProperties) {
@@ -1793,7 +1201,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
    //CREATE NEW SCRIPT FILE IN GIT.     
 	$scope.saveScript = function() {
 		
-		 block.blockUI();
+		 $scope.block.blockUI();
 		 $scope.createFileRequest = {
 	  			scriptserviceRequest: {
 	  				script : {
@@ -1813,13 +1221,13 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
       
          $scope.restService.post($scope.base_url + "/git/content", $filter("json")($scope.createFileRequest), function() {} )
          .success(function (data) {
-        	block.unblockUI(); 
+        	$scope.block.unblockUI(); 
         		$scope.$parent.scriptIsEdit = true;
         		$scope.$parent.script = $scope.scriptContents;
 			    showSaveMessage(data.scriptserviceResponse.response.message, 'success');
          })
          .error(function(data) { 
-        	block.unblockUI();
+        	$scope.block.unblockUI();
         	if (angular.isObject(data)) {
         		if (!$scope.$parent.scriptIsEdit) {
    				 $scope.$parent.scriptIsEdit = false;				
@@ -1838,7 +1246,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 	//UPDATE EXIT SCRIPT FILE IN GIT. 
 	 $scope.editScript = function() {
 			
-	    	block.blockUI();
+	    	$scope.block.blockUI();
 	    	$scope.editFileRequest = {
 	    			scriptserviceRequest: {
 	    				script : {
@@ -1858,13 +1266,13 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
 
 	         $scope.restService.put($scope.base_url + "/git/content", $filter("json")($scope.editFileRequest), function() {} )
 	            .success(function (data) {     
-	            	block.unblockUI(); 
+	            	$scope.block.unblockUI(); 
 	            		$scope.$parent.scriptIsEdit = true;
 	            		$scope.$parent.script = $scope.scriptContents;
 					    showSaveMessage(data.scriptserviceResponse.response.message, 'success');					
 	            })
 	            .error(function(data) {
-	            	block.unblockUI();
+	            	$scope.block.unblockUI();
 	            	if (angular.isObject(data)) {
 	            	    showSaveMessage(data.scriptserviceResponse.response.message, 'error');
 	            	} else {

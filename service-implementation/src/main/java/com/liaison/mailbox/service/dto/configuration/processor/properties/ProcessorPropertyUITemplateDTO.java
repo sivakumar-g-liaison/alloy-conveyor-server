@@ -27,6 +27,7 @@ public class ProcessorPropertyUITemplateDTO {
 	private boolean handOverExecutionToJavaScript;
 	private List<ProcessorPropertyDTO> staticProperties;
 	private List<ProcessorFolderPropertyDTO> folderProperties;
+	private List<ProcessorCredentialPropertyDTO> credentialProperties;
 
 
 	public List<ProcessorFolderPropertyDTO> getFolderProperties() {
@@ -66,5 +67,11 @@ public class ProcessorPropertyUITemplateDTO {
 	public void setStaticProperties(List<ProcessorPropertyDTO> staticProperties) {
 		this.staticProperties = staticProperties;
 	}
+    public List<ProcessorCredentialPropertyDTO> getCredentialProperties() {
+        return credentialProperties;
+    }
+    public void setCredentialProperties(List<ProcessorCredentialPropertyDTO> credentialProperties) {
+        this.credentialProperties = credentialProperties;
+    }
 
 }

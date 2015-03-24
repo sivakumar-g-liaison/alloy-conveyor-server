@@ -38,6 +38,7 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
@@ -397,8 +398,8 @@ public class DropboxIntegrationServiceTest extends BaseServiceTest {
 
 		ProcessorDTO processorDTO = new ProcessorDTO();
 
-		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
-		processorDTO.setCredentials(credetnialList);
+		List<ProcessorCredentialPropertyDTO> credetnialList = new ArrayList<ProcessorCredentialPropertyDTO>();
+		processorDTO.getProcessorPropertiesInTemplateJson().setCredentialProperties(credetnialList);
 
 		List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
 		processorDTO.setProcessorPropertiesInTemplateJson(new ProcessorPropertyUITemplateDTO());

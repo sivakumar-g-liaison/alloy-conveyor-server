@@ -256,6 +256,18 @@
 				   "maxLength": "250"
 			  }    
 		  }
+	   ],
+	   "credentialProperties":[
+	   		{
+	            "credentialURI": "",
+	            "credentialType": "LOGIN_CREDENTIAL",
+	            "credentialDisplayType": "Login Credential",
+	            "userId": "",
+	            "password": "",
+	            "idpType": "",
+	            "idpURI": "",
+	            "valueProvided": false
+	        }
 	   ]
    }
 }

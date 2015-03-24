@@ -109,26 +109,26 @@ angular.module(
 						if (url !== '' && $rootScope.inputPatternForURL.test(url)) {
 
 							var port = url.split('/')[2].split(':')[1];
-							for (i = 0; i < scope.$parent.$parent.propertiesAddedToProcessor.length; i++) {
-								if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
+							for (var i = 0; i < scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor.length; i++) {
+								if (scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
 									if ($rootScope.inputPatternForPort.test(port)) {
-										scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = true;
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = true;
 									} else {
-										scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
 									}
 									if (typeof port !== 'undefined' && port !== '') {
-										scope.$parent.$parent.propertiesAddedToProcessor[i].value = port;
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = port;
 									} else {
-										scope.$parent.$parent.defaultPortValue();
-										scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
+										scope.$parent.$parent.$parent.$parent.defaultPortValue();
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
 									}
-									if(port === '') scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
+									if(port === '') scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
 								}
 							}
 						} else {
-							for(i = 0; i < scope.$parent.$parent.propertiesAddedToProcessor.length; i++) {
-								if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
-									scope.$parent.$parent.propertiesAddedToProcessor[i].value = '';	
+							for(var i = 0; i < scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor.length; i++) {
+								if (scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
+									scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = '';	
                                     //scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;						
 								}
 							}
@@ -142,28 +142,28 @@ angular.module(
 					   if(typeof url !== 'undefined') {
 							var ip = url.split('/')[2].split(':')[0];
 							var port = url.split('/')[2].split(':')[1]; 
-							 for(i = 0; i < scope.$parent.$parent.propertiesAddedToProcessor.length; i++) {
-								if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
+							 for(i = 0; i < scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor.length; i++) {
+								if (scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
 									if ($rootScope.inputPatternForPort.test(port)) {										
-										scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = true;
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = true;
 									} else {
-									  scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;										    
+									  scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;										    
 									}
 									if (typeof port !== 'undefined' && port !== '') {
-										scope.$parent.$parent.propertiesAddedToProcessor[i].value = port;
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = port;
 									} else {
 										scope.defaultPortValue();
-										scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;	
+										scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;	
 									}
 									if(port === '') scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;
 							   }
 							}
 						} else {
-							for(i = 0; i < scope.$parent.$parent.propertiesAddedToProcessor.length; i++) {
-								if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
-									scope.$parent.$parent.propertiesAddedToProcessor[i].value = '';
+							for(var i = 0; i < scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor.length; i++) {
+								if (scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {
+									scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = '';
 									scope.defaultPortValue();
-									scope.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;	
+									scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].readOnly = false;	
 							   }
 							}
 						}
@@ -172,17 +172,17 @@ angular.module(
 				   //Load default Port Value for required protocal
                    scope.defaultPortValue = function() {
 					
-						for (i = 0; i < scope.$parent.$parent.propertiesAddedToProcessor.length; i++) {							
-							if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {								
-								if (scope.$parent.$parent.processor.protocol.value === "FTP") {
-									scope.$parent.$parent.propertiesAddedToProcessor[i].value = scope.ftpDefaultPort;
-								} else if (scope.$parent.$parent.processor.protocol.value === "SFTP") {
-									scope.$parent.$parent.propertiesAddedToProcessor[i].value = scope.sftpDefaultPort;
-								} else if (scope.$parent.$parent.processor.protocol.value === "FTPS") {
-									scope.$parent.$parent.propertiesAddedToProcessor[i].value = scope.ftpsDefaultPort;
+						for (var i = 0; i < scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor.length; i++) {							
+							if (scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].name === 'port') {								
+								if (scope.$parent.$parent.$parent.$parent.processor.protocol.value === "FTP") {
+									scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = scope.ftpDefaultPort;
+								} else if (scope.$parent.$parent.$parent.$parent.processor.protocol.value === "SFTP") {
+									scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = scope.sftpDefaultPort;
+								} else if (scope.$parent.$parent.$parent.$parent.processor.protocol.value === "FTPS") {
+									scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = scope.ftpsDefaultPort;
 								} 
-							} else if (scope.$parent.$parent.propertiesAddedToProcessor[i].name === 'httpVersion') {
-								scope.$parent.$parent.propertiesAddedToProcessor[i].value = scope.httpDefaultVersion;
+							} else if (scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].name === 'httpVersion') {
+								scope.$parent.$parent.$parent.$parent.propertiesAddedToProcessor[i].value = scope.httpDefaultVersion;
 							}
 						}
 					}				    				   

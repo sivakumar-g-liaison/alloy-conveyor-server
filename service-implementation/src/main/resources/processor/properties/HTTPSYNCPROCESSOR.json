@@ -45,6 +45,8 @@
             "validationRules": null,
             "options":["false","true"]          
         }
-    ]
+    ],
+    "folderProperties":[],
+    "credentialProperties":[]
   }
 }

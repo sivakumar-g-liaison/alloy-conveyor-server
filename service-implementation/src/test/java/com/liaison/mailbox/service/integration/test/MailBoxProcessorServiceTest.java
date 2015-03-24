@@ -36,6 +36,7 @@ import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
@@ -1134,16 +1135,15 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 			JsonGenerationException,
 			MalformedURLException, FileNotFoundException, JAXBException, IOException, LiaisonException {
 
-		List<CredentialDTO> credetnialList = new ArrayList<CredentialDTO>();
+		List<ProcessorCredentialPropertyDTO> credetnialList = new ArrayList<ProcessorCredentialPropertyDTO>();
 		List<ProcessorFolderPropertyDTO> folderList = new ArrayList<ProcessorFolderPropertyDTO>();
 		ProcessorFolderPropertyDTO folderPropertyDto = new ProcessorFolderPropertyDTO();
 		folderPropertyDto.setFolderType(folderTye);
 		folderPropertyDto.setFolderURI(folderURI);
 		folderPropertyDto.setFolderDesc("someDesc");
-		folderList.add(folderPropertyDto);
 
 		ProcessorDTO processorDTO = new ProcessorDTO();
-		processorDTO.setCredentials(credetnialList);
+		processorDTO.getProcessorPropertiesInTemplateJson().setCredentialProperties(credetnialList);
 
 		processorDTO.setProcessorPropertiesInTemplateJson(new ProcessorPropertyUITemplateDTO());
 		processorDTO.getProcessorPropertiesInTemplateJson().setFolderProperties(folderList);
