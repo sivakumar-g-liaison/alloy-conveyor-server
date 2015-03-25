@@ -169,11 +169,6 @@ public class ProcessorConfigurationService {
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
 
-			if (null != processorDTO.getCredentials()) {
-				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
-					validator.validate(credentialDTO);
-				}
-			}
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
 			if (serviceInstance == null) {
@@ -549,12 +544,6 @@ public class ProcessorConfigurationService {
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
-
-			if (null != processorDTO.getCredentials()) {
-				for (CredentialDTO credentialDTO : processorDTO.getCredentials()) {
-					validator.validate(credentialDTO);
-				}
-			}
 
 			// validates the processor type
 			ProcessorType foundProcessorType = ProcessorType.findByName(processorDTO.getType());

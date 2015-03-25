@@ -45,6 +45,8 @@
         "defaultValue":"",
         "validationRules": null            
       }
-    ]
+    ],
+    "folderProperties" : [],
+	"credentialProperties":[]
   }
 }

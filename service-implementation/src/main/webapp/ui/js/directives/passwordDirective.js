@@ -16,8 +16,8 @@ angular.module(
 
                     rowEntity: '=',
                     colFiled: '=',
-                    password: '@'                    
-                },
+                    password: '@',
+                 },
                 template: '<div><input type="password"  ng-model="password" ng-input="password" ng-change="showConfirmBox()" class="textboxingrid" />\n\
                                 <label ng-show=showconfirmpassword >{{matchString}}</label> \n\
                                 \n\

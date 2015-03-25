@@ -256,5 +256,15 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_LOCAL_PAYLOAD_LOCATION_DISPLAYTYPE = "Local Payload Location";
 	public static final String PROPERTY_REMOTE_TARGET_LOCATION_DISPLAYTYPE = "Remote Target Location";
 	public static final String PROPERTY_REMOTE_PAYLOAD_LOCATION_DISPLAYTYPE = "Remote Payload Location";
+	
+	//Credential Properties
+	public static final String PROPERTY_LOGIN_CREDENTIAL_DISPLAY_TYPE = "Login Credential";
+	public static final String PROPERTY_TRUSTORE_DISPLAY_TYPE = "Trustore Certificate";
+	public static final String PROPERTY_SSH_PRIVATE_KEY_DISPLAY_TYPE = "SSH Private Key";
+	public static final String PROPERTY_SSH_PUBLIC_KEY_DISPLAY_TYPE = "SSH Public Key";
+	
+	public static final String PROPERTY_LOGIN_CREDENTIAL = "LOGIN_CREDENTIAL";
+    public static final String PROPERTY_TRUSTORE = "TRUSTSTORE_CERT";
+    public static final String PROPERTY_SSH_KEYPAIR = "SSH_KEYPAIR";
 
 }

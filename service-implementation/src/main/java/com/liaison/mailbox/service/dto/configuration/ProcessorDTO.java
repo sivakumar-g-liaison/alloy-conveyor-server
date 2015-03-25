@@ -29,6 +29,7 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Protocol;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
@@ -38,6 +39,7 @@ import com.liaison.mailbox.service.util.JSONUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.DataValidation;
+import com.liaison.mailbox.service.validation.GenericValidator;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
@@ -64,7 +66,6 @@ public class ProcessorDTO {
 	@ApiModelProperty( value = "Mailbox id", required = true)
 	private String linkedMailboxId;
 	private List<String> linkedProfiles;
-	private List<CredentialDTO> credentials;
 	private List<ProfileDTO> profiles;
 
 	public ProcessorDTO() {
@@ -142,17 +143,6 @@ public class ProcessorDTO {
 		this.linkedMailboxId = linkedMailboxId;
 	}
 
-	public List<CredentialDTO> getCredentials() {
-		if (credentials == null) {
-			credentials = new ArrayList<CredentialDTO>();
-		}
-		return credentials;
-	}
-
-	public void setCredentials(List<CredentialDTO> credentials) {
-		this.credentials = credentials;
-	}
-
 	public List<String> getLinkedProfiles() {
 		return linkedProfiles;
 	}
@@ -217,11 +207,6 @@ public class ProcessorDTO {
 		// separate static and dynamic and folder properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
-		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
-
-		//Construct FOLDER DTO LIST
-		List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
-		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
 
 		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.getProcessorSpecificStaticPropsFrmTemplt(staticPropertiesDTO, processor, isCreate);
 
@@ -234,12 +219,21 @@ public class ProcessorDTO {
 		processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrName(this.getName());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
+		
+		GenericValidator validator = new GenericValidator();
+		
+		// handling of folder properties
+		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
+    
+        //Construct FOLDER DTO LIST
+        List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
+        ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
 
 		// Setting the folders.
 		Folder folder = null;
 		List<Folder> folders = new ArrayList<>();
 		for (FolderDTO folderDTO : folderDTOList) {
-
+		    
 			folder = new Folder();
 			folderDTO.copyToEntity(folder);
 
@@ -250,12 +244,19 @@ public class ProcessorDTO {
 		if (!folders.isEmpty()) {
 			processor.setFolders(folders);
 		}
+		
+		// handling of credential properties
+		List<ProcessorCredentialPropertyDTO> credentialTemplateDTOList = propertiesDTO.getCredentialProperties();
+		
+		// construct credentialDTO from credentialPropertyDTO in template json
+		List <CredentialDTO> credentialDTOList = ProcessorPropertyJsonMapper.getCredentialProperties(credentialTemplateDTOList);
 
 		// Setting the credentials
 		Credential credential = null;
 		List<Credential> credentialList = new ArrayList<>();
-		for (CredentialDTO credentialDTO : this.getCredentials()) {
-
+		for (CredentialDTO credentialDTO : credentialDTOList) {
+		    
+		    validator.validate(credentialDTO);
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
 			credential.setPguid(MailBoxUtil.getGUID());
@@ -321,17 +322,6 @@ public class ProcessorDTO {
 		this.setType(processor.getProcessorType().name());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 		this.setName(processor.getProcsrName());
-
-		// Set credentials
-		if (null != processor.getCredentials()) {
-
-			CredentialDTO credentialDTO = null;
-			for (Credential credential : processor.getCredentials()) {
-				credentialDTO = new CredentialDTO();
-				credentialDTO.copyFromEntity(credential);
-				this.getCredentials().add(credentialDTO);
-			}
-		}
 
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		// Set protocol
