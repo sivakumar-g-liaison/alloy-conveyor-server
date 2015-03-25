@@ -284,6 +284,12 @@ var rest = myApp.controller(
                 } else {
                     $scope.isProcessorTypeDropbox = false;
                 }
+                
+                if ($scope.processor.protocol.value === 'SWEEPER') {
+                    $scope.isProcessorTypeSweeper = true;
+                } else {
+                    $scope.isProcessorTypeSweeper = false;
+                }
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
 					$scope.disableCertificates = false;	

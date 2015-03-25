@@ -1002,15 +1002,23 @@ public class ProcessorPropertyJsonMapper {
 
         List<ProcessorCredentialPropertyDTO> processorCredentialProperties = new ArrayList<ProcessorCredentialPropertyDTO>();
         ProcessorCredentialPropertyDTO credentialPropertyTemplate = null;
+        boolean isLoginCredentialsAvailable = false;
         if (null != processor.getCredentials()) {
 
             for (Credential credential : processor.getCredentials()) {
 
+                if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.LOGIN_CREDENTIAL))
+                    isLoginCredentialsAvailable = true;
                 credentialPropertyTemplate = new ProcessorCredentialPropertyDTO();
                 handleCredentialProperties(credentialPropertyTemplate, credential);
                 processorCredentialProperties.add(credentialPropertyTemplate);
             }
-            if (processorCredentialProperties.size() > 0) propertiesJsonTemplate.setCredentialProperties(processorCredentialProperties);
+            // if Login Credential is not available then Login Credential from
+            // template JSON has to be added
+            if (!isLoginCredentialsAvailable)
+                processorCredentialProperties.addAll(propertiesJsonTemplate.getCredentialProperties());
+            if (processorCredentialProperties.size() > 0)
+                propertiesJsonTemplate.setCredentialProperties(processorCredentialProperties);
         }
     }
 }
