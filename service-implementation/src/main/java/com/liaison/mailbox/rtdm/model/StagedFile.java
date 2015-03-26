@@ -199,7 +199,7 @@ public class StagedFile implements Identifiable {
 		this.setMailboxId(stagedFileDto.getMailboxGuid());
 		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
 		this.setFileMetaData(stagedFileDto.getMeta());
-		MailBoxStatus status = MailBoxStatus.findByCode(stagedFileDto.getStatus());
+		MailBoxStatus status =MailBoxUtil.isEmpty(stagedFileDto.getStatus())?MailBoxStatus.ACTIVE: MailBoxStatus.findByCode(stagedFileDto.getStatus());
 		this.setStagedFileStatus(status.name());
 		this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
 	}

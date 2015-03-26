@@ -65,7 +65,7 @@ public class DropboxStagedFilesService {
 	 * @throws JAXBException
 	 */
 	public GetStagedFilesResponseDTO getStagedFiles(String aclManifest, String fileName, String page, String pageSize,
-			String sortField, String sortDirection) throws IOException, JAXBException {
+			String sortField, String sortDirection,String status) throws IOException, JAXBException {
 
 		LOG.debug("Entering into get staged files service.");
 
@@ -106,12 +106,12 @@ public class DropboxStagedFilesService {
 
 		// retrieve searched staged files of mailboxes.
 		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
-		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, fileName);
+		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, fileName,status);
 		pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
 		startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
 		count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 		serviceResponse.setTotalItems(totalCount);
-		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, fileName, startOffset, count, sortField, sortDirection);
+		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, fileName, startOffset, count, sortField, sortDirection,status);
 
 		if (stagedFiles.isEmpty()) {
 			LOG.info("There are no staged files available for linked mailboxes");

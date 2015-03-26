@@ -147,7 +147,8 @@ public class DropboxFileStagedResource extends AuditedResource {
 			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
 			@QueryParam(value = "pageSize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
 			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
-			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection) {
+			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
+			@QueryParam(value = "status") @ApiParam(name = "status", required = false, value = "Status of staged file") final String status) {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
@@ -202,7 +203,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 					// getting staged files based on manifest
 					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService
-							.getStagedFiles(manifestResponse.getManifest(), stageFileName, page, pageSize, sortField, sortDirection);
+							.getStagedFiles(manifestResponse.getManifest(), stageFileName, page, pageSize, sortField, sortDirection,status);
 					getStagedFilesResponseDTO.setHitCounter(hitCounter);
 					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 

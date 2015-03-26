@@ -28,6 +28,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	
 	public static final String CURRENT_TIME = "current_time";
 	
+	public static final String STATUS = "status";
+	
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
 	 * 
@@ -35,7 +37,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	 * @return list of stagedFiles
 	 */
 	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
-			int pagingCount, String sortField, String sortDirection);
+			int pagingCount, String sortField, String sortDirection,String status);
 	public List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
-	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName);
+	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
 }

@@ -20,7 +20,9 @@ import javax.persistence.EntityManager;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
@@ -39,7 +41,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	 */
 	@Override
 	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
-			int pagingCount, String sortField, String sortDirection) {
+			int pagingCount, String sortField, String sortDirection,String status) {
 
 		List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
@@ -49,7 +51,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
 					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
-					.append(" and sf.expirationTime > :"+ CURRENT_TIME);
+					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
+					.append(" and sf.stagedFileStatus = :"+ STATUS);
 			
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
 				sortDirection = sortDirection.toUpperCase();
@@ -62,6 +65,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
 				    .setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
+				    .setParameter(STATUS,(MailBoxUtil.isEmpty(status)?MailBoxStatus.ACTIVE.name():status.toUpperCase()))
 					.setFirstResult(pagingOffset)
 					.setMaxResults(pagingCount)
 					.getResultList();
@@ -123,7 +127,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	 * 
 	 */
 	@Override
-	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName) {
+	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		Long totalItems = null;
@@ -134,12 +138,14 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
 					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
-					.append(" and sf.expirationTime > :"+ CURRENT_TIME);
+					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
+					.append(" and sf.stagedFileStatus = :"+ STATUS);
 			
 			totalItems = (Long)entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
 					.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
+					.setParameter(STATUS,(MailBoxUtil.isEmpty(status)?MailBoxStatus.ACTIVE.name():status.toUpperCase()))
 					.getSingleResult();
 			
 			count = totalItems.intValue();
