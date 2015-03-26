@@ -418,7 +418,7 @@ myApp.controller(
                      return;
                 }
                 
-                if (credObj.credentialType === "LOGIN_CREDENTIAL" && ((credObj.userId === "" || credObj.userId === null || typeof credObj.userId === 'undefined') || (credObj.password === "" || credObj.password === null || typeof credObj.password === 'undefined' && (credObj.credentialType !== "SSH_KEYPAIR")))) {
+                if (credObj.credentialType === "LOGIN_CREDENTIAL" && $scope.$parent.processorCredProperties.length !== 3 && ((credObj.userId === "" || credObj.userId === null || typeof credObj.userId === 'undefined') || (credObj.password === "" || credObj.password === null || typeof credObj.password === 'undefined'))) {
                     showAlert ('It is mandatory to provide userId and password', 'error');
                     return;
                 }
