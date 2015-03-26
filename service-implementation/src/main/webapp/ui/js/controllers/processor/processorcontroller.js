@@ -7,12 +7,22 @@ var rest = myApp.controller(
 			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;
             $scope.isJavaScriptExecution = false;
+            $scope.isCreateConfiguredLocation = true;
             //check JavaScriptExecutor
             $scope.onChangeJavaScriptExecutor = function () {            	
             	if ($scope.isJavaScriptExecution) {            		
             		$scope.isJavaScriptExecution = false;
             	} else {            		
             		$scope.isJavaScriptExecution = true;
+            	} 	            	
+            }
+            
+            //check Create Configure Payload Location or not 
+            $scope.onChangeCreateConfiguredLocation = function () {            	
+            	if ($scope.isCreateConfiguredLocation) {            		
+            		$scope.isCreateConfiguredLocation = false;
+            	} else {            		
+            		$scope.isCreateConfiguredLocation = true;
             	} 	            	
             }
             
@@ -149,6 +159,7 @@ var rest = myApp.controller(
 				$scope.script = '';
 			    $scope.scriptIsEdit = false; 
 				$scope.isJavaScriptExecution = false;
+				$scope.isCreateConfiguredLocation = true;
                 // to disable protocol for http listener processor
                 $scope.isProcessorTypeHTTPListener = false;
                 // to disable protocol for file writer
@@ -178,6 +189,7 @@ var rest = myApp.controller(
                     javaScriptURI: "",
                     description: "",
                     status: "",
+                    createConfiguredLocation: true,
                     protocol: "",
                     linkedMailboxId: "",
                     linkedProfiles: [],
@@ -1330,8 +1342,7 @@ var rest = myApp.controller(
 				}
 				
 				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;
-				
-				
+								
 				$scope.processor.description = data.getProcessorResponse.processor.description;				
 				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
 				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);
@@ -1745,7 +1756,7 @@ var rest = myApp.controller(
 						$scope.scriptIsEdit = true;
 						}
 						
-						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;					
+						$scope.isJavaScriptExecution = data.getProcessorResponse.processor.remoteProcessorProperties.handOverExecutionToJavaScript;
 						
                         //Fix: Reading profile in procsr callback
                         $scope.restService.get($scope.base_url + '/profile', //Get mail box Data
@@ -2246,6 +2257,7 @@ var rest = myApp.controller(
                 }
                 $scope.processor.javaScriptURI = $scope.trimScriptTemplateName();
                 $scope.processor.remoteProcessorProperties["handOverExecutionToJavaScript"] = $scope.isJavaScriptExecution;
+                
 				$scope.scriptIsEdit = false;
 				if ($scope.processor.javaScriptURI != null && 
 						$scope.processor.javaScriptURI != "") {
@@ -2258,6 +2270,7 @@ var rest = myApp.controller(
 					$scope.appendPortToUrl();
                     editRequest.reviseProcessorRequest.processor.status = $scope.status.id;
                     editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.id;
+                    editRequest.reviseProcessorRequest.processor.createConfiguredLocation = $scope.isCreateConfiguredLocation;
 					
 						var reviseProcessor = false;
 						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.credentials.length; i++) {
@@ -2291,6 +2304,8 @@ var rest = myApp.controller(
 					$scope.appendPortToUrl();
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.id;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.id;
+                    addRequest.addProcessorToMailBoxRequest.processor.createConfiguredLocation = $scope.isCreateConfiguredLocation;
+                    
 					
 						var saveProcessor = false;
 						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.credentials.length; i++) {
@@ -2449,6 +2464,7 @@ var rest = myApp.controller(
 				    $scope.script = '';
 			        $scope.scriptIsEdit = false; 	
                     $scope.isJavaScriptExecution = false;
+                    $scope.isCreateConfiguredLocation = true;
                     $scope.formAddPrcsr.scriptName.$setValidity('allowed', true);
                     formAddPrcsr.sshkeyconfirmpassphrase.style.backgroundColor = '';
                      // To reset the values in the file browser window

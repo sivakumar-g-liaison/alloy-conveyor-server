@@ -63,11 +63,13 @@ public class ProcessorDTO {
 	private List<CredentialDTO> credentials;
 	private List<PropertyDTO> dynamicProperties;
 	private List<ProfileDTO> profiles;
+	private boolean createConfiguredLocation;	
+	
 
 	public ProcessorDTO() {
 		super();
 	}
-
+	
 	public String getGuid() {
 		return guid;
 	}
@@ -200,6 +202,15 @@ public class ProcessorDTO {
 	public void setRemoteProcessorProperties(RemoteProcessorPropertiesDTO remoteProcessorProperties) {
 		this.remoteProcessorProperties = remoteProcessorProperties;
 	}
+	
+	public boolean isCreateConfiguredLocation() {
+		return createConfiguredLocation;
+	}
+
+	public void setCreateConfiguredLocation(boolean createConfiguredLocation) {
+		this.createConfiguredLocation = createConfiguredLocation;
+	}
+
 
 	/**
 	 * Method is used to copy the values from DTO to Entity. It does not create relationship between

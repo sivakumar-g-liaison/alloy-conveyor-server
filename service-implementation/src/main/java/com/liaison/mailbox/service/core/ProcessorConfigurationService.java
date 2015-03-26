@@ -12,9 +12,8 @@ package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,18 +35,17 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -74,6 +72,7 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -83,6 +82,8 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
@@ -182,7 +183,15 @@ public class ProcessorConfigurationService {
 			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
 			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
 			serviceRequest.getProcessor().copyToEntity(processor, true);
-
+			
+			// check and create configured location
+			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
+			if (processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
+				checkAndCreateConfiguredLocation(processorDTO);
+			} else {
+				processorService.checkAndCreateConfiguredLocation(processorDTO);
+			}
+			
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
@@ -583,6 +592,14 @@ public class ProcessorConfigurationService {
 
 			// Copying the new details of the processor and merging.
 			processorDTO.copyToEntity(processor, false);
+			
+			// check and create configured location
+			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
+			if (processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
+				checkAndCreateConfiguredLocation(processorDTO);
+			} else {
+				processorService.checkAndCreateConfiguredLocation(processorDTO);
+			}
 
 			configDao.merge(processor);
 
@@ -891,6 +908,68 @@ public class ProcessorConfigurationService {
 		return httpListenerProperties;
 
 	}
+	
+	/**
+	 * This Method check and create configured location given by processorDTO.
+	 * 
+	 * @param processorDTO
+	 *            it have details of processor
+	 * @throws IOException
+	 */
+	public void checkAndCreateConfiguredLocation(ProcessorDTO processorDTO) {
+
+		String configuredPath = null;
+		try {
+
+			if (processorDTO.getFolders() != null) {
+
+				for (FolderDTO folderDTO : processorDTO.getFolders()) {
+
+					FolderType foundFolderType = FolderType.findByCode(folderDTO.getFolderType());
+					if (FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
+						configuredPath = getConfiguredPayloadPath(folderDTO.getFolderURI());
+						LOGGER.info("Retrieving  configured location from processor dto");
+					}
+				}
+
+				if (processorDTO.isCreateConfiguredLocation() && !MailBoxUtil.isEmpty(configuredPath)) {
+
+					File fileDirectory = new File(configuredPath);
+					if (!fileDirectory.exists()) {
+						Files.createDirectories(fileDirectory.toPath());
+						LOGGER.debug("checked and create configured location - {}", fileDirectory.toPath());
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,
+					configuredPath, Response.Status.BAD_REQUEST);
+		}
+
+	}
+		
+	/**
+	 * To Retrieve the Payload URI
+	 * 	
+	 * @param path
+	 * @return String
+	 *            The configured Path
+	 */
+	private String getConfiguredPayloadPath(String path) {
+
+		String configuredPath = null;
+
+		if (path != null && path.toUpperCase().contains(MailBoxConstants.MOUNT_LOCATION)) {
+			String mountLocationValue = MailBoxUtil.getEnvironmentProperties().getString("MOUNT_POINT");
+			configuredPath = path.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN, mountLocationValue);
+		} else {
+			return path;
+		}
+		LOGGER.info("The configured Path is" + configuredPath);
+		return configuredPath;
+	}
+
 	
 		
 }
