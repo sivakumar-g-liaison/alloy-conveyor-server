@@ -153,7 +153,8 @@ public class HttpListener extends AuditedResource {
 			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
-
+				GlassMessage glassMessage = new GlassMessage();
+				TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 				logger.debug("Starting sync processing");
 				try {
 					validateRequestSize(request);
@@ -175,9 +176,7 @@ public class HttpListener extends AuditedResource {
 
 					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
 
-					//GLASS LOGGING BEGINS//
-					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-					GlassMessage glassMessage = new GlassMessage();
+					//GLASS LOGGING BEGINS CORNER 1 //
 					glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
 					glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
@@ -190,10 +189,16 @@ public class HttpListener extends AuditedResource {
 
 					ResponseBuilder builder = Response.ok();
 					copyResponseInfo(request, httpResponse, builder);
-
+					
+					//GLASS LOGGING BEGINS CORNER 4 //
+					glassMessage.setStatus(ExecutionState.COMPLETED);
+					glassLogger.logToGlass(glassMessage);
+					//GLASS LOGGING BEGINS CORNER 4 //
 					return builder.build();
 				} catch (IOException | JAXBException e) {
-					logger.error(e.getMessage(), e);
+					logger.error(e.getMessage(), e);					
+					glassMessage.setStatus(ExecutionState.FAILED);
+					glassLogger.logToGlass(glassMessage);					
 					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}

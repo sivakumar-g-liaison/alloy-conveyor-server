@@ -30,20 +30,20 @@ export SYSLOG_ID="App"
 export SYSLOG_MESSAGE_ID="AUDIT"
 export SYSLOG_FACILITY="Local0"
  
-export GLASS_SPECTRUM_PORT=10010
-export GLASS_SPECTRUM_IP=192.168.0.67
-export GLASS_SPECTRUM_USER=g2seattle
-export GLASS_SPECTRUM_PASSWORD=g2seattle
-export GLASS_SPECTRUM_DATASPACE=g2-seattle
+export GLASS_SPECTRUM_PORT=80
+export GLASS_SPECTRUM_IP=at4u-vpspectrum.liaison.prod
+export GLASS_SPECTRUM_USER=g2
+export GLASS_SPECTRUM_PASSWORD=QkUn7VcnNLLb_2Kzt4gGpP6yV
+export GLASS_SPECTRUM_DATASPACE=03a85acc-babd-47c5-9599-53354c6fa52c
 export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
  
  
-export GLASS_METRIC_PORT=10010
-export GLASS_METRIC_IP=192.168.0.67
-export GLASS_METRIC_USER=g2tampere
-export GLASS_METRIC_PASSWORD=g2tampere
-export GLASS_METRIC_DATASPACE=g2-tampere
-export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
+export GLASS_METRIC_PORT=80
+export GLASS_METRIC_IP=at4u-vpspectrum.liaison.prod
+export GLASS_METRIC_USER=g2
+export GLASS_METRIC_PASSWORD=QkUn7VcnNLLb_2Kzt4gGpP6yV
+export GLASS_METRIC_DATASPACE=03a85acc-babd-47c5-9599-53354c6fa52c
+export GLASS_METRIC_DATAOBJECTNAME=g2-glass
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
 export GSA_LENS_IP=192.168.0.10
  
@@ -52,9 +52,9 @@ export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
+export LOGSTASHMACHINE=at4u-vplstash.liaison.prod
 export LOGSTASHPORT=4560
-export LOGSTASH_LOG_DIR=/tmp
+export LOGSTASH_LOG_DIR=/var/log/tomcat
 # ==================================================================
 # log overrides
 # ==================================================================

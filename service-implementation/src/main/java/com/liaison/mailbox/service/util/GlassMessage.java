@@ -31,7 +31,15 @@ public class GlassMessage {
     private String protocol;
     private String pipelineId;
     private GatewayType inAgent;
+    private GatewayType outAgent;
+    
+	public GatewayType getOutAgent() {
+		return outAgent;
+	}
 
+	public void setOutAgent(GatewayType outAgent) {
+		this.outAgent = outAgent;
+	}
 
 	public GatewayType getInAgent() {
 		return inAgent;

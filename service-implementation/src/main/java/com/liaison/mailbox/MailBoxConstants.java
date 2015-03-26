@@ -189,6 +189,16 @@ public interface MailBoxConstants {
 
 	// added for self signed truststore
 	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
+	
+	public static final String DEFAULT_FIRST_CORNER_NAME = "SECOND CORNER";
+	public static final String PROPERTY_FIRST_CORNER_NAME = "com.liaison.secondcorner.name";
+	public static final String DEFAULT_SECOND_CORNER_NAME = "SECOND CORNER";
+	public static final String PROPERTY_SECOND_CORNER_NAME = "com.liaison.secondcorner.name";
+	public static final String DEFAULT_THIRD_CORNER_NAME = "THIRD CORNER";
+	public static final String PROPERTY_THIRD_CORNER_NAME = "com.liaison.thirdcorner.name";
+	public static final String DEFAULT_FOURTH_CORNER_NAME = "FOURTH CORNER";
+	public static final String PROPERTY_FOURTH_CORNER_NAME = "com.liaison.fourthcorner.name";
+
 
 	// static properties
 	public static final String PROPERTY_URL = "url";

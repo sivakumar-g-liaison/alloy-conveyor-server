@@ -17,7 +17,6 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -402,3 +401,4 @@ public class StorageUtilities {
 		return fs2Header;
 	}
 }
+

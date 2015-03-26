@@ -189,7 +189,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 						if(inputLocation.contains("ftps")){
 							glassMessage.setInAgent(GatewayType.FTPS);
 						}if(inputLocation.contains("sftp")){
-							glassMessage.setInAgent(GatewayType.SSH);
+							glassMessage.setInAgent(GatewayType.SFTP);
 						}else if(inputLocation.contains("ftp")){
 							glassMessage.setInAgent(GatewayType.FTP);
 						}

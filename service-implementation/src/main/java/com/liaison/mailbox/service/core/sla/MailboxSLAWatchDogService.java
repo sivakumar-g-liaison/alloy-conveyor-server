@@ -42,6 +42,7 @@ import org.codehaus.jettison.json.JSONException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.queue.WorkTicket;
@@ -63,6 +64,7 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
@@ -83,7 +85,9 @@ import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponse
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * @author OFS
@@ -389,6 +393,26 @@ public class MailboxSLAWatchDogService {
 	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
 	        processorExecutionStateDAO.merge(processorExecutionState);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
+	        
+	      //GLASS LOGGING BEGINS//
+			TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+			GlassMessage glassMessage = new GlassMessage();
+			glassMessage.setCategory(ProcessorType.FILEWRITER);
+			glassMessage.setProtocol(Protocol.FILEWRITER.getCode());
+			glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+			glassMessage.setMailboxId(mailboxId);
+			glassMessage.setStatus(ExecutionState.STAGED);
+			glassMessage.setPipelineId(workTicket.getPipelineId());
+			if(processorPayloadLocation.contains("ftps")){
+				glassMessage.setOutAgent(GatewayType.FTPS);
+			}if(processorPayloadLocation.contains("sftp")){
+				glassMessage.setOutAgent(GatewayType.SFTP);
+			}else if(processorPayloadLocation.contains("ftp")){
+				glassMessage.setOutAgent(GatewayType.FTP);
+			}
+
+			glassLogger.logToGlass(glassMessage);
+			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
 		} catch (JAXBException | JsonParseException | JsonMappingException e) {
 			//cannot send email since the request json cannot be parsed

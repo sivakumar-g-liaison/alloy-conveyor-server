@@ -80,7 +80,6 @@ public class TriggerProfileResource extends AuditedResource {
 	notes = "trigger a profile",
 	position = 23,
 	response = com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({
 		@ApiResponse( code = 500, message = "Unexpected Service failure." )
