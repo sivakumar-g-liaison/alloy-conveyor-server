@@ -703,12 +703,12 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * 
 	 */
 	@Override
-	public void checkAndCreateConfiguredLocation(ProcessorDTO processorDTO) {
+	public void createLocalFolders(ProcessorDTO processorDTO) {
 
 		String configuredPath = null;
 		try {
 			configuredPath = getPayloadURI();
-			createConfiguredLocation(processorDTO, configuredPath);
+			createPathIfNotAvailable(processorDTO, configuredPath);
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,

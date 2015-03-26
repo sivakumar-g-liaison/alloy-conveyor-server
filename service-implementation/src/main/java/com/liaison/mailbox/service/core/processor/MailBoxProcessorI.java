@@ -20,6 +20,6 @@ public interface MailBoxProcessorI {
 
 	public void invoke(String executionId,MailboxFSM fsm);
 
-	public void checkAndCreateConfiguredLocation(ProcessorDTO processorDTO);
+	public void createLocalFolders(ProcessorDTO processorDTO);
 
 }

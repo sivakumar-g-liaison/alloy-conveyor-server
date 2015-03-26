@@ -677,7 +677,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * 
 	 * @throws IOException
 	 */
-	public void createConfiguredLocation(ProcessorDTO processorDTO, String localPath) throws IOException {
+	public void createPathIfNotAvailable(ProcessorDTO processorDTO, String localPath) throws IOException {
 
 		if (processorDTO.isCreateConfiguredLocation() && !MailBoxUtil.isEmpty(localPath)) {
 

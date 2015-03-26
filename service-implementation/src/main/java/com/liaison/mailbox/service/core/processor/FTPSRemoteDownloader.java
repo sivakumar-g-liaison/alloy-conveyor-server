@@ -253,12 +253,12 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override
-	public void checkAndCreateConfiguredLocation(ProcessorDTO processorDTO) {
+	public void createLocalFolders(ProcessorDTO processorDTO) {
 
 		String configuredPath = null;
 		try {
 			configuredPath = getWriteResponseURI();
-			createConfiguredLocation(processorDTO, configuredPath);
+			createPathIfNotAvailable(processorDTO, configuredPath);
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,

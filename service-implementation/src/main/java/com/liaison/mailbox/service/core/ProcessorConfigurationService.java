@@ -186,12 +186,8 @@ public class ProcessorConfigurationService {
 			
 			// check and create configured location
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-			if (processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
-				checkAndCreateConfiguredLocation(processorDTO);
-			} else {
-				processorService.checkAndCreateConfiguredLocation(processorDTO);
-			}
-			
+			processorService.createLocalFolders(processorDTO);
+						
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
@@ -595,11 +591,7 @@ public class ProcessorConfigurationService {
 			
 			// check and create configured location
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-			if (processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
-				checkAndCreateConfiguredLocation(processorDTO);
-			} else {
-				processorService.checkAndCreateConfiguredLocation(processorDTO);
-			}
+			processorService.createLocalFolders(processorDTO);		
 
 			configDao.merge(processor);
 
@@ -909,67 +901,5 @@ public class ProcessorConfigurationService {
 
 	}
 	
-	/**
-	 * This Method check and create configured location given by processorDTO.
-	 * 
-	 * @param processorDTO
-	 *            it have details of processor
-	 * @throws IOException
-	 */
-	public void checkAndCreateConfiguredLocation(ProcessorDTO processorDTO) {
-
-		String configuredPath = null;
-		try {
-
-			if (processorDTO.getFolders() != null) {
-
-				for (FolderDTO folderDTO : processorDTO.getFolders()) {
-
-					FolderType foundFolderType = FolderType.findByCode(folderDTO.getFolderType());
-					if (FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
-						configuredPath = getConfiguredPayloadPath(folderDTO.getFolderURI());
-						LOGGER.info("Retrieving  configured location from processor dto");
-					}
-				}
-
-				if (processorDTO.isCreateConfiguredLocation() && !MailBoxUtil.isEmpty(configuredPath)) {
-
-					File fileDirectory = new File(configuredPath);
-					if (!fileDirectory.exists()) {
-						Files.createDirectories(fileDirectory.toPath());
-						LOGGER.debug("checked and create configured location - {}", fileDirectory.toPath());
-					}
-				}
-			}
-
-		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,
-					configuredPath, Response.Status.BAD_REQUEST);
-		}
-
-	}
-		
-	/**
-	 * To Retrieve the Payload URI
-	 * 	
-	 * @param path
-	 * @return String
-	 *            The configured Path
-	 */
-	private String getConfiguredPayloadPath(String path) {
-
-		String configuredPath = null;
-
-		if (path != null && path.toUpperCase().contains(MailBoxConstants.MOUNT_LOCATION)) {
-			String mountLocationValue = MailBoxUtil.getEnvironmentProperties().getString("MOUNT_POINT");
-			configuredPath = path.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN, mountLocationValue);
-		} else {
-			return path;
-		}
-		LOGGER.info("The configured Path is" + configuredPath);
-		return configuredPath;
-	}
-
 	
-		
 }

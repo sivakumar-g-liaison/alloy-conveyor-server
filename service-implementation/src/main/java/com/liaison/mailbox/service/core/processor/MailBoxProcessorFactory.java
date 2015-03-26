@@ -95,6 +95,8 @@ public class MailBoxProcessorFactory {
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new DirectorySweeperProcessor(processor);
+		}else if (ProcessorType.FILEWRITER.equals(processor.getProcessorType())) {
+			mailBoxProcessor = new FileWriter(processor);
 		}
 		return mailBoxProcessor;
 	}
