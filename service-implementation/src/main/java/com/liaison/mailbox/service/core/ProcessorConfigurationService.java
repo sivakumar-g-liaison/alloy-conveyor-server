@@ -81,7 +81,6 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;

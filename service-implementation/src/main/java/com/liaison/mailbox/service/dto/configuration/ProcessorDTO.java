@@ -207,6 +207,7 @@ public class ProcessorDTO {
 		// separate static and dynamic and folder properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
 		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
+		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
 
 		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.getProcessorSpecificStaticPropsFrmTemplt(staticPropertiesDTO, processor, isCreate);
 
@@ -226,8 +227,7 @@ public class ProcessorDTO {
 		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
     
         //Construct FOLDER DTO LIST
-        List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
-        ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
+        List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);        
 
 		// Setting the folders.
 		Folder folder = null;

@@ -534,6 +534,8 @@ public class ProcessorPropertyJsonMapper {
             } else if (field.getType().equals(Integer.TYPE)) {
                 if (!MailBoxUtil.isEmpty(propertyValue)) {
                     field.setInt(staticPropertiesDTO, Integer.valueOf(propertyValue).intValue());
+                } else {
+                	field.setInt(staticPropertiesDTO, 0);
                 }
             } else if (field.getType().equals(String.class)) {
                 field.set(staticPropertiesDTO, propertyValue);
