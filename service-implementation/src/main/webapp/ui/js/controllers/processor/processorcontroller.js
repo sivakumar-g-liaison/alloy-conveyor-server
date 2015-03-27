@@ -7,22 +7,12 @@ var rest = myApp.controller(
 			$scope.disablePipeLineId = false;
             $scope.disableHTTPListenerPipeLineId = false;
             $scope.isJavaScriptExecution = false;
-            $scope.isCreateConfiguredLocation = true;
             //check JavaScriptExecutor
             $scope.onChangeJavaScriptExecutor = function () {            	
             	if ($scope.isJavaScriptExecution) {            		
             		$scope.isJavaScriptExecution = false;
             	} else {            		
             		$scope.isJavaScriptExecution = true;
-            	} 	            	
-            }
-            
-            //check Create Configure Payload Location or not 
-            $scope.onChangeCreateConfiguredLocation = function () {            	
-            	if ($scope.isCreateConfiguredLocation) {            		
-            		$scope.isCreateConfiguredLocation = false;
-            	} else {            		
-            		$scope.isCreateConfiguredLocation = true;
             	} 	            	
             }
             

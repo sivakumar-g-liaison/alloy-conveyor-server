@@ -671,7 +671,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	
 	/**
-	 * This Method check and create configured location.
+	 * This Method create local folders if not available.
 	 * 
 	 * * @param processorDTO it have details of processor
 	 * 
@@ -684,7 +684,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			File fileDirectory = new File(localPath);
 			if (!fileDirectory.exists()) {
 				Files.createDirectories(fileDirectory.toPath());
-				LOGGER.debug("checked and create configured location - {}", fileDirectory.toPath());
+				LOGGER.debug("create local folders if not available - {}", fileDirectory.toPath());
 			}
 		}
 

@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,7 +71,6 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -184,7 +182,7 @@ public class ProcessorConfigurationService {
 			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
 			serviceRequest.getProcessor().copyToEntity(processor, true);
 			
-			// check and create configured location
+			//create local folders if not available
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 			processorService.createLocalFolders(processorDTO);
 						
@@ -589,7 +587,7 @@ public class ProcessorConfigurationService {
 			// Copying the new details of the processor and merging.
 			processorDTO.copyToEntity(processor, false);
 			
-			// check and create configured location
+			//create local folders if not available
 			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
 			processorService.createLocalFolders(processorDTO);		
 

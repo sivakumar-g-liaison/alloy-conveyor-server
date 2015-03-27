@@ -52,7 +52,13 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 		// TODO Auto-generated method stub
 		
 	}
-
+    
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 * 
+	 */
 	@Override
 	public void createLocalFolders(ProcessorDTO processorDTO) {
 		String configuredPath = null;
@@ -61,10 +67,10 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 			createPathIfNotAvailable(processorDTO, configuredPath);
 
 		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
 					configuredPath, Response.Status.BAD_REQUEST);
 		}
-		
+
 	}
 
 }

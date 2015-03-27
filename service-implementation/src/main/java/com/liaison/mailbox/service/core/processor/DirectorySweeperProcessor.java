@@ -697,7 +697,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	}
 	
 	/**
-	 * This Method check and create configured payload location.
+	 * This Method create local folders if not available.
 	 * 
 	 * * @param processorDTO it have details of processor
 	 * 
@@ -711,7 +711,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			createPathIfNotAvailable(processorDTO, configuredPath);
 
 		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
 					configuredPath, Response.Status.BAD_REQUEST);
 		}
 

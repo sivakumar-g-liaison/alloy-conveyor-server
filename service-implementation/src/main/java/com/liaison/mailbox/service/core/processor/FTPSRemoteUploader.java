@@ -341,7 +341,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
     
 	/**
-	 * This Method check and create configured location.
+	 * This Method create local folders if not available.
 	 * 
 	 * * @param processorDTO it have details of processor
 	 * 
@@ -355,7 +355,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			createPathIfNotAvailable(processorDTO, configuredPath);
 
 		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.CONFIGURED_LOCATION_CREATION_FAILED,
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
 					configuredPath, Response.Status.BAD_REQUEST);
 		}
 

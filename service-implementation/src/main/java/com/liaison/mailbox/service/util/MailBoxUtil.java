@@ -48,10 +48,8 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.netflix.config.ConfigurationManager;
 
