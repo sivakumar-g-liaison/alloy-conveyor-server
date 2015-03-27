@@ -48,6 +48,7 @@ import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -668,6 +669,27 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		LOGGER.info("Trigerring - The private key file path not configured.");
 	}
 
+	
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 * 
+	 * @throws IOException
+	 */
+	public void createPathIfNotAvailable(ProcessorDTO processorDTO, String localPath) throws IOException {
+
+		if (processorDTO.isCreateConfiguredLocation() && !MailBoxUtil.isEmpty(localPath)) {
+
+			File fileDirectory = new File(localPath);
+			if (!fileDirectory.exists()) {
+				Files.createDirectories(fileDirectory.toPath());
+				LOGGER.debug("create local folders if not available - {}", fileDirectory.toPath());
+			}
+		}
+
+	}
+	
 	@Override
 	public void updateState() {
 		// TODO Auto-generated method stub

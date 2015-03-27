@@ -336,6 +336,9 @@
             <div class="form-group">
                 <div>
                     <h4>Folders</h4>
+                    <span>Create folders if not available <input type="checkbox" ng-model="isCreateConfiguredLocation" id="mbx_procsr_configuredlocation" ng-init="isCreateConfiguredLocation=true">
+					</span>
+					<br/><br/>
                     <div class="gridStyle" ng-grid="gridOptionsForProcessorFolder">
                     </div>
                 </div>

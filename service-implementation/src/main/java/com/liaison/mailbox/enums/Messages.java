@@ -74,6 +74,9 @@ public enum Messages {
 
 	PROCESSOR_EXECUTION_SUCCESSFULLY("Processor %s execution successfully."),
 	PROCESSOR_EXECUTION_FAILED("Error execution in the processor %s."),
+    
+	// CREATE CONFIGURED LOCATION
+	LOCAL_FOLDERS_CREATION_FAILED("Local folders %s creation failed."),
 
 	// INVALID ENUM
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
