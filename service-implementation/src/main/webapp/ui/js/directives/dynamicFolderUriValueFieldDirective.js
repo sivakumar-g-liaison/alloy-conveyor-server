@@ -14,10 +14,16 @@ angular.module(
 			replace: true,
 			scope : {
 				currentRowObject: '='
-			},
-			templateUrl: 'partials/directive-templates/folderUri.html',				
-			link: function(scope, elem, attrs) {        
-			   scope.infoIconImgUrl = 'img/alert-triangle-red.png';                   
+			},	
+			link: function(scope, elem, attrs) {  
+                scope.$watch("currentRowObject.folderType", function() {
+                var templateUrl = 'partials/directive-templates/folderUri.html';                    
+                    $rootScope.restService.get(templateUrl, function (data) {
+                          elem.html(data);
+                          $compile(elem.contents())(scope);
+                    }); 
+                });
+			    scope.infoIconImgUrl = 'img/alert-triangle-red.png';                   
 			}
          };   
        }

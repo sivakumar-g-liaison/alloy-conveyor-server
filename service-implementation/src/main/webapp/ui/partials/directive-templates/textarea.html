@@ -9,7 +9,7 @@
     left: 27%;  
   }
  </style> 
-<form id="formTextArea" name="formTextArea">
+<ng-form id="formTextArea" name="formTextArea">
 <div ng-switch on="currentRowObject.name">
   <div ng-switch-when="url">
   <textarea class="form-control" dynamic-validation-directive="currentRowObject.name" ng-model="currentRowObject.value" ng-input="{{currentRowObject.value}}" style="width:90%;height: 45px" placeholder="required" ng-minLength = {{currentRowObject.validationRules.minLength}} ng-maxLength = {{currentRowObject.validationRules.maxLength}} ng-disabled = "currentRowObject.readOnly" ng-change = "OnChangeUrl(currentRowObject)" ng-pattern = "{{currentRowObject.validationRules.pattern}}"  ng-required="currentRowObject.mandatory || currentRowObject.valueProvided"/> 
@@ -50,4 +50,4 @@
     </div>
   </div>
 </div>
-</form> 
+</ng-form> 

@@ -235,7 +235,7 @@
 			  "readOnly":false,
 			  "valueProvided":false,
 			  "validationRules":{
-				   "folderURIPattern":"\/^[a-zA-Z0-9_\\\/!@#\\$%^&()--+=\/{}.,;'~` ]+$\/",
+				   "folderURIPattern":"",
 				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
 				   "minLength": "",
 				   "maxLength": "250"
@@ -250,7 +250,7 @@
 			  "readOnly":false,
 			  "valueProvided":false,
 			  "validationRules":{
-				   "folderURIPattern":"\/^[a-zA-Z0-9_\\\/!@#\\$%^&()--+=\/{}.,;'~` ]+$\/",
+				   "folderURIPattern":"",
 				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
 				   "minLength": "",
 				   "maxLength": "250"

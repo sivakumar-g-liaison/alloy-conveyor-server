@@ -37,6 +37,8 @@ angular.module(
                     if (property === null || typeof property === 'undefined') {
                         return;
                     }
+                    property.folderURI = scope.currentRowObject.folderURI;
+                    property.folderDesc = scope.currentRowObject.folderDesc;
                     angular.copy(property, scope.currentRowObject);
                     console.log("currentRowObject"+scope.currentRowObject);                  	
                  };          

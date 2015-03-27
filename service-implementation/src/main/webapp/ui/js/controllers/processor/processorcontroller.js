@@ -1089,7 +1089,7 @@ var rest = myApp.controller(
                     width: "33%",
                     displayName: "URI*",
                     enableCellEdit: false,
-                    cellTemplate: '<dynamic-folder-uri-value-field-directive current-row-object = folderAddedToProcessor[row.rowIndex] test-attr=currentType/>'                   
+                    cellTemplate: '<dynamic-folder-uri-value-field-directive current-row-object = folderAddedToProcessor[row.rowIndex]/>'                   
                 }, {
                     field: "folderType",
                     width: "20%",
@@ -1101,7 +1101,7 @@ var rest = myApp.controller(
                     width: "40%",
                     displayName: "Description",
                     enableCellEdit: false,
-                    cellTemplate: '<dynamic-folder-desc-value-field-directive current-row-object = folderAddedToProcessor[row.rowIndex] test-attr=currentType/>'                   
+                    cellTemplate: '<dynamic-folder-desc-value-field-directive current-row-object = folderAddedToProcessor[row.rowIndex]/>'                   
                 }, {
                     field: "allowAdd",
                     width: "7%",
