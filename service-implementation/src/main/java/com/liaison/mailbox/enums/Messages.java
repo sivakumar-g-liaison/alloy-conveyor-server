@@ -76,9 +76,9 @@ public enum Messages {
 	PROCESSOR_EXECUTION_FAILED("Error execution in the processor %s."),
     
 	// CREATE CONFIGURED LOCATION
-	LOCAL_FOLDERS_CREATION_FAILED("Local folders %s creation failed."),
-	HOME_FOLDER_DOESNT_EXIST_ALREADY("The folder %s should exist before configuring processor."),
-	FOLDER_DOESNT_MATCH_PATTERN("The folder doesnt match patterm %s ."),
+	LOCAL_FOLDERS_CREATION_FAILED("Local folder %s creation failed."),
+	HOME_FOLDER_DOESNT_EXIST_ALREADY("The local folder %s must exist before configuring processor."),
+	FOLDER_DOESNT_MATCH_PATTERN("The local folder doesn't match pattern %s ."),
 
 	// INVALID ENUM
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),
