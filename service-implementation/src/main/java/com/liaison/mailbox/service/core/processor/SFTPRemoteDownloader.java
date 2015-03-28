@@ -42,7 +42,6 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
-import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
@@ -240,12 +239,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override
-	public void createLocalFolders(ProcessorDTO processorDTO) {
+	public void createLocalPath() {
 
 		String configuredPath = null;
 		try {
 			configuredPath = getWriteResponseURI();
-			createPathIfNotAvailable(processorDTO, configuredPath);
+			createPathIfNotAvailable(configuredPath);
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,

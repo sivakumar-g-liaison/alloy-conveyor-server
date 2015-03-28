@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.acl.util.ACLUtil;
 import com.liaison.commons.acl.util.RemoteURLPublicKeyVerifier;
 import com.liaison.commons.acl.util.SignatureVerifier;
-import com.liaison.commons.acl.util.example.ExampleBase64EncodedSignatureVerifier;
 import com.liaison.commons.audit.AuditStatement.Status;
 import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.jpa.DAOUtil;

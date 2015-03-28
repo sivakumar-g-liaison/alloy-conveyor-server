@@ -7,7 +7,6 @@ import javax.ws.rs.core.Response;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
@@ -60,15 +59,15 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * 
 	 */
 	@Override
-	public void createLocalFolders(ProcessorDTO processorDTO) {
+	public void createLocalPath() {
 		String configuredPath = null;
 		try {
 			configuredPath = getFileWriteLocation();
-			createPathIfNotAvailable(processorDTO, configuredPath);
+			createPathIfNotAvailable(configuredPath);
 
 		} catch (IOException e) {
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
-					configuredPath, Response.Status.BAD_REQUEST);
+					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
 		}
 
 	}

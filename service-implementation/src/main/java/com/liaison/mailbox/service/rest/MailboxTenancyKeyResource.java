@@ -30,7 +30,6 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.MailboxTenancyKeyService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;

@@ -183,9 +183,13 @@ public class ProcessorConfigurationService {
 			serviceRequest.getProcessor().copyToEntity(processor, true);
 			
 			//create local folders if not available
-			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-			processorService.createLocalFolders(processorDTO);
-						
+			if(processorDTO.isCreateConfiguredLocation() ){
+			   MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
+			   if(processorService!=null){
+			        processorService.createLocalPath();
+			      }
+			 }	
+			
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
@@ -588,8 +592,12 @@ public class ProcessorConfigurationService {
 			processorDTO.copyToEntity(processor, false);
 			
 			//create local folders if not available
-			MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
-			processorService.createLocalFolders(processorDTO);		
+			if(processorDTO.isCreateConfiguredLocation()){
+			   MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
+			   if(processorService!=null){
+			        processorService.createLocalPath();
+			      }
+			 }
 
 			configDao.merge(processor);
 

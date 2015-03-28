@@ -55,7 +55,6 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -703,16 +702,17 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * 
 	 */
 	@Override
-	public void createLocalFolders(ProcessorDTO processorDTO) {
+	public void createLocalPath() {
 
 		String configuredPath = null;
 		try {
 			configuredPath = getPayloadURI();
-			createPathIfNotAvailable(processorDTO, configuredPath);
+			createPathIfNotAvailable(configuredPath);
 
 		} catch (IOException e) {
+			//e.printStackTrace();
 			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
-					configuredPath, Response.Status.BAD_REQUEST);
+					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
 		}
 
 	}
