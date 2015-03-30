@@ -341,6 +341,8 @@ public class HttpListener extends AuditedResource {
 									workTicket.getGlobalProcessId())).build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
+                    glassMessage.setStatus(ExecutionState.FAILED);
+                    transactionVisibilityClient.logToGlass(glassMessage);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}
