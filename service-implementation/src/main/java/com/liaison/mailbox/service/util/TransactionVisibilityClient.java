@@ -1,19 +1,14 @@
 package com.liaison.mailbox.service.util;
 
 import java.util.Date;
-import java.util.GregorianCalendar;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.liaison.commons.message.glass.dom.*;
+import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
-import com.liaison.commons.message.glass.dom.MapItemType;
-import com.liaison.commons.message.glass.dom.StatusCode;
-import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -39,43 +34,62 @@ public class TransactionVisibilityClient {
 		 visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
 		
 	 }
-	 
-	 
+
 	 public void logToGlass(GlassMessage message){
-		 
-		 MapItemType item = new MapItemType();
-		 item.setKey("proc-exec-id");
-		 item.setValue(message.getExecutionId());
-		 visibilityAPI.getAdditionalInformation().add(item);
-		 
-		 item = new MapItemType();
-		 item.setKey("mailbox-id");
-		 item.setValue(message.getMailboxId());
-		 visibilityAPI.getAdditionalInformation().add(item);
-		 
-		 item = new MapItemType();
-		 item.setKey("processor-id");
-		 item.setValue(message.getProcessorId());
-		 visibilityAPI.getAdditionalInformation().add(item);
-		 
-		 item = new MapItemType();
-		 item.setKey("tenancy-key");
-		 item.setValue(message.getTenancyKey());
-		 visibilityAPI.getAdditionalInformation().add(item);
-		 
-		 item = new MapItemType();
-		 item.setKey("siid");
-		 item.setValue(message.getServiceInstandId());
-		 visibilityAPI.getAdditionalInformation().add(item);
-		 
-		 item = new MapItemType();
-		 item.setKey("pipeline-id");
-		 item.setValue(message.getPipelineId());
-		 visibilityAPI.getAdditionalInformation().add(item);
+
+         visibilityAPI.getAdditionalInformation().clear();
+
+         //Log TransactionVisibilityAPI
+         MapItemType item;
+
+         if (message.getExecutionId() != null && !message.getExecutionId().equals("")) {
+             item = new MapItemType();
+             item.setKey("proc-exec-id");
+             item.setValue(message.getExecutionId());
+             visibilityAPI.getAdditionalInformation().add(item);
+         }
+
+         if (message.getMailboxId() != null && !message.getMailboxId().equals(""))  {
+             item = new MapItemType();
+             item.setKey("mailbox-id");
+             item.setValue(message.getMailboxId());
+             visibilityAPI.getAdditionalInformation().add(item);
+         }
+
+         if (message.getProcessorId() != null && !message.getProcessorId().equals("")) {
+             item = new MapItemType();
+             item.setKey("processor-id");
+             item.setValue(message.getProcessorId());
+             visibilityAPI.getAdditionalInformation().add(item);
+         }
+
+         if (message.getTenancyKey() != null && !message.getTenancyKey().equals("")) {
+             item = new MapItemType();
+             item.setKey("tenancy-key");
+             item.setValue(message.getTenancyKey());
+             visibilityAPI.getAdditionalInformation().add(item);
+         }
+
+         if (message.getServiceInstandId() != null && !message.getServiceInstandId().equals("")) {
+             item = new MapItemType();
+             item.setKey("siid");
+             item.setValue(message.getServiceInstandId());
+             visibilityAPI.getAdditionalInformation().add(item);
+         }
+
+         if (message.getPipelineId() != null && !message.getPipelineId().equals("")) {
+             item = new MapItemType();
+             item.setKey("pipeline-id");
+             item.setValue(message.getPipelineId());
+             visibilityAPI.getAdditionalInformation().add(item);
+         }
 		 
 		 visibilityAPI.setCategory(message.getProtocol()+":"+message.getCategory().getCode());
 		 visibilityAPI.setId(message.getGlobalPId());
-		 if(ExecutionState.PROCESSING.value().equals(message.getStatus().value())){
+         visibilityAPI.setGlobalId(message.getGlobalPId());
+         visibilityAPI.setInSize(message.getInSize());
+
+         if(ExecutionState.PROCESSING.value().equals(message.getStatus().value())){
 			 visibilityAPI.setStatus(StatusCode.P);
 		 }else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())){
 			 visibilityAPI.setStatus(StatusCode.B);
@@ -90,38 +104,15 @@ public class TransactionVisibilityClient {
 		 }else if (ExecutionState.STAGED.value().equals(message.getStatus().value())){
 			 visibilityAPI.setStatus(StatusCode.G);
 		 }
-		 
+
 		 visibilityAPI.setInAgent(message.getInAgent());
-		 XMLGregorianCalendar t = toXmlGregorianCalendar(new Date().getTime());
-	     visibilityAPI.setArrivalTime(t);
+		 XMLGregorianCalendar t = GlassMessageUtil.convertToXMLGregorianCalendar(new Date());
+         visibilityAPI.setArrivalTime(t);
 	     visibilityAPI.setStatusDate(t);
-		
-				  
+
+
 		 logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		 logger.debug("TransactionVisibilityAPI with status {} logged for execution :{}",message.getStatus().value(),message.getExecutionId());	 
 		 
 	 }
-	 
-	 /**
-	     * Converts a given time in milliseconds into a {@link XMLGregorianCalendar} object.
-	     * <p>
-	     * The input milliseconds value represents the specified number of milliseconds since the standard base time known
-	     * as "the epoch", namely January 1, 1970, 00:00:00 GMT.
-	     *
-	     * @param date
-	     *            A given time corresponding to the number of milliseconds since January 1, 1970, 00:00:00 GMT
-	     * @return A new instance of <code>XMLGregorianCalendar</code> representing the input time
-	     */
-	    public  XMLGregorianCalendar toXmlGregorianCalendar(final long date) {
-	        try {
-	            final GregorianCalendar calendar = new GregorianCalendar();
-	            calendar.setTimeInMillis(date);
-	            return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-	                calendar);
-	        }
-	        catch (final DatatypeConfigurationException ex) {
-	            System.out.println("Unable to convert date '%s' to an XMLGregorianCalendar object");
-	        }
-			return null;
-	    }
 }

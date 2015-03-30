@@ -18,9 +18,11 @@ public class GlassMessage {
     private String pipelineId;
     private GatewayType inAgent;
     private GatewayType outAgent;
-    
+    private String message;
+    private int inSize;
 
-	public GatewayType getOutAgent() {
+
+    public GatewayType getOutAgent() {
 		return outAgent;
 	}
 
@@ -116,4 +118,19 @@ public class GlassMessage {
 		this.serviceInstandId = serviceInstandId;
 	}
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setInSize(int inSize) {
+        this.inSize = inSize;
+    }
+
+    public int getInSize() {
+        return inSize;
+    }
 }
