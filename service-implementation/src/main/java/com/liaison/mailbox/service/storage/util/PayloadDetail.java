@@ -8,7 +8,7 @@
  */
 package com.liaison.mailbox.service.storage.util;
 
-import com.liaison.fs2.api.FS2MetaSnapshot;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 
 /**
  * @author VNagarajan

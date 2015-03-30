@@ -25,7 +25,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2Configuration;
 import com.liaison.fs2.api.FS2Factory;
-import com.liaison.fs2.api.FS2MetaSnapshot;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FS2StorageIdentifier;
 import com.liaison.fs2.api.FlexibleStorageSystem;
