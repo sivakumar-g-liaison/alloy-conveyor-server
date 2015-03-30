@@ -34,12 +34,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
-import com.liaison.common.log4j2.markers.GlassMessageMarkers;
-import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
 import com.liaison.commons.message.glass.dom.StatusType;
-import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.framework.util.IdentifierUtil;
-import com.liaison.mailbox.service.util.TimestampUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -129,7 +125,6 @@ public class HttpListener extends AuditedResource {
 
     private static final String SB_REQUEST_TIMESTAMP_NAME = "SB_REQUEST";
     private static final String SB_RESPONSE_TIMESTAMP_NAME = "SB_RESPONSE";
-    private static final String MAILBOX_ASA_IDENTIFIER = "MAILBOX";
 
 	public HttpListener() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
@@ -182,7 +177,6 @@ public class HttpListener extends AuditedResource {
 				serviceCallCounter.incrementAndGet();
 				GlassMessage glassMessage = new GlassMessage();
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-                TimestampUtil timestampUtil;
 				logger.debug("Starting sync processing");
 				try {
 					validateRequestSize(request);
@@ -214,33 +208,31 @@ public class HttpListener extends AuditedResource {
                     glassMessage.setProcessId(processId);
 
                     //Log First corner
-                    timestampUtil = new TimestampUtil(glassMessage);
-                    timestampUtil.logFirstCornerTimestamp();
+                    glassMessage.logFirstCornerTimestamp();
 
                     //Log status running
-                    logStatus(glassMessage, StatusType.RUNNING, "");
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
 
                     //Log TVA status processing
                     transactionVisibilityClient.logToGlass(glassMessage);
                     //GLASS LOGGING ENDS//
 
-                    HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties, timestampUtil);
+                    HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties, glassMessage);
 
 					ResponseBuilder builder = Response.ok();
 					copyResponseInfo(request, httpResponse, builder);
 
-                    logStatus(glassMessage, StatusType.SUCCESS, "");
+                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
 					//GLASS LOGGING CORNER 4 //
-					timestampUtil.logFourthCornerTimestamp();
+                    glassMessage.logFourthCornerTimestamp();
 					return builder.build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
                     //Log error status
-                    logStatus(glassMessage, StatusType.ERROR, e.getMessage());
+                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
 					glassMessage.setStatus(ExecutionState.FAILED);
                     transactionVisibilityClient.logToGlass(glassMessage);
-                    timestampUtil = new TimestampUtil(glassMessage);
-                    timestampUtil.logFourthCornerTimestamp();
+                    glassMessage.logFourthCornerTimestamp();
 					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
@@ -336,11 +328,10 @@ public class HttpListener extends AuditedResource {
                     glassMessage.setProcessId(processId);
 
                     //Log FIRST corner
-                    TimestampUtil timestampUtil = new TimestampUtil(glassMessage);
-                    timestampUtil.logFirstCornerTimestamp();
+                    glassMessage.logFirstCornerTimestamp();
 
                     //Log running status
-                    logStatus(glassMessage, StatusType.RUNNING, "");
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
 
                     //Log TVA status
                     transactionVisibilityClient.logToGlass(glassMessage);
@@ -361,7 +352,7 @@ public class HttpListener extends AuditedResource {
 					logger.error(e.getMessage(), e);
                     glassMessage.setStatus(ExecutionState.FAILED);
                     //Log error status
-                    logStatus(glassMessage, StatusType.ERROR, e.getMessage());
+                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
                     transactionVisibilityClient.logToGlass(glassMessage);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
@@ -553,7 +544,7 @@ public class HttpListener extends AuditedResource {
 			WorkTicket workTicket, GlassMessage glassMessage) throws Exception {
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 
-        logStatus(glassMessage, StatusType.QUEUED, "");
+        glassMessage.logProcessingStatus(StatusType.QUEUED, "");
         postToQueue(workTicketJson);
 	}
 
@@ -568,11 +559,13 @@ public class HttpListener extends AuditedResource {
 	 *
 	 * @param sessionContext
 	 * @param request
+     * @param httpListenerProperties
+     * @param glassMessage
 	 * @return HttpResponse
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties, TimestampUtil timestampUtil)
+	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties, GlassMessage glassMessage)
 			throws JAXBException, Exception {
 		logger.info("Starting to forward request...");
 
@@ -587,10 +580,10 @@ public class HttpListener extends AuditedResource {
 		HttpClient httpClient = createHttpClient();
 
         //Log SB request timestamp
-        timestampUtil.logBeginTimestamp(SB_REQUEST_TIMESTAMP_NAME);
+        glassMessage.logBeginTimestamp(SB_REQUEST_TIMESTAMP_NAME);
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
         //Log SB response timestamp
-        timestampUtil.logEndTimestamp(SB_RESPONSE_TIMESTAMP_NAME);
+        glassMessage.logEndTimestamp(SB_RESPONSE_TIMESTAMP_NAME);
 
         return httpResponse;
 	}
@@ -848,31 +841,6 @@ public class HttpListener extends AuditedResource {
 		logger.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 		return fs2Header;
 	}
-
-    private void logStatus(GlassMessage glassMessage, StatusType statusType, String message) {
-
-        //Log ActivityStatusAPI
-        ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
-        activityStatusAPI.setPipelineId(glassMessage.getPipelineId());
-        activityStatusAPI.setProcessId(glassMessage.getProcessId());
-        activityStatusAPI.setGlobalId(glassMessage.getGlobalPId());
-        activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
-
-        com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
-        status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
-        if (message != null && !message.equals("")) {
-            status.setDescription(MAILBOX_ASA_IDENTIFIER + ": " + message);
-        } else {
-            status.setDescription(MAILBOX_ASA_IDENTIFIER);
-        }
-        status.setStatusId(IdentifierUtil.getUuid());
-        status.setType(statusType);
-
-        activityStatusAPI.getStatuses().add(status);
-
-        logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
-    }
-
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
