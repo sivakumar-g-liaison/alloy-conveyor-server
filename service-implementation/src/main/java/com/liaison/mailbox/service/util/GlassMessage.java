@@ -20,6 +20,7 @@ public class GlassMessage {
     private GatewayType outAgent;
     private String message;
     private int inSize;
+    private String processId;
 
 
     public GatewayType getOutAgent() {
@@ -132,5 +133,13 @@ public class GlassMessage {
 
     public int getInSize() {
         return inSize;
+    }
+
+    public String getProcessId() {
+        return processId;
+    }
+
+    public void setProcessId(String processId) {
+        this.processId = processId;
     }
 }

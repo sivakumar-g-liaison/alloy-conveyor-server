@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -34,6 +35,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.framework.util.IdentifierUtil;
+import com.liaison.mailbox.service.util.TimestampUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -121,6 +124,9 @@ public class HttpListener extends AuditedResource {
 	private static final int GLOBAL_PROCESS_ID_MAXLENGTH = 32;
 	private static final String GLOBAL_PROCESS_ID_PATTERN = "^[a-zA-Z0-9]*$";
 
+    private static final String SB_REQUEST_TIMESTAMP_NAME = "SB_REQUEST";
+    private static final String SB_RESPONSE_TIMESTAMP_NAME = "SB_RESPONSE";
+
 	public HttpListener() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
 		MonitorRegistry monitorRegistry = DefaultMonitorRegistry.getInstance();
@@ -189,6 +195,11 @@ public class HttpListener extends AuditedResource {
 					logger.debug("constructed workticket");
 					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 
+                    //Log First corner
+                    String processId = IdentifierUtil.getUuid();
+                    TimestampUtil timestampUtil = new TimestampUtil(workTicket.getGlobalProcessId(), workTicket.getPipelineId(), processId);
+                    timestampUtil.logFirstCornerTimestamp();
+
                     //GLASS LOGGING STARTS//
                     glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
                     glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
@@ -198,23 +209,25 @@ public class HttpListener extends AuditedResource {
                     glassMessage.setPipelineId(workTicket.getPipelineId());
                     glassMessage.setInAgent(GatewayType.REST);
                     glassMessage.setInSize(request.getContentLength());
+                    glassMessage.setProcessId(processId);
                     transactionVisibilityClient.logToGlass(glassMessage);
                     //GLASS LOGGING ENDS//
 
-                    HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
+                    HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties, timestampUtil);
 
 					ResponseBuilder builder = Response.ok();
 					copyResponseInfo(request, httpResponse, builder);
 
-					//GLASS LOGGING BEGINS CORNER 4 //
-					glassMessage.setStatus(ExecutionState.COMPLETED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-					//GLASS LOGGING BEGINS CORNER 4 //
+					//GLASS LOGGING CORNER 4 //
+					timestampUtil.logFourthCornerTimestamp();
 					return builder.build();
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					glassMessage.setStatus(ExecutionState.FAILED);
                     transactionVisibilityClient.logToGlass(glassMessage);
+                    TimestampUtil timestampUtil = new TimestampUtil(glassMessage.getGlobalPId(),
+                            glassMessage.getPipelineId(), glassMessage.getProcessId());
+                    timestampUtil.logFourthCornerTimestamp();
 					//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
@@ -278,6 +291,10 @@ public class HttpListener extends AuditedResource {
 				serviceCallCounter.incrementAndGet();
 
 				logger.debug("Starting async processing");
+
+                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+                GlassMessage glassMessage = new GlassMessage();
+
 				try {
 					validateRequestSize(request);
 
@@ -293,9 +310,12 @@ public class HttpListener extends AuditedResource {
 					}
 					WorkTicket workTicket = createWorkTicket(request, mailboxPguid, httpListenerProperties);
 
+                    //Log FIRST corner
+                    String processId = IdentifierUtil.getUuid();
+                    TimestampUtil timestampUtil = new TimestampUtil(workTicket.getGlobalProcessId(), workTicket.getPipelineId(), processId);
+                    timestampUtil.logFirstCornerTimestamp();
+
                     //GLASS LOGGING BEGINS//
-                    TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-                    GlassMessage glassMessage = new GlassMessage();
                     glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
                     glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
                     glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
@@ -304,6 +324,7 @@ public class HttpListener extends AuditedResource {
                     glassMessage.setPipelineId(workTicket.getPipelineId());
                     glassMessage.setInAgent(GatewayType.REST);
                     glassMessage.setInSize(request.getContentLength());
+                    glassMessage.setProcessId(processId);
                     transactionVisibilityClient.logToGlass(glassMessage);
                     //GLASS LOGGING ENDS//
 
@@ -527,7 +548,7 @@ public class HttpListener extends AuditedResource {
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties)
+	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties, TimestampUtil timestampUtil)
 			throws JAXBException, Exception {
 		logger.info("Starting to forward request...");
 
@@ -540,8 +561,14 @@ public class HttpListener extends AuditedResource {
 		StringEntity requestBody =new StringEntity(workTicketJson);
 		httpRequest.setEntity(requestBody);
 		HttpClient httpClient = createHttpClient();
+
+        //Log SB request timestamp
+        timestampUtil.logBeginTimestamp(SB_REQUEST_TIMESTAMP_NAME);
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
-		return httpResponse;
+        //Log SB response timestamp
+        timestampUtil.logEndTimestamp(SB_RESPONSE_TIMESTAMP_NAME);
+
+        return httpResponse;
 	}
 
 	/**
