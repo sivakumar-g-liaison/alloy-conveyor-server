@@ -33,10 +33,10 @@ public class TimestampUtil {
     private String processID;
     private String pipelineID;
 
-    public TimestampUtil(String globalProcessId, String pipelineId, String processId) {
-        this.globalProcessID = globalProcessId;
-        this.processID = processId;
-        this.pipelineID = pipelineId;
+    public TimestampUtil(GlassMessage glassMessage) {
+        this.globalProcessID = glassMessage.getGlobalPId();
+        this.processID = glassMessage.getProcessId();
+        this.pipelineID = glassMessage.getPipelineId();
     }
 
     public String getGlobalProcessID() {
