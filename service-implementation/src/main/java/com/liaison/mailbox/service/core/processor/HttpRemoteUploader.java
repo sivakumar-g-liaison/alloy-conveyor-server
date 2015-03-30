@@ -240,4 +240,25 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 		// TODO Auto-generated method stub
 		
 	}
+
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 * 
+	 */
+	@Override
+	public void createLocalPath() {
+
+		String configuredPath = null;
+		try {
+			configuredPath = getPayloadURI();
+			createPathIfNotAvailable(configuredPath);
+
+		} catch (IOException e) {
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
+					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
+		}
+
+	}
 }

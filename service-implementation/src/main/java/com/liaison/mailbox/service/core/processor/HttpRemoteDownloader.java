@@ -217,4 +217,24 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		// TODO Auto-generated method stub
 		
 	}
+
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 */
+	@Override
+	public void createLocalPath() {
+
+		String configuredPath = null;
+		try {
+			configuredPath = getWriteResponseURI();
+			createPathIfNotAvailable(configuredPath);
+
+		} catch (IOException e) {
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
+					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
+		}
+
+	}
 }

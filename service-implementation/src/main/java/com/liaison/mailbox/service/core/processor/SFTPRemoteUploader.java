@@ -41,9 +41,11 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -327,5 +329,26 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			throw new RuntimeException(e);
 		}
 		
+	}
+
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 * 
+	 */
+	@Override
+	public void createLocalPath() {
+		
+		String configuredPath = null;
+		try {
+			configuredPath = getPayloadURI();
+			createPathIfNotAvailable(configuredPath);
+
+		} catch (IOException e) {
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
+					configuredPath, Response.Status.BAD_REQUEST);
+		}
+
 	}
 }

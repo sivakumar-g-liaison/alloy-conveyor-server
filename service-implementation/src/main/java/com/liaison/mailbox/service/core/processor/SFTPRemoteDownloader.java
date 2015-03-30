@@ -39,6 +39,7 @@ import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -230,5 +231,25 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 */
+	@Override
+	public void createLocalPath() {
+
+		String configuredPath = null;
+		try {
+			configuredPath = getWriteResponseURI();
+			createPathIfNotAvailable(configuredPath);
+
+		} catch (IOException e) {
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
+					configuredPath, Response.Status.BAD_REQUEST);
+		}
+
 	}
 }

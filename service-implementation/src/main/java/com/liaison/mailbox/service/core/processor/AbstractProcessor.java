@@ -14,10 +14,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.GroupPrincipal;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -538,7 +546,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @return processedFolderPath The folder path with mount location
 	 *
 	 */
-	public String replaceTokensInFolderPath(String folderPath) throws IOException {
+	public String replaceTokensInFolderPath(String folderPath)  {
 
 		String processedFolderPath = null;
 
@@ -667,6 +675,60 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		LOGGER.info("Trigerring - The private key file path not configured.");
 	}
+
+	
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 * 
+	 * @throws IOException
+	 */
+	public void createPathIfNotAvailable(String localPath) throws IOException {
+		
+		File fileDirectory = new File(localPath);
+		if(MailBoxUtil.isEmpty(localPath) || fileDirectory.exists()){
+			LOGGER.debug("Not creating folders..");
+			return;
+		}
+		
+		Path filePathToCreate = fileDirectory.toPath();
+		
+		FileSystem fileSystem = FileSystems.getDefault();	
+		String pattern = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.data.folder.pattern","glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**");
+		PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
+		if(!pathMatcher.matches(filePathToCreate)){
+			throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN,pattern, Response.Status.BAD_REQUEST);	
+		}
+		
+		//check availability of /data/*/* folder
+		if(!Files.exists(filePathToCreate.subpath(0, 3))){
+			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
+		}
+		
+		LOGGER.debug("create local folders if not available - {}", filePathToCreate);
+		Files.createDirectories(filePathToCreate);
+		
+		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
+		String group = getGroupFor(filePathToCreate.getName(1).toString());
+		LOGGER.debug("group  name - {}", group);				
+		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+		//skip when reaching inbox/outbox
+		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
+			
+			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);	
+			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
+			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString("rwxrwx---"));
+			filePathToCreate = filePathToCreate.getParent();
+		 }
+		
+		LOGGER.debug("Done setting group");
+		
+	}
+	
+	private String getGroupFor(String protocol) {
+		return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
+ 	}
 
 	@Override
 	public void updateState() {
