@@ -95,9 +95,13 @@ public class MailBoxProcessorFactory {
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new DirectorySweeperProcessor(processor);
-		}/* else if (ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType())) {
+		/*} else if (ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType())) {
 			//mailBoxProcessor = new DropBoxProcessor(processor);
 		}*/
+
+	    } else if (ProcessorType.FILEWRITER.equals(processor.getProcessorType())) {
+			mailBoxProcessor = new FileWriter(processor);
+		}
 		return mailBoxProcessor;
 	}
 

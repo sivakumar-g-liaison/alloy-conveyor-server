@@ -47,6 +47,7 @@ var rest = myApp.controller(
 				$scope.script = '';
 			    $scope.scriptIsEdit = false; 
 				$scope.isJavaScriptExecution = false;
+				$scope.isCreateConfiguredLocation = true;
                 // to disable protocol for http listener processor
                 $scope.isProcessorTypeHTTPListener = false;
                 // to disable protocol for file writer
@@ -78,6 +79,7 @@ var rest = myApp.controller(
                     javaScriptURI: "",
                     description: "",
                     status: "",
+                    createConfiguredLocation: true,
                     protocol: "",
                     linkedMailboxId: "",
                     linkedProfiles: [],              
@@ -250,7 +252,6 @@ var rest = myApp.controller(
 							
 				$scope.isJavaScriptExecution = data.getProcessorResponse.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript;
 				
-							
 				$scope.processor.description = data.getProcessorResponse.processor.description;				
 				(data.getProcessorResponse.processor.status === 'ACTIVE') ? $scope.status = $scope.initialProcessorData.supportedStatus.options[0] : $scope.status = $scope.initialProcessorData.supportedStatus.options[1];
 				$scope.setTypeDuringProcessorEdit(data.getProcessorResponse.processor.type);				
@@ -571,6 +572,7 @@ var rest = myApp.controller(
                     editRequest.reviseProcessorRequest.processor.status = $scope.status.value;
                     editRequest.reviseProcessorRequest.processor.type = $scope.procsrType.value;
 					editRequest.reviseProcessorRequest.processor.protocol = $scope.processor.protocol.value;
+                    editRequest.reviseProcessorRequest.processor.createConfiguredLocation = $scope.isCreateConfiguredLocation;
 					
 						var reviseProcessor = false;
 						for(var i = 0; i < $scope.editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
@@ -602,10 +604,12 @@ var rest = myApp.controller(
 				
                     addRequest.addProcessorToMailBoxRequest.processor = $scope.processor;
 					$scope.appendPortToUrl();
+
                     addRequest.addProcessorToMailBoxRequest.processor.status = $scope.status.value;
                     addRequest.addProcessorToMailBoxRequest.processor.type = $scope.procsrType.value;
 					addRequest.addProcessorToMailBoxRequest.processor.protocol = $scope.processor.protocol.value;
-					
+                    addRequest.addProcessorToMailBoxRequest.processor.createConfiguredLocation = $scope.isCreateConfiguredLocation;
+                    
 						var saveProcessor = false;
 						for(var i = 0; i < $scope.addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties.length; i++) {
 						
@@ -762,6 +766,7 @@ var rest = myApp.controller(
 				    $scope.script = '';
 			        $scope.scriptIsEdit = false; 	
                     $scope.isJavaScriptExecution = false;
+                    $scope.isCreateConfiguredLocation = true;
                     $scope.formAddPrcsr.scriptName.$setValidity('allowed', true);
                     $scope.$broadcast("resetCredentialSection");
             };            

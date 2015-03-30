@@ -38,13 +38,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -80,6 +80,8 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
+import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -181,7 +183,15 @@ public class ProcessorConfigurationService {
 			ProcessorType foundProcessorType = ProcessorType.findByName(serviceRequest.getProcessor().getType());
 			Processor processor = Processor.processorInstanceFactory(foundProcessorType);
 			serviceRequest.getProcessor().copyToEntity(processor, true);
-
+			
+			//create local folders if not available
+			if(processorDTO.isCreateConfiguredLocation() ){
+			   MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
+			   if(processorService!=null){
+			        processorService.createLocalPath();
+			      }
+			 }	
+			
 			createMailBoxAndProcessorLink(serviceRequest, null, processor);
 
 			createScheduleProfileAndProcessorLink(serviceRequest, null, processor);
@@ -580,6 +590,14 @@ public class ProcessorConfigurationService {
 
 			// Copying the new details of the processor and merging.
 			processorDTO.copyToEntity(processor, false);
+			
+			//create local folders if not available
+			if(processorDTO.isCreateConfiguredLocation()){
+			   MailBoxProcessorI processorService = MailBoxProcessorFactory.getInstance(processor);
+			   if(processorService!=null){
+			        processorService.createLocalPath();
+			      }
+			 }
 
 			configDao.merge(processor);
 
@@ -890,6 +908,4 @@ public class ProcessorConfigurationService {
 		return httpListenerProperties;
 
 	}
-
-
 }

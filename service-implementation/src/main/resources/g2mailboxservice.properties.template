@@ -260,3 +260,7 @@ com.liaison.jms.receive.timeout.dropboxQueue
 #-1 is infinite
 com.liaison.jms.send.attempts.dropboxQueue=-1
 ########DROBBOXQUEUE####### 
+
+sftp.group.name=ext_sftp_users
+ftp.group.name=ext_ftp_users
+ftps.group.name=ext_ftps_users

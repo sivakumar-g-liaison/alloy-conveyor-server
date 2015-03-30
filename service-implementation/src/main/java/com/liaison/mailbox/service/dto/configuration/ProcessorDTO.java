@@ -67,11 +67,13 @@ public class ProcessorDTO {
 	private String linkedMailboxId;
 	private List<String> linkedProfiles;
 	private List<ProfileDTO> profiles;
+	private boolean createConfiguredLocation;	
+	
 
 	public ProcessorDTO() {
 		super();
 	}
-
+	
 	public String getGuid() {
 		return guid;
 	}
@@ -171,6 +173,15 @@ public class ProcessorDTO {
 			ProcessorPropertyUITemplateDTO processorPropertiesInTemplateJson) {
 		this.processorPropertiesInTemplateJson = processorPropertiesInTemplateJson;
 	}
+	
+	public boolean isCreateConfiguredLocation() {
+		return createConfiguredLocation;
+	}
+
+	public void setCreateConfiguredLocation(boolean createConfiguredLocation) {
+		this.createConfiguredLocation = createConfiguredLocation;
+	}
+
 
 	/**
 	 * Method is used to copy the values from DTO to Entity. It does not create relationship between

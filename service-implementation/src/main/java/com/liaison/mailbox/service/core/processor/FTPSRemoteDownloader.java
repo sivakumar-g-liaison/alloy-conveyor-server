@@ -40,9 +40,11 @@ import com.liaison.commons.util.client.ftps.G2FTPSClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
+import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -248,6 +250,26 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	@Override
 	public void cleanup() {
 		// TODO Auto-generated method stub
+
+	}
+	
+	/**
+	 * This Method create local folders if not available.
+	 * 
+	 * * @param processorDTO it have details of processor
+	 */
+	@Override
+	public void createLocalPath() {
+
+		String configuredPath = null;
+		try {
+			configuredPath = getWriteResponseURI();
+			createPathIfNotAvailable(configuredPath);
+
+		} catch (IOException e) {
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
+					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
+		}
 
 	}
 }

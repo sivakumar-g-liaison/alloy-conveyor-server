@@ -19,4 +19,6 @@ public interface MailBoxProcessorI {
 
 	public void invoke(String executionId,MailboxFSM fsm);
 
+	public void createLocalPath();
+
 }
