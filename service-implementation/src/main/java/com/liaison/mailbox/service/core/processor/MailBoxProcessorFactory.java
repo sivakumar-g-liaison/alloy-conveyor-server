@@ -16,7 +16,7 @@ import com.liaison.mailbox.enums.Protocol;
 
 /**
  * Factory class to instantiate MailBox Processors.
- *
+ * 
  * @author veerasamyn
  */
 public class MailBoxProcessorFactory {
@@ -30,7 +30,7 @@ public class MailBoxProcessorFactory {
 
 	/**
 	 * Factory to method to create instances for mailbox processor.
-	 *
+	 * 
 	 * @param processor
 	 *            The Processor Entity
 	 * @return The MailBox Processor instance.
@@ -39,7 +39,8 @@ public class MailBoxProcessorFactory {
 
 		MailBoxProcessorI mailBoxProcessor = null;
 
-		Protocol foundProtocolType = Protocol.findByCode(processor.getProcsrProtocol());
+		Protocol foundProtocolType = Protocol.findByCode(processor
+				.getProcsrProtocol());
 
 		if (ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
 
@@ -58,16 +59,17 @@ public class MailBoxProcessorFactory {
 				break;
 
 			case HTTP:
-				mailBoxProcessor = new HttpRemoteDownloader(processor);
+				mailBoxProcessor = new HTTPRemoteDownloader(processor);
 				break;
 			case HTTPS:
-				mailBoxProcessor = new HttpRemoteDownloader(processor);
+				mailBoxProcessor = new HTTPRemoteDownloader(processor);
 				break;
 			default:
 				break;
 
 			}
-		} else if (ProcessorType.REMOTEUPLOADER.equals(processor.getProcessorType())) {
+		} else if (ProcessorType.REMOTEUPLOADER.equals(processor
+				.getProcessorType())) {
 
 			switch (foundProtocolType) {
 
@@ -84,10 +86,10 @@ public class MailBoxProcessorFactory {
 				break;
 
 			case HTTP:
-				mailBoxProcessor = new HttpRemoteUploader(processor);
+				mailBoxProcessor = new HTTPRemoteUploader(processor);
 				break;
 			case HTTPS:
-				mailBoxProcessor = new HttpRemoteUploader(processor);
+				mailBoxProcessor = new HTTPRemoteUploader(processor);
 				break;
 			default:
 				break;
@@ -95,11 +97,14 @@ public class MailBoxProcessorFactory {
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new DirectorySweeperProcessor(processor);
-		/*} else if (ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType())) {
-			//mailBoxProcessor = new DropBoxProcessor(processor);
-		}*/
+			/*
+			 * } else if
+			 * (ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType
+			 * ())) { //mailBoxProcessor = new DropBoxProcessor(processor); }
+			 */
 
-	    } else if (ProcessorType.FILEWRITER.equals(processor.getProcessorType())) {
+		} else if (ProcessorType.FILEWRITER
+				.equals(processor.getProcessorType())) {
 			mailBoxProcessor = new FileWriter(processor);
 		}
 		return mailBoxProcessor;

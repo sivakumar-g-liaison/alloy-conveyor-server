@@ -35,7 +35,7 @@ public class RemoteProcessorPropertiesDTO {
 	private int retryInterval;
 	private String pipeLineID;
 	private String httpListenerPipeLineId;
-	private List<HttpOtherRequestHeaderDTO> otherRequestHeader;
+	private List<HTTPOtherRequestHeaderDTO> otherRequestHeader;
 	private boolean securedPayload;
 	private boolean handOverExecutionToJavaScript;
 	private boolean deleteFileAfterSweep;
@@ -137,11 +137,11 @@ public class RemoteProcessorPropertiesDTO {
 		this.encodingFormat = encodingFormat;
 	}
 
-	public List<HttpOtherRequestHeaderDTO> getOtherRequestHeader() {
+	public List<HTTPOtherRequestHeaderDTO> getOtherRequestHeader() {
 		return otherRequestHeader;
 	}
 
-	public void setOtherRequestHeader(List<HttpOtherRequestHeaderDTO> otherRequestHeader) {
+	public void setOtherRequestHeader(List<HTTPOtherRequestHeaderDTO> otherRequestHeader) {
 		this.otherRequestHeader = otherRequestHeader;
 	}
 

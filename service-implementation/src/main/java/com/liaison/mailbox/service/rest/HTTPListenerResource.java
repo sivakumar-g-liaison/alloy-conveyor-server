@@ -62,9 +62,11 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.processor.HTTPProcessor;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.util.HTTPProcessorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
@@ -85,9 +87,11 @@ import com.netflix.servo.monitor.Monitors;
 @Path("process")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.WILDCARD)
-public class HttpListener extends AuditedResource {
+public class HTTPListenerResource extends AuditedResource {
 
-	private static final Logger logger = LogManager.getLogger(HttpListener.class);
+	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
+	
+	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
@@ -97,14 +101,7 @@ public class HttpListener extends AuditedResource {
 
 	protected static final String HTTP_METHOD_POST = "POST";
 
-	protected static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
-	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
-	protected static final String CONFIGURATION_QUEUE_PROVIDER_URL = "g2.queueing.server.url";
-	protected static final String CONFIGURATION_QUEUE_NAME = "directory.sweeper.queue.name";
-	protected static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
-	private static final String AUTHENTICATION_HEADER_PREFIX = "Basic ";
-
-	public HttpListener() {
+	public HTTPListenerResource() {
 		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
 		MonitorRegistry monitorRegistry = DefaultMonitorRegistry.getInstance();
 		monitorRegistry.register(monitor);
@@ -157,24 +154,25 @@ public class HttpListener extends AuditedResource {
 				TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 				logger.debug("Starting sync processing");
 				try {
-					validateRequestSize(request);
+					HTTPProcessorUtil.validateRequestSize(request.getContentLength());
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
 
-					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+					Map <String,  String> httpListenerProperties = HTTPProcessorUtil.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
 					logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
-					if (isAuthenticationCheckRequired(httpListenerProperties)) {
-						authenticateRequestor(request);
+					if (HTTPProcessorUtil.isAuthenticationCheckRequired(httpListenerProperties)) {
+						HTTPProcessorUtil.authenticateRequestor(request
+								.getHeader(HTTP_HEADER_BASIC_AUTH));
 					}
 					logger.debug("constructed workticket");
 
 					WorkTicket workTicket  = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 					        getRequestHeaders(request), mailboxPguid, httpListenerProperties);
-
-					HttpResponse httpResponse = forwardRequest(workTicket, request, httpListenerProperties);
+					HTTPProcessor syncProcessor=new HTTPProcessor();
+					HttpResponse httpResponse=syncProcessor.forwardRequest(workTicket, request, httpListenerProperties);
 
 					//GLASS LOGGING BEGINS CORNER 1 //
 					glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
@@ -188,7 +186,7 @@ public class HttpListener extends AuditedResource {
 					//GLASS LOGGING ENDS//
 
 					ResponseBuilder builder = Response.ok();
-					copyResponseInfo(request, httpResponse, builder);
+					syncProcessor.copyResponseInfo(request, httpResponse, builder);
 					
 					//GLASS LOGGING BEGINS CORNER 4 //
 					glassMessage.setStatus(ExecutionState.COMPLETED);
@@ -263,17 +261,18 @@ public class HttpListener extends AuditedResource {
 
 				logger.debug("Starting async processing");
 				try {
-					validateRequestSize(request);
+					HTTPProcessorUtil.validateRequestSize(request.getContentLength());
 
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
 
-					Map <String,  String> httpListenerProperties = retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
+					Map <String,  String> httpListenerProperties = HTTPProcessorUtil.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
-					if (isAuthenticationCheckRequired(httpListenerProperties)) {
-						authenticateRequestor(request);
+					if (HTTPProcessorUtil.isAuthenticationCheckRequired(httpListenerProperties)) {
+						HTTPProcessorUtil.authenticateRequestor(request
+								.getHeader(HTTP_HEADER_BASIC_AUTH));
 					}
 
 					WorkTicket  workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
@@ -321,322 +320,6 @@ public class HttpListener extends AuditedResource {
 		}
 	}
 
-	/**
-	 * This method will validate the size of the request.
-	 *
-	 * @param request
-	 *            The HttpServletRequest
-	 */
-	protected void validateRequestSize(HttpServletRequest request) {
-		long contentLength = request.getContentLength();
-		DecryptableConfiguration config = LiaisonConfigurationFactory
-				.getConfiguration();
-		int maxRequestSize = config.getInt(CONFIGURATION_MAX_REQUEST_SIZE);
-
-		if (contentLength > maxRequestSize) {
-			throw new RuntimeException("Request has content length of "
-					+ contentLength
-					+ " which exceeds the configured maximum size of "
-					+ maxRequestSize);
-		}
-	}
-
-	protected void authenticateRequestor(HttpServletRequest request) {
-
-		// retrieving the authentication header from request
-		String basicAuthenticationHeader = request
-				.getHeader(HTTP_HEADER_BASIC_AUTH);
-		if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
-
-			// trim the prefix basic and get the username:password part
-			basicAuthenticationHeader = basicAuthenticationHeader.replaceFirst(
-					AUTHENTICATION_HEADER_PREFIX, "");
-			// decode the string to get username and password
-			String authenticationDetails = new String(
-					Base64.decodeBase64(basicAuthenticationHeader));
-			String[] authenticationCredentials = authenticationDetails
-					.split(":");
-
-			if (authenticationCredentials.length == 2) {
-
-				String loginId = authenticationCredentials[0];
-				// encode the password using base64 bcoz UM will expect a base64
-				// encoded token
-				String token = new String(
-						Base64.encodeBase64(authenticationCredentials[1]
-								.getBytes()));
-				// if both username and password is present call UM client to
-				// authenticate
-				UserManagementClient UMClient = new UserManagementClient();
-				UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD,
-						loginId, token);
-				UMClient.authenticate();
-				if (!UMClient.isSuccessful()) {
-					throw new RuntimeException(UMClient.getMessage());
-				}
-			} else {
-				throw new RuntimeException(
-						"Authorization Header does not contain UserName and Password");
-			}
-		} else {
-			throw new RuntimeException(
-					"Authorization Header not available in the Request");
-		}
-
-	}
-
-
-	/**
-	 * This method will persist payload in spectrum.
-	 *
-	 * @param sessionContext
-	 * @param request
-	 * @return HttpResponse
-	 * @throws Exception
-	 * @throws JAXBException
-	 */
-	protected HttpResponse forwardRequest(WorkTicket workTicket, HttpServletRequest request, Map <String, String> httpListenerProperties)
-			throws JAXBException, Exception {
-		logger.info("Starting to forward request...");
-
-		//persist payload in spectrum
-		StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
-		workTicket.setProcessMode(ProcessMode.SYNC);
-		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
-		HttpPost httpRequest = createHttpRequest(request);
-		httpRequest.setHeader("Content-type", ContentType.APPLICATION_JSON.getMimeType());
-		StringEntity requestBody =new StringEntity(workTicketJson);
-		httpRequest.setEntity(requestBody);
-		HttpClient httpClient = createHttpClient();
-		HttpResponse httpResponse = httpClient.execute(httpRequest);
-		return httpResponse;
-	}
-
-	/**
-	 * This method will create HttpClient.
-	 *
-	 * @return HttpClient
-	 */
-	protected HttpClient createHttpClient() {
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-		HttpClient httpClient = httpClientBuilder.build();
-		return httpClient;
-	}
-
-	/**
-	 * This method will create HttpPost request by given request.
-	 *
-	 * @return HttpPost
-	 * @throws Exception
-	 * @throws JAXBException
-	 */
-	protected HttpPost createHttpRequest(HttpServletRequest request) throws JAXBException, Exception {
-		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
-		logger.info("Forward request to:"+serviceBrokerSyncUri);
-		HttpPost post = new HttpPost(serviceBrokerSyncUri);
-		return post;
-	}
-
-	/**
-	 * This method will copy all Response Information.
-	 *
-	 * @param httpResponse
-	 * @param builder
-	 * @param globalProcessId
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 * @throws JAXBException
-	 */
-	protected void copyResponseInfo(HttpServletRequest request, HttpResponse httpResponse,
-			ResponseBuilder builder) throws IllegalStateException, IOException, JAXBException {
-
-
-
-		if (httpResponse.getStatusLine().getStatusCode() > 299) {
-			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}",httpResponse.getEntity().getContent());
-			WorkResult result = JAXBUtility.unmarshalFromJSON(httpResponse.getEntity().getContent(), WorkResult.class);
-			builder.status(result.getStatus());
-
-			//Sets the headers
-			Set<String> headers = result.getHeaderNames();
-
-			for (String name : headers) {
-				builder.header(name, result.getHeader(name));
-			}
-			//set global process id in the header
-			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
-
-			//If payload URI avail, reads payload from spectrum. Mostly it would be an error message payload
-			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-				if (responseInputStream != null) {
-					builder.entity(responseInputStream);
-				}
-			} else {
-				if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
-					builder.entity(result.getErrorMessage());
-				} else {
-					builder.entity(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-				}
-			}
-
-			//Content type
-			String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
-			if (contentType == null) {
-				builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, request.getContentType());
-			}
-
-	   	} else {
-
-			InputStream responseInputStream = httpResponse.getEntity().getContent();
-			WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
-
-			//sets status code from work result
-			builder.status(result.getStatus());
-
-			//Sets the headers
-			Set<String> headers = result.getHeaderNames();
-			for (String name : headers) {
-				builder.header(name, result.getHeader(name));
-			}
-			//set global process id in the header
-			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
-
-			//reads paylaod from spectrum
-			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-			   responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
-			   if (responseInputStream != null) {
-			       builder.entity(responseInputStream);
-			   }
-			}
-
-		   //Content type
-		   String contentType = result.getHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
-		   if (contentType == null) {
-		       builder.header(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE, request.getContentType());
-		   }
-
-	   	}
-
-	}
-
-	/**
-	 * This method will retrieve Response Content Length by given HttpResponse.
-	 *
-	 * @param httpResponse
-	 * @return responsecontentLength
-	 */
-	protected int getResponseContentLength(HttpResponse httpResponse) {
-		Header header = httpResponse.getFirstHeader(MailBoxConstants.HTTP_HEADER_CONTENT_LENGTH);
-
-		if (header == null) {
-			// TODO - this should be an error.
-			return 0;
-		}
-
-		String strLength = header.getValue();
-		int length = Integer.parseInt(strLength);
-
-		return length;
-	}
-
-	/**
-	 * This method will retrieve Response Content type by given httpresponse.
-	 *
-	 * @param httpResponse
-	 * @return ContentType
-	 */
-	protected ContentType getResponseContentType(HttpResponse httpResponse) {
-		Header header = httpResponse.getFirstHeader(MailBoxConstants.HTTP_HEADER_CONTENT_TYPE);
-
-		if (header == null) {
-			// TODO - this should be an error.
-			return null;
-		}
-
-		String strContentType = header.getValue();
-		ContentType contentType = ContentType.parse(strContentType);
-
-		return contentType;
-	}
-
-	/**
-	 * This method will retrieve Response headers by given httpresponse.
-	 *
-	 * @param httpResponse
-	 * @param builder
-	 */
-	protected void copyResponseHeaders(HttpResponse httpResponse,
-			ResponseBuilder builder) {
-		// Copy headers that start with the Gateway prefix.
-		Header[] headers = httpResponse.getAllHeaders();
-
-		for (Header header : headers) {
-			if (header.getName().regionMatches(true, 0, MailBoxConstants.GATEWAY_HEADER_PREFIX,
-					0, MailBoxConstants.GATEWAY_HEADER_PREFIX.length())) {
-				String name = header.getName();
-				name = name.substring(MailBoxConstants.GATEWAY_HEADER_PREFIX.length());
-				builder.header(name, header.getValue());
-			}
-		}
-	}
-
-	/**
-	 * This method will retrieve the Service Broker Uri from config.
-	 *
-	 * @return serviceBrokerUri
-	 */
-	protected String getServiceBrokerUriFromConfig() {
-		DecryptableConfiguration config = LiaisonConfigurationFactory
-				.getConfiguration();
-		String serviceBrokerUri = config
-				.getString(CONFIGURATION_SERVICE_BROKER_URI);
-
-		if ((serviceBrokerUri == null)
-				|| (serviceBrokerUri.trim().length() == 0)) {
-			throw new RuntimeException("Service Broker URI not configured ('"
-					+ CONFIGURATION_SERVICE_BROKER_URI
-					+ "'), cannot process sync");
-		}
-
-		return serviceBrokerUri;
-	}
-
-	/**
-	 * Method to retrieve the mailbox from the pguid and return the value of
-	 * HTTPListener propery "Http Listner Auth Check Required "
-	 *
-	 * @param mailboxpguid
-	 * @return
-	 * @throws Exception
-	 */
-	protected boolean isAuthenticationCheckRequired(Map <String, String> httpListenerProperties) {
-
-		boolean isAuthCheckRequired = true;
-		isAuthCheckRequired = Boolean.parseBoolean(httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
-		logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}", httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
-		return isAuthCheckRequired;
-	}
-
-	/**
-	 * Method to retrieve http listener properties of processor of specific type by given mailboxGuid
-	 *
-	 * @param mailboxGuid mailbox Pguid
-	 * @param isSync boolean specifying
-	 * @return
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	private Map <String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType) throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-
-		logger.info("retrieving the properties configured in httplistener of mailbox {}", mailboxGuid);
-		ProcessorConfigurationService procsrService = new ProcessorConfigurationService();
-		return procsrService.getHttpListenerProperties(mailboxGuid, processorType);
-
-	}
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {

@@ -43,11 +43,11 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author VNagarajan
- *
+ * 
  */
-public class SftpClient {
+public class SFTPClient {
 
-	private static final Logger LOGGER = LogManager.getLogger(HttpClient.class);
+	private static final Logger LOGGER = LogManager.getLogger(HTTPClient.class);
 
 	/**
 	 * @param processor
@@ -63,12 +63,12 @@ public class SftpClient {
 			int retryAttempts = 0;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
-				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)processor.getProperties();
+				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO) processor.getProperties();
 				url = sftpUploaderStaticProperties.getUrl();
 				connectionTimeout = sftpUploaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpUploaderStaticProperties.getRetryAttempts();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
-				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)processor.getProperties();
+				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO) processor.getProperties();
 				url = sftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = sftpDownloaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
@@ -87,11 +87,13 @@ public class SftpClient {
 
 			if ((loginCredential != null)) {
 
-			    // password has to be retrieved from KMS only if password is present in login credential
-			    // in case of sftp using keys, password will not be available and hence retrieval of
-			    // password from KMS is not valid in this case.
-				String passwordFromKMS = (!StringUtil.isNullOrEmptyAfterTrim(loginCredential.getCredsPassword())) ?
-				                        KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword()) : null;
+				// password has to be retrieved from KMS only if password is
+				// present in login credential
+				// in case of sftp using keys, password will not be available
+				// and hence retrieval of
+				// password from KMS is not valid in this case.
+				String passwordFromKMS = (!StringUtil.isNullOrEmptyAfterTrim(loginCredential.getCredsPassword())) ? KMSUtil
+						.getSecretFromKMS(loginCredential.getCredsPassword()) : null;
 
 				if (!MailBoxUtil.isEmpty(loginCredential.getCredsUsername())) {
 					sftpRequest.setUser(loginCredential.getCredsUsername());
@@ -117,11 +119,12 @@ public class SftpClient {
 					throw new MailBoxServicesException(Messages.SSHKEY_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
 				}
 
-				String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
-						+ ".txt";
+				String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString(
+						"ssh.private.key.temp.location")
+						+ sshKeyPairCredential.getCredsUri() + ".txt";
 				// write to a file
 				try (FileOutputStream out = new FileOutputStream(privateKeyPath)) {
-				    out.write(privateKeyStream);
+					out.write(privateKeyStream);
 				}
 				sftpRequest.setPrivateKeyPath(privateKeyPath);
 
@@ -130,8 +133,8 @@ public class SftpClient {
 			return sftpRequest;
 		} catch (JAXBException | IOException | LiaisonException | MailBoxServicesException
 				| SymmetricAlgorithmException | CertificateEncodingException | UnrecoverableKeyException
-				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException
-				| JSONException | CMSException | BootstrapingFailedException | IllegalAccessException | NoSuchFieldException e) {
+				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException | JSONException
+				| CMSException | BootstrapingFailedException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 

@@ -53,29 +53,29 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Http remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
- *
+ * 
  * @author OFS
  */
-public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
+public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 
-	private static final Logger LOGGER = LogManager.getLogger(HttpRemoteDownloader.class);
+	private static final Logger LOGGER = LogManager.getLogger(HTTPRemoteDownloader.class);
 
 	@SuppressWarnings("unused")
-	private HttpRemoteDownloader() {
+	private HTTPRemoteDownloader() {
 		// to force creation of instance only by passing the processor entity
 	}
 
-	public HttpRemoteDownloader(Processor processor) {
+	public HTTPRemoteDownloader(Processor processor) {
 		super(processor);
 		// this.configurationInstance = processor;
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) {
+	public void invoke(String executionId, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
-		
-		try {			
+
+		try {
 			// HTTPRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -86,22 +86,22 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				// HTTPRequest executed through Java
 				executeRequest();
 			}
-			
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
+
+		} catch (JAXBException | IOException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 *
+	 * 
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws JAXBException
-	 *
+	 * 
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
 	 * @throws KeyStoreException
@@ -114,71 +114,72 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws CMSException
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
-	 *
+	 * 
 	 */
 	protected void executeRequest() {
 
 		HTTPRequest request = (HTTPRequest) getClient();
 		ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096);
-        request.setOutputStream(responseStream);
+		request.setOutputStream(responseStream);
 
-        HTTPResponse response = null;
-        boolean failedStatus = false;
+		HTTPResponse response = null;
+		boolean failedStatus = false;
 
-		// Set the pay load value to http client input data for POST & PUT request
+		// Set the pay load value to http client input data for POST & PUT
+		// request
 		File[] files = null;
 
 		try {
 
 			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
-			    HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO)getProperties();
+				HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
 
-			    files = getFilesToUpload();
+				files = getFilesToUpload();
 				if (null != files) {
 
 					for (File entry : files) {
 
-					    try (InputStream contentStream = FileUtils.openInputStream(entry)) {
-					    	
-					    	String contentType = httpDownloaderStaticProperties.getContentType();
-					        request.inputData(contentStream, contentType);
+						try (InputStream contentStream = FileUtils.openInputStream(entry)) {
 
-		                    response = request.execute();
-		                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
-		                    if (response.getStatusCode() != 200) {
+							String contentType = httpDownloaderStaticProperties.getContentType();
+							request.inputData(contentStream, contentType);
 
-		                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-		                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+							response = request.execute();
+							LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(),
+									entry.getName());
+							if (response.getStatusCode() != 200) {
 
-		                        failedStatus = true;
-		                        delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
-		                        //continue;
+								LOGGER.info("The reponse code received is {} ", response.getStatusCode());
+								LOGGER.info("Execution failure for ", entry.getAbsolutePath());
 
-		                    } else {
+								failedStatus = true;
+								delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
+								// continue;
 
-		                        if (null != entry) {
-		                            delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
-		                        }
-		                    }
-					    }
+							} else {
+
+								if (null != entry) {
+									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
+								}
+							}
+						}
 					}
 					if (failedStatus) {
-	                    throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
-	                }
+						throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
+					}
 				}
 			} else {
-			    response = request.execute();
-		        writeResponseToMailBox(responseStream);
+				response = request.execute();
+				writeResponseToMailBox(responseStream);
 			}
 
-		} catch(MailBoxServicesException | IOException | JAXBException | LiaisonException 
-				| URISyntaxException | IllegalAccessException | NoSuchFieldException e) {
+		} catch (MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException
+				| IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 
 	}
-
 
 	@Override
 	public Object getClient() {
@@ -186,46 +187,48 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	/**
-     * Delegate method to archive the file.
-     *
-     * @param file
-     * @param locationName
-     * @param isError
-     * @throws IOException
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-     */
-    private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-    	
-    	HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
-    	String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION))?httpUploaderStaticProperties.getErrorFileLocation():httpUploaderStaticProperties.getProcessedFileLocation();
-        String fileLocation = replaceTokensInFolderPath(filePath);
-        if (MailBoxUtil.isEmpty(fileLocation)) {
-            archiveFile(file.getAbsolutePath(), isError);
-        } else {
-            archiveFile(file, fileLocation);
-        }
-    }
+	 * Delegate method to archive the file.
+	 * 
+	 * @param file
+	 * @param locationName
+	 * @param isError
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+
+		HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
+		String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION)) ? httpUploaderStaticProperties
+				.getErrorFileLocation() : httpUploaderStaticProperties.getProcessedFileLocation();
+		String fileLocation = replaceTokensInFolderPath(filePath);
+		if (MailBoxUtil.isEmpty(fileLocation)) {
+			archiveFile(file.getAbsolutePath(), isError);
+		} else {
+			archiveFile(file, fileLocation);
+		}
+	}
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation ) {
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cleanup() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	/**
@@ -242,8 +245,8 @@ public class HttpRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			createPathIfNotAvailable(configuredPath);
 
 		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
-					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED, configuredPath,
+					Response.Status.BAD_REQUEST, e.getMessage());
 		}
 
 	}

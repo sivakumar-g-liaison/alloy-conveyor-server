@@ -53,26 +53,27 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * Http remote uploader to perform push operation, also it has support methods for JavaScript.
- *
+ * Http remote uploader to perform push operation, also it has support methods
+ * for JavaScript.
+ * 
  * @author veerasamyn
  */
-public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
+public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
 
-	private static final Logger LOGGER = LogManager.getLogger(HttpRemoteUploader.class);
+	private static final Logger LOGGER = LogManager.getLogger(HTTPRemoteUploader.class);
 
 	@SuppressWarnings("unused")
-	private HttpRemoteUploader() {
+	private HTTPRemoteUploader() {
 		// to force creation of instance only by passing the processor entity
 	}
 
-	public HttpRemoteUploader(Processor configurationInstance) {
+	public HTTPRemoteUploader(Processor configurationInstance) {
 		super(configurationInstance);
 	}
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 *
+	 * 
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
@@ -90,11 +91,11 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CMSException
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
-	 *
+	 * 
 	 * @throws MailBoxConfigurationServicesException
-	 *
+	 * 
 	 */
-	public void executeRequest(String executionId,MailboxFSM fsm) {
+	public void executeRequest(String executionId, MailboxFSM fsm) {
 
 		HTTPRequest request = null;
 		HTTPResponse response = null;
@@ -102,32 +103,38 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		try {
 
-			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
+			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
 
-			// Set the pay load value to http client input data for POST & PUT request
+			// Set the pay load value to http client input data for POST & PUT
+			// request
 			File[] files = null;
 
 			// retrieve required properties
 			String httpVerb = httpUploaderStaticProperties.getHttpVerb();
 			String contentType = httpUploaderStaticProperties.getContentType();
 
-			if ("POST".equals(httpVerb)	|| "PUT".equals(httpVerb)) {
+			if ("POST".equals(httpVerb) || "PUT".equals(httpVerb)) {
 
 				files = getFilesToUpload();
 				if (null != files) {
 
 					FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 					Date lastCheckTime = new Date();
-					String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
+					String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(
+							MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 					for (File entry : files) {
 
-						//interrupt signal check has to be done only if execution Id is present
-						if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
+						// interrupt signal check has to be done only if
+						// execution Id is present
+						if (!StringUtil.isNullOrEmptyAfterTrim(executionId)
+								&& ((new Date().getTime() - lastCheckTime.getTime()) / 1000) > Long
+										.parseLong(constantInterval)) {
 							lastCheckTime = new Date();
-							if(eventDAO.isThereAInterruptSignal(executionId)) {
+							if (eventDAO.isThereAInterruptSignal(executionId)) {
 								LOGGER.info("##########################################################################");
-								LOGGER.info("The executor with execution id  "+executionId+" is gracefully interrupted");
+								LOGGER.info("The executor with execution id  " + executionId
+										+ " is gracefully interrupted");
 								LOGGER.info("#############################################################################");
 								fsm.createEvent(ExecutionEvents.INTERRUPTED, executionId);
 								fsm.handleEvent(fsm.createEvent(ExecutionEvents.INTERRUPTED));
@@ -138,27 +145,28 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 						try (InputStream contentStream = FileUtils.openInputStream(entry);
 								ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
 
-						    request = (HTTPRequest) getClient();
-		                    request.setOutputStream(responseStream);
-						    request.inputData(contentStream, contentType);
+							request = (HTTPRequest) getClient();
+							request.setOutputStream(responseStream);
+							request.inputData(contentStream, contentType);
 
-		                    response = request.execute();
-		                    LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(), entry.getName());
-		                    if (response.getStatusCode() != 200) {
+							response = request.execute();
+							LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(),
+									entry.getName());
+							if (response.getStatusCode() != 200) {
 
-		                        LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-		                        LOGGER.info("Execution failure for ",entry.getAbsolutePath());
+								LOGGER.info("The reponse code received is {} ", response.getStatusCode());
+								LOGGER.info("Execution failure for ", entry.getAbsolutePath());
 
-		                        failedStatus = true;
-		                        delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
-		                        //continue;
+								failedStatus = true;
+								delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
+								// continue;
 
-		                    } else {
+							} else {
 
-		                        if (null != entry) {
-		                            delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
-		                        }
-		                    }
+								if (null != entry) {
+									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
+								}
+							}
 						}
 
 					}
@@ -168,10 +176,11 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 				} else {
 					LOGGER.info("The given HTTP Uploader payload URI is Empty.");
-					throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
+					throw new MailBoxServicesException("The given payload configuration is Empty.",
+							Response.Status.CONFLICT);
 				}
 			}
-		} catch (JAXBException | IOException | LiaisonException |IllegalAccessException | NoSuchFieldException e) {
+		} catch (JAXBException | IOException | LiaisonException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -179,7 +188,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Delegate method to archive the file.
-	 *
+	 * 
 	 * @param file
 	 * @param locationName
 	 * @param isError
@@ -190,12 +199,13 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException, NoSuchFieldException,
-							SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+	private void delegateArchiveFile(File file, String locationName, boolean isError) throws IOException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
-		HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)getProperties();
-    	String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION))?httpUploaderStaticProperties.getErrorFileLocation():httpUploaderStaticProperties.getProcessedFileLocation();
-        String fileLocation = replaceTokensInFolderPath(filePath);
+		HTTPUploaderPropertiesDTO httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) getProperties();
+		String filePath = (locationName.equals(MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION)) ? httpUploaderStaticProperties
+				.getErrorFileLocation() : httpUploaderStaticProperties.getProcessedFileLocation();
+		String fileLocation = replaceTokensInFolderPath(filePath);
 
 		if (MailBoxUtil.isEmpty(fileLocation)) {
 			archiveFile(file.getAbsolutePath(), isError);
@@ -205,7 +215,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) {
+	public void invoke(String executionId, MailboxFSM fsm) {
 
 		try {
 
@@ -219,7 +229,7 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 				executeRequest(executionId, fsm);
 			}
 
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
+		} catch (JAXBException | IOException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -268,8 +278,8 @@ public class HttpRemoteUploader extends AbstractProcessor implements MailBoxProc
 			createPathIfNotAvailable(configuredPath);
 
 		} catch (IOException e) {
-			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED,
-					configuredPath, Response.Status.BAD_REQUEST,e.getMessage());
+			throw new MailBoxConfigurationServicesException(Messages.LOCAL_FOLDERS_CREATION_FAILED, configuredPath,
+					Response.Status.BAD_REQUEST, e.getMessage());
 		}
 
 	}

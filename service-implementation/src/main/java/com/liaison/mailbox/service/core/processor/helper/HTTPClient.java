@@ -45,12 +45,12 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author VNagarajan
- *
- * Helper class to construct http request
+ * 
+ *         Helper class to construct http request
  */
-public class HttpClient {
+public class HTTPClient {
 
-	private static final Logger LOGGER = LogManager.getLogger(HttpClient.class);
+	private static final Logger LOGGER = LogManager.getLogger(HTTPClient.class);
 
 	/**
 	 * @param processor
@@ -65,7 +65,6 @@ public class HttpClient {
 			// Create HTTPRequest and set the properties
 			HTTPRequest request = new HTTPRequest(null);
 			request.setLogger(LOGGER);
-
 
 			// Convert the json string to DTO
 			HTTPUploaderPropertiesDTO httpUploaderStaticProperties = null;
@@ -82,7 +81,7 @@ public class HttpClient {
 			int port = 0;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
-				httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO)processor.getProperties();
+				httpUploaderStaticProperties = (HTTPUploaderPropertiesDTO) processor.getProperties();
 				url = httpUploaderStaticProperties.getUrl();
 				connectionTimeout = httpUploaderStaticProperties.getConnectionTimeout();
 				socketTimeout = httpUploaderStaticProperties.getSocketTimeout();
@@ -94,7 +93,7 @@ public class HttpClient {
 				contentType = httpUploaderStaticProperties.getContentType();
 				port = httpUploaderStaticProperties.getPort();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
-				httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO)processor.getProperties();
+				httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) processor.getProperties();
 				url = httpDownloaderStaticProperties.getUrl();
 				connectionTimeout = httpDownloaderStaticProperties.getConnectionTimeout();
 				socketTimeout = httpDownloaderStaticProperties.getSocketTimeout();
@@ -125,9 +124,10 @@ public class HttpClient {
 
 			// Set the Other header to HttpRequest
 			if (otherRequestHeaders != null) {
-				for (String s : otherRequestHeaders.split(",") ) {
-					String headers [] = s.split(":");
-					if(headers.length == 2)request.addHeader(headers[0], headers[1]);
+				for (String s : otherRequestHeaders.split(",")) {
+					String headers[] = s.split(":");
+					if (headers.length == 2)
+						request.addHeader(headers[0], headers[1]);
 				}
 			}
 
@@ -139,11 +139,11 @@ public class HttpClient {
 			// Set the basic auth header for http request
 			Credential loginCredential = processor.getCredentialOfSpecificType(CredentialType.LOGIN_CREDENTIAL);
 
-			if ((loginCredential != null)
-					&& !MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
+			if ((loginCredential != null) && !MailBoxUtil.isEmpty(loginCredential.getCredsUsername())
 					&& !MailBoxUtil.isEmpty(loginCredential.getCredsPassword())) {
 				String passwordFromKMS = KMSUtil.getSecretFromKMS(loginCredential.getCredsPassword());
-				request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(), passwordFromKMS));
+				request.setAuthenticationHandler(new BasicAuthenticationHandler(loginCredential.getCredsUsername(),
+						passwordFromKMS));
 			}
 
 			// Configure keystore for HTTPS request
@@ -154,16 +154,20 @@ public class HttpClient {
 
 				if (trustStoreCredential != null) {
 
-					// If no certificate is configured then use default global trustoreid
-					String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri()))
-							? (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID))
+					// If no certificate is configured then use default global
+					// trustoreid
+					String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri())) ? (MailBoxUtil
+							.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID))
 							: trustStoreCredential.getCredsIdpUri();
 
 					try (InputStream instream = KMSUtil.fetchTrustStore(trustStoreID)) {
 
-						//if (instream == null) { //TODO Veera:do we need this check???
-						//	throw new MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED, Response.Status.BAD_REQUEST);
-						//}
+						// if (instream == null) { //TODO Veera:do we need this
+						// check???
+						// throw new
+						// MailBoxServicesException(Messages.CERTIFICATE_RETRIEVE_FAILED,
+						// Response.Status.BAD_REQUEST);
+						// }
 						trustStore.load(instream, null);
 					}
 
@@ -176,9 +180,9 @@ public class HttpClient {
 
 		} catch (MailBoxConfigurationServicesException | JAXBException | IOException | LiaisonException
 				| MailBoxServicesException | SymmetricAlgorithmException | UnrecoverableKeyException
-				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException
-				| JsonParseException | CMSException | BootstrapingFailedException | CertificateException
-				| JSONException | IllegalAccessException | NoSuchFieldException e) {
+				| OperatorCreationException | KeyStoreException | NoSuchAlgorithmException | JsonParseException
+				| CMSException | BootstrapingFailedException | CertificateException | JSONException
+				| IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}

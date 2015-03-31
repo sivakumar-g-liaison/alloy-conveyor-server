@@ -50,7 +50,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDo
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
-import com.liaison.mailbox.service.dto.configuration.request.HttpOtherRequestHeaderDTO;
+import com.liaison.mailbox.service.dto.configuration.request.HTTPOtherRequestHeaderDTO;
 import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorPropertiesDTO;
 
 /**
@@ -294,7 +294,7 @@ public class ProcessorPropertyJsonMapper {
             field.setAccessible(true);
             Object fieldValue = field.get(legacyProps);
             if (property.getName().equals(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS)) {
-                List<HttpOtherRequestHeaderDTO> otherRequestHeaders = (List<HttpOtherRequestHeaderDTO>) fieldValue;
+                List<HTTPOtherRequestHeaderDTO> otherRequestHeaders = (List<HTTPOtherRequestHeaderDTO>) fieldValue;
                 propertyValue = handleOtherRequestHeaders(otherRequestHeaders);
             } else {
                 propertyValue = fieldValue.toString();
@@ -736,7 +736,7 @@ public class ProcessorPropertyJsonMapper {
 			  fieldInOldJson.setAccessible(true);
 			  Object propertyValue = fieldInOldJson.get(source);
 			  if (field.getName().equals(MailBoxConstants.PROPERTY_OTHER_REQUEST_HEADERS)) {
-				  List <HttpOtherRequestHeaderDTO> otherRequestHeaders = (List<HttpOtherRequestHeaderDTO>)propertyValue;
+				  List <HTTPOtherRequestHeaderDTO> otherRequestHeaders = (List<HTTPOtherRequestHeaderDTO>)propertyValue;
 				  propertyValue = handleOtherRequestHeaders(otherRequestHeaders);
 			  }
 			  field.set(target, propertyValue);
@@ -752,9 +752,9 @@ public class ProcessorPropertyJsonMapper {
 	 * @param otherRequestHeaders
 	 * @return String Value of otherRequestHeader
 	 */
-	private static String handleOtherRequestHeaders(List <HttpOtherRequestHeaderDTO> otherRequestHeaders) {
+	private static String handleOtherRequestHeaders(List <HTTPOtherRequestHeaderDTO> otherRequestHeaders) {
 		StringBuilder otherRequestHeader = new StringBuilder();
-		for (HttpOtherRequestHeaderDTO header : otherRequestHeaders) {
+		for (HTTPOtherRequestHeaderDTO header : otherRequestHeaders) {
 			otherRequestHeader.append(header.getName()).append(":").append(header.getValue()).append(",");
 		}
 		String otherRequestHeaderStr = otherRequestHeader.toString();

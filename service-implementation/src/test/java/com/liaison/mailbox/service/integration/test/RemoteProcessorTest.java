@@ -46,7 +46,7 @@ import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
-import com.liaison.mailbox.service.core.processor.HttpRemoteDownloader;
+import com.liaison.mailbox.service.core.processor.HTTPRemoteDownloader;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -113,7 +113,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 
-		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
+		AbstractProcessor downloader = new HTTPRemoteDownloader(processor);
 		HTTPRequest request = (HTTPRequest) downloader.getClient();
 
 		Assert.assertEquals(200, request.execute().getStatusCode());
@@ -212,7 +212,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
-		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
+		AbstractProcessor downloader = new HTTPRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream);
 	}
 
@@ -254,7 +254,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
-		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
+		AbstractProcessor downloader = new HTTPRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream);
 	}
 
@@ -296,7 +296,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
-		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
+		AbstractProcessor downloader = new HTTPRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream,
 				"test" + System.nanoTime() + ".txt");
 	}
@@ -340,7 +340,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
-		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
+		AbstractProcessor downloader = new HTTPRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream,
 				"test" + System.nanoTime() + ".txt");
 	}
@@ -376,7 +376,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(4096);
 		stream.write(test.getBytes());
 
-		AbstractProcessor downloader = new HttpRemoteDownloader(processor);
+		AbstractProcessor downloader = new HTTPRemoteDownloader(processor);
 		downloader.writeResponseToMailBox(stream,
 				"test file name" + System.nanoTime() + ".txt");
 

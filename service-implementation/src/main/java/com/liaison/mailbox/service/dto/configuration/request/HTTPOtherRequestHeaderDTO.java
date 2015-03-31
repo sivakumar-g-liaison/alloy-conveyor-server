@@ -13,7 +13,7 @@ package com.liaison.mailbox.service.dto.configuration.request;
  * @author OFS
  * 
  */
-public class HttpOtherRequestHeaderDTO {
+public class HTTPOtherRequestHeaderDTO {
 
 	private String name;
 	private String value;

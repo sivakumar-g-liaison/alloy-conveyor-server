@@ -12,34 +12,40 @@ package com.liaison.mailbox.dtdm.dao;
 import java.io.Serializable;
 
 /**
- *
+ * 
  * @author OFS
- *
+ * 
  */
 public class FilterObject implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    public String field;
-    public String getField() {
-        return field;
-    }
-    public void setField(String field) {
-        this.field = field;
-    }
-    public String getText() {
-        return text;
-    }
-    public void setText(String text) {
-        this.text = text;
-    }
-    public boolean isMultiselect() {
-        return multiselect;
-    }
-    public void setMultiselect(boolean multiselect) {
-        this.multiselect = multiselect;
-    }
-    public String text;
-    public boolean multiselect;
+	public String field;
+	public String text;
+	public boolean multiselect;
+
+	public String getField() {
+		return field;
+	}
+
+	public void setField(String field) {
+		this.field = field;
+	}
+
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	public boolean isMultiselect() {
+		return multiselect;
+	}
+
+	public void setMultiselect(boolean multiselect) {
+		this.multiselect = multiselect;
+	}
 
 }

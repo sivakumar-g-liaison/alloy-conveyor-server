@@ -37,15 +37,15 @@ public class ClientFactory {
 		switch(procsrProtocol.toLowerCase()) {
 
 			case HTTP:
-				return HttpClient.getClient(processorService);
+				return HTTPClient.getClient(processorService);
 			case HTTPS:
-				return HttpClient.getClient(processorService);
+				return HTTPClient.getClient(processorService);
 			case FTP:
 				return FTPSClient.getClient(processorService);
 			case FTPS:
 				return FTPSClient.getClient(processorService);
 			case SFTP:
-				return SftpClient.getClient(processorService);
+				return SFTPClient.getClient(processorService);
 			default: //It won't happen.
 				return null;
 		}
