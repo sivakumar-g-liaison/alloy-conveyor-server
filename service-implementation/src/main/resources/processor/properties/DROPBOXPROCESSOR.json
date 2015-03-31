@@ -7,7 +7,7 @@
     "staticProperties": [
        {
             "name":"httpListenerPipeLineId",
-            "displayName" : "httpListenerPipeLineId",
+            "displayName" : "PipelineId",
             "value":"",
             "type":"textarea",
             "readOnly":true,
@@ -23,7 +23,7 @@
          },
          {
             "name":"securedPayload",
-            "displayName" : "securedPayload",
+            "displayName" : "Encrypt Payload",
             "value":"true",
             "type":"select",
             "mandatory":true,

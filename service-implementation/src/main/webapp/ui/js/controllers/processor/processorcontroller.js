@@ -505,7 +505,9 @@ var rest = myApp.controller(
             $scope.saveProcessor = function () {		    
 			
 				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];
-                $scope.processor.processorPropertiesInTemplateJson.folderProperties = [];					
+                $scope.processor.processorPropertiesInTemplateJson.folderProperties = [];
+                
+                //add static properties	
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
                      if ($scope.propertiesAddedToProcessor[i].name === "") {
@@ -514,17 +516,11 @@ var rest = myApp.controller(
 					      property.value = '';
 					}				
 					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
-                }
-				for (var i = 0; i < $scope.availableProperties.length; i++) {
-                    var property = $scope.availableProperties[i];
-                    if ($scope.availableProperties[i].name === "") {
-				    	 continue;				    	 
-				     } else if (property.valueProvided === false && property.mandatory === false) {
-					      property.value = '';
-					 }						
-					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
-                }
+                }                
+                $scope.processor.processorPropertiesInTemplateJson.staticProperties = 
+    				$scope.processor.processorPropertiesInTemplateJson.staticProperties.concat($scope.availableProperties);
 				
+				//add folder properties
 				for (var i = 0; i < $scope.folderAddedToProcessor.length; i++) {
 				     var property = $scope.folderAddedToProcessor[i];
 					 if ($scope.folderAddedToProcessor[i].folderURI === "") {
@@ -533,16 +529,16 @@ var rest = myApp.controller(
 					      property.folderURI = '';
 					}
                     $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);						
-				}
-				for (var i = 0; i < $scope.folderAvailableProperties.length; i++) {				     				  
-                    $scope.processor.processorPropertiesInTemplateJson.folderProperties.push($scope.folderAvailableProperties[i]);						
-				}
+				}				
+				$scope.processor.processorPropertiesInTemplateJson.folderProperties = 
+				$scope.processor.processorPropertiesInTemplateJson.folderProperties.concat($scope.folderAvailableProperties);
 				
                 $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
 				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
 				$scope.processor.processorPropertiesInTemplateJson.protocol = $scope.processor.protocol.value;
 				$scope.processor.processorPropertiesInTemplateJson.displayName = $scope.procsrType.key;
                 
+				//add credential properties
                 for (var i = 0; i < $scope.processorCredProperties.length; i++) {
                     var credObj = $scope.processorCredProperties[i];
                     delete credObj.passwordDirtyState;
@@ -880,20 +876,23 @@ var rest = myApp.controller(
 			};
 			
 			$scope.resetProcessorType = function(proceesorType) {
-				  $scope.selectedProcessorType = proceesorType.value;
-				  $scope.initialSetUp();			  
-				if ($scope.selectedProcessorType === 'SWEEPER') {
-                    $scope.isProcessorTypeSweeper = true;
-                    $scope.isProcessorTypeHTTPListener = false;
-                    $scope.isProcessorTypeFileWriter = false;
-                    $scope.isProcessorTypeDropbox = false;
-                    $scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options,$scope.selectedProcessorType)];
-                    $rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
-                    $scope.separateProperties(data.processorDefinition.staticProperties);
-                    $scope.separateFolderProperties(data.processorDefinition.folderProperties);	
-                    $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});	
-				} else if ($scope.selectedProcessorType === 'HTTPSYNCPROCESSOR' || $scope.selectedProcessorType === 'HTTPASYNCPROCESSOR') {
+			    $scope.selectedProcessorType = proceesorType.value;
+			    $scope.initialSetUp();
+                switch ($scope.selectedProcessorType) {
+                  case "SWEEPER":
+					$scope.isProcessorTypeSweeper = true;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options,$scope.selectedProcessorType)];
+					$rootScope.restService.get('data/processor/properties/sweeper.json', function (data) {                    
+					$scope.separateProperties(data.processorDefinition.staticProperties);
+					$scope.separateFolderProperties(data.processorDefinition.folderProperties);	
+					$scope.processorCredProperties = data.processorDefinition.credentialProperties;
+					});
+					break;
+                  case "HTTPSYNCPROCESSOR": 
+				  case "HTTPASYNCPROCESSOR": 				 
 					$scope.isProcessorTypeSweeper = false;
 					$scope.isProcessorTypeHTTPListener = true;
 					$scope.isProcessorTypeFileWriter = false;
@@ -901,9 +900,10 @@ var rest = myApp.controller(
 					$scope.processor.protocol = $scope.initialProcessorData.supportedProcessors.options[getIndexOfValue($scope.initialProcessorData.supportedProcessors.options, $scope.selectedProcessorType)];
 					$rootScope.restService.get('data/processor/properties/httpsyncAndAsync.json', function (data) {						
 					  $scope.separateProperties(data.processorDefinition.staticProperties);
-                      $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+					  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
 					});	
-				} else if ($scope.selectedProcessorType === 'FILEWRITER') {
+					break;
+				  case "FILEWRITER": 				
 					$scope.isProcessorTypeSweeper = false;
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeDropbox = false;
@@ -912,8 +912,9 @@ var rest = myApp.controller(
 				    $rootScope.restService.get('data/processor/properties/fileWriter.json', function (data) {				  
 					  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});	
-				} else if ($scope.selectedProcessorType === 'DROPBOXPROCESSOR') {
+					});
+                    break;
+                  case "DROPBOXPROCESSOR":			
 					$scope.isProcessorTypeSweeper = false;
 					$scope.isProcessorTypeHTTPListener = false;
 					$scope.isProcessorTypeFileWriter = false;
@@ -922,11 +923,14 @@ var rest = myApp.controller(
 					$rootScope.restService.get('data/processor/properties/dropboxProcessor.json', function (data) {					
 					  $scope.separateProperties(data.processorDefinition.staticProperties);		
                       $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-					});	
-				} else  {
+					});
+                    break;
+				  default:
 					$scope.resetProtocol($scope.processor.protocol);
-				} 
+				    break;
+			    }		
                 $scope.$broadcast("resetCredentialSection");
+				
 			};
 			$scope.resetProtocol = function(potocolType) {
 			
@@ -940,59 +944,80 @@ var rest = myApp.controller(
 				 if (!$scope.processor.protocol) {
 					 $scope.processor.protocol = $scope.initialProcessorData.supportedProtocols.options[0];
 					 protocalName = $scope.processor.protocol.value;
-				 }	
-				if ($scope.selectedProcessorType == 'REMOTEDOWNLOADER') {                     				 
-					 if (protocalName == 'SFTP') {
-					    $rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
-						  $scope.separateProperties(data.processorDefinition.staticProperties);
-						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-				       });	
-					 } else if (protocalName == 'FTP') {
-					    $rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
+				 }
+              	 switch ($scope.selectedProcessorType) {
+				   case "REMOTEDOWNLOADER":
+				       switch (protocalName) {
+							case "SFTP":
+								$rootScope.restService.get('data/processor/properties/sftpdownloader.json', function (data) {					
+								  $scope.separateProperties(data.processorDefinition.staticProperties);
+								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+								});
+								break;
+							case "FTP":					  
+								$rootScope.restService.get('data/processor/properties/ftpdownloader.json', function (data) {						
+								  $scope.separateProperties(data.processorDefinition.staticProperties);
+								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+								});
+								break;
+							case "FTPS":				
+								$rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
+								  $scope.separateProperties(data.processorDefinition.staticProperties);
+								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+								});
+								break;
+							case "HTTP":
+							case "HTTPS":
+								$rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {				        
+								  $scope.separateProperties(data.processorDefinition.staticProperties);
+								  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+								  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+								});
+								break;
+							default:	
+							   break;
+						}
+					  break;	
+				  case "REMOTEUPLOADER":				
+					 switch (protocalName) {						
+						case "SFTP":
+							$rootScope.restService.get('data/processor/properties/sftpuploader.json', function (data) {				        
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
 							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                              $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-						});
-					 } else if (protocalName == 'FTPS') {
-					    $rootScope.restService.get('data/processor/properties/ftpsdownloader.json', function (data) {							
+							  $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
+						   });
+						   break;
+						case "FTP":					
+							$rootScope.restService.get('data/processor/properties/ftpuploader.json', function (data) {				        
 							  $scope.separateProperties(data.processorDefinition.staticProperties);
 							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                              $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-						});
-					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
-					    $rootScope.restService.get('data/processor/properties/httpdownloader.json', function (data) {				        
-						  $scope.separateProperties(data.processorDefinition.staticProperties);
-						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-						});
-					 }			  			
-				} else if ($scope.selectedProcessorType == 'REMOTEUPLOADER') {					
-                    if (protocalName == 'SFTP') {
-					    $rootScope.restService.get('data/processor/properties/sftpuploader.json', function (data) {				        
-						  $scope.separateProperties(data.processorDefinition.staticProperties);
-						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;   
-				       });	
-					 } else if (protocalName == 'FTP') {
-					    $rootScope.restService.get('data/processor/properties/ftpuploader.json', function (data) {				        
-						  $scope.separateProperties(data.processorDefinition.staticProperties);
-						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-						});
-					 } else if (protocalName == 'FTPS') {
-					    $rootScope.restService.get('data/processor/properties/ftpsuploader.json', function (data) {					       
-						  $scope.separateProperties(data.processorDefinition.staticProperties);
-						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-						});
-					 } else if (protocalName == 'HTTP' || protocalName == 'HTTPS') {
-					    $rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {					       
-						  $scope.separateProperties(data.processorDefinition.staticProperties);
-						  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
-                          $scope.processorCredProperties = data.processorDefinition.credentialProperties;
-						});
-					 }				 
+							  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+							});
+							break;
+						case "FTPS":					
+							$rootScope.restService.get('data/processor/properties/ftpsuploader.json', function (data) {					       
+							  $scope.separateProperties(data.processorDefinition.staticProperties);
+							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+							  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+							});
+							break;
+						case "HTTP":
+						case "HTTPS":					
+							$rootScope.restService.get('data/processor/properties/httpuploader.json', function (data) {					       
+							  $scope.separateProperties(data.processorDefinition.staticProperties);
+							  $scope.separateFolderProperties(data.processorDefinition.folderProperties);
+							  $scope.processorCredProperties = data.processorDefinition.credentialProperties;
+							});
+							break;
+						default:
+						   break;
+				     }
+                    break;
+			      default:
+				    break;				   
 				}
                 //GMB-201
                 if(protocalName === "FTPS" || protocalName === "HTTPS") {
