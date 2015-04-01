@@ -86,11 +86,14 @@ public class WorkTicketUtil {
                     throw new MailBoxServicesException("The global process id is invalid", Response.Status.BAD_REQUEST);
                 } else {
                     workTicket.setGlobalProcessId(globalProcessId);
+                   
                 }
 
             } else {
                 workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
             }
+            
+            LOGGER.debug("The GPID set in workticket is {}", workTicket.getGlobalProcessId());
 
     }
 
