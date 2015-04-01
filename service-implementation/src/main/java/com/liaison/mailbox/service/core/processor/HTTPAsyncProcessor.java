@@ -22,7 +22,7 @@ public class HTTPAsyncProcessor extends HTTPAbstractProcessor{
 	public void processWorkTicket(WorkTicket workTicket,String mailboxPguid){
 		
 		try {
-			WorkTicketUtil.constructMetaDataJson(workTicket);
+			WorkTicketUtil.postWrkTcktToQ(workTicket);
 			//GLASS LOGGING BEGINS//
 			TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 			GlassMessage glassMessage = new GlassMessage();
@@ -30,7 +30,7 @@ public class HTTPAsyncProcessor extends HTTPAbstractProcessor{
 			glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
 			glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 			glassMessage.setMailboxId(mailboxPguid);
-			glassMessage.setStatus(ExecutionState.STAGED);
+			glassMessage.setStatus(ExecutionState.QUEUED);
 			glassMessage.setPipelineId(workTicket.getPipelineId());
 			glassMessage.setInAgent(GatewayType.REST);
 			glassLogger.logToGlass(glassMessage);

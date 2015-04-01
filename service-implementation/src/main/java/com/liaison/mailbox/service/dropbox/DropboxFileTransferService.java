@@ -246,7 +246,7 @@ public class DropboxFileTransferService {
 		LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-		WorkTicketUtil.constructMetaDataJson(workTicket);
+		WorkTicketUtil.postWrkTcktToQ(workTicket);
 	}
 
 	/**

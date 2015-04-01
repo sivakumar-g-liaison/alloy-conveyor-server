@@ -38,11 +38,13 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.HTTPAsyncProcessor;
 import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
@@ -131,6 +133,12 @@ public class HTTPListenerResource extends AuditedResource {
 				serviceCallCounter.incrementAndGet();
 				GlassMessage glassMessage = new GlassMessage();
 				TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+				glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
+				glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
+				glassMessage.setMailboxId(mailboxPguid);
+				glassMessage.setStatus(ExecutionState.STAGED);
+				glassMessage.setInAgent(GatewayType.REST);
+				
 				logger.debug("Starting sync processing");
 				try {
 					HTTPSyncProcessor syncProcessor=new HTTPSyncProcessor();
@@ -150,9 +158,20 @@ public class HTTPListenerResource extends AuditedResource {
 					logger.debug("constructed workticket");
 
 					WorkTicket workTicket  = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-					        getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+																				   getRequestHeaders(request), 
+																				   mailboxPguid, 
+																				   httpListenerProperties);
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassLogger.logToGlass(glassMessage); //CORNER 1 LOGGING
+					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(), httpListenerProperties,request.getContentType(),mailboxPguid);
 					
-					return syncProcessor.forwardRequest(workTicket, request.getInputStream(), httpListenerProperties,request.getContentType(),mailboxPguid);
+					// GLASS LOGGING BEGINS CORNER 4 //
+					glassMessage.setStatus(ExecutionState.COMPLETED);
+					glassLogger.logToGlass(glassMessage);
+					// GLASS LOGGING BEGINS CORNER 4 //
+					
+					return syncResponse;
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);					
 					glassMessage.setStatus(ExecutionState.FAILED);

@@ -192,7 +192,7 @@ public class MailBoxService {
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public void executeProcessor(String request) {
+	public void executeProcessor(String triggerProfileRequest) {
 
 		Processor processor = null;
 		ProcessorExecutionState processorExecutionState = null;
@@ -208,7 +208,7 @@ public class MailBoxService {
 			LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");			
 			
 
-			TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, TriggerProcessorRequestDTO.class);
+			TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest, TriggerProcessorRequestDTO.class);
 
 			// validates mandatory value.
 			processorId = dto.getProcessorId();

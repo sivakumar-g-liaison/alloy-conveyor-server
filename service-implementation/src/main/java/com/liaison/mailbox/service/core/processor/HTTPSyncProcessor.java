@@ -18,10 +18,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
@@ -50,58 +48,42 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 	 * @throws Exception
 	 * @throws JAXBException
 	 */
-	public Response forwardRequest(WorkTicket workTicket, InputStream inputStream,
-			Map<String, String> httpListenerProperties, String contentType, String mailboxPguid) throws JAXBException,
-			Exception {
+	public Response processRequest(WorkTicket workTicket, InputStream inputStream,
+			Map<String, String> httpListenerProperties, String contentType, String mailboxPguid) throws Exception {
 		logger.info("Starting to forward request...");
 
 		// persist payload in spectrum
 		StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
 		workTicket.setProcessMode(ProcessMode.SYNC);
-		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
-		String serviceBrokerSyncUri = getServiceBrokerUriFromConfig();
-		logger.info("Forward request to:" + serviceBrokerSyncUri);
+		
+		String serviceBrokerSyncUri = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
+		if(serviceBrokerSyncUri.isEmpty()){
+			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
+		}
+		
 		HttpPost httpRequest = new HttpPost(serviceBrokerSyncUri);
 		httpRequest.setHeader("Content-type", ContentType.APPLICATION_JSON.getMimeType());
-		StringEntity requestBody = new StringEntity(workTicketJson);
+		StringEntity requestBody = new StringEntity(JAXBUtility.marshalToJSON(workTicket));
 		httpRequest.setEntity(requestBody);
 		HttpClient httpClient = createHttpClient();
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
-		return logGlassMessages(httpResponse, contentType, workTicket, mailboxPguid);
-	 
-	}
-
-	private Response logGlassMessages(HttpResponse httpResponse, String contentType, WorkTicket workTicket,
-			String mailboxPguid) {
+		
 		GlassMessage glassMessage = new GlassMessage();
 		TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-		// GLASS LOGGING BEGINS CORNER 1 //
+		// GLASS LOGGING BEGINS CORNER 2 //
 		glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
 		glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
 		glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 		glassMessage.setMailboxId(mailboxPguid);
-		glassMessage.setStatus(ExecutionState.STAGED);
+		glassMessage.setStatus(ExecutionState.QUEUED);
 		glassMessage.setPipelineId(workTicket.getPipelineId());
 		glassMessage.setInAgent(GatewayType.REST);
 		glassLogger.logToGlass(glassMessage);
 		// GLASS LOGGING ENDS//
-
-		ResponseBuilder builder = Response.ok();
-		try {
-			copyResponseInfo(contentType, httpResponse, builder);
-		} catch (IllegalStateException | IOException | JAXBException e) {
-			logger.error(e.getMessage(), e);					
-			glassMessage.setStatus(ExecutionState.FAILED);
-			glassLogger.logToGlass(glassMessage);					
-			//throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-			throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-		}
-
-		// GLASS LOGGING BEGINS CORNER 4 //
-		glassMessage.setStatus(ExecutionState.COMPLETED);
-		glassLogger.logToGlass(glassMessage);
-		// GLASS LOGGING BEGINS CORNER 4 //
-		return builder.build();
+		
+		return buildResponse(contentType, httpResponse);
+		
+	
 	}
 
 	/**
@@ -115,24 +97,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 		return httpClient;
 	}
 
-	/**
-	 * This method will retrieve the Service Broker Uri from config.
-	 * 
-	 * @return serviceBrokerUri
-	 */
-	private String getServiceBrokerUriFromConfig() {
-		DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
-
-		String serviceBrokerUri = config.getString(CONFIGURATION_SERVICE_BROKER_URI);
-
-		if ((serviceBrokerUri == null) || (serviceBrokerUri.trim().length() == 0)) {
-			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI
-					+ "'), cannot process sync");
-		}
-
-		return serviceBrokerUri;
-	}
-
+	
 	/**
 	 * This method will copy all Response Information.
 	 * 
@@ -143,9 +108,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public void copyResponseInfo(String reqContentType, HttpResponse httpResponse, ResponseBuilder builder)
+	private Response buildResponse(String reqContentType, HttpResponse httpResponse)
 			throws IllegalStateException, IOException, JAXBException {
 
+		ResponseBuilder builder = Response.ok(); 
 		if (httpResponse.getStatusLine().getStatusCode() > 299) {
 			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}", httpResponse.getEntity()
 					.getContent());
@@ -213,7 +179,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 			}
 
 		}
-
+	return builder.build();
 	}
-
+ 
 }

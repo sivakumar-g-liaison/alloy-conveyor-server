@@ -58,7 +58,7 @@ public class WorkTicketUtil {
 		return pipelineId;
 	}
 
-	public static void constructMetaDataJson(WorkTicket workTicket) throws Exception {
+	public static void postWrkTcktToQ(WorkTicket workTicket) throws Exception {
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		postToQueue(workTicketJson);
 	}
