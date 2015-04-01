@@ -82,6 +82,8 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 	private String pipeLineID;
 	private  List<Path> inProgressFiles = new ArrayList<>();
+	TransactionVisibilityClient glassLogger = null;
+	GlassMessage glassMessage = null;
 
 	public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
@@ -96,8 +98,6 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		super(configurationInstance);
 	}
 
-	TransactionVisibilityClient glassLogger = null;
-	GlassMessage glassMessage = null;
 
 	@Override
 	public void invoke(String executionId,MailboxFSM fsm) {

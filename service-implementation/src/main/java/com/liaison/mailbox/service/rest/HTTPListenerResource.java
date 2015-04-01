@@ -11,9 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,19 +24,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,28 +38,18 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.GatewayType;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
-import com.liaison.dto.queue.WorkResult;
 import com.liaison.dto.queue.WorkTicket;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
-import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.core.processor.HTTPProcessor;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.core.processor.HTTPAsyncProcessor;
+import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
-import com.liaison.mailbox.service.util.HTTPProcessorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
-import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.MonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -154,45 +133,26 @@ public class HTTPListenerResource extends AuditedResource {
 				TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 				logger.debug("Starting sync processing");
 				try {
-					HTTPProcessorUtil.validateRequestSize(request.getContentLength());
+					HTTPSyncProcessor syncProcessor=new HTTPSyncProcessor();
+					syncProcessor.validateRequestSize(request.getContentLength());
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
 
-					Map <String,  String> httpListenerProperties = HTTPProcessorUtil.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+					Map <String,  String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
 					logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
-					if (HTTPProcessorUtil.isAuthenticationCheckRequired(httpListenerProperties)) {
-						HTTPProcessorUtil.authenticateRequestor(request
+					if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
+						syncProcessor.authenticateRequestor(request
 								.getHeader(HTTP_HEADER_BASIC_AUTH));
 					}
 					logger.debug("constructed workticket");
 
 					WorkTicket workTicket  = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 					        getRequestHeaders(request), mailboxPguid, httpListenerProperties);
-					HTTPProcessor syncProcessor=new HTTPProcessor();
-					HttpResponse httpResponse=syncProcessor.forwardRequest(workTicket, request, httpListenerProperties);
-
-					//GLASS LOGGING BEGINS CORNER 1 //
-					glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
-					glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
-					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-					glassMessage.setMailboxId(mailboxPguid);
-					glassMessage.setStatus(ExecutionState.STAGED);
-					glassMessage.setPipelineId(workTicket.getPipelineId());
-					glassMessage.setInAgent(GatewayType.REST);
-					glassLogger.logToGlass(glassMessage);
-					//GLASS LOGGING ENDS//
-
-					ResponseBuilder builder = Response.ok();
-					syncProcessor.copyResponseInfo(request, httpResponse, builder);
 					
-					//GLASS LOGGING BEGINS CORNER 4 //
-					glassMessage.setStatus(ExecutionState.COMPLETED);
-					glassLogger.logToGlass(glassMessage);
-					//GLASS LOGGING BEGINS CORNER 4 //
-					return builder.build();
+					return syncProcessor.forwardRequest(workTicket, request.getInputStream(), httpListenerProperties,request.getContentType(),mailboxPguid);
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);					
 					glassMessage.setStatus(ExecutionState.FAILED);
@@ -261,39 +221,25 @@ public class HTTPListenerResource extends AuditedResource {
 
 				logger.debug("Starting async processing");
 				try {
-					HTTPProcessorUtil.validateRequestSize(request.getContentLength());
-
+					HTTPAsyncProcessor asyncProcessor=new HTTPAsyncProcessor();
+					asyncProcessor.validateRequestSize(request.getContentLength());
 					if(StringUtils.isEmpty(mailboxPguid)){
 						throw new RuntimeException(	"Mailbox ID is not passed as a query param (mailboxId) ");
 					}
-
-					Map <String,  String> httpListenerProperties = HTTPProcessorUtil.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
+					Map <String,  String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
 					// authentication should happen only if the property
 					// "Http Listner Auth Check Required" is true
-					if (HTTPProcessorUtil.isAuthenticationCheckRequired(httpListenerProperties)) {
-						HTTPProcessorUtil.authenticateRequestor(request
+					logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}", mailboxPguid);
+					if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
+						asyncProcessor.authenticateRequestor(request
 								.getHeader(HTTP_HEADER_BASIC_AUTH));
 					}
-
 					WorkTicket  workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
                             getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
-					WorkTicketUtil.constructMetaDataJson(workTicket);
-
-					//GLASS LOGGING BEGINS//
-					TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-					GlassMessage glassMessage = new GlassMessage();
-					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
-					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
-					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-					glassMessage.setMailboxId(mailboxPguid);
-					glassMessage.setStatus(ExecutionState.STAGED);
-					glassMessage.setPipelineId(workTicket.getPipelineId());
-					glassMessage.setInAgent(GatewayType.REST);
-					glassLogger.logToGlass(glassMessage);
-					//GLASS LOGGING ENDS//
-
+					asyncProcessor.processWorkTicket(workTicket,mailboxPguid);
+					
 					return Response
 							.ok()
 							.status(Status.ACCEPTED)

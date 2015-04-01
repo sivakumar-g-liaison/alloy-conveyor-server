@@ -1,4 +1,4 @@
-package com.liaison.mailbox.service.util;
+package com.liaison.mailbox.service.core.processor;
 
 import java.util.Map;
 
@@ -13,10 +13,11 @@ import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.rest.HTTPListenerResource;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 
-public class HTTPProcessorUtil {
-
+public abstract class HTTPAbstractProcessor {
+	
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
 	private static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
@@ -28,7 +29,7 @@ public class HTTPProcessorUtil {
 	 * @param request
 	 *            The HttpServletRequest
 	 */
-	public static void validateRequestSize(long contentLength) {
+	public  void validateRequestSize(long contentLength) {
 		DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
 		int maxRequestSize = config.getInt(CONFIGURATION_MAX_REQUEST_SIZE);
 
@@ -38,7 +39,7 @@ public class HTTPProcessorUtil {
 		}
 	}
 
-	public static void authenticateRequestor(String basicAuthenticationHeader) {
+	public  void authenticateRequestor(String basicAuthenticationHeader) {
 
 		if (!MailBoxUtil.isEmpty(basicAuthenticationHeader)) {
 
@@ -86,7 +87,7 @@ public class HTTPProcessorUtil {
 	 * @throws NoSuchFieldException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public static Map<String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType)
+	public  Map<String, String> retrieveHttpListenerProperties(String mailboxGuid, ProcessorType processorType)
 			throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException {
 
@@ -104,7 +105,7 @@ public class HTTPProcessorUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean isAuthenticationCheckRequired(Map<String, String> httpListenerProperties) {
+	public  boolean isAuthenticationCheckRequired(Map<String, String> httpListenerProperties) {
 
 		boolean isAuthCheckRequired = true;
 		isAuthCheckRequired = Boolean
@@ -113,5 +114,6 @@ public class HTTPProcessorUtil {
 				httpListenerProperties.get(MailBoxConstants.HTTPLISTENER_AUTH_CHECK));
 		return isAuthCheckRequired;
 	}
+
 
 }
