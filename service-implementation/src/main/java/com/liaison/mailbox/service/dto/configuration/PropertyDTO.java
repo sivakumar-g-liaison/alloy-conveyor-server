@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.io.Serializable;
+
 import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -23,8 +25,9 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * @author veerasamyn
  */
 @ApiModel(value = "property")
-public class PropertyDTO {
-
+public class PropertyDTO implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	@ApiModelProperty( value = "Property name", required = true)
 	private String name;
 	private String value;

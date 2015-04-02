@@ -115,7 +115,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 
 				//GMB-320 - Creates directory to the remote folder
-				for (String directory : remotePath.split(File.separator)) {
+				for (String directory : remotePath.split(File.separatorChar=='\\' ? "\\\\" : File.separator)) {
 				
 					if (directory.isEmpty()) {//For when path starts with /
 						continue;

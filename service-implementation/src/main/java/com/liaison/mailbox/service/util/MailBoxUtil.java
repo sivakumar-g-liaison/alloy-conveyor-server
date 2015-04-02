@@ -51,6 +51,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.util.ServiceUtils;
+import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
@@ -193,18 +194,10 @@ public class MailBoxUtil {
 	 */
 	public static List <TenancyKeyDTO>  getTenancyKeysFromACLManifest(String aclManifestJson) throws IOException {
 
-		LOGGER.info("deserializing the acl manifest DTO from manifest json");
-		String decodedManifestString = new String(LiaisonGZipUtils.uncompress(Base64.decodeBase64(aclManifestJson)));
-		ACLManifest aclManifestDTO = ACLUtil.readACLManifest(decodedManifestString, false, false);
-		LOGGER.info("acl Manifest DTO deserialized successfully");
+		GEMACLClient gemClient = new GEMACLClient();
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
 
-		//retrieve the very first platform object from acl manifest json
-		Platform platform = aclManifestDTO.getPlatform().get(0);
-
-		// retrieve all domains present in platform
-		List <RoleBasedAccessControl> roleBasedAccessControls = (platform != null)? platform.getRoleBasedAccessControl():new ArrayList<RoleBasedAccessControl>();
-		LOGGER.info("Retrieving tenancy key from acl manifest");
+		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 		TenancyKeyDTO tenancyKey = null;
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 

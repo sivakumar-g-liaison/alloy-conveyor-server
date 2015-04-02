@@ -618,27 +618,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 		return generateWorkTickets(files);
 	}
 
-	/**
-	 * Method to construct FS2ObjectHeaders from the given workTicket
-	 *
-	 * @param workTicket
-	 * @return FS2ObjectHeaders
-	 * @throws IOException
-	 * @throws MailBoxServicesException
-	 */
-	private FS2ObjectHeaders constructFS2Headers(WorkTicket workTicket) throws MailBoxServicesException, IOException {
-
-		FS2ObjectHeaders fs2Header = new FS2ObjectHeaders();
-		fs2Header.addHeader(MailBoxConstants.KEY_GLOBAL_PROCESS_ID, workTicket.getGlobalProcessId());
-		fs2Header.addHeader(MailBoxConstants.KEY_RAW_PAYLOAD_SIZE, workTicket.getPayloadSize().toString());
-		fs2Header.addHeader(MailBoxConstants.KEY_PIPELINE_ID, workTicket.getPipelineId());
-		fs2Header.addHeader(MailBoxConstants.KEY_PAYLOAD_DESCRIPTION, String.format(MailBoxConstants.PAYLOAD_DESCRIPTION_VALUE, getPayloadURI()));
-		fs2Header.addHeader(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, configurationInstance.getServiceInstance().getName());
-		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY, (MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
-		return fs2Header;
-	}
-
+	
 	/**
 	 * Use to validate the given file can be added in the given group.
 	 *

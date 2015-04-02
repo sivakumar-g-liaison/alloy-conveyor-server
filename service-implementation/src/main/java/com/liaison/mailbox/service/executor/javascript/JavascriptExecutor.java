@@ -344,7 +344,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 			if (!(itemObject instanceof String))
 			{
-				String message = String.format("Script '%s' %s function returned a non-String in position %i.", script, functionName, i);
+				String message = String.format("Script '%s' %s function returned a non-String in position %d.", script, functionName, i);
 				throw new RuntimeException(message);
 			}
 
