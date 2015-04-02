@@ -191,6 +191,7 @@ dependencies {
 	compile 'net.logstash.log4j2:log4j2-logstash-jsonevent-layout:3.+'
 	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
+
 	//TODO change to 2.+ after logging updATE
 	compile 'com.liaison.commons:lib_message_bus:2.+'
 
@@ -229,7 +230,8 @@ dependencies {
 
 	workTicket 'com.liaison.dto:dto:3.+'
 	
-	compile ("com.liaison.commons.message.glass:glass-message-lib:4.+")
+	compile ("com.liaison.commons.message.glass:glass-message-lib:5.+")
+
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
 
 }
@@ -326,6 +328,7 @@ cargo {
 
 		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
 		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
+        jvmArgs += " -Dlog4j.configurationFile=log4j2-${deployEnvironment}.xml"
 
 		// if containerDebug, append tomcat debug args to jvm args
 		if(project.hasProperty('containerDebug')) {

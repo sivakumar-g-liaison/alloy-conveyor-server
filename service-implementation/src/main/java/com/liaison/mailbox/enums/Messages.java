@@ -77,8 +77,8 @@ public enum Messages {
     
 	// CREATE CONFIGURED LOCATION
 	LOCAL_FOLDERS_CREATION_FAILED("Local folder %s creation failed."),
-	HOME_FOLDER_DOESNT_EXIST_ALREADY("The local folder %s must exist before configuring processor."),
-	FOLDER_DOESNT_MATCH_PATTERN("The local folder doesn't match pattern %s ."),
+	HOME_FOLDER_DOESNT_EXIST_ALREADY("The local folder %s must exist before creating custom folders."),
+	FOLDER_DOESNT_MATCH_PATTERN("Application can create folders only if it matches the pattern %s ."),
 
 	// INVALID ENUM
 	ENUM_TYPE_DOES_NOT_SUPPORT("%s type is set to a value that is not supported."),

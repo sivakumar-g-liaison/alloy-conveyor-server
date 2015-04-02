@@ -719,7 +719,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		}
 		
 		Path filePathToCreate = fileDirectory.toPath();
-		
+		LOGGER.debug("Setting on to create - {}", filePathToCreate);
 		FileSystem fileSystem = FileSystems.getDefault();	
 		String pattern = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.data.folder.pattern","glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**");
 		PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
@@ -732,9 +732,9 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
 		}
 		
-		LOGGER.debug("create local folders if not available - {}", filePathToCreate);
-		Files.createDirectories(filePathToCreate);
 		
+		Files.createDirectories(filePathToCreate);
+		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
 		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
 		LOGGER.debug("group  name - {}", group);				
