@@ -27,9 +27,22 @@ public class PropertiesFileDTO {
 	private String trustStoreGroupId;
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
-	private String mailboxPguidDisplayPrefix;
+	private String processorSyncUrlDisplayPrefix;
+	private String processorAsyncUrlDisplayPrefix;
 	private String defaultScriptTemplateName;	
 	
+	public String getProcessorSyncUrlDisplayPrefix() {
+		return processorSyncUrlDisplayPrefix;
+	}
+	public void setProcessorSyncUrlDisplayPrefix(String processorSyncUrlDisplayPrefix) {
+		this.processorSyncUrlDisplayPrefix = processorSyncUrlDisplayPrefix;
+	}
+	public String getProcessorAsyncUrlDisplayPrefix() {
+		return processorAsyncUrlDisplayPrefix;
+	}
+	public void setProcessorAsyncUrlDisplayPrefix(String processorAsyncUrlDisplayPrefix) {
+		this.processorAsyncUrlDisplayPrefix = processorAsyncUrlDisplayPrefix;
+	}
 	public String getDefaultScriptTemplateName() {
 		return defaultScriptTemplateName;
 	}
@@ -60,11 +73,5 @@ public class PropertiesFileDTO {
 	}
 	public void setListJobsIntervalInHours(String listJobsIntervalInHours) {
 		this.listJobsIntervalInHours = listJobsIntervalInHours;
-	}
-	public String getMailboxPguidDisplayPrefix() {
-		return mailboxPguidDisplayPrefix;
-	}
-	public void setMailboxPguidDisplayPrefix(String mailboxPguidDisplayPrefix) {
-		this.mailboxPguidDisplayPrefix = mailboxPguidDisplayPrefix;
 	}
 }

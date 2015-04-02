@@ -174,7 +174,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 	$rootScope.javaProperties = {
 		globalTrustStoreId: "",
 		globalTrustStoreGroupId: "",
-		mailboxPguidDisplayPrefix: "",
+		processorSyncUrlDisplayPrefix: "",
+		processorAsyncUrlDisplayPrefix: "",
 		defaultScriptTemplateName: ""	
 	};
 	$rootScope.restService.get($rootScope.base_url + '/serviceconfigurations',
@@ -182,7 +183,8 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 			if (status === 200 && data.getPropertiesValueResponseDTO.response.status === 'success') {
 				$rootScope.javaProperties.globalTrustStoreId = data.getPropertiesValueResponseDTO.properties.trustStoreId;
 				$rootScope.javaProperties.globalTrustStoreGroupId = data.getPropertiesValueResponseDTO.properties.trustStoreGroupId;
-				$rootScope.javaProperties.mailboxPguidDisplayPrefix = data.getPropertiesValueResponseDTO.properties.mailboxPguidDisplayPrefix;
+				$rootScope.javaProperties.processorSyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorSyncUrlDisplayPrefix;
+				$rootScope.javaProperties.processorAsyncUrlDisplayPrefix = data.getPropertiesValueResponseDTO.properties.processorAsyncUrlDisplayPrefix;
 				$rootScope.javaProperties.defaultScriptTemplateName = data.getPropertiesValueResponseDTO.properties.defaultScriptTemplateName;
 				
 			} else {
