@@ -229,6 +229,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Setting the grid details
         $scope.gridOptions = {
         		columnDefs: [{
+                    field: 'guid',
+                    width: '20%',
+                    displayName: 'MailboxId'
+                }, {
                     field: 'name',
                     width: '20%',
                     displayName: 'Name',
@@ -244,7 +248,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                 	cellTemplate: $scope.manageConfigStatus
                 }, {
                     field: 'status',
-                    width: '20%',
+                    width: '10%',
                     displayName: 'Status',
                     cellTemplate: $scope.manageStatus
                 },
@@ -253,12 +257,10 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 				 */
                 { // Customized column
                     displayName: 'Action',
-                    width: '20%',
+                    width: '10%',
                     sortable: false,
                     cellTemplate: $scope.editableInPopup
                 }
-
-
             ],
             data: 'mailboxes',
             // rowTemplate: customRowTemplate,
