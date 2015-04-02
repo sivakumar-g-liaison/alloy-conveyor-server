@@ -1,14 +1,4 @@
 <!-- saved from url=(0022)http://internet.e-mail -->
-<style>
- .ace_editor {
-   height: 200px;
-   width:  500px;
-  }
-  .exactCenter {
-    position: fixed;   
-    left: 27%;  
-  }
- </style> 
 <ng-form id="formTextArea" name="formTextArea">
 <div ng-switch on="currentRowObject.name">
   <div ng-switch-when="url">
@@ -29,7 +19,7 @@
 <div ng-show="!currentRowObject.readOnly">
   <a ng-click="isModal(currentRowObject)" data-toggle="modal" data-target="#{{currentRowObject.name}}"  class="right">
     <i class="glyphicon glyphicon-new-window"></i></a>  
-  <div class="modal-custom fade exactCenter" id="{{currentRowObject.name}}" role="dialog" aria-hidden="true">
+  <div class="modal-custom fade textarea_exactCenter" id="{{currentRowObject.name}}" role="dialog" aria-hidden="true">
    <div class="modal-dialog">
 	<div class="modal-content">
 		<div class="modal-header">
