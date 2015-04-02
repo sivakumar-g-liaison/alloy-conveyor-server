@@ -25,7 +25,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 	     $scope.tenancyKey = {guid:'', name:''};
 	     $scope.tenancyKeys = [];
 		
-        $scope.showMailboxGuid = false;
         //Model for Add MB
         addRequest = $scope.addRequest = {
             addMailBoxRequest: {
@@ -60,7 +59,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         $scope.status = $scope.enumstats[0];
         
-        $scope.mailboxPguidDisplayContent = '';
 
         //Data from server - YOU HAVE TO JUST ADD 'add new -->' manually to the list from server.
         $scope.allStaticPropertiesThatAreNotAssignedValuesYet = [{"name":"add new -->","id":"add new -->"},
@@ -130,9 +128,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                 $scope.mailBox.guid = $scope.mailBoxId;
                                 $scope.mailBox.name = data.getMailBoxResponse.mailBox.name;
                                 $scope.mailBox.description = data.getMailBoxResponse.mailBox.description;
-                                $scope.showMailboxGuid = true;
-                                $scope.mailboxPguidDisplayContent = ($rootScope.javaProperties.mailboxPguidDisplayPrefix != null && $rootScope.javaProperties.mailboxPguidDisplayPrefix != '')?
-                                                                     $rootScope.javaProperties.mailboxPguidDisplayPrefix + $scope.mailBoxId: $scope.mailBoxId;
         						if(data.getMailBoxResponse.mailBox.processors.length > 0) {
         							
         							$scope.addProcessorBtnValue = 'List Processors';
@@ -258,9 +253,6 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
                         	if(data.addMailBoxResponse.mailBox !== null) {
                             	$scope.mailBoxId = data.addMailBoxResponse.mailBox.guid;
-                                $scope.showMailboxGuid = true;
-                                $scope.mailboxPguidDisplayContent = ($rootScope.javaProperties.mailboxPguidDisplayPrefix != null && $rootScope.javaProperties.mailboxPguidDisplayPrefix != '')?
-                                                     $rootScope.javaProperties.mailboxPguidDisplayPrefix + $scope.mailBoxId: $scope.mailBoxId;
                         	}
 
                         	if (data.addMailBoxResponse.response.status === 'success') {

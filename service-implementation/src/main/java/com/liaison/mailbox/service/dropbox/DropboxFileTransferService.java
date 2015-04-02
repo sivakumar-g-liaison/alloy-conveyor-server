@@ -50,7 +50,7 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
 /**
- * Class which has  Dropbox File Transfer related operations.
+ * Class which has Dropbox File Transfer related operations.
  *
  * @author OFS
  */
@@ -111,7 +111,7 @@ public class DropboxFileTransferService {
 			MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 			for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
-				
+
 				tenancyKey = tenancyKeyDTO.getGuid();
 
 				List<Processor> processors = getDropboxProcessors(tenancyKeyDTO, profileId, tenancyKey);
@@ -142,12 +142,8 @@ public class DropboxFileTransferService {
 			return transferContentResponse;
 		} finally {
 			// close stream once we are done
-			try {
-				if (null != stream)
-					stream.close();
-			} catch (Exception e) {
-				/* Ignore */
-			}
+			if (null != stream)
+				stream.close();
 		}
 	}
 
@@ -201,8 +197,7 @@ public class DropboxFileTransferService {
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(MailBoxConstants.LOGIN_ID, loginId);
 		properties.put(MailBoxConstants.KEY_TENANCY_KEY, tenancyKey);
-		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD,
-                String.valueOf(securedPayload));
+		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
 
 		workTicket.setPipelineId(pipeLineId);
 		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);

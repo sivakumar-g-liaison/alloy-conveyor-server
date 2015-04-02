@@ -50,7 +50,8 @@ angular.module(
                  // function that constructs the currentRowObject correctly according to 
                  // the selected option in the dropdown
                  scope.constructProperty = function(property) {
-                 
+                	 
+                	scope.showAddNewComponent.value = false;
                     if (property === null || typeof property === 'undefined') {
                         return;
                     }

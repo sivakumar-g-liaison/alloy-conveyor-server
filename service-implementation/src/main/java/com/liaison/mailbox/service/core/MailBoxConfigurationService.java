@@ -581,7 +581,8 @@ public class MailBoxConfigurationService {
 			dto.setTrustStoreGroupId(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
 			dto.setListJobsIntervalInHours(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
 			dto.setFsmEventCheckIntervalInSeconds(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
-			dto.setMailboxPguidDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_PGUID_DISPLAY_PREFIX));
+			dto.setProcessorSyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
+			dto.setProcessorAsyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
 			dto.setDefaultScriptTemplateName(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
 
 			serviceResponse.setProperties(dto);

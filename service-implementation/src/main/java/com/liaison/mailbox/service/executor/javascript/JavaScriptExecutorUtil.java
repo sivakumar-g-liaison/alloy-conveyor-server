@@ -9,6 +9,7 @@
 package com.liaison.mailbox.service.executor.javascript;
 
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Map;
@@ -65,8 +66,8 @@ public final class JavaScriptExecutorUtil {
 
 			if (scriptContext == null) {
 
-			    try (InputStreamReader reader = new InputStreamReader(System.in); PrintWriter outputWriter = new PrintWriter(System.out);
-			            PrintWriter errorWriter = new PrintWriter(System.err)) {
+			    try (InputStreamReader reader = new InputStreamReader(System.in, "UTF-8"); PrintWriter outputWriter = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
+			            PrintWriter errorWriter = new PrintWriter(new OutputStreamWriter(System.err, "UTF-8"))) {
 			        scriptContext = new JavascriptScriptContext(reader, outputWriter, errorWriter);
 			    }
 

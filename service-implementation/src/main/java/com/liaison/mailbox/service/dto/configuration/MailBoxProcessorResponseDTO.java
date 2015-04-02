@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,8 +23,9 @@ import com.liaison.mailbox.enums.MailBoxStatus;
  * 
  * @author veerasamyn
  */
-public class MailBoxProcessorResponseDTO {
+public class MailBoxProcessorResponseDTO  implements Serializable{
 
+	private static final long serialVersionUID = 1L;
 	private String guid;
 	private String name;
 	private String type;
