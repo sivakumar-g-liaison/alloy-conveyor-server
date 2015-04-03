@@ -32,7 +32,7 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
-import com.liaison.mailbox.service.core.processor.DirectorySweeperProcessor;
+import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
@@ -88,7 +88,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 
-		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
+		DirectorySweeper downloader = new DirectorySweeper(processor);
 		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
@@ -127,7 +127,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 
-		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
+		DirectorySweeper downloader = new DirectorySweeper(processor);
 		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		target.toFile().setReadable(true);
 		target.toFile().setWritable(true);
@@ -170,7 +170,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 
-		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
+		DirectorySweeper downloader = new DirectorySweeper(processor);
 		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
@@ -212,7 +212,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		folders.add(folder);
 		processor.setFolders(folders);
 
-		DirectorySweeperProcessor downloader = new DirectorySweeperProcessor(processor);
+		DirectorySweeper downloader = new DirectorySweeper(processor);
 		List<WorkTicket> files = downloader.sweepDirectory(inbox, false, false, fileRenameFormat, 0);
 		Files.delete(target);
 		Assert.assertEquals(1, files.size());

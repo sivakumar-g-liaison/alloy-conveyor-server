@@ -178,7 +178,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) {
+	public void runProcessor(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {			

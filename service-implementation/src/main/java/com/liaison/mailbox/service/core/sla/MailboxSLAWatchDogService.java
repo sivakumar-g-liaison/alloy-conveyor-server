@@ -43,6 +43,7 @@ import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.queue.WorkTicket;
@@ -314,6 +315,8 @@ public class MailboxSLAWatchDogService {
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+		GlassMessage glassMessage = new GlassMessage();
 
 		try {
 
@@ -321,6 +324,12 @@ public class MailboxSLAWatchDogService {
 
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+			glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+			glassMessage.setMailboxId(mailboxId);
+			glassMessage.setStatus(ExecutionState.STAGED);
+			glassMessage.setPipelineId(workTicket.getPipelineId());
+			
+			glassMessage.logProcessingStatus(StatusType.RUNNING, "");
 
 			// validates mandatory value.
 			mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -343,6 +352,8 @@ public class MailboxSLAWatchDogService {
 				LOG.error("Processor of type uploader is not available for mailbox {}", mailboxId);
 				throw new MailBoxServicesException(Messages.UPLOADER_OR_FILEWRITER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
+			glassMessage.setCategory(processor.getProcessorType());
+			glassMessage.setProtocol(processor.getProcessorType().getCode());
 			LOG.debug("Processor {} of type uploader or filewriter is available for mailbox {}", processor.getProcsrName(), mailboxId);
 
 			// retrieve the processor execution status of corresponding uploader from run-time DB
@@ -395,14 +406,7 @@ public class MailboxSLAWatchDogService {
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 	        
 	      //GLASS LOGGING BEGINS//
-			TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-			GlassMessage glassMessage = new GlassMessage();
-			glassMessage.setCategory(ProcessorType.FILEWRITER);
-			glassMessage.setProtocol(Protocol.FILEWRITER.getCode());
-			glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-			glassMessage.setMailboxId(mailboxId);
-			glassMessage.setStatus(ExecutionState.STAGED);
-			glassMessage.setPipelineId(workTicket.getPipelineId());
+			
 			if(processorPayloadLocation.contains("ftps")){
 				glassMessage.setOutAgent(GatewayType.FTPS);
 			}if(processorPayloadLocation.contains("sftp")){
@@ -411,7 +415,9 @@ public class MailboxSLAWatchDogService {
 				glassMessage.setOutAgent(GatewayType.FTP);
 			}
 
-			glassLogger.logToGlass(glassMessage);
+			//GLASS LOGGING CORNER 4 //
+			glassMessage.logProcessingStatus(StatusType.SUCCESS, "");			
+            glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
 		} catch (JAXBException | JsonParseException | JsonMappingException e) {
@@ -432,6 +438,12 @@ public class MailboxSLAWatchDogService {
 				processorDAO.merge(processor);
 			}
 			notifyUser(processor, mailboxId, e);
+			//GLASS LOGGING CORNER 4 //
+			glassMessage.setStatus(ExecutionState.FAILED);
+			transactionVisibilityClient.logToGlass(glassMessage);
+			glassMessage.logProcessingStatus(StatusType.ERROR, "");
+			glassMessage.logFourthCornerTimestamp();
+			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);
 
 		} catch (Exception e) {
@@ -449,6 +461,12 @@ public class MailboxSLAWatchDogService {
 				processorDAO.merge(processor);
 			}
 			notifyUser(processor, mailboxId, e);
+			//GLASS LOGGING CORNER 4 //
+			glassMessage.setStatus(ExecutionState.FAILED);
+			transactionVisibilityClient.logToGlass(glassMessage);
+			glassMessage.logProcessingStatus(StatusType.ERROR, "");
+			glassMessage.logFourthCornerTimestamp();
+			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);
 		}
 

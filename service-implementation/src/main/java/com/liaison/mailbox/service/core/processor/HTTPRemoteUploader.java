@@ -215,7 +215,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void invoke(String executionId, MailboxFSM fsm) {
+	public void runProcessor(String executionId, MailboxFSM fsm) {
 
 		try {
 

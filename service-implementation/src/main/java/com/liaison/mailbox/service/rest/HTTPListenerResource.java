@@ -148,20 +148,19 @@ public class HTTPListenerResource extends AuditedResource {
                         throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId) ");
                     }
 
-                    Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
-                            mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+                    Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
                     // authentication should happen only if the property
                     // "Http Listner Auth Check Required" is true
-                    logger.info(
-                            "Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
-                            mailboxPguid);
+                    logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",mailboxPguid);
                     if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
                         syncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
                     }
                     logger.debug("constructed workticket");
 
                     WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-                            getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+                            													  getRequestHeaders(request),
+                            													  mailboxPguid, 
+                            													  httpListenerProperties);
                     String processId = IdentifierUtil.getUuid();
                     glassMessage.setProcessId(processId);
                     glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
@@ -169,15 +168,11 @@ public class HTTPListenerResource extends AuditedResource {
 
                     // Log First corner
                     glassMessage.logFirstCornerTimestamp();
-
                     // Log status running
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
-                    transactionVisibilityClient.logToGlass(glassMessage); // CORNER
-                                                                          // 1
-                                                                          // LOGGING
-                    Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
-                            httpListenerProperties, request.getContentType(), mailboxPguid);
-
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");                   
+                    transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
+                    
+                    Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),httpListenerProperties, request.getContentType(), mailboxPguid);
                     // GLASS LOGGING BEGINS CORNER 4 //
                     glassMessage.setStatus(ExecutionState.COMPLETED);
                     glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
@@ -305,8 +300,8 @@ public class HTTPListenerResource extends AuditedResource {
                             .ok()
                             .status(Status.ACCEPTED)
                             .type(MediaType.TEXT_PLAIN)
-                            .entity(String.format("Payload accepted as process ID '%s'",
-                                    workTicket.getGlobalProcessId())).build();
+                            .entity(String.format("Payload accepted as process ID '%s'",workTicket.getGlobalProcessId())).build();
+                    
                 } catch (IOException | JAXBException e) {
                     logger.error(e.getMessage(), e);
                     // Log error status

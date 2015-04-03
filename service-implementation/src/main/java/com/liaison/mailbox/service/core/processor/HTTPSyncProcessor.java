@@ -67,23 +67,8 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 		httpRequest.setEntity(requestBody);
 		HttpClient httpClient = createHttpClient();
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
-		
-		GlassMessage glassMessage = new GlassMessage();
-		TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-		// GLASS LOGGING BEGINS CORNER 2 //
-		glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
-		glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
-		glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-		glassMessage.setMailboxId(mailboxPguid);
-		glassMessage.setStatus(ExecutionState.QUEUED);
-		glassMessage.setPipelineId(workTicket.getPipelineId());
-		glassMessage.setInAgent(GatewayType.REST);
-		glassLogger.logToGlass(glassMessage);
-		// GLASS LOGGING ENDS//
-		
 		return buildResponse(contentType, httpResponse);
 		
-	
 	}
 
 	/**

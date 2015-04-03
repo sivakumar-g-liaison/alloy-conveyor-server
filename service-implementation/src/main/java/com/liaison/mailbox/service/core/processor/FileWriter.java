@@ -47,7 +47,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	}
 
 	@Override
-	public void invoke(String executionId, MailboxFSM fsm) {
+	public void runProcessor(String executionId, MailboxFSM fsm) {
 		// TODO Auto-generated method stub
 		
 	}

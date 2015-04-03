@@ -76,8 +76,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
 	public StaticProcessorPropertiesDTO staticProcessorProperties;
 
-	public AbstractProcessor() {
-	}
+	public AbstractProcessor() {}
 
 	public AbstractProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;

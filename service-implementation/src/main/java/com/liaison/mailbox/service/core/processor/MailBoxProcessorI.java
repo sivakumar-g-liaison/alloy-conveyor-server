@@ -17,7 +17,7 @@ import com.liaison.mailbox.service.core.fsm.MailboxFSM;
  */
 public interface MailBoxProcessorI {
 
-	public void invoke(String executionId,MailboxFSM fsm);
+	public void runProcessor(String executionId,MailboxFSM fsm);
 
 	public void createLocalPath();
 

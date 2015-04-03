@@ -105,8 +105,7 @@ public class WorkTicketUtil {
      * @param httpListenerProperties
      * @return WorkTicket
      */
-    public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, Object> requestHeaders,
-            String mailboxPguid, Map<String, String> httpListenerProperties) {
+    public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, Object> requestHeaders,String mailboxPguid, Map<String, String> httpListenerProperties) {
 
         WorkTicket workTicket = new WorkTicket();
         workTicket.setAdditionalContext(MailBoxConstants.HTTP_METHOD, requestProp.get(MailBoxConstants.HTTP_METHOD));

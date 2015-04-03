@@ -39,8 +39,7 @@ public class MailBoxProcessorFactory {
 
 		MailBoxProcessorI mailBoxProcessor = null;
 
-		Protocol foundProtocolType = Protocol.findByCode(processor
-				.getProcsrProtocol());
+		Protocol foundProtocolType = Protocol.findByCode(processor.getProcsrProtocol());
 
 		if (ProcessorType.REMOTEDOWNLOADER.equals(processor.getProcessorType())) {
 
@@ -96,7 +95,7 @@ public class MailBoxProcessorFactory {
 
 			}
 		} else if (ProcessorType.SWEEPER.equals(processor.getProcessorType())) {
-			mailBoxProcessor = new DirectorySweeperProcessor(processor);
+			mailBoxProcessor = new DirectorySweeper(processor);
 			/*
 			 * } else if
 			 * (ProcessorType.DROPBOXPROCESSOR.equals(processor.getProcessorType

@@ -41,11 +41,11 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.GatewayType;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
-import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -76,60 +76,61 @@ import com.liaison.mailbox.service.util.TransactionVisibilityClient;
  * @author veerasamyn
  */
 
-public class DirectorySweeperProcessor extends AbstractProcessor implements MailBoxProcessorI {
+public class DirectorySweeper extends AbstractProcessor implements MailBoxProcessorI {
 
-	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeperProcessor.class);
+	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 
 	private String pipeLineID;
-	private  List<Path> inProgressFiles = new ArrayList<>();
-	TransactionVisibilityClient glassLogger = null;
-	GlassMessage glassMessage = null;
+	private  List<Path> activeFiles = new ArrayList<>();
+	
 
 	public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
 	}
 
 	@SuppressWarnings("unused")
-	private DirectorySweeperProcessor() {
+	private DirectorySweeper() {
 		// to force creation of instance only by passing the processor entity
 	}
 
-	public DirectorySweeperProcessor(Processor configurationInstance) {
+	public DirectorySweeper(Processor configurationInstance) {
 		super(configurationInstance);
 	}
 
 
 	@Override
-	public void invoke(String executionId,MailboxFSM fsm) {
+	public void runProcessor(String executionId,MailboxFSM fsm) {
 
 		try {
 
-			//GLASS LOGGING BEGINS//
-			glassLogger = new TransactionVisibilityClient(executionId);
-			glassMessage = new GlassMessage();
-			glassMessage.setCategory(ProcessorType.SWEEPER);
-			glassMessage.setProtocol(Protocol.SWEEPER.getCode());
-			glassMessage.setExecutionId(executionId);
-			glassMessage.setPipelineId(getPipeLineID());
-
-			//GLASS LOGGING ENDS//
-			boolean handoverExecutionToJS = getProperties().isHandOverExecutionToJavaScript();
-			if (handoverExecutionToJS) {
+			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
-			} else {
-				executeRequest();
+			 } else {
+				run(executionId);
 			}
 		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void executeRequest() {
+	private void run(String executionId) {
+		
+		
+		TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient(executionId);
+		GlassMessage glassMessage = new GlassMessage();
+		
 
-		try {
-
+	try {
+		
+		//GLASS LOGGING BEGINS//
+		glassMessage.setCategory(ProcessorType.SWEEPER);
+		glassMessage.setProtocol(Protocol.SWEEPER.getCode());
+		glassMessage.setPipelineId(getPipeLineID());
+		//Log running status
+		glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+		//GLASS LOGGING ENDS//
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
 
@@ -144,10 +145,10 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
 		}
 
-        LOGGER.debug("Is progress list is empty: {}", inProgressFiles.isEmpty());
-        List<WorkTicket> workTickets = (inProgressFiles.isEmpty())
-				? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
-				: validateInprogressFiles(inProgressFiles, timeLimit);
+        LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
+        List<WorkTicket> workTickets = (activeFiles.isEmpty())	
+        								? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
+        								: retryGenWrkTktForActiveFiles(activeFiles, timeLimit);
 
 		if (workTickets.isEmpty()) {
 			LOGGER.info("There are no files to process.");
@@ -180,13 +181,16 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			} else {
 				for (WorkTicketGroup workTicketGroup : workTicketGroups) {;
 					String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
-					LOGGER.info("Returns json response.{}", new JSONObject(wrkTcktToSbr).toString(2));
+					LOGGER.info("JSON POSTED TO SB.{}", new JSONObject(wrkTcktToSbr).toString(2));
 					postToSweeperQueue(wrkTcktToSbr);
-					//For glass logging :(
+					//For glass logging 
 					for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()){
 						glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
-						glassMessage.setStatus(ExecutionState.STAGED);
-
+						glassMessage.setStatus(ExecutionState.PROCESSING);
+						Long payloadSize = wrkTicket.getPayloadSize();
+						if(payloadSize!=null && payloadSize < Integer.MAX_VALUE){
+							glassMessage.setInSize((int) (long) payloadSize);
+						}
 						if(inputLocation.contains("ftps")){
 							glassMessage.setInAgent(GatewayType.FTPS);
 						}if(inputLocation.contains("sftp")){
@@ -195,16 +199,20 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 							glassMessage.setInAgent(GatewayType.FTP);
 						}
 
-						glassLogger.logToGlass(glassMessage);
+						//Log FIRST corner
+	                    glassMessage.logFirstCornerTimestamp();
+	                    transactionVisibilityClient.logToGlass(glassMessage);
+	                  //Log running status
+	                    glassMessage.logProcessingStatus(StatusType.QUEUED, "");
 					}
 				}
 
 			}
 		}
 
-		// call again when in-progress file list is not empty
-		if (!inProgressFiles.isEmpty()) {
-			executeRequest();
+		// retry when in-progress file list is not empty
+		if (!activeFiles.isEmpty()) {
+			run(executionId);
 		}
 
 		} catch (MailBoxServicesException | IOException | URISyntaxException
@@ -251,8 +259,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 
 					if (validateLastModifiedTolerance(timeLimit, file)) {
 						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.toString());
-
-                        inProgressFiles.add(file);
+                        activeFiles.add(file);
 						continue;
 					}
 					result.add(file);
@@ -359,7 +366,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * Method to post meta data to rest service/ queue.
 	 *
 	 * @param input
-	 *            The input message to queue.
+	 * The input message to queue.
 	 */
 	private void postToSweeperQueue(String input)   {
 
@@ -588,7 +595,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	/**
 	 * Checks recently in-progress files are completed or not
 	 *
-	 * @param inprogressFiles
+	 * @param activeFilesList
 	 *            list of recently update files
 	 * @param timelimit
 	 *            period of the recent modifications
@@ -600,11 +607,11 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	private List<WorkTicket> validateInprogressFiles(List<Path> inprogressFiles, long timelimit)
+	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList, long timelimit)
 			throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		List<Path> files = new ArrayList<>();
-		for (Path file : inprogressFiles) {
+		for (Path file : activeFilesList) {
 
 			if (!validateLastModifiedTolerance(timelimit, file)) {
 				LOGGER.info("There are no changes in the file {} recently. So it is added in the sweeper list.", file.getFileName());
@@ -614,7 +621,7 @@ public class DirectorySweeperProcessor extends AbstractProcessor implements Mail
 			LOGGER.info("The file {} is still in progress. So it is removed from the in-progress list.", file.getFileName());
 		}
 
-		inprogressFiles.clear();//Clearing the recently updated files after the second call.
+		activeFilesList.clear();//Clearing the recently updated files after the second call.
 		return generateWorkTickets(files);
 	}
 

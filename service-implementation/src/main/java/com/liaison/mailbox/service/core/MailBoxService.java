@@ -48,9 +48,8 @@ import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.ProcessorQueue;
-import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
+
 
 /**
  * Class which has mailbox functional related operations.
@@ -121,23 +120,7 @@ public class MailBoxService {
 				executionId = MailBoxUtil.getGUID();				
 				request = new TriggerProcessorRequestDTO(executionId, processor.getPguid(), profileName);
 				message = MailBoxUtil.marshalToJSON(request);
-				messages.add(message);
-				
-				//GLASS LOGGING BEGINS//
-				TransactionVisibilityClient glassLogger = new TransactionVisibilityClient(executionId);
-				GlassMessage glassMessage = new GlassMessage();
-				glassMessage.setCategory(processor.getProcessorType());
-				glassMessage.setProtocol(processor.getProcsrProtocol());
-				glassMessage.setExecutionId(executionId);
-				//glassMessage.setGlobalPId(globalPId); - cannot set this since not available at this stage of processor execution
-				glassMessage.setMailboxId(processor.getMailbox().getPguid());
-				glassMessage.setProcessorId(processor.getPguid());
-				glassMessage.setServiceInstandId(processor.getServiceInstance().getPguid());
-				glassMessage.setTenancyKey(processor.getMailbox().getTenancyKey());
-				glassMessage.setStatus(ExecutionState.QUEUED);
-				glassLogger.logToGlass(glassMessage);
-				//GLASS LOGGING ENDS//
-				
+				messages.add(message);			
 				String slaVerificationStatus = (processor instanceof RemoteUploader)
 											   ? SLAVerificationStatus.SLA_NOT_VERIFIED.getCode()
 											   : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
@@ -200,9 +183,7 @@ public class MailBoxService {
 		String executionId = null;
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-		TransactionVisibilityClient glassLogger = null;
-		GlassMessage glassMessage = null;
+		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();		
 		try {
 
 			LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");			
@@ -242,31 +223,9 @@ public class MailBoxService {
 				throw new MailBoxServicesException(Messages.INVALID_PROCESSOR_EXECUTION_STATUS, Response.Status.CONFLICT);
 			}
             
-			//GLASS LOGGING BEGINS//
-			glassLogger = new TransactionVisibilityClient(executionId);
-			glassMessage = new GlassMessage();
-			glassMessage.setCategory(processor.getProcessorType());
-			glassMessage.setProtocol(processor.getProcsrProtocol());
-			glassMessage.setExecutionId(executionId);
-			//glassMessage.setGlobalPId(globalPId); - cannot set this since not available at this stage of processor execution
-			glassMessage.setMailboxId(processor.getMailbox().getPguid());
-			glassMessage.setProcessorId(processor.getPguid());
-			glassMessage.setServiceInstandId(processor.getServiceInstance().getPguid());
-			glassMessage.setTenancyKey(processor.getMailbox().getTenancyKey());	
-			if(processor.getProcsrProtocol().equalsIgnoreCase("ftp")){
-				glassMessage.setInAgent(GatewayType.FTP);
-			}else if(processor.getProcsrProtocol().equalsIgnoreCase("ftps")){
-				glassMessage.setInAgent(GatewayType.FTPS);
-			}else if(processor.getProcsrProtocol().equalsIgnoreCase("sftp")){
-				glassMessage.setInAgent(GatewayType.SSH);
-			}
-			//GLASS LOGGING ENDS//
-			
 			if (ExecutionState.PROCESSING.value().equalsIgnoreCase(processorExecutionState.getExecutionStatus())) {
 
-				fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
-				glassMessage.setStatus(ExecutionState.SKIPPED);
-				glassLogger.logToGlass(glassMessage);
+				fsm.handleEvent(fsm.createEvent(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));				
 				LOG.info("The processor is already in progress , validated via DB." + processor.getPguid());
 				return;
 		    }
@@ -276,9 +235,7 @@ public class MailBoxService {
 
 			if(processorService == null){
 			 LOG.info("Could not create instance for the processor type {}", processor.getProcessorType());
-			 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-			 glassMessage.setStatus(ExecutionState.FAILED);
-			 glassLogger.logToGlass(glassMessage);
+			 fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));			 
 			}
 
 		    LOG.info("The Processer type is {}", processor.getProcessorType());
@@ -286,23 +243,15 @@ public class MailBoxService {
 			processorExecutionStateDAO.merge(processorExecutionState);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
 	        
-	        processorService.invoke(executionId,fsm);
-	        
-	        glassMessage.setStatus(ExecutionState.PROCESSING);
-			glassLogger.logToGlass(glassMessage);
-			
+	        processorService.runProcessor(executionId,fsm);
 	        processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 	        processorExecutionStateDAO.merge(processorExecutionState);
 		    fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-		    glassMessage.setStatus(ExecutionState.COMPLETED);
-			glassLogger.logToGlass(glassMessage);
-	        LOG.info("#################################################################");
+		    LOG.info("#################################################################");
 
 		} catch (MailBoxServicesException e) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-			glassMessage.setStatus(ExecutionState.FAILED);
-			glassLogger.logToGlass(glassMessage);
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
@@ -314,8 +263,6 @@ public class MailBoxService {
 		catch (Exception e) {
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-			glassMessage.setStatus(ExecutionState.FAILED);
-			glassLogger.logToGlass(glassMessage);
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);

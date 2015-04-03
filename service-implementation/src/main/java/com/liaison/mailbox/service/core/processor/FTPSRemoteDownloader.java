@@ -66,7 +66,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void invoke(String executionId, MailboxFSM fsm) {
+	public void runProcessor(String executionId, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 	    try {
@@ -78,7 +78,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 			} else {
 				// FTPSRequest executed through Java
-				executeRequest();
+				run();
 			}
 	   } catch(JAXBException |IOException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
@@ -108,7 +108,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws BootstrapingFailedException
 	 *
 	 */
-	protected void executeRequest() {
+	protected void run() {
 
 		try {
 
