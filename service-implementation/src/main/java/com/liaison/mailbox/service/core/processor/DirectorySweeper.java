@@ -137,7 +137,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		// retrieve required properties
 		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
 		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
-		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : fileRenameFormat;
+		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : "."+fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
 		// Validation of the necessary properties
@@ -255,7 +255,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
 			for (Path file : stream) {
                 LOGGER.debug("Sweeping file {}", file.toString());
-				if (!file.getFileName().toString().contains(fileRenameFormat)) {
+				if (!file.getFileName().toString().endsWith(fileRenameFormat)) {
 
 					if (validateLastModifiedTolerance(timeLimit, file)) {
 						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.toString());
