@@ -197,7 +197,7 @@ textarea {
 }
 
 
-//--- file[addmailbox.css] --- 
+/*--- file[addmailbox.css] --- */
 
 .form-row {
   padding-bottom: .5em;
@@ -216,7 +216,7 @@ textarea {
   height: 300px;
 }
 
-//--- file[404.css] --- 
+/*--- file[404.css] --- */
 
 ::-moz-selection {
   background: #b3d4fc;
@@ -304,21 +304,21 @@ html,input {
   color: #222;
 }
 
-//--- file[createScriptFileModal.css] --- 
+/*--- file[createScriptFileModal.css] --- */
 
-.ace_editor {
+.createScriptFileModal_ace_editor {
   height: 440px;
   width: 430px;
 }
 
-//--- file[index.css] --- 
+/*--- file[index.css] --- */
 
 .index_body {
   padding-top: 55px;
   padding-bottom: 75px;
 }
 
-//--- file[mbx_top_navbar.css] --- 
+/*--- file[mbx_top_navbar.css] --- */
 
 .nested ul li {
   display: block;
@@ -344,7 +344,7 @@ html,input {
   float: none;
 }
 
-//--- file[textarea.css] --- 
+/*--- file[textarea.css] --- */
 
 .textarea_ace_editor {
   height: 200px;
@@ -356,7 +356,7 @@ html,input {
   left: 27%;
 }
 
-//--- file[footer.css] --- 
+/*--- file[footer.css] --- */
 
 .footer {
   margin-top: 200px;
@@ -367,7 +367,7 @@ html,input {
   -border-radius: 6px;
 }
 
-//--- file[processor.css] --- 
+/*--- file[processor.css] --- */
 
 .processor_gridStyle {
   border: 1px solid #d4d4d4;
@@ -484,15 +484,6 @@ div[data-tree-model] li .processor_expanded {
   margin: 0 auto;
   box-shadow: 0 1px 10px #a7a7a7,inset 0 1px 0 #fff;
   background: #fcfcfc;
-}
-
-.processor_ace_editor {
-  height: 200px;
-}
-
-.createScriptFileModal_ace_editor {
-   height: 440px;
-   width:  430px;
 }
 
 .addmailboxform-row {

@@ -17,7 +17,7 @@
 	<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>{{currentRowObject.displayName}} cannot be longer than {{currentRowObject.validationRules.maxLength}} characters.</span>
  </div>
 <div ng-show="!currentRowObject.readOnly">
-  <a ng-click="isModal(currentRowObject)" data-toggle="modal" data-target="#{{currentRowObject.name}}"  class="right">
+  <a ng-click="isModal(currentRowObject)" data-toggle="modal" data-target="#{{currentRowObject.name}}"  class="processor_right">
     <i class="glyphicon glyphicon-new-window"></i></a>  
   <div class="modal-custom fade textarea_exactCenter" id="{{currentRowObject.name}}" role="dialog" aria-hidden="true">
    <div class="modal-dialog">
@@ -30,7 +30,7 @@
 		 <div ui-ace="{onLoad : loadValueData,
 					  theme : 'monokai',					  
 					  mode: 'json'
-					}">
+					}" class="textarea_ace_editor">
 		  </div>
 			<div class="modal-footer">
 				<button id="mbx-procsr-properties-close" type="button" class="btn btn-default" data-dismiss="modal" ng-click="close()">Close</button>
