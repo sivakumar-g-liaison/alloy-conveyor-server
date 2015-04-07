@@ -10,6 +10,8 @@
 
 package com.liaison.mailbox.service.dto.configuration;
 
+import java.io.Serializable;
+
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -21,8 +23,9 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * @author OFS
  */
 @ApiModel(value = "profile")
-public class ProfileDTO {
+public class ProfileDTO implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	@ApiModelProperty( value = "Profile name", required = true)
 	private String name;
 	private String id;
