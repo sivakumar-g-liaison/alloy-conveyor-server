@@ -459,7 +459,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 			}   
 			
 			// To allow only numeric value
-			if(valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedtomailbox' || valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedbymailbox') {
+			if(valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedtomailbox' || valueSelectedinSelectionBox.value.id === 'timetopickupfilepostedbymailbox' || valueSelectedinSelectionBox.value.id ==='ttl') {
 				if (!($scope.numberPattern.test(row.getProperty('value')))) {
 					showAlert('Value should be a number.', 'error');
 					return;
