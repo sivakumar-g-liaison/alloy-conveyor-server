@@ -216,11 +216,14 @@ public class MailBoxUtil {
 		return tenancyKeys;
 	}
 
-	public static List <String> getTenancyKeyGuidsFromTenancyKeys (List <TenancyKeyDTO> tenancyKeys) {
+	public static List <String> getTenancyKeyGuids (String aclManifestJson) throws IOException {
 
 		List<String> tenancyKeyGuids = new ArrayList<String>();
-		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
-			tenancyKeyGuids.add(tenancyKey.getGuid());
+		GEMACLClient gemClient = new GEMACLClient();
+        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        
+		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
+			tenancyKeyGuids.add(rbac.getDomainInternalName());
 		}
 		return tenancyKeyGuids;
 
@@ -267,12 +270,20 @@ public class MailBoxUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String getTenancyKeyWithGuid(String tenancyKeyGuid, List <TenancyKeyDTO> tenancyKeys) throws IOException {
-
+	public static String getTenancyKeyNameByGuid(String aclManifestJson, String tenancyKeyGuid) throws IOException {
+	    
 		String tenancyKeyDisplayName = null;
-		for (TenancyKeyDTO tenancyKey : tenancyKeys) {
-			if (tenancyKey.getGuid().equals(tenancyKeyGuid)) tenancyKeyDisplayName = tenancyKey.getName();
-		}
+        GEMACLClient gemClient = new GEMACLClient();
+        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+        
+        for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
+            
+            if (rbac.getDomainInternalName().equals(tenancyKeyGuid)) {
+                tenancyKeyDisplayName = rbac.getDomainName();
+                break;
+            }
+        }
+      
 		return tenancyKeyDisplayName;
 	}
 	

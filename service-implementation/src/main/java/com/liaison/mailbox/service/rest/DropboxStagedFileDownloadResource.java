@@ -153,7 +153,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 						throw new MailBoxServicesException("Staged file id is Mandatory", Response.Status.BAD_REQUEST);
 					}
 
-					List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(manifestResponse
+					List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(manifestResponse
 							.getManifest());
 					if (tenancyKeys.isEmpty()) {
 						LOG.error("retrieval of tenancy key from acl manifest failed");
@@ -161,14 +161,9 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 								Response.Status.BAD_REQUEST);
 					}
 
-					List<String> tenancyKeysArray = new ArrayList<String>();
-					for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
-						tenancyKeysArray.add(tenancyKeyDTO.getGuid());
-					}
-
 					// validate file id belongs to any user organisation
 					String spectrumUrl = stagedFileService.validateIfFileIdBelongsToAnyOrganisation(stagedFileId,
-							tenancyKeysArray);
+					        tenancyKeys);
 					if (spectrumUrl == null) {
 						LOG.error("Given staged file id does not belong to any user organisation.");
 						throw new MailBoxServicesException(Messages.STAGE_FILEID_NOT_BELONG_TO_ORGANISATION,

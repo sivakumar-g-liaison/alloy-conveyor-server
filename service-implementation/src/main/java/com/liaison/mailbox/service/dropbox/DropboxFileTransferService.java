@@ -77,7 +77,6 @@ public class DropboxFileTransferService {
 			long startTime = 0;
 			long endTime = 0;
 
-			String tenancyKey = null;
 			List<Processor> dropboxProcessors = new ArrayList<Processor>();
 			LOG.info("Retrieving tenancy keys from acl-manifest");
 
@@ -86,7 +85,7 @@ public class DropboxFileTransferService {
 			startTime = System.currentTimeMillis();
 
 			// retrieve the tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
 			if (tenancyKeys.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
 				throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
@@ -110,11 +109,9 @@ public class DropboxFileTransferService {
 			LOG.debug("Calculating elapsed time for retrieving profile name by given Id from DB");
 			MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-			for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
+			for (String tenancyKey  : tenancyKeys) {
 
-				tenancyKey = tenancyKeyDTO.getGuid();
-
-				List<Processor> processors = getDropboxProcessors(tenancyKeyDTO, profileId, tenancyKey);
+				List<Processor> processors = getDropboxProcessors(profileId, tenancyKey);
 
 				dropboxProcessors.addAll(processors);
 				// if there are no dropbox processors available for this tenancy
@@ -147,7 +144,7 @@ public class DropboxFileTransferService {
 		}
 	}
 
-	private List<Processor> getDropboxProcessors(TenancyKeyDTO tenancyKeyDTO, String profileId, String tenancyKey) {
+	private List<Processor> getDropboxProcessors(String profileId, String tenancyKey) {
 
 		long startTime = 0;
 		long endTime = 0;
@@ -257,18 +254,16 @@ public class DropboxFileTransferService {
 		GetTransferProfilesResponseDTO serviceResponse = new GetTransferProfilesResponseDTO();
 		List<ProfileDTO> transferProfiles = new ArrayList<ProfileDTO>();
 
-		String tenancyKey = null;
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 
 		// retrieve the tenancy key from acl manifest
-		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
-		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
+		for (String tenancyKey : tenancyKeys) {
 
-			tenancyKey = tenancyKeyDTO.getGuid();
 			LOG.debug("DropboxFileTransferService - retrieved tenancy key is %s", tenancyKey);
 			List<String> specificProcessorTypes = new ArrayList<String>();
 			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());

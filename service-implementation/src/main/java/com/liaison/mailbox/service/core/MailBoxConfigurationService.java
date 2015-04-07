@@ -120,7 +120,7 @@ public class MailBoxConfigurationService {
 			mailBox.setPguid(MailBoxUtil.getGUID());
 
 			// retrieve the tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
+			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
 			}
@@ -218,24 +218,18 @@ public class MailBoxConfigurationService {
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 
-			// retrieve the tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
-			if (tenancyKeys.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
-			}
-
 			MailBox mailBox = configDao.find(MailBox.class, guid);
 			if (mailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
 			}
 
 			// retrieve the actual tenancykey Display Name from TenancyKeys
-			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyWithGuid(mailBox.getTenancyKey(), tenancyKeys);
+			String tenancyKeyDisplayName = MailBoxUtil.getTenancyKeyNameByGuid(aclManifestJson, mailBox.getTenancyKey());
 
 			// if the tenancy key display name is not available then error will be logged as the given tenancyKey is
 			// not available in tenancyKeys retrieved from acl manifest
 			if (StringUtil.isNullOrEmptyAfterTrim(tenancyKeyDisplayName)) {
-				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
+				LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
 			}
 
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
@@ -329,18 +323,16 @@ public class MailBoxConfigurationService {
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
 
-			// retrieve the tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
-			if (tenancyKeys.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
-			}
-
 			// retrieve the actual tenancykey guids from DTO
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
+			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+			
+			 if (tenancyKeyGuids.isEmpty()) {
+	                LOG.error("retrieval of tenancy key from acl manifest failed");
+	         }
 
 			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
 			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
-				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
+				LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
 			}
 
 			configDao.merge(retrievedMailBox);
@@ -404,20 +396,17 @@ public class MailBoxConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
 			}
 
-			// retrieve the tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
-			if (tenancyKeys.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
-			}
-
 			// retrieve the actual tenancykey guids from DTO
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
-
-			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
-			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
-				LOG.error("Tenancy Key present Manifest does not match the Tenancy Key of mailbox.");
-			}
-
+            List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+            
+             if (tenancyKeyGuids.isEmpty()) {
+                 LOG.error("retrieval of tenancy key from acl manifest failed");
+             }
+            
+            // checking if the tenancy key in acl manifest matches with tenancy key in mailbox
+            if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
+                LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
+            }
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(MailBoxStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
@@ -477,16 +466,15 @@ public class MailBoxConfigurationService {
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
-			List<MailBox> mailboxes = new ArrayList<MailBox>();
-			// retrieve tenancy key from acl manifest
-			List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
+            List<MailBox> mailboxes = new ArrayList<MailBox>();
+            // retrieve the actual tenancykey guids from DTO
+            List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
 
-			if (tenancyKeys.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
-				throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
-			}
+            if (tenancyKeyGuids.isEmpty()) {
+                LOG.error("retrieval of tenancy key from acl manifest failed");
+                throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
+            }
 
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuidsFromTenancyKeys(tenancyKeys);
 			if (!MailBoxUtil.isEmpty(profName)) {
 
 				totalCount = configDao.getMailboxCountByProtocol(mbxName, profName, tenancyKeyGuids);

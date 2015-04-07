@@ -80,23 +80,18 @@ public class DropboxStagedFilesService {
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 
 		// retrieve the tenancy key from acl manifest
-		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("Retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
 
-		LOG.debug("retrieve tenancyKey Values from tenancyKeyDTO");
-		List<String> tenancyKeyValues = new ArrayList<String>();
-		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
-			tenancyKeyValues.add(tenancyKeyDTO.getGuid());
-		}
-		LOG.debug("The retrieved tenancykey values are {}", tenancyKeyValues);
+		LOG.debug("The retrieved tenancykey values are {}", tenancyKeys);
 
 		// retrieve corresponding mailboxes of the available tenancyKeys.
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
-		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeyValues);
-		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeyValues);
+		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeys);
+		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeys);
 
 		if (mailboxIds.isEmpty()) {
 			LOG.error("There are no mailboxes linked to the tenancyKeys");
@@ -205,23 +200,18 @@ public class DropboxStagedFilesService {
 		
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 		// retrieve the tenancy key from acl manifest
-		List<TenancyKeyDTO> tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifest);
+		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
 		if (tenancyKeys.isEmpty()) {
 			LOG.error("Retrieval of tenancy key from acl manifest failed");
 			throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 		}
 
-		LOG.debug("retrieve tenancyKey Values from tenancyKeyDTO");
-		List<String> tenancyKeyValues = new ArrayList<String>();
-		for (TenancyKeyDTO tenancyKeyDTO : tenancyKeys) {
-			tenancyKeyValues.add(tenancyKeyDTO.getGuid());
-		}
-		LOG.debug("The retrieved tenancykey values are {}", tenancyKeyValues);
+		LOG.debug("The retrieved tenancykey values are {}", tenancyKeys);
 
 		// retrieve corresponding mailboxes of the available tenancyKeys.
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
-		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeyValues);
-		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeyValues);
+		LOG.debug("retrieve all mailboxes linked to tenancykeys {}", tenancyKeys);
+		List<String> mailboxIds = mailboxDao.findAllMailboxesLinkedToTenancyKeys(tenancyKeys);
 
 		if (mailboxIds.isEmpty()) {
 			LOG.error("There are no mailboxes linked to the tenancyKeys");
