@@ -22,7 +22,6 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,17 +74,6 @@ public class EmailNotifier {
 		}
 	}
 
-	/**
-	 * Send a single email.
-	 */
-	public void sendEmail(String subject_subtitle, String message) {
-
-		if (StringUtils.isEmpty(subject_subtitle)) {
-			sendEmail("", SUBJECT, message, "TEXT");
-		} else {
-			sendEmail("", SUBJECT + " - " + subject_subtitle, message, "TEXT");
-		}
-	}
 
 	/**
 	 * Send a single email.
@@ -117,32 +105,7 @@ public class EmailNotifier {
         }
 	}
 
-	/**
-	 * Send a single email.
-	 */
-	public void sendEmail(String aFromEmailAddr, String aToEmailAddr, String aSubject, String aBody) {
-
-		try {
-
-	        // Here, no Authenticator argument is used (it is null).
-	        // Authenticators are used to prompt the user for user
-	        // name and password.
-		    Session session = getMailSession(MailBoxUtil.getEnvProperties());
-	        MimeMessage message = new MimeMessage(session);
-
-			// the "from" address may be set in code, or set in the
-			// config file under "mail.from" ; here, the latter style is used
-			// message.setFrom( new InternetAddress(aFromEmailAddr) );
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(aToEmailAddr));
-			message.setSubject(aSubject);
-			final String completeMessage = new StringBuilder().append(aBody).append("\n\n").append(NOTE).toString();
-			message.setText(completeMessage);
-			Transport.send(message);
-		} catch (MessagingException | IOException ex) {
-		    LOGGER.error("Cannot send email. " + ex);
-		}
-	}
-
+	
     private Session getMailSession(Properties sessionProperties){
         if(mailSession == null){
             mailSession = Session.getInstance(sessionProperties);

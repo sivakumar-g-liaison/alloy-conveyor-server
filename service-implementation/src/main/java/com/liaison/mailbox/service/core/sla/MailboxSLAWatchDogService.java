@@ -65,7 +65,6 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
@@ -132,11 +131,8 @@ public class MailboxSLAWatchDogService {
 		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
 
 		try {
-
-			boolean isMailboxSLAAdhered = validateMailboxSLARule(slaViolatedMailboxesList);
-			boolean isCustomerSLAAdhered = validateCustomerSLARule(slaViolatedMailboxesList);
-
-			if (isMailboxSLAAdhered && isCustomerSLAAdhered) {
+			
+			if (validateMailboxSLARule(slaViolatedMailboxesList) && validateCustomerSLARule(slaViolatedMailboxesList)) {
 				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
 			} else {
 
