@@ -187,14 +187,12 @@ public class MailboxSLAWatchDogService {
 				continue;
 			}
 
-			Timestamp timeStmp = getSLAConfigurationAsTimeStamp(timeToPickUpFilePostedToMailbox);
-
 			FSMStateDAO procDAO = new FSMStateDAOBase();
 
 			List<FSMStateValue> listfsmStateVal = null;
 
 			LOG.debug("checking whether the processor executed with in the specified mailbox SLA configuration time");
-			listfsmStateVal = procDAO.findProcessorsExecutingByProcessorId(procsr.getPguid(), timeStmp);
+			listfsmStateVal = procDAO.findProcessorsExecutingByProcessorId(procsr.getPguid(), getSLAConfigurationAsTimeStamp(timeToPickUpFilePostedToMailbox));
 
 			String mailboxName = null;
 			String emailSubject = null;
@@ -726,7 +724,7 @@ public class MailboxSLAWatchDogService {
 				// last execution of processor and sla configuration in the mailbox
 				if (isSLACheckRequired(processorLastExecutionTime, slaConfiguredTime)) {
 					LOG.debug("customer sla verification is required");
-					isCustomerSLAViolated = doCustomerSLAVerification(procsr, slaViolatedMailboxes);
+					isCustomerSLAViolated = doCustomerSLAVerification(procsr);
 					// update the sla verification status as sla verified
 					fileStagedEvent.setSlaVerificationStatus(SLAVerificationStatus.SLA_VERIFIED.getCode());
 					procDAO.merge(fileStagedEvent);
@@ -808,7 +806,6 @@ public class MailboxSLAWatchDogService {
 	 *
 	 * @param processor
 	 * @param timeToPickUpFilePostedByMailbox
-	 * @param slaViolatedMailboxes
 	 * @throws UnrecoverableKeyException
 	 * @throws JsonParseException
 	 * @throws NoSuchAlgorithmException
@@ -825,7 +822,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws CMSException
 	 * @throws BootstrapingFailedException
 	 */
-	private boolean doCustomerSLAVerification (Processor processor, List <String> slaViolatedMailboxes) throws Exception {
+	private boolean doCustomerSLAVerification (Processor processor) throws Exception {
 
 	    LOG.info("Entering Customer SLA Verification check");
         boolean isCustomerSLAViolated = false;
