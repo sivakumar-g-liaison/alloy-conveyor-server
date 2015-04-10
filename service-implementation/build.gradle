@@ -364,6 +364,16 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 	}
 }
 
+
+
+task configureRTDropBoxDBUserName{
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:true)
+}
+
+task configureDTDropBoxDBUserName{
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserDTDM}", byline:true)
+}
+
 task deployAsDropbox (dependsOn:['configureRTDropBoxDBUserName','configureDTDropBoxDBUserName']){
 	
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
@@ -373,14 +383,6 @@ task deployAsDropbox (dependsOn:['configureRTDropBoxDBUserName','configureDTDrop
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlRTDM}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:true)*/
 	
-}
-
-task configureRTDropBoxDBUserName{
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:true)
-}
-
-task configureDTDropBoxDBUserName{
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserDTDM}", byline:true)
 }
 
 task setDevProperties << {
