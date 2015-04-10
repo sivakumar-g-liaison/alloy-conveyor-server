@@ -3,12 +3,33 @@
 
 allprojects {
 
-ext.dbUrlDTDM='jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=lsildb23d.liaison.dev)(port= 2484))(connect_data=(service_name=G2DEV.liaison.dev)))'
-ext.dbUserDTDM='DBX_GATEWAY_DTDM_APPL'
+	ext.dbServerNameDtdm='lsildb23d.liaison.dev'
+	ext.dbServerServiceDtdm='G2DEV.liaison.dev'
+	ext.dbServerPortDtdm='1521'
+	ext.dbSchemaNameDtdm='GATEWAY_DTDM'
+	ext.dbSchemaNamePrefixDtdm='JEN'
+	ext.dbaPasswordDtdm='12345678'
+	
+	
+	ext.dbServerNameRtdm='lsildb23d.liaison.dev'
+	ext.dbServerServiceRtdm='G2DEV.liaison.dev'
+	ext.dbServerPortRtdm='1521'
+	ext.dbSchemaNameRtdm='GATEWAY_RTDM'
+	ext.dbSchemaNamePrefixRtdm='JEN'
+	ext.dbaPasswordRtdm='12345678'
+	
+	ext.deployAsDropbox='true'
 
-ext.dbUrlRTDM='jdbc:oracle:thin:@(description=(address=(protocol=TCPS)(host=lsildb23d.liaison.dev)(port= 2484))(connect_data=(service_name=G2DEV.liaison.dev)))'
-ext.dbUserRTDM='DBX_GATEWAY_RTDM_APPL'
+	ext.devintDBUserDTDM='DBX_GATEWAY_DTDM_APPL'
+	ext.devintDBUserRTDM='DBX_GATEWAY_RTDM_APPL'
 
-ext.deployAsDropbox='true'
+	ext.qastageDBUserDTDM='QDBX_GATEWAY_DTDM_APPL'
+	ext.qastageDBUserRTDM='QDBX_GATEWAY_RTDM_APPL'
+
+	ext.uatDBUserDTDM='UDBX_GATEWAY_DTDM_APPL'
+	ext.uatDBUserRTDM='UDBX_GATEWAY_RTDM_APPL'
+
+	ext.productionDBUserDTDM='PDBX_GATEWAY_DTDM_APPL'
+	ext.productionDBUserRTDM='PDBX_GATEWAY_DTDM_APPL'
 
 }
