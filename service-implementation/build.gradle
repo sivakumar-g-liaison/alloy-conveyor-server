@@ -366,44 +366,32 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 
 
 
-/*task configureRTDropBoxDBUserName{
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserRTDM}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-qa-stage.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${qastageDBUserRTDM}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-uat.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${uatDBUserRTDM}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-production.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${productionDBUserRTDM}", byline:true)
-}
-
-task configureDTDropBoxDBUserName{
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserDTDM}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-qa-stage.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${qastageDBUserDTDM}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-uat.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${uatDBUserDTDM}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-production.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${productionDBUserDTDM}", byline:true)
-}*/
-
-/*task deployAsDropbox (dependsOn:['configureRTDropBoxDBUserName','configureDTDropBoxDBUserName']){
+task buildAsDropbox (type :Copy){
+	from 'src/main/resources/g2dropbox-dev-int.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-dev-int.properties", "g2mailboxservice-dev-int.properties")
+	  }
 	
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-qa-stage.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-uat.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-production.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
+	from 'src/main/resources/g2dropbox-qa-stage.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-qa-stage.properties", "g2mailboxservice-qa-stage.properties")
+	  }
+	
+	from 'src/main/resources/g2dropbox-uat.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-uat.properties", "g2mailboxservice-uat.properties")
+	  }
+	
+	from 'src/main/resources/g2dropbox-production.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-production.properties", "g2mailboxservice-production.properties")
+	  }
 	
 	
-}*/
-
-task buildAsDropbox {
-	
-	ant.copy( file:"src/main/resources/g2dropbox-dev-int.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.properties", overwrite:true )
-	/*{
-		filterchain {
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserRTDM}") }
-			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserDTDM}") }
-			
-		}
-	}
-	
-	ant.copy( file:"src/main/resources/${rootProject.name}-dev-int.temp.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.properties", overwrite:true )
-	ant.delete(file:"src/main/resources/${rootProject.name}-dev-int.temp.properties")*/
 	
 }
 
