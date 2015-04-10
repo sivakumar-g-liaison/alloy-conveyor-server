@@ -71,7 +71,7 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
@@ -490,7 +490,7 @@ public class ProcessorConfigurationService {
 			validateProcessorBelongToMbx(mailBoxGuid, retrievedProcessor);
 
 			// Changing the processor status
-			retrievedProcessor.setProcsrStatus(MailBoxStatus.INACTIVE.value());
+			retrievedProcessor.setProcsrStatus(EntityStatus.INACTIVE.value());
 			config.merge(retrievedProcessor);
 
 			// response message construction
@@ -561,7 +561,7 @@ public class ProcessorConfigurationService {
 			}
 
 			// validates the processor status
-			MailBoxStatus foundStatusType = MailBoxStatus.findByName(processorDTO.getStatus());
+			EntityStatus foundStatusType = EntityStatus.findByName(processorDTO.getStatus());
 			if (foundStatusType == null) {
 				throw new MailBoxConfigurationServicesException(Messages.ENUM_TYPE_DOES_NOT_SUPPORT, PROCESSOR_STATUS, Response.Status.BAD_REQUEST);
 			}

@@ -174,9 +174,9 @@ public class DropboxFileTransferResource extends AuditedResource {
 					startTime = System.currentTimeMillis();
 
 					//creating work ticket
-					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(serviceRequest),
-					        getRequestHeaders(serviceRequest), "", null);
-
+					WorkTicketUtil workTicketUtil = new WorkTicketUtil();
+					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest), getRequestHeaders(serviceRequest), "", null);
+					workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
 					LOG.debug("Calculating elapsed time for creating workticket");

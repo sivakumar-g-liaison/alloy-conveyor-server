@@ -31,7 +31,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
@@ -118,7 +118,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
-		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 		Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
 				getResponseDTO.getMailBox().getProperties().get(0).getName());
@@ -176,7 +176,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
-		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 		Assert.assertEquals(requestDTO.getMailBox().getProperties().get(0).getName(),
 				getResponseDTO.getMailBox().getProperties().get(0).getName());
@@ -237,7 +237,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		logger.info(jsonResponse);
 
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
-		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.INACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 	}
     
@@ -297,11 +297,11 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
-		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 		Assert.assertEquals(mbxDTO.getName(), getResponseDTO.getMailBox().getName());
 		Assert.assertEquals(mbxDTO.getDescription(), getResponseDTO.getMailBox().getDescription());
 		Assert.assertEquals(mbxDTO.getShardKey(), getResponseDTO.getMailBox().getShardKey());
-		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 		Assert.assertEquals(mbxDTO.getProperties().get(0).getName(),
 				getResponseDTO.getMailBox().getProperties().get(0).getName());
@@ -357,7 +357,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
-		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 		Assert.assertEquals(mailBox.getName(), getResponseDTO.getMailBox().getName());
 	}
     
@@ -404,7 +404,7 @@ public class MailBoxConfigurationServiceTest extends BaseServiceTest {
 		GetMailBoxResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetMailBoxResponseDTO.class);
 
 		// Assertion
-		Assert.assertEquals(MailBoxStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 		Assert.assertEquals(mailBox.getName(), getResponseDTO.getMailBox().getName());
 
 	}

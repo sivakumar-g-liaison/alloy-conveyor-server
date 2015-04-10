@@ -28,7 +28,7 @@ import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.commons.util.client.http.HTTPStringData;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
@@ -197,7 +197,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setDescription("MBX_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setTenancyKey(tenancyKey);
-			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 
 			property.setName("MBX_SIZE");
 			property.setValue("1024");
@@ -207,7 +207,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setName("MBX_REV_TEST" + uniqueValue);
 			mailBoxDTO.setDescription("MBX_REV_TEST_DESCRIPTION" + uniqueValue);
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
-			mailBoxDTO.setStatus(MailBoxStatus.ACTIVE.name());
+			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
 			
 			property.setName("MBX_REV_SIZE");

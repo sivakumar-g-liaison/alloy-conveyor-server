@@ -28,7 +28,7 @@ import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
@@ -63,7 +63,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN)
 					.setParameter(PROF_NAME, profileName)
-					.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
+					.setParameter(STATUS, EntityStatus.ACTIVE.value())
 					.setParameter(MBX_NAME, (MailBoxUtil.isEmpty(mbxNamePattern) ? "''" : mbxNamePattern + "%"))
 					.setParameter(SHARD_KEY, (MailBoxUtil.isEmpty(shardKey) ? "%%" : shardKey))
 					.getResultList();
@@ -208,7 +208,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			Query processorQuery = entityManager.createQuery(query.toString())
 												.setParameter(PGUID, mbxGuid);
 			if(activeEntityRequired) {
-				processorQuery.setParameter(STATUS, MailBoxStatus.ACTIVE.value());
+				processorQuery.setParameter(STATUS, EntityStatus.ACTIVE.value());
 			}		
 			
 			List<?> proc = processorQuery.getResultList();
@@ -247,7 +247,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
+					.setParameter(STATUS, EntityStatus.ACTIVE.name())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -288,7 +288,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PGUID, mbxGuid)
-					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
+					.setParameter(STATUS, EntityStatus.ACTIVE.name())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -331,7 +331,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(ProcessorConfigurationDAO.PROFILE_ID, profileId)
 					.setParameter(ProcessorConfigurationDAO.TENANCY_KEY, tenancyKey)
-					.setParameter(STATUS, MailBoxStatus.ACTIVE.name())
+					.setParameter(STATUS, EntityStatus.ACTIVE.name())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -395,7 +395,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PROCESSOR_TYPE, processorType)
-					.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
+					.setParameter(STATUS, EntityStatus.ACTIVE.value())
 					.getResultList();
 
 			Iterator<?> iter = proc.iterator();
@@ -426,7 +426,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		try {
 
 			List <?> proc = entityManager.createNamedQuery(FIND_ALL_ACTIVE_PROCESSORS)
-								.setParameter(STATUS, MailBoxStatus.ACTIVE.value())
+								.setParameter(STATUS, EntityStatus.ACTIVE.value())
 								.getResultList();
 			Iterator<?> iter = proc.iterator();
 			Processor processor;

@@ -31,7 +31,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.http.HTTPRequest;
 import com.liaison.commons.util.client.http.HTTPRequest.HTTP_METHOD;
 import com.liaison.framework.util.ServiceUtils;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -1010,7 +1010,7 @@ public class MailBoxProcessorServiceTest extends BaseServiceTest {
 		GetProcessorResponseDTO getResponseDTO = MailBoxUtil.unmarshalFromJSON(jsonResponse, GetProcessorResponseDTO.class);
 
 		Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
-		Assert.assertEquals(MailBoxStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
+		Assert.assertEquals(EntityStatus.INACTIVE.name(), getResponseDTO.getProcessor().getStatus());
 	}
 
 	/**

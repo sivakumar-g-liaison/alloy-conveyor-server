@@ -20,7 +20,7 @@ import javax.persistence.EntityManager;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
@@ -65,7 +65,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
 				    .setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
-				    .setParameter(STATUS,(MailBoxUtil.isEmpty(status)?MailBoxStatus.ACTIVE.name():status.toUpperCase()))
+				    .setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
 					.setFirstResult(pagingOffset)
 					.setMaxResults(pagingCount)
 					.getResultList();
@@ -145,7 +145,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
 					.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
-					.setParameter(STATUS,(MailBoxUtil.isEmpty(status)?MailBoxStatus.ACTIVE.name():status.toUpperCase()))
+					.setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
 					.getSingleResult();
 			
 			count = totalItems.intValue();

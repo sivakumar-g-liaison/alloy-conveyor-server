@@ -33,7 +33,7 @@ public interface MailBoxConstants {
 	/** Property which is used to get the configured receivers from mailbox. */
 	public final static String MBX_RCVR_PROPERTY = "emailnotificationids";
 
-	public final static String MBX_STATUS = "MailBoxStatus";
+	public final static String MBX_STATUS = "EntityStatus";
 
 	public final static String PROCESSOR_TYPE = "ProcessorType";
 

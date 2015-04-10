@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
@@ -87,7 +87,7 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 
 				List<?> proc = entityManager.createQuery(query.toString())
 						.setParameter(ProfileConfigurationDAO.TENANCY_KEY, tenancyKey)
-						.setParameter(ProfileConfigurationDAO.STATUS, MailBoxStatus.ACTIVE.name())
+						.setParameter(ProfileConfigurationDAO.STATUS, EntityStatus.ACTIVE.name())
 						.getResultList();
 
 				Iterator<?> iter = proc.iterator();
