@@ -365,13 +365,14 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 }
 
 task deployAsDropbox {
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:false)
 	
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlDTDM}", byline:false)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserDTDM}", byline:false)
 	
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlRTDM}", byline:false)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:false)
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlDTDM}", byline:true)
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserDTDM}", byline:true)
+	
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlRTDM}", byline:true)
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:true)\
+	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
 }
 
 task setDevProperties << {
