@@ -11,10 +11,7 @@
 package com.liaison.mailbox.service.util;
 
 import java.util.Date;
-import java.util.GregorianCalendar;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.logging.log4j.LogManager;
@@ -102,6 +99,27 @@ public class TransactionVisibilityClient {
             item = new MapItemType();
             item.setKey("pipeline-id");
             item.setValue(message.getPipelineId());
+            visibilityAPI.getAdditionalInformation().add(item);
+        }
+        
+        if (message.getTransferProfileName() != null && !message.getTransferProfileName().equals("")) {
+            item = new MapItemType();
+            item.setKey("tranfer-profile-name");
+            item.setValue(message.getTransferProfileName());
+            visibilityAPI.getAdditionalInformation().add(item);
+        }
+        
+        if (message.getStagedFileId() != null && !message.getStagedFileId().equals("")) {
+            item = new MapItemType();
+            item.setKey("staged-file-id");
+            item.setValue(message.getStagedFileId());
+            visibilityAPI.getAdditionalInformation().add(item);
+        }
+        
+        if (message.getMeta() != null && !message.getMeta().equals("")) {
+            item = new MapItemType();
+            item.setKey("meta");
+            item.setValue(message.getMeta());
             visibilityAPI.getAdditionalInformation().add(item);
         }
 

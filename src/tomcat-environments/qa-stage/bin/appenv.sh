@@ -32,12 +32,16 @@ export SYSLOG_FACILITY="Local0"
  
 export GLASS_SPECTRUM_PORT=10010
 export GLASS_SPECTRUM_IP=192.168.0.67
-export GLASS_SPECTRUM_USER=g2qa
-export GLASS_SPECTRUM_PASSWORD=Testing1
-export GLASS_SPECTRUM_DATASPACE=g2-qa-glass
+export GLASS_SPECTRUM_USER=g2seattle
+export GLASS_SPECTRUM_PASSWORD=g2seattle
+export GLASS_SPECTRUM_DATASPACE=g2-seattle
 export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
- 
- 
+export GLASS_SPECTRUM_MESSAGE_TTL=630720000
+export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
+export GLASS_ROLLING_SIZE="250 MB"
+export GLASS_RING_BUFFER_SIZE=128
+
+
 export GLASS_METRIC_PORT=10010
 export GLASS_METRIC_IP=192.168.0.67
 export GLASS_METRIC_USER=g2tampere
@@ -45,7 +49,17 @@ export GLASS_METRIC_PASSWORD=g2tampere
 export GLASS_METRIC_DATASPACE=g2-tampere
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
+export GLASS_METRIC_TTL=630720000
+export METRICS_LOG_DIR="/var/log/tomcat/metrics_failover"
+export METRICS_ROLLING_SIZE="250 MB"
+export METRICS_RING_BUFFER_SIZE=128
+
 export GSA_LENS_IP=192.168.0.10
+export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
+export ORGANIZATION_GSA_ROLLING_SIZE="250 MB"
+export ORGANIZATION_GSA_RING_BUFFER_SIZE=128
+export PAIRWISE_GSA_ROLLING_SIZE="250 MB"
+export PAIRWISE_GSA_RING_BUFFER_SIZE=128
  
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
 export LOCAL_HOSTNAME=$(hostname)
@@ -54,7 +68,10 @@ export LOGIN_USER=$(who am i | awk '{print $1}')
  
 export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
 export LOGSTASHPORT=4560
-export LOGSTASH_LOG_DIR=/var/log/tomcat/logstash_failover
+export LOGSTASH_ROLLING_SIZE="250 MB"
+
+export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
+export LOGSTASH_RING_BUFFER_SIZE=128
 # ==================================================================
 # log overrides
 # ==================================================================

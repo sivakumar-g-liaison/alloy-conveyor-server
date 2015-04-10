@@ -12,7 +12,6 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,24 +37,31 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.message.glass.dom.GatewayType;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxStagedFilesService;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropBoxUnStagedFileResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -107,8 +113,12 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
-
-				try {
+               
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+                        MailBoxUtil.getGUID());
+                GlassMessage glassMessage = new GlassMessage();
+			
+                try {
 
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
@@ -163,13 +173,29 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 					// validate file id belongs to any user organisation
 					String spectrumUrl = stagedFileService.validateIfFileIdBelongsToAnyOrganisation(stagedFileId,
-					        tenancyKeys);
+					        tenancyKeys, glassMessage);
 					if (spectrumUrl == null) {
 						LOG.error("Given staged file id does not belong to any user organisation.");
 						throw new MailBoxServicesException(Messages.STAGE_FILEID_NOT_BELONG_TO_ORGANISATION,
 								Response.Status.BAD_REQUEST);
 					}
+                   
+					String processId = IdentifierUtil.getUuid();
+                    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+                    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+                    glassMessage.setGlobalPId(MailBoxUtil.getGUID());
+                    glassMessage.setStatus(ExecutionState.PROCESSING);
+                    glassMessage.setInAgent(GatewayType.REST);
+                    glassMessage.setProcessId(processId);
+                    
+                    // Log time stamp
+                    glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
+                    // Log running status
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+
+                    // Log TVA status
+                    transactionVisibilityClient.logToGlass(glassMessage);
 					// getting the file stream from spectrum for the given file
 					// id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);

@@ -45,8 +45,7 @@ export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export GLASS_ROLLING_SIZE="250 MB"
 export GLASS_RING_BUFFER_SIZE=128
 
- 
- 
+
 export GLASS_METRIC_PORT=10010
 export GLASS_METRIC_IP=192.168.0.67
 export GLASS_METRIC_USER=g2tampere
@@ -54,7 +53,6 @@ export GLASS_METRIC_PASSWORD=g2tampere
 export GLASS_METRIC_DATASPACE=g2-tampere
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
-export GSA_LENS_IP=192.168.0.10
 export GLASS_METRIC_TTL=630720000
 export METRICS_LOG_DIR="/var/log/tomcat/metrics_failover"
 export METRICS_ROLLING_SIZE="250 MB"
@@ -74,6 +72,8 @@ export LOGIN_USER=$(who am i | awk '{print $1}')
  
 export LOGSTASHMACHINE=lsvllogst01d.liaison.dev
 export LOGSTASHPORT=4560
+export LOGSTASH_ROLLING_SIZE="250 MB"
+
 export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
 export LOGSTASH_RING_BUFFER_SIZE=128
 # ==================================================================

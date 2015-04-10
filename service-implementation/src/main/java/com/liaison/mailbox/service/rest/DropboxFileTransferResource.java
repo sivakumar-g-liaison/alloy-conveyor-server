@@ -11,6 +11,8 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,15 +36,21 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.commons.message.glass.dom.GatewayType;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
@@ -50,7 +58,9 @@ import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifest
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -105,13 +115,20 @@ public class DropboxFileTransferResource extends AuditedResource {
 				long actualStartTime = System.currentTimeMillis();
 				long startTime = 0;
 				long endTime = 0;
+				
+                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+                            MailBoxUtil.getGUID());
+                GlassMessage glassMessage = new GlassMessage();
 
 				try {
 
 					// start time to calculate elapsed time for retrieving necessary details from headers
 					startTime = System.currentTimeMillis();
-
-					String fileName = serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME);
+                    String fileName = null;
+                    if (!MailBoxUtil.isEmpty(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME))) {
+                        fileName = URLDecoder.decode(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME),
+                                StandardCharsets.UTF_8.displayName());
+                    }
 
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
@@ -176,6 +193,20 @@ public class DropboxFileTransferResource extends AuditedResource {
 					//creating work ticket
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(serviceRequest),
 					        getRequestHeaders(serviceRequest), "", null);
+					
+	                   
+                    String processId = IdentifierUtil.getUuid();
+                    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+                    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+                    glassMessage.setStatus(ExecutionState.PROCESSING);
+                    glassMessage.setInAgent(GatewayType.REST);
+                    glassMessage.setProcessId(processId);
+                    glassMessage.setSenderId(loginId);                  
+                    // Log time stamp
+                    glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+                    // Log running status
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -188,7 +219,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// calling service to upload content to spectrum
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService
 							.transferFile(workTicket, serviceRequest.getInputStream(), transferProfileId,
-									manifestResponse.getManifest(), fileName, loginId);
+									manifestResponse.getManifest(), fileName, loginId, glassMessage);
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -211,13 +242,25 @@ public class DropboxFileTransferResource extends AuditedResource {
 					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}",workTicket.getFileName(),endTime-actualStartTime);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
-
+					
+                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
+                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(e.getMessage());
+	                   // Log error status
+                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+                    glassMessage.setStatus(ExecutionState.FAILED);
+                    transactionVisibilityClient.logToGlass(glassMessage);
+                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+                    throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
+	                   // Log error status
+                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+                    glassMessage.setStatus(ExecutionState.FAILED);
+                    transactionVisibilityClient.logToGlass(glassMessage);
+                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}

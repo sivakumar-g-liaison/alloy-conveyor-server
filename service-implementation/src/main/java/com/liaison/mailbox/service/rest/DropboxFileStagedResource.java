@@ -116,7 +116,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 							StagePayloadRequestDTO.class);
 					// create the new staged file
 					DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
-					return stagedFileService.addStagedFile(serviceRequest);
+					return stagedFileService.addStagedFile(serviceRequest, null);
 
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
