@@ -380,13 +380,30 @@ task configureDTDropBoxDBUserName{
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-production.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${productionDBUserDTDM}", byline:true)
 }
 
-task deployAsDropbox (dependsOn:['configureRTDropBoxDBUserName','configureDTDropBoxDBUserName']){
+/*task deployAsDropbox (dependsOn:['configureRTDropBoxDBUserName','configureDTDropBoxDBUserName']){
 	
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-qa-stage.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-uat.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-production.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:true)
 	
+	
+}*/
+
+task buildAsDropbox {
+	
+	ant.copy( file:"src/main/resources/${rootProject.name}-dev-int.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.temp.properties", overwrite:true )
+	{
+		filterchain {
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserRTDM}") }
+			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserDTDM}") }
+			
+		}
+	}
+	
+	ant.copy( file:"src/main/resources/${rootProject.name}-dev-int.temp.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.properties", overwrite:true )
+	ant.delete(file:"src/main/resources/${rootProject.name}-dev-int.temp.properties")
 	
 }
 
