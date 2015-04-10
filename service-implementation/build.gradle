@@ -366,7 +366,7 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 
 
 
-task configureRTDropBoxDBUserName{
+/*task configureRTDropBoxDBUserName{
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserRTDM}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-qa-stage.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${qastageDBUserRTDM}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-uat.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${uatDBUserRTDM}", byline:true)
@@ -378,7 +378,7 @@ task configureDTDropBoxDBUserName{
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-qa-stage.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${qastageDBUserDTDM}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-uat.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${uatDBUserDTDM}", byline:true)
 	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-production.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${productionDBUserDTDM}", byline:true)
-}
+}*/
 
 /*task deployAsDropbox (dependsOn:['configureRTDropBoxDBUserName','configureDTDropBoxDBUserName']){
 	
@@ -392,8 +392,8 @@ task configureDTDropBoxDBUserName{
 
 task buildAsDropbox {
 	
-	ant.copy( file:"src/main/resources/${rootProject.name}-dev-int.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.temp.properties", overwrite:true )
-	{
+	ant.copy( file:"src/main/resources/g2dropbox-dev-int.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.properties", overwrite:true )
+	/*{
 		filterchain {
 			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}") }
 			tokenfilter { replaceregex(pattern:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${devintDBUserRTDM}") }
@@ -403,7 +403,7 @@ task buildAsDropbox {
 	}
 	
 	ant.copy( file:"src/main/resources/${rootProject.name}-dev-int.temp.properties", toFile:"src/main/resources/${rootProject.name}-dev-int.properties", overwrite:true )
-	ant.delete(file:"src/main/resources/${rootProject.name}-dev-int.temp.properties")
+	ant.delete(file:"src/main/resources/${rootProject.name}-dev-int.temp.properties")*/
 	
 }
 
