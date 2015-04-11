@@ -23,7 +23,6 @@ import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.MailBoxStatus;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
@@ -88,12 +87,10 @@ public class DropboxService {
         // log timestamp
         glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 	        
-		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
+        DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
 
-		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket
-				.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize()
-				.toString(), mailboxId, workTicket.getPayloadURI(), metadata,MailBoxStatus.ACTIVE.value(),workTicket.getHeader(MailBoxConstants.FS2_OPTIONS_TTL));
+		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
 
 		dtoReq.setStagedFile(stageFileReqDTO);
 

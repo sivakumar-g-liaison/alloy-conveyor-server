@@ -9,6 +9,10 @@
 
 package com.liaison.mailbox.service.dto.dropbox;
 
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.EntityStatus;
+
 /**
  *
  * @author OFS
@@ -30,17 +34,16 @@ public class StagedFileDTO {
 
 	}
 
-	public StagedFileDTO(String fileName, String filePguid, String filePath, String fileSize, String mailboxGuid,
-			String spectrumUri, String meta,String status,String timeToLive) {
-		this.setName(fileName);
-		this.setId(filePguid);
-		this.setPath(filePath);
-		this.setFileSize(fileSize);
-		this.setMailboxGuid(mailboxGuid);
-		this.setSpectrumUri(spectrumUri);
-		this.setMeta(meta);
-		this.setStatus(status);
-		this.setExpirationTime(timeToLive);
+	public StagedFileDTO(WorkTicket workTicket) {
+		this.setName(workTicket.getFileName());		
+		this.setPath(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString());
+		this.setFileSize(workTicket.getPayloadSize()
+				.toString());
+		this.setMailboxGuid(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString());
+		this.setSpectrumUri(workTicket.getPayloadURI());
+		this.setMeta(workTicket.getHeader(MailBoxConstants.UPLOAD_META));
+		this.setStatus(EntityStatus.ACTIVE.value());
+		this.setExpirationTime(workTicket.getHeader(MailBoxConstants.FS2_OPTIONS_TTL));
 	}
 
 	public String getId() {

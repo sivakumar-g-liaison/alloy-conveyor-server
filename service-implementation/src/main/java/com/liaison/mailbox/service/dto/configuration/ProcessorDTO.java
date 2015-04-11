@@ -27,7 +27,7 @@ import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
@@ -298,7 +298,7 @@ public class ProcessorDTO {
 		}
 
 		// Set the status
-		MailBoxStatus foundStatusType = MailBoxStatus.findByName(this.getStatus());
+		EntityStatus foundStatusType = EntityStatus.findByName(this.getStatus());
 		processor.setProcsrStatus(foundStatusType.value());
 
 	}
@@ -326,7 +326,7 @@ public class ProcessorDTO {
 
 		String status = processor.getProcsrStatus();
 		if (!MailBoxUtil.isEmpty(status)) {
-			MailBoxStatus foundStatus = MailBoxStatus.findByCode(status);
+			EntityStatus foundStatus = EntityStatus.findByCode(status);
 			this.setStatus(foundStatus.name());
 		}
 

@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.FolderType;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
@@ -190,7 +190,7 @@ public class GenericValidator {
 	private boolean enumValidation(DataValidation annotationDetails, Object value) {
 
 		if (MailBoxConstants.MBX_STATUS.equals(annotationDetails.type())
-				&&	MailBoxStatus.findByName(String.valueOf(value)) == null) {
+				&&	EntityStatus.findByName(String.valueOf(value)) == null) {
 					errorMessage.append(annotationDetails.errorMessage());
 					return false;
 		} else if (MailBoxConstants.PROCESSOR_TYPE.equals(annotationDetails.type())

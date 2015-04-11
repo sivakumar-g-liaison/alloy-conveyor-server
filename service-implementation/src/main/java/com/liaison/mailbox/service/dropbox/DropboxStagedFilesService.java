@@ -26,7 +26,7 @@ import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
@@ -258,7 +258,7 @@ public class DropboxStagedFilesService {
 		
 		// UnStaging the stagedFile by changing its status to INACTIVE
 		StagedFile unStagingFile = stagedFiles.get(0);
-		unStagingFile.setStagedFileStatus(MailBoxStatus.INACTIVE.value());
+		unStagingFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
 		stagedFileDAO.merge(unStagingFile);
 		
 		//Setting the necessary details to the response

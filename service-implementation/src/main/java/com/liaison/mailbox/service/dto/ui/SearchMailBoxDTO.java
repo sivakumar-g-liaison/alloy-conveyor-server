@@ -16,7 +16,7 @@ import java.util.List;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailBoxProperty;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 
 /**
@@ -138,7 +138,7 @@ public class SearchMailBoxDTO {
 		this.setName(mailBox.getMbxName());
 		this.setDescription(mailBox.getMbxDesc());
 		
-		MailBoxStatus status = MailBoxStatus.findByCode(mailBox.getMbxStatus());
+		EntityStatus status = EntityStatus.findByCode(mailBox.getMbxStatus());
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());
