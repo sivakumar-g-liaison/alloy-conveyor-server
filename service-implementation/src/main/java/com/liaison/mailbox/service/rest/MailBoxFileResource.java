@@ -36,6 +36,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -53,8 +54,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author OFS
  */
-@Path("mailbox/listFile")
-@Api(value = "mailbox/listFile", 
+@AppConfigurationResource
+@Path("config/mailbox/listFile")
+@Api(value = "config/mailbox/listFile", 
 description = "Gateway for the processor configuration helper.")
 public class MailBoxFileResource extends AuditedResource {
 	

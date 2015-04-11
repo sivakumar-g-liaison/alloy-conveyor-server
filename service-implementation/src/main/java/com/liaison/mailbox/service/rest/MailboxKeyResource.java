@@ -34,6 +34,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -50,8 +51,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author OFS
  */
-@Path("mailbox/processor/uploadkey")
-@Api(value = "mailbox/processor/uploadkey", 
+@AppConfigurationResource
+@Path("config/mailbox/processor/uploadkey")
+@Api(value = "config/mailbox/processor/uploadkey", 
 description = "Gateway for the mailbox upload self signed trust store services.")
 public class MailboxKeyResource extends AuditedResource{
 	

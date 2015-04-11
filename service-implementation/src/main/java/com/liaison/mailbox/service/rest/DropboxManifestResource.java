@@ -46,6 +46,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
@@ -70,8 +71,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author santoshc
  */
-@Path("dropbox/authAndGetACL")
-@Api(value = "dropbox/authAndGetACL", description = "Gateway for the dropbox manifest services.")
+@AppConfigurationResource
+@Path("config/dropbox/authAndGetACL")
+@Api(value = "config/dropbox/authAndGetACL", description = "Gateway for the dropbox manifest services.")
 public class DropboxManifestResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxManifestResource.class);

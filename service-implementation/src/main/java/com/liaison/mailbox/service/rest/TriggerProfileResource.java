@@ -32,6 +32,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -48,8 +49,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  *
  */
-@Path("mailbox/trigger/profile")
-@Api(value = "mailbox/trigger/profile", description = "Trigger profile services")
+@AppConfigurationResource
+@Path("config/mailbox/trigger/profile")
+@Api(value = "config/mailbox/trigger/profile", description = "Trigger profile services")
 public class TriggerProfileResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(TriggerProfileResource.class);

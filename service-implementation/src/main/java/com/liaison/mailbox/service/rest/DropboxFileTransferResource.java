@@ -43,6 +43,7 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
@@ -66,6 +67,7 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -75,7 +77,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author OFS
  */
-@Path("dropbox/transferContent")
+@AppConfigurationResource
+@Path("config/dropbox/transferContent")
+@Api(value = "config/dropbox/transferContent", description = "Gateway for the dropbox services.")
 public class DropboxFileTransferResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxFileTransferResource.class);

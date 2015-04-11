@@ -92,7 +92,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // *****
     //FOR USE WITH PYTHON
     //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
-    $rootScope.base_url = '../rest/mailbox';
+    $rootScope.base_url = '../mailbox';
     $rootScope.kms_base_url='/kms/key-management';
     //$rootScope.kms_base_url='http://10.0.24.129:8989/key-management';
     $rootScope.url_upload_key = $rootScope.kms_base_url+'/upload/public';

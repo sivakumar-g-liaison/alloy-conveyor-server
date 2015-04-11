@@ -31,6 +31,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailboxTenancyKeyService;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -47,8 +48,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  *
  */
-@Path("mailbox/tenancyKeys/")
-@Api(value = "mailbox/tenancyKeys", description = "gateway to retrieve all tenancy keys of acl manifest in request")
+@AppConfigurationResource
+@Path("config/mailbox/tenancyKeys/")
+@Api(value = "config/mailbox/tenancyKeys", description = "gateway to retrieve all tenancy keys of acl manifest in request")
 public class MailboxTenancyKeyResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxTenancyKeyResource.class);

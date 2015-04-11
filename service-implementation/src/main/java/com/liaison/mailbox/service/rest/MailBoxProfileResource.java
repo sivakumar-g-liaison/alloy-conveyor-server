@@ -37,6 +37,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
@@ -58,8 +59,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author OFS
  */
-@Path("mailbox/profile")
-@Api(value = "mailbox/profile", description = "Gateway for the profile configuration services.")
+@AppConfigurationResource
+@Path("config/mailbox/profile")
+@Api(value = "config/mailbox/profile", description = "Gateway for the profile configuration services.")
 public class MailBoxProfileResource extends AuditedResource {
 	
 	private static final Logger LOG = LogManager.getLogger(MailBoxProfileResource.class);

@@ -35,6 +35,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -54,8 +55,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author OFS
  */
-@Path("dropbox/authenticate")
-@Api(value = "dropbox/authenticate",
+@AppConfigurationResource
+@Path("config/dropbox/authenticate")
+@Api(value = "config/dropbox/authenticate",
 description = "Gateway for the dropbox services.")
 public class DropboxAuthenticationResource extends AuditedResource {
 

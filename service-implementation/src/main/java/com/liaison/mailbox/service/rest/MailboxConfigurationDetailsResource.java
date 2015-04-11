@@ -39,6 +39,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -59,8 +60,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author OFS
  */
-@Path("mailbox/{id}")
-@Api(value = "mailbox/{id}", description = "Gateway for the mailbox configuration services.")
+@AppConfigurationResource
+@Path("config/mailbox/{id}")
+@Api(value = "config/mailbox/{id}", description = "Gateway for the mailbox configuration services.")
 public class MailboxConfigurationDetailsResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxConfigurationDetailsResource.class);

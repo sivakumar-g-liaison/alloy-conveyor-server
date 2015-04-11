@@ -42,6 +42,7 @@ import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
@@ -67,6 +68,7 @@ import com.netflix.servo.monitor.Monitors;
  * @author OFS
  */
 
+@RuntimeProcessResource
 @Path("process")
 @Consumes(MediaType.WILDCARD)
 @Produces(MediaType.WILDCARD)

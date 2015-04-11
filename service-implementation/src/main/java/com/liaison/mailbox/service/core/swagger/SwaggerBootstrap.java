@@ -47,7 +47,7 @@ public class SwaggerBootstrap extends HttpServlet {
 			} catch (UnknownHostException e) {
 				logger.error("unknown host", e);
 			}
-			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice/rest");
+			config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice");
 
 		} else {
 
@@ -61,9 +61,9 @@ public class SwaggerBootstrap extends HttpServlet {
 			}
 
 			if (!basePathParts[2].equals("localhost:8989")) {
-				config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice/rest");
+				config.setBasePath("http://" + ip.getHostAddress().toString() + ":8989/g2mailboxservice");
 			} else {
-				config.setBasePath("http://localhost:8989/g2mailboxservice/rest");
+				config.setBasePath("http://localhost:8989/g2mailboxservice");
 			}
 		}
 

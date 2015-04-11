@@ -43,6 +43,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
@@ -66,6 +67,7 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -76,7 +78,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author santoshc
  */
-@Path("dropbox/stagedFiles/{stagedFileId}")
+@AppConfigurationResource
+@Path("config/dropbox/stagedFiles/{stagedFileId}")
+@Api(value = "config/dropbox/stagedFiles/{stagedFileId}", description = "Gateway for the dropbox services.")
 public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxStagedFileDownloadResource.class);
