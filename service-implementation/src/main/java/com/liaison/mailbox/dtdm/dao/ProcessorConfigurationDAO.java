@@ -39,13 +39,20 @@ import com.liaison.mailbox.dtdm.model.Processor;
 								+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
 		@NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
 						query = "select processor from Processor processor"
-								+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS)
+								+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS),
+		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX, 
+						query = "SELECT processor from Processor processor"
+								+ " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
+								+ ProcessorConfigurationDAO.PGUID 
+								+ " and processor.procsrName like :" 
+								+ ProcessorConfigurationDAO.PRCSR_NAME)
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
 	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
 	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
 	public static final String FIND_ALL_ACTIVE_PROCESSORS = "findAllActiveProcessors";
+	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "findProcessorByNameAndMbx";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -54,6 +61,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String PGUID = "pguid";
 	public static final String SERV_INST_ID = "proc_serv_inst_id";
 	public static final String PROCESSOR_TYPE = "processor_type";
+	public static final String PRCSR_NAME = "prcsr_name";
 	public static final String PROFILE_ID = "profile_id";
 	public static final String TENANCY_KEY = "tenancy_key";
 
@@ -125,6 +133,12 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of processors
 	 */
 	public List <Processor> findAllActiveProcessors(); 
+	
+	/**
+ 	* Retrieves processors by mailbox guid and processor name
+ 	* @return  processors
+ 	*/
+ 	public Processor findProcessorByNameAndMbx(String mbxGuid, String ProcName); 
 
 
 }

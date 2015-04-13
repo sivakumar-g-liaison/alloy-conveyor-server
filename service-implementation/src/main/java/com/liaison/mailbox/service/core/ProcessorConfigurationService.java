@@ -160,12 +160,10 @@ public class ProcessorConfigurationService {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 			ProcessorConfigurationDAO configDAO = new ProcessorConfigurationDAOBase();
-			List<Processor> retrievedEntity = configDAO.findProcessorByMbx(mailBoxGuid, false);
-			for(Processor proc : retrievedEntity){
-				if(serviceRequest.getProcessor().getName().equals(proc.getProcsrName())){
+			Processor retrievedEntity = configDAO.findProcessorByNameAndMbx(mailBoxGuid, processorDTO.getName());
+				if(null != retrievedEntity){
 					throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST,PROCESSOR, Response.Status.CONFLICT);
 				}
-			}
 
 			GenericValidator validator = new GenericValidator();
 			validator.validate(processorDTO);
