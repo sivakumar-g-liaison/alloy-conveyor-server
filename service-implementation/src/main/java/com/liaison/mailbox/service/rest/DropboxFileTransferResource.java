@@ -11,6 +11,8 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -111,7 +113,12 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// start time to calculate elapsed time for retrieving necessary details from headers
 					startTime = System.currentTimeMillis();
 
-					String fileName = serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME);
+					String fileName = null;
+                    if (!MailBoxUtil.isEmpty(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME))) {
+                        
+                        fileName = URLDecoder.decode(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME),
+                                StandardCharsets.UTF_8.displayName());
+                    }
 
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
