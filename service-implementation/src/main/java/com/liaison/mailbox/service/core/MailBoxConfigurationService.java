@@ -39,7 +39,7 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
@@ -408,7 +408,7 @@ public class MailBoxConfigurationService {
                 LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
             }
 			// Changing the mailbox status
-			retrievedMailBox.setMbxStatus(MailBoxStatus.INACTIVE.value());
+			retrievedMailBox.setMbxStatus(EntityStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
 
 			// response message construction

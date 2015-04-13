@@ -35,6 +35,7 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
@@ -51,6 +52,7 @@ import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
+import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -60,7 +62,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author santoshc
  */
-@Path("dropbox/transferProfiles")
+@AppConfigurationResource
+@Path("config/dropbox/transferProfiles")
+@Api(value = "config/dropbox/transferProfiles", description = "Gateway for the dropbox services.")
 public class DropboxTransferProfileResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxTransferProfileResource.class);

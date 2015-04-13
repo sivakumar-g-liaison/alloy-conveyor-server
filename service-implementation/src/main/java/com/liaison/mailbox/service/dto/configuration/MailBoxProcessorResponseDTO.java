@@ -16,7 +16,7 @@ import java.util.List;
 
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 
 /**
  * Data Transfer Object for processor details in MailBox.
@@ -98,7 +98,7 @@ public class MailBoxProcessorResponseDTO  implements Serializable{
 		this.setName(processor.getProcsrName());
 		this.setProtocol(processor.getProcsrProtocol());
 
-		MailBoxStatus status = MailBoxStatus.findByCode(processor.getProcsrStatus());
+		EntityStatus status = EntityStatus.findByCode(processor.getProcsrStatus());
 		this.setStatus(status.name());
 
 		if (null != processor.getScheduleProfileProcessors()) {

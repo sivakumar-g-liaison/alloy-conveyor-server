@@ -29,6 +29,7 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -44,8 +45,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author OFS
  */
-@Path("mailbox/serviceconfigurations")
-@Api(value = "mailbox/serviceconfigurations",
+@AppConfigurationResource
+@Path("config/mailbox/serviceconfigurations")
+@Api(value = "config/mailbox/serviceconfigurations",
 description = "Gateway for the mailbox helper services.")
 public class MailboxServiceConfigurationsResource extends AuditedResource {
 

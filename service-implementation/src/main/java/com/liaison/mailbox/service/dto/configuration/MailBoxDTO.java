@@ -25,7 +25,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
@@ -171,7 +171,7 @@ public class MailBoxDTO implements Serializable {
 		}
 		mailBox.setMailboxProperties(properties);
 
-		MailBoxStatus status = MailBoxStatus.findByName(this.getStatus());
+		EntityStatus status = EntityStatus.findByName(this.getStatus());
 		mailBox.setMbxStatus(status.value());
 	}
 
@@ -195,7 +195,7 @@ public class MailBoxDTO implements Serializable {
 		this.setName(mailBox.getMbxName());
 		this.setDescription(mailBox.getMbxDesc());
 
-		MailBoxStatus status = MailBoxStatus.findByCode(mailBox.getMbxStatus());
+		EntityStatus status = EntityStatus.findByCode(mailBox.getMbxStatus());
 		this.setStatus(status.name());
 
 		this.setShardKey(mailBox.getShardKey());

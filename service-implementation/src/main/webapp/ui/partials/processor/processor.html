@@ -71,7 +71,7 @@
                         <label>
                             Description
                         </label>
-                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" style="height:108px;" ng-maxlength=512 class="form-control"></textarea>
+                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength=512 class="form-control processor_textArea_Editor"></textarea>
                         <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
                             <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
                             <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
@@ -253,7 +253,7 @@
                       </div>
 					  </div>
 					  <div class="processor_adjustUploadPaddingTop" ng-show="!disableSSHKeys">
-						<button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary" style="margin-top:25px;" ng-click="uploadSSHKey()">Upload</button>
+						<button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary processor_buttonMargin_Top" ng-click="uploadSSHKey()">Upload</button>
 					    <br/><br/>
 					 </div>
                    <div class="row" ng-show="!disableCertificates">
@@ -272,7 +272,7 @@
 						    </div>
                         </div>
                         <div class="col-sm-1 col-md-1">
-                            <button id="mbx-procsr-certificateupload" ng-disabled="!isFileSelected" class="btn btn-primary" style="margin-top:25px;margin-left:-31px" ng-click="uploadFile()">Upload</button>
+                            <button id="mbx-procsr-certificateupload" ng-disabled="!isFileSelected" class="btn btn-primary processor_buttonMargin_Top processor_buttonMargin_Left" ng-click="uploadFile()">Upload</button>
                         </div>
                         <br>
                         <div class="col-sm-6 col-md-6">
@@ -283,7 +283,7 @@
                                 <br/>
                                 <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
                               
-                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="0" style="margin-left:5px">  No
+                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="0" class="processor_inputMargin_Left">  No
 
                             </div>
                         </div>

@@ -532,3 +532,80 @@ input::-moz-focus-inner {
   padding: 0;
   border: 0;
 }
+
+/*--- folderDescription.html---*/
+.folderDescriptionStyle{
+	width:95%;
+	height: 45px;
+}
+
+/*--- folderUri.html---*/
+.textArea_Editor{
+	width:90%;
+	height: 45px;
+}
+
+/*--- propertyNameDirectiveTemplate.html---*/
+.propertyNameDirectiveStyle{
+	width:47%;
+	height:45px;	
+}
+
+/*--- processor.html---*/
+.processor_textArea_Editor{
+	height:108px !important;
+}
+
+.processor_buttonMargin_Top{
+	margin-top:25px;
+}
+
+.processor_buttonMargin_Left{
+	margin-left:-31px;
+}
+
+.processor_inputMargin_Left{
+	margin-left:5px;
+}
+
+/*--- addprofile.html---*/
+.addprofile_Width{
+	width:100%
+}
+
+/*--- about.html---*/
+.marginTop{	
+	margin-top:1em;
+}
+
+.paddingTop{	
+	padding-top:1em;
+}
+
+.marginBottom{
+	margin-bottom: 1em;
+}
+
+.textAlign{
+	text-align: center;
+}
+
+.inputStyle{
+	position: absolute;
+	top: 30px; 
+	bottom: 30px;
+	left: 5px; 
+	bottom:0px;
+}
+
+.paddingTop_Home{
+	padding-top: 2em;
+}
+
+.paddingBottomFive{
+	padding-bottom:.5em;
+}
+
+.img_Width{
+	width: 70%;
+}

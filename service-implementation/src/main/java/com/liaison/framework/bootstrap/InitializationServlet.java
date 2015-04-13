@@ -56,8 +56,10 @@ public class InitializationServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
     	
     	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
+    	    logger.debug("dropbox queue starts to poll");
     		ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();       
         } else {
+            logger.debug("processor and sweeper queues starts to poll");
         	ProcessorQueuePoller.startPolling();
         	ServiceBrokerToMailboxWorkTicketPoller.startPolling();
         }

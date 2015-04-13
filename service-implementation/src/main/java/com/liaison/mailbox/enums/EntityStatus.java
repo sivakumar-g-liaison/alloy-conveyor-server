@@ -16,14 +16,14 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  * @author OFS
  * 
  */
-public enum MailBoxStatus {
+public enum EntityStatus {
 
 	ACTIVE("ACTIVE"),
 	INACTIVE("INACTIVE");
 
 	private String value;
 
-	private MailBoxStatus(String status) {
+	private EntityStatus(String status) {
 		this.value = status;
 	}
 
@@ -32,15 +32,15 @@ public enum MailBoxStatus {
 	}
     
 	/**
-	 * This method will retrieve the MailBoxStatus by given MailBox status.
+	 * This method will retrieve the EntityStatus by given MailBox status.
 	 * 
 	 * @param code the MailBox status as string
-	 * @return MailBoxStatus
+	 * @return EntityStatus
 	 */
-	public static MailBoxStatus findByCode(String code) {
+	public static EntityStatus findByCode(String code) {
 
-		MailBoxStatus found = null;
-		for (MailBoxStatus value : MailBoxStatus.values()) {
+		EntityStatus found = null;
+		for (EntityStatus value : EntityStatus.values()) {
 
 			if (!MailBoxUtil.isEmpty(code) && code.equals(value.value())) {
 				found = value;
@@ -52,16 +52,16 @@ public enum MailBoxStatus {
 	}
     
 	/**
-	 * This method will retrieve the MailBoxStatus by given status from MailBoxDTO.
+	 * This method will retrieve the EntityStatus by given status from MailBoxDTO.
 	 * 
 	 * @param name 
 	 *        the MailBoxDTO status
-	 * @return MailBoxStatus
+	 * @return EntityStatus
 	 */
-	public static MailBoxStatus findByName(String name) {
+	public static EntityStatus findByName(String name) {
 
-		MailBoxStatus found = null;
-		for (MailBoxStatus value : MailBoxStatus.values()) {
+		EntityStatus found = null;
+		for (EntityStatus value : EntityStatus.values()) {
 
 			if (!MailBoxUtil.isEmpty(name) && name.equals(value.name())) {
 				found = value;

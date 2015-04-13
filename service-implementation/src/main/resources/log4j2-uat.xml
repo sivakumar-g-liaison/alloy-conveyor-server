@@ -16,12 +16,18 @@
 
     <appenders>
 
+
+        <!-- ############################################################## -->
+        <!-- #########    Logstash, General Application Logs   ############ -->
+        <!-- ############################################################## -->
+
         <!--
             LogStashSocket is a tcp socket dumping logstash spec 1.0 messages
-         you'll need to export LOGSTASHMACHINE=something and export LOGSTASHPORT=something
          -->
         <Socket name="LogStashSocket" host="${env:LOGSTASHMACHINE}" port="${env:LOGSTASHPORT}"
-                reconnectionDelay="500"
+                connectTimeoutMillis="500"
+                reconnectionDelayMillis="500"
+                immediateFail="true"
                 protocol="tcp"
                 ignoreExceptions="false">
             <!-- exclude redundant log element -->
@@ -54,9 +60,16 @@
                 <KeyValuePair key="java_version" value="${sys:java.version}"/>
 
             </LogStashJSONLayout>
+            <filters>
+                <!-- remove some noise-->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+            </filters>
+
         </Socket>
 
 
+        <!-- destination of failover when logstash socket fails -->
         <RollingFile name="LogStashFailoverFile" fileName="${env:LOGSTASH_LOG_DIR}/logstash.failover.log"
                      filePattern="${env:LOGSTASH_LOG_DIR}/logstash.failover-%d{MM-dd-yyyy}.log.gz"
                      ignoreExceptions="false">
@@ -90,40 +103,136 @@
                 <KeyValuePair key="java_version" value="${sys:java.version}"/>
 
             </LogStashJSONLayout>
+            <filters>
+                <!-- remove some noise-->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+            </filters>
 
             <Policies>
                 <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="250 MB"/>
+                <SizeBasedTriggeringPolicy size="${env:LOGSTASH_ROLLING_SIZE}"/>
             </Policies>
         </RollingFile>
 
+        <!-- Failover when either logstash socket appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncLogStashSocketWithFailover"
+               blocking="false"
+               bufferSize="${env:LOGSTASH_RING_BUFFER_SIZE}"
+               errorRef="LogStashFailoverFile"
+               ignoreExceptions="false"
+                >
+            <AppenderRef ref="LogStashSocket"/>
+        </Async>
 
-        <Failover name="LogStashFailover" primary="LogStashSocket">
+        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncLogStashSocketWithFailoverFailover" primary="AsyncLogStashSocketWithFailover">
             <Failovers>
-                <AppenderRef ref="LogStashFailoverFile"/>
+                <AppenderRef ref="Console"/>
             </Failovers>
         </Failover>
 
-<!--
-        <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData">
+
+
+        <!-- ############################################################## -->
+        <!-- #########        Organization GSA APPENDER        ############ -->
+        <!-- ############################################################## -->
+
+        <!-- primary appender to lens -->
+        <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData" ignoreExceptions="false">
             <GSAMessageXMLLayout/>
             <filters>
                 <MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
             </filters>
         </GSAMessageLENS>
-        
-         <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData">
-             <GSAMessageXMLLayout />
-             <filters>
-                 <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
-             </filters>
-         </GSAMessageLENS>
 
 
+        <!-- failover destination -->
+        <RollingFile name="OrgGSALENSAppenderFailoverFile" fileName="${env:LENS_LOG_DIR}/OrgGSALENSAppender.failover.log"
+                     filePattern="${env:LENS_LOG_DIR}/OrgGSALENSAppender.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <GSAMessageXMLLayout/>
+            <filters>
+                <MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${env:ORGANIZATION_GSA_ROLLING_SIZE}"/>
+            </Policies>
+        </RollingFile>
+
+        <!-- Failover when either LENS appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncOrgGSALENSAppenderWithFailover"
+               blocking="false"
+               bufferSize="${env:ORGANIZATION_GSA_RING_BUFFER_SIZE}"
+               errorRef="OrgGSALENSAppenderFailoverFile"
+               ignoreExceptions="false"
+                >
+            <AppenderRef ref="OrgGSALENSAppender"/>
+        </Async>
+
+        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncOrgGSALENSAppenderWithFailoverFailover" primary="AsyncOrgGSALENSAppenderWithFailover">
+            <Failovers>
+                <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
+
+
+        <!-- ############################################################## -->
+        <!-- #########          Pairwise GSA APPENDER          ############ -->
+        <!-- ############################################################## -->
+
+        <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData">
+            <GSAMessageXMLLayout />
+            <filters>
+                <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
+            </filters>
+        </GSAMessageLENS>
+
+
+        <!-- failover destination -->
+        <RollingFile name="PairwiseGSALENSAppenderFailoverFile" fileName="${env:LENS_LOG_DIR}/PairwiseGSALENSAppender.failover.log"
+                     filePattern="${env:LENS_LOG_DIR}/PairwiseGSALENSAppender.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <GSAMessageXMLLayout />
+            <filters>
+                <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
+            </filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${env:PAIRWISE_GSA_ROLLING_SIZE}"/>
+            </Policies>
+        </RollingFile>
+
+        <!-- Failover when either LENS appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncPairwiseGSALENSAppenderWithFailover"
+               blocking="false"
+               bufferSize="${env:PAIRWISE_GSA_RING_BUFFER_SIZE}"
+               errorRef="PairwiseGSALENSAppenderFailoverFile"
+               ignoreExceptions="false"
+                >
+            <AppenderRef ref="PairwiseGSALENSAppender"/>
+        </Async>
+
+        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncPairwiseGSALENSAppenderWithFailoverFailover" primary="AsyncPairwiseGSALENSAppenderWithFailover">
+            <Failovers>
+                <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
+
+        <!-- ############################################################## -->
+        <!-- #########          Glass Message General         ############ -->
+        <!-- ############################################################## -->
+
+        <!-- Logs ONLY Glass Messages to Spectrum -->
         <GlassMessageSpectrum name="GlassMessageSpectrumREST"
                               ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
                               password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
-                              sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="630720000"
+                              sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="${env:GLASS_SPECTRUM_MESSAGE_TTL}"
                               dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}">
             <GlassMessageJSONLayout compact="true"/>
             <filters>
@@ -132,55 +241,165 @@
             </filters>
         </GlassMessageSpectrum>
 
+        <!-- failover destination -->
+        <RollingFile name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
+                     filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <GlassMessageJSONLayout compact="true"/>
+            <filters>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
+                              onMismatch="DENY"/>
+            </filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${env:GLASS_ROLLING_SIZE}"/>
+            </Policies>
+        </RollingFile>
+
+        <!-- Failover when either GlassMessageSpectrumREST appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncGlassMessageSpectrumRESTWithFailover"
+               blocking="false"
+               bufferSize="${env:GLASS_RING_BUFFER_SIZE}"
+               errorRef="GlassMessageSpectrumFile"
+               ignoreExceptions="false"
+                >
+            <AppenderRef ref="GlassMessageSpectrumREST"/>
+        </Async>
+
+        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncGlassMessageSpectrumRESTWithFailoverFailover" primary="AsyncGlassMessageSpectrumRESTWithFailover">
+            <Failovers>
+                <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
+
+
+
+        <!-- ############################################################## -->
+        <!-- #########          Glass Message Metrics         ############ -->
+        <!-- ############################################################## -->
 
         <GlassMessageSpectrum name="MetricsGMSpectrumAppender"
                               ip="${env:GLASS_METRIC_IP}" port="${env:GLASS_METRIC_PORT}"
                               password="${env:GLASS_METRIC_PASSWORD}" username="${env:GLASS_METRIC_USER}"
                               dataSpaceName="${env:GLASS_METRIC_DATASPACE}" sourceName="${env:GLASS_METRIC_SOURCE_NAME}"
-                              messageTTL="630720000" dataObjectName="${env:GLASS_METRIC_DATAOBJECTNAME}">
+                              messageTTL="${env:GLASS_METRIC_TTL}" dataObjectName="${env:GLASS_METRIC_DATAOBJECTNAME}">
             <GlassMessageJSONLayout compact="true"/>
             <filters>
                 <MarkerFilter marker="METRICS_GM_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
             </filters>
         </GlassMessageSpectrum>
--->
 
-       <File name="FileSyslogLogFile" fileName="/var/log/tomcat/filesyslog.log" append="true" >
-        <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
-        <filters>
-        <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
-        </filters>
-       </File>
-        
+        <!-- failover destination -->
+        <RollingFile name="MetricsGMSpectrumFile" fileName="${env:METRICS_LOG_DIR}/MetricsGMSpectrum.failover.log"
+                     filePattern="${env:METRICS_LOG_DIR}/MetricsGMSpectrum.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <GlassMessageJSONLayout compact="true"/>
+            <filters>
+                <MarkerFilter marker="METRICS_GM_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${env:METRICS_ROLLING_SIZE}"/>
+            </Policies>
+        </RollingFile>
+
+        <!-- Failover when either MetricsGMSpectrumAppender appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncMetricsGMSpectrumAppenderWithFailover"
+               blocking="false"
+               bufferSize="${env:METRICS_RING_BUFFER_SIZE}"
+               errorRef="MetricsGMSpectrumFile"
+               ignoreExceptions="false"
+                >
+            <AppenderRef ref="MetricsGMSpectrumAppender"/>
+        </Async>
+
+        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncMetricsGMSpectrumAppenderWithFailoverFailover" primary="AsyncMetricsGMSpectrumAppenderWithFailover">
+            <Failovers>
+                <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
 
 
-       <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
-       <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
-       </Console>
-        
-     </appenders>
+		
+		
+		<!-- ############################################################## -->
+        <!-- #########             Audit - Syslog              ############ -->
+        <!-- ############################################################## -->
+
+        <File name="FileSyslogLogFile" fileName="/var/log/tomcat/syslog/filesyslog.log" append="true" >
+            <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
+            <filters>
+                <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+        </File>
+
+        <!-- failover destination  -->
+        <RollingFile name="FileSyslogFailoverFile" fileName="${env:SYSLOG_LOG_DIR}/filesyslog.failover.log"
+                     filePattern="${env:SYSLOG_LOG_DIR}/filesyslog.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <AuditStatementRFC5424JSONLayout appName="${env:SYSLOG_APPNAME}" enterpriseNumber="${env:SYSLOG_ENTERPRISE_NUMBER}" facility="${env:SYSLOG_FACILITY}" id="${env:SYSLOG_ID}" messageID="${env:SYSLOG_MESSAGE_ID}" newline="true" />
+            <filters>
+                <AuditStatementFilter  onMatch="ACCEPT" onMismatch="DENY"/>
+            </filters>
+ 
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="${env:SYSLOG_ROLLING_SIZE}"/>
+            </Policies>
+        </RollingFile>
+
+ 
+
+        <!-- Failover when either FileSyslogLogFile appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncFileSyslogWithFailover"
+               blocking="false"
+               bufferSize="${env:SYSLOG_RING_BUFFER_SIZE}"
+               errorRef="FileSyslogFailoverFile"
+               ignoreExceptions="false">
+
+            <AppenderRef ref="FileSyslogLogFile"/>
+        </Async>
+
+         <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncFileSyslogWithFailoverFailover" primary="AsyncFileSyslogWithFailover">
+            <Failovers>
+                <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
+
+		
+
+		<!-- ############################################################## -->
+        <!-- #########                 Console                 ############ -->
+        <!-- ############################################################## -->
+
+        <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+            <filters>
+                <!-- remove some noise-->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+            </filters>
+        </Console>
+
+    </appenders>
 
     <loggers>
-	     <root level="DEBUG">
-	     	 <!-- logstash
-	     	  Note: Ignore innocuous logged line "ERROR appender Failover has no parameter that matches element Failovers" during startup, this is actually normal.
-	     	  -->
-	    	<appender-ref ref="LogStashFailover"/>
-	    	
-	               
-            <!--  logs MessageBus popped messages -->
-            <!--  <appender-ref ref="MBPopLogFile" /> -->
-         
-	        <!-- logs to console (not necessarily for production) -->
-	        <appender-ref ref="Console" /> 
-	       
-	        <!-- logs syslog formatted audit messages to local file (not for production) -->
-            <appender-ref ref="FileSyslogLogFile" />
-<!--
-             <appender-ref ref="OrgGSALENSAppender"/>
+        <root level="INFO">
+            <appender-ref ref="AsyncLogStashSocketWithFailoverFailover"/>
+            <appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />
+            <appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />
+            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
+            <appender-ref ref="AsyncMetricsGMSpectrumAppenderWithFailoverFailover"/>
+			<appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
 
-             <appender-ref ref="PairwiseGSALENSAppender" />
--->
-	     </root>
-	</loggers>
+            <!-- not for production -->
+            <appender-ref ref="Console" />
+
+        </root>
+    </loggers>
 </configuration>

@@ -36,6 +36,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
@@ -57,8 +58,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author veerasamyn
  */
-@Path("mailbox")
-@Api(value = "mailbox", description = "Gateway for the mailbox configuration services.")
+@AppConfigurationResource
+@Path("config/mailbox")
+@Api(value = "config/mailbox", description = "Gateway for the mailbox configuration services.")
 public class MailBoxConfigurationResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);

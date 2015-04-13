@@ -104,7 +104,18 @@ war {
 		include 'WEB-INF/**','META-INF/**'
 		into '/'
 	}
-
+    
+	// copy webapp
+	from('src/main/webapp/ui') {
+		exclude 'WEB-INF/**','META-INF/**','swagger-ui/**'
+		into '/config/ui'
+	}
+	
+	// copy swagger
+	from('src/main/webapp/ui/swagger-ui') {
+		into '/api-docs/swagger-ui'
+	}
+	
 	// exclude the JPA configs, handled above
 	//rootSpec.exclude 'META-INF/**'
 	// exclude the servlet configs, handled above
@@ -117,6 +128,8 @@ war {
 	rootSpec.exclude "log4j2*.xml"
 	// exclude the WADL tools, they are build time
 	rootSpec.exclude "*wadl*"
+	//exclude webapp/ui
+	rootSpec.exclude 'ui/**'
 }
 
 war.dependsOn('configureTomcat')
@@ -287,7 +300,7 @@ rebel {
 		omitDefault = true
 		resource {
 			directory = "src/main/webapp/ui"
-			target = "/ui"
+			target = "/config/ui"
 		}
 	}
 }
@@ -365,14 +378,35 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 	}
 }
 
-task deployAsDropbox {
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.deployAsDropbox=)(.*)', replace:"\\1${deployAsDropbox}", byline:false)
+
+
+task buildAsDropbox (type :Copy){
+	from 'src/main/resources/g2dropbox-dev-int.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-dev-int.properties", "g2mailboxservice-dev-int.properties")
+	  }
 	
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlDTDM}", byline:false)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.dtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserDTDM}", byline:false)
+	from 'src/main/resources/g2dropbox-qa-stage.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-qa-stage.properties", "g2mailboxservice-qa-stage.properties")
+	  }
 	
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_URL=)(.*)', replace:"\\1${dbUrlRTDM}", byline:false)
-	ant.replaceregexp(file:"${projectDir}/src/main/resources/${rootProject.name}-dev-int.properties", match:'(com\\.liaison\\.rtdm\\.DB_USER=)(.*)', replace:"\\1${dbUserRTDM}", byline:false)
+	from 'src/main/resources/g2dropbox-uat.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-uat.properties", "g2mailboxservice-uat.properties")
+	  }
+	
+	from 'src/main/resources/g2dropbox-production.properties'
+	into 'src/main/resources/'
+	rename { String fileName ->
+		fileName.replace("g2dropbox-production.properties", "g2mailboxservice-production.properties")
+	  }
+	
+	
+	
 }
 
 task setDevProperties << {

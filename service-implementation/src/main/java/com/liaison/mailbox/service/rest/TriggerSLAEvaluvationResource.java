@@ -34,6 +34,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -49,8 +50,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  *
  */
-@Path("mailbox/trigger/slacheck")
-@Api(value = "mailbox/trigger/slacheck", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
+@AppConfigurationResource
+@Path("config/mailbox/trigger/slacheck")
+@Api(value = "config/mailbox/trigger/slacheck", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
 public class TriggerSLAEvaluvationResource extends AuditedResource {
 	
 	private static final Logger LOG = LogManager.getLogger(TriggerSLAEvaluvationResource.class);

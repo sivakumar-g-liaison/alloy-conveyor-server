@@ -19,11 +19,17 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.MailBoxStatus;
+import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
+import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * Class which has  Dropbox related operations.
@@ -50,20 +56,24 @@ public class DropboxService {
 		LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
-
-		// getting meta data from meta json
-		String metadata = workTicket.getHeader(MailBoxConstants.UPLOAD_META);
-
-		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+	    GlassMessage glassMessage = new GlassMessage(workTicket);
+	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+	    glassMessage.setStatus(ExecutionState.READY);
+        
+        // log activity status
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT:Workticket Consumed from queue");   
+        // log timestamp
+        glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+	        
+        DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
-
-		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket.getFileName(), "", workTicket
-				.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString(), workTicket.getPayloadSize()
-				.toString(), workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString(),
-				workTicket.getPayloadURI(), metadata,MailBoxStatus.ACTIVE.value(),workTicket.getHeader(MailBoxConstants.FS2_OPTIONS_TTL));
-
+		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
 		dtoReq.setStagedFile(stageFileReqDTO);
-
-		stageFileService.addStagedFile(dtoReq);
+		stageFileService.addStagedFile(dtoReq, glassMessage);
+		 
+	    // log TVA status
+	    //transactionVisibilityClient.logToGlass(glassMessage);
 	}
 }

@@ -33,7 +33,7 @@ public interface MailBoxConstants {
 	/** Property which is used to get the configured receivers from mailbox. */
 	public final static String MBX_RCVR_PROPERTY = "emailnotificationids";
 
-	public final static String MBX_STATUS = "MailBoxStatus";
+	public final static String MBX_STATUS = "EntityStatus";
 
 	public final static String PROCESSOR_TYPE = "ProcessorType";
 
@@ -124,6 +124,8 @@ public interface MailBoxConstants {
 	public final static String KEY_MAILBOX_ID = "mailboxId";
 	public final static String KEY_OVERWRITE = "overwrite";
 	public final static String KEY_FILE_PATH = "path";
+	public final static String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
+	public final static String KEY_WORKTICKET_TENANCYKEY = "tenancyKey";
 
 	//GITURI
 	public static final String PROPERTY_GITLAB_ACTIVITY_PROJECT_ID = "com.liaison.gitlab.mailbox.script.project.id";
@@ -277,5 +279,13 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_LOGIN_CREDENTIAL = "LOGIN_CREDENTIAL";
     public static final String PROPERTY_TRUSTORE = "TRUSTSTORE_CERT";
     public static final String PROPERTY_SSH_KEYPAIR = "SSH_KEYPAIR";
-
+    
+    // glass log messages
+    public static final String DROPBOX_FILE_TRANSFER = "dropbox_file_transfer";
+    public static final String FILE_QUEUED_SUCCESSFULLY = "MFT:File queued for transfer successfully";
+    public static final String FILE_STAGED_SUCCESSFULLY = "MFT:File staged for delivery";
+    public static final String FILE_DOWNLOADED_SUCCESSFULLY = "File downloaded successfully";
+    public static final String FILE_QUEUEING_FAILED = "File content queued for transfer got failed";
+    public static final String FILE_STAGING_FAILED = "File staging got failed after consuming from queue";
+    public static final String FILE_DOWNLOADING_FAILED = "File downloading got failed";
 }
