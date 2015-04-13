@@ -310,7 +310,7 @@ public class MailboxSLAWatchDogService {
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-		GlassMessage glassMessage = new GlassMessage();
+		GlassMessage glassMessage = null;
 
 		try {
 
@@ -318,11 +318,8 @@ public class MailboxSLAWatchDogService {
 
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
-			glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-			glassMessage.setMailboxId(mailboxId);
+			glassMessage = new GlassMessage(workTicket);
 			glassMessage.setStatus(ExecutionState.STAGED);
-			glassMessage.setPipelineId(workTicket.getPipelineId());
-			
 			glassMessage.logProcessingStatus(StatusType.RUNNING, "");
 
 			// validates mandatory value.
