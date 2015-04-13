@@ -104,7 +104,18 @@ war {
 		include 'WEB-INF/**','META-INF/**'
 		into '/'
 	}
-
+    
+	// copy webapp
+	from('src/main/webapp/ui') {
+		exclude 'WEB-INF/**','META-INF/**','swagger-ui/**'
+		into '/config/ui'
+	}
+	
+	// copy swagger
+	from('src/main/webapp/ui/swagger-ui') {
+		into '/api-docs/swagger-ui'
+	}
+	
 	// exclude the JPA configs, handled above
 	//rootSpec.exclude 'META-INF/**'
 	// exclude the servlet configs, handled above
@@ -117,6 +128,8 @@ war {
 	rootSpec.exclude "log4j2*.xml"
 	// exclude the WADL tools, they are build time
 	rootSpec.exclude "*wadl*"
+	//exclude webapp/ui
+	rootSpec.exclude 'ui/**'
 }
 
 war.dependsOn('configureTomcat')
@@ -287,7 +300,7 @@ rebel {
 		omitDefault = true
 		resource {
 			directory = "src/main/webapp/ui"
-			target = "/ui"
+			target = "/config/ui"
 		}
 	}
 }

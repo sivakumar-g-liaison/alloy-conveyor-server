@@ -38,6 +38,7 @@ import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -58,8 +59,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author veerasamyn
  */
-@Path("mailbox/{mailboxid}/processor")
-@Api(value = "mailbox/{mailboxid}/processor",
+@AppConfigurationResource
+@Path("config/mailbox/{mailboxid}/processor")
+@Api(value = "config/mailbox/{mailboxid}/processor",
 description = "Gateway for the processor configuration services.")
 public class MailBoxProcessorResource extends AuditedResource {
 

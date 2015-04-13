@@ -232,6 +232,43 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 	
+	/**
+	 * Retrieves processors from the given mailbox guid and processor name
+	 *
+	 * @param mbxGuid the mailbox guid
+	 * @param procName the processor name
+	 * @return processor
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Processor findProcessorByNameAndMbx(String mbxGuid, String procName) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		Processor processor = null;
+
+		try {
+
+			LOG.info("find processor by mbx and processor name starts.");
+			
+			List<Processor> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_NAME_AND_MBX)
+					.setParameter(PGUID,  (MailBoxUtil.isEmpty(mbxGuid) ? "''" : mbxGuid))
+					.setParameter(PRCSR_NAME, (MailBoxUtil.isEmpty(procName) ? "''" : procName))
+					.getResultList();
+			
+			if ((proc != null) && (proc.size() > 0)) {
+                processor =  proc.get(0);
+            }
+			
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		LOG.info("find processor by mbx and processor name ends.");
+		return processor;
+	}
+	
 	@Override
 	public List<Processor> findProcessorsByType(List<String> specificProcessorTypes) {
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);

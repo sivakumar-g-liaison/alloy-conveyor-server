@@ -10,18 +10,23 @@
 
 package com.liaison.mailbox.service.util;
 
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.liaison.common.log4j2.markers.GlassMessageMarkers;
-import com.liaison.commons.message.glass.dom.*;
+import com.liaison.commons.message.glass.dom.ActivityStatusAPI;
+import com.liaison.commons.message.glass.dom.GatewayType;
+import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.message.glass.dom.TimeStamp;
+import com.liaison.commons.message.glass.dom.TimeStampAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.Date;
 
 /**
  * @author OFS
@@ -63,7 +68,43 @@ public class GlassMessage {
     private String message;
     private int inSize;
     private String processId;
+    private String senderId;
+    private String transferProfileName;
+    private String stagedFileId;
+    private String meta;
 
+    public String getTransferProfileName() {
+        return transferProfileName;
+    }
+
+    public void setTransferProfileName(String transferProfileName) {
+        this.transferProfileName = transferProfileName;
+    }
+    
+    public String getStagedFileId() {
+        return stagedFileId;
+    }
+
+    public void setStagedFileId(String stagedFileId) {
+        this.stagedFileId = stagedFileId;
+    }
+
+    public String getMeta() {
+        return meta;
+    }
+
+    public void setMeta(String meta) {
+        this.meta = meta;
+    }
+
+    public String getSenderId() {
+        return senderId;
+    }
+
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+    
     public GatewayType getOutAgent() {
         return outAgent;
     }

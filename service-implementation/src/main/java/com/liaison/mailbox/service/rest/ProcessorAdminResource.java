@@ -40,6 +40,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -54,8 +55,9 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
-@Path("mailbox/processoradmin/processor/execution")
-@Api(value = "mailbox/processoradmin", description = "Administration of processor services")
+@AppConfigurationResource
+@Path("config/mailbox/processoradmin/processor/execution")
+@Api(value = "config/mailbox/processoradmin", description = "Administration of processor services")
 public class ProcessorAdminResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);

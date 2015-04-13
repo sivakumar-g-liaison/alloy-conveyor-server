@@ -33,32 +33,52 @@ export SYSLOG_ENTERPRISE_NUMBER="99999"
 export SYSLOG_ID="App"
 export SYSLOG_MESSAGE_ID="AUDIT"
 export SYSLOG_FACILITY="Local0"
+export SYSLOG_ROLLING_SIZE="250 MB"
+export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
+export SYSLOG_RING_BUFFER_SIZE=128
  
 export GLASS_SPECTRUM_PORT=443
-export GLASS_SPECTRUM_IP=at4p-vpspectrum
+export GLASS_SPECTRUM_IP=at4p-vpspectrum.liaison.prod
 export GLASS_SPECTRUM_USER=g2glass
 export GLASS_SPECTRUM_PASSWORD=FR9haL44zQR7SYBAse7VT6jaTi
 export GLASS_SPECTRUM_DATASPACE=g2-glass
 export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
- 
+export GLASS_SPECTRUM_MESSAGE_TTL=630720000
+export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
+export GLASS_ROLLING_SIZE="250 MB"
+export GLASS_RING_BUFFER_SIZE=128
  
 export GLASS_METRIC_PORT=443
-export GLASS_METRIC_IP=at4p-vpspectrum
+export GLASS_METRIC_IP=at4p-vpspectrum.liaison.prod
 export GLASS_METRIC_USER=g2prod
 export GLASS_METRIC_PASSWORD=4Va2mHXK7bJPcbcjdWKc8QjVMa
 export GLASS_METRIC_DATASPACE=g2-prod
 export GLASS_METRIC_DATAOBJECTNAME=MetricsGM
 export GLASS_METRIC_SOURCE_NAME=$APP_ENV
+export GLASS_METRIC_TTL=630720000
+export METRICS_LOG_DIR="/var/log/tomcat/metrics_failover"
+export METRICS_ROLLING_SIZE="250 MB"
+export METRICS_RING_BUFFER_SIZE=128
+
 export GSA_LENS_IP=10.152.2.31
+
+export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
+export ORGANIZATION_GSA_ROLLING_SIZE="250 MB"
+export ORGANIZATION_GSA_RING_BUFFER_SIZE=128
+export PAIRWISE_GSA_ROLLING_SIZE="250 MB"
+export PAIRWISE_GSA_RING_BUFFER_SIZE=128
  
 export HOST_IPS=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | sed 'N;s/\n/, /;')
 export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=at4p-vplstash
+export LOGSTASHMACHINE=at4p-vplstash.liaison.prod
 export LOGSTASHPORT=4560
-export LOGSTASH_LOG_DIR=/tmp
+export LOGSTASH_ROLLING_SIZE="250 MB"
+
+export LOGSTASH_LOG_DIR=/var/log/tomcat
+export LOGSTASH_RING_BUFFER_SIZE=128
 # ==================================================================
 # log overrides
 # ==================================================================

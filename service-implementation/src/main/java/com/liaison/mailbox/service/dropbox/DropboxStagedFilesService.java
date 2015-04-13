@@ -20,17 +20,18 @@ import javax.xml.bind.JAXBException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.ResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropBoxUnStagedFileResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
@@ -39,7 +40,9 @@ import com.liaison.mailbox.service.dto.dropbox.response.StagePayloadResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.StagedFileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
@@ -127,7 +130,7 @@ public class DropboxStagedFilesService {
 		return serviceResponse;
 	}
 
-	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys) {
+	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys, GlassMessage glassMessage) {
 
 		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
@@ -137,6 +140,8 @@ public class DropboxStagedFilesService {
 			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, fileId,
 					Response.Status.BAD_REQUEST);
 		}
+		glassMessage.setMeta(stagedFile.getFileMetaData());
+		glassMessage.setStagedFileId(fileId);
 
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
 		MailBox mailbox = mailboxDao.find(MailBox.class, stagedFile.getMailboxId());
@@ -145,9 +150,10 @@ public class DropboxStagedFilesService {
 			throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, stagedFile.getMailboxId(),
 					Response.Status.BAD_REQUEST);
 		}
-
+		glassMessage.setMailboxId(mailbox.getPguid());
 		for (String tkey : tenancyKeys) {
 			if (mailbox.getTenancyKey().equals(tkey)) {
+			    glassMessage.setTenancyKey(tkey);
 				return stagedFile.getSpectrumUri();
 			}
 		}
@@ -155,7 +161,7 @@ public class DropboxStagedFilesService {
 		return null;
 	}
 
-	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request) throws IOException, JAXBException {
+	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request, GlassMessage glassMessage) throws IOException, JAXBException {
 
 		LOG.debug("Entering into add staged file.");
 
@@ -181,12 +187,30 @@ public class DropboxStagedFilesService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
 			serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
 
+	         //successfully staged
+            if (null != glassMessage) {
+                
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY);
+                glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+            }
+            
 			LOG.debug("Exit from add staged file.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			
+            if (null != glassMessage) {
+                    
+                    // glass log in case of failure during file staging
+                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+                        MailBoxUtil.getGUID());
+                glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+                glassMessage.setStatus(ExecutionState.FAILED);
+                transactionVisibilityClient.logToGlass(glassMessage);
+                
+            }
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE,
 					Messages.FAILURE, e.getMessage()));
 			return serviceResponse;

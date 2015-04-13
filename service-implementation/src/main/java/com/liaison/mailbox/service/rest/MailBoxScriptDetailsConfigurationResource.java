@@ -33,6 +33,7 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
+import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ScriptService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -55,8 +56,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author OFS
  */
 
-@Path("mailbox/git/content/{git.file.name}")
-@Api(value = "mailbox/git/content/{git.file.name}",
+@AppConfigurationResource
+@Path("config/mailbox/git/content/{git.file.name}")
+@Api(value = "config/mailbox/git/content/{git.file.name}",
 description = "Gateway for the script file details services")
 public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 
