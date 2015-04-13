@@ -1,3 +1,7 @@
+2.1.2-SNAPSHOT
+-------------------------------
+Added https.protocols parameter to JVM
+
 2.1.1-SNAPSHOT
 -------------------------------
 

@@ -329,6 +329,7 @@ cargo {
 		jvmArgs += " -Darchaius.deployment.applicationId=${project.war.baseName}"
 		jvmArgs += " -Darchaius.deployment.environment=${deployEnvironment}"
         jvmArgs += " -Dlog4j.configurationFile=log4j2-${deployEnvironment}.xml"
+		jvmArgs += " -Dhttps.protocols=TLSv1.2"
 
 		// if containerDebug, append tomcat debug args to jvm args
 		if(project.hasProperty('containerDebug')) {
