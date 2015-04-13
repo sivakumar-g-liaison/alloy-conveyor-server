@@ -248,7 +248,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
 					
-                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
+                    //glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
                     glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {

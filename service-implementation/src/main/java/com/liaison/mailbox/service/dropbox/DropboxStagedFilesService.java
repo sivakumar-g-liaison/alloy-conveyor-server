@@ -192,6 +192,7 @@ public class DropboxStagedFilesService {
                 
                 glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY);
                 glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+                
             }
             
 			LOG.debug("Exit from add staged file.");

@@ -60,10 +60,7 @@ public class DropboxService {
 	    GlassMessage glassMessage = new GlassMessage(workTicket);
 	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
 	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-	    glassMessage.setStatus(ExecutionState.STAGED);
-	    
-	    // log TVA status
-        transactionVisibilityClient.logToGlass(glassMessage);
+	    glassMessage.setStatus(ExecutionState.READY);
         
         // log activity status
         glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT:Workticket Consumed from queue");   
@@ -75,5 +72,8 @@ public class DropboxService {
 		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
 		dtoReq.setStagedFile(stageFileReqDTO);
 		stageFileService.addStagedFile(dtoReq, glassMessage);
+		 
+	    // log TVA status
+	    //transactionVisibilityClient.logToGlass(glassMessage);
 	}
 }
