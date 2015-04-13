@@ -206,7 +206,7 @@ public class DropboxStagedFilesService {
                     // glass log in case of failure during file staging
                 TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
                         MailBoxUtil.getGUID());
-                glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+                glassMessage.logProcessingStatus(StatusType.ERROR, "MFT:File staging Failed");
                 glassMessage.setStatus(ExecutionState.FAILED);
                 transactionVisibilityClient.logToGlass(glassMessage);
                 

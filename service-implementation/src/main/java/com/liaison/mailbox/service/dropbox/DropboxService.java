@@ -66,7 +66,7 @@ public class DropboxService {
         transactionVisibilityClient.logToGlass(glassMessage);
         
         // log activity status
-        glassMessage.logProcessingStatus(StatusType.RUNNING, "");   
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT:Workticket Consumed from queue");   
         // log timestamp
         glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 	        

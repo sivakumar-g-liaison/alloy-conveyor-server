@@ -320,7 +320,7 @@ public class MailboxSLAWatchDogService {
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 			glassMessage = new GlassMessage(workTicket);
 			glassMessage.setStatus(ExecutionState.STAGED);
-			glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+			glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
 			// validates mandatory value.
 			mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -407,7 +407,7 @@ public class MailboxSLAWatchDogService {
 			}
 
 			//GLASS LOGGING CORNER 4 //
-			glassMessage.logProcessingStatus(StatusType.SUCCESS, "");			
+			glassMessage.logProcessingStatus(StatusType.SUCCESS, "Payload delivered at target location");			
             glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
@@ -432,7 +432,7 @@ public class MailboxSLAWatchDogService {
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "");
+			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);
@@ -455,7 +455,7 @@ public class MailboxSLAWatchDogService {
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "");
+			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);

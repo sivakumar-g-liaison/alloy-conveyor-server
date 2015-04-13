@@ -211,7 +211,7 @@ public class DropboxFileTransferResource extends AuditedResource {
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Recevived");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -248,13 +248,13 @@ public class DropboxFileTransferResource extends AuditedResource {
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
 					
-                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
+                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
                     glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
 	                   // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+                    glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
                     glassMessage.setStatus(ExecutionState.FAILED);
                     transactionVisibilityClient.logToGlass(glassMessage);
                     glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
@@ -262,7 +262,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 	                   // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+                    glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
                     glassMessage.setStatus(ExecutionState.FAILED);
                     transactionVisibilityClient.logToGlass(glassMessage);
                     glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);

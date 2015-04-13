@@ -196,7 +196,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Download Request Recevied");
 
                     // Log TVA status
                     transactionVisibilityClient.logToGlass(glassMessage);

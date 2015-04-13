@@ -282,8 +282,8 @@ public interface MailBoxConstants {
     
     // glass log messages
     public static final String DROPBOX_FILE_TRANSFER = "dropbox_file_transfer";
-    public static final String FILE_QUEUED_SUCCESSFULLY = "File content queued for transfer successfully";
-    public static final String FILE_STAGED_SUCCESSFULLY = "File staged successfully after consuming from queue";
+    public static final String FILE_QUEUED_SUCCESSFULLY = "MFT:File content queued for transfer successfully";
+    public static final String FILE_STAGED_SUCCESSFULLY = "MFT:File staged for delivery";
     public static final String FILE_DOWNLOADED_SUCCESSFULLY = "File downloaded successfully";
     public static final String FILE_QUEUEING_FAILED = "File content queued for transfer got failed";
     public static final String FILE_STAGING_FAILED = "File staging got failed after consuming from queue";
