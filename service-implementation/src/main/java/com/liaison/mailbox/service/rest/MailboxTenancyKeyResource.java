@@ -46,7 +46,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 /**
  * 
  * @author OFS
- *
+ * 
  */
 @AppConfigurationResource
 @Path("config/mailbox/tenancyKeys/")
@@ -60,46 +60,41 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	public MailboxTenancyKeyResource() throws IOException {
+
+	public MailboxTenancyKeyResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
+
 	/**
 	 * REST method to retrieve all domains from acl-manifest present in request header.
 	 * 
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "Tenancy Keys present in acl-manifest in header",
-	notes = "returns tenancy keys present in acl-manifest header",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.GetTenancyKeysResponseDTO.class)
+	@ApiOperation(value = "Tenancy Keys present in acl-manifest in header", notes = "returns tenancy keys present in acl-manifest header", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetTenancyKeysResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response retrieveTenancyKeys(@Context final HttpServletRequest request) {
-		
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
 				try {
-				serviceCallCounter.addAndGet(1);				
-				// retrieving acl manifest from header
-                LOG.info("Retrieving acl manifest json from request header");
-                String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
-                //retrieve TenancyKeys
-                MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
-                return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(manifestJson);
-				}catch (IOException e) {
+					serviceCallCounter.addAndGet(1);
+					// retrieving acl manifest from header
+					LOG.info("Retrieving acl manifest json from request header");
+					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
+					// retrieve TenancyKeys
+					MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
+					return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(manifestJson);
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
-				
+
 			}
 		};
 		worker.actionLabel = "MailboxTenancyKeyResource.retrieveTenancyKeys()";
@@ -112,8 +107,8 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}	
-		
+		}
+
 	}
 
 	@Override
@@ -126,11 +121,11 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 
 	@Override
 	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub		
+		// TODO Auto-generated method stub
 	}
 }

@@ -162,7 +162,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		Transition<ProcessorStateDTO, ExecutionEvents> transition = this.createTransition();
 		transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
-		ProcessorStateDTO processorProcessing = processorQueued.createACopyWithNewState(ExecutionState.PROCESSING);
+		ProcessorStateDTO processorProcessing = processorQueued.cloneWithNewState(ExecutionState.PROCESSING);
 		transition.addUpdate(processorProcessing.getExecutionId(), processorProcessing);
 		this.addTransition(transition);
 
@@ -171,7 +171,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorQueued.getExecutionId(), processorQueued);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.SKIP_AS_ALREADY_RUNNING));
-		ProcessorStateDTO skipProcessing = processorQueued.createACopyWithNewState(ExecutionState.SKIPPED);
+		ProcessorStateDTO skipProcessing = processorQueued.cloneWithNewState(ExecutionState.SKIPPED);
 		transition.addUpdate(skipProcessing.getExecutionId(), skipProcessing);
 		this.addTransition(transition);
 
@@ -180,7 +180,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.INTERRUPTED));
-		ProcessorStateDTO processorInterrupted = processorProcessing.createACopyWithNewState(ExecutionState.INTERRUPTED);
+		ProcessorStateDTO processorInterrupted = processorProcessing.cloneWithNewState(ExecutionState.INTERRUPTED);
 		transition.addUpdate(processorInterrupted.getExecutionId(), processorInterrupted);
 		this.addTransition(transition);
 
@@ -189,7 +189,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-		ProcessorStateDTO processorCompleted = processorProcessing.createACopyWithNewState(ExecutionState.COMPLETED);
+		ProcessorStateDTO processorCompleted = processorProcessing.cloneWithNewState(ExecutionState.COMPLETED);
 		transition.addUpdate(processorCompleted.getExecutionId(), processorCompleted);
 		this.addTransition(transition);
 
@@ -198,7 +198,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-		ProcessorStateDTO processorFailed = processorProcessing.createACopyWithNewState(ExecutionState.FAILED);
+		ProcessorStateDTO processorFailed = processorProcessing.cloneWithNewState(ExecutionState.FAILED);
 		transition.addUpdate(processorFailed.getExecutionId(), processorFailed);
 		this.addTransition(transition);
 
@@ -207,7 +207,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorProcessing.getExecutionId(), processorProcessing);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
-		ProcessorStateDTO processorHandedOverToJS = processorProcessing.createACopyWithNewState(ExecutionState.HANDED_TO_JS);
+		ProcessorStateDTO processorHandedOverToJS = processorProcessing.cloneWithNewState(ExecutionState.HANDED_TO_JS);
 		transition.addUpdate(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
 		this.addTransition(transition);
 
@@ -216,7 +216,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-		ProcessorStateDTO processorCompletedAfterJS = processorHandedOverToJS.createACopyWithNewState(ExecutionState.COMPLETED);
+		ProcessorStateDTO processorCompletedAfterJS = processorHandedOverToJS.cloneWithNewState(ExecutionState.COMPLETED);
 		transition.addUpdate(processorCompletedAfterJS.getExecutionId(), processorCompletedAfterJS);
 		this.addTransition(transition);
 
@@ -225,7 +225,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 		transition = this.createTransition();
 		transition.addCriteria(processorHandedOverToJS.getExecutionId(), processorHandedOverToJS);
 		transition.setEvent(new ActiveEvent<ExecutionEvents>(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
-		ProcessorStateDTO processorFailedAfterJS = processorHandedOverToJS.createACopyWithNewState(ExecutionState.FAILED);
+		ProcessorStateDTO processorFailedAfterJS = processorHandedOverToJS.cloneWithNewState(ExecutionState.FAILED);
 		transition.addUpdate(processorFailedAfterJS.getExecutionId(), processorFailedAfterJS);
 		this.addTransition(transition);
 

@@ -38,6 +38,7 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -71,7 +72,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public MailBoxConfigurationResource() throws IOException {
+	public MailBoxConfigurationResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
@@ -79,23 +81,15 @@ public class MailBoxConfigurationResource extends AuditedResource {
 	/**
 	 * REST method to initiate mailbox creation.
 	 *
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param request HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Create Mailbox",
-			notes = "create a new mailbox",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO.class)
+	@ApiOperation(value = "Create Mailbox", notes = "create a new mailbox", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new mailbox", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.AddMailBoxRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new mailbox", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.AddMailBoxRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response createMailBox(
 			@Context final HttpServletRequest request,
 			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") final String serviceInstanceId) {
@@ -137,61 +131,62 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Rest method to search the mailbox based on the given query parameters. If both are empty it returns all
 	 * mailboxes.
-	 * 
-	 * @param mbxName
-	 *            The mailbox name should be searched
-	 * @param profileName
-	 *            The profile name should be searched
+	 *
+	 * @param mbxName The mailbox name should be searched
+	 * @param profileName The profile name should be searched
 	 * @return The Response
 	 */
 	@GET
-	@ApiOperation(value = "Search Mailbox",
-			notes = "search a mailbox using given query parameters",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
+	@ApiOperation(value = "Search Mailbox", notes = "search a mailbox using given query parameters", position = 1, response = com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response searchMailBox(
 			@Context final HttpServletRequest request,
 			@QueryParam(value = "name") @ApiParam(name = "name", required = false, value = "Name of the mailbox to be searched. Either mailbox name or profile name is mandatory.") final String mbxName,
 			@QueryParam(value = "profile") @ApiParam(name = "profile", required = false, value = "Name of the profile to be searched. Either mailbox name or profile name is mandatory.") final String profileName,
 			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter,
 			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
-			@QueryParam(value= "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
-			@QueryParam(value= "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
- 			@QueryParam(value= "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
-			@QueryParam(value= "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId) {		
+			@QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
+			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId) {
 
-		
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				try {
 					// search the mailbox from the given details
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					//retrieving acl manifest from header
+					// retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
-					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));					
-                    //search the mailbox based on the given query parameters
-					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(mbxName, serviceInstanceId, profileName, manifestJson, page, pageSize, sortField, sortDirection);
+					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
+
+					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+					searchFilter.setMbxName(mbxName);
+					searchFilter.setServiceInstanceId(serviceInstanceId);
+					searchFilter.setProfileName(profileName);
+					searchFilter.setPage(page);
+					searchFilter.setPageSize(pageSize);
+					searchFilter.setSortField(sortField);
+					searchFilter.setSortDirection(sortDirection);
+					// search the mailbox based on the given query parameters
+					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
 					serviceResponse.setHitCounter(hitCounter);
-					
-					return serviceResponse;					
+
+					return serviceResponse;
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
+				}
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationResource.searchMailBox()";
@@ -206,7 +201,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}	
+		}
 	}
 
 	@Override

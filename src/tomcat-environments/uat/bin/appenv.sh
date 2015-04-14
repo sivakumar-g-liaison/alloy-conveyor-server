@@ -16,6 +16,8 @@ export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.l
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.includeLocation=true"
 # log4j will look for updates to log4j xml every 5 minutes
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.interval.sec=300"
+# Https.protocols parameter for JVM
+export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TSLv1.2"
 # ==================================================================
 # log overrides
 # ==================================================================
@@ -68,7 +70,7 @@ export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=at4u-lvlogst01.liaison.prod
+export LOGSTASHMACHINE=at4u-vplstash.liaison.prod
 export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 

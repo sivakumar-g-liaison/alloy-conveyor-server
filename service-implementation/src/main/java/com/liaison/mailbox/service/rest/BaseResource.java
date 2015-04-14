@@ -56,12 +56,10 @@ public class BaseResource {
 	private static final Logger kpi = LogManager.getLogger("com.liaison.mailbox.metrics.KPI");
 	public static final String HEADER_X_GATE_GATEWAYID = "x-gate-gatewayid";
 	public static final String HEADER_USER_ID = "UserId";
-	
+
 	protected void auditAttempt(String message) {
 
-		AuditStatement auditStatement = new DefaultAuditStatement(Status.ATTEMPT,
-				message,
-				PCIV20Requirement.PCI10_2_5,
+		AuditStatement auditStatement = new DefaultAuditStatement(Status.ATTEMPT, message, PCIV20Requirement.PCI10_2_5,
 				PCIV20Requirement.PCI10_2_2);
 		logger.info(auditStatement);
 
@@ -124,10 +122,10 @@ public class BaseResource {
 		if (null != worker.getID()) {
 			ThreadContext.put(LogTags.USER_PRINCIPAL, worker.getID()); // audit log context
 			ThreadContext.put(LogTags.USER_PRINCIPAL_ID, worker.getID()); // audit log context
-			
+
 		}
 		if (null != worker.getQueryParams()) {
-			ThreadContext.put(LogTags.PGUIDS, worker.getFishTagService()+":"+worker.getQueryParams().get("guid"));
+			ThreadContext.put(LogTags.PGUIDS, worker.getFishTagService() + ":" + worker.getQueryParams().get("guid"));
 			for (Entry<String, String> paramEntry : worker.getQueryParams().entrySet()) {
 				ThreadContext.put(LogTags.QUERY_PARAM + paramEntry.getKey(), paramEntry.getValue());
 			}
@@ -137,12 +135,9 @@ public class BaseResource {
 	/**
 	 * success audit statement.
 	 */
-	protected AuditStatement successExitStatement = new DefaultAuditStatement(Status.SUCCEED,
-			"Success (2xx)");
-	protected AuditStatement failExitStatement = new DefaultAuditStatement(Status.FAILED,
-			"Failure");
-	protected AuditStatement unknownExitStatusStatement = new DefaultAuditStatement(Status.SUCCEED,
-			"assume Success");
+	protected AuditStatement successExitStatement = new DefaultAuditStatement(Status.SUCCEED, "Success (2xx)");
+	protected AuditStatement failExitStatement = new DefaultAuditStatement(Status.FAILED, "Failure");
+	protected AuditStatement unknownExitStatusStatement = new DefaultAuditStatement(Status.SUCCEED, "assume Success");
 
 	/**
 	 * Call this when concluding a service, indicates successful exit (or fail) based on response status.
@@ -202,8 +197,8 @@ public class BaseResource {
 			if (null != serviceResponse) {
 				if (contentType.equals(MediaType.APPLICATION_JSON)) {
 					responseBody = MailBoxUtil.marshalToJSON(serviceResponse);
-					response = Response.status(httpCode).header("Content-Type", MediaType.APPLICATION_JSON)
-							.entity(responseBody);
+					response = Response.status(httpCode).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+							responseBody);
 				} else {
 					response = Response.status(httpCode).header("Content-Type", contentType).entity(serviceResponse);
 				}
@@ -211,8 +206,8 @@ public class BaseResource {
 				response = Response.status(httpCode).header("Content-Type", contentType);
 			}
 		} catch (IOException | JAXBException e) {
-			response = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN)
-					.entity("Response serialization failure.");
+			response = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(
+					"Response serialization failure.");
 			logger.error(e.getMessage(), e);
 		}
 
@@ -237,7 +232,8 @@ public class BaseResource {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 */
-	public String getRequestBody(HttpServletRequest request) throws UnsupportedEncodingException, IOException {
+	public String getRequestBody(HttpServletRequest request)
+			throws UnsupportedEncodingException, IOException {
 		if (null == request) {
 			return "";
 		} else {
@@ -246,67 +242,69 @@ public class BaseResource {
 			return requestString;
 		}
 	}
-	
+
 	public static String getGatewayIdFromHeader(HttpServletRequest request) {
 		return request.getHeader(HEADER_X_GATE_GATEWAYID);
 	}
 
-    protected String getUserIdFromHeader(final HttpServletRequest request) {
-        String userId = request.getHeader(HEADER_USER_ID);
-        if(userId == null || userId.isEmpty()) {
-            return "unknown-user";
-        }
+	protected String getUserIdFromHeader(final HttpServletRequest request) {
+		String userId = request.getHeader(HEADER_USER_ID);
+		if (userId == null || userId.isEmpty()) {
+			return "unknown-user";
+		}
 
-        return userId;
-    }
-    
-    /**
-     * Returns header map from http request.
-     * 
-     * @param request The HTTPRequest
-     * @return Headers
-     */
-    protected Map<String, Object> getRequestHeaders(HttpServletRequest request) {
+		return userId;
+	}
 
-        Map<String, Object> headers = new HashMap<>();
+	/**
+	 * Returns header map from http request.
+	 * 
+	 * @param request The HTTPRequest
+	 * @return Headers
+	 */
+	protected Map<String, Object> getRequestHeaders(HttpServletRequest request) {
 
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements())
-        {
-            String headerName = headerNames.nextElement();
-            List<String> headerValues = new ArrayList<>();
-            Enumeration<String> values = request.getHeaders(headerName);
+		Map<String, Object> headers = new HashMap<>();
 
-            while (values.hasMoreElements())
-            {
-                headerValues.add(values.nextElement());
-            }
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			List<String> headerValues = new ArrayList<>();
+			Enumeration<String> values = request.getHeaders(headerName);
 
-            headers.put(headerName,  headerValues);
-        }
+			while (values.hasMoreElements()) {
+				headerValues.add(values.nextElement());
+			}
 
-        return headers;
-    }
+			headers.put(headerName, headerValues);
+		}
 
-    /**
-     * Get workticket properties from the http request
-     *
-     * @param request HTTP request
-     * @return Map contains workticket properties
-     */
-    protected Map<String, Object> getRequestProperties(HttpServletRequest request) {
+		return headers;
+	}
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(MailBoxConstants.HTTP_METHOD, request.getMethod());
-        headers.put(MailBoxConstants.HTTP_QUERY_STRING, request.getQueryString());
-        headers.put(MailBoxConstants.HTTP_REMOTE_PORT, request.getRemotePort());
-        headers.put(MailBoxConstants.HTTP_CHARACTER_ENCODING, (request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
-        headers.put(MailBoxConstants.HTTP_REMOTE_USER, (request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
-        headers.put(MailBoxConstants.HTTP_REMOTE_ADDRESS, request.getRemoteAddr());
-        headers.put(MailBoxConstants.HTTP_REQUEST_PATH, request.getRequestURL().toString());
-        headers.put(MailBoxConstants.HTTP_CONTENT_TYPE, (request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType()));
-        headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
+	/**
+	 * Get workticket properties from the http request
+	 * 
+	 * @param request HTTP request
+	 * @return Map contains workticket properties
+	 */
+	protected Map<String, Object> getRequestProperties(HttpServletRequest request) {
 
-        return headers;
-    }
+		Map<String, Object> headers = new HashMap<>();
+		headers.put(MailBoxConstants.HTTP_METHOD, request.getMethod());
+		headers.put(MailBoxConstants.HTTP_QUERY_STRING, request.getQueryString());
+		headers.put(MailBoxConstants.HTTP_REMOTE_PORT, request.getRemotePort());
+		headers.put(MailBoxConstants.HTTP_CHARACTER_ENCODING,
+				(request.getCharacterEncoding() != null ? request.getCharacterEncoding() : ""));
+		headers.put(MailBoxConstants.HTTP_REMOTE_USER,
+				(request.getRemoteUser() != null ? request.getRemoteUser() : "unknown-user"));
+		headers.put(MailBoxConstants.HTTP_REMOTE_ADDRESS, request.getRemoteAddr());
+		headers.put(MailBoxConstants.HTTP_REQUEST_PATH, request.getRequestURL().toString());
+		headers.put(MailBoxConstants.HTTP_CONTENT_TYPE,
+				(request.getContentType() != null ? request.getContentType() : ContentType.TEXT_PLAIN.getMimeType()));
+		headers.put(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER,
+				request.getHeader(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
+
+		return headers;
+	}
 }

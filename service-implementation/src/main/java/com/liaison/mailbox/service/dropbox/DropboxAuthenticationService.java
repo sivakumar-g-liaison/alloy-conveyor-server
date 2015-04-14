@@ -93,8 +93,8 @@ public class DropboxAuthenticationService {
 
 		response.setResponse(new AuthenticationResponseDTO(
 				com.liaison.usermanagement.enums.Messages.AUTHENTICATION_SUCCESSFULL,
-				com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS, UMClient.getAuthenticationToken(), UMClient
-						.getSessionDate(), UMClient.getSessionValidTillDate()));
+				com.liaison.usermanagement.enums.Messages.STATUS_SUCCESS, UMClient.getAuthenticationToken(),
+				UMClient.getSessionDate(), UMClient.getSessionValidTillDate()));
 
 		LOG.debug("Exit from user authentication for dropbox.");
 		return response;
@@ -108,7 +108,8 @@ public class DropboxAuthenticationService {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	public Response getManifest() throws MessagingException, IOException {
+	public Response getManifest()
+			throws MessagingException, IOException {
 
 		LOG.debug("Entering into get manifest service.");
 
@@ -196,7 +197,7 @@ public class DropboxAuthenticationService {
 		GEMManifestResponse manifestFromGEM = null;
 
 		LOG.debug("Entering into retrieve manifest service using GEM client");
-		
+
 		try {
 
 			// get manifest from GEM for the given loginId
@@ -212,7 +213,7 @@ public class DropboxAuthenticationService {
 			LOG.error("Dropbox - getting manifest after authentication failed.", e);
 			e.printStackTrace();
 		}
-		
+
 		LOG.debug("Exit from retrieve manifest service using GEM client");
 
 		return manifestFromGEM;
@@ -244,14 +245,14 @@ public class DropboxAuthenticationService {
 	public String isAccountAuthenticatedSuccessfully(DropboxAuthAndGetManifestRequestDTO serviceRequest)
 			throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
 			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
-		
+
 		LOG.debug("Entering into user authentication using UM client.");
 
 		UserManagementClient UMClient = new UserManagementClient();
 		UMClient.addAccount(UserManagementClient.TYPE_NAME_PASSWORD, serviceRequest.getLoginId(),
 				serviceRequest.getPassword(), serviceRequest.getToken());
 		UMClient.authenticate();
-		
+
 		LOG.debug("Exit from user authentication using UM client.");
 
 		if (UMClient.isSuccessful()) {

@@ -84,7 +84,8 @@ public class DropboxManifestResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public DropboxManifestResource() throws IOException {
+	public DropboxManifestResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
@@ -107,11 +108,13 @@ public class DropboxManifestResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
-					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, JsonGenerationException, JsonMappingException, JAXBException, IOException {
-				
+			public Object call()
+					throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+					InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException,
+					JsonGenerationException, JsonMappingException, JAXBException, IOException {
+
 				LOG.debug("Entering into authenticate and get manifest service");
-				
+
 				serviceCallCounter.addAndGet(1);
 				DropboxAuthAndGetManifestRequestDTO serviceRequest;
 				DropboxAuthAndGetManifestResponseDTO responseEntity;
@@ -133,8 +136,8 @@ public class DropboxManifestResource extends AuditedResource {
 					LOG.error("Dropbox - user authentication failed");
 					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
 							Messages.FAILURE);
-					return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON)
-							.entity(responseEntity).build();
+					return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+							responseEntity).build();
 				}
 
 				// getting manifest
@@ -143,13 +146,13 @@ public class DropboxManifestResource extends AuditedResource {
 					LOG.error("Dropbox - user authenticated but failed to retrieve manifest.");
 					responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 							Messages.FAILURE);
-					return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
-							.entity(responseEntity).build();
+					return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+							responseEntity).build();
 				}
-				
-				responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL,
-						Messages.SUCCESS);
-				
+
+				responseEntity = new DropboxAuthAndGetManifestResponseDTO(
+						Messages.USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL, Messages.SUCCESS);
+
 
 				ResponseBuilder builder = Response
 						.ok()
@@ -161,9 +164,9 @@ public class DropboxManifestResource extends AuditedResource {
 						.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
 						.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
 								manifestResponse.getPublicKeyGuid());
-				
+
 				LOG.debug("Exit from authenticate and get manifest service.");
-				
+
 				return builder.build();
 			}
 		};
@@ -198,7 +201,8 @@ public class DropboxManifestResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws MessagingException, IOException {
+			public Object call()
+					throws MessagingException, IOException {
 
 				DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 

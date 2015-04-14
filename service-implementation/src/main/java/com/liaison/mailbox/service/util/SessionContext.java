@@ -21,10 +21,9 @@ import org.apache.http.HttpRequest;
 /**
  * 
  * @author OFS
- *
+ * 
  */
-public class SessionContext
-{
+public class SessionContext {
 	protected static final String PIPELINE_ID_TOKEN = "PipelineId";
 	protected static final String DOCUMENT_PROTOCOL_TOKEN = "DocumentProtocol";
 	protected static final String DOCUMENT_TYPE_TOKEN = "DocumentType";
@@ -61,24 +60,21 @@ public class SessionContext
 	protected String _payloadUri = null;
 	protected int _contentLength = 0;
 	protected String _mailboxId = null;
-	
+
 
 	protected ArrayList<Header> _headers = null;
 
 
-	public SessionContext ()
-	{
+	public SessionContext() {
 		_headers = new ArrayList<Header>();
 	}
-    
+
 	/**
 	 * Copies all the data from the HttpServletRequest to SessionContext.
 	 * 
-	 * @param request
-	 *        HttpServletRequest
+	 * @param request HttpServletRequest
 	 */
-	public void copyFrom (HttpServletRequest request)
-	{
+	public void copyFrom(HttpServletRequest request) {
 		setRemoteAddress(request.getRemoteAddr());
 		setRemotePort(request.getRemotePort());
 		setRemoteUser(request.getRemoteUser());
@@ -92,43 +88,35 @@ public class SessionContext
 		copyRequestHeadersToSessionContext(request);
 		extractPipelineIdTokens(request);
 	}
-    
+
 	/**
 	 * Copies all the request header from HttpServletRequest to SessionContext.
 	 * 
-	 * @param request
-	 *        HttpServletRequest
+	 * @param request HttpServletRequest
 	 */
-	protected void copyRequestHeadersToSessionContext (HttpServletRequest request)
-	{
+	protected void copyRequestHeadersToSessionContext(HttpServletRequest request) {
 		Enumeration<String> headerNames = request.getHeaderNames();
 
-		while (headerNames.hasMoreElements())
-		{
+		while (headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
 
-				addHeader(headerName, request.getHeaders(headerName));
+			addHeader(headerName, request.getHeaders(headerName));
 		}
 	}
 
-	protected void extractPipelineIdTokens (HttpServletRequest request)
-	{
+	protected void extractPipelineIdTokens(HttpServletRequest request) {
 		String[] tokens = getTokens(request);
 
-		for (String token : tokens)
-		{
+		for (String token : tokens) {
 			String[] parts = token.split("=");
 
 			if ((parts != null) && (parts.length == 2))
 
-			{				
+			{
 
-				if (parts[0].equalsIgnoreCase(DOCUMENT_PROTOCOL_TOKEN))
-				{
+				if (parts[0].equalsIgnoreCase(DOCUMENT_PROTOCOL_TOKEN)) {
 					setDocumentProtocol(parts[1]);
-				}
-				else if (parts[0].equalsIgnoreCase(DOCUMENT_TYPE_TOKEN))
-				{
+				} else if (parts[0].equalsIgnoreCase(DOCUMENT_TYPE_TOKEN)) {
 					setDocumentType(parts[1]);
 				}
 				// No else clause, ignore extra pieces.
@@ -137,119 +125,183 @@ public class SessionContext
 		}
 	}
 
-	protected String[] getTokens (HttpServletRequest request)
-	{
+	protected String[] getTokens(HttpServletRequest request) {
 		String queryString = request.getQueryString();
 		String pathInfo = request.getPathInfo();
 
-		if ((queryString == null) && (pathInfo == null))
-		{
+		if ((queryString == null) && (pathInfo == null)) {
 			// TODO - this should be an error.
 			return null;
 		}
 
 		String[] tokens = null;
 
-		if (pathInfo != null)
-		{
+		if (pathInfo != null) {
 			tokens = pathInfo.split("/");
-		}
-		else
-		{
+		} else {
 			tokens = queryString.split("&");
 		}
 
 		return tokens;
 	}
-    
+
 	/**
 	 * Copies all the data from SessionContext to HttpRequest.
 	 * 
-	 * @param request
-	 *        HttpRequest
+	 * @param request HttpRequest
 	 */
-	public void copyTo (HttpRequest request)
-	{
-		addNonNullHeaders(request, GATEWAY_REMOTE_ADDRESS_HEADER,     getRemoteAddress());
-		addNonNullHeaders(request, GATEWAY_REMOTE_PORT_HEADER,        getRemotePort() + "");
-		addNonNullHeaders(request, GATEWAY_REMOTE_USER_HEADER,        getRemoteUser());
-		addNonNullHeaders(request, GATEWAY_GLOBAL_PROCESS_ID_HEADER,  getGlobalProcessId());
-		addNonNullHeaders(request, GATEWAY_REQUEST_TIMESTAMP_HEADER,  getRequestTimestamp() + "");
-		addNonNullHeaders(request, GATEWAY_REQUEST_PATH_HEADER,       getRequestPath());
-		addNonNullHeaders(request, GATEWAY_REQUEST_METHOD_HEADER,     getMethod());
-		addNonNullHeaders(request, GATEWAY_QUERY_STRING_HEADER,       getQueryString());
-		addNonNullHeaders(request, GATEWAY_CONTENT_TYPE_HEADER,       getContentType());
+	public void copyTo(HttpRequest request) {
+		addNonNullHeaders(request, GATEWAY_REMOTE_ADDRESS_HEADER, getRemoteAddress());
+		addNonNullHeaders(request, GATEWAY_REMOTE_PORT_HEADER, getRemotePort() + "");
+		addNonNullHeaders(request, GATEWAY_REMOTE_USER_HEADER, getRemoteUser());
+		addNonNullHeaders(request, GATEWAY_GLOBAL_PROCESS_ID_HEADER, getGlobalProcessId());
+		addNonNullHeaders(request, GATEWAY_REQUEST_TIMESTAMP_HEADER, getRequestTimestamp() + "");
+		addNonNullHeaders(request, GATEWAY_REQUEST_PATH_HEADER, getRequestPath());
+		addNonNullHeaders(request, GATEWAY_REQUEST_METHOD_HEADER, getMethod());
+		addNonNullHeaders(request, GATEWAY_QUERY_STRING_HEADER, getQueryString());
+		addNonNullHeaders(request, GATEWAY_CONTENT_TYPE_HEADER, getContentType());
 		addNonNullHeaders(request, GATEWAY_CHARACTER_ENCODING_HEADER, getCharacterEncoding());
-		addNonNullHeaders(request, GATEWAY_PIPELINE_ID_HEADER,        getPipelineId());
-		addNonNullHeaders(request, GATEWAY_DOCUMENT_PROTOCOL_HEADER,  getDocumentProtocol());
-		addNonNullHeaders(request, GATEWAY_DOCUMENT_TYPE_HEADER,      getDocumentType());
-		addNonNullHeaders(request, GATEWAY_ID,      getMailboxId());
+		addNonNullHeaders(request, GATEWAY_PIPELINE_ID_HEADER, getPipelineId());
+		addNonNullHeaders(request, GATEWAY_DOCUMENT_PROTOCOL_HEADER, getDocumentProtocol());
+		addNonNullHeaders(request, GATEWAY_DOCUMENT_TYPE_HEADER, getDocumentType());
+		addNonNullHeaders(request, GATEWAY_ID, getMailboxId());
 
 		copyHeadersToOutgoingRequest(request);
 	}
 
-	protected void addNonNullHeaders (HttpRequest request, String headerName, String headerValue)
-	{
-		if (headerValue != null)
-		{
+	protected void addNonNullHeaders(HttpRequest request, String headerName, String headerValue) {
+		if (headerValue != null) {
 			request.addHeader(headerName, headerValue);
 		}
 	}
 
-	protected void copyHeadersToOutgoingRequest (HttpRequest request)
-	{
-		for (Header header : _headers)
-		{
+	protected void copyHeadersToOutgoingRequest(HttpRequest request) {
+		for (Header header : _headers) {
 			request.addHeader(GATEWAY_HEADER_PREFIX + header.name, header.value);
 		}
 	}
 
 
-	public void setRemoteAddress (String requestorIPAddress) {	_requestorIPAddress = requestorIPAddress; }
-	public String getRemoteAddress () { return _requestorIPAddress; }
+	public void setRemoteAddress(String requestorIPAddress) {
+		_requestorIPAddress = requestorIPAddress;
+	}
 
-	public void setRemotePort (int requestorPort) { _requestorPort = requestorPort; }
-	public int getRemotePort () { return _requestorPort; }
+	public String getRemoteAddress() {
+		return _requestorIPAddress;
+	}
 
-	public void setRemoteUser (String remoteUser) { _remoteUser = remoteUser; }
-	public String getRemoteUser () { return _remoteUser; }
+	public void setRemotePort(int requestorPort) {
+		_requestorPort = requestorPort;
+	}
 
-	public void setGlobalProcessId (String globalProcessId) { _globalProcessId = globalProcessId; }
-	public String getGlobalProcessId () { return _globalProcessId; }
+	public int getRemotePort() {
+		return _requestorPort;
+	}
 
-	public void setRequestTimestamp (Date timestamp) { _requestTimestamp = timestamp; }
-	public Date getRequestTimestamp () { return _requestTimestamp; }
+	public void setRemoteUser(String remoteUser) {
+		_remoteUser = remoteUser;
+	}
 
-	public void setRequestPath (String path) { _requestPath = path; }
-	public String getRequestPath () { return _requestPath; }
+	public String getRemoteUser() {
+		return _remoteUser;
+	}
 
-	public void setMethod (String method) { _requestMethod = method; }
-	public String getMethod () { return _requestMethod; }
+	public void setGlobalProcessId(String globalProcessId) {
+		_globalProcessId = globalProcessId;
+	}
 
-	public void setQueryString (String queryString) { _queryString = queryString; }
-	public String getQueryString () { return _queryString; }
+	public String getGlobalProcessId() {
+		return _globalProcessId;
+	}
 
-	public void setContentType (String contentType) { _contentType = contentType; }
-	public String getContentType () { return _contentType; }
+	public void setRequestTimestamp(Date timestamp) {
+		_requestTimestamp = timestamp;
+	}
 
-	public void setContentLength (int contentLength) { _contentLength = contentLength; }
-	public int getContentLength () { return _contentLength; }
+	public Date getRequestTimestamp() {
+		return _requestTimestamp;
+	}
 
-	public void setCharacterEncoding (String characterEncoding) { _characterEncoding = characterEncoding; }
-	public String getCharacterEncoding () { return _characterEncoding; }
+	public void setRequestPath(String path) {
+		_requestPath = path;
+	}
 
-	public void setPipelineId (String pipelineId) { _pipelineId = pipelineId; }
-	public String getPipelineId () { return _pipelineId; }
+	public String getRequestPath() {
+		return _requestPath;
+	}
 
-	public void setDocumentType (String documentType) { _documentType = documentType; }
-	public String getDocumentType () { return _documentType; }
+	public void setMethod(String method) {
+		_requestMethod = method;
+	}
 
-	public void setDocumentProtocol (String documentProtocol) { _documentProtocol = documentProtocol; }
-	public String getDocumentProtocol () { return _documentProtocol; }
+	public String getMethod() {
+		return _requestMethod;
+	}
 
-	public void setPayloadUri (String payloadUri) { _payloadUri = payloadUri; }
-	public String getPayloadUri () { return _payloadUri; }
-	
+	public void setQueryString(String queryString) {
+		_queryString = queryString;
+	}
+
+	public String getQueryString() {
+		return _queryString;
+	}
+
+	public void setContentType(String contentType) {
+		_contentType = contentType;
+	}
+
+	public String getContentType() {
+		return _contentType;
+	}
+
+	public void setContentLength(int contentLength) {
+		_contentLength = contentLength;
+	}
+
+	public int getContentLength() {
+		return _contentLength;
+	}
+
+	public void setCharacterEncoding(String characterEncoding) {
+		_characterEncoding = characterEncoding;
+	}
+
+	public String getCharacterEncoding() {
+		return _characterEncoding;
+	}
+
+	public void setPipelineId(String pipelineId) {
+		_pipelineId = pipelineId;
+	}
+
+	public String getPipelineId() {
+		return _pipelineId;
+	}
+
+	public void setDocumentType(String documentType) {
+		_documentType = documentType;
+	}
+
+	public String getDocumentType() {
+		return _documentType;
+	}
+
+	public void setDocumentProtocol(String documentProtocol) {
+		_documentProtocol = documentProtocol;
+	}
+
+	public String getDocumentProtocol() {
+		return _documentProtocol;
+	}
+
+	public void setPayloadUri(String payloadUri) {
+		_payloadUri = payloadUri;
+	}
+
+	public String getPayloadUri() {
+		return _payloadUri;
+	}
+
 	public String getMailboxId() {
 		return _mailboxId;
 	}
@@ -259,10 +311,8 @@ public class SessionContext
 	}
 
 
-	public void addHeader (String name, Enumeration<String> values)
-	{
-		while (values.hasMoreElements())
-		{
+	public void addHeader(String name, Enumeration<String> values) {
+		while (values.hasMoreElements()) {
 			String value = values.nextElement();
 
 			Header header = new Header();
@@ -273,8 +323,7 @@ public class SessionContext
 		}
 	}
 
-	protected class Header
-	{
+	protected class Header {
 		public String name = null;
 		public String value = null;
 	}

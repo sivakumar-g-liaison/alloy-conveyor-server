@@ -25,7 +25,6 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.FS2Configuration;
 import com.liaison.fs2.api.FS2Factory;
-import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.fs2.api.FS2ObjectHeaders;
 import com.liaison.fs2.api.FS2StorageIdentifier;
 import com.liaison.fs2.api.FlexibleStorageSystem;
@@ -36,6 +35,7 @@ import com.liaison.fs2.api.encryption.impl.SimpleEncryptionProvider;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.fs2.api.exceptions.FS2ObjectAlreadyExistsException;
 import com.liaison.fs2.api.exceptions.FS2PayloadNotFoundException;
+import com.liaison.fs2.metadata.FS2MetaSnapshot;
 import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
 import com.liaison.fs2.storage.spectrum.FS2DefaultSpectrumStorageConfig;
 import com.liaison.fs2.storage.spectrum.SpectrumConfigBuilder;
@@ -46,9 +46,8 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * @author VNagarajan
  * 
- *         This utility class persists and retrieves the payload from various
- *         file systems. Currently there spectrum(secure/unsecure) and flat file
- *         system.
+ *         This utility class persists and retrieves the payload from various file systems. Currently there
+ *         spectrum(secure/unsecure) and flat file system.
  * 
  */
 public class StorageUtilities {
@@ -90,33 +89,33 @@ public class StorageUtilities {
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
 
-    /**
-     * Initialize FS2
-     */
-    private static void initializeFS2() {
+	/**
+	 * Initialize FS2
+	 */
+	private static void initializeFS2() {
 
-        if (FS2 == null) {
+		if (FS2 == null) {
 
-            LOGGER.info("Initializing FS2");
-            configureSpectrum();
-            configureFilesystem();
-            FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
-            LOGGER.info("Initialized Successfully ");
-        }       
-    }
+			LOGGER.info("Initializing FS2");
+			configureSpectrum();
+			configureFilesystem();
+			FS2 = FS2Factory.newInstance(ArrayUtils.addAll(spectrumConfigs, filesystemConfigs));
+			LOGGER.info("Initialized Successfully ");
+		}
+	}
 
 	/**
-	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or
-	 * file system.
+	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or file system.
 	 * 
 	 * @param payloadURL
 	 * @return
 	 * @throws MailBoxServicesException
 	 */
-	public static InputStream retrievePayload(String payloadURL) throws MailBoxServicesException {
+	public static InputStream retrievePayload(String payloadURL)
+			throws MailBoxServicesException {
 
 		try {
-		    initializeFS2();
+			initializeFS2();
 			URI spectrumURI = new URI(payloadURL);
 			LOGGER.info("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
@@ -129,8 +128,7 @@ public class StorageUtilities {
 	}
 
 	/**
-	 * A helper method to persist the payload into spectrum(secure/unsecure) and
-	 * file system.
+	 * A helper method to persist the payload into spectrum(secure/unsecure) and file system.
 	 * 
 	 * @param payload
 	 * @param globalProcessId
@@ -149,8 +147,7 @@ public class StorageUtilities {
 			String localProcessorId = workTicket.getGlobalProcessId();
 			String messageName = workTicket.getFileName() + MailBoxUtil.getGUID();
 
-			boolean isSecure = Boolean.parseBoolean((String) httpListenerProperties
-					.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
+			boolean isSecure = Boolean.parseBoolean((String) httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD));
 
 			long startTime = 0;
 			long endTime = 0;
@@ -159,7 +156,8 @@ public class StorageUtilities {
 
 			String uri = FS2_URI_MBX_PAYLOAD + globalProcessorId;
 			if (isDropbox) {
-				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_" + messageName;
+				uri = "/" + tenancyKey + "/" + loginId + "/" + globalProcessorId + "." + localProcessorId + "_"
+						+ messageName;
 			}
 
 			initializeFS2();
@@ -169,34 +167,35 @@ public class StorageUtilities {
 			PayloadDetail detail = null;
 
 			// fetch the metdata includes payload size
-	         try (InputStream is = payload) {
-	                FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, payload);
-	                detail = new PayloadDetail();
-	                detail.setMetaSnapshot(metaSnapshot);
-	                detail.setPayloadSize(metaSnapshot.getPayloadSize());
-	                LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
-	                        workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
-	        }
-			/*try (CountingInputStream inputStream = new CountingInputStream(payload)) {
-
+			try (InputStream is = payload) {
+				FS2MetaSnapshot metaSnapshot = FS2.createObjectEntry(requestUri, fs2Header, payload);
 				detail = new PayloadDetail();
-				startTime = System.currentTimeMillis();
-				FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
-
-				endTime = System.currentTimeMillis();
 				detail.setMetaSnapshot(metaSnapshot);
-				detail.setPayloadSize(inputStream.getCount());
+				detail.setPayloadSize(metaSnapshot.getPayloadSize());
 				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
 						workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
-
-			}*/
+			}
+			/*
+			 * try (CountingInputStream inputStream = new CountingInputStream(payload)) {
+			 * 
+			 * detail = new PayloadDetail(); startTime = System.currentTimeMillis();
+			 * FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
+			 * 
+			 * endTime = System.currentTimeMillis(); detail.setMetaSnapshot(metaSnapshot);
+			 * detail.setPayloadSize(inputStream.getCount());
+			 * LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
+			 * workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
+			 * 
+			 * }
+			 */
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
 
-		} catch(FS2ObjectAlreadyExistsException e) {
-            LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-            throw new MailBoxServicesException("Failed to write the payload in spectrum : "+ e.getMessage() + ". Becuase it already exists in the system.", Response.Status.CONFLICT);
-        } catch (FS2Exception | IOException e) {
+		} catch (FS2ObjectAlreadyExistsException e) {
+			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
+			throw new MailBoxServicesException("Failed to write the payload in spectrum : " + e.getMessage()
+					+ ". Becuase it already exists in the system.", Response.Status.CONFLICT);
+		} catch (FS2Exception | IOException e) {
 			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
 			throw new MailBoxServicesException("Failed to write payload in spectrum : " + e.getMessage(),
 					Response.Status.INTERNAL_SERVER_ERROR);
@@ -204,9 +203,8 @@ public class StorageUtilities {
 	}
 
 	/**
-	 * A helper method to automatically create a spectrum URI in the format
-	 * needed to determine the secure spectrum or the unsecure spectrum at the
-	 * default location.
+	 * A helper method to automatically create a spectrum URI in the format needed to determine the secure spectrum or
+	 * the unsecure spectrum at the default location.
 	 * 
 	 * @param path
 	 * @param secure
@@ -235,9 +233,8 @@ public class StorageUtilities {
 	}
 
 	/**
-	 * A helper method to automatically create a spectrum URI in the format
-	 * needed. Throws an exception if the type and location don't match a
-	 * configured value.
+	 * A helper method to automatically create a spectrum URI in the format needed. Throws an exception if the type and
+	 * location don't match a configured value.
 	 * 
 	 * @param path
 	 * @param secure
@@ -362,14 +359,15 @@ public class StorageUtilities {
 	 * @throws IOException
 	 */
 	public static void storePayload(InputStream stream, WorkTicket workTicket,
-			Map<String, String> httpListenerProperties, boolean isDropbox) throws Exception {
+			Map<String, String> httpListenerProperties, boolean isDropbox)
+			throws Exception {
 
 		try (InputStream payloadToPersist = stream) {
 
 			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist, workTicket,
 					httpListenerProperties, isDropbox);
-			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(), detail.getMetaSnapshot()
-					.getURI().toString());
+			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(),
+					detail.getMetaSnapshot().getURI().toString());
 			LOGGER.info("FILE SIZE IN BYTES {} ", detail.getPayloadSize());
 
 			workTicket.setPayloadSize(detail.getPayloadSize());
@@ -401,4 +399,3 @@ public class StorageUtilities {
 		return fs2Header;
 	}
 }
-

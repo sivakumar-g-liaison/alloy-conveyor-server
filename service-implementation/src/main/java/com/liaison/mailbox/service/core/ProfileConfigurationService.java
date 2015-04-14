@@ -36,7 +36,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has configuration related operations.
- *
+ * 
  * @author OFS
  */
 
@@ -48,9 +48,8 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 
 	/**
 	 * Creates Profile.
-	 *
-	 * @param request
-	 *            The request DTO.
+	 * 
+	 * @param request The request DTO.
 	 * @return The responseDTO.
 	 */
 	public AddProfileResponseDTO createProfile(AddProfileRequestDTO request) {
@@ -71,7 +70,8 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 
 			if (configDao.findProfileByName(profileDTO.getName()) != null) {
-				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS,
+						Response.Status.BAD_REQUEST);
 			}
 
 			ScheduleProfilesRef profile = new ScheduleProfilesRef();
@@ -91,8 +91,8 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
 
 			return serviceResponse;
 		}
@@ -101,12 +101,12 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 
 	/**
 	 * Updates Profile.
-	 *
-	 * @param request
-	 *            The request DTO.
+	 * 
+	 * @param request The request DTO.
 	 * @return The responseDTO.
 	 */
-	public ReviseProfileResponseDTO updateProfile (ReviseProfileRequestDTO request) throws MailBoxConfigurationServicesException {
+	public ReviseProfileResponseDTO updateProfile(ReviseProfileRequestDTO request)
+			throws MailBoxConfigurationServicesException {
 
 		LOG.debug("Entering into profile updation.");
 		ReviseProfileResponseDTO serviceResponse = new ReviseProfileResponseDTO();
@@ -124,13 +124,14 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
 
 			ScheduleProfilesRef retreivedProfile = configDao.find(ScheduleProfilesRef.class, profileDTO.getId());
-			if(retreivedProfile == null) {
+			if (retreivedProfile == null) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
 
-			if((!retreivedProfile.getSchProfName().equals(profileDTO.getName()))
-			        && (configDao.findProfileByName(profileDTO.getName()) != null)) {
-			    throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS, Response.Status.BAD_REQUEST);
+			if ((!retreivedProfile.getSchProfName().equals(profileDTO.getName()))
+					&& (configDao.findProfileByName(profileDTO.getName()) != null)) {
+				throw new MailBoxConfigurationServicesException(Messages.PROFILE_ALREADY_EXISTS,
+						Response.Status.BAD_REQUEST);
 			}
 
 			retreivedProfile.setSchProfName(profileDTO.getName());
@@ -150,8 +151,8 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
 
 			return serviceResponse;
 		}
@@ -160,7 +161,7 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 
 	/**
 	 * Retrieves all profiles.
-	 *
+	 * 
 	 * @return The GetProfileResponseDTO.
 	 */
 	public GetProfileResponseDTO getProfiles(String page, String pageSize, String sortInfo, String filterText) {
@@ -170,8 +171,9 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 
 		try {
 
-			GridResult <ScheduleProfilesRef> result = getGridItems(ScheduleProfilesRef.class, filterText, sortInfo, page, pageSize);
-			List <ScheduleProfilesRef> profiles = result.getResultList();
+			GridResult<ScheduleProfilesRef> result = getGridItems(ScheduleProfilesRef.class, filterText, sortInfo,
+					page, pageSize);
+			List<ScheduleProfilesRef> profiles = result.getResultList();
 
 			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
 			if (profiles == null || profiles.isEmpty()) {
@@ -191,19 +193,19 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfiles(profilesDTO);
 			serviceResponse.setTotalItems(result.getTotalItems());
-			
+
 			LOG.debug("Exiting from get all profiles operation.");
 
 			return serviceResponse;
 		} catch (Exception e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
 
 			return serviceResponse;
 		}
 
 	}
-	
+
 }

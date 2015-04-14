@@ -389,7 +389,8 @@ public class MailboxSLAWatchDogService {
 			LOG.debug("Payload from spectrum is successfully written to given payload location");
 
 			//Initiate FSM
-			ProcessorStateDTO processorStaged = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, profileName, ExecutionState.STAGED, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
+			ProcessorStateDTO processorStaged = new ProcessorStateDTO();
+			processorStaged.setValues(executionId, processor, profileName, ExecutionState.STAGED,SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			fsm.addState(processorStaged);
 
 	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
@@ -415,42 +416,25 @@ public class MailboxSLAWatchDogService {
 			//cannot send email since the request json cannot be parsed
 			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 
-		} catch (MailBoxServicesException e) {
-			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null)? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE :
-								processor.getPguid(), ExecutionState.STAGING_FAILED, (processor == null)? MailBoxConstants.PROCESSOR_NOT_AVAILABLE : processor.getProcsrName(),
-								(processor == null)?ProcessorType.REMOTEUPLOADER : processor.getProcessorType(), (mailboxId == null) ?
-								MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ?
-								MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
-			fsm.addState(processorStageFailed);
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			// processorExecutionState table will be updated only if processorExecution is available
-			if (null != processorExecutionState) {
-				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
-				processorDAO.merge(processor);
-			}
-			notifyUser(processor, mailboxId, e);
-			//GLASS LOGGING CORNER 4 //
-			glassMessage.setStatus(ExecutionState.FAILED);
-			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
-			glassMessage.logFourthCornerTimestamp();
-			 //GLASS LOGGING ENDS//
-			LOG.error("File Staging failed", e);
-
 		} catch (Exception e) {
-
-			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO(executionId, (processor == null) ? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE :
-								processor.getPguid(), ExecutionState.STAGING_FAILED, (processor == null)? MailBoxConstants.PROCESSOR_NOT_AVAILABLE : processor.getProcsrName(),
-								(processor == null)?ProcessorType.REMOTEUPLOADER : processor.getProcessorType(), (mailboxId == null) ?
-								MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE : mailboxId, (profileName == null) ?
-								MailBoxConstants.PROFILE_NOT_AVAILABLE : profileName, null, SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
-			fsm.addState(processorStageFailed);
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			// processorExecutionState table will be updated only if processorStateExecution is available
-			if (null != processorExecutionState) {
+			
+			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
+			processorStageFailed.setExecutionId(executionId);
+			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
+			processorStageFailed.setMailboxId(mailboxId);
+			processorStageFailed.setProfileName(profileName);
+			processorStageFailed.setSlaVerficationStatus(SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
+			// processorExecutionState table will be updated only if processorExecution is available
+			if (null != processorExecutionState && processor!=null) {
+				processorStageFailed.setProcessorId(processor.getPguid());
+				processorStageFailed.setProcessorName(processor.getProcsrName());
+				processorStageFailed.setProcessorType(processor.getProcessorType());
 				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
 				processorDAO.merge(processor);
 			}
+			
+			fsm.addState(processorStageFailed);
+			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
 			notifyUser(processor, mailboxId, e);
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
@@ -459,6 +443,7 @@ public class MailboxSLAWatchDogService {
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);
+
 		}
 
 	}

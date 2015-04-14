@@ -53,25 +53,25 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @AppConfigurationResource
 @Path("config/mailbox/processor/uploadkey")
-@Api(value = "config/mailbox/processor/uploadkey", 
-description = "Gateway for the mailbox upload self signed trust store services.")
-public class MailboxKeyResource extends AuditedResource{
-	
-	
+@Api(value = "config/mailbox/processor/uploadkey", description = "Gateway for the mailbox upload self signed trust store services.")
+public class MailboxKeyResource extends AuditedResource {
+
+
 	private static final Logger LOG = LogManager.getLogger(MailboxKeyResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);	
-	
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public MailboxKeyResource() throws IOException {
+
+	public MailboxKeyResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
+
 	/**
 	 * 
 	 * REST method for uploading Self Signed TrustStore
@@ -79,33 +79,28 @@ public class MailboxKeyResource extends AuditedResource{
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Upload TrustStore",
-			notes = "upload Self Signed TrustStore",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO.class)
+	@ApiOperation(value = "Upload TrustStore", notes = "upload Self Signed TrustStore", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response uploadSelfSignedTrustStore(@Context final HttpServletRequest request) {
-		
-	  // create the worker delegate to perform the business logic
+
+		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws MailBoxConfigurationServicesException {
-				
-				serviceCallCounter.addAndGet(1);				
+			public Object call()
+					throws MailBoxConfigurationServicesException {
+
+				serviceCallCounter.addAndGet(1);
 				try {
-					// add the new profile details 
+					// add the new profile details
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
 					return processor.uploadSelfSignedTrustStore();
-					
+
 				} catch (IOException | JSONException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}			
+				}
 			}
 		};
 		worker.actionLabel = "MailBoxUploadSelfSignedTrustStoreResource.uploadSelfSignedTrustStore()";
@@ -120,7 +115,7 @@ public class MailboxKeyResource extends AuditedResource{
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 
-   }
+	}
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
@@ -129,17 +124,16 @@ public class MailboxKeyResource extends AuditedResource{
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
 				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
 	}
-	
+
 	@Override
 	protected void beginMetricsCollection() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
-

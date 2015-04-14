@@ -52,14 +52,13 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the script file details services.
- *
+ * 
  * @author OFS
  */
 
 @AppConfigurationResource
 @Path("config/mailbox/git/content/{git.file.name}")
-@Api(value = "config/mailbox/git/content/{git.file.name}",
-description = "Gateway for the script file details services")
+@Api(value = "config/mailbox/git/content/{git.file.name}", description = "Gateway for the script file details services")
 public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxScriptDetailsConfigurationResource.class);
@@ -70,37 +69,31 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
 	private Stopwatch stopwatch;
-	private static final StatsTimer statsTimer = new StatsTimer(MonitorConfig.builder("MailBoxScriptDetailsConfigurationResource_statsTimer")
-			.build(), new StatsConfig.Builder().build());
+	private static final StatsTimer statsTimer = new StatsTimer(MonitorConfig.builder(
+			"MailBoxScriptDetailsConfigurationResource_statsTimer").build(), new StatsConfig.Builder().build());
 
 	static {
 		DefaultMonitorRegistry.getInstance().register(statsTimer);
 	}
 
 	/**
-	 *
+	 * 
 	 * Rest method to fetch script file from git
-	 *
+	 * 
 	 * @param request
 	 * @param pguid
 	 * @return Response
 	 */
 	@GET
-	@ApiOperation(value = "fetch the script file by url",
-   notes = "The script file are loaded from GitLab repository",
-   position = 3,
-   response=com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO.class)
+	@ApiOperation(value = "fetch the script file by url", notes = "The script file are loaded from GitLab repository", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
-   @Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "fetch script file", required = true,
-	dataType = "com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO", paramType = "body") })
-   @ApiResponses({
-	@ApiResponse( code = 500, message = "Unexpected Service failure." )
-	})
-
+	@Produces(MediaType.APPLICATION_JSON)
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "fetch script file", required = true, dataType = "com.liaison.mailbox.service.dto.configuration.response.ScriptServiceResponseDTO", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response readScript(
 			@Context final HttpServletRequest request,
-			@PathParam(value = "git.file.name") @ApiParam(name = "git.file.name", required = true, value = "URL where file is going to be fetch") final String gitFileName) throws Exception {
+			@PathParam(value = "git.file.name") @ApiParam(name = "git.file.name", required = true, value = "URL where file is going to be fetch") final String gitFileName)
+			throws Exception {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -131,7 +124,7 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-  }
+	}
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {

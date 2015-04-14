@@ -33,9 +33,9 @@ import com.netflix.servo.monitor.StatsTimer;
 import com.netflix.servo.stats.StatsConfig;
 
 /**
- *
+ * 
  * @author OFS
- *
+ * 
  */
 public abstract class AuditedResource extends BaseResource {
 
@@ -51,9 +51,8 @@ public abstract class AuditedResource extends BaseResource {
 	@Monitor(name = "Global_serviceCallCounter", type = DataSourceType.COUNTER)
 	protected static final AtomicInteger globalServiceCallCounter = new AtomicInteger(0);
 
-	protected static final StatsTimer globalStatsTimer = new StatsTimer(MonitorConfig.builder("Global_statsTimer")
-			.build(),
-			new StatsConfig.Builder().build());
+	protected static final StatsTimer globalStatsTimer = new StatsTimer(
+			MonitorConfig.builder("Global_statsTimer").build(), new StatsConfig.Builder().build());
 
 	static {
 		DefaultMonitorRegistry.getInstance().register(globalStatsTimer);
@@ -61,7 +60,7 @@ public abstract class AuditedResource extends BaseResource {
 
 	/**
 	 * This handles auditing around your business logic, then hands the worker off to the KPI instrumented caller.
-	 *
+	 * 
 	 * @param request
 	 * @param worker
 	 * @param expectedMediaTypes
@@ -72,7 +71,7 @@ public abstract class AuditedResource extends BaseResource {
 		// *****************************************************
 		// Log boiler plate (hopefully to be added to filter soon).
 		worker.id = getUserIdFromHeader(request);
-		initLogContext(worker); //enable when fish tag is needed
+		initLogContext(worker); // enable when fish tag is needed
 		logger.info(getInitialAuditStatement(worker.getActionLabel()));
 		Response response = null;
 		try {
@@ -100,7 +99,7 @@ public abstract class AuditedResource extends BaseResource {
 
 	/**
 	 * The KPI instrumented caller invokes the delegate worker.
-	 *
+	 * 
 	 * @param request
 	 * @param worker
 	 * @param expectedMediaTypes
@@ -119,12 +118,12 @@ public abstract class AuditedResource extends BaseResource {
 			serializationMediaType = determineDesiredSerialization(request);
 
 			Object responseObject = worker.call();
-			 if(responseObject instanceof CommonResponseDTO) {
-				 CommonResponseDTO response=(CommonResponseDTO)responseObject;
-				 if(Messages.FAILURE.value().equalsIgnoreCase(response.getResponse().getStatus())) {
-					 httpCode = 400;
-					 success = false;
-				 }
+			if (responseObject instanceof CommonResponseDTO) {
+				CommonResponseDTO response = (CommonResponseDTO) responseObject;
+				if (Messages.FAILURE.value().equalsIgnoreCase(response.getResponse().getStatus())) {
+					httpCode = 400;
+					success = false;
+				}
 			}
 			if (responseObject instanceof Serializable) {
 				// invoke the delegate to do the read work for
@@ -163,7 +162,7 @@ public abstract class AuditedResource extends BaseResource {
 
 	/**
 	 * Implement initial audit statement common to exports service requests.
-	 *
+	 * 
 	 * @param actionLabel
 	 * @return
 	 */

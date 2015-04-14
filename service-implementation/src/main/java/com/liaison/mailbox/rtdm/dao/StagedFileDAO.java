@@ -11,9 +11,11 @@
 package com.liaison.mailbox.rtdm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
  * @author OFS
@@ -36,8 +38,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	 * @param mailboxIds
 	 * @return list of stagedFiles
 	 */
-	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
-			int pagingCount, String sortField, String sortDirection,String status);
+	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 	public List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
 }

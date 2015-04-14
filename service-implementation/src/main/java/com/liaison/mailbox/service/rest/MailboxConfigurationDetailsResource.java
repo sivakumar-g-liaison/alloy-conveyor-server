@@ -57,7 +57,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox configuration services.
- *
+ * 
  * @author OFS
  */
 @AppConfigurationResource
@@ -73,31 +73,24 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public MailboxConfigurationDetailsResource() throws IOException {
+	public MailboxConfigurationDetailsResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
+
 	/**
 	 * REST method to update existing mailbox.
-	 *
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * 
+	 * @param request HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
 	@PUT
-	@ApiOperation(value = "Update Mailbox",
-			notes = "update details of existing mailbox",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
+	@ApiOperation(value = "Update Mailbox", notes = "update details of existing mailbox", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update existing mailbox", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update existing mailbox", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseMailBoxRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response reviseMailBox(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
@@ -118,11 +111,10 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 
 					// retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
-					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));					
+					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
 					// updates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId,
-							manifestJson);
+					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson);
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -146,23 +138,16 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 
 	/**
 	 * REST method to delete a mailbox.
-	 *
-	 * @param guid
-	 *            The id of the mailbox
-	 *
+	 * 
+	 * @param guid The id of the mailbox
+	 * 
 	 * @return Response Object
 	 */
 	@DELETE
-	@ApiOperation(value = "Delete Mailbox",
-			notes = "delete a mailbox",
-			position = 2,
-			response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
+	@ApiOperation(value = "Delete Mailbox", notes = "delete a mailbox", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response deactivateMailBox(@Context final HttpServletRequest request,
 			@PathParam(value = "id") @ApiParam(name = "id", required = true, value = "mailbox guid") final String guid) {
 
@@ -189,7 +174,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.deactivateMailBox()";
 		worker.queryParams.put("guid", guid);
-		
+
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -204,22 +189,15 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 
 	/**
 	 * REST method to retrieve a mailbox details.
-	 *
-	 * @param guid
-	 *            The id of the mailbox
+	 * 
+	 * @param guid The id of the mailbox
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "Mailbox Details",
-			notes = "returns details of a valid mailbox",
-			position = 3,
-			response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
+	@ApiOperation(value = "Mailbox Details", notes = "returns details of a valid mailbox", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response readMailBox(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "id") final @ApiParam(name = "id", required = true, value = "mailbox guid") String guid,
@@ -252,7 +230,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.readMailBox()";
 		worker.queryParams.put("guid", guid);
-		
+
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -263,8 +241,8 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 
-	}	
-	
+	}
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

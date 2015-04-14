@@ -11,12 +11,14 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
  * @author OFS
@@ -45,10 +47,10 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME = "findByMboxNameAndTenancyKeyName";
 
 	public int getMailboxCountByProtocol(String mbxName, String profName, List <String> tenancyKeys);
-	public List<MailBox> find(String mbxName, String profName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
+	public List<MailBox> find(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
 
 	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys);
-	public List<MailBox> findByName(String mbxName, List <String> tenancyKeys, int startOffset, int count, String sortField, String sortDirection);
+	public List<MailBox> findByName(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
 	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName);
 	
 	/**

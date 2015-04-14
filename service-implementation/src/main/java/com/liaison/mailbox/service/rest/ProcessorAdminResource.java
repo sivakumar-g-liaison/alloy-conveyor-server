@@ -74,6 +74,7 @@ public class ProcessorAdminResource extends AuditedResource {
 
 	/**
 	 * REST service to get the list processors latest state
+	 * 
 	 * @param HttpServletRequest
 	 * @param status
 	 * @param frmDate
@@ -82,16 +83,15 @@ public class ProcessorAdminResource extends AuditedResource {
 	 * @return Response
 	 */
 	@GET
-	@ApiOperation(value = "Get Executing Processors",
-	notes = "get list of executing processors",
-	position = 21,
-	response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
+	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21, response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
-	})
-	public Response getExecutingProcessors(@Context HttpServletRequest request, @QueryParam(value = "status") @ApiParam(name="status", required=false, value="get list of executing processors with the status specified") final String status,
-			@QueryParam(value = "frmDate") @ApiParam(name="frmDate", required=false, value="get list of executing processors from the date specified ") final String frmDate, @QueryParam(value = "toDate") @ApiParam(name="toDate", required=false, value="get list of executing processors to the date specified") final String toDate, @QueryParam(value = "hitCounter") @ApiParam(name="hitCounter", required=false, value="hitCounter") final String hitCounter) {
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	public Response getExecutingProcessors(
+			@Context HttpServletRequest request,
+			@QueryParam(value = "status") @ApiParam(name = "status", required = false, value = "get list of executing processors with the status specified") final String status,
+			@QueryParam(value = "frmDate") @ApiParam(name = "frmDate", required = false, value = "get list of executing processors from the date specified ") final String frmDate,
+			@QueryParam(value = "toDate") @ApiParam(name = "toDate", required = false, value = "get list of executing processors to the date specified") final String toDate,
+			@QueryParam(value = "hitCounter") @ApiParam(name = "hitCounter", required = false, value = "hitCounter") final String hitCounter) {
 
 
 		// create the worker delegate to perform the business logic
@@ -104,7 +104,7 @@ public class ProcessorAdminResource extends AuditedResource {
 				try {
 					GetExecutingProcessorResponseDTO serviceResponse = null;
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
-                    //get the list processors latest state
+					// get the list processors latest state
 					serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
 					serviceResponse.setHitCounter(hitCounter);
 
@@ -132,23 +132,18 @@ public class ProcessorAdminResource extends AuditedResource {
 
 	/**
 	 * REST method to interrupt the execution of running processor.
-	 *
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * 
+	 * @param request HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
 	@DELETE
-	@ApiOperation(value = "Interrupt processors",
-	notes = "interrupt running processor",
-	position = 22,
-	response = com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO.class)
+	@ApiOperation(value = "Interrupt processors", notes = "interrupt running processor", position = 22, response = com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Interrupt running processor", required = true,
-	dataType = "com.liaison.mailbox.swagger.dto.request.InterruptExecutionRequest", paramType = "body") })
-	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
-	})
-	public Response interruptRunningProcessor(@Context final HttpServletRequest request,@QueryParam(value = "executionID") @ApiParam(name = "executionID", required = false, value = "executionID") final String executionID) {
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Interrupt running processor", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.InterruptExecutionRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	public Response interruptRunningProcessor(
+			@Context final HttpServletRequest request,
+			@QueryParam(value = "executionID") @ApiParam(name = "executionID", required = false, value = "executionID") final String executionID) {
 
 
 		// create the worker delegate to perform the business logic
@@ -181,7 +176,7 @@ public class ProcessorAdminResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
-    }
+	}
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
