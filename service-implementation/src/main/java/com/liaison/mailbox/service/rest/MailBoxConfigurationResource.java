@@ -40,6 +40,7 @@ import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
+import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -55,7 +56,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox configuration services.
- * 
+ *
  * @author veerasamyn
  */
 @AppConfigurationResource
@@ -79,7 +80,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 
 	/**
 	 * REST method to initiate mailbox creation.
-	 * 
+	 *
 	 * @param request HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
@@ -134,7 +135,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 	/**
 	 * Rest method to search the mailbox based on the given query parameters. If both are empty it returns all
 	 * mailboxes.
-	 * 
+	 *
 	 * @param mbxName The mailbox name should be searched
 	 * @param profileName The profile name should be searched
 	 * @return The Response
@@ -168,9 +169,17 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					// retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
 					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
+
+					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+					searchFilter.setMbxName(mbxName);
+					searchFilter.setServiceInstanceId(serviceInstanceId);
+					searchFilter.setProfileName(profileName);
+					searchFilter.setPage(page);
+					searchFilter.setPageSize(pageSize);
+					searchFilter.setSortField(sortField);
+					searchFilter.setSortDirection(sortDirection);
 					// search the mailbox based on the given query parameters
-					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(mbxName, serviceInstanceId,
-							profileName, manifestJson, page, pageSize, sortField, sortDirection);
+					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
 					serviceResponse.setHitCounter(hitCounter);
 
 					return serviceResponse;

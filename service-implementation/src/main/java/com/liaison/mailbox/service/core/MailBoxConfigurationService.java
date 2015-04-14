@@ -46,7 +46,6 @@ import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertiesFileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.FileInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
@@ -58,12 +57,13 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxRespo
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has mailbox configuration related operations.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxConfigurationService {
@@ -73,7 +73,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Creates Mail Box.
-	 * 
+	 *
 	 * @param request The request DTO.
 	 * @return The responseDTO.
 	 * @throws IOException
@@ -153,7 +153,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Create Mailbox ServiceInstance Id.
-	 * 
+	 *
 	 * @param serviceInstanceID The serviceInstanceID of the mailbox
 	 * @param mailbox
 	 * @throws MailBoxConfigurationServicesException
@@ -192,7 +192,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Get the mailbox using guid and its processor using service instance id.
-	 * 
+	 *
 	 * @param guid The guid of the mailbox.
 	 * @return The responseDTO.
 	 * @throws SymmetricAlgorithmException
@@ -267,7 +267,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Method revise the mailbox configurations.
-	 * 
+	 *
 	 * @param guid The mailbox pguid.
 	 * @throws IOException
 	 * @throws JAXBException
@@ -384,7 +384,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Method revise the mailbox configurations.
-	 * 
+	 *
 	 * @param guid The mailbox pguid.
 	 * @throws IOException
 	 */
@@ -438,27 +438,24 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Searches the mailbox using mailbox name and profile name.
-	 * 
+	 *
 	 * @param mbxName The name of the mailbox
-	 * 
+	 *
 	 * @param profName The name of the profile
 	 * @param serviceInstId
-	 * 
+	 *
 	 * @return The SearchMailBoxResponseDTO
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String serviceInstanceId, String profName,
-			String aclManifestJson, String page, String pageSize, String sortField, String sortDirection)
+	public SearchMailBoxResponseDTO searchMailBox(GenericSearchFilterDTO searchFilter, String aclManifestJson)
 			throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.debug("Entering into search mailbox.");
 
 		int totalCount = 0;
-		int startOffset = 0;
-		int count = 0;
 		List<MailBox> retrievedMailBoxes = null;
 		Map<String, Integer> pageOffsetDetails = null;
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
@@ -466,7 +463,7 @@ public class MailBoxConfigurationService {
 		try {
 
 			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
+			if (MailBoxUtil.isEmpty(searchFilter.getServiceInstanceId())) {
 				LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
 			}
 
@@ -484,26 +481,23 @@ public class MailBoxConfigurationService {
 						Response.Status.BAD_REQUEST);
 			}
 
-			if (!MailBoxUtil.isEmpty(profName)) {
+			if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
 
-				totalCount = configDao.getMailboxCountByProtocol(mbxName, profName, tenancyKeyGuids);
-				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
-				startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
-				count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-				retrievedMailBoxes = configDao.find(mbxName, profName, tenancyKeyGuids, startOffset, count, sortField,
-						sortDirection);
+				totalCount = configDao.getMailboxCountByProtocol(searchFilter.getMbxName(),
+						searchFilter.getProfileName(), tenancyKeyGuids);
+				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+						searchFilter.getPageSize(), totalCount);
+				retrievedMailBoxes = configDao.find(searchFilter, tenancyKeyGuids, pageOffsetDetails);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 
 			} else {
 
 				// If the profile name is empty it will use findByName
-				totalCount = configDao.getMailboxCountByName(mbxName, tenancyKeyGuids);
-				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
-				startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
-				count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-				retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset, count, sortField,
-						sortDirection);
+				totalCount = configDao.getMailboxCountByName(searchFilter.getMbxName(), tenancyKeyGuids);
+				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+						searchFilter.getPageSize(), totalCount);
+				retrievedMailBoxes = configDao.findByName(searchFilter, tenancyKeyGuids, pageOffsetDetails);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 			}
@@ -514,7 +508,8 @@ public class MailBoxConfigurationService {
 			for (MailBox mbx : mailboxes) {
 
 				serachMailBoxDTO = new SearchMailBoxDTO();
-				serachMailBoxDTO.copyFromEntity(mbx, dao.isMailboxHasProcessor(mbx.getPguid(), serviceInstanceId));
+				serachMailBoxDTO.copyFromEntity(mbx,
+						dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId()));
 				searchMailBoxDTOList.add(serachMailBoxDTO);
 			}
 
@@ -537,7 +532,7 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Service to list the directory structure for browse component.
-	 * 
+	 *
 	 * @param file The root directory location
 	 * @return The FileInfoDTO
 	 */
@@ -559,9 +554,9 @@ public class MailBoxConfigurationService {
 	}
 
 	/**
-	 * 
+	 *
 	 * getting values from java properties file
-	 * 
+	 *
 	 * @param trustStore
 	 * @return
 	 * @throws IOException
