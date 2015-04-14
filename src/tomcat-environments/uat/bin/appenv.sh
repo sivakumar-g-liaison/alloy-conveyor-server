@@ -68,7 +68,7 @@ export LOCAL_HOSTNAME=$(hostname)
 export DAEMON_USER=$(whoami)
 export LOGIN_USER=$(who am i | awk '{print $1}')
  
-export LOGSTASHMACHINE=at4u-lvlogst01.liaison.prod
+export LOGSTASHMACHINE=at4u-vplstash.liaison.prod
 export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 
