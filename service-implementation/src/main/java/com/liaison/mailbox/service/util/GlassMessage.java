@@ -34,278 +34,276 @@ import com.liaison.mailbox.enums.ProcessorType;
  */
 public class GlassMessage {
 
-    // TimestampLogger
-    public static final String DEFAULT_FIRST_CORNER_NAME = "FIRST CORNER";
-    public static final String PROPERTY_FIRST_CORNER_NAME = "com.liaison.firstcorner.name";
-    public static final String DEFAULT_SECOND_CORNER_NAME = "SECOND CORNER";
-    public static final String PROPERTY_SECOND_CORNER_NAME = "com.liaison.secondcorner.name";
-    public static final String DEFAULT_THIRD_CORNER_NAME = "THIRD CORNER";
-    public static final String PROPERTY_THIRD_CORNER_NAME = "com.liaison.thirdcorner.name";
-    public static final String DEFAULT_FOURTH_CORNER_NAME = "FOURTH CORNER";
-    public static final String PROPERTY_FOURTH_CORNER_NAME = "com.liaison.fourthcorner.name";
+	// TimestampLogger
+	public static final String DEFAULT_FIRST_CORNER_NAME = "FIRST CORNER";
+	public static final String PROPERTY_FIRST_CORNER_NAME = "com.liaison.firstcorner.name";
+	public static final String DEFAULT_SECOND_CORNER_NAME = "SECOND CORNER";
+	public static final String PROPERTY_SECOND_CORNER_NAME = "com.liaison.secondcorner.name";
+	public static final String DEFAULT_THIRD_CORNER_NAME = "THIRD CORNER";
+	public static final String PROPERTY_THIRD_CORNER_NAME = "com.liaison.thirdcorner.name";
+	public static final String DEFAULT_FOURTH_CORNER_NAME = "FOURTH CORNER";
+	public static final String PROPERTY_FOURTH_CORNER_NAME = "com.liaison.fourthcorner.name";
 
-    private transient ExecutionTimestamp firstCornerTimestamp;
-    private transient ExecutionTimestamp thirdCornerTimestamp;
+	private transient ExecutionTimestamp firstCornerTimestamp;
+	private transient ExecutionTimestamp thirdCornerTimestamp;
 
-    private static final String MAILBOX_ASA_IDENTIFIER = "MAILBOX";
+	private static final String MAILBOX_ASA_IDENTIFIER = "MAILBOX";
 
-    private static final Logger logger = LogManager.getLogger(GlassMessage.class);
+	private static final Logger logger = LogManager.getLogger(GlassMessage.class);
 
-    DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
+	DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
 
-    private ProcessorType category;
-    private ExecutionState status;
-    private String globalPId;
-    private String mailboxId;
-    private String processorId;
-    private String executionId;
-    private String tenancyKey;
-    private String serviceInstandId;
-    private String protocol;
-    private String pipelineId;
-    private GatewayType inAgent;
-    private GatewayType outAgent;
-    private String message;
-    private int inSize;
-    private String processId;
-    private String senderId;
-    private String transferProfileName;
-    private String stagedFileId;
-    private String meta;
+	private ProcessorType category;
+	private ExecutionState status;
+	private String globalPId;
+	private String mailboxId;
+	private String processorId;
+	private String executionId;
+	private String tenancyKey;
+	private String serviceInstandId;
+	private String protocol;
+	private String pipelineId;
+	private GatewayType inAgent;
+	private GatewayType outAgent;
+	private String message;
+	private int inSize;
+	private String processId;
+	private String senderId;
+	private String transferProfileName;
+	private String stagedFileId;
+	private String meta;
 
-    public String getTransferProfileName() {
-        return transferProfileName;
-    }
+	public String getTransferProfileName() {
+		return transferProfileName;
+	}
 
-    public void setTransferProfileName(String transferProfileName) {
-        this.transferProfileName = transferProfileName;
-    }
-    
-    public String getStagedFileId() {
-        return stagedFileId;
-    }
+	public void setTransferProfileName(String transferProfileName) {
+		this.transferProfileName = transferProfileName;
+	}
 
-    public void setStagedFileId(String stagedFileId) {
-        this.stagedFileId = stagedFileId;
-    }
+	public String getStagedFileId() {
+		return stagedFileId;
+	}
 
-    public String getMeta() {
-        return meta;
-    }
+	public void setStagedFileId(String stagedFileId) {
+		this.stagedFileId = stagedFileId;
+	}
 
-    public void setMeta(String meta) {
-        this.meta = meta;
-    }
+	public String getMeta() {
+		return meta;
+	}
 
-    public String getSenderId() {
-        return senderId;
-    }
+	public void setMeta(String meta) {
+		this.meta = meta;
+	}
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
-    
-    public GatewayType getOutAgent() {
-        return outAgent;
-    }
+	public String getSenderId() {
+		return senderId;
+	}
 
-    public void setOutAgent(GatewayType outAgent) {
-        this.outAgent = outAgent;
-    }
+	public void setSenderId(String senderId) {
+		this.senderId = senderId;
+	}
 
-    public GatewayType getInAgent() {
-        return inAgent;
-    }
+	public GatewayType getOutAgent() {
+		return outAgent;
+	}
 
-    public void setInAgent(GatewayType inAgent) {
-        this.inAgent = inAgent;
-    }
+	public void setOutAgent(GatewayType outAgent) {
+		this.outAgent = outAgent;
+	}
 
-    public String getPipelineId() {
-        return pipelineId;
-    }
+	public GatewayType getInAgent() {
+		return inAgent;
+	}
 
-    public void setPipelineId(String pipelineId) {
-        this.pipelineId = pipelineId;
-    }
+	public void setInAgent(GatewayType inAgent) {
+		this.inAgent = inAgent;
+	}
 
-    public String getProtocol() {
-        return protocol;
-    }
+	public String getPipelineId() {
+		return pipelineId;
+	}
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
+	public void setPipelineId(String pipelineId) {
+		this.pipelineId = pipelineId;
+	}
 
-    public ProcessorType getCategory() {
-        return category;
-    }
+	public String getProtocol() {
+		return protocol;
+	}
 
-    public void setCategory(ProcessorType category) {
-        this.category = category;
-    }
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
 
-    public ExecutionState getStatus() {
-        return status;
-    }
+	public ProcessorType getCategory() {
+		return category;
+	}
 
-    public void setStatus(ExecutionState status) {
-        this.status = status;
-    }
+	public void setCategory(ProcessorType category) {
+		this.category = category;
+	}
 
-    public String getGlobalPId() {
-        return globalPId;
-    }
+	public ExecutionState getStatus() {
+		return status;
+	}
 
-    public void setGlobalPId(String globalPId) {
-        this.globalPId = globalPId;
-    }
+	public void setStatus(ExecutionState status) {
+		this.status = status;
+	}
 
-    public String getMailboxId() {
-        return mailboxId;
-    }
+	public String getGlobalPId() {
+		return globalPId;
+	}
 
-    public void setMailboxId(String mailboxId) {
-        this.mailboxId = mailboxId;
-    }
+	public void setGlobalPId(String globalPId) {
+		this.globalPId = globalPId;
+	}
 
-    public String getProcessorId() {
-        return processorId;
-    }
+	public String getMailboxId() {
+		return mailboxId;
+	}
 
-    public void setProcessorId(String processorId) {
-        this.processorId = processorId;
-    }
+	public void setMailboxId(String mailboxId) {
+		this.mailboxId = mailboxId;
+	}
 
-    public String getExecutionId() {
-        return executionId;
-    }
+	public String getProcessorId() {
+		return processorId;
+	}
 
-    public void setExecutionId(String executionId) {
-        this.executionId = executionId;
-    }
+	public void setProcessorId(String processorId) {
+		this.processorId = processorId;
+	}
 
-    public String getTenancyKey() {
-        return tenancyKey;
-    }
+	public String getExecutionId() {
+		return executionId;
+	}
 
-    public void setTenancyKey(String tenancyKey) {
-        this.tenancyKey = tenancyKey;
-    }
+	public void setExecutionId(String executionId) {
+		this.executionId = executionId;
+	}
 
-    public String getServiceInstandId() {
-        return serviceInstandId;
-    }
+	public String getTenancyKey() {
+		return tenancyKey;
+	}
 
-    public void setServiceInstandId(String serviceInstandId) {
-        this.serviceInstandId = serviceInstandId;
-    }
+	public void setTenancyKey(String tenancyKey) {
+		this.tenancyKey = tenancyKey;
+	}
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+	public String getServiceInstandId() {
+		return serviceInstandId;
+	}
 
-    public String getMessage() {
-        return message;
-    }
+	public void setServiceInstandId(String serviceInstandId) {
+		this.serviceInstandId = serviceInstandId;
+	}
 
-    public void setInSize(int inSize) {
-        this.inSize = inSize;
-    }
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
-    public int getInSize() {
-        return inSize;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    public String getProcessId() {
-        return processId;
-    }
+	public void setInSize(int inSize) {
+		this.inSize = inSize;
+	}
 
-    public void setProcessId(String processId) {
-        this.processId = processId;
-    }
+	public int getInSize() {
+		return inSize;
+	}
 
-    public static void logTimestamp(Logger logger, String message, Object... objects) {
-        if (logger != null) {
-            logger.info(String.format("[TIME] %s | %s", new Date(System.currentTimeMillis()),
-                    String.format(message, objects)));
-        }
-    }
+	public String getProcessId() {
+		return processId;
+	}
 
-    public void logFirstCornerTimestamp() {
-        firstCornerTimestamp = logBeginTimestamp(config
-                .getString(PROPERTY_FIRST_CORNER_NAME, DEFAULT_FIRST_CORNER_NAME));
-    }
+	public void setProcessId(String processId) {
+		this.processId = processId;
+	}
 
-    public void logSecondCornerTimestamp() {
-        logEndTimestamp(config.getString(DEFAULT_SECOND_CORNER_NAME, PROPERTY_SECOND_CORNER_NAME));
-    }
+	public static void logTimestamp(Logger logger, String message, Object... objects) {
+		if (logger != null) {
+			logger.info(String.format("[TIME] %s | %s", new Date(System.currentTimeMillis()),
+					String.format(message, objects)));
+		}
+	}
 
-    public void logThirdCrnerTimestamp() {
-        thirdCornerTimestamp = logBeginTimestamp(config
-                .getString(DEFAULT_THIRD_CORNER_NAME, PROPERTY_THIRD_CORNER_NAME));
-    }
+	public void logFirstCornerTimestamp() {
+		firstCornerTimestamp = logBeginTimestamp(config.getString(PROPERTY_FIRST_CORNER_NAME, DEFAULT_FIRST_CORNER_NAME));
+	}
 
-    public void logFourthCornerTimestamp() {
-        logEndTimestamp(config.getString(PROPERTY_FOURTH_CORNER_NAME, DEFAULT_FOURTH_CORNER_NAME));
-    }
+	public void logSecondCornerTimestamp() {
+		logEndTimestamp(config.getString(DEFAULT_SECOND_CORNER_NAME, PROPERTY_SECOND_CORNER_NAME));
+	}
 
-    public ExecutionTimestamp logBeginTimestamp(String name) {
-        ExecutionTimestamp timeStamp = ExecutionTimestamp.beginTimestamp(name);
-        logTimeStamp(timeStamp);
-        return timeStamp;
-    }
+	public void logThirdCrnerTimestamp() {
+		thirdCornerTimestamp = logBeginTimestamp(config.getString(DEFAULT_THIRD_CORNER_NAME, PROPERTY_THIRD_CORNER_NAME));
+	}
 
-    public void logEndTimestamp(String name, String sessionId) {
-        ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name, sessionId);
-        logTimeStamp(timeStamp);
-    }
+	public void logFourthCornerTimestamp() {
+		logEndTimestamp(config.getString(PROPERTY_FOURTH_CORNER_NAME, DEFAULT_FOURTH_CORNER_NAME));
+	}
 
-    public void logEndTimestamp(String name) {
-        ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name);
-        logTimeStamp(timeStamp);
-    }
+	public ExecutionTimestamp logBeginTimestamp(String name) {
+		ExecutionTimestamp timeStamp = ExecutionTimestamp.beginTimestamp(name);
+		logTimeStamp(timeStamp);
+		return timeStamp;
+	}
 
-    private void logTimeStamp(ExecutionTimestamp timestamp) {
-        logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, constructTimeStampAPI(timestamp));
-    }
+	public void logEndTimestamp(String name, String sessionId) {
+		ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name, sessionId);
+		logTimeStamp(timeStamp);
+	}
 
-    private TimeStampAPI constructTimeStampAPI(ExecutionTimestamp timestamp) {
-        return constructTimeStampAPI(ExecutionTimestamp.buildGlassTimeStamp(timestamp));
-    }
+	public void logEndTimestamp(String name) {
+		ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name);
+		logTimeStamp(timeStamp);
+	}
 
-    private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
+	private void logTimeStamp(ExecutionTimestamp timestamp) {
+		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, constructTimeStampAPI(timestamp));
+	}
 
-        TimeStampAPI timeStampAPI = new TimeStampAPI();
-        timeStampAPI.setProcessId(getProcessId());
-        timeStampAPI.setGlobalId(getGlobalPId());
-        timeStampAPI.setPipelineId(getPipelineId());
-        timeStampAPI.getTimeStamps().add(glassTimeStamp);
+	private TimeStampAPI constructTimeStampAPI(ExecutionTimestamp timestamp) {
+		return constructTimeStampAPI(ExecutionTimestamp.buildGlassTimeStamp(timestamp));
+	}
 
-        return timeStampAPI;
-    }
+	private TimeStampAPI constructTimeStampAPI(TimeStamp glassTimeStamp) {
 
-    public void logProcessingStatus(StatusType statusType, String message) {
+		TimeStampAPI timeStampAPI = new TimeStampAPI();
+		timeStampAPI.setProcessId(getProcessId());
+		timeStampAPI.setGlobalId(getGlobalPId());
+		timeStampAPI.setPipelineId(getPipelineId());
+		timeStampAPI.getTimeStamps().add(glassTimeStamp);
 
-        // Log ActivityStatusAPI
-        ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
-        activityStatusAPI.setPipelineId(getPipelineId());
-        activityStatusAPI.setProcessId(getProcessId());
-        activityStatusAPI.setGlobalId(getGlobalPId());
-        activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
+		return timeStampAPI;
+	}
 
-        com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
-        status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
-        if (message != null && !message.equals("")) {
-            status.setDescription(MAILBOX_ASA_IDENTIFIER + ": " + message);
-        } else {
-            status.setDescription(MAILBOX_ASA_IDENTIFIER);
-        }
-        status.setStatusId(IdentifierUtil.getUuid());
-        status.setType(statusType);
+	public void logProcessingStatus(StatusType statusType, String message) {
 
-        activityStatusAPI.getStatuses().add(status);
+		// Log ActivityStatusAPI
+		ActivityStatusAPI activityStatusAPI = new ActivityStatusAPI();
+		activityStatusAPI.setPipelineId(getPipelineId());
+		activityStatusAPI.setProcessId(getProcessId());
+		activityStatusAPI.setGlobalId(getGlobalPId());
+		activityStatusAPI.setGlassMessageId(IdentifierUtil.getUuid());
 
-        logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
-    }
+		com.liaison.commons.message.glass.dom.Status status = new com.liaison.commons.message.glass.dom.Status();
+		status.setDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+		if (message != null && !message.equals("")) {
+			status.setDescription(MAILBOX_ASA_IDENTIFIER + ": " + message);
+		} else {
+			status.setDescription(MAILBOX_ASA_IDENTIFIER);
+		}
+		status.setStatusId(IdentifierUtil.getUuid());
+		status.setType(statusType);
+
+		activityStatusAPI.getStatuses().add(status);
+
+		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, activityStatusAPI);
+	}
 }

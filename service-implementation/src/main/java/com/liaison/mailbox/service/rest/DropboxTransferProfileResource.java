@@ -59,7 +59,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- *
+ * 
  * @author santoshc
  */
 @AppConfigurationResource
@@ -75,7 +75,8 @@ public class DropboxTransferProfileResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public DropboxTransferProfileResource() throws IOException {
+	public DropboxTransferProfileResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
@@ -87,7 +88,8 @@ public class DropboxTransferProfileResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call()
+					throws Exception {
 
 				serviceCallCounter.incrementAndGet();
 
@@ -100,42 +102,41 @@ public class DropboxTransferProfileResource extends AuditedResource {
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if(StringUtil.isNullOrEmptyAfterTrim(mailboxToken) || StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
+							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
 						LOG.error("ACL manifest or mailbox token missing.");
-						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
+								Response.Status.BAD_REQUEST);
 					}
 					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
 							MailBoxConstants.UM_AUTH_TOKEN);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil
-							.constructAuthenticationRequest(loginId, null, authenticationToken);
+					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
+							loginId, null, authenticationToken);
 
 					// authenticating
-					String encryptedMbxToken = authService
-							.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
+					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
 					if (encryptedMbxToken == null) {
 						LOG.error("Dropbox - user authentication failed");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
 								Messages.FAILURE);
-						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON)
-								.entity(responseEntity).build();
+						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+								responseEntity).build();
 					}
 
 					// getting manifest
-					GEMManifestResponse manifestResponse = authService
-							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
 					if (manifestResponse == null) {
 						LOG.error("Dropbox - authenticated but failed to retrieve manifest");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 								Messages.FAILURE);
-						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
-								.entity(responseEntity).build();
+						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+								responseEntity).build();
 					}
 
-					GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService
-							.getTransferProfiles(manifestResponse.getManifest());
+					GetTransferProfilesResponseDTO getTransferProfilesResponseDTO = fileTransferService.getTransferProfiles(manifestResponse.getManifest());
 					String responseBody = MailBoxUtil.marshalToJSON(getTransferProfilesResponseDTO);
 
 					// response message construction

@@ -56,10 +56,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @AppConfigurationResource
 @Path("config/mailbox/listFile")
-@Api(value = "config/mailbox/listFile", 
-description = "Gateway for the processor configuration helper.")
+@Api(value = "config/mailbox/listFile", description = "Gateway for the processor configuration helper.")
 public class MailBoxFileResource extends AuditedResource {
-	
+
 	private static final Logger LOG = LogManager.getLogger(MailBoxFileResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -67,14 +66,14 @@ public class MailBoxFileResource extends AuditedResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	
 
-	public MailBoxFileResource() throws IOException {
+
+	public MailBoxFileResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
+
 	/**
 	 * REST method to retrieve a list of files from mailbox.
 	 * 
@@ -83,19 +82,16 @@ public class MailBoxFileResource extends AuditedResource {
 	@GET
 	@ApiOperation(value = "List File", notes = "return list of files", position = 1)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response getFileList(@Context final HttpServletRequest request) {
-        
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				try {
 					String jsFileLocation = MailBoxUtil.getEnvironmentProperties().getString(
 							"processor.javascript.root.directory");
@@ -106,13 +102,13 @@ public class MailBoxFileResource extends AuditedResource {
 
 					List<FileInfoDTO> infos = new ArrayList<FileInfoDTO>();
 					infos.add(info);
-					String response = MailBoxUtil.marshalToJSON(infos);	
+					String response = MailBoxUtil.marshalToJSON(infos);
 					return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}					
+				}
 			}
 		};
 		worker.actionLabel = "MailBoxFileResource.getFileList()";
@@ -125,9 +121,9 @@ public class MailBoxFileResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
 	}
-	
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

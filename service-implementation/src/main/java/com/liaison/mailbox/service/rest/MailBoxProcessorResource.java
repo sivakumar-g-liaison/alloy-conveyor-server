@@ -56,13 +56,12 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- *
+ * 
  * @author veerasamyn
  */
 @AppConfigurationResource
 @Path("config/mailbox/{mailboxid}/processor")
-@Api(value = "config/mailbox/{mailboxid}/processor",
-description = "Gateway for the processor configuration services.")
+@Api(value = "config/mailbox/{mailboxid}/processor", description = "Gateway for the processor configuration services.")
 public class MailBoxProcessorResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(MailBoxProcessorResource.class);
@@ -73,54 +72,49 @@ public class MailBoxProcessorResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public MailBoxProcessorResource() throws IOException {
+	public MailBoxProcessorResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 
 	/**
 	 * REST method to update a processor.
-	 *
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @param guid
-	 *            The id of the mailbox
-	 *
+	 * 
+	 * @param request HttpServletRequest, injected with context annotation
+	 * @param guid The id of the mailbox
+	 * 
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Create Processor",
-	notes = "create a new processor",
-	position = 1,
-	response = com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO.class)
+	@ApiOperation(value = "Create Processor", notes = "create a new processor", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new processor", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.AddProcessorToMailBoxRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new processor", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.AddProcessorToMailBoxRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response createProcessor(
 			@Context final HttpServletRequest request,
-			@PathParam(value = "mailboxid") @ApiParam(name="mailboxid", required=true, value="mailboxid") final String guid,
+			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailboxid") final String guid,
 			@QueryParam(value = "sid") @ApiParam(name = "sid", required = true, value = "Service instance id") final String serviceInstanceId) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			public Object call()
+					throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 				serviceCallCounter.addAndGet(1);
 
 				String requestString;
 				try {
 					requestString = getRequestBody(request);
-					AddProcessorToMailboxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProcessorToMailboxRequestDTO.class);
+					AddProcessorToMailboxRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							AddProcessorToMailboxRequestDTO.class);
 					// create the new Processor
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 
-				} catch (IOException | JAXBException | JSONException  e) {
+				} catch (IOException | JAXBException | JSONException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				} catch (SymmetricAlgorithmException e) {

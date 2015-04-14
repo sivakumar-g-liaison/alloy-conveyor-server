@@ -63,7 +63,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Path("config/mailbox/profile")
 @Api(value = "config/mailbox/profile", description = "Gateway for the profile configuration services.")
 public class MailBoxProfileResource extends AuditedResource {
-	
+
 	private static final Logger LOG = LogManager.getLogger(MailBoxProfileResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -71,57 +71,50 @@ public class MailBoxProfileResource extends AuditedResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	
 
-	public MailBoxProfileResource() throws IOException {
+
+	public MailBoxProfileResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
+
 	/**
 	 * REST method to initiate profile creation.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param request HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Create Profile",
-			notes = "create a new profile",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO.class)
+	@ApiOperation(value = "Create Profile", notes = "create a new profile", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new profile", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Create new profile", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.AddProfileRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response createProfile(@Context final HttpServletRequest request) {
-		
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				String requestString;
 				try {
 					requestString = getRequestBody(request);
-					AddProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, AddProfileRequestDTO.class);
+					AddProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							AddProfileRequestDTO.class);
 					// creates new profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					return profile.createProfile(serviceRequest);
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
+				}
 			}
-		};		
+		};
 		worker.actionLabel = "MailBoxProfileResource.createProfile()";
 
 		// hand the delegate to the framework for calling
@@ -132,51 +125,44 @@ public class MailBoxProfileResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
 	}
-	
+
 	/**
 	 * REST method to update a profile
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
+	 * @param request HttpServletRequest, injected with context annotation
 	 * @return Response Object
 	 */
 	@PUT
-	@ApiOperation(value = "Update profile",
-			notes = "Update an existing profile",
-			position = 2,
-			response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
+	@ApiOperation(value = "Update profile", notes = "Update an existing profile", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update an existing profile", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update an existing profile", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProfileRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response reviseProfile(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				String requestString;
-				try{
+				try {
 					requestString = getRequestBody(request);
-					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProfileRequestDTO.class);
+					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							ReviseProfileRequestDTO.class);
 					// update profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					return profile.updateProfile(serviceRequest);
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}				
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.updateProfile()";
@@ -191,36 +177,30 @@ public class MailBoxProfileResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * REST method to retrieve all profiles.
 	 * 
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "List Profiles",
-			notes = "returns detail information of all the profiles",
-			position = 3,
-			response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
+	@ApiOperation(value = "List Profiles", notes = "returns detail information of all the profiles", position = 3, response = com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response readProfiles(
 			@Context final HttpServletRequest request,
 			@ApiParam(value = "Page Number", required = false) @QueryParam(value = "page") final String page,
-            @ApiParam(value = "Page Size", required = false) @QueryParam(value = "pageSize") final String pageSize,
-            @ApiParam(value = "Sorting Information", required = false) @QueryParam(value = "sortInfo") final String sortInfo,
-            @ApiParam(value = "Filter Text", required = false) @QueryParam(value = "filterText") final String filterText) {
-		
- 	  // create the worker delegate to perform the business logic
+			@ApiParam(value = "Page Size", required = false) @QueryParam(value = "pageSize") final String pageSize,
+			@ApiParam(value = "Sorting Information", required = false) @QueryParam(value = "sortInfo") final String sortInfo,
+			@ApiParam(value = "Filter Text", required = false) @QueryParam(value = "filterText") final String filterText) {
+
+		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
-				serviceCallCounter.addAndGet(1);				
+
+				serviceCallCounter.addAndGet(1);
 				// read Profiles
 				ProfileConfigurationService profile = new ProfileConfigurationService();
 				return profile.getProfiles(page, pageSize, sortInfo, filterText);
@@ -237,10 +217,10 @@ public class MailBoxProfileResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
 
-	}	
-	
+	}
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

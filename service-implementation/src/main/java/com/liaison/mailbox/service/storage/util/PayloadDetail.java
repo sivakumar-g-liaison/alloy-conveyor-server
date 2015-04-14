@@ -12,9 +12,8 @@ import com.liaison.fs2.metadata.FS2MetaSnapshot;
 
 /**
  * @author VNagarajan
- *
- * Class contains meta about the payload and size.
- * Wrapper for Payload Metadata
+ * 
+ *         Class contains meta about the payload and size. Wrapper for Payload Metadata
  */
 public class PayloadDetail {
 
@@ -24,15 +23,17 @@ public class PayloadDetail {
 	public FS2MetaSnapshot getMetaSnapshot() {
 		return metaSnapshot;
 	}
+
 	public void setMetaSnapshot(FS2MetaSnapshot metaSnapshot) {
 		this.metaSnapshot = metaSnapshot;
 	}
+
 	public long getPayloadSize() {
 		return payloadSize;
 	}
+
 	public void setPayloadSize(long payloadSize) {
 		this.payloadSize = payloadSize;
 	}
 
 }
-

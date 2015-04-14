@@ -74,7 +74,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- *
+ * 
  * @author OFS
  */
 @AppConfigurationResource
@@ -92,7 +92,8 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
-	public DropboxFileTransferResource() throws IOException {
+	public DropboxFileTransferResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
@@ -106,7 +107,8 @@ public class DropboxFileTransferResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call()
+					throws Exception {
 
 				serviceCallCounter.incrementAndGet();
 
@@ -119,26 +121,28 @@ public class DropboxFileTransferResource extends AuditedResource {
 				long actualStartTime = System.currentTimeMillis();
 				long startTime = 0;
 				long endTime = 0;
-				
-                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-                            MailBoxUtil.getGUID());
-                GlassMessage glassMessage = new GlassMessage();
+
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+						MailBoxUtil.getGUID());
+				GlassMessage glassMessage = new GlassMessage();
 
 				try {
 
 					// start time to calculate elapsed time for retrieving necessary details from headers
 					startTime = System.currentTimeMillis();
-                    String fileName = null;
-                    if (!MailBoxUtil.isEmpty(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME))) {
-                        fileName = URLDecoder.decode(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME),
-                                StandardCharsets.UTF_8.displayName());
-                    }
+					String fileName = null;
+					if (!MailBoxUtil.isEmpty(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME))) {
+						fileName = URLDecoder.decode(serviceRequest.getHeader(MailBoxConstants.UPLOAD_FILE_NAME),
+								StandardCharsets.UTF_8.displayName());
+					}
 
 					// get login id and auth token from mailbox token
 					String mailboxToken = serviceRequest.getHeader(MailBoxConstants.DROPBOX_AUTH_TOKEN);
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
-					if(StringUtil.isNullOrEmptyAfterTrim(mailboxToken) || StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
-						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING, Response.Status.BAD_REQUEST);
+					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
+							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
+								Response.Status.BAD_REQUEST);
 					}
 					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
@@ -150,21 +154,20 @@ public class DropboxFileTransferResource extends AuditedResource {
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil
-							.constructAuthenticationRequest(loginId, null, authenticationToken);
+					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
+							loginId, null, authenticationToken);
 
 					// to calculate elapsed time for authentication
 					startTime = System.currentTimeMillis();
 
 					// authenticating
-					String encryptedMbxToken = authService
-							.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
+					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
 					if (encryptedMbxToken == null) {
 						LOG.error("Dropbox - user authentication failed");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
 								Messages.FAILURE);
-						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON)
-								.entity(responseEntity).build();
+						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+								responseEntity).build();
 					}
 
 					// to calculate elapsed time for authentication
@@ -177,13 +180,12 @@ public class DropboxFileTransferResource extends AuditedResource {
 					startTime = System.currentTimeMillis();
 
 					// getting manifest
-					GEMManifestResponse manifestResponse = authService
-							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
 					if (manifestResponse == null) {
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 								Messages.FAILURE);
-						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
-								.entity(responseEntity).build();
+						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+								responseEntity).build();
 					}
 
 					// to calculate elapsed time for getting manifest
@@ -194,24 +196,25 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// to calculate elapsed time for work ticket creation
 					startTime = System.currentTimeMillis();
 
-					//creating work ticket
+					// creating work ticket
 					WorkTicketUtil workTicketUtil = new WorkTicketUtil();
-					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest), getRequestHeaders(serviceRequest), "", null);
+					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
+							getRequestHeaders(serviceRequest), "", null);
 					workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
-					
-	                   
-                    String processId = IdentifierUtil.getUuid();
-                    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-                    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-                    glassMessage.setStatus(ExecutionState.PROCESSING);
-                    glassMessage.setInAgent(GatewayType.REST);
-                    glassMessage.setProcessId(processId);
-                    glassMessage.setSenderId(loginId);                  
-                    // Log time stamp
-                    glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
-                    // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+
+					String processId = IdentifierUtil.getUuid();
+					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+					glassMessage.setStatus(ExecutionState.PROCESSING);
+					glassMessage.setInAgent(GatewayType.REST);
+					glassMessage.setProcessId(processId);
+					glassMessage.setSenderId(loginId);
+					// Log time stamp
+					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+					// Log running status
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -222,9 +225,9 @@ public class DropboxFileTransferResource extends AuditedResource {
 					startTime = System.currentTimeMillis();
 
 					// calling service to upload content to spectrum
-					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService
-							.transferFile(workTicket, serviceRequest.getInputStream(), transferProfileId,
-									manifestResponse.getManifest(), fileName, loginId, glassMessage);
+					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService.transferFile(
+							workTicket, serviceRequest.getInputStream(), transferProfileId,
+							manifestResponse.getManifest(), fileName, loginId, glassMessage);
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -244,28 +247,29 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
-					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}",workTicket.getFileName(),endTime-actualStartTime);
+					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}", workTicket.getFileName(), endTime
+							- actualStartTime);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
-					
-                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
-                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
-	                   // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
-                    glassMessage.setStatus(ExecutionState.FAILED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-                    throw new LiaisonRuntimeException(e.getMessage());
+					// Log error status
+					glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+					glassMessage.setStatus(ExecutionState.FAILED);
+					transactionVisibilityClient.logToGlass(glassMessage);
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+					throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
-	                   // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
-                    glassMessage.setStatus(ExecutionState.FAILED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+					// Log error status
+					glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+					glassMessage.setStatus(ExecutionState.FAILED);
+					transactionVisibilityClient.logToGlass(glassMessage);
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}
@@ -285,9 +289,8 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 	/**
 	 * This method will validate the size of the request.
-	 *
-	 * @param request
-	 *            The HttpServletRequest
+	 * 
+	 * @param request The HttpServletRequest
 	 */
 	protected void validateRequestSize(HttpServletRequest request) {
 		long contentLength = request.getContentLength();

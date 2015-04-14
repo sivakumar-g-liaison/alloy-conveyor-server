@@ -30,9 +30,9 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 
 /**
- *
+ * 
  * @author OFS
- *
+ * 
  */
 public class WorkTicketUtil {
 
@@ -43,12 +43,12 @@ public class WorkTicketUtil {
 
 	/**
 	 * retrieve the pipeline id configured in httplistener of mailbox
-	 *
+	 * 
 	 * @param mailboxpguid
 	 * @Param isSync boolean
 	 * @return String pipeline id
-	 *
-	 *
+	 * 
+	 * 
 	 */
 	public static String retrievePipelineId(Map<String, String> httpListenerProperties) {
 
@@ -58,101 +58,107 @@ public class WorkTicketUtil {
 		return pipelineId;
 	}
 
-	public static void postWrkTcktToQ(WorkTicket workTicket) throws Exception {
+	public static void postWrkTcktToQ(WorkTicket workTicket)
+			throws Exception {
 		String workTicketJson = JAXBUtility.marshalToJSON(workTicket);
 		postToQueue(workTicketJson);
 	}
 
-	public static void postToQueue(String message) throws Exception {
+	public static void postToQueue(String message)
+			throws Exception {
 		SweeperQueue.getInstance().sendMessages(message);
 		LOGGER.debug("postToQueue, message: {}", message);
 
 	}
 
 	/**
-     * Validates the global process id if it is available in the header and set in the workticket.
-     * Generates new guid if it is not available
-     *
-     * @param workTicket
-     * @param globalProcessId - got from request header.
-     */
-    public void setGlobalProcessId(WorkTicket workTicket, String globalProcessId) {
+	 * Validates the global process id if it is available in the header and set in the workticket. Generates new guid if
+	 * it is not available
+	 * 
+	 * @param workTicket
+	 * @param globalProcessId - got from request header.
+	 */
+	public void setGlobalProcessId(WorkTicket workTicket, String globalProcessId) {
 
-            if (!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)) {
+		if (!StringUtil.isNullOrEmptyAfterTrim(globalProcessId)) {
 
-                if (GLOBAL_PROCESS_ID_MAXLENGTH < globalProcessId.length()
-                    || GLOBAL_PROCESS_ID_MINLENGTH > globalProcessId.length()
-                    || !(globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN))) {
-                    throw new MailBoxServicesException("The global process id is invalid", Response.Status.BAD_REQUEST);
-                } else {
-                    workTicket.setGlobalProcessId(globalProcessId);
-                   
-                }
+			if (GLOBAL_PROCESS_ID_MAXLENGTH < globalProcessId.length()
+					|| GLOBAL_PROCESS_ID_MINLENGTH > globalProcessId.length()
+					|| !(globalProcessId.matches(GLOBAL_PROCESS_ID_PATTERN))) {
+				throw new MailBoxServicesException("The global process id is invalid", Response.Status.BAD_REQUEST);
+			} else {
+				workTicket.setGlobalProcessId(globalProcessId);
 
-            } else {
-                workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-            }
-            
-            LOGGER.debug("The GPID set in workticket is {}", workTicket.getGlobalProcessId());
+			}
 
-    }
+		} else {
+			workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+		}
+
+		LOGGER.debug("The GPID set in workticket is {}", workTicket.getGlobalProcessId());
+
+	}
 
 	/**
-     * This method will create workTicket by given request.
-     *
-     * @param request
-     * @param mailboxPguid
-     * @param httpListenerProperties
-     * @return WorkTicket
-     */
-    public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, Object> requestHeaders,String mailboxPguid, Map<String, String> httpListenerProperties) {
+	 * This method will create workTicket by given request.
+	 * 
+	 * @param request
+	 * @param mailboxPguid
+	 * @param httpListenerProperties
+	 * @return WorkTicket
+	 */
+	public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, Object> requestHeaders,
+			String mailboxPguid, Map<String, String> httpListenerProperties) {
 
-        WorkTicket workTicket = new WorkTicket();
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_METHOD, requestProp.get(MailBoxConstants.HTTP_METHOD));
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_QUERY_STRING, requestProp.get(MailBoxConstants.HTTP_QUERY_STRING));
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_PORT, requestProp.get(MailBoxConstants.HTTP_REMOTE_PORT));
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_CHARACTER_ENCODING, requestProp.get(MailBoxConstants.HTTP_CHARACTER_ENCODING));
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_USER, requestProp.get(MailBoxConstants.HTTP_REMOTE_USER));
-        workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_ADDRESS, requestProp.get(MailBoxConstants.HTTP_REMOTE_ADDRESS));
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_REQUEST_PATH, requestProp.get(MailBoxConstants.HTTP_REQUEST_PATH));
-        workTicket.setAdditionalContext(MailBoxConstants.HTTP_CONTENT_TYPE, requestProp.get(MailBoxConstants.HTTP_CONTENT_TYPE));
-        workTicket.getAdditionalContext().putAll(requestHeaders);
-        workTicket.setCreatedTime(new Date());
+		WorkTicket workTicket = new WorkTicket();
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_METHOD, requestProp.get(MailBoxConstants.HTTP_METHOD));
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_QUERY_STRING,
+				requestProp.get(MailBoxConstants.HTTP_QUERY_STRING));
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_PORT,
+				requestProp.get(MailBoxConstants.HTTP_REMOTE_PORT));
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_CHARACTER_ENCODING,
+				requestProp.get(MailBoxConstants.HTTP_CHARACTER_ENCODING));
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_USER,
+				requestProp.get(MailBoxConstants.HTTP_REMOTE_USER));
+		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REMOTE_ADDRESS,
+				requestProp.get(MailBoxConstants.HTTP_REMOTE_ADDRESS));
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_REQUEST_PATH,
+				requestProp.get(MailBoxConstants.HTTP_REQUEST_PATH));
+		workTicket.setAdditionalContext(MailBoxConstants.HTTP_CONTENT_TYPE,
+				requestProp.get(MailBoxConstants.HTTP_CONTENT_TYPE));
+		workTicket.getAdditionalContext().putAll(requestHeaders);
+		workTicket.setCreatedTime(new Date());
 
-        if (null != httpListenerProperties) {
-            workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(httpListenerProperties));
-        }
-        setGlobalProcessId(workTicket, (String) requestProp.get(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
+		if (null != httpListenerProperties) {
+			workTicket.setPipelineId(WorkTicketUtil.retrievePipelineId(httpListenerProperties));
+		}
+		setGlobalProcessId(workTicket, (String) requestProp.get(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER));
 
-        return workTicket;
-    }
+		return workTicket;
+	}
 
-    /**
-     * Copies all the request header from HttpServletRequest to WorkTicket.
-     *
-     * @param request
-     *        HttpServletRequest
-     * @param request
-     *        workTicket
-     *
-     */
-    public void copyRequestHeadersToWorkTicket (HttpServletRequest request , WorkTicket workTicket)  {
+	/**
+	 * Copies all the request header from HttpServletRequest to WorkTicket.
+	 * 
+	 * @param request HttpServletRequest
+	 * @param request workTicket
+	 * 
+	 */
+	public void copyRequestHeadersToWorkTicket(HttpServletRequest request, WorkTicket workTicket) {
 
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements())
-        {
-            String headerName = headerNames.nextElement();
-            List<String> headerValues = new ArrayList<>();
-            Enumeration<String> values = request.getHeaders(headerName);
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			List<String> headerValues = new ArrayList<>();
+			Enumeration<String> values = request.getHeaders(headerName);
 
-            while (values.hasMoreElements())
-            {
-                headerValues.add(values.nextElement());
-            }
+			while (values.hasMoreElements()) {
+				headerValues.add(values.nextElement());
+			}
 
-            workTicket.addHeaders(headerName,  headerValues);
-        }
+			workTicket.addHeaders(headerName, headerValues);
+		}
 
-    }
+	}
 }

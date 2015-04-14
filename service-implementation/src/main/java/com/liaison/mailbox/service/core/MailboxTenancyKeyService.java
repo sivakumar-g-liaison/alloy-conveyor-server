@@ -27,7 +27,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Class which has Mailbox Tenancy Key functional related operations.
- *
+ * 
  * @author OFS
  */
 public class MailboxTenancyKeyService {
@@ -38,12 +38,12 @@ public class MailboxTenancyKeyService {
 
 	/**
 	 * Method to retrieve all tenancy keys present in acl manifest
-	 *
+	 * 
 	 * @param aclManifestJson
-	 *
+	 * 
 	 * @return of tenancy keys present in acl-manifest
 	 */
-	public GetTenancyKeysResponseDTO getAllTenancyKeysFromACLManifest (String aclManifestJson) {
+	public GetTenancyKeysResponseDTO getAllTenancyKeysFromACLManifest(String aclManifestJson) {
 
 		LOG.debug("Entering retrieve all tenancy keys");
 		GetTenancyKeysResponseDTO serviceResponse = new GetTenancyKeysResponseDTO();
@@ -53,7 +53,8 @@ public class MailboxTenancyKeyService {
 			tenancyKeys = MailBoxUtil.getTenancyKeysFromACLManifest(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.info("Retrieval of Tenancy keys failed");
-				throw new MailBoxServicesException(Messages.READ_OPERATION_FAILED, TENANCY_KEYS, Response.Status.BAD_REQUEST);
+				throw new MailBoxServicesException(Messages.READ_OPERATION_FAILED, TENANCY_KEYS,
+						Response.Status.BAD_REQUEST);
 			}
 
 			// constructing the response
@@ -61,13 +62,13 @@ public class MailboxTenancyKeyService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, TENANCY_KEYS, Messages.SUCCESS));
 			LOG.debug("Exit from retrieve all tenancy keys.");
 			return serviceResponse;
-		} catch (IOException | MailBoxServicesException e ) {
+		} catch (IOException | MailBoxServicesException e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, TENANCY_KEYS, Messages.FAILURE, e.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, TENANCY_KEYS, Messages.FAILURE,
+					e.getMessage()));
 			return serviceResponse;
 		}
-
 
 
 	}
