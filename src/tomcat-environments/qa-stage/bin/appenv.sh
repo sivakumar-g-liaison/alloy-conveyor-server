@@ -16,8 +16,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.l
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.includeLocation=true"
 # log4j will look for updates to log4j xml every 5 minutes
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.interval.sec=300"
-# Https.protocols parameter for JVM
-export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TSLv1.2"
+
 # ==================================================================
 # log overrides
 # ==================================================================
@@ -127,4 +126,4 @@ export CATALINA_OPTS="$CATALINA_OPTS -XX:GCTimeRatio=9"
 export CATALINA_OPTS="$CATALINA_OPTS -XX:+DisableExplicitGC"
 
 # Https.protocols parameter for JVM
-export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TSLv1.2"
+export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TLSv1.2"
