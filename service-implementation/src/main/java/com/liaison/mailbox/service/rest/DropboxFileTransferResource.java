@@ -59,6 +59,7 @@ import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifest
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.internal.helper.dto.FileTransferHelperDTO;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -74,7 +75,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- * 
+ *
  * @author OFS
  */
 @AppConfigurationResource
@@ -201,19 +202,19 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
 					workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
-	                   
-                    String processId = IdentifierUtil.getUuid();
-                    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-                    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-                    glassMessage.setStatus(ExecutionState.PROCESSING);
-                    glassMessage.setInAgent(GatewayType.REST);
-                    glassMessage.setProcessId(processId);
-                    glassMessage.setSenderId(loginId);                  
-                    // Log time stamp
-                    glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
-                    // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Recevived");
+					String processId = IdentifierUtil.getUuid();
+					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+					glassMessage.setStatus(ExecutionState.PROCESSING);
+					glassMessage.setInAgent(GatewayType.REST);
+					glassMessage.setProcessId(processId);
+					glassMessage.setSenderId(loginId);
+					// Log time stamp
+					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+					// Log running status
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Recevived");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -223,10 +224,16 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// to calculate elapsed time for work ticket creation
 					startTime = System.currentTimeMillis();
 
+					// creating file transfer helper dto
+					FileTransferHelperDTO fileTransferDTO = new FileTransferHelperDTO();
+					fileTransferDTO.setFileContent(serviceRequest.getInputStream());
+					fileTransferDTO.setTransferProfileId(transferProfileId);
+					fileTransferDTO.setFileName(fileName);
+					fileTransferDTO.setLoginId(loginId);
+
 					// calling service to upload content to spectrum
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService.transferFile(
-							workTicket, serviceRequest.getInputStream(), transferProfileId,
-							manifestResponse.getManifest(), fileName, loginId, glassMessage);
+							workTicket, fileTransferDTO, glassMessage, manifestResponse.getManifest());
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -235,14 +242,12 @@ public class DropboxFileTransferResource extends AuditedResource {
 					String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
 
 					// response message construction
-					ResponseBuilder builder = Response
-							.ok()
-							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-									manifestResponse.getPublicKeyGuid())
-							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
+					ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER,
+							manifestResponse.getManifest()).header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER,
+							manifestResponse.getSignature()).header(
+							GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid()).header(
+							MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken).type(MediaType.APPLICATION_JSON).entity(
+							responseBody).status(Response.Status.OK);
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -250,25 +255,25 @@ public class DropboxFileTransferResource extends AuditedResource {
 							- actualStartTime);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
-					
-                    //glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
-                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+					// glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
-	                   // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
-                    glassMessage.setStatus(ExecutionState.FAILED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-                    throw new LiaisonRuntimeException(e.getMessage());
+					// Log error status
+					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
+					glassMessage.setStatus(ExecutionState.FAILED);
+					transactionVisibilityClient.logToGlass(glassMessage);
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+					throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
-	                   // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
-                    glassMessage.setStatus(ExecutionState.FAILED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+					// Log error status
+					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
+					glassMessage.setStatus(ExecutionState.FAILED);
+					transactionVisibilityClient.logToGlass(glassMessage);
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}
@@ -288,7 +293,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 	/**
 	 * This method will validate the size of the request.
-	 * 
+	 *
 	 * @param request The HttpServletRequest
 	 */
 	protected void validateRequestSize(HttpServletRequest request) {

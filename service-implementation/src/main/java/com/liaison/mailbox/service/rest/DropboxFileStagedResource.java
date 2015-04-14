@@ -52,6 +52,7 @@ import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifes
 import com.liaison.mailbox.service.dto.dropbox.response.GetStagedFilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -67,7 +68,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- * 
+ *
  * @author OFS
  */
 @AppConfigurationResource
@@ -93,9 +94,9 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 	/**
 	 * REST method to add staged file.
-	 * 
+	 *
 	 * @param request HttpServletRequest, injected with context annotation
-	 * 
+	 *
 	 * @return Response Object
 	 */
 	@POST
@@ -204,22 +205,28 @@ public class DropboxFileStagedResource extends AuditedResource {
 								responseEntity).build();
 					}
 
+					// construct the generic search filter dto
+					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+					searchFilter.setStagedFileName(stageFileName);
+					searchFilter.setPage(page);
+					searchFilter.setPageSize(pageSize);
+					searchFilter.setSortField(sortField);
+					searchFilter.setSortDirection(sortDirection);
+					searchFilter.setStatus(status);
+
 					// getting staged files based on manifest
 					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService.getStagedFiles(
-							manifestResponse.getManifest(), stageFileName, page, pageSize, sortField, sortDirection,
-							status);
+							searchFilter, manifestResponse.getManifest());
 					getStagedFilesResponseDTO.setHitCounter(hitCounter);
 					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 
 					// response message construction
-					ResponseBuilder builder = Response
-							.ok()
-							.header(MailBoxConstants.ACL_MANIFEST_HEADER, manifestResponse.getManifest())
-							.header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER, manifestResponse.getSignature())
-							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
-									manifestResponse.getPublicKeyGuid())
-							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.type(MediaType.APPLICATION_JSON).entity(responseBody).status(Response.Status.OK);
+					ResponseBuilder builder = Response.ok().header(MailBoxConstants.ACL_MANIFEST_HEADER,
+							manifestResponse.getManifest()).header(MailBoxConstants.ACL_SIGNED_MANIFEST_HEADER,
+							manifestResponse.getSignature()).header(
+							GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, manifestResponse.getPublicKeyGuid()).header(
+							MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken).type(MediaType.APPLICATION_JSON).entity(
+							responseBody).status(Response.Status.OK);
 
 					LOG.debug("Exit from getStagedFiles service.");
 

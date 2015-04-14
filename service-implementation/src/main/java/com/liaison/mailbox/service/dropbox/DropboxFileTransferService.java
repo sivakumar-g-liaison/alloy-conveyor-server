@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletInputStream;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.input.CloseShieldInputStream;
@@ -44,6 +43,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Dropbo
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.internal.helper.dto.FileTransferHelperDTO;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -53,7 +53,7 @@ import com.liaison.mailbox.service.util.WorkTicketUtil;
 
 /**
  * Class which has Dropbox File Transfer related operations.
- * 
+ *
  * @author OFS
  */
 public class DropboxFileTransferService {
@@ -70,8 +70,8 @@ public class DropboxFileTransferService {
 	 * @return DropboxTransferContentResponseDTO
 	 * @throws Exception
 	 */
-	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream,
-			String profileId, String aclManifest, String fileName, String loginId, GlassMessage glassMessage)
+	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, FileTransferHelperDTO fileTransferDTO,
+			GlassMessage glassMessage, String aclManifestJson)
 			throws Exception {
 
 		try {
@@ -88,7 +88,7 @@ public class DropboxFileTransferService {
 			startTime = System.currentTimeMillis();
 
 			// retrieve the tenancy key from acl manifest
-			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
+			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
 				LOG.error("retrieval of tenancy key from acl manifest failed");
 				throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
@@ -104,8 +104,10 @@ public class DropboxFileTransferService {
 			startTime = System.currentTimeMillis();
 
 			// for getting profile name
+			String profileId = fileTransferDTO.getTransferProfileId();
 			ProfileConfigurationDAO profileDao = new ProfileConfigurationDAOBase();
 			ScheduleProfilesRef profile = profileDao.find(ScheduleProfilesRef.class, profileId);
+			fileTransferDTO.setTransferProfileName(profile.getSchProfName());
 
 			// end time to calculate elapsed time for getting manifest
 			endTime = System.currentTimeMillis();
@@ -115,6 +117,7 @@ public class DropboxFileTransferService {
 			for (String tenancyKey : tenancyKeys) {
 
 				List<Processor> processors = getDropboxProcessors(profileId, tenancyKey);
+				fileTransferDTO.setTenancyKey(tenancyKey);
 
 				dropboxProcessors.addAll(processors);
 				// if there are no dropbox processors available for this tenancy
@@ -126,8 +129,7 @@ public class DropboxFileTransferService {
 				}
 				for (Processor processor : processors) {
 
-					transferPayloadAndPostWorkticket(processor, workTicket, loginId, tenancyKey, profile, fileName,
-							stream, glassMessage);
+					transferPayloadAndPostWorkticket(processor, workTicket, fileTransferDTO, glassMessage);
 				}
 			}
 			if (dropboxProcessors.isEmpty()) {
@@ -142,8 +144,8 @@ public class DropboxFileTransferService {
 			return transferContentResponse;
 		} finally {
 			// close stream once we are done
-			if (null != stream)
-				stream.close();
+			if (null != fileTransferDTO.getFileContent())
+				fileTransferDTO.getFileContent().close();
 		}
 	}
 
@@ -176,9 +178,8 @@ public class DropboxFileTransferService {
 		return processors;
 	}
 
-	private void transferPayloadAndPostWorkticket(Processor processor, WorkTicket workTicket, String loginId,
-			String tenancyKey, ScheduleProfilesRef profile, String fileName, ServletInputStream stream,
-			GlassMessage glassMessage)
+	private void transferPayloadAndPostWorkticket(Processor processor, WorkTicket workTicket,
+			FileTransferHelperDTO fileTransferDTO, GlassMessage glassMessage)
 			throws Exception {
 
 		long startTime = 0;
@@ -196,16 +197,18 @@ public class DropboxFileTransferService {
 		String serviceInstanceId = processor.getServiceInstance().getName();
 
 		Map<String, String> properties = new HashMap<String, String>();
-		properties.put(MailBoxConstants.LOGIN_ID, loginId);
-		properties.put(MailBoxConstants.KEY_TENANCY_KEY, tenancyKey);
+		properties.put(MailBoxConstants.LOGIN_ID, fileTransferDTO.getLoginId());
+		properties.put(MailBoxConstants.KEY_TENANCY_KEY, fileTransferDTO.getTenancyKey());
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
 
 		workTicket.setPipelineId(pipeLineId);
 		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
 		workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
-		workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
-		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY, tenancyKey);
+		workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME,
+				fileTransferDTO.getTransferProfileName());
+		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY, fileTransferDTO.getTenancyKey());
 		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID, processor.getPguid());
+
 		// set ttl value from mailbox property or else from property file
 		String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
 				MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
@@ -225,7 +228,7 @@ public class DropboxFileTransferService {
 		Integer ttlNumber = Integer.parseInt(ttl);
 
 		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoSeconds(ttlUnit, ttlNumber));
-		workTicket.setFileName(fileName);
+		workTicket.setFileName(fileTransferDTO.getFileName());
 		workTicket.setProcessMode(ProcessMode.ASYNC);
 		workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 
@@ -234,7 +237,7 @@ public class DropboxFileTransferService {
 
 		// GMB-385 Fix stream modified into closeshield inputstream in order to
 		// avoid Stream Closed IOException during iteration
-		CloseShieldInputStream clsInputStream = new CloseShieldInputStream(stream);
+		CloseShieldInputStream clsInputStream = new CloseShieldInputStream(fileTransferDTO.getFileContent());
 
 		// store payload to spectrum
 		StorageUtilities.storePayload(clsInputStream, workTicket, properties, true);
@@ -246,25 +249,25 @@ public class DropboxFileTransferService {
 
 		// set the glassmessage details once workTicket construction is complete with all details
 
-        glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));  
-        glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-        glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
-        glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
-        glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
-        glassMessage.setPipelineId(workTicket.getPipelineId());
-        glassMessage.setInSize(workTicket.getPayloadSize().intValue());
-        glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
-        
-        // Log TVA status
-        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-        transactionVisibilityClient.logToGlass(glassMessage);
-                
-        // log activity status before posting to queue
-        glassMessage.logProcessingStatus(StatusType.QUEUED, MailBoxConstants.FILE_QUEUED_SUCCESSFULLY);     
-        //log time stamp before posting to queue
-        glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+		glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));
+		glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+		glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
+		glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
+		glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
+		glassMessage.setPipelineId(workTicket.getPipelineId());
+		glassMessage.setInSize(workTicket.getPayloadSize().intValue());
+		glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 
-        WorkTicketUtil.postWrkTcktToQ(workTicket);
+		// Log TVA status
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+		transactionVisibilityClient.logToGlass(glassMessage);
+
+		// log activity status before posting to queue
+		glassMessage.logProcessingStatus(StatusType.QUEUED, MailBoxConstants.FILE_QUEUED_SUCCESSFULLY);
+		// log time stamp before posting to queue
+		glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+		WorkTicketUtil.postWrkTcktToQ(workTicket);
 	}
 
 	/**

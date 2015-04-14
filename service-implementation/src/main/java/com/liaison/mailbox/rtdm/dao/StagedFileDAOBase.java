@@ -14,14 +14,17 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.model.StagedFile;
+import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -40,13 +43,19 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	 * 
 	 */
 	@Override
-	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, String fileName, int pagingOffset,
-			int pagingCount, String sortField, String sortDirection,String status) {
+	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails) {
 
 		List<StagedFile> stagedFiles = new ArrayList<StagedFile>();
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
 		try {
+		    
+		   // get Search Filters
+		    String sortDirection = searchFilter.getSortDirection().toUpperCase();
+		    String fileName = searchFilter.getStagedFileName();
+		    String status = searchFilter.getStatus();
+		    int pagingOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
+		    int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
@@ -55,7 +64,6 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.stagedFileStatus = :"+ STATUS);
 			
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
-				sortDirection = sortDirection.toUpperCase();
 				query.append(" order by sf.fileName " + sortDirection);
 			}else {
 				query.append(" order by sf.fileName");

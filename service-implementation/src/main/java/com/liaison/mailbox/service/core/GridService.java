@@ -34,7 +34,7 @@ import com.liaison.mailbox.dtdm.dao.FilterObject;
 import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 
 /**
- * 
+ *
  * @author OFS
  */
 
@@ -70,7 +70,7 @@ public abstract class GridService<T> {
 
 	/**
 	 * Method provides filter and sorting.
-	 * 
+	 *
 	 * @param clazz
 	 * @param filterText
 	 * @param sortInfo
@@ -117,7 +117,7 @@ public abstract class GridService<T> {
 
 			List<Predicate> predicateList = new ArrayList<>();
 
-			addPredicates(searchTextObjectList, clazz, criteriaBuilder, gemRequest, predicateList);
+			addPredicates(searchTextObjectList, criteriaBuilder, gemRequest, predicateList);
 
 
 			// Add created predicates to where criteria
@@ -171,7 +171,7 @@ public abstract class GridService<T> {
 
 	/**
 	 * Adds sort to the criteria
-	 * 
+	 *
 	 * @param sortInfoMap
 	 * @param criteriaBuilder
 	 * @param query
@@ -191,7 +191,8 @@ public abstract class GridService<T> {
 
 			String fieldName = fieldsValue.get(i).toString();
 			String direction = directionsValue.get(i).toString();
-            if(fieldName.equals("name")) fieldName = "schProfName";
+			if (fieldName.equals("name"))
+				fieldName = "schProfName";
 			Path<Object> field = null;
 			field = gemRequest.get(fieldName);
 
@@ -206,7 +207,7 @@ public abstract class GridService<T> {
 
 	/**
 	 * Adds predicates to the criteria
-	 * 
+	 *
 	 * @param searchTextObjectList
 	 * @param criteriaBuilder
 	 * @param gemRequest
@@ -214,7 +215,8 @@ public abstract class GridService<T> {
 	 * @return
 	 * @throws ParseException
 	 */
-	private List<Predicate> addPredicates(final Map<String, List<FilterObject>> searchTextObjectList, Class<T> clazz,
+
+	private List<Predicate> addPredicates(final Map<String, List<FilterObject>> searchTextObjectList,
 			final CriteriaBuilder criteriaBuilder, final Root<T> gemRequest, List<Predicate> predicateList)
 			throws ParseException {
 
@@ -227,7 +229,8 @@ public abstract class GridService<T> {
 			for (FilterObject entry : searchFilterObjects) {
 
 				String field = entry.getField();
-                if(field.equals("name")) field = "schProfName";
+				if (field.equals("name"))
+					field = "schProfName";
 				Expression<String> path = null;
 
 				entry.setText(entry.getText().trim().toUpperCase());
