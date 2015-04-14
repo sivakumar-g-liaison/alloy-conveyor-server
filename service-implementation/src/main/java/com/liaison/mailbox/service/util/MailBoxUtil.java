@@ -27,7 +27,6 @@ import java.util.Properties;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,11 +40,7 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
-import com.liaison.commons.acl.manifest.dto.ACLManifest;
-import com.liaison.commons.acl.manifest.dto.Platform;
 import com.liaison.commons.acl.manifest.dto.RoleBasedAccessControl;
-import com.liaison.commons.acl.util.ACLUtil;
-import com.liaison.commons.util.LiaisonGZipUtils;
 import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;

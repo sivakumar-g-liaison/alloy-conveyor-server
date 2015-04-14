@@ -24,7 +24,7 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 

@@ -41,6 +41,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
@@ -57,7 +58,6 @@ import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxRespo
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
-import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.GenericValidator;
 

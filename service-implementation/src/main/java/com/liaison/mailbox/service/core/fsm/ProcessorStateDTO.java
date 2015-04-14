@@ -36,26 +36,15 @@ public class ProcessorStateDTO {
 	private String executionId;
 	private String slaVerficationStatus;
 
-	// TODO for Ganesh
-    // Too many parameters
-	public ProcessorStateDTO(String executionId, String processorId, ExecutionState executionState, String processorName,
-			ProcessorType processorType, String mailboxId, String profileName, String stateNotes, String slaVerificationStatus) {
-
-		this.setExecutionId(executionId);
-		this.setExecutionState(executionState);
-		this.setProcessorId(processorId);
-		this.setProcessorName(processorName);
-		this.setProcessorType(processorType);
-		this.setMailboxId(mailboxId);
-		this.setProfileName(profileName);
-		this.setStateNotes(stateNotes);
-		this.setSlaVerficationStatus(slaVerificationStatus);
-	}
-	
+		
 	public ProcessorStateDTO(String executionId,String processorId,ExecutionState executionState){
 		this.setExecutionId(executionId);
 		this.setExecutionState(executionState);
 		this.setProcessorId(processorId);
+	}
+
+	public ProcessorStateDTO() {
+		
 	}
 
 	public String getExecutionId() {
@@ -130,9 +119,17 @@ public class ProcessorStateDTO {
 		this.executionState = executionState;
 	}
 
-	public ProcessorStateDTO createACopyWithNewState(ExecutionState execState) {
-		ProcessorStateDTO newCopy = new ProcessorStateDTO(this.getExecutionId(), this.getProcessorId(), execState,
-				this.getProcessorName(), this.getProcessorType(), this.getMailboxId(), this.getProfileName(), this.getStateNotes(), this.getSlaVerficationStatus());
+	public ProcessorStateDTO cloneWithNewState(ExecutionState execState) {
+		ProcessorStateDTO newCopy = new ProcessorStateDTO();
+		newCopy.setExecutionId(this.getExecutionId());
+		newCopy.setProcessorId(this.getProcessorId());
+		newCopy.setExecutionState(execState);
+		newCopy.setProcessorName(this.getProcessorName());
+		newCopy.setProcessorType(this.getProcessorType());
+		newCopy.setMailboxId(this.getMailboxId());
+		newCopy.setProfileName(this.getProfileName());
+		newCopy.setStateNotes(this.getStateNotes());
+		newCopy.setSlaVerficationStatus(this.getSlaVerficationStatus());
 		return newCopy;
 	}
     
@@ -175,11 +172,18 @@ public class ProcessorStateDTO {
 	 * @param stateNotes
 	 * @return ProcessorStateDTO
 	 */
-	public static ProcessorStateDTO getProcessorStateInstance(String executionId, Processor processor, String profileName,
-			ExecutionState state, String stateNotes, String slaVerificationStatus) {
+	
+	public void setValues(String executionId, Processor processor, String profileName,ExecutionState state,String slaVerificationStatus) {
+		
+		this.setExecutionId(executionId);
+		this.setProcessorId(processor.getPguid());
+		this.setExecutionState(state);
+		this.setProcessorName(processor.getProcsrName());
+		this.setProcessorType(processor.getProcessorType());
+		this.setMailboxId(processor.getMailbox().getPguid());
+		this.setProfileName(profileName);
+		this.setSlaVerficationStatus(this.getSlaVerficationStatus());
 
-		return new ProcessorStateDTO(executionId, processor.getPguid(), state, processor.getProcsrName(),
-				processor.getProcessorType(), processor.getMailbox().getPguid(), profileName, stateNotes, slaVerificationStatus);
 	}
 	
 	/**

@@ -147,7 +147,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
         LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
         List<WorkTicket> workTickets = (activeFiles.isEmpty())	
-        								? sweepDirectory(inputLocation, false, false, fileRenameFormat, timeLimit)
+        								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit)
         								: retryGenWrkTktForActiveFiles(activeFiles, timeLimit);
 
 		if (workTickets.isEmpty()) {
@@ -241,10 +241,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	// TODO for Ganesh
-    // Too many parameters
-	public List<WorkTicket> sweepDirectory(String root, boolean includeSubDir, boolean listDirectoryOnly,
-			String fileRenameFormat, long timeLimit) throws IOException, URISyntaxException,
+	
+	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly,String fileRenameFormat, long lastModifiedLmt) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         LOGGER.debug("SweepingDirectory: {}", root);
@@ -259,7 +257,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 LOGGER.debug("Sweeping file {}", file.toString());
 				if (!file.getFileName().toString().endsWith(fileRenameFormat)) {
 
-					if (validateLastModifiedTolerance(timeLimit, file)) {
+					if (validateLastModifiedTolerance(lastModifiedLmt, file)) {
 						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.toString());
                         activeFiles.add(file);
 						continue;

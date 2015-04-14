@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
@@ -130,8 +129,7 @@ public class MailBoxService {
 			LOG.debug("ABOUT TO get ProcessorQueue Instance {}", messages.toArray(new String[messages.size()]));
 			ProcessorQueue.getInstance().sendMessages(messages.toArray(new String[messages.size()]));
 
-			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,
-					Messages.SUCCESS));
+			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,Messages.SUCCESS));
 			return serviceResponse;
 
 		} catch (MailBoxServicesException | JAXBException | IOException e) {
@@ -158,11 +156,10 @@ public class MailBoxService {
 	 * @param processor
 	 * @param profileName
 	 */
-	private void addProcessorToFSMState(String executionId, Processor processor, String profileName,
-			String slaVerficationStatus) {
+	private void addProcessorToFSMState(String executionId, Processor processor, String profileName,String slaVerficationStatus) {
 
-		ProcessorStateDTO state = ProcessorStateDTO.getProcessorStateInstance(executionId, processor, profileName,
-				ExecutionState.QUEUED, null, slaVerficationStatus);
+		ProcessorStateDTO state = new ProcessorStateDTO();
+		state.setValues(executionId, processor, profileName,ExecutionState.QUEUED,slaVerficationStatus);
 		MailboxFSM fsm = new MailboxFSM();
 		fsm.addState(state);
 
@@ -219,8 +216,8 @@ public class MailBoxService {
 					   : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
 			// Initiate FSM
 			processor = processorDAO.find(Processor.class, processorId);
-			ProcessorStateDTO processorQueued = ProcessorStateDTO.getProcessorStateInstance(executionId, processor,
-					dto.getProfileName(), ExecutionState.QUEUED, null, slaVerificationStatus);
+			ProcessorStateDTO processorQueued = new ProcessorStateDTO();
+			processorQueued.setValues(executionId, processor,	dto.getProfileName(), ExecutionState.QUEUED, slaVerificationStatus);
 			fsm.addDefaultStateTransitionRules(processorQueued);
 
 			// retrieve the processor execution status from run-time DB

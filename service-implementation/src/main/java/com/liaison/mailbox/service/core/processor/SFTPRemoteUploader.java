@@ -162,8 +162,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 *
 	 */
 	
-	// TODO for Ganesh
-    // Too many parameters
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 

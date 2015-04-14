@@ -15,7 +15,7 @@ import java.util.Map;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.StagedFile;
-import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
  * @author OFS

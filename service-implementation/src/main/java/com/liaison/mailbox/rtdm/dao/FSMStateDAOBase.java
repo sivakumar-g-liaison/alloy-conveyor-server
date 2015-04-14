@@ -78,10 +78,17 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 		//Added annotation to order the items in descending order.
 		FSMStateValue value = state.getExecutionState().get(0);
 		
-		ProcessorStateDTO processorState = new ProcessorStateDTO(state.getExecutionId(), state.getProcessorId(),
-				ExecutionState.findByCode(value.getValue()), state.getProcessorName(),
-				ProcessorType.findByCode(state.getProcessorType()), state.getMailboxId(),
-				state.getProfileName(), state.getStateNotes(), state.getSlaVerificationStatus());
+		ProcessorStateDTO processorState = new ProcessorStateDTO();
+		processorState.setExecutionId(state.getExecutionId());
+		processorState.setExecutionState(ExecutionState.findByCode(value.getValue()));
+		processorState.setProcessorId(state.getProcessorId());
+		processorState.setProcessorName(state.getProcessorName());
+		processorState.setProcessorType(ProcessorType.findByCode(state.getProcessorType()));
+		processorState.setMailboxId(state.getMailboxId());
+		processorState.setProfileName(state.getProfileName());
+		processorState.setStateNotes(state.getStateNotes());
+		processorState.setSlaVerficationStatus(state.getSlaVerificationStatus());
+		
 		
 		return processorState;
 		

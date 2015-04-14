@@ -1,8 +1,8 @@
-package com.liaison.mailbox.service.internal.helper.dto;
+package com.liaison.mailbox.service.dto.dropbox;
 
 import java.io.InputStream;
 
-public class FileTransferHelperDTO {
+public class FileTransferMetaDTO {
     
     String fileName;
     String loginId;

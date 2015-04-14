@@ -1,4 +1,4 @@
-package com.liaison.mailbox.service.internal.helper.dto;
+package com.liaison.mailbox.service.dto;
 
 public class GenericSearchFilterDTO {
 	

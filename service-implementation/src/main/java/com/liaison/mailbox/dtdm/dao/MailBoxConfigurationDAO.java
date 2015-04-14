@@ -18,7 +18,7 @@ import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailBox;
-import com.liaison.mailbox.service.internal.helper.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
  * @author OFS

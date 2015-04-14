@@ -34,7 +34,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
@@ -94,18 +95,19 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		
 		 // prepare post method  
         HttpPost httpPost = new HttpPost(getKMS_BASE_URL() + "/upload/truststore"); 
-        DefaultHttpClient httpclient = new DefaultHttpClient();
-       
+        try(CloseableHttpClient httpclient = HttpClientBuilder.create().build()){ 
+        
         StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
         FileBody keyStore = new FileBody(new File(this.getClass().getResource("/requests/keymanager/g2truststore.jks").getPath()));
         HttpEntity reqEntity = MultipartEntityBuilder.create()
                 .addPart("jsonRequest", jsonRequestBody)
                 .addPart("keystore", keyStore)
                 .build();
-               
         httpPost.setEntity(reqEntity);
         HttpResponse response = httpclient.execute(httpPost);
         logger.debug(response.getStatusLine());
+        
+        }
 	}
 	
 	/**
@@ -127,18 +129,19 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		
 		 // prepare post method  
         HttpPost httpPost = new HttpPost(getKMS_BASE_URL() + "/upload/public"); 
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+        try(CloseableHttpClient httpclient = HttpClientBuilder.create().build()){ 
        
-        StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
-        FileBody publicKeyCert = new FileBody(new File(this.getClass().getResource("/requests/keymanager/publickey.cer").getPath()));
-        HttpEntity reqEntity = MultipartEntityBuilder.create()
-                .addPart("request", jsonRequestBody)
-                .addPart("key", publicKeyCert)
-                .build();
-               
-        httpPost.setEntity(reqEntity);
-        HttpResponse response = httpclient.execute(httpPost);
-        logger.debug(response.getStatusLine());
+	        StringBody jsonRequestBody = new StringBody(jsonRequest, ContentType.APPLICATION_JSON);
+	        FileBody publicKeyCert = new FileBody(new File(this.getClass().getResource("/requests/keymanager/publickey.cer").getPath()));
+	        HttpEntity reqEntity = MultipartEntityBuilder.create()
+	                .addPart("request", jsonRequestBody)
+	                .addPart("key", publicKeyCert)
+	                .build();
+	               
+	        httpPost.setEntity(reqEntity);
+	        HttpResponse response = httpclient.execute(httpPost);
+	        logger.debug(response.getStatusLine());
+        }
 	}
 	
 	/**
@@ -161,13 +164,13 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 		
 		 // prepare post method  
         HttpPut httpPut = new HttpPut(getKMS_BASE_URL() + "/update/truststore/0C3A3BC50A0037B00665D98D2D86079D"); 
-        DefaultHttpClient httpclient = new DefaultHttpClient();
-        
-        httpPut.addHeader("Content-Type", "application/json");
-        httpPut.setEntity(new StringEntity(jsonRequest));
-        
-        HttpResponse response = httpclient.execute(httpPut);
-        logger.debug(response.getStatusLine());
+        try(CloseableHttpClient httpclient = HttpClientBuilder.create().build()){ 
+	        httpPut.addHeader("Content-Type", "application/json");
+	        httpPut.setEntity(new StringEntity(jsonRequest));
+	        
+	        HttpResponse response = httpclient.execute(httpPut);
+	        logger.debug(response.getStatusLine());
+        } 
 	}
 	
 	/**

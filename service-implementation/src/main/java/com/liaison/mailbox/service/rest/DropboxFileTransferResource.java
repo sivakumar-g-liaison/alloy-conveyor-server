@@ -55,11 +55,11 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.FileTransferMetaDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.internal.helper.dto.FileTransferHelperDTO;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -225,7 +225,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					startTime = System.currentTimeMillis();
 
 					// creating file transfer helper dto
-					FileTransferHelperDTO fileTransferDTO = new FileTransferHelperDTO();
+					FileTransferMetaDTO fileTransferDTO = new FileTransferMetaDTO();
 					fileTransferDTO.setFileContent(serviceRequest.getInputStream());
 					fileTransferDTO.setTransferProfileId(transferProfileId);
 					fileTransferDTO.setFileName(fileName);

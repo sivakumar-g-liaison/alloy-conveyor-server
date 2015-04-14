@@ -42,8 +42,8 @@ import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetTransferProfilesResponseDTO;
+import com.liaison.mailbox.service.dto.dropbox.FileTransferMetaDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.internal.helper.dto.FileTransferHelperDTO;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -70,7 +70,7 @@ public class DropboxFileTransferService {
 	 * @return DropboxTransferContentResponseDTO
 	 * @throws Exception
 	 */
-	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, FileTransferHelperDTO fileTransferDTO,
+	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, FileTransferMetaDTO fileTransferDTO,
 			GlassMessage glassMessage, String aclManifestJson)
 			throws Exception {
 
@@ -179,7 +179,7 @@ public class DropboxFileTransferService {
 	}
 
 	private void transferPayloadAndPostWorkticket(Processor processor, WorkTicket workTicket,
-			FileTransferHelperDTO fileTransferDTO, GlassMessage glassMessage)
+			FileTransferMetaDTO fileTransferDTO, GlassMessage glassMessage)
 			throws Exception {
 
 		long startTime = 0;
