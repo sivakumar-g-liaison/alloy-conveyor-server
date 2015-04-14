@@ -42,13 +42,12 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox helper services.
- *
+ * 
  * @author OFS
  */
 @AppConfigurationResource
 @Path("config/mailbox/serviceconfigurations")
-@Api(value = "config/mailbox/serviceconfigurations",
-description = "Gateway for the mailbox helper services.")
+@Api(value = "config/mailbox/serviceconfigurations", description = "Gateway for the mailbox helper services.")
 public class MailboxServiceConfigurationsResource extends AuditedResource {
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -58,26 +57,21 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
 
-	public MailboxServiceConfigurationsResource() throws IOException {
+	public MailboxServiceConfigurationsResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 
 	/**
 	 * REST method to retrieve property file values.
-	 *
+	 * 
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "Property File",
-			notes = "returns property file values",
-			position = 1,
-			response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
+	@ApiOperation(value = "Property File", notes = "returns property file values", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetPropertiesValueResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})
-
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response getPropertyFileValues(@Context final HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
@@ -87,7 +81,7 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 
-				//get Property File
+				// get Property File
 				MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 				return mailbox.getValuesFromPropertiesFile();
 			}

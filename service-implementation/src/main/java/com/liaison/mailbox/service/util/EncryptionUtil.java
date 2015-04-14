@@ -27,22 +27,24 @@ import com.liaison.mailbox.MailBoxConstants;
 
 /**
  * @author kirithigad
- *
+ * 
  */
 public class EncryptionUtil {
 
-    static byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes(Charset.forName(MailBoxConstants.CHARSETNAME));
+	static byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes(Charset.forName(MailBoxConstants.CHARSETNAME));
 	static byte[] DYNAMIC_KEY;
 
 	/**
-	 *  Method to retrieve encoded decrypted Token.
-	 *
+	 * Method to retrieve encoded decrypted Token.
+	 * 
 	 * @param encryptString
 	 * @param isDefaultKey
 	 * @return byte
 	 * @throws Exception
 	 */
-	public static byte[] encrypt(String encryptString, boolean isDefaultKey) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
+	public static byte[] encrypt(String encryptString, boolean isDefaultKey)
+			throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException,
+			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
 
 		if (!isDefaultKey && (DYNAMIC_KEY == null)) {
 
@@ -64,16 +66,17 @@ public class EncryptionUtil {
 
 	/**
 	 * Method to retrieve decoded decrypted Token.
-	 *
+	 * 
 	 * @param encryptedBytes
 	 * @param isDefaultKey
 	 * @return String
 	 * @throws Exception
 	 */
-	public static String decrypt(byte[] encryptedBytes, boolean isDefaultKey) throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
-			 {
+	public static String decrypt(byte[] encryptedBytes, boolean isDefaultKey)
+			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
-		byte[] key = isDefaultKey ? STATIC_KEY: DYNAMIC_KEY;
+		byte[] key = isDefaultKey ? STATIC_KEY : DYNAMIC_KEY;
 		byte[] ivBytes = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		SecretKeySpec skey = new SecretKeySpec(key, "AES");
 		final IvParameterSpec iv = new IvParameterSpec(ivBytes);

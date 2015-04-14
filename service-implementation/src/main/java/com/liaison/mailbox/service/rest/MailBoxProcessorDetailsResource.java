@@ -61,10 +61,9 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @AppConfigurationResource
 @Path("config/mailbox/{mailboxid}/processor/{processorid}")
-@Api(value = "config/mailbox/{mailboxid}/processor/{processorid}", 
-description = "Gateway for the processor configuration services.")
+@Api(value = "config/mailbox/{mailboxid}/processor/{processorid}", description = "Gateway for the processor configuration services.")
 public class MailBoxProcessorDetailsResource extends AuditedResource {
-	
+
 	private static final Logger LOG = LogManager.getLogger(MailBoxProcessorDetailsResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -73,32 +72,26 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public MailBoxProcessorDetailsResource() throws IOException {
+	public MailBoxProcessorDetailsResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 
-	
+
 	/**
 	 * REST method to remove a processor details.
 	 * 
-	 * @param mailboxguid
-	 *            The id of the mailbox
-	 * @param guid
-	 *            The id of the processor
+	 * @param mailboxguid The id of the mailbox
+	 * @param guid The id of the processor
 	 * @return Response Object
 	 * 
 	 */
 	@DELETE
-	@ApiOperation(value = "Remove Processor",
-			notes = "remove processor details",
-			position = 2,
-			response = com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO.class)
+	@ApiOperation(value = "Remove Processor", notes = "remove processor details", position = 2, response = com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response deleteProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
@@ -108,18 +101,18 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
+
 				serviceCallCounter.addAndGet(1);
-				
+
 				// Deactivating processor
 				ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 				return mailbox.deactivateProcessor(mailboxguid, guid);
 			}
-		};	
+		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.deleteProcessor()";
 		worker.queryParams.put("mailboxid", mailboxguid);
 		worker.queryParams.put("processorid", guid);
-		
+
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -128,29 +121,22 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
 
 	}
-	
+
 	/**
 	 * REST method to retrieve a mailbox details.
 	 * 
-	 * @param mailboxguid
-	 *            The id of the mailbox
-	 * @param guid
-	 *            The id of the processor
+	 * @param mailboxguid The id of the mailbox
+	 * @param guid The id of the processor
 	 * @return Response Object
 	 */
 	@GET
-	@ApiOperation(value = "Processor Details",
-			notes = "returns detail information of a valid processor",
-			position = 3,
-			response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
+	@ApiOperation(value = "Processor Details", notes = "returns detail information of a valid processor", position = 3, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})	
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response getProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
@@ -159,28 +145,29 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-				
-				serviceCallCounter.addAndGet(1);				
+			public Object call()
+					throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+				serviceCallCounter.addAndGet(1);
 				try {
 					// Gets processor details.
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 					return mailbox.getProcessor(mailboxguid, guid);
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				} catch (SymmetricAlgorithmException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}	
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
 		worker.queryParams.put("mailboxid", mailboxguid);
 		worker.queryParams.put("processorid", guid);
-		
+
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -189,66 +176,59 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-		}		
+		}
 
 	}
-	
+
 	/**
 	 * REST method to update existing processor.
 	 * 
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @param mailboxguid
-	 *            The id of the mailbox
-	 * @param guid
-	 *            The id of the processor
+	 * @param request HttpServletRequest, injected with context annotation
+	 * @param mailboxguid The id of the mailbox
+	 * @param guid The id of the processor
 	 * @return Response Object
 	 */
 	@PUT
-	@ApiOperation(value = "Update Processor",
-			notes = "revise details of valid processor",
-			position = 4,
-			response = com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO.class)
+	@ApiOperation(value = "Update Processor", notes = "revise details of valid processor", position = 4, response = com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update  processor", required = true,
-			dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProcessorRequest", paramType = "body") })
-	@ApiResponses({
-			@ApiResponse(code = 500, message = "Unexpected Service failure.")
-	})	
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Update  processor", required = true, dataType = "com.liaison.mailbox.swagger.dto.request.ReviseProcessorRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response reviseProcessor(
 			@Context final HttpServletRequest request,
 			@PathParam(value = "mailboxid") @ApiParam(name = "mailboxid", required = true, value = "mailbox guid") final String mailboxguid,
 			@PathParam(value = "processorid") @ApiParam(name = "processorid", required = true, value = "processor id") final String guid) {
-     
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-				
-				serviceCallCounter.addAndGet(1);				
+			public Object call()
+					throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+				serviceCallCounter.addAndGet(1);
 				String requestString;
 				try {
 					requestString = getRequestBody(request);
-					ReviseProcessorRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ReviseProcessorRequestDTO.class);
+					ReviseProcessorRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							ReviseProcessorRequestDTO.class);
 					// updates existing processor
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 					return mailbox.reviseProcessor(serviceRequest, mailboxguid, guid);
-					
+
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				} catch (SymmetricAlgorithmException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} 
-				
+				}
+
 			}
 		};
 		worker.actionLabel = "MailBoxProcessorDetailsResource.getProcessor()";
 		worker.queryParams.put("mailboxid", mailboxguid);
 		worker.queryParams.put("processorid", guid);
-		
+
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -259,7 +239,7 @@ public class MailBoxProcessorDetailsResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-	
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

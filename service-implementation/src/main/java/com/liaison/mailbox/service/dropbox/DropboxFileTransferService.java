@@ -53,7 +53,7 @@ import com.liaison.mailbox.service.util.WorkTicketUtil;
 
 /**
  * Class which has Dropbox File Transfer related operations.
- *
+ * 
  * @author OFS
  */
 public class DropboxFileTransferService {
@@ -71,7 +71,8 @@ public class DropboxFileTransferService {
 	 * @throws Exception
 	 */
 	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, ServletInputStream stream,
-			String profileId, String aclManifest, String fileName, String loginId, GlassMessage glassMessage) throws Exception {
+			String profileId, String aclManifest, String fileName, String loginId, GlassMessage glassMessage)
+			throws Exception {
 
 		try {
 
@@ -111,7 +112,7 @@ public class DropboxFileTransferService {
 			LOG.debug("Calculating elapsed time for retrieving profile name by given Id from DB");
 			MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
-			for (String tenancyKey  : tenancyKeys) {
+			for (String tenancyKey : tenancyKeys) {
 
 				List<Processor> processors = getDropboxProcessors(profileId, tenancyKey);
 
@@ -176,7 +177,8 @@ public class DropboxFileTransferService {
 	}
 
 	private void transferPayloadAndPostWorkticket(Processor processor, WorkTicket workTicket, String loginId,
-			String tenancyKey, ScheduleProfilesRef profile, String fileName, ServletInputStream stream, GlassMessage glassMessage)
+			String tenancyKey, ScheduleProfilesRef profile, String fileName, ServletInputStream stream,
+			GlassMessage glassMessage)
 			throws Exception {
 
 		long startTime = 0;
@@ -186,8 +188,8 @@ public class DropboxFileTransferService {
 		processorDTO = new ProcessorDTO();
 		processorDTO.copyFromEntity(processor, false);
 
-		DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper
-				.getProcessorBasedStaticPropsFromJson(processor.getProcsrProperties(), processor);
+		DropboxProcessorPropertiesDTO dropboxProcessorStaticProperties = (DropboxProcessorPropertiesDTO) ProcessorPropertyJsonMapper.getProcessorBasedStaticPropsFromJson(
+				processor.getProcsrProperties(), processor);
 		String pipeLineId = dropboxProcessorStaticProperties.getHttpListenerPipeLineId();
 		boolean securedPayload = dropboxProcessorStaticProperties.isSecuredPayload();
 		String mailboxPguid = processor.getMailbox().getPguid();
@@ -202,8 +204,8 @@ public class DropboxFileTransferService {
 		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);
 		workTicket.setAdditionalContext(MailBoxConstants.KEY_SERVICE_INSTANCE_ID, serviceInstanceId);
 		workTicket.setAdditionalContext(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME, profile.getSchProfName());
-        workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY, tenancyKey);
-        workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID, processor.getPguid());
+		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY, tenancyKey);
+		workTicket.setAdditionalContext(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID, processor.getPguid());
 		// set ttl value from mailbox property or else from property file
 		String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
 				MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
@@ -241,8 +243,9 @@ public class DropboxFileTransferService {
 		endTime = System.currentTimeMillis();
 		LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
-        
+
 		// set the glassmessage details once workTicket construction is complete with all details
+
         glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));  
         glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
         glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
@@ -261,7 +264,7 @@ public class DropboxFileTransferService {
         //log time stamp before posting to queue
         glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
-		WorkTicketUtil.postWrkTcktToQ(workTicket);
+        WorkTicketUtil.postWrkTcktToQ(workTicket);
 	}
 
 	/**
@@ -270,7 +273,8 @@ public class DropboxFileTransferService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetTransferProfilesResponseDTO getTransferProfiles(String aclManifest) throws IOException {
+	public GetTransferProfilesResponseDTO getTransferProfiles(String aclManifest)
+			throws IOException {
 
 		LOG.debug("Entering getTransferProfiles");
 
@@ -292,8 +296,8 @@ public class DropboxFileTransferService {
 			specificProcessorTypes.add(DropBoxProcessor.class.getCanonicalName());
 
 			ProfileConfigurationDAO profileDAO = new ProfileConfigurationDAOBase();
-			List<ScheduleProfilesRef> scheduleProfiles = profileDAO
-					.findTransferProfilesSpecificProcessorTypeByTenancyKey(tenancyKey, specificProcessorTypes);
+			List<ScheduleProfilesRef> scheduleProfiles = profileDAO.findTransferProfilesSpecificProcessorTypeByTenancyKey(
+					tenancyKey, specificProcessorTypes);
 
 			// if there are no dropbox processors available for this tenancy key
 			// continue to next one.

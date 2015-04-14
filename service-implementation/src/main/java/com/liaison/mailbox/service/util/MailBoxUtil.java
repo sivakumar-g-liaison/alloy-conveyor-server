@@ -61,7 +61,7 @@ import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.
- *
+ * 
  * @author veerasamyn
  */
 public class MailBoxUtil {
@@ -73,19 +73,17 @@ public class MailBoxUtil {
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
-	 *
-	 * @param serializedJson
-	 *            The serialized JSON String.
-	 * @param clazz
-	 *            The corresponding class of the serialized JSON.
+	 * 
+	 * @param serializedJson The serialized JSON String.
+	 * @param clazz The corresponding class of the serialized JSON.
 	 * @return Object The instance of the give Class.
 	 * @throws JAXBException
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws JAXBException, JsonParseException,
-			JsonMappingException, IOException {
+	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz)
+			throws JAXBException, JsonParseException, JsonMappingException, IOException {
 		LOGGER.debug("Input JSON is {}", serializedJson);
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
@@ -108,7 +106,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Utility is used to marshal the Object to JSON.
-	 *
+	 * 
 	 * @param object
 	 * @return
 	 * @throws JAXBException
@@ -116,8 +114,8 @@ public class MailBoxUtil {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static String marshalToJSON(Object object) throws JAXBException, JsonGenerationException, JsonMappingException,
-			IOException {
+	public static String marshalToJSON(Object object)
+			throws JAXBException, JsonGenerationException, JsonMappingException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
@@ -137,7 +135,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Method is used to get the unique id from UUIDGen Utility.
-	 *
+	 * 
 	 * @return UUID The 32bit string.
 	 */
 	public static String getGUID() {
@@ -146,9 +144,8 @@ public class MailBoxUtil {
 
 	/**
 	 * Checks the given string is empty or not.
-	 *
-	 * @param str
-	 *            The input String
+	 * 
+	 * @param str The input String
 	 * @return boolean
 	 */
 	public static boolean isEmpty(String str) {
@@ -159,24 +156,25 @@ public class MailBoxUtil {
 		return LiaisonConfigurationFactory.getConfiguration();
 	}
 
-	public static Properties getEnvProperties() throws IOException {
+	public static Properties getEnvProperties()
+			throws IOException {
 
-        synchronized (lock) {
+		synchronized (lock) {
 
-            if (properties.isEmpty()) {
-                Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
-                String propertyFileName = "g2mailboxservice-" + env + ".properties";
-                String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-                InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-                properties.load(is);
-            }
-            return properties;
-        }
-    }
+			if (properties.isEmpty()) {
+				Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
+				String propertyFileName = "g2mailboxservice-" + env + ".properties";
+				String props = ServiceUtils.readFileFromClassPath(propertyFileName);
+				InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
+				properties.load(is);
+			}
+			return properties;
+		}
+	}
 
 	/**
 	 * Method to get the current timestmp to insert into database.
-	 *
+	 * 
 	 * @return
 	 */
 	public static Timestamp getTimestamp() {
@@ -187,12 +185,13 @@ public class MailBoxUtil {
 
 	/**
 	 * Method to get all tenancy keys from acl manifest Json
-	 *
+	 * 
 	 * @param String - aclManifestJson
 	 * @return list of tenancy keys
 	 * @throws IOException
 	 */
-	public static List <TenancyKeyDTO>  getTenancyKeysFromACLManifest(String aclManifestJson) throws IOException {
+	public static List<TenancyKeyDTO> getTenancyKeysFromACLManifest(String aclManifestJson)
+			throws IOException {
 
 		GEMACLClient gemClient = new GEMACLClient();
 		List<TenancyKeyDTO> tenancyKeys = new ArrayList<TenancyKeyDTO>();
@@ -201,27 +200,29 @@ public class MailBoxUtil {
 		TenancyKeyDTO tenancyKey = null;
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
-				tenancyKey = new TenancyKeyDTO();
-				tenancyKey.setName(rbac.getDomainName());
-				// if domainInternalName is not available then exception will be thrown.
-				if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName()) ) {
-					throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST, Response.Status.CONFLICT);
-				} else {
-					tenancyKey.setGuid(rbac.getDomainInternalName());
-				}
-		  tenancyKeys.add(tenancyKey);
-	   }
+			tenancyKey = new TenancyKeyDTO();
+			tenancyKey.setName(rbac.getDomainName());
+			// if domainInternalName is not available then exception will be thrown.
+			if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName())) {
+				throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST,
+						Response.Status.CONFLICT);
+			} else {
+				tenancyKey.setGuid(rbac.getDomainInternalName());
+			}
+			tenancyKeys.add(tenancyKey);
+		}
 
 		LOGGER.info("List of Tenancy keys retrieved are {}", tenancyKeys);
 		return tenancyKeys;
 	}
 
-	public static List <String> getTenancyKeyGuids (String aclManifestJson) throws IOException {
+	public static List<String> getTenancyKeyGuids(String aclManifestJson)
+			throws IOException {
 
 		List<String> tenancyKeyGuids = new ArrayList<String>();
 		GEMACLClient gemClient = new GEMACLClient();
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
-        
+		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 			tenancyKeyGuids.add(rbac.getDomainInternalName());
 		}
@@ -231,31 +232,36 @@ public class MailBoxUtil {
 
 	/**
 	 * Method to retrieve the dummy acl manifest json from properties file
-	 *
+	 * 
 	 * @param manifestJson
 	 * @return
 	 * @throws IOException
 	 * @throws MailBoxConfigurationServicesException
 	 */
-	public static String getDummyManifestJson() throws IOException, MailBoxConfigurationServicesException {
+	public static String getDummyManifestJson()
+			throws IOException, MailBoxConfigurationServicesException {
 
 		String dummyManifestJson = null;
 
 		// check the value of property "use.dummy.manifest"
 		// if it is true use dummy manifest else throw an error due to the
 		// non-availability of manifest in header
-		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DUMMY_MANIFEST_USAGE_PROPERTY,"false"))) {
+		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(
+				MailBoxConstants.DUMMY_MANIFEST_USAGE_PROPERTY, "false"))) {
 
 			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DUMMY_MANIFEST_PROPERTY);
+			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.DUMMY_MANIFEST_PROPERTY);
 			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
 				LOGGER.error("dummy acl manifest is not available in the properties file");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, MailBoxConstants.PROPERTIES_FILE, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,
+						MailBoxConstants.PROPERTIES_FILE, Response.Status.BAD_REQUEST);
 			}
 
 		} else {
 			LOGGER.error("acl manifest is not available in the request header");
-			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE, MailBoxConstants.REQUEST_HEADER, Response.Status.BAD_REQUEST);
+			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,
+					MailBoxConstants.REQUEST_HEADER, Response.Status.BAD_REQUEST);
 		}
 
 		return dummyManifestJson;
@@ -264,35 +270,38 @@ public class MailBoxUtil {
 
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
-	 *
+	 * 
 	 * @param tenancyKeyGuid
 	 * @param tenancyKeys
 	 * @return
 	 * @throws IOException
 	 */
-	public static String getTenancyKeyNameByGuid(String aclManifestJson, String tenancyKeyGuid) throws IOException {
-	    
+	public static String getTenancyKeyNameByGuid(String aclManifestJson, String tenancyKeyGuid)
+			throws IOException {
+
 		String tenancyKeyDisplayName = null;
-        GEMACLClient gemClient = new GEMACLClient();
-        List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
-        
-        for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-            
-            if (rbac.getDomainInternalName().equals(tenancyKeyGuid)) {
-                tenancyKeyDisplayName = rbac.getDomainName();
-                break;
-            }
-        }
-      
+		GEMACLClient gemClient = new GEMACLClient();
+		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
+
+		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
+
+			if (rbac.getDomainInternalName().equals(tenancyKeyGuid)) {
+				tenancyKeyDisplayName = rbac.getDomainName();
+				break;
+			}
+		}
+
 		return tenancyKeyDisplayName;
 	}
-	
+
 	/**
 	 * method to write the given inputstream to given location
-	 *
+	 * 
 	 * @throws IOException
 	 */
-	public static void writeDataToGivenLocation(InputStream response, String targetLocation, String filename, Boolean isOverwrite) throws IOException {
+	public static void writeDataToGivenLocation(InputStream response, String targetLocation, String filename,
+			Boolean isOverwrite)
+			throws IOException {
 
 		LOGGER.info("Started writing given inputstream to given location {}", targetLocation);
 		File directory = new File(targetLocation);
@@ -302,17 +311,17 @@ public class MailBoxUtil {
 
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
 		// if the file already exists create a file and write the contents.
-		if (file.exists() && !isOverwrite)  {
+		if (file.exists() && !isOverwrite) {
 			LOGGER.info("File {} already exists and should not be overwritten", file.getName());
 		} else {
 			Files.write(file.toPath(), IOUtils.toByteArray(response));
 		}
 		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
 		if (response != null) {
-		    response.close();
+			response.close();
 		}
 	}
-	
+
 	/**
 	 * Method to calculate the elapsed time between two given time limits
 	 * 
@@ -321,27 +330,29 @@ public class MailBoxUtil {
 	 * @param taskToCalulateElapsedTime
 	 */
 	public static void calculateElapsedTime(long startTime, long endTime) {
-		
+
 		LOGGER.debug("start time - {}", startTime);
 		LOGGER.debug("end time - {}", endTime);
 		Long elapsedTime = endTime - startTime;
-		LOGGER.debug("elapsed time is {}",  elapsedTime);
-		
+		LOGGER.debug("elapsed time is {}", elapsedTime);
+
 	}
-	
-	public static String getManifest(String manifestFromRequestHeader) throws MailBoxConfigurationServicesException, IOException{
-		
+
+	public static String getManifest(String manifestFromRequestHeader)
+			throws MailBoxConfigurationServicesException, IOException {
+
 		if (MailBoxUtil.isEmpty(manifestFromRequestHeader)) {
 			LOGGER.debug("ACL Manifest not available in the request header");
 			return MailBoxUtil.getDummyManifestJson();
-		} 
-		
+		}
+
 		return manifestFromRequestHeader;
 
 	}
 
 	/**
 	 * Method to get pagingOffsetDetails
+	 * 
 	 * @param page
 	 * @param pageSize
 	 * @param totalCount
@@ -349,8 +360,8 @@ public class MailBoxUtil {
 	 */
 	public static Map<String, Integer> getPagingOffsetDetails(String page, String pageSize, int totalCount) {
 
-		Map <String, Integer> pageParameters = new HashMap<String, Integer>();
-		//Calculate page size parameters
+		Map<String, Integer> pageParameters = new HashMap<String, Integer>();
+		// Calculate page size parameters
 		Integer pageValue = 1;
 		Integer pageSizeValue = 10;
 		if (page != null && !page.isEmpty()) {
@@ -380,18 +391,19 @@ public class MailBoxUtil {
 			toIndex = pageSizeValue;
 		}
 		pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
-		
+
 		return pageParameters;
 	}
-	
+
 	/**
 	 * Method to convertTTLIntoSeconds
+	 * 
 	 * @param ttlUnit
 	 * @param ttlNumber
 	 * @return Integer
 	 */
 	public static Integer convertTTLIntoSeconds(String ttlUnit, Integer ttlNumber) {
-		
+
 		if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
 			return ttlNumber * 365 * 24 * 60 * 60;
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
@@ -408,20 +420,21 @@ public class MailBoxUtil {
 			return ttlNumber;
 		}
 	}
-	
+
 	/**
 	 * Method to add given TimeToLive value in seconds to the CurrentTime
+	 * 
 	 * @param seconds
 	 * 
 	 * @return Timestamp
 	 */
-	public static Timestamp addTTLToCurrentTime(int seconds){
-		
-        Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(currentTimeStamp.getTime());
-        cal.add(Calendar.SECOND, seconds);
-        return new Timestamp(cal.getTime().getTime());
+	public static Timestamp addTTLToCurrentTime(int seconds) {
+
+		Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(currentTimeStamp.getTime());
+		cal.add(Calendar.SECOND, seconds);
+		return new Timestamp(cal.getTime().getTime());
 	}
-	
+
 }

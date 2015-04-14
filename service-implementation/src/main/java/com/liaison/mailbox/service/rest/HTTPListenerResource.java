@@ -64,7 +64,7 @@ import com.netflix.servo.monitor.Monitors;
 
 /**
  * G2 HTTP Gateway.
- * 
+ *
  * @author OFS
  */
 
@@ -74,278 +74,277 @@ import com.netflix.servo.monitor.Monitors;
 @Produces(MediaType.WILDCARD)
 public class HTTPListenerResource extends AuditedResource {
 
-    private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
+	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
-    private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
+	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
 
-    @Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
-    private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
+	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
+	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-    @Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
-    private final static AtomicInteger failureCounter = new AtomicInteger(0);
+	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
+	private final static AtomicInteger failureCounter = new AtomicInteger(0);
 
-    protected static final String HTTP_METHOD_POST = "POST";
+	protected static final String HTTP_METHOD_POST = "POST";
 
-    public HTTPListenerResource() {
-        CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
-        MonitorRegistry monitorRegistry = DefaultMonitorRegistry.getInstance();
-        monitorRegistry.register(monitor);
-    }
+	public HTTPListenerResource() {
+		CompositeMonitor<?> monitor = Monitors.newObjectMonitor(this);
+		MonitorRegistry monitorRegistry = DefaultMonitorRegistry.getInstance();
+		monitorRegistry.register(monitor);
+	}
 
-    @POST
-    @Path("sync/{token1}")
-    public Response handleSyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-            @QueryParam(value = "mailboxId") String mailboxPguid) {
-        return handleSync(request, mailboxPguid);
-    }
+	@POST
+	@Path("sync/{token1}")
+	public Response handleSyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@QueryParam(value = "mailboxId") String mailboxPguid) {
+		return handleSync(request, mailboxPguid);
+	}
 
-    @POST
-    @Path("sync/{token1}/{token2}")
-    public Response handleSyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-            @QueryParam(value = "mailboxId") String mailboxPguid) {
-        return handleSync(request, mailboxPguid);
-    }
+	@POST
+	@Path("sync/{token1}/{token2}")
+	public Response handleSyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@QueryParam(value = "mailboxId") String mailboxPguid) {
+		return handleSync(request, mailboxPguid);
+	}
 
-    @POST
-    @Path("sync/{token1}/{token2}/{token3}")
-    public Response handleSyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-            @QueryParam(value = "mailboxId") String mailboxPguid) {
-        return handleSync(request, mailboxPguid);
-    }
+	@POST
+	@Path("sync/{token1}/{token2}/{token3}")
+	public Response handleSyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@QueryParam(value = "mailboxId") String mailboxPguid) {
+		return handleSync(request, mailboxPguid);
+	}
 
-    /**
-     * This method will processing the sync message by give request.
-     * 
-     * @param request
-     *            The HttpServletRequest
-     * @return The Response Object
-     */
-    @POST
-    @Path("sync")
-    @AccessDescriptor(skipFilter = true)
-    public Response handleSync(@Context final HttpServletRequest request,
-            @QueryParam(value = "mailboxId") final String mailboxPguid) {
+	/**
+	 * This method will processing the sync message by give request.
+	 *
+	 * @param request The HttpServletRequest
+	 * @return The Response Object
+	 */
+	@POST
+	@Path("sync")
+	@AccessDescriptor(skipFilter = true)
+	public Response handleSync(@Context final HttpServletRequest request,
+			@QueryParam(value = "mailboxId") final String mailboxPguid) {
 
-        // create the worker delegate to perform the business logic
-        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-            @Override
-            public Object call() throws Exception {
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call()
+					throws Exception {
 
-                serviceCallCounter.incrementAndGet();
-                GlassMessage glassMessage = new GlassMessage();
-                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-                        MailBoxUtil.getGUID());
-                glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
-                glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
-                glassMessage.setMailboxId(mailboxPguid);
-                glassMessage.setStatus(ExecutionState.PROCESSING);
-                glassMessage.setInAgent(GatewayType.REST);
-                glassMessage.setInSize(request.getContentLength());
+				serviceCallCounter.incrementAndGet();
+				GlassMessage glassMessage = new GlassMessage();
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+						MailBoxUtil.getGUID());
+				glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
+				glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
+				glassMessage.setMailboxId(mailboxPguid);
+				glassMessage.setStatus(ExecutionState.PROCESSING);
+				glassMessage.setInAgent(GatewayType.REST);
+				glassMessage.setInSize(request.getContentLength());
 
-                logger.debug("Starting sync processing");
-                try {
-                    HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
-                    syncProcessor.validateRequestSize(request.getContentLength());
-                    if (StringUtils.isEmpty(mailboxPguid)) {
-                        throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId) ");
-                    }
+				logger.debug("Starting sync processing");
+				try {
+					HTTPSyncProcessor syncProcessor = new HTTPSyncProcessor();
+					syncProcessor.validateRequestSize(request.getContentLength());
+					if (StringUtils.isEmpty(mailboxPguid)) {
+						throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId) ");
+					}
 
-                    Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
-                    // authentication should happen only if the property
-                    // "Http Listner Auth Check Required" is true
-                    logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",mailboxPguid);
-                    if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
-                        syncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
-                    }
-                    logger.debug("constructed workticket");
+					Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
+							mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
+					// authentication should happen only if the property
+					// "Http Listner Auth Check Required" is true
+					logger.info(
+							"Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
+							mailboxPguid);
+					if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
+						syncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
+					}
+					logger.debug("constructed workticket");
 
-                    WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-                            													  getRequestHeaders(request),
-                            													  mailboxPguid, 
-                            													  httpListenerProperties);
-                    String processId = IdentifierUtil.getUuid();
-                    glassMessage.setProcessId(processId);
-                    glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-                    glassMessage.setPipelineId(workTicket.getPipelineId());
+					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
+							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+					String processId = IdentifierUtil.getUuid();
+					glassMessage.setProcessId(processId);
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+					glassMessage.setPipelineId(workTicket.getPipelineId());
 
-                    // Log First corner
-                    glassMessage.logFirstCornerTimestamp();
-                    // Log status running
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");                   
-                    transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
-                    
-                    Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),httpListenerProperties, request.getContentType(), mailboxPguid);
-                    // GLASS LOGGING BEGINS CORNER 4 //
-                    glassMessage.setStatus(ExecutionState.COMPLETED);
-                    glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
-                    glassMessage.logFourthCornerTimestamp();
-                    transactionVisibilityClient.logToGlass(glassMessage);
+					// Log First corner
+					glassMessage.logFirstCornerTimestamp();
+					// Log status running
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");
+					transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
 
-                    return syncResponse;
-                } catch (IOException | JAXBException e) {
-                    logger.error(e.getMessage(), e);
-                    // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed");
-                    glassMessage.setStatus(ExecutionState.FAILED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-                    glassMessage.logFourthCornerTimestamp();
-                    // throw new
-                    // LiaisonRuntimeException("Unable to Read Request. " +
-                    // e.getMessage());
-                    throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
-                }
-            }
-        };
-        worker.actionLabel = "HttpListener.handleSync()";
-        worker.queryParams.put("guid", mailboxPguid);
-        // hand the delegate to the framework for calling
-        try {
-            return handleAuditedServiceRequest(request, worker);
-        } catch (LiaisonAuditableRuntimeException e) {
-            if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-                return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-            }
-            return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-        }
-    }
+					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
+							httpListenerProperties, request.getContentType(), mailboxPguid);
+					// GLASS LOGGING BEGINS CORNER 4 //
+					glassMessage.setStatus(ExecutionState.COMPLETED);
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
+					glassMessage.logFourthCornerTimestamp();
+					transactionVisibilityClient.logToGlass(glassMessage);
 
-    @POST
-    @Path("async/{token1}")
-    public Response handleAsyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
-            @QueryParam(value = "mailboxId") String mailboxPguid) {
-        return handleAsync(request, mailboxPguid);
-    }
+					return syncResponse;
+				} catch (IOException | JAXBException e) {
+					logger.error(e.getMessage(), e);
+					// Log error status
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed");
+					glassMessage.setStatus(ExecutionState.FAILED);
+					transactionVisibilityClient.logToGlass(glassMessage);
+					glassMessage.logFourthCornerTimestamp();
+					// throw new
+					// LiaisonRuntimeException("Unable to Read Request. " +
+					// e.getMessage());
+					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
+				}
+			}
+		};
+		worker.actionLabel = "HttpListener.handleSync()";
+		worker.queryParams.put("guid", mailboxPguid);
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}
+	}
 
-    @POST
-    @Path("async/{token1}/{token2}")
-    public Response handleAsyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-            @QueryParam(value = "mailboxId") String mailboxPguid) {
-        return handleAsync(request, mailboxPguid);
-    }
+	@POST
+	@Path("async/{token1}")
+	public Response handleAsyncOneToken(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@QueryParam(value = "mailboxId") String mailboxPguid) {
+		return handleAsync(request, mailboxPguid);
+	}
 
-    @POST
-    @Path("async/{token1}/{token2}/{token3}")
-    public Response handleAsyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
-            @QueryParam(value = "mailboxId") String mailboxPguid) {
-        return handleAsync(request, mailboxPguid);
-    }
+	@POST
+	@Path("async/{token1}/{token2}")
+	public Response handleAsyncTwoTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@QueryParam(value = "mailboxId") String mailboxPguid) {
+		return handleAsync(request, mailboxPguid);
+	}
 
-    /**
-     * This method will processing the async message by give request.
-     * 
-     * @param request
-     *            The HttpServletRequest
-     * @return The Response Object
-     */
-    @POST
-    @Path("async")
-    @AccessDescriptor(skipFilter = true)
-    public Response handleAsync(@Context final HttpServletRequest request,
-            @QueryParam(value = "mailboxId") final String mailboxPguid) {
+	@POST
+	@Path("async/{token1}/{token2}/{token3}")
+	public Response handleAsyncThreeTokens(@Context HttpServletRequest request, @Context HttpServletResponse response,
+			@QueryParam(value = "mailboxId") String mailboxPguid) {
+		return handleAsync(request, mailboxPguid);
+	}
 
-        // create the worker delegate to perform the business logic
-        AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
-            @Override
-            public Object call() throws Exception {
+	/**
+	 * This method will processing the async message by give request.
+	 *
+	 * @param request The HttpServletRequest
+	 * @return The Response Object
+	 */
+	@POST
+	@Path("async")
+	@AccessDescriptor(skipFilter = true)
+	public Response handleAsync(@Context final HttpServletRequest request,
+			@QueryParam(value = "mailboxId") final String mailboxPguid) {
 
-                serviceCallCounter.incrementAndGet();
+		// create the worker delegate to perform the business logic
+		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+			@Override
+			public Object call()
+					throws Exception {
 
-                logger.debug("Starting async processing");
-                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-                        MailBoxUtil.getGUID());
-                GlassMessage glassMessage = new GlassMessage();
+				serviceCallCounter.incrementAndGet();
 
-                try {
-                    HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
-                    asyncProcessor.validateRequestSize(request.getContentLength());
-                    if (StringUtils.isEmpty(mailboxPguid)) {
-                        throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId) ");
-                    }
-                    Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
-                            mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
-                    // authentication should happen only if the property
-                    // "Http Listner Auth Check Required" is true
-                    logger.info(
-                            "Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
-                            mailboxPguid);
-                    if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
-                        asyncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
-                    }
-                    WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
-                            getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+				logger.debug("Starting async processing");
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+						MailBoxUtil.getGUID());
+				GlassMessage glassMessage = new GlassMessage();
 
-                    String processId = IdentifierUtil.getUuid();
-                    glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
-                    glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
-                    glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-                    glassMessage.setMailboxId(mailboxPguid);
-                    glassMessage.setStatus(ExecutionState.PROCESSING);
-                    glassMessage.setPipelineId(workTicket.getPipelineId());
-                    glassMessage.setInAgent(GatewayType.REST);
-                    glassMessage.setInSize(request.getContentLength());
-                    glassMessage.setProcessId(processId);
+				try {
+					HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
+					asyncProcessor.validateRequestSize(request.getContentLength());
+					if (StringUtils.isEmpty(mailboxPguid)) {
+						throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId) ");
+					}
+					Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
+							mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
+					// authentication should happen only if the property
+					// "Http Listner Auth Check Required" is true
+					logger.info(
+							"Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
+							mailboxPguid);
+					if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
+						asyncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
+					}
+					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
+							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
-                    // Log FIRST corner
-                    glassMessage.logFirstCornerTimestamp();
+					String processId = IdentifierUtil.getUuid();
+					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
+					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+					glassMessage.setMailboxId(mailboxPguid);
+					glassMessage.setStatus(ExecutionState.PROCESSING);
+					glassMessage.setPipelineId(workTicket.getPipelineId());
+					glassMessage.setInAgent(GatewayType.REST);
+					glassMessage.setInSize(request.getContentLength());
+					glassMessage.setProcessId(processId);
 
-                    // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP ASync Request success");
+					// Log FIRST corner
+					glassMessage.logFirstCornerTimestamp();
 
-                    // Log TVA status
-                    transactionVisibilityClient.logToGlass(glassMessage);
+					// Log running status
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP ASync Request success");
 
-                    StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
-                    workTicket.setProcessMode(ProcessMode.ASYNC);
-                    asyncProcessor.processWorkTicket(workTicket, mailboxPguid, glassMessage);
+					// Log TVA status
+					transactionVisibilityClient.logToGlass(glassMessage);
 
-                    return Response
-                            .ok()
-                            .status(Status.ACCEPTED)
-                            .type(MediaType.TEXT_PLAIN)
-                            .entity(String.format("Payload accepted as process ID '%s'",workTicket.getGlobalProcessId())).build();
-                    
-                } catch (IOException | JAXBException e) {
-                    logger.error(e.getMessage(), e);
-                    // Log error status
-                    glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed");
-                    glassMessage.setStatus(ExecutionState.FAILED);
-                    transactionVisibilityClient.logToGlass(glassMessage);
-                    glassMessage.logFourthCornerTimestamp();
-                    throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-                }
-            }
-        };
-        worker.actionLabel = "HttpListener.handleAsync()";
+					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
+					workTicket.setProcessMode(ProcessMode.ASYNC);
+					asyncProcessor.processWorkTicket(workTicket, mailboxPguid, glassMessage);
 
-        // hand the delegate to the framework for calling
-        try {
-            return handleAuditedServiceRequest(request, worker);
-        } catch (LiaisonAuditableRuntimeException e) {
-            if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
-                return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
-            }
-            return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
-        }
-    }
+					return Response.ok().status(Status.ACCEPTED).type(MediaType.TEXT_PLAIN).entity(
+							String.format("Payload accepted as process ID '%s'", workTicket.getGlobalProcessId())).build();
 
-    @Override
-    protected AuditStatement getInitialAuditStatement(String actionLabel) {
-        return new DefaultAuditStatement(AuditStatement.Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
-                PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
-                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
-                HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
-    }
+				} catch (IOException | JAXBException e) {
+					logger.error(e.getMessage(), e);
+					// Log error status
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed");
+					glassMessage.setStatus(ExecutionState.FAILED);
+					transactionVisibilityClient.logToGlass(glassMessage);
+					glassMessage.logFourthCornerTimestamp();
+					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				}
+			}
+		};
+		worker.actionLabel = "HttpListener.handleAsync()";
 
-    @Override
-    protected void beginMetricsCollection() {
-        // TODO Auto-generated method stub
+		// hand the delegate to the framework for calling
+		try {
+			return handleAuditedServiceRequest(request, worker);
+		} catch (LiaisonAuditableRuntimeException e) {
+			if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+				return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+			}
+			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+		}
+	}
 
-    }
+	@Override
+	protected AuditStatement getInitialAuditStatement(String actionLabel) {
+		return new DefaultAuditStatement(AuditStatement.Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,
+				PCIV20Requirement.PCI10_2_2, HIPAAAdminSimplification201303.HIPAA_AS_C_164_308_5iiD,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_a2iv,
+				HIPAAAdminSimplification201303.HIPAA_AS_C_164_312_c2d);
+	}
 
-    @Override
-    protected void endMetricsCollection(boolean success) {
-        // TODO Auto-generated method stub
+	@Override
+	protected void beginMetricsCollection() {
+		// TODO Auto-generated method stub
 
-    }
+	}
+
+	@Override
+	protected void endMetricsCollection(boolean success) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

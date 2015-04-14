@@ -23,7 +23,8 @@ import javax.ws.rs.Path;
  * @param <T>
  * 
  */
-public abstract class AbstractResourceDelegate<T> implements Callable<T> {
+public abstract class AbstractResourceDelegate<T>
+		implements Callable<T> {
 	protected String id = null;
 	protected String actionLabel = "SERVICE REQUEST";
 	protected Map<String, String> queryParams = new HashMap<String, String>();
@@ -49,7 +50,7 @@ public abstract class AbstractResourceDelegate<T> implements Callable<T> {
 		if (null == pathAnnotation) {
 			return "UNABLE TO DETERMINE PATH, PLEASE USE AbstractResourceDelegate as METHOD LOCAL ANONYMOUS INNER CLASS FROM METHOD WITH PATH ANNOTATION";
 		}
-		return pathAnnotation.value()+"/"+enclosingMethod.getName();
+		return pathAnnotation.value() + "/" + enclosingMethod.getName();
 	}
 
 	public String getFishTagService() {

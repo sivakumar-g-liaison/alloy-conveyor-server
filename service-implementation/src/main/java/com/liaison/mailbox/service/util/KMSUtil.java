@@ -40,7 +40,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
  * Utilities for KMS.
- *
+ * 
  * @author OFS
  */
 public class KMSUtil {
@@ -50,7 +50,7 @@ public class KMSUtil {
 
 	/**
 	 * Util method get stored secret from KMS
-	 *
+	 * 
 	 * @param guid
 	 * @return String
 	 * @throws CertificateEncodingException
@@ -66,32 +66,34 @@ public class KMSUtil {
 	 * @throws JAXBException
 	 * @throws JsonParseException
 	 */
-	public static String getSecretFromKMS(String guid) throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException,
-			NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException, LiaisonException, MailBoxServicesException, JsonParseException, JAXBException {
+	public static String getSecretFromKMS(String guid)
+			throws CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException,
+			KeyStoreException, NoSuchAlgorithmException, CMSException, IOException, BootstrapingFailedException,
+			LiaisonException, MailBoxServicesException, JsonParseException, JAXBException {
 
-			// get gem manifest response from GEM
-			GEMACLClient gemClient = new GEMACLClient();
-			GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
+		// get gem manifest response from GEM
+		GEMACLClient gemClient = new GEMACLClient();
+		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 
-			// setting the request headers in the request to key manager from gem
-			Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
+		// setting the request headers in the request to key manager from gem
+		Map<String, String> headerMap = gemClient.getRequestHeaders(gemManifestFromGEM, "application/json");
 
-			String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
-			String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
+		String url = MailBoxUtil.getEnvironmentProperties().getString("kms-base-url") + "secret/" + guid;
+		String base64EncodedPassword = HTTPClientUtil.getHTTPResponseInString(LOGGER, url, headerMap);
 
-			if (base64EncodedPassword == null || base64EncodedPassword.isEmpty()) {
-				throw new MailBoxServicesException(Messages.READ_SECRET_FAILED, Response.Status.BAD_REQUEST);
-			} else {
-				String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
-				String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));
-				return base64DecodedPassword;
-			}
-    }
+		if (base64EncodedPassword == null || base64EncodedPassword.isEmpty()) {
+			throw new MailBoxServicesException(Messages.READ_SECRET_FAILED, Response.Status.BAD_REQUEST);
+		} else {
+			String decodeLevel1 = new String(Base64.decodeBase64(base64EncodedPassword));
+			String base64DecodedPassword = new String(Base64.decodeBase64(decodeLevel1));
+			return base64DecodedPassword;
+		}
+	}
 
 	/**
-	 *
+	 * 
 	 * Method for fetching SSH Privatekey as an InputStream
-	 *
+	 * 
 	 * @return InputStream
 	 * @throws LiaisonException
 	 * @throws JSONException
@@ -105,9 +107,10 @@ public class KMSUtil {
 	 * @throws BootstrapingFailedException
 	 * @throws JAXBException
 	 */
-	public static byte[] fetchSSHPrivateKey(String keypairPguid) throws LiaisonException, JSONException, IOException, CertificateEncodingException,
-			UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException,
-			JAXBException {
+	public static byte[] fetchSSHPrivateKey(String keypairPguid)
+			throws LiaisonException, JSONException, IOException, CertificateEncodingException,
+			UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException,
+			CMSException, BootstrapingFailedException, JAXBException {
 
 		byte[] privateKeyBytes = null;
 		GEMACLClient gemClient = new GEMACLClient();
@@ -137,9 +140,9 @@ public class KMSUtil {
 	}
 
 	/**
-	 *
+	 * 
 	 * Method for fetching TrustStore as an InputStream
-	 *
+	 * 
 	 * @return InputStream
 	 * @throws LiaisonException
 	 * @throws JSONException
@@ -153,7 +156,10 @@ public class KMSUtil {
 	 * @throws UnrecoverableKeyException
 	 * @throws CertificateEncodingException
 	 */
-	public static InputStream fetchTrustStore(String trustStoreId) throws LiaisonException, JSONException, IOException, JAXBException, CertificateEncodingException, UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, CMSException, BootstrapingFailedException {
+	public static InputStream fetchTrustStore(String trustStoreId)
+			throws LiaisonException, JSONException, IOException, JAXBException, CertificateEncodingException,
+			UnrecoverableKeyException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException,
+			CMSException, BootstrapingFailedException {
 
 		InputStream is = null;
 		GEMACLClient gemClient = new GEMACLClient();
@@ -188,23 +194,24 @@ public class KMSUtil {
 	}
 
 	/**
-     * Construct a KMS URL from a partial path. Base URL comes from properties.
-     *
-     * @param path
-     * @return String
+	 * Construct a KMS URL from a partial path. Base URL comes from properties.
+	 * 
+	 * @param path
+	 * @return String
 	 * @throws IOException
-     */
-    public static String getKeyManagementUrl(String path) throws IOException {
+	 */
+	public static String getKeyManagementUrl(String path)
+			throws IOException {
 
-        String baseUrl = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_KEY_MANAGEMENT_BASE_URL);
-        if(baseUrl == null) {
-            throw new RuntimeException(String.format("Property [%s] cannot be null", PROPERTY_KEY_MANAGEMENT_BASE_URL));
-        }
-        // strip trailing slashes
-        while (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-        return baseUrl + path;
-    }
+		String baseUrl = MailBoxUtil.getEnvironmentProperties().getString(PROPERTY_KEY_MANAGEMENT_BASE_URL);
+		if (baseUrl == null) {
+			throw new RuntimeException(String.format("Property [%s] cannot be null", PROPERTY_KEY_MANAGEMENT_BASE_URL));
+		}
+		// strip trailing slashes
+		while (baseUrl.endsWith("/")) {
+			baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+		}
+		return baseUrl + path;
+	}
 
 }

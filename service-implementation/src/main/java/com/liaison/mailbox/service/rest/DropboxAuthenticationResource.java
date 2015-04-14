@@ -52,13 +52,12 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- *
+ * 
  * @author OFS
  */
 @AppConfigurationResource
 @Path("config/dropbox/authenticate")
-@Api(value = "config/dropbox/authenticate",
-description = "Gateway for the dropbox services.")
+@Api(value = "config/dropbox/authenticate", description = "Gateway for the dropbox services.")
 public class DropboxAuthenticationResource extends AuditedResource {
 
 	private static final Logger LOG = LogManager.getLogger(DropboxAuthenticationResource.class);
@@ -69,33 +68,26 @@ public class DropboxAuthenticationResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-	public DropboxAuthenticationResource() throws IOException {
+	public DropboxAuthenticationResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 
 	/**
 	 * REST method to update a processor.
-	 *
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 * @param guid
-	 *            The id of the mailbox
-	 *
+	 * 
+	 * @param request HttpServletRequest, injected with context annotation
+	 * @param guid The id of the mailbox
+	 * 
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Authenticate Account",
-	notes = "authenticate an user account",
-	position = 1,
-	response=com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO.class)
+	@ApiOperation(value = "Authenticate Account", notes = "authenticate an user account", position = 1, response = com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Authenticate an user account", required = true,
-	dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body") })
-	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
-	})
+	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "Authenticate an user account", required = true, dataType = "com.liaison.usermanagement.swagger.dto.request.AuthenticateRequest", paramType = "body") })
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
 	public Response authenticateAccount(@Context final HttpServletRequest request) {
 
@@ -103,7 +95,8 @@ public class DropboxAuthenticationResource extends AuditedResource {
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 
 			@Override
-			public Object call() throws Exception {
+			public Object call()
+					throws Exception {
 
 				serviceCallCounter.addAndGet(1);
 				DropboxAuthAndGetManifestRequestDTO serviceRequest;
@@ -112,8 +105,8 @@ public class DropboxAuthenticationResource extends AuditedResource {
 
 					String requestString = getRequestBody(request);
 
-					serviceRequest = MailBoxUtil.unmarshalFromJSON(
-							requestString, DropboxAuthAndGetManifestRequestDTO.class);
+					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
+							DropboxAuthAndGetManifestRequestDTO.class);
 
 					DropboxAuthenticationService dropboxService = new DropboxAuthenticationService();
 					return dropboxService.authenticateAccount(serviceRequest);
@@ -138,7 +131,7 @@ public class DropboxAuthenticationResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
-	
+
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
 		return new DefaultAuditStatement(Status.ATTEMPT, actionLabel, PCIV20Requirement.PCI10_2_5,

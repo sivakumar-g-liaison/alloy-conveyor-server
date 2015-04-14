@@ -63,7 +63,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Class which has mailbox configuration related operations.
- *
+ * 
  * @author veerasamyn
  */
 public class MailBoxConfigurationService {
@@ -73,9 +73,8 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Creates Mail Box.
-	 *
-	 * @param request
-	 *            The request DTO.
+	 * 
+	 * @param request The request DTO.
 	 * @return The responseDTO.
 	 * @throws IOException
 	 * @throws JAXBException
@@ -83,8 +82,9 @@ public class MailBoxConfigurationService {
 	 * @throws JsonParseException
 	 */
 	public AddMailBoxResponseDTO createMailBox(AddMailboxRequestDTO request, String serviceInstanceId,
-			String aclManifestJson) throws MailBoxConfigurationServicesException, JsonParseException,
-			JsonMappingException, JAXBException, IOException {
+			String aclManifestJson)
+			throws MailBoxConfigurationServicesException, JsonParseException, JsonMappingException, JAXBException,
+			IOException {
 
 		LOG.debug("Entering into create mailbox.");
 		AddMailBoxResponseDTO serviceResponse = new AddMailBoxResponseDTO();
@@ -93,7 +93,8 @@ public class MailBoxConfigurationService {
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
+						Response.Status.BAD_REQUEST);
 			}
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
@@ -103,11 +104,13 @@ public class MailBoxConfigurationService {
 
 			// Getting the mailbox.
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(), mailboxDTO.getTenancyKey());
+			MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(),
+					mailboxDTO.getTenancyKey());
 
 			if (null != retrievedEntity) {
-	            throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST,MAILBOX, Response.Status.CONFLICT);
-	        }
+				throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST, MAILBOX,
+						Response.Status.CONFLICT);
+			}
 			// validation
 			GenericValidator validator = new GenericValidator();
 			validator.validate(mailboxDTO);
@@ -140,8 +143,8 @@ public class MailBoxConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
 			return serviceResponse;
 
 		}
@@ -150,9 +153,8 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Create Mailbox ServiceInstance Id.
-	 *
-	 * @param serviceInstanceID
-	 *            The serviceInstanceID of the mailbox
+	 * 
+	 * @param serviceInstanceID The serviceInstanceID of the mailbox
 	 * @param mailbox
 	 * @throws MailBoxConfigurationServicesException
 	 */
@@ -190,9 +192,8 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Get the mailbox using guid and its processor using service instance id.
-	 *
-	 * @param guid
-	 *            The guid of the mailbox.
+	 * 
+	 * @param guid The guid of the mailbox.
 	 * @return The responseDTO.
 	 * @throws SymmetricAlgorithmException
 	 * @throws IOException
@@ -201,7 +202,8 @@ public class MailBoxConfigurationService {
 	 * @throws JsonParseException
 	 */
 	public GetMailBoxResponseDTO getMailBox(String guid, boolean addConstraint, String serviceInstanceId,
-			String aclManifestJson) throws JAXBException, IOException, SymmetricAlgorithmException {
+			String aclManifestJson)
+			throws JAXBException, IOException, SymmetricAlgorithmException {
 
 		LOG.debug("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);
@@ -212,7 +214,8 @@ public class MailBoxConfigurationService {
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
+						Response.Status.BAD_REQUEST);
 			}
 
 			// Getting mailbox
@@ -220,7 +223,8 @@ public class MailBoxConfigurationService {
 
 			MailBox mailBox = configDao.find(MailBox.class, guid);
 			if (mailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid,
+						Response.Status.BAD_REQUEST);
 			}
 
 			// retrieve the actual tenancykey Display Name from TenancyKeys
@@ -254,7 +258,8 @@ public class MailBoxConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
 			return serviceResponse;
 		}
 
@@ -262,17 +267,16 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Method revise the mailbox configurations.
-	 *
-	 * @param guid
-	 *            The mailbox pguid.
+	 * 
+	 * @param guid The mailbox pguid.
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid,
-			String serviceInstanceId, String aclManifestJson) throws JsonParseException, JsonMappingException,
-			JAXBException, IOException {
+			String serviceInstanceId, String aclManifestJson)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.debug("Entering into revise mailbox.The revise request is for {} ", guid);
 
@@ -282,7 +286,8 @@ public class MailBoxConfigurationService {
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
-				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE,
+						Response.Status.BAD_REQUEST);
 			}
 
 			MailBoxDTO mailboxDTO = request.getMailBox();
@@ -298,7 +303,8 @@ public class MailBoxConfigurationService {
 			}
 
 			if (!guid.equals(mailboxDTO.getGuid())) {
-				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX, Response.Status.CONFLICT);
+				throw new MailBoxConfigurationServicesException(Messages.GUID_DOES_NOT_MATCH, MAILBOX,
+						Response.Status.CONFLICT);
 			}
 
 			// Getting the mailbox.
@@ -310,12 +316,14 @@ public class MailBoxConfigurationService {
 
 			if (!mailboxDTO.getName().equals(retrievedMailBox.getMbxName())) {
 				// Getting the mailbox.
-				MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(), mailboxDTO.getTenancyKey());
+				MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(),
+						mailboxDTO.getTenancyKey());
 
 				if (null != retrievedEntity) {
-		            throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST,MAILBOX, Response.Status.CONFLICT);
-		        }
-		  }
+					throw new MailBoxConfigurationServicesException(Messages.ENTITY_ALREADY_EXIST, MAILBOX,
+							Response.Status.CONFLICT);
+				}
+			}
 
 			// Removing the child items.
 			retrievedMailBox.getMailboxProperties().clear();
@@ -325,10 +333,10 @@ public class MailBoxConfigurationService {
 
 			// retrieve the actual tenancykey guids from DTO
 			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
-			
-			 if (tenancyKeyGuids.isEmpty()) {
-	                LOG.error("retrieval of tenancy key from acl manifest failed");
-	         }
+
+			if (tenancyKeyGuids.isEmpty()) {
+				LOG.error("retrieval of tenancy key from acl manifest failed");
+			}
 
 			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
 			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
@@ -367,8 +375,8 @@ public class MailBoxConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
 			return serviceResponse;
 		}
 
@@ -376,12 +384,12 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Method revise the mailbox configurations.
-	 *
-	 * @param guid
-	 *            The mailbox pguid.
+	 * 
+	 * @param guid The mailbox pguid.
 	 * @throws IOException
 	 */
-	public DeActivateMailBoxResponseDTO deactivateMailBox(String guid, String aclManifestJson) throws IOException {
+	public DeActivateMailBoxResponseDTO deactivateMailBox(String guid, String aclManifestJson)
+			throws IOException {
 
 		LOG.debug("Entering into deactivate mailbox.");
 		DeActivateMailBoxResponseDTO serviceResponse = new DeActivateMailBoxResponseDTO();
@@ -393,20 +401,21 @@ public class MailBoxConfigurationService {
 
 			MailBox retrievedMailBox = configDao.find(MailBox.class, guid);
 			if (retrievedMailBox == null) {
-				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
+				throw new MailBoxConfigurationServicesException(Messages.MBX_DOES_NOT_EXIST, guid,
+						Response.Status.BAD_REQUEST);
 			}
 
 			// retrieve the actual tenancykey guids from DTO
-            List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
-            
-             if (tenancyKeyGuids.isEmpty()) {
-                 LOG.error("retrieval of tenancy key from acl manifest failed");
-             }
-            
-            // checking if the tenancy key in acl manifest matches with tenancy key in mailbox
-            if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
-                LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
-            }
+			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+
+			if (tenancyKeyGuids.isEmpty()) {
+				LOG.error("retrieval of tenancy key from acl manifest failed");
+			}
+
+			// checking if the tenancy key in acl manifest matches with tenancy key in mailbox
+			if (!tenancyKeyGuids.contains(retrievedMailBox.getTenancyKey())) {
+				LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
+			}
 			// Changing the mailbox status
 			retrievedMailBox.setMbxStatus(EntityStatus.INACTIVE.value());
 			configDao.merge(retrievedMailBox);
@@ -420,8 +429,8 @@ public class MailBoxConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.DEACTIVATION_FAILED.value(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, MAILBOX, Messages.FAILURE, e
-					.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.DEACTIVATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
 			return serviceResponse;
 
 		}
@@ -429,21 +438,20 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Searches the mailbox using mailbox name and profile name.
-	 *
-	 * @param mbxName
-	 *            The name of the mailbox
-	 *
-	 * @param profName
-	 *            The name of the profile
+	 * 
+	 * @param mbxName The name of the mailbox
+	 * 
+	 * @param profName The name of the profile
 	 * @param serviceInstId
-	 *
+	 * 
 	 * @return The SearchMailBoxResponseDTO
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public SearchMailBoxResponseDTO searchMailBox(String mbxName,String serviceInstanceId, String profName, String aclManifestJson, String page, String pageSize, String sortField, String sortDirection)
+	public SearchMailBoxResponseDTO searchMailBox(String mbxName, String serviceInstanceId, String profName,
+			String aclManifestJson, String page, String pageSize, String sortField, String sortDirection)
 			throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.debug("Entering into search mailbox.");
@@ -452,7 +460,7 @@ public class MailBoxConfigurationService {
 		int startOffset = 0;
 		int count = 0;
 		List<MailBox> retrievedMailBoxes = null;
-		Map <String, Integer> pageOffsetDetails = null;
+		Map<String, Integer> pageOffsetDetails = null;
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
 
 		try {
@@ -466,14 +474,15 @@ public class MailBoxConfigurationService {
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
-            List<MailBox> mailboxes = new ArrayList<MailBox>();
-            // retrieve the actual tenancykey guids from DTO
-            List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+			List<MailBox> mailboxes = new ArrayList<MailBox>();
+			// retrieve the actual tenancykey guids from DTO
+			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
 
-            if (tenancyKeyGuids.isEmpty()) {
-                LOG.error("retrieval of tenancy key from acl manifest failed");
-                throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
-            }
+			if (tenancyKeyGuids.isEmpty()) {
+				LOG.error("retrieval of tenancy key from acl manifest failed");
+				throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
+						Response.Status.BAD_REQUEST);
+			}
 
 			if (!MailBoxUtil.isEmpty(profName)) {
 
@@ -481,7 +490,8 @@ public class MailBoxConfigurationService {
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
 				startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
 				count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-				retrievedMailBoxes = configDao.find(mbxName, profName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
+				retrievedMailBoxes = configDao.find(mbxName, profName, tenancyKeyGuids, startOffset, count, sortField,
+						sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 
@@ -492,7 +502,8 @@ public class MailBoxConfigurationService {
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
 				startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
 				count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
-				retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset , count, sortField , sortDirection);
+				retrievedMailBoxes = configDao.findByName(mbxName, tenancyKeyGuids, startOffset, count, sortField,
+						sortDirection);
 				mailboxes.addAll(retrievedMailBoxes);
 				serviceResponse.setTotalItems(totalCount);
 			}
@@ -517,9 +528,8 @@ public class MailBoxConfigurationService {
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse
-					.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE, e
-							.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
 			return serviceResponse;
 		}
 
@@ -527,9 +537,8 @@ public class MailBoxConfigurationService {
 
 	/**
 	 * Service to list the directory structure for browse component.
-	 *
-	 * @param file
-	 *            The root directory location
+	 * 
+	 * @param file The root directory location
 	 * @return The FileInfoDTO
 	 */
 	public FileInfoDTO getFileDetail(File file) {
@@ -550,9 +559,9 @@ public class MailBoxConfigurationService {
 	}
 
 	/**
-	 *
+	 * 
 	 * getting values from java properties file
-	 *
+	 * 
 	 * @param trustStore
 	 * @return
 	 * @throws IOException
@@ -565,13 +574,20 @@ public class MailBoxConfigurationService {
 
 		try {
 
-			dto.setTrustStoreId(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
-			dto.setTrustStoreGroupId(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
-			dto.setListJobsIntervalInHours(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
-			dto.setFsmEventCheckIntervalInSeconds(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
-			dto.setProcessorSyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
-			dto.setProcessorAsyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
-			dto.setDefaultScriptTemplateName(MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+			dto.setTrustStoreId(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
+			dto.setTrustStoreGroupId(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
+			dto.setListJobsIntervalInHours(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+			dto.setFsmEventCheckIntervalInSeconds(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
+			dto.setProcessorSyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
+			dto.setProcessorAsyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
+			dto.setDefaultScriptTemplateName(MailBoxUtil.getEnvironmentProperties().getString(
+					MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
@@ -582,9 +598,8 @@ public class MailBoxConfigurationService {
 		} catch (Exception e) {
 
 			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse
-					.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX, Messages.FAILURE, e
-							.getMessage()));
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_FAILED, MAILBOX,
+					Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 		}
 

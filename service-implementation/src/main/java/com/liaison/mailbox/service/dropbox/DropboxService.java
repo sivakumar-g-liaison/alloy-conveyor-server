@@ -32,8 +32,8 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
- * Class which has  Dropbox related operations.
- *
+ * Class which has Dropbox related operations.
+ * 
  * @author OFS
  */
 public class DropboxService {
@@ -41,21 +41,21 @@ public class DropboxService {
 	private static final Logger LOG = LogManager.getLogger(DropboxService.class);
 
 	/**
-	 * Method which will consume request from dropbox queue and log a staged
-	 * event in StagedFiles Table in DB
-	 *
+	 * Method which will consume request from dropbox queue and log a staged event in StagedFiles Table in DB
+	 * 
 	 * @param request
 	 * @throws IOException
 	 * @throws JAXBException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
-	public void invokeDropboxQueue(String request) throws JsonParseException, JsonMappingException, JAXBException,
-			IOException {
+	public void invokeDropboxQueue(String request)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException {
 
 		LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+
         TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 	    GlassMessage glassMessage = new GlassMessage(workTicket);
 	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
@@ -68,6 +68,7 @@ public class DropboxService {
         glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 	        
         DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
+
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
 		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
 		dtoReq.setStagedFile(stageFileReqDTO);

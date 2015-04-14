@@ -67,7 +67,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This is the gateway for the mailbox processor configuration services.
- *
+ * 
  * @author OFS
  */
 @AppConfigurationResource
@@ -85,17 +85,17 @@ public class DropboxFileStagedResource extends AuditedResource {
 
 	protected static final String CONFIGURATION_MAX_REQUEST_SIZE = "com.liaison.servicebroker.sync.max.request.size";
 
-	public DropboxFileStagedResource() throws IOException {
+	public DropboxFileStagedResource()
+			throws IOException {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 
 	/**
 	 * REST method to add staged file.
-	 *
-	 * @param request
-	 *            HttpServletRequest, injected with context annotation
-	 *
+	 * 
+	 * @param request HttpServletRequest, injected with context annotation
+	 * 
 	 * @return Response Object
 	 */
 	@POST
@@ -156,7 +156,8 @@ public class DropboxFileStagedResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call() throws Exception {
+			public Object call()
+					throws Exception {
 
 				serviceCallCounter.incrementAndGet();
 
@@ -181,33 +182,32 @@ public class DropboxFileStagedResource extends AuditedResource {
 							MailBoxConstants.UM_AUTH_TOKEN);
 
 					// constructing authenticate and get manifest request
-					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil
-							.constructAuthenticationRequest(loginId, null, authenticationToken);
+					DropboxAuthAndGetManifestRequestDTO dropboxAuthAndGetManifestRequestDTO = DropboxAuthenticatorUtil.constructAuthenticationRequest(
+							loginId, null, authenticationToken);
 
 					// authenticating
-					String encryptedMbxToken = authService
-							.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
+					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
 					if (encryptedMbxToken == null) {
 						LOG.error("Dropbox - user authentication failed");
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
 								Messages.FAILURE);
-						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON)
-								.entity(responseEntity).build();
+						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+								responseEntity).build();
 					}
 
 					// getting manifest
-					GEMManifestResponse manifestResponse = authService
-							.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
+					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
 					if (manifestResponse == null) {
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 								Messages.FAILURE);
-						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON)
-								.entity(responseEntity).build();
+						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
+								responseEntity).build();
 					}
 
 					// getting staged files based on manifest
-					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService
-							.getStagedFiles(manifestResponse.getManifest(), stageFileName, page, pageSize, sortField, sortDirection,status);
+					GetStagedFilesResponseDTO getStagedFilesResponseDTO = fileStagedService.getStagedFiles(
+							manifestResponse.getManifest(), stageFileName, page, pageSize, sortField, sortDirection,
+							status);
 					getStagedFilesResponseDTO.setHitCounter(hitCounter);
 					String responseBody = MailBoxUtil.marshalToJSON(getStagedFilesResponseDTO);
 

@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- *
+ * 
  * @author OFS
  */
 public class QueryBuilderUtil {
@@ -23,13 +23,13 @@ public class QueryBuilderUtil {
 	private static final Logger LOGGER = LogManager.getLogger(QueryBuilderUtil.class);
 
 	/**
-	 * This method will construct a string of processor types appended by OR operator instead of using IN Clause
-	 * because using IN clause along with TYPE operator is having issues
-	 *
+	 * This method will construct a string of processor types appended by OR operator instead of using IN Clause because
+	 * using IN clause along with TYPE operator is having issues
+	 * 
 	 * @param specificProcessorTypes
 	 * @return
 	 */
-	public static String constructSqlStringForTypeOperator(List <String> specificProcessorTypes) {
+	public static String constructSqlStringForTypeOperator(List<String> specificProcessorTypes) {
 
 		StringBuilder s = new StringBuilder();
 
@@ -47,7 +47,7 @@ public class QueryBuilderUtil {
 
 	/**
 	 * Generate "in" clause string from the list.
-	 *
+	 * 
 	 * @param mailboxIds list of mailboxIds
 	 * @return String
 	 */

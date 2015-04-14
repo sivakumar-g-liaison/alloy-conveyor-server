@@ -46,8 +46,8 @@ import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
- * Class which has  Dropbox related operations.
- *
+ * Class which has Dropbox related operations.
+ * 
  * @author OFS
  */
 public class DropboxStagedFilesService {
@@ -58,9 +58,8 @@ public class DropboxStagedFilesService {
 	public static final String STAGED_FILE = "Staged File";
 
 	/**
-	 * Method to retrieve all staged files of the mailboxes linked to tenancy
-	 * keys available in the manifest
-	 *
+	 * Method to retrieve all staged files of the mailboxes linked to tenancy keys available in the manifest
+	 * 
 	 * @param request
 	 * @param aclManifest
 	 * @return list of StagedFiles
@@ -68,14 +67,15 @@ public class DropboxStagedFilesService {
 	 * @throws JAXBException
 	 */
 	public GetStagedFilesResponseDTO getStagedFiles(String aclManifest, String fileName, String page, String pageSize,
-			String sortField, String sortDirection,String status) throws IOException, JAXBException {
+			String sortField, String sortDirection, String status)
+			throws IOException, JAXBException {
 
 		LOG.debug("Entering into get staged files service.");
 
 		int totalCount = 0;
 		int startOffset = 0;
 		int count = 0;
-		Map <String, Integer> pageOffsetDetails = null;
+		Map<String, Integer> pageOffsetDetails = null;
 
 		GetStagedFilesResponseDTO serviceResponse = new GetStagedFilesResponseDTO();
 		List<StagedFileDTO> stagedFileDTOs = new ArrayList<StagedFileDTO>();
@@ -104,12 +104,13 @@ public class DropboxStagedFilesService {
 
 		// retrieve searched staged files of mailboxes.
 		StagedFileDAO stagedFileDao = new StagedFileDAOBase();
-		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, fileName,status);
+		totalCount = stagedFileDao.getStagedFilesCountByName(mailboxIds, fileName, status);
 		pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(page, pageSize, totalCount);
 		startOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
 		count = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 		serviceResponse.setTotalItems(totalCount);
-		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, fileName, startOffset, count, sortField, sortDirection,status);
+		List<StagedFile> stagedFiles = stagedFileDao.findStagedFilesOfMailboxes(mailboxIds, fileName, startOffset,
+				count, sortField, sortDirection, status);
 
 		if (stagedFiles.isEmpty()) {
 			LOG.info("There are no staged files available for linked mailboxes");
@@ -130,7 +131,8 @@ public class DropboxStagedFilesService {
 		return serviceResponse;
 	}
 
-	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys, GlassMessage glassMessage) {
+	public String validateIfFileIdBelongsToAnyOrganisation(String fileId, List<String> tenancyKeys,
+			GlassMessage glassMessage) {
 
 		StagedFileDAO dropboxDao = new StagedFileDAOBase();
 
@@ -153,7 +155,7 @@ public class DropboxStagedFilesService {
 		glassMessage.setMailboxId(mailbox.getPguid());
 		for (String tkey : tenancyKeys) {
 			if (mailbox.getTenancyKey().equals(tkey)) {
-			    glassMessage.setTenancyKey(tkey);
+				glassMessage.setTenancyKey(tkey);
 				return stagedFile.getSpectrumUri();
 			}
 		}
@@ -161,7 +163,8 @@ public class DropboxStagedFilesService {
 		return null;
 	}
 
-	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request, GlassMessage glassMessage) throws IOException, JAXBException {
+	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request, GlassMessage glassMessage)
+			throws IOException, JAXBException {
 
 		LOG.debug("Entering into add staged file.");
 
@@ -195,34 +198,37 @@ public class DropboxStagedFilesService {
                 
             }
             
+
 			LOG.debug("Exit from add staged file.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
 			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			
-            if (null != glassMessage) {
-                    
-                    // glass log in case of failure during file staging
-                TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-                        MailBoxUtil.getGUID());
-                glassMessage.logProcessingStatus(StatusType.ERROR, "MFT:File staging Failed");
-                glassMessage.setStatus(ExecutionState.FAILED);
-                transactionVisibilityClient.logToGlass(glassMessage);
-                
-            }
+
+			if (null != glassMessage) {
+
+				// glass log in case of failure during file staging
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
+						MailBoxUtil.getGUID());
+				glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+				glassMessage.setStatus(ExecutionState.FAILED);
+				transactionVisibilityClient.logToGlass(glassMessage);
+
+			}
+	
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE,
 					Messages.FAILURE, e.getMessage()));
 			return serviceResponse;
 
 		}
 	}
-	
-	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid) throws IOException, JAXBException {
+
+	public DropBoxUnStagedFileResponseDTO getDroppedStagedFileResponse(String aclManifest, String guid)
+			throws IOException, JAXBException {
 
 		LOG.debug("Entering into drop staged files service.");
-		
+
 		LOG.info("Retrieving tenancy keys from acl-manifest");
 		// retrieve the tenancy key from acl manifest
 		List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifest);
@@ -249,25 +255,26 @@ public class DropboxStagedFilesService {
 		// validation the ResponseDTO
 		GenericValidator validator = new GenericValidator();
 		validator.validate(dropBoxUnStagedResponse);
-		
-		//Find the staged file based on given GUID and mailboxIds
+
+		// Find the staged file based on given GUID and mailboxIds
 		List<StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfMailboxesBasedonGUID(mailboxIds, guid);
 
 		if (stagedFiles.isEmpty()) {
-			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, guid, Response.Status.BAD_REQUEST);
+			throw new MailBoxConfigurationServicesException(Messages.STAGED_FILEID_DOES_NOT_EXIST, guid,
+					Response.Status.BAD_REQUEST);
 		}
-		
+
 		// UnStaging the stagedFile by changing its status to INACTIVE
 		StagedFile unStagingFile = stagedFiles.get(0);
 		unStagingFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
 		stagedFileDAO.merge(unStagingFile);
-		
-		//Setting the necessary details to the response
+
+		// Setting the necessary details to the response
 		dropBoxUnStagedResponse.setGUID(guid);
-		dropBoxUnStagedResponse.setResponse(new ResponseDTO(Messages.DELETE_ONDEMAND_SUCCESSFUL, STAGED_FILE, Messages.SUCCESS));
+		dropBoxUnStagedResponse.setResponse(new ResponseDTO(Messages.DELETE_ONDEMAND_SUCCESSFUL, STAGED_FILE,
+				Messages.SUCCESS));
 		LOG.debug("Exit from drop staged files service.");
 
 		return dropBoxUnStagedResponse;
 	}
 }
-

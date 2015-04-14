@@ -48,13 +48,13 @@ import com.wordnik.swagger.annotations.ApiResponses;
 /**
  * 
  * @author OFS
- *
+ * 
  */
 @AppConfigurationResource
 @Path("config/mailbox/trigger/slacheck")
 @Api(value = "config/mailbox/trigger/slacheck", description = "Checks whether Mailbox Configurations satisfies the expectations as per SLA")
 public class TriggerSLAEvaluvationResource extends AuditedResource {
-	
+
 	private static final Logger LOG = LogManager.getLogger(TriggerSLAEvaluvationResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
@@ -62,45 +62,39 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-	
-	
+
 
 	public TriggerSLAEvaluvationResource() {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
-	
-	
+
+
 	/**
 	 * REST method to validate the sla rules of all mailboxes.
 	 * 
 	 * @return Response Object
 	 */
 	@POST
-	@ApiOperation(value = "Check Mailbox satifies the expectations",
-	notes = "Check Mailbox satifies the expectations",
-	position = 23,
-	response = com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO.class)
+	@ApiOperation(value = "Check Mailbox satifies the expectations", notes = "Check Mailbox satifies the expectations", position = 23, response = com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiResponses({
-		@ApiResponse( code = 500, message = "Unexpected Service failure." )
-	})
-	@AccessDescriptor(skipFilter=true)
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	@AccessDescriptor(skipFilter = true)
 	public Response validateMailboxSLA(@Context final HttpServletRequest request) {
-        
+
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
 			public Object call() {
-				
-				serviceCallCounter.addAndGet(1);				
+
+				serviceCallCounter.addAndGet(1);
 				try {
 					LOG.debug("Entering into Mailbox SLA Validation");
-					//validate the sla rules of all mailboxes
+					// validate the sla rules of all mailboxes
 					MailboxSLAWatchDogService service = new MailboxSLAWatchDogService();
-					
-					return service.validateSLARules();					
+
+					return service.validateSLARules();
 				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -108,9 +102,9 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 					LOG.error(e.getMessage(), e);
 					e.printStackTrace();
 					throw new LiaisonRuntimeException("Failed to validate SLA." + e.getMessage());
-					
-				}			
-				
+
+				}
+
 			}
 		};
 		worker.actionLabel = "TriggerSLAEvaluvationResource.validateMailboxSLA()";
@@ -125,7 +119,7 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 
-	}	
+	}
 
 	@Override
 	protected AuditStatement getInitialAuditStatement(String actionLabel) {
@@ -138,13 +132,13 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 	@Override
 	protected void beginMetricsCollection() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
