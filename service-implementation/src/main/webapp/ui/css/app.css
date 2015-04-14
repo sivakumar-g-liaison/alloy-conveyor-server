@@ -542,7 +542,7 @@ input::-moz-focus-inner {
 /*--- folderUri.html---*/
 .textArea_Editor{
 	width:90%;
-	height: 45px;
+	height: 45px !important;
 }
 
 /*--- propertyNameDirectiveTemplate.html---*/

@@ -27,9 +27,9 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.enums.ExecutionState;
 
 /**
- * 
+ *
  * @author OFS
- * 
+ *
  */
 public class TransactionVisibilityClient {
 
@@ -132,8 +132,8 @@ public class TransactionVisibilityClient {
 			visibilityAPI.setStatus(StatusCode.P);
 		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.B);
-		} else if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
-			visibilityAPI.setStatus(StatusCode.P);
+		} else if (ExecutionState.READY.value().equals(message.getStatus().value())) {
+			visibilityAPI.setStatus(StatusCode.R);
 		} else if (ExecutionState.FAILED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.F);
 		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {
@@ -150,8 +150,8 @@ public class TransactionVisibilityClient {
 		visibilityAPI.setStatusDate(t);
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
-		logger.debug("TransactionVisibilityAPI with status {} logged for execution :{}", message.getStatus().value(),
-				message.getExecutionId());
+		logger.debug("TransactionVisibilityAPI with status {} logged for GPID :{}", message.getStatus().value(),
+				visibilityAPI.getGlobalId());
 
 	}
 }

@@ -201,20 +201,19 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
 					workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
+	                   
+                    String processId = IdentifierUtil.getUuid();
+                    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+                    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+                    glassMessage.setStatus(ExecutionState.PROCESSING);
+                    glassMessage.setInAgent(GatewayType.REST);
+                    glassMessage.setProcessId(processId);
+                    glassMessage.setSenderId(loginId);                  
+                    // Log time stamp
+                    glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
-
-					String processId = IdentifierUtil.getUuid();
-					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-					glassMessage.setStatus(ExecutionState.PROCESSING);
-					glassMessage.setInAgent(GatewayType.REST);
-					glassMessage.setProcessId(processId);
-					glassMessage.setSenderId(loginId);
-					// Log time stamp
-					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-
-					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+                    // Log running status
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Recevived");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -251,25 +250,25 @@ public class DropboxFileTransferResource extends AuditedResource {
 							- actualStartTime);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
-
-					glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+					
+                    //glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
+                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
-					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
-					glassMessage.setStatus(ExecutionState.FAILED);
-					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-					throw new LiaisonRuntimeException(e.getMessage());
+	                   // Log error status
+                    glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
+                    glassMessage.setStatus(ExecutionState.FAILED);
+                    transactionVisibilityClient.logToGlass(glassMessage);
+                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+                    throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
-					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
-					glassMessage.setStatus(ExecutionState.FAILED);
-					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+	                   // Log error status
+                    glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
+                    glassMessage.setStatus(ExecutionState.FAILED);
+                    transactionVisibilityClient.logToGlass(glassMessage);
+                    glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
 			}

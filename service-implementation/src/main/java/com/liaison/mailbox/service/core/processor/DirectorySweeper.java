@@ -129,7 +129,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		glassMessage.setProtocol(Protocol.SWEEPER.getCode());
 		glassMessage.setPipelineId(getPipeLineID());
 		//Log running status
-		glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+		glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
 		//GLASS LOGGING ENDS//
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
@@ -203,7 +203,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	                    glassMessage.logFirstCornerTimestamp();
 	                    transactionVisibilityClient.logToGlass(glassMessage);
 	                  //Log running status
-	                    glassMessage.logProcessingStatus(StatusType.QUEUED, "");
+	                    glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
 					}
 				}
 

@@ -56,45 +56,25 @@ public class DropboxService {
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
-		// getting meta data from meta json
-		String metadata = workTicket.getHeader(MailBoxConstants.UPLOAD_META);
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+	    GlassMessage glassMessage = new GlassMessage(workTicket);
+	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+	    glassMessage.setStatus(ExecutionState.READY);
+        
+        // log activity status
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT:Workticket Consumed from queue");   
+        // log timestamp
+        glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+	        
+        DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 
-		// get details from workTicket
-		String mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
-
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-		GlassMessage glassMessage = new GlassMessage();
-
-		glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-		glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-		glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-		glassMessage.setStatus(ExecutionState.STAGED);
-		glassMessage.setMailboxId(mailboxId);
-		glassMessage.setPipelineId(workTicket.getPipelineId());
-		glassMessage.setInSize(workTicket.getPayloadSize().intValue());
-		glassMessage.setTransferProfileName(workTicket.getAdditionalContextItem(
-				MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME).toString());
-		glassMessage.setProcessorId(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID).toString());
-		glassMessage.setTenancyKey(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY).toString());
-		glassMessage.setTransferProfileName(workTicket.getAdditionalContextItem(
-				MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME).toString());
-		glassMessage.setServiceInstandId(workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID).toString());
-
-		// log TVA status
-		transactionVisibilityClient.logToGlass(glassMessage);
-
-		// log activity status
-		glassMessage.logProcessingStatus(StatusType.RUNNING, "");
-		// log timestamp
-		glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-
-		DropboxStagedFilesService stageFileService = new DropboxStagedFilesService();
 		StagePayloadRequestDTO dtoReq = new StagePayloadRequestDTO();
-
 		StagedFileDTO stageFileReqDTO = new StagedFileDTO(workTicket);
-
 		dtoReq.setStagedFile(stageFileReqDTO);
-
 		stageFileService.addStagedFile(dtoReq, glassMessage);
+		 
+	    // log TVA status
+	    //transactionVisibilityClient.logToGlass(glassMessage);
 	}
 }

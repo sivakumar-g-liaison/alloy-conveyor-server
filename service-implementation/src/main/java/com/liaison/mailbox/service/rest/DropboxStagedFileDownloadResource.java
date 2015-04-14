@@ -184,21 +184,23 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					}
 
 					String processId = IdentifierUtil.getUuid();
-					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-					glassMessage.setGlobalPId(MailBoxUtil.getGUID());
-					glassMessage.setStatus(ExecutionState.PROCESSING);
-					glassMessage.setInAgent(GatewayType.REST);
-					glassMessage.setProcessId(processId);
 
-					// Log time stamp
-					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+                    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+                    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+                    glassMessage.setGlobalPId(MailBoxUtil.getGUID());
+                    glassMessage.setStatus(ExecutionState.PROCESSING);
+                    glassMessage.setInAgent(GatewayType.REST);
+                    glassMessage.setProcessId(processId);
+                    
+                    // Log time stamp
+                    glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
-					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+                    // Log running status
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Download Request Recevied");
 
-					// Log TVA status
-					transactionVisibilityClient.logToGlass(glassMessage);
+                    // Log TVA status
+                    transactionVisibilityClient.logToGlass(glassMessage);
+
 					// getting the file stream from spectrum for the given file
 					// id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);

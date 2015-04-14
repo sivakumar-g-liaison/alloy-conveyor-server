@@ -190,12 +190,14 @@ public class DropboxStagedFilesService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, STAGED_FILE, Messages.SUCCESS));
 			serviceResponse.setStagedFile(new StagedFileResponseDTO(String.valueOf(stagedFile.getPrimaryKey())));
 
-			// successfully staged
-			if (null != glassMessage) {
-
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY);
-				glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-			}
+	         //successfully staged
+            if (null != glassMessage) {
+                
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY);
+                glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+                
+            }
+            
 
 			LOG.debug("Exit from add staged file.");
 			return serviceResponse;
@@ -214,6 +216,7 @@ public class DropboxStagedFilesService {
 				transactionVisibilityClient.logToGlass(glassMessage);
 
 			}
+	
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE,
 					Messages.FAILURE, e.getMessage()));
 			return serviceResponse;

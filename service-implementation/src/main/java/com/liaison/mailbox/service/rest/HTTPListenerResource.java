@@ -64,7 +64,7 @@ import com.netflix.servo.monitor.Monitors;
 
 /**
  * G2 HTTP Gateway.
- * 
+ *
  * @author OFS
  */
 
@@ -115,7 +115,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 	/**
 	 * This method will processing the sync message by give request.
-	 * 
+	 *
 	 * @param request The HttpServletRequest
 	 * @return The Response Object
 	 */
@@ -172,14 +172,14 @@ public class HTTPListenerResource extends AuditedResource {
 					// Log First corner
 					glassMessage.logFirstCornerTimestamp();
 					// Log status running
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");
 					transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
 							httpListenerProperties, request.getContentType(), mailboxPguid);
 					// GLASS LOGGING BEGINS CORNER 4 //
 					glassMessage.setStatus(ExecutionState.COMPLETED);
-					glassMessage.logProcessingStatus(StatusType.SUCCESS, "");
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
 					glassMessage.logFourthCornerTimestamp();
 					transactionVisibilityClient.logToGlass(glassMessage);
 
@@ -187,7 +187,7 @@ public class HTTPListenerResource extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed");
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();
@@ -234,7 +234,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 	/**
 	 * This method will processing the async message by give request.
-	 * 
+	 *
 	 * @param request The HttpServletRequest
 	 * @return The Response Object
 	 */
@@ -291,7 +291,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.logFirstCornerTimestamp();
 
 					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP ASync Request success");
 
 					// Log TVA status
 					transactionVisibilityClient.logToGlass(glassMessage);
@@ -300,16 +300,13 @@ public class HTTPListenerResource extends AuditedResource {
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					asyncProcessor.processWorkTicket(workTicket, mailboxPguid, glassMessage);
 
-                    return Response
-                            .ok()
-                            .status(Status.ACCEPTED)
-                            .type(MediaType.TEXT_PLAIN)
-                            .entity(String.format("Payload accepted as process ID '%s'",workTicket.getGlobalProcessId())).build();
+					return Response.ok().status(Status.ACCEPTED).type(MediaType.TEXT_PLAIN).entity(
+							String.format("Payload accepted as process ID '%s'", workTicket.getGlobalProcessId())).build();
 
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed");
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();

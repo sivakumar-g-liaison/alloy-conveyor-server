@@ -310,7 +310,7 @@ public class MailboxSLAWatchDogService {
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
-		GlassMessage glassMessage = new GlassMessage();
+		GlassMessage glassMessage = null;
 
 		try {
 
@@ -318,12 +318,9 @@ public class MailboxSLAWatchDogService {
 
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
-			glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-			glassMessage.setMailboxId(mailboxId);
+			glassMessage = new GlassMessage(workTicket);
 			glassMessage.setStatus(ExecutionState.STAGED);
-			glassMessage.setPipelineId(workTicket.getPipelineId());
-			
-			glassMessage.logProcessingStatus(StatusType.RUNNING, "");
+			glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
 			// validates mandatory value.
 			mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -410,7 +407,7 @@ public class MailboxSLAWatchDogService {
 			}
 
 			//GLASS LOGGING CORNER 4 //
-			glassMessage.logProcessingStatus(StatusType.SUCCESS, "");			
+			glassMessage.logProcessingStatus(StatusType.SUCCESS, "Payload delivered at target location");			
             glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
@@ -435,7 +432,7 @@ public class MailboxSLAWatchDogService {
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "");
+			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);
@@ -458,7 +455,7 @@ public class MailboxSLAWatchDogService {
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "");
+			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 			LOG.error("File Staging failed", e);

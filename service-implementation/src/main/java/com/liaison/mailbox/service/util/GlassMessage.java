@@ -24,13 +24,15 @@ import com.liaison.commons.message.glass.dom.TimeStampAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.util.IdentifierUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class GlassMessage {
 
@@ -52,6 +54,25 @@ public class GlassMessage {
 	private static final Logger logger = LogManager.getLogger(GlassMessage.class);
 
 	DecryptableConfiguration config = LiaisonConfigurationFactory.getConfiguration();
+
+	public GlassMessage(WorkTicket wrkTicket) {
+		this.setGlobalPId(wrkTicket.getGlobalProcessId());
+		this.setPipelineId(wrkTicket.getPipelineId());
+		Long payloadSize = wrkTicket.getPayloadSize();
+		if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
+			this.setInSize((int) (long) payloadSize);
+		}
+		this.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
+		this.setProcessorId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
+		this.setTenancyKey((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
+		this.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
+		this.setServiceInstandId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
+		this.setMailboxId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID));
+	}
+
+	public GlassMessage() {
+		// TODO Auto-generated constructor stub
+	}
 
 	private ProcessorType category;
 	private ExecutionState status;
