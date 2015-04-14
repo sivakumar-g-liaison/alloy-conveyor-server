@@ -127,3 +127,6 @@ export CATALINA_OPTS="$CATALINA_OPTS -XX:GCTimeRatio=9"
 # Disable remote (distributed) garbage collection by Java clients
 # and remove ability for applications to call explicit GC collection
 export CATALINA_OPTS="$CATALINA_OPTS -XX:+DisableExplicitGC"
+
+# Https.protocols parameter for JVM
+export CATALINA_OPTS="$CATALINA_OPTS -Dhttps.protocols=TSLv1.2"
