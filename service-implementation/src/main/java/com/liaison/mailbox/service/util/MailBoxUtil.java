@@ -65,6 +65,8 @@ public class MailBoxUtil {
 	private static final Object lock = new Object();
 	private static final Properties properties = new Properties();
 
+	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
+
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
 	 * 
@@ -337,6 +339,17 @@ public class MailBoxUtil {
 		pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
 
 		return pageParameters;
+	}
+	
+	/**
+	 * Method to get the data retention value from the properties
+	 * 
+	 * @param identifier
+	 * @return
+	 */
+	public static Integer getDataRetentionTTL(String identifier) {
+	    String ttl = String.format(propDataRetentionTTL, identifier != null ? identifier + "." : "");
+	    return getEnvironmentProperties().getInteger(ttl, 2592000);
 	}
 
 	/**

@@ -175,19 +175,7 @@ public class StorageUtilities {
 				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
 						workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
 			}
-			/*
-			 * try (CountingInputStream inputStream = new CountingInputStream(payload)) {
-			 * 
-			 * detail = new PayloadDetail(); startTime = System.currentTimeMillis();
-			 * FS2.writePayloadFromStream(metaSnapshot.getURI(), inputStream);
-			 * 
-			 * endTime = System.currentTimeMillis(); detail.setMetaSnapshot(metaSnapshot);
-			 * detail.setPayloadSize(inputStream.getCount());
-			 * LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
-			 * workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
-			 * 
-			 * }
-			 */
+
 			LOGGER.debug("Successfully persist the payload in spectrum to url {} ", requestUri);
 			return detail;
 
@@ -295,7 +283,7 @@ public class StorageUtilities {
 		for (String type : spectrumTypes) {
 			for (String location : spectrumLocations) {
 
-				String identifier = type + "." + location;
+				final String identifier = type + "." + location;
 				FS2Configuration config;
 
 				if (type.equals(SECURE_MONIKER)) {
@@ -306,6 +294,11 @@ public class StorageUtilities {
 						public boolean doCalcPayloadSize() {
 							return false;
 						}
+
+						@Override
+					    public int getTTL() {
+					        return MailBoxUtil.getDataRetentionTTL(identifier);
+					    }
 					};
 				} else {
 					config = new FS2DefaultSpectrumStorageConfig(new FS2StorageIdentifier(type, location),
@@ -314,6 +307,11 @@ public class StorageUtilities {
 						public boolean doCalcPayloadSize() {
 							return false;
 						}
+
+						@Override
+					    public int getTTL() {
+						    return MailBoxUtil.getDataRetentionTTL(identifier);
+					    }
 					};
 				}
 				spectrumConfigs[i] = config;
@@ -393,7 +391,9 @@ public class StorageUtilities {
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 
-		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()));
+		if (workTicket.getTtlDays() != -1) {
+		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()));
+		}
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
 		return fs2Header;

@@ -201,7 +201,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicketUtil workTicketUtil = new WorkTicketUtil();
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
-					workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
+					//workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
