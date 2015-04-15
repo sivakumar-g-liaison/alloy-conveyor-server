@@ -50,7 +50,6 @@ import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.netflix.config.ConfigurationManager;
 
@@ -65,6 +64,8 @@ public class MailBoxUtil {
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
 	private static final Object lock = new Object();
 	private static final Properties properties = new Properties();
+
+	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -226,44 +227,6 @@ public class MailBoxUtil {
 	}
 
 	/**
-	 * Method to retrieve the dummy acl manifest json from properties file
-	 * 
-	 * @param manifestJson
-	 * @return
-	 * @throws IOException
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	public static String getDummyManifestJson()
-			throws IOException, MailBoxConfigurationServicesException {
-
-		String dummyManifestJson = null;
-
-		// check the value of property "use.dummy.manifest"
-		// if it is true use dummy manifest else throw an error due to the
-		// non-availability of manifest in header
-		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(
-				MailBoxConstants.DUMMY_MANIFEST_USAGE_PROPERTY, "false"))) {
-
-			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DUMMY_MANIFEST_PROPERTY);
-			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
-				LOGGER.error("dummy acl manifest is not available in the properties file");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,
-						MailBoxConstants.PROPERTIES_FILE, Response.Status.BAD_REQUEST);
-			}
-
-		} else {
-			LOGGER.error("acl manifest is not available in the request header");
-			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,
-					MailBoxConstants.REQUEST_HEADER, Response.Status.BAD_REQUEST);
-		}
-
-		return dummyManifestJson;
-	}
-
-
-	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
 	 * 
 	 * @param tenancyKeyGuid
@@ -333,18 +296,6 @@ public class MailBoxUtil {
 
 	}
 
-	public static String getManifest(String manifestFromRequestHeader)
-			throws MailBoxConfigurationServicesException, IOException {
-
-		if (MailBoxUtil.isEmpty(manifestFromRequestHeader)) {
-			LOGGER.debug("ACL Manifest not available in the request header");
-			return MailBoxUtil.getDummyManifestJson();
-		}
-
-		return manifestFromRequestHeader;
-
-	}
-
 	/**
 	 * Method to get pagingOffsetDetails
 	 * 
@@ -388,6 +339,17 @@ public class MailBoxUtil {
 		pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
 
 		return pageParameters;
+	}
+	
+	/**
+	 * Method to get the data retention value from the properties
+	 * 
+	 * @param identifier
+	 * @return
+	 */
+	public static Integer getDataRetentionTTL(String identifier) {
+	    String ttl = String.format(propDataRetentionTTL, identifier != null ? identifier + "." : "");
+	    return getEnvironmentProperties().getInteger(ttl, 2592000);
 	}
 
 	/**

@@ -10,13 +10,10 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
@@ -107,7 +104,7 @@ public class WorkTicketUtil {
 	 * @param httpListenerProperties
 	 * @return WorkTicket
 	 */
-	public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, Object> requestHeaders,
+	public WorkTicket createWorkTicket(Map<String, Object> requestProp, Map<String, List<String>> requestHeaders,
 			String mailboxPguid, Map<String, String> httpListenerProperties) {
 
 		WorkTicket workTicket = new WorkTicket();
@@ -128,6 +125,7 @@ public class WorkTicketUtil {
 		workTicket.setAdditionalContext(MailBoxConstants.HTTP_CONTENT_TYPE,
 				requestProp.get(MailBoxConstants.HTTP_CONTENT_TYPE));
 		workTicket.getAdditionalContext().putAll(requestHeaders);
+		workTicket.getHeaders().putAll(requestHeaders);
 		workTicket.setCreatedTime(new Date());
 
 		if (null != httpListenerProperties) {
@@ -138,27 +136,4 @@ public class WorkTicketUtil {
 		return workTicket;
 	}
 
-	/**
-	 * Copies all the request header from HttpServletRequest to WorkTicket.
-	 * 
-	 * @param request HttpServletRequest
-	 * @param request workTicket
-	 * 
-	 */
-	public void copyRequestHeadersToWorkTicket(HttpServletRequest request, WorkTicket workTicket) {
-
-		Enumeration<String> headerNames = request.getHeaderNames();
-		while (headerNames.hasMoreElements()) {
-			String headerName = headerNames.nextElement();
-			List<String> headerValues = new ArrayList<>();
-			Enumeration<String> values = request.getHeaders(headerName);
-
-			while (values.hasMoreElements()) {
-				headerValues.add(values.nextElement());
-			}
-
-			workTicket.addHeaders(headerName, headerValues);
-		}
-
-	}
 }

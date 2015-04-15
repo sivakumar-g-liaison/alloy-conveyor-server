@@ -59,7 +59,7 @@ public class StorageUtilitiesTest {
 		WorkTicket wTicket = new WorkTicket();
 		wTicket.setGlobalProcessId(String.valueOf(globalProcessId));
 		Map <String, String>properties = new HashMap <String, String>();
-		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(false));
+		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(true));
 
 		PayloadDetail detail = StorageUtilities.persistPayload(stream, wTicket, properties, false);
 
@@ -95,7 +95,7 @@ public class StorageUtilitiesTest {
 
 	}
 
-	@Test
+	@Test(enabled=false)
 	public void testWriteAndReadSecurePayload() throws IOException {
 
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");

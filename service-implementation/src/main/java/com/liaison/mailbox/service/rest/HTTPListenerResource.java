@@ -128,13 +128,11 @@ public class HTTPListenerResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call()
-					throws Exception {
+			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
 				GlassMessage glassMessage = new GlassMessage();
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 				glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
 				glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
 				glassMessage.setMailboxId(mailboxPguid);
@@ -152,16 +150,15 @@ public class HTTPListenerResource extends AuditedResource {
 
 					Map<String, String> httpListenerProperties = syncProcessor.retrieveHttpListenerProperties(
 							mailboxPguid, ProcessorType.HTTPSYNCPROCESSOR);
-					// authentication should happen only if the property
-					// "Http Listner Auth Check Required" is true
-					logger.info(
-							"Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
+
+					// authentication should happen only if the property "Http Listner Auth Check Required" is true
+					logger.info("Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
 							mailboxPguid);
 					if (syncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
 						syncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
 					}
-					logger.debug("constructed workticket");
 
+					logger.debug("construct workticket");
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 					String processId = IdentifierUtil.getUuid();
@@ -247,32 +244,30 @@ public class HTTPListenerResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call()
-					throws Exception {
+			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
 
 				logger.debug("Starting async processing");
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
 				GlassMessage glassMessage = new GlassMessage();
 
 				try {
-					HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
+				    HTTPAsyncProcessor asyncProcessor = new HTTPAsyncProcessor();
 					asyncProcessor.validateRequestSize(request.getContentLength());
 					if (StringUtils.isEmpty(mailboxPguid)) {
 						throw new RuntimeException("Mailbox ID is not passed as a query param (mailboxId) ");
 					}
 					Map<String, String> httpListenerProperties = asyncProcessor.retrieveHttpListenerProperties(
 							mailboxPguid, ProcessorType.HTTPASYNCPROCESSOR);
-					// authentication should happen only if the property
-					// "Http Listner Auth Check Required" is true
+					// authentication should happen only if the property "Http Listner Auth Check Required" is true
 					logger.info(
 							"Verifying if httplistenerauthcheckrequired is configured in httplistener of mailbox {}",
 							mailboxPguid);
 					if (asyncProcessor.isAuthenticationCheckRequired(httpListenerProperties)) {
 						asyncProcessor.authenticateRequestor(request.getHeader(HTTP_HEADER_BASIC_AUTH));
 					}
+
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
