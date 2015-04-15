@@ -20,9 +20,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.datanucleus.util.Base64;
 
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
@@ -68,7 +68,8 @@ public class DropboxAuthenticatorUtil {
 			IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
 		LOGGER.debug("Retrieval of Token Details");
-		byte[] decodedToken = Base64.decode(token);
+		Base64 decoder = new Base64();
+		byte[] decodedToken = decoder.decode(token);
 		String decryptedToken = EncryptionUtil.decrypt(decodedToken, true);
 		LOGGER.debug("decryptedToken token {} ", decryptedToken);
 		// Retrieval of recent revision date from token

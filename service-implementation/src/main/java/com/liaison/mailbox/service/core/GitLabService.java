@@ -23,7 +23,7 @@ import com.google.gson.Gson;
 import com.liaison.commons.jaxb.JAXBUtility;
 
 /**
- * Handles all script related operations
+ * Class which handles creation and updation of java script files in GIT
  * 
  * @author OFS
  */

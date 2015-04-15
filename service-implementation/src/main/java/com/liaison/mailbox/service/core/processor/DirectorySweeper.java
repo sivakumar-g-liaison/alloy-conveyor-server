@@ -178,36 +178,36 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 			if (workTicketGroups.isEmpty()) {
 				LOGGER.info("The file group is empty, so NOP");
-			} else {
-				for (WorkTicketGroup workTicketGroup : workTicketGroups) {;
-					String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
-					LOGGER.info("JSON POSTED TO SB.{}", new JSONObject(wrkTcktToSbr).toString(2));
-					postToSweeperQueue(wrkTcktToSbr);
-					//For glass logging 
-					for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()){
-						glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
-						glassMessage.setStatus(ExecutionState.PROCESSING);
-						Long payloadSize = wrkTicket.getPayloadSize();
-						if(payloadSize!=null && payloadSize < Integer.MAX_VALUE){
-							glassMessage.setInSize((int) (long) payloadSize);
-						}
-						if(inputLocation.contains("ftps")){
-							glassMessage.setInAgent(GatewayType.FTPS);
-						}if(inputLocation.contains("sftp")){
-							glassMessage.setInAgent(GatewayType.SFTP);
-						}else if(inputLocation.contains("ftp")){
-							glassMessage.setInAgent(GatewayType.FTP);
-						}
+				} else {
+					for (WorkTicketGroup workTicketGroup : workTicketGroups) {
+						String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
+						LOGGER.info("JSON POSTED TO SB.{}", new JSONObject(wrkTcktToSbr).toString(2));
+						postToSweeperQueue(wrkTcktToSbr);
+						// For glass logging
+						for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
+							glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
+							glassMessage.setStatus(ExecutionState.PROCESSING);
+							Long payloadSize = wrkTicket.getPayloadSize();
+							if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
+								glassMessage.setInSize((int) (long) payloadSize);
+							}
+							if (inputLocation.contains("ftps")) {
+								glassMessage.setInAgent(GatewayType.FTPS);
+							} else if (inputLocation.contains("sftp")) {
+								glassMessage.setInAgent(GatewayType.SFTP);
+							} else if (inputLocation.contains("ftp")) {
+								glassMessage.setInAgent(GatewayType.FTP);
+							}
 
-						//Log FIRST corner
-	                    glassMessage.logFirstCornerTimestamp();
-	                    transactionVisibilityClient.logToGlass(glassMessage);
-	                  //Log running status
-	                    glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
+							// Log FIRST corner
+							glassMessage.logFirstCornerTimestamp();
+							transactionVisibilityClient.logToGlass(glassMessage);
+							// Log running status
+							glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
+						}
 					}
-				}
 
-			}
+				}
 		}
 
 		// retry when in-progress file list is not empty

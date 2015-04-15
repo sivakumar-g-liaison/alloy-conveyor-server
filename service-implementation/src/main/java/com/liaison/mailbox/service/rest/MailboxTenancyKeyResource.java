@@ -33,7 +33,6 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailboxTenancyKeyService;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -86,11 +85,11 @@ public class MailboxTenancyKeyResource extends AuditedResource {
 					serviceCallCounter.addAndGet(1);
 					// retrieving acl manifest from header
 					LOG.info("Retrieving acl manifest json from request header");
-					String manifestJson = MailBoxUtil.getManifest(request.getHeader("acl-manifest"));
+					String manifestJson = request.getHeader("acl-manifest");
 					// retrieve TenancyKeys
 					MailboxTenancyKeyService mailboxTenancyKey = new MailboxTenancyKeyService();
 					return mailboxTenancyKey.getAllTenancyKeysFromACLManifest(manifestJson);
-				} catch (IOException e) {
+				} catch (Exception e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
