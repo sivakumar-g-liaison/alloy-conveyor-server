@@ -68,8 +68,7 @@ public class DropboxAuthenticatorUtil {
 			IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
 		LOGGER.debug("Retrieval of Token Details");
-		Base64 decoder = new Base64();
-		byte[] decodedToken = decoder.decode(token);
+		byte[] decodedToken = Base64.decodeBase64(token.getBytes());
 		String decryptedToken = EncryptionUtil.decrypt(decodedToken, true);
 		LOGGER.debug("decryptedToken token {} ", decryptedToken);
 		// Retrieval of recent revision date from token
