@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -45,13 +43,11 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.
@@ -62,8 +58,6 @@ public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final Object lock = new Object();
-	private static final Properties properties = new Properties();
 
 	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
 
@@ -150,22 +144,6 @@ public class MailBoxUtil {
 
 	public static DecryptableConfiguration getEnvironmentProperties() {
 		return LiaisonConfigurationFactory.getConfiguration();
-	}
-
-	public static Properties getEnvProperties()
-			throws IOException {
-
-		synchronized (lock) {
-
-			if (properties.isEmpty()) {
-				Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
-				String propertyFileName = "g2mailboxservice-" + env + ".properties";
-				String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-				InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-				properties.load(is);
-			}
-			return properties;
-		}
 	}
 
 	/**

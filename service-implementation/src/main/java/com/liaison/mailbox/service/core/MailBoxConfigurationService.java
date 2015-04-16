@@ -26,6 +26,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -569,20 +570,15 @@ public class MailBoxConfigurationService {
 
 		try {
 
-			dto.setTrustStoreId(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
-			dto.setTrustStoreGroupId(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
-			dto.setListJobsIntervalInHours(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
-			dto.setFsmEventCheckIntervalInSeconds(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
-			dto.setProcessorSyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
-			dto.setProcessorAsyncUrlDisplayPrefix(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
-			dto.setDefaultScriptTemplateName(MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
+		    DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
+			dto.setTrustStoreId(config.getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
+			dto.setTrustStoreGroupId(config.getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
+			dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
+			dto.setFsmEventCheckIntervalInSeconds(config.getString(
+			        MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));
+			dto.setProcessorSyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_SYNC_URL_DISPLAY_PREFIX));
+			dto.setProcessorAsyncUrlDisplayPrefix(config.getString(MailBoxConstants.PROCESSOR_ASYNC_URL_DISPLAY_PREFIX));
+			dto.setDefaultScriptTemplateName(config.getString(MailBoxConstants.DEFAULT_SCRIPT_TEMPLATE_NAME));
 
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
