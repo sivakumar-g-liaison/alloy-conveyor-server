@@ -75,21 +75,26 @@
                   Description
               </label>
 
-              <textarea class="form-control" ng-model="mailBox.description" id="description" rows="2" name="description"
+              <textarea class="form-control" ng-model="mailBox.description" id="description" rows="1" name="description"
                         ng-pattern="userInputPattern" ng-maxLength=1024>          </textarea>
               <div ng-show="formAddMbx.description.$dirty && formAddMbx.description.$invalid">
                   <span id="mbx-add-descInvalid-pattern" class="customHide" ng-class = "{'help-block-custom' : formAddMbx.description.$error.pattern}" ng-show="formAddMbx.description.$error.pattern">Invalid Description.</span>
           		  <span id="mbx-add-descInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block' : formAddMbx.description.$error.maxlength}" ng-show="formAddMbx.description.$error.maxlength">
           		  <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInMailBoxDescription}} characters.</span>
               </div>
-              <br>
           </div>
+			<div>
+			<label ng-show = "isMailBoxEdit">
+				MailboxId
+			</label>
+			<textarea class="form-control" readonly="readonly" ng-model="mailboxGuid" ng-show = "isMailBoxEdit" id="mailbox_pguid" rows="1" name="mailboxpguid"/>
+		  </div>
           </div>
        </div>
    
 	<div class="form-group">
     <div>
-      <div class="addMailBox_gridStyle" ng-grid="gridOptionsForMailbox">
+      <div class="gridStyle addMailBox_gridStyle" ng-grid="gridOptionsForMailbox">
       </div>
       <br>
    </div>

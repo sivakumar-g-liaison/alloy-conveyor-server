@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -45,14 +43,11 @@ import com.liaison.commons.util.UUIDGen;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.netflix.config.ConfigurationManager;
 
 /**
  * Utilities for MailBox.
@@ -63,8 +58,8 @@ public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
-	private static final Object lock = new Object();
-	private static final Properties properties = new Properties();
+
+	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
 
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
@@ -151,22 +146,6 @@ public class MailBoxUtil {
 		return LiaisonConfigurationFactory.getConfiguration();
 	}
 
-	public static Properties getEnvProperties()
-			throws IOException {
-
-		synchronized (lock) {
-
-			if (properties.isEmpty()) {
-				Object env = ConfigurationManager.getDeploymentContext().getDeploymentEnvironment();
-				String propertyFileName = "g2mailboxservice-" + env + ".properties";
-				String props = ServiceUtils.readFileFromClassPath(propertyFileName);
-				InputStream is = new ByteArrayInputStream(props.getBytes("UTF-8"));
-				properties.load(is);
-			}
-			return properties;
-		}
-	}
-
 	/**
 	 * Method to get the current timestmp to insert into database.
 	 * 
@@ -224,44 +203,6 @@ public class MailBoxUtil {
 		return tenancyKeyGuids;
 
 	}
-
-	/**
-	 * Method to retrieve the dummy acl manifest json from properties file
-	 * 
-	 * @param manifestJson
-	 * @return
-	 * @throws IOException
-	 * @throws MailBoxConfigurationServicesException
-	 */
-	public static String getDummyManifestJson()
-			throws IOException, MailBoxConfigurationServicesException {
-
-		String dummyManifestJson = null;
-
-		// check the value of property "use.dummy.manifest"
-		// if it is true use dummy manifest else throw an error due to the
-		// non-availability of manifest in header
-		if (Boolean.valueOf(MailBoxUtil.getEnvironmentProperties().getString(
-				MailBoxConstants.DUMMY_MANIFEST_USAGE_PROPERTY, "false"))) {
-
-			LOGGER.info("Retrieving the dummy acl manifest json from properties file");
-			dummyManifestJson = MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.DUMMY_MANIFEST_PROPERTY);
-			if (MailBoxUtil.isEmpty(dummyManifestJson)) {
-				LOGGER.error("dummy acl manifest is not available in the properties file");
-				throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,
-						MailBoxConstants.PROPERTIES_FILE, Response.Status.BAD_REQUEST);
-			}
-
-		} else {
-			LOGGER.error("acl manifest is not available in the request header");
-			throw new MailBoxConfigurationServicesException(Messages.ACL_MANIFEST_NOT_AVAILABLE,
-					MailBoxConstants.REQUEST_HEADER, Response.Status.BAD_REQUEST);
-		}
-
-		return dummyManifestJson;
-	}
-
 
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
@@ -333,18 +274,6 @@ public class MailBoxUtil {
 
 	}
 
-	public static String getManifest(String manifestFromRequestHeader)
-			throws MailBoxConfigurationServicesException, IOException {
-
-		if (MailBoxUtil.isEmpty(manifestFromRequestHeader)) {
-			LOGGER.debug("ACL Manifest not available in the request header");
-			return MailBoxUtil.getDummyManifestJson();
-		}
-
-		return manifestFromRequestHeader;
-
-	}
-
 	/**
 	 * Method to get pagingOffsetDetails
 	 * 
@@ -388,6 +317,17 @@ public class MailBoxUtil {
 		pageParameters.put(MailBoxConstants.PAGING_COUNT, toIndex);
 
 		return pageParameters;
+	}
+	
+	/**
+	 * Method to get the data retention value from the properties
+	 * 
+	 * @param identifier
+	 * @return
+	 */
+	public static Integer getDataRetentionTTL(String identifier) {
+	    String ttl = String.format(propDataRetentionTTL, identifier != null ? identifier + "." : "");
+	    return getEnvironmentProperties().getInteger(ttl, 2592000);
 	}
 
 	/**

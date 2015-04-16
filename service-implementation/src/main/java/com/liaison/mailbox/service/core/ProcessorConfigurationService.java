@@ -108,7 +108,7 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class ProcessorConfigurationService {
 
@@ -123,7 +123,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Creates processor for the mailbox.
-	 * 
+	 *
 	 * @param serviceRequest The AddProcessorToMailboxRequestDTO
 	 * @return The AddProcessorToMailboxResponseDTO
 	 * @throws IOException
@@ -249,7 +249,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Creates link between scheduleProfileref and processor.
-	 * 
+	 *
 	 * @param addRequest The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest The ReviseProcessorRequest DTO
 	 * @param processor The processor Entity
@@ -306,7 +306,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Creates link between mailbox and processor.
-	 * 
+	 *
 	 * @param addRequest The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest The ReviseProcessorRequest DTO
 	 * @param processor The processor Entity
@@ -335,7 +335,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Get the Processor details of the mailbox using guid.
-	 * 
+	 *
 	 * @param processorGuid The guid of the Processor.
 	 * @return The responseDTO.
 	 * @throws IOException
@@ -389,7 +389,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Get the TrustStoreResponse.
-	 * 
+	 *
 	 * @return GetTrustStoreResponseDTO
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws ClientProtocolException
@@ -472,7 +472,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Deactivate the processor using guid.
-	 * 
+	 *
 	 * @param processorGuid The guid of the Processor.
 	 * @return The responseDTO.
 	 */
@@ -517,7 +517,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Method revise the processor configuration
-	 * 
+	 *
 	 * @param request The Revise Processor Request DTO
 	 * @param mailBoxId The guid of the mailbox.The given processor should belongs to the given mailbox.
 	 * @param processorId The processor guid which is to be revised.
@@ -636,7 +636,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Method for add and update the dynamic processorProperty to Processor entity
-	 * 
+	 *
 	 * @param guid The processor guid
 	 * @param propertyDTO The dynamic properties
 	 */
@@ -696,7 +696,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Validates the given processor is belongs to the given mailbox.
-	 * 
+	 *
 	 * @param mailBoxGuid The guid of the mailbox
 	 * @param processor The processor of the mailbox
 	 * @throws MailBoxConfigurationServicesException
@@ -713,7 +713,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Get the executing processors
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws IOException
 	 */
@@ -748,19 +748,19 @@ public class ProcessorConfigurationService {
 			}
 
 			if (!MailBoxUtil.isEmpty(status) && !MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate)) {
-				listfsmStateVal = procDAO.findProcessorsExecutingByValueAndDate(status, frmDate, toDate);
+				listfsmStateVal = procDAO.findExecutingProcessorsByValueAndDate(status, frmDate, toDate);
 			}
 
 			if (!MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
-				listfsmStateVal = procDAO.findProcessorsExecutingByValue(status, timeStmp);
+				listfsmStateVal = procDAO.findExecutingProcessorsByValue(status, timeStmp);
 			}
 
 			if (!MailBoxUtil.isEmpty(frmDate) && !MailBoxUtil.isEmpty(toDate) && MailBoxUtil.isEmpty(status)) {
-				listfsmStateVal = procDAO.findProcessorsExecutingByDate(frmDate, toDate);
+				listfsmStateVal = procDAO.findExecutingProcessorsByDate(frmDate, toDate);
 			}
 
 			if (MailBoxUtil.isEmpty(status) && MailBoxUtil.isEmpty(frmDate) && MailBoxUtil.isEmpty(toDate)) {
-				listfsmStateVal = procDAO.findAllProcessorsExecuting(timeStmp);
+				listfsmStateVal = procDAO.findAllExecutingProcessors(timeStmp);
 			}
 
 			List<GetExecutingProcessorDTO> getExecutingProcessorDTOList = new ArrayList<GetExecutingProcessorDTO>();
@@ -796,12 +796,12 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * 
+	 *
 	 * Interrupt the execution of running processor
-	 * 
+	 *
 	 * @param executionID
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	public InterruptExecutionEventResponseDTO interruptRunningProcessor(String executionID)
 			throws MailBoxConfigurationServicesException {
@@ -850,7 +850,7 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Method to retrieve the properties of HTTPListner of type Sync/Async
-	 * 
+	 *
 	 * @param mailboxGuid
 	 * @param httpListenerType
 	 * @return a Map containing the HttpListenerSpecific Properties

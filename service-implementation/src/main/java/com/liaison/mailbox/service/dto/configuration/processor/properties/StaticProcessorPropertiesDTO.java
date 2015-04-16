@@ -16,19 +16,17 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
  * @author OFS
  *
  */
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="staticProperties")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.FileWriterPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.DropboxProcessorPropertiesDTO.class),
-        @JsonSubTypes.Type(value=com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO.class)
-})
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "staticProperties")
+@JsonSubTypes({ @JsonSubTypes.Type(value = FTPUploaderPropertiesDTO.class),
+		@JsonSubTypes.Type(value = FTPDownloaderPropertiesDTO.class),
+		@JsonSubTypes.Type(value = HTTPUploaderPropertiesDTO.class),
+		@JsonSubTypes.Type(value = HTTPDownloaderPropertiesDTO.class),
+		@JsonSubTypes.Type(value = SFTPUploaderPropertiesDTO.class),
+		@JsonSubTypes.Type(value = SFTPDownloaderPropertiesDTO.class),
+		@JsonSubTypes.Type(value = SweeperPropertiesDTO.class),
+		@JsonSubTypes.Type(value = FileWriterPropertiesDTO.class),
+		@JsonSubTypes.Type(value = DropboxProcessorPropertiesDTO.class),
+		@JsonSubTypes.Type(value = HTTPListenerPropertiesDTO.class) })
 public class StaticProcessorPropertiesDTO {
 
 	private boolean handOverExecutionToJavaScript;

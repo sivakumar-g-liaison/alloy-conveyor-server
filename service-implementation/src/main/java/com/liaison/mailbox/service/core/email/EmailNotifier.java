@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.config.ConfigurationManager;
+import com.netflix.config.util.ConfigurationUtils;
 
 /**
  *
@@ -81,7 +82,7 @@ public class EmailNotifier {
 	public void sendEmail(List<String> toEmailAddrList, String subject, String body, String type) {
 
 		try {
-		    Session session = getMailSession(MailBoxUtil.getEnvProperties());
+		    Session session = getMailSession(ConfigurationUtils.getProperties(MailBoxUtil.getEnvironmentProperties()));
             MimeMessage message = new MimeMessage(session);
 
             // the "from" address may be set in code, or set in the
@@ -99,7 +100,7 @@ public class EmailNotifier {
             message.setText(completeMessage);
             Transport.send(message);
 
-        } catch (MessagingException | IOException ex ) {
+        } catch (MessagingException ex ) {
         	LOGGER.error("Cannot send email. " + ex);
 
         }

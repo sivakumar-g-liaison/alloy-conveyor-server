@@ -28,7 +28,7 @@ import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
-public class HTTPSyncProcessor extends HTTPAbstractProcessor{
+public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 	private static final String CONFIGURATION_SERVICE_BROKER_URI = "com.liaison.servicebroker.sync.uri";
@@ -49,12 +49,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 		// persist payload in spectrum
 		StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
 		workTicket.setProcessMode(ProcessMode.SYNC);
-		
+
 		String serviceBrokerSyncUri = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
-		if(serviceBrokerSyncUri.isEmpty()){
+        if (serviceBrokerSyncUri.isEmpty()) {
 			throw new RuntimeException("Service Broker URI not configured ('" + CONFIGURATION_SERVICE_BROKER_URI + "'), cannot process sync");
 		}
-		
+
 		HttpPost httpRequest = new HttpPost(serviceBrokerSyncUri);
 		httpRequest.setHeader("Content-type", ContentType.APPLICATION_JSON.getMimeType());
 		StringEntity requestBody = new StringEntity(JAXBUtility.marshalToJSON(workTicket));
@@ -131,7 +131,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 
 			InputStream responseInputStream = httpResponse.getEntity().getContent();
 			WorkResult result = JAXBUtility.unmarshalFromJSON(responseInputStream, WorkResult.class);
-
+			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS: {}", JAXBUtility.marshalToJSON(result));
 			// sets status code from work result
 			builder.status(result.getStatus());
 
@@ -158,7 +158,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor{
 			}
 
 		}
-	return builder.build();
+		return builder.build();
 	}
  
 }

@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -22,7 +22,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class ProcessorStateDTO {
 
@@ -36,7 +36,7 @@ public class ProcessorStateDTO {
 	private String executionId;
 	private String slaVerficationStatus;
 
-		
+
 	public ProcessorStateDTO(String executionId,String processorId,ExecutionState executionState){
 		this.setExecutionId(executionId);
 		this.setExecutionState(executionState);
@@ -44,7 +44,7 @@ public class ProcessorStateDTO {
 	}
 
 	public ProcessorStateDTO() {
-		
+
 	}
 
 	public String getExecutionId() {
@@ -132,15 +132,15 @@ public class ProcessorStateDTO {
 		newCopy.setSlaVerficationStatus(this.getSlaVerficationStatus());
 		return newCopy;
 	}
-    
+
 	/**
 	 * Copies all the data from dto to entity.
-	 * 
+	 *
 	 * @param entity
 	 *         the FSMState
 	 */
 	public void copyToEntity(FSMState entity) {
-		
+
 		//Constructing the FSMStae
 		entity.setPguid(MailBoxUtil.getGUID());
 		entity.setExecutionId(this.getExecutionId());
@@ -151,7 +151,7 @@ public class ProcessorStateDTO {
 		entity.setProfileName(this.getProfileName());
 		entity.setStateNotes(this.getExecutionState().notes());
 		entity.setSlaVerificationStatus(this.getSlaVerficationStatus());
-		
+
 		//Constructing FSMStateValue
 		FSMStateValue value = new FSMStateValue();
 		value.setPguid(MailBoxUtil.getGUID());
@@ -161,10 +161,10 @@ public class ProcessorStateDTO {
 		values.add(value);
 		entity.setExecutionState(values);
 	}
-	
+
 	/**
 	 * Copies all the data from processor to dto.
-	 * 
+	 *
 	 * @param executionId
 	 * @param processor
 	 * @param profileName
@@ -172,9 +172,9 @@ public class ProcessorStateDTO {
 	 * @param stateNotes
 	 * @return ProcessorStateDTO
 	 */
-	
-	public void setValues(String executionId, Processor processor, String profileName,ExecutionState state,String slaVerificationStatus) {
-		
+
+	public void setValues(String executionId, Processor processor, String profileName,ExecutionState state, String slaVerificationStatus) {
+
 		this.setExecutionId(executionId);
 		this.setProcessorId(processor.getPguid());
 		this.setExecutionState(state);
@@ -182,10 +182,10 @@ public class ProcessorStateDTO {
 		this.setProcessorType(processor.getProcessorType());
 		this.setMailboxId(processor.getMailbox().getPguid());
 		this.setProfileName(profileName);
-		this.setSlaVerficationStatus(this.getSlaVerficationStatus());
+		this.setSlaVerficationStatus(slaVerificationStatus);
 
 	}
-	
+
 	/**
 	 * Validation for  executionId.
 	 * @param incoming

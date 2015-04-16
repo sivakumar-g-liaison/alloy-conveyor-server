@@ -262,9 +262,9 @@ public class BaseResource {
 	 * @param request The HTTPRequest
 	 * @return Headers
 	 */
-	protected Map<String, Object> getRequestHeaders(HttpServletRequest request) {
+	protected Map<String, List<String>> getRequestHeaders(HttpServletRequest request) {
 
-		Map<String, Object> headers = new HashMap<>();
+		Map<String, List<String>> headers = new HashMap<>();
 
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements()) {

@@ -83,7 +83,7 @@ public class MailboxServiceConfigurationsResource extends AuditedResource {
 
 				// get Property File
 				MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-				return mailbox.getValuesFromPropertiesFile();
+				return mailbox.readPropertiesFile();
 			}
 		};
 		worker.actionLabel = "MailboxServiceConfigurationsResource.getPropertyFileValues()";

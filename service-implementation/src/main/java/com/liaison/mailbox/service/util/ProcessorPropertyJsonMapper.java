@@ -55,7 +55,7 @@ import com.liaison.mailbox.service.dto.configuration.request.RemoteProcessorProp
 
 /**
  * Utilities for ProcessorProperties.
- * 
+ *
  * @author OFS
  */
 public class ProcessorPropertyJsonMapper {
@@ -81,7 +81,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve specific processor property given name
-	 * 
+	 *
 	 * @param processorDTO
 	 * @param propertyName
 	 * @return
@@ -102,7 +102,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve specific processor property given name
-	 * 
+	 *
 	 * @param processorDTO
 	 * @param propertyName
 	 * @return String it should return property Value by given property Name
@@ -123,9 +123,9 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve ProcessorPropertyUITemplateDTO in format stored in Template JSON from the properties JSON
-	 * stored in DB This method will convert the json to ProcessorPropertyUITemplateDTO format even if it is in older
+	 * stored in DB. This method will convert the json to ProcessorPropertyUITemplateDTO format even if it is in older
 	 * format (RemoteProcessorPropertiesDTO)
-	 * 
+	 *
 	 * @param propertyJson
 	 * @param processor
 	 * @return ProcessorPropertyUITemplateDTO
@@ -173,10 +173,10 @@ public class ProcessorPropertyJsonMapper {
 	}
 
 	/**
-	 * Method to retrieve staticproperties in format stored in DB (ie StaticProcessorPropertiesDTO) from the properties
-	 * JSON stored in DB This method will convert the json to StaticProcessorPropertiesDTO format even if it is in older
-	 * format (RemoteProcessorPropertiesDTO)
-	 * 
+	 * Method to retrieve static properties in format stored in DB (ie StaticProcessorPropertiesDTO) from the properties
+	 * JSON stored in DB. This method will convert the json to StaticProcessorPropertiesDTO format even if it is in
+	 * older format (RemoteProcessorPropertiesDTO)
+	 *
 	 * @param propertyJson
 	 * @param processor
 	 * @return
@@ -211,7 +211,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve StaticProcessorPropertiesDTO by given procsrProperties retrieved from db.
-	 * 
+	 *
 	 * @param propertyJson
 	 * @return The propertyJson is string of procsrProperties retrieved from db.
 	 * @throws JsonParseException
@@ -228,7 +228,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve ProcessorPropertyUITemplateDTO from JsonTemplate by given processorType and protocol
-	 * 
+	 *
 	 * @param processorType The processorType of the Processor
 	 * @param protocol The protocol of the Processor
 	 * @return ProcessorPropertyUITemplateDTO
@@ -265,7 +265,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to build new JSON format from the older format
-	 * 
+	 *
 	 * @param uiPropertyTemplate
 	 * @param legacyProps
 	 * @return
@@ -326,7 +326,7 @@ public class ProcessorPropertyJsonMapper {
 	 * considered as static properties and the properties added by user through "addNew" will be considered as dynamic
 	 * properties. The above mentioned properties needs to be mapped as static properties. Those properties are in
 	 * lowercase and needs to be converted to camel case. This method will return the camelCase version property Name
-	 * 
+	 *
 	 * @param Name
 	 * @return String camelCase version of given propertyName
 	 */
@@ -341,7 +341,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to handle dynamic properties
-	 * 
+	 *
 	 * @param processor
 	 * @param propertiesDTO
 	 */
@@ -371,7 +371,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to separate static and dynamic properties
-	 * 
+	 *
 	 * @param staticProperties
 	 * @param dynamicProperties
 	 */
@@ -389,14 +389,14 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve StaticProcessorProperitesDTO from staticProperties in template json
-	 * 
-	 * 
+	 *
+	 *
 	 * @param staticProperties
 	 * @param processorType
 	 * @param protocol
-	 * 
+	 *
 	 * @return StaticProcessorProperitesDTO
-	 * 
+	 *
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws JAXBException
@@ -512,7 +512,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve the static properties DTO after mapping static properties in JSON template
-	 * 
+	 *
 	 * @param staticPropertiesInTemplateJson
 	 * @param staticPropertiesDTO
 	 * @return
@@ -551,7 +551,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve list of static properties from staticPropertiesDTO object
-	 * 
+	 *
 	 * @param staticPropertiesDTO
 	 * @return list of static properties
 	 * @throws IllegalArgumentException
@@ -602,7 +602,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve StaticProcessorProperitesDTO from remoteProcessorProperties
-	 * 
+	 *
 	 * @param remoteProcessorProperties The RemoteProcessorPropertiesDTO
 	 * @param processorType
 	 * @param protocol
@@ -706,10 +706,10 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method StaticProcessorPropertiesDTO from RemoteProcessorPropertiesDTO object
-	 * 
+	 *
 	 * @param source The RemoteProcessorPropertiesDTO
 	 * @param target The StaticProcessorPropertiesDTO
-	 * 
+	 *
 	 * @throws NoSuchFieldException
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
@@ -748,7 +748,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct HttpOtherRequestHeaderDTO from template Json.
-	 * 
+	 *
 	 * @param otherRequestHeaders
 	 * @return String Value of otherRequestHeader
 	 */
@@ -763,7 +763,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method retrieve dynamic properties from processor for construct ProcessorPropertyUITemplate.
-	 * 
+	 *
 	 * @param staticProcessorPropertiesDTO The staticProcessorPropertiesDTO of the processor
 	 * @param processor
 	 * @throws NoSuchFieldException
@@ -800,9 +800,9 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct list of folderDTO from the folderDTOTemplateList
-	 * 
+	 *
 	 * @param folderPropertiesDTO The ProcessorFolderPropertyDTO
-	 * 
+	 *
 	 * @return List<FolderDTO> return List of FolderDto's
 	 */
 	public static List<FolderDTO> getFolderProperties(List<ProcessorFolderPropertyDTO> folderPropertiesDTO) {
@@ -821,7 +821,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct FolderTemplate by given processor which is to be retrieved from db.
-	 * 
+	 *
 	 * @param processor The Processor of the the mailBox
 	 * @param uiPropTemplate The ProcessorPropertyUITemplateDTO of the Processor
 	 * @throws JsonParseException
@@ -879,7 +879,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct ProcessorFolderPropertyDTO from Folder which is to be retrieve from db.
-	 * 
+	 *
 	 * @param property The ProcessorFolderPropertyDTO which is to be construct from Folder
 	 * @param folder The Folder for construct ProcessorFolderPropertyDTO
 	 */
@@ -900,9 +900,9 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to retrieve the credential Display Type from given credential Entity
-	 * 
+	 *
 	 * @param credential The credential Entity in DB from which the display Name has to be deduced
-	 * 
+	 *
 	 * @return String - DisplayType of given credential
 	 */
 	private static String getCredentialDisplayType(Credential credential) {
@@ -928,10 +928,10 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct credential Template from credential Entity
-	 * 
+	 *
 	 * @param credentialTemplate The template in Json for credentialProperties to be constructed from credential Entity
 	 * @param credential The credential Entity in DB from which credentialTempalte has to be constructed
-	 * 
+	 *
 	 */
 	private static void handleCredentialProperties(ProcessorCredentialPropertyDTO credentialPropertyTemplate,
 			Credential credential) {
@@ -949,9 +949,9 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct list of CredentialDTO from the CredentialDTOTemRplateList
-	 * 
+	 *
 	 * @param folderPropertiesDTO The ProcessorFolderPropertyDTO
-	 * 
+	 *
 	 * @return List<FolderDTO> return List of CredentialDTO
 	 */
 	public static List<CredentialDTO> getCredentialProperties(
@@ -975,7 +975,7 @@ public class ProcessorPropertyJsonMapper {
 	/**
 	 * Method to construct Credential Template form the given Processor entity and set that in the
 	 * propertiesJsonTemplate DTO
-	 * 
+	 *
 	 * @param processor The processor entity from which the credential Template has to be constructed
 	 * @param propertiesJsonTemplate The processor properties JSON template in which the credentialTemplate needs to be
 	 *            set
