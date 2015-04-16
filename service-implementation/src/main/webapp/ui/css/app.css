@@ -212,7 +212,6 @@ textarea {
 }
 
 .addMailBox_gridStyle {
-  border: 1px solid #d4d4d4;
   height: 300px;
 }
 
@@ -369,22 +368,6 @@ html,input {
 
 /*--- file[processor.css] --- */
 
-.processor_gridStyle {
-  border: 1px solid #d4d4d4;
-}
-
-.processor_gridStyleFolder {
-  border: 1px solid #d4d4d4;
-}
-
-.processor_gridStyleCredentials {
-  border: 1px solid #d4d4d4;
-}
-
-.processor_gridStyleProcessors {
-  border: 1px solid #d4d4d4;
-}
-
 .processor_right {
   position: absolute;
   top: 10px;
@@ -490,11 +473,6 @@ div[data-tree-model] li .processor_expanded {
   padding-bottom: .5em;
 }
 
-.gridStyle {
-  border: 1px solid #d4d4d4;
-  height: 300px;
-}
-
 .contact_about-img {
   width: 50%;
   margin-left: 25%;
@@ -536,7 +514,7 @@ input::-moz-focus-inner {
 /*--- folderDescription.html---*/
 .folderDescriptionStyle{
 	width:95%;
-	height: 45px;
+	height: 45px !important;
 }
 
 /*--- folderUri.html---*/
@@ -548,7 +526,7 @@ input::-moz-focus-inner {
 /*--- propertyNameDirectiveTemplate.html---*/
 .propertyNameDirectiveStyle{
 	width:47%;
-	height:45px;	
+	height:45px !important;	
 }
 
 /*--- processor.html---*/

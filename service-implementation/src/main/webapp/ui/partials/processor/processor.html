@@ -5,7 +5,7 @@
       Processors of Mailbox {{mailboxName}}
     </h2>
 
-        <div class="processor_gridStyle" ng-grid="gridOptionsForProcessorList">
+        <div class="gridStyle" ng-grid="gridOptionsForProcessorList">
 
         </div>
         <br/>
@@ -176,7 +176,7 @@
                 <div  ng-show="!isProcessorTypeFileWriter">
                     <h4>Properties</h4>
 
-                    <div class="processor_gridStyle" ng-grid="gridOptionsForProcessor">
+                    <div class="gridStyle" ng-grid="gridOptionsForProcessor">
                     </div>
                 </div>
             </div>           
@@ -186,7 +186,7 @@
                     <span>Create folders if not available <input type="checkbox" ng-model="isCreateConfiguredLocation" id="mbx_procsr_configuredlocation" ng-init="isCreateConfiguredLocation=true">
 					</span>
 					<br/><br/>
-                    <div class="processor_gridStyle" ng-grid="gridOptionsForProcessorFolder">
+                    <div class="gridStyle" ng-grid="gridOptionsForProcessorFolder">
                     </div>
                 </div>
                 <br>
@@ -288,7 +288,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="processor_gridStyle" ng-grid="gridOptionsForProcessorCredential">
+                    <div class="gridStyle" ng-grid="gridOptionsForProcessorCredential">
                     </div>
                 </div>
                 <br>
