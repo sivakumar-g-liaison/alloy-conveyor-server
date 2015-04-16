@@ -52,7 +52,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Class which has mailbox functional related operations.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxService {
@@ -61,7 +61,7 @@ public class MailBoxService {
 
 	/**
 	 * The method gets the list of processors from the given profile, mailboxNamePattern and invokes the processor.
-	 * 
+	 *
 	 * @param profileName The name of the profile to trigger
 	 * @param mailboxNamePattern The mailbox name pattern to exclude
 	 * @return The trigger profile response DTO
@@ -126,7 +126,7 @@ public class MailBoxService {
 
 			}
 
-			LOG.debug("ABOUT TO get ProcessorQueue Instance {}", messages.toArray(new String[messages.size()]));
+			LOG.debug("ABOUT TO get ProcessorQueue Instance {}", (Object)messages.toArray(new String[messages.size()]));
 			ProcessorQueue.getInstance().sendMessages(messages.toArray(new String[messages.size()]));
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.PROFILE_TRIGGERED_SUCCESSFULLY, profileName,Messages.SUCCESS));
@@ -151,7 +151,7 @@ public class MailBoxService {
 
 	/**
 	 * Method to add the initial processor execution statue.
-	 * 
+	 *
 	 * @param executionId
 	 * @param processor
 	 * @param profileName
@@ -167,9 +167,9 @@ public class MailBoxService {
 
 	/**
 	 * The method gets the processor based on given processor id.
-	 * 
+	 *
 	 * Unique id for processor
-	 * 
+	 *
 	 * @return The trigger profile response DTO
 	 * @throws IOException
 	 * @throws JAXBException
@@ -282,7 +282,7 @@ public class MailBoxService {
 
 	/**
 	 * Sent notifications for trigger system failure.
-	 * 
+	 *
 	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
 	 * @param subject The notification subject
 	 * @param emailBody The body of the notification
@@ -297,7 +297,7 @@ public class MailBoxService {
 
 	/**
 	 * Sent notifications for trigger system failure.
-	 * 
+	 *
 	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
 	 * @param subject The notification subject
 	 * @param exc The exception as body content
