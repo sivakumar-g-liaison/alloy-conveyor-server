@@ -380,7 +380,7 @@ task devConfigLogging(description: 'configures log4j2 for build local log files'
 
 
 
-task buildAsDropbox (type :Copy){
+/*task buildAsDropbox (type :Copy){
 	from 'src/main/resources/g2dropbox-dev-int.properties'
 	into 'src/main/resources/'
 	rename { String fileName ->
@@ -407,7 +407,7 @@ task buildAsDropbox (type :Copy){
 	
 	
 	
-}
+}*/
 
 task setDevProperties << {
     /*ant.copy( file:"src/main/resources/${rootProject.name}.properties.template", toFile:"src/main/resources/${rootProject.name}-dev.properties", overwrite:true )
