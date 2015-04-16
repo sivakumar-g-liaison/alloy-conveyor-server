@@ -561,8 +561,8 @@ public class MailBoxConfigurationService {
 	 * @return
 	 * @throws IOException
 	 */
-	public GetPropertiesValueResponseDTO getValuesFromPropertiesFile() {
-		LOG.debug("Entering into getValuesFromPropertiesFile.");
+	public GetPropertiesValueResponseDTO readPropertiesFile() {
+		LOG.debug("Entering into readPropertiesFile.");
 
 		GetPropertiesValueResponseDTO serviceResponse = new GetPropertiesValueResponseDTO();
 		PropertiesFileDTO dto = new PropertiesFileDTO();
@@ -587,7 +587,7 @@ public class MailBoxConfigurationService {
 			serviceResponse.setProperties(dto);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_JAVA_PROPERTIES_SUCCESSFULLY, MAILBOX,
 					Messages.SUCCESS));
-			LOG.debug("Exit from getValuesFromPropertiesFile.");
+			LOG.debug("Exit from readPropertiesFile.");
 			return serviceResponse;
 
 		} catch (Exception e) {

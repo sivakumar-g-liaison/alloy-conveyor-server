@@ -131,7 +131,7 @@ public class MailboxSLAWatchDogService {
 		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
 
 		try {
-			
+
 			if (validateMailboxSLARule(slaViolatedMailboxesList) && validateCustomerSLARule(slaViolatedMailboxesList)) {
 				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
 			} else {
@@ -192,7 +192,7 @@ public class MailboxSLAWatchDogService {
 			List<FSMStateValue> listfsmStateVal = null;
 
 			LOG.debug("checking whether the processor executed with in the specified mailbox SLA configuration time");
-			listfsmStateVal = procDAO.findProcessorsExecutingByProcessorId(procsr.getPguid(), getSLAConfigurationAsTimeStamp(timeToPickUpFilePostedToMailbox));
+			listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(procsr.getPguid(), getSLAConfigurationAsTimeStamp(timeToPickUpFilePostedToMailbox));
 
 			String mailboxName = null;
 			String emailSubject = null;
@@ -396,9 +396,9 @@ public class MailboxSLAWatchDogService {
 	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
 	        processorExecutionStateDAO.merge(processorExecutionState);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
-	        
+
 	      //GLASS LOGGING BEGINS//
-			
+
 			if(processorPayloadLocation.contains("ftps")){
 				glassMessage.setOutAgent(GatewayType.FTPS);
 			}if(processorPayloadLocation.contains("sftp")){
@@ -408,7 +408,7 @@ public class MailboxSLAWatchDogService {
 			}
 
 			//GLASS LOGGING CORNER 4 //
-			glassMessage.logProcessingStatus(StatusType.SUCCESS, "Payload delivered at target location");			
+			glassMessage.logProcessingStatus(StatusType.SUCCESS, "Payload delivered at target location");
             glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
@@ -417,7 +417,7 @@ public class MailboxSLAWatchDogService {
 			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 
 		} catch (Exception e) {
-			
+
 			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
 			processorStageFailed.setExecutionId(executionId);
 			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
@@ -432,7 +432,7 @@ public class MailboxSLAWatchDogService {
 				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
 				processorDAO.merge(processor);
 			}
-			
+
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
 			notifyUser(processor, mailboxId, e);
