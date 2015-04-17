@@ -415,8 +415,7 @@ public class ProcessorPropertyJsonMapper {
 		StaticProcessorPropertiesDTO propertiesDTO = null;
 
 		if (!isCreate) {
-			propertiesDTO = JSONUtil.unmarshalFromJSON(processor.getProcsrProperties(),
-					StaticProcessorPropertiesDTO.class);
+			propertiesDTO = getProcessorBasedStaticPropsFromJson(processor.getProcsrProperties(), processor);
 			getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
 			return propertiesDTO;
 		} else {
