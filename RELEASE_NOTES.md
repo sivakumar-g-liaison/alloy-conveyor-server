@@ -2,6 +2,13 @@
 -------------------------------
 Added https.protocols parameter to JVM
 Turn on ACL for qa-stage.
+GMB-424(Dropbox: List staged files failure when sortDirection missing)
+dropbox queue configuration
+Legacy processors cannot be revised in latest implementation - Fixed
+Patch/Turn On Acl For Qa Stage
+Fix for backward compatibility in certain processor edits.
+GMB-427 - remive loading props from during revise
+code refinements
 
 2.1.1-SNAPSHOT
 -------------------------------
