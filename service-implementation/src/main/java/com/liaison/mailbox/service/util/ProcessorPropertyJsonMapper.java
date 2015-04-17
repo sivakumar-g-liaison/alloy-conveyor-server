@@ -407,145 +407,100 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalAccessException
 	 */
 
-	public static StaticProcessorPropertiesDTO getProcessorSpecificStaticPropsFrmTemplt(
-			List<ProcessorPropertyDTO> staticProperties, Processor processor, boolean isCreate)
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
-			JsonParseException, JsonMappingException, IOException, JAXBException {
+	public static StaticProcessorPropertiesDTO getProcessorPropInstanceFor(ProcessorType processorType , Protocol protocol) {	
+	        
+		switch (processorType) {
 
-		StaticProcessorPropertiesDTO propertiesDTO = null;
+			case REMOTEDOWNLOADER:
+				switch (protocol) {
 
-		if (!isCreate) {
-			propertiesDTO = getProcessorBasedStaticPropsFromJson(processor.getProcsrProperties(), processor);
-			getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-			return propertiesDTO;
-		} else {
+					case FTPS:
+						return new FTPDownloaderPropertiesDTO();
+					case FTP:
+						return new FTPDownloaderPropertiesDTO();
+					case SFTP:
+						return new SFTPDownloaderPropertiesDTO();
+					case HTTP:
+						return new HTTPDownloaderPropertiesDTO();
+					case HTTPS:
+						return new HTTPDownloaderPropertiesDTO();
+					default:
+						LOGGER.error("The processor type {} and protocol {} is not supported",processorType,protocol);
+						return null;
+				}
+				
+			case REMOTEUPLOADER:
+				switch (protocol) {
 
-			Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
-			switch (processor.getProcessorType()) {
+					case FTPS:
+						return new FTPUploaderPropertiesDTO();
+					case FTP:
+						return new FTPUploaderPropertiesDTO();
+					case SFTP:
+						return new SFTPUploaderPropertiesDTO();
+					case HTTP:
+						return new HTTPUploaderPropertiesDTO();
+					case HTTPS:
+						return new HTTPUploaderPropertiesDTO();
+					default:
+						LOGGER.error("The processor type {} and protocol {} is not supported",processorType,protocol);
+						return null;
 
-				case REMOTEDOWNLOADER:
-					switch (protocol) {
-
-						case FTPS:
-							propertiesDTO = new FTPDownloaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case FTP:
-							propertiesDTO = new FTPDownloaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case SFTP:
-							propertiesDTO = new SFTPDownloaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case HTTP:
-							propertiesDTO = new HTTPDownloaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case HTTPS:
-							propertiesDTO = new HTTPDownloaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						default:
-							break;
-
-					}
-					break;
-				case REMOTEUPLOADER:
-					switch (protocol) {
-
-						case FTPS:
-							propertiesDTO = new FTPUploaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case FTP:
-							propertiesDTO = new FTPUploaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case SFTP:
-							propertiesDTO = new SFTPUploaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case HTTP:
-							propertiesDTO = new HTTPUploaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						case HTTPS:
-							propertiesDTO = new HTTPUploaderPropertiesDTO();
-							getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-							break;
-						default:
-							break;
-
-					}
-					break;
-				case SWEEPER:
-					propertiesDTO = new SweeperPropertiesDTO();
-					getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-					break;
-
-				case DROPBOXPROCESSOR:
-					propertiesDTO = new DropboxProcessorPropertiesDTO();
-					getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-					break;
-
-				case HTTPASYNCPROCESSOR:
-					propertiesDTO = new HTTPListenerPropertiesDTO();
-					getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-					break;
-
-				case HTTPSYNCPROCESSOR:
-					propertiesDTO = new HTTPListenerPropertiesDTO();
-					getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-					break;
-
-				case FILEWRITER:
-					propertiesDTO = new FileWriterPropertiesDTO();
-					getProcessorSpecificStaticProps(staticProperties, propertiesDTO);
-					break;
+				}
+				
+			case SWEEPER:
+				return new SweeperPropertiesDTO();
+			case DROPBOXPROCESSOR:
+				return new DropboxProcessorPropertiesDTO();				
+			case HTTPASYNCPROCESSOR:
+				return new HTTPListenerPropertiesDTO();
+			case HTTPSYNCPROCESSOR:
+				return new HTTPListenerPropertiesDTO();
+			case FILEWRITER:
+				return new FileWriterPropertiesDTO();
+				
 			}
-			return propertiesDTO;
-		}
+		
+		LOGGER.error("The processor type {} and protocol {} is not supported",processorType,protocol);
+		return null;
 	}
 
 
 	/**
 	 * Method to retrieve the static properties DTO after mapping static properties in JSON template
 	 *
-	 * @param staticPropertiesInTemplateJson
-	 * @param staticPropertiesDTO
+	 * @param from
+	 * @param to
 	 * @return
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 */
-	private static StaticProcessorPropertiesDTO getProcessorSpecificStaticProps(
-			List<ProcessorPropertyDTO> staticPropertiesInTemplateJson, StaticProcessorPropertiesDTO staticPropertiesDTO)
+	public static void transferProps(List<ProcessorPropertyDTO> from, StaticProcessorPropertiesDTO to)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-		for (ProcessorPropertyDTO property : staticPropertiesInTemplateJson) {
+		for (ProcessorPropertyDTO property : from) {
 
 			if (property.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
 				continue;
 			}
-			Field field = staticPropertiesDTO.getClass().getDeclaredField(property.getName());
+			Field field = to.getClass().getDeclaredField(property.getName());
 			field.setAccessible(true);
 			String propertyValue = property.getValue();
 			if (field.getType().equals(Boolean.TYPE)) {
-				field.setBoolean(staticPropertiesDTO, Boolean.valueOf(propertyValue));
+				field.setBoolean(to, Boolean.valueOf(propertyValue));
 			} else if (field.getType().equals(Integer.TYPE)) {
 				if (!MailBoxUtil.isEmpty(propertyValue)) {
-					field.setInt(staticPropertiesDTO, Integer.valueOf(propertyValue).intValue());
+					field.setInt(to, Integer.valueOf(propertyValue).intValue());
 				} else {
-					field.setInt(staticPropertiesDTO, 0);
+					field.setInt(to, 0);
 				}
 			} else if (field.getType().equals(String.class)) {
-				field.set(staticPropertiesDTO, propertyValue);
+				field.set(to, propertyValue);
 			}
 		}
-		return staticPropertiesDTO;
-
+		
 	}
 
 	/**
