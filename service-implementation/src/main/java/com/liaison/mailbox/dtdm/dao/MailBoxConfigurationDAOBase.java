@@ -94,8 +94,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 
 			
-			String sortDirection = searchFilter.getSortDirection().toUpperCase();
-			String sortField=searchFilter.getSortField().toLowerCase();
+			String sortDirection = searchFilter.getSortDirection();
+			String sortField=searchFilter.getSortField();
 			String mbxName=searchFilter.getMbxName();
 			String profName=searchFilter.getProfileName();
 			StringBuilder query = new StringBuilder().append("SELECT distinct mbx FROM MailBox mbx")
@@ -107,7 +107,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 
-				switch (sortField) {
+				sortDirection = sortDirection.toUpperCase();
+				switch (sortField.toLowerCase()) {
 					case "name":
 						query.append(" order by mbx.mbxName " + sortDirection);
 						break;
@@ -188,12 +189,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
 					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
-			String sortDirection = searchFilter.getSortDirection().toUpperCase();
-			String sortField=searchFilter.getSortField().toLowerCase();
+			String sortDirection = searchFilter.getSortDirection();
+			String sortField=searchFilter.getSortField();
 
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
-				
-				switch (sortField) {
+				sortDirection=sortDirection.toUpperCase();
+				switch (sortField.toLowerCase()) {
 					case "name":
 						query.append(" order by mbx.mbxName " + sortDirection);
 						break;

@@ -417,12 +417,12 @@ public class MailboxSLAWatchDogService {
 			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 
 		} catch (Exception e) {
-
+			LOG.error("File Staging failed", e);
 			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
 			processorStageFailed.setExecutionId(executionId);
 			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
 			processorStageFailed.setMailboxId(mailboxId);
-			processorStageFailed.setProfileName(profileName);
+			processorStageFailed.setProfileName(profileName!=null?profileName:MailBoxConstants.PROFILE_NOT_AVAILABLE);
 			processorStageFailed.setSlaVerficationStatus(SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
 			// processorExecutionState table will be updated only if processorExecution is available
 			if (null != processorExecutionState && processor!=null) {
@@ -442,7 +442,7 @@ public class MailboxSLAWatchDogService {
 			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
-			LOG.error("File Staging failed", e);
+			
 
 		}
 
