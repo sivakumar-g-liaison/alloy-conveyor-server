@@ -145,7 +145,7 @@
       "folderProperties":[
 		  {
 			  "folderURI": "",
-			  "folderDisplayType": "Remote Payload Location",
+			  "folderDisplayType": "Local Payload Location",
 			  "folderType": "PAYLOAD_LOCATION",
 			  "folderDesc": "",
 			  "mandatory": false,
@@ -160,7 +160,7 @@
 		  },
 		  {
 			  "folderURI": "",
-			  "folderDisplayType": "Local Target Location",
+			  "folderDisplayType": "Remote Target Location",
 			  "folderType": "RESPONSE_LOCATION",
 			  "folderDesc": "",
 			  "mandatory": false,

@@ -548,12 +548,10 @@ var rest = myApp.controller(
 					 if ($scope.folderAddedToProcessor[i].folderURI === "") {
 				    	 continue;				    	 
 				    } else if (property.valueProvided === false && property.mandatory === false) {
-					      property.folderURI = '';
+				    	continue;
 					}
                     $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);						
-				}				
-				$scope.processor.processorPropertiesInTemplateJson.folderProperties = 
-				$scope.processor.processorPropertiesInTemplateJson.folderProperties.concat($scope.folderAvailableProperties);
+				}			
 				
                 $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
 				$scope.processor.processorPropertiesInTemplateJson.type = $scope.procsrType.value;
@@ -564,7 +562,8 @@ var rest = myApp.controller(
                 for (var i = 0; i < $scope.processorCredProperties.length; i++) {
                     var credObj = $scope.processorCredProperties[i];
                     delete credObj.passwordDirtyState;
-                    if (credObj.credentialType === "LOGIN_CREDENTIAL" && credObj.userId !== "" && credObj.userId !== null && typeof credObj.userId !== "undefined") {
+                    if (credObj.credentialType === "LOGIN_CREDENTIAL" && credObj.userId !== "" && credObj.userId !== null 
+                    		&& typeof credObj.userId !== "undefined" && credObj.valueProvided === true ) {
                         $scope.processor.processorPropertiesInTemplateJson.credentialProperties.push(credObj);
                     } else if (credObj.credentialType !== "LOGIN_CREDENTIAL"){
                         $scope.processor.processorPropertiesInTemplateJson.credentialProperties.push(credObj);

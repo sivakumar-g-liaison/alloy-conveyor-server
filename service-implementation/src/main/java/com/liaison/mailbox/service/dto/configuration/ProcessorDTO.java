@@ -251,6 +251,7 @@ public class ProcessorDTO {
 		for (FolderDTO folderDTO : folderDTOList) {
 		    
 			folder = new Folder();
+			validator.validate(folderDTO);
 			folderDTO.copyToEntity(folder);
 
 			folder.setPguid(MailBoxUtil.getGUID());
