@@ -87,6 +87,7 @@ public abstract class AuditedResource extends BaseResource {
 				logger.error(t); // Hack
 				throw (LiaisonAuditableRuntimeException) t; // Hack
 			} else {
+			    logger.error(t); // Hack
 				LiaisonAuditableRuntimeException e = new LiaisonUnhandledContainerException(t,
 						Response.Status.INTERNAL_SERVER_ERROR); // Hack
 				logger.error(e); // Hack

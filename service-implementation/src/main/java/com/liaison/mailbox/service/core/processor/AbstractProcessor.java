@@ -710,13 +710,18 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @throws IOException
 	 */
 	public void createPathIfNotAvailable(String localPath) throws IOException {
-		
+
+	    if (MailBoxUtil.isEmpty(localPath)) {
+	        LOGGER.debug("Given path is empty, so not creating folders..");
+	        return;
+	    }
+
 		File fileDirectory = new File(localPath);
-		if(MailBoxUtil.isEmpty(localPath) || fileDirectory.exists()){
-			LOGGER.debug("Not creating folders..");
-			return;
-		}
-		
+        if (fileDirectory.exists()) {
+            LOGGER.debug("Not creating folders..");
+            return;
+        }
+
 		Path filePathToCreate = fileDirectory.toPath();
 		LOGGER.debug("Setting on to create - {}", filePathToCreate);
 		FileSystem fileSystem = FileSystems.getDefault();	
