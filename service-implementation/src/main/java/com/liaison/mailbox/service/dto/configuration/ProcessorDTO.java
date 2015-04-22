@@ -14,10 +14,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
@@ -51,6 +55,8 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value = "processor")
 public class ProcessorDTO {
+	@JsonIgnore
+	private static final Logger LOGGER = LogManager.getLogger(ProcessorDTO.class);
 
 	private String guid;
 	private String name;
@@ -202,9 +208,10 @@ public class ProcessorDTO {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException,
-			JsonGenerationException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-
+	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException{
+		
+		try {
+			
 		if (isCreate) {
 			processor.setPguid(MailBoxUtil.getGUID());
 		}
@@ -214,21 +221,19 @@ public class ProcessorDTO {
 
 		ProcessorPropertyUITemplateDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
 
-
 		// separate static and dynamic and folder properties
 		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
-		List <ProcessorPropertyDTO> staticPropertiesDTO = propertiesDTO.getStaticProperties();
-		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(staticPropertiesDTO, dynamicPropertiesDTO);
+		//TODO rename the staticProperties to just properties in JSON
+		List <ProcessorPropertyDTO> procPropertiesFromTemplate = propertiesDTO.getStaticProperties();
+		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(procPropertiesFromTemplate, dynamicPropertiesDTO);
 
-		StaticProcessorPropertiesDTO staticPropertiesDTOInDB = ProcessorPropertyJsonMapper.getProcessorSpecificStaticPropsFrmTemplt(staticPropertiesDTO, processor, isCreate);
-
+		StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(), 
+																												 Protocol.findByCode(processor.getProcsrProtocol()));
+		ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
 		// set static properties into properties json to be stored in DB
-		if (null != propertiesDTO) {
-			String propertiesJSON = JSONUtil.marshalToJSON(staticPropertiesDTOInDB);
-			processor.setProcsrProperties(propertiesJSON);
-		}
-
-		processor.setProcsrDesc(this.getDescription());
+		String propertiesJSON = JSONUtil.marshalToJSON(processorPropsDTO);
+		processor.setProcsrProperties(propertiesJSON);
+	    processor.setProcsrDesc(this.getDescription());
 		processor.setProcsrName(this.getName());
 		processor.setJavaScriptUri(this.getJavaScriptURI());
 		
@@ -246,6 +251,7 @@ public class ProcessorDTO {
 		for (FolderDTO folderDTO : folderDTOList) {
 		    
 			folder = new Folder();
+			validator.validate(folderDTO);
 			folderDTO.copyToEntity(folder);
 
 			folder.setPguid(MailBoxUtil.getGUID());
@@ -300,6 +306,15 @@ public class ProcessorDTO {
 		// Set the status
 		EntityStatus foundStatusType = EntityStatus.findByName(this.getStatus());
 		processor.setProcsrStatus(foundStatusType.value());
+		
+		} catch (NoSuchFieldException | SecurityException
+				| IllegalArgumentException | IllegalAccessException | JAXBException | IOException | SymmetricAlgorithmException e) {
+			LOGGER.error(e);
+			throw new MailBoxConfigurationServicesException("Revise Operation failed:"+e.getMessage(),Response.Status.INTERNAL_SERVER_ERROR);
+			
+		}
+
+		
 
 	}
 

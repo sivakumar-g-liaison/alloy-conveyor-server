@@ -51,7 +51,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		try {
 		    
 		   // get Search Filters
-		    String sortDirection = searchFilter.getSortDirection().toUpperCase();
+		    String sortDirection = searchFilter.getSortDirection();
 		    String fileName = searchFilter.getStagedFileName();
 		    String status = searchFilter.getStatus();
 		    int pagingOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
@@ -64,6 +64,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.stagedFileStatus = :"+ STATUS);
 			
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
+				sortDirection=sortDirection.toUpperCase();
 				query.append(" order by sf.fileName " + sortDirection);
 			}else {
 				query.append(" order by sf.fileName");
