@@ -64,7 +64,7 @@ public class ProcessorPropertyJsonMapper {
 
 	public static final String PROP_HANDOVER_EXECUTION_TO_JS = "handOverExecutionToJavaScript";
 	public static final String JSON_ROOT_PATH = "processor/properties/";
-	
+
 
 	private static Map<String, String> propertyMapper = null;
 
@@ -255,7 +255,7 @@ public class ProcessorPropertyJsonMapper {
 		return processorProperties;
 
 	}
-	
+
 
 	/**
 	 * Method to retrieve the proper Name of dynamic Properties In older Implementation some properties like
@@ -349,8 +349,8 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalAccessException
 	 */
 
-	public static StaticProcessorPropertiesDTO getProcessorPropInstanceFor(ProcessorType processorType , Protocol protocol) {	
-	        
+	public static StaticProcessorPropertiesDTO getProcessorPropInstanceFor(ProcessorType processorType , Protocol protocol) {
+
 		switch (processorType) {
 
 			case REMOTEDOWNLOADER:
@@ -370,7 +370,7 @@ public class ProcessorPropertyJsonMapper {
 						LOGGER.error("The processor type {} and protocol {} is not supported",processorType,protocol);
 						return null;
 				}
-				
+
 			case REMOTEUPLOADER:
 				switch (protocol) {
 
@@ -389,20 +389,20 @@ public class ProcessorPropertyJsonMapper {
 						return null;
 
 				}
-				
+
 			case SWEEPER:
 				return new SweeperPropertiesDTO();
 			case DROPBOXPROCESSOR:
-				return new DropboxProcessorPropertiesDTO();				
+				return new DropboxProcessorPropertiesDTO();
 			case HTTPASYNCPROCESSOR:
 				return new HTTPListenerPropertiesDTO();
 			case HTTPSYNCPROCESSOR:
 				return new HTTPListenerPropertiesDTO();
 			case FILEWRITER:
 				return new FileWriterPropertiesDTO();
-				
+
 			}
-		
+
 		LOGGER.error("The processor type {} and protocol {} is not supported",processorType,protocol);
 		return null;
 	}
@@ -442,7 +442,7 @@ public class ProcessorPropertyJsonMapper {
 				field.set(to, propertyValue);
 			}
 		}
-		
+
 	}
 
 	/**
@@ -618,8 +618,9 @@ public class ProcessorPropertyJsonMapper {
 		for (HTTPOtherRequestHeaderDTO header : otherRequestHeaders) {
 			otherRequestHeader.append(header.getName()).append(":").append(header.getValue()).append(",");
 		}
+
 		String otherRequestHeaderStr = otherRequestHeader.toString();
-		return otherRequestHeaderStr.substring(0, otherRequestHeaderStr.length() - 2);
+		return otherRequestHeaderStr.length() > 0 ? otherRequestHeaderStr.substring(0, otherRequestHeaderStr.length() - 1) : "";
 	}
 
 	/**
@@ -668,9 +669,9 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct list of folderDTO from the folderDTOTemplateList
-	 * 
+	 *
 	 * @param folderPropertiesDTO The ProcessorFolderPropertyDTO
-	 * 
+	 *
 	 * @return List<FolderDTO> return List of FolderDto's
 	 */
 	public static List<FolderDTO> getFolderProperties(List<ProcessorFolderPropertyDTO> folderPropertiesDTO) {
@@ -689,7 +690,7 @@ public class ProcessorPropertyJsonMapper {
 
 	/**
 	 * Method to construct FolderTemplate by given processor which is to be retrieved from db.
-	 * 
+	 *
 	 * @param processor The Processor of the the mailBox
 	 * @param uiPropTemplate The ProcessorPropertyUITemplateDTO of the Processor
 	 * @throws JsonParseException
