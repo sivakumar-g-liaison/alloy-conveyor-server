@@ -113,7 +113,7 @@
          {
             "name": "passive",
             "displayName": "Passive",
-            "value":"false",
+            "value":"true",
             "type":"select",            
 			"mandatory": true,
 			"dynamic": false,

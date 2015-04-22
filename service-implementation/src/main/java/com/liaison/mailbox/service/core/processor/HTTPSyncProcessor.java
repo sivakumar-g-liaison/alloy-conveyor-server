@@ -35,7 +35,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 	/**
 	 * This method will persist payload in spectrum.
-	 * 
+	 *
 	 * @param sessionContext
 	 * @param request
 	 * @return HttpResponse
@@ -62,12 +62,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		HttpClient httpClient = createHttpClient();
 		HttpResponse httpResponse = httpClient.execute(httpRequest);
 		return buildResponse(contentType, httpResponse);
-		
+
 	}
 
 	/**
 	 * This method will create HttpClient.
-	 * 
+	 *
 	 * @return HttpClient
 	 */
 	private HttpClient createHttpClient() {
@@ -76,10 +76,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		return httpClient;
 	}
 
-	
+
 	/**
 	 * This method will copy all Response Information.
-	 * 
+	 *
 	 * @param httpResponse
 	 * @param builder
 	 * @param globalProcessId
@@ -90,7 +90,7 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 	private Response buildResponse(String reqContentType, HttpResponse httpResponse)
 			throws IllegalStateException, IOException, JAXBException {
 
-		ResponseBuilder builder = Response.ok(); 
+		ResponseBuilder builder = Response.ok();
 		if (httpResponse.getStatusLine().getStatusCode() > 299) {
 			logger.debug("THE RESPONSE RECEIVED FROM SERVICE BROKER IS:FAILED. Actual:{}", httpResponse.getEntity()
 					.getContent());
@@ -103,8 +103,12 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}
-			// set global process id in the header
-			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			// JIRA GMB-428 - set global process id in header only if it is not already available
+			if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
+				// set global process id in the header
+				builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			}
+
 
 			// If payload URI avail, reads payload from spectrum. Mostly it
 			// would be an error message payload
@@ -140,8 +144,11 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			for (String name : headers) {
 				builder.header(name, result.getHeader(name));
 			}
-			// set global process id in the header
-			builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			// JIRA GMB-428 - set global process id in header only if it is not already available
+			if (!headers.contains(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER)) {
+				// set global process id in the header
+				builder.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, result.getProcessId());
+			}
 
 			// reads paylaod from spectrum
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
@@ -160,5 +167,5 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		}
 		return builder.build();
 	}
- 
+
 }

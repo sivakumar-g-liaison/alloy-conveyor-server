@@ -331,28 +331,29 @@ public class MailBoxUtil {
 	}
 
 	/**
-	 * Method to convertTTLIntoSeconds
-	 * 
-	 * @param ttlUnit
-	 * @param ttlNumber
-	 * @return Integer
-	 */
-	public static Integer convertTTLIntoSeconds(String ttlUnit, Integer ttlNumber) {
-
+	* Converts the given work ticket lifetime (TTL) in days - Round up to next integer. 
+	* Example: 0.1 rounded off to 1
+	* 
+	* @param ttlUnit specifies the type of TTL value  which can be Year,Month,Week,Day,Hours,Minutes.
+	* @param ttlNumber specifies the TTL value in days.
+	* @return Integer 
+	*/
+	public static Integer convertTTLIntoDays(String ttlUnit, Integer ttlNumber) {
+		// decimal value is used with operators in order to round up to next no
 		if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
-			return ttlNumber * 365 * 24 * 60 * 60;
+			return (int) Math.ceil(ttlNumber * 365.0); 
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
-			return ttlNumber * 30 * 24 * 60 * 60;
+			return (int) Math.ceil(ttlNumber * 30.0);
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
-			return ttlNumber * 7 * 24 * 60 * 60;
+			return (int) Math.ceil(ttlNumber * 7.0);
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
-			return ttlNumber * 24 * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_HOURS)) {
-			return ttlNumber * 60 * 60;
-		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
-			return ttlNumber * 60;
-		} else {
 			return ttlNumber;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_HOURS)) {
+			return (int) Math.ceil(ttlNumber / 24.0);
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
+			return  (int) Math.ceil(ttlNumber / (24.0 * 60.0));
+		} else {
+			return (int) Math.ceil(ttlNumber / (24.0 * 60.0 * 60.0));
 		}
 	}
 
