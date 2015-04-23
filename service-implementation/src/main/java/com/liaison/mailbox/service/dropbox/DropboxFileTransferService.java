@@ -226,6 +226,7 @@ public class DropboxFileTransferService {
 		}
 
 		Integer ttlNumber = Integer.parseInt(ttl);
+		properties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlUnit, ttlNumber)));
 
 		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
 		workTicket.setFileName(fileTransferDTO.getFileName());
