@@ -329,6 +329,34 @@ public class MailBoxUtil {
 	    String ttl = String.format(propDataRetentionTTL, identifier != null ? identifier + "." : "");
 	    return getEnvironmentProperties().getInteger(ttl, 2592000);
 	}
+	
+	
+	/**
+	 * Method to convertTTLIntoSeconds
+	 * 
+	 * @param ttlUnit
+	 * @param ttlNumber
+	 * @return Integer
+	 */
+	public static Integer convertTTLIntoSeconds(String ttlUnit, Integer ttlNumber) {
+
+		if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
+			return ttlNumber * 365 * 24 * 60 * 60;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
+			return ttlNumber * 30 * 24 * 60 * 60;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
+			return ttlNumber * 7 * 24 * 60 * 60;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_DAYS)) {
+			return ttlNumber * 24 * 60 * 60;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_HOURS)) {
+			return ttlNumber * 60 * 60;
+		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MINUTES)) {
+			return ttlNumber * 60;
+		} else {
+			return ttlNumber;
+		}
+	}
+
 
 	/**
 	* Converts the given work ticket lifetime (TTL) in days - Round up to next integer. 

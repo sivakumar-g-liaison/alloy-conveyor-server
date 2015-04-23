@@ -392,7 +392,7 @@ public class StorageUtilities {
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 
 		if (workTicket.getTtlDays() != -1) {
-		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()));
+		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, httpListenerProperties.get(MailBoxConstants.TTLINSECONDS));
 		}
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
