@@ -206,7 +206,7 @@ dependencies {
 
 
 	//TODO change to 2.+ after logging updATE
-	compile 'com.liaison.commons:lib_message_bus:2.+'
+	compile 'com.liaison.commons:lib_message_bus:3.+'
 
 	// inherited from NetFlix Karyon (TODO integrate with main UI)
 	//compile project(':karyon-admin-web')
