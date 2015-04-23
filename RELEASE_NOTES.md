@@ -19,6 +19,7 @@
 * GMB-432:FTPS Downloader :By Default the passive value should be true while creating an * FTPS Downloader
 * production url updates
 * enable hornetq ssl in dev-int
+* GMB-426 Processor creation:Inconsistently we are facing the 'Key manager failed to add stored secret' error message when the user create an SFTP Downloader/uploader processor
 
 2.1.1-SNAPSHOT
 -------------------------------
