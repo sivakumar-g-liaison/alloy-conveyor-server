@@ -390,9 +390,9 @@ public class StorageUtilities {
 				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-
-		if (workTicket.getTtlDays() != -1) {
-		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL, String.valueOf(workTicket.getTtlDays()));
+		String ttlValue= httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS);
+		if (!MailBoxUtil.isEmpty(ttlValue) && -1 != Integer.parseInt(ttlValue))  {
+		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue);
 		}
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
