@@ -20,6 +20,8 @@
 * production url updates
 * enable hornetq ssl in dev-int
 * GMB-426 Processor creation:Inconsistently we are facing the 'Key manager failed to add stored secret' error message when the user create an SFTP Downloader/uploader processor
+* GMB-430 Fix to set the TTL as seconds in fs2header
+* passive value of static properties always display in grid without adding explicitly was fixed
 
 2.1.1-SNAPSHOT
 -------------------------------
