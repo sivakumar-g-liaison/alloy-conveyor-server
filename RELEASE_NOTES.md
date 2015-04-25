@@ -1,4 +1,4 @@
-2.1.2-SNAPSHOT
+2.1.2
 -------------------------------
 * Added https.protocols parameter to JVM
 * Turn on ACL for qa-stage.
