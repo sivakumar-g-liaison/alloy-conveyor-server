@@ -139,7 +139,7 @@
         <!-- ############################################################## -->
 
         <!-- primary appender to lens -->
-        <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData" ignoreExceptions="false">
+        <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData" ignoreExceptions="false" clientId="UATG2-PUBLISHER" proxy="lens-proxy">
             <GSAMessageXMLLayout/>
             <filters>
                 <MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -184,7 +184,7 @@
         <!-- #########          Pairwise GSA APPENDER          ############ -->
         <!-- ############################################################## -->
 
-        <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData">
+        <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData" clientId="UATG2-PUBLISHER" proxy="lens-proxy">
             <GSAMessageXMLLayout />
             <filters>
                 <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
