@@ -1,7 +1,30 @@
-2.1.2-SNAPSHOT
+2.1.3-SNAPSHOT
 -------------------------------
-Added https.protocols parameter to JVM
-Turn on ACL for qa-stage.
+
+2.1.2
+-------------------------------
+* Added https.protocols parameter to JVM
+* Turn on ACL for qa-stage.
+* GMB-424(Dropbox: List staged files failure when sortDirection missing)
+* dropbox queue configuration
+* Legacy processors cannot be revised in latest implementation - Fixed
+* Patch/Turn On Acl For Qa Stage
+* Fix for backward compatibility in certain processor edits.
+* GMB-427 - remive loading props from during revise
+* code refinements
+* fixed internal issues
+* GMB-429 : HTTPsync Processor:HTTPsync Processor is not working as expected using the 'HTTPListener Auth check required' property as true
+* GMB-425:HTTP Sync Processor:HTTP Syn URL is not integrated with the latest URL Changes
+* GMB-425:HTTP Sync Processor:HTTP Syn URL is not integrated with the latest URL Changes (uat url changed)
+* GMB-428:HTTPsync Processor:Response generated with duplicate global process id when the user manually configured the globalprocessid in header
+* GMB-430 (Dropbox :Staged file is not deleted based upon the TTL value configured in Mailbox)
+* GMB-431 Processor - Revise :List of processors are failing in revision mode
+* GMB-432:FTPS Downloader :By Default the passive value should be true while creating an * FTPS Downloader
+* production url updates
+* enable hornetq ssl in dev-int
+* GMB-426 Processor creation:Inconsistently we are facing the 'Key manager failed to add stored secret' error message when the user create an SFTP Downloader/uploader processor
+* GMB-430 Fix to set the TTL as seconds in fs2header
+* passive value of static properties always display in grid without adding explicitly was fixed
 
 2.1.1-SNAPSHOT
 -------------------------------
