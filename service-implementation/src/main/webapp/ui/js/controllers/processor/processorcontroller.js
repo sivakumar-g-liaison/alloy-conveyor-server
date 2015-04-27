@@ -333,7 +333,7 @@ var rest = myApp.controller(
 					 var property = $scope.staticProperties[i];
 					 if (property.mandatory === true || property.valueProvided === true) {
                         $scope.propertiesAddedToProcessor.push(property);
-                    } else if (property.mandatory === false || property.valueProvided === false) {
+                     } else {
                         $scope.availableProperties.push(property);
                     }
 				}
@@ -532,25 +532,18 @@ var rest = myApp.controller(
                 //add static properties	
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
-                     if ($scope.propertiesAddedToProcessor[i].name === "") {
-				    	 continue;				    	 
-				    } else if (property.valueProvided === false && property.mandatory === false) {
-					      property.value = '';
-					}				
-					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
-                }                
-                $scope.processor.processorPropertiesInTemplateJson.staticProperties = 
-    				$scope.processor.processorPropertiesInTemplateJson.staticProperties.concat($scope.availableProperties);
-				
+                     if ($scope.propertiesAddedToProcessor[i].name !== "" 
+					     && (property.valueProvided === true || property.mandatory === true)) {
+				    	 $scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				    	 
+				    }					
+                }				
 				//add folder properties
 				for (var i = 0; i < $scope.folderAddedToProcessor.length; i++) {
 				     var property = $scope.folderAddedToProcessor[i];
-					 if ($scope.folderAddedToProcessor[i].folderURI === "") {
-				    	 continue;				    	 
-				    } else if (property.valueProvided === false && property.mandatory === false) {
-				    	continue;
-					}
-                    $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);						
+					 if ($scope.folderAddedToProcessor[i].folderURI !== "" && 
+					     (property.valueProvided === true || property.mandatory === true)) {
+				    	 $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);				    	 
+				    }                   					
 				}			
 				
                 $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
