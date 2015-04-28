@@ -517,8 +517,6 @@ var rest = myApp.controller(
             };           
             
             $scope.save = function () {
-            	//To notify passwordDirective to clear the password and error message
-                $scope.doSend();
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
                
@@ -528,6 +526,7 @@ var rest = myApp.controller(
 			
 				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];
                 $scope.processor.processorPropertiesInTemplateJson.folderProperties = [];
+                $scope.processor.processorPropertiesInTemplateJson.credentialProperties = [];
                 
                 //add static properties	
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
@@ -665,6 +664,8 @@ var rest = myApp.controller(
 					function (data, status) {
 					if (status === 200) {
 							editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = data;
+                            //To notify passwordDirective to clear the password and error message
+                            $scope.doSend();
 							$scope.processorReviseAfterKM();
 							
 						} else if (status === 404) {
@@ -695,6 +696,8 @@ var rest = myApp.controller(
 						//console.log('status and data = ' + secdata + ', '+ status);
 						if (status === 201) {
 							addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = secdata;
+                            //To notify passwordDirective to clear the password and error message
+                            $scope.doSend();
 							$scope.processorSaveAfterKM();
 						} else {
 							$scope.block.unblockUI();
