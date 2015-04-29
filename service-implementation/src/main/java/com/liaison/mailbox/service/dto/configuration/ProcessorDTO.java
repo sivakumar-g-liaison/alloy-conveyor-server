@@ -230,6 +230,7 @@ public class ProcessorDTO {
 		StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(), 
 																												 Protocol.findByCode(processor.getProcsrProtocol()));
 		ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
+		processorPropsDTO.setHandOverExecutionToJavaScript(propertiesDTO.isHandOverExecutionToJavaScript());
 		// set static properties into properties json to be stored in DB
 		String propertiesJSON = JSONUtil.marshalToJSON(processorPropsDTO);
 		processor.setProcsrProperties(propertiesJSON);
