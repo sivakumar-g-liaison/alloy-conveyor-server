@@ -1,9 +1,12 @@
+2.1.6
+-------------------------------
+* Add missing properties - MSOPS-2325
+
 2.1.5
 -------------------------------
-*GMB-436
-*ACL enabled in UAT
-*DB Property Changes
-*Add missing properties - MSOPS-2325
+* GMB-436
+* ACL enabled in UAT
+* DB Property Changes
 
 2.1.4
 -------------------------------
