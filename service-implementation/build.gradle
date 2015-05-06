@@ -129,7 +129,9 @@ war {
 	// exclude the WADL tools, they are build time
 	rootSpec.exclude "*wadl*"
 	//exclude webapp/ui
-	rootSpec.exclude 'ui/**'
+	rootSpec.include 'ui/error-403.html'
+	rootSpec.include 'ui/error-404.html'
+	rootSpec.include 'ui/error-500.html'
 }
 
 war.dependsOn('configureTomcat')
