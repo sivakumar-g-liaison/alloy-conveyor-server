@@ -421,14 +421,14 @@ public class MailboxSLAWatchDogService {
 			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
 			processorStageFailed.setExecutionId(executionId);
 			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
-			processorStageFailed.setMailboxId(mailboxId);
-			processorStageFailed.setProfileName(profileName!=null?profileName:MailBoxConstants.PROFILE_NOT_AVAILABLE);
+			processorStageFailed.setMailboxId(mailboxId != null ? mailboxId : MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE);
+			processorStageFailed.setProfileName(profileName != null ? profileName : MailBoxConstants.PROFILE_NOT_AVAILABLE);
 			processorStageFailed.setSlaVerficationStatus(SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
+			processorStageFailed.setProcessorId((processor == null) ? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE : processor.getPguid());
+			processorStageFailed.setProcessorName((processor == null) ? MailBoxConstants.PROCESSOR_NOT_AVAILABLE : processor.getProcsrName());
+			processorStageFailed.setProcessorType((processor == null) ? ProcessorType.REMOTEUPLOADER : processor.getProcessorType());
 			// processorExecutionState table will be updated only if processorExecution is available
-			if (null != processorExecutionState && processor!=null) {
-				processorStageFailed.setProcessorId(processor.getPguid());
-				processorStageFailed.setProcessorName(processor.getProcsrName());
-				processorStageFailed.setProcessorType(processor.getProcessorType());
+			if (null != processorExecutionState) {
 				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
 				processorDAO.merge(processor);
 			}

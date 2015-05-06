@@ -28,5 +28,5 @@ profileName=$1
 excludeName=$2
 echo "Input profile name is:"$profileName
 echo "Exclusion List:"$excludeName
-curl -d "" -H "Content-Type:application/json" -o /app/mailbox/triggerProfileSchedulerlogs/logs_$DATE.txt   http://10.146.18.25:8989/g2mailboxservice/rest/v1/mailbox/triggerProfile?name=$profileName&excludeMailbox=$excludeName
+curl -d "" -H "Content-Type:application/json" -o /app/mailbox/triggerProfileSchedulerlogs/logs_$DATE.txt   http://10.146.18.25:8989/g2mailboxservice/config/mailbox/trigger/profile?name=$profileName&excludeMailbox=$excludeName
 exit 0
