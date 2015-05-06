@@ -390,6 +390,7 @@ var rest = myApp.controller(
 							data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = decPwd;
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
+						    $scope.setTypeDuringProtocolEdit(data.getProcessorResponse.processor.protocol);
 							$scope.block.unblockUI();
 							showSaveMessage('Key manager failed to retrieve the stored secret', 'error');
 							return;
@@ -517,7 +518,7 @@ var rest = myApp.controller(
             };           
             
             $scope.save = function () {
-            	//To notify passwordDirective to clear the password and error message
+                //To notify passwordDirective to clear the password and error message
                 $scope.doSend();
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
@@ -528,6 +529,7 @@ var rest = myApp.controller(
 			
 				$scope.processor.processorPropertiesInTemplateJson.staticProperties = [];
                 $scope.processor.processorPropertiesInTemplateJson.folderProperties = [];
+                $scope.processor.processorPropertiesInTemplateJson.credentialProperties = [];
                 
                 //add static properties	
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
@@ -674,14 +676,16 @@ var rest = myApp.controller(
 										editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = crdata;
 										$scope.processorReviseAfterKM();
 									} else {
-										$scope.block.unblockUI();
+									    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+										$scope.block.unblockUI();										
 										showSaveMessage("Key manager failed to revise stored secret", 'error');
 										return;
 									}
 								}, {'Content-Type': 'application/octet-stream'}
 							);
 						} else {
-							$scope.block.unblockUI();
+						    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+							$scope.block.unblockUI();							
 							showSaveMessage("Key manager failed to revise stored secret", 'error');
 							return;
 						}
@@ -697,7 +701,8 @@ var rest = myApp.controller(
 							addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = secdata;
 							$scope.processorSaveAfterKM();
 						} else {
-							$scope.block.unblockUI();
+						    $scope.setTypeDuringProtocolEdit(addRequest.addProcessorToMailBoxRequest.processor.protocol);
+							$scope.block.unblockUI();							
 							showSaveMessage("Key manager failed to add stored secret", 'error');
 							return;
 						}
@@ -749,6 +754,7 @@ var rest = myApp.controller(
 								$scope.isPublicKeySelected = false;
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
 							} else {
+								$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'error');
 							}
 						} else {

@@ -174,23 +174,27 @@ public class HTTPListenerResource extends AuditedResource {
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
 							httpListenerProperties, request.getContentType(), mailboxPguid);
-					// GLASS LOGGING BEGINS CORNER 4 //
-					glassMessage.setStatus(ExecutionState.COMPLETED);
-					glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
-					glassMessage.logFourthCornerTimestamp();
-					transactionVisibilityClient.logToGlass(glassMessage);
+
+                    // GLASS LOGGING //
+                    if (syncResponse.getStatus() > 299) {
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity());;
+                        glassMessage.setStatus(ExecutionState.FAILED);
+                    } else {
+                        glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
+                        glassMessage.setStatus(ExecutionState.COMPLETED);
+                    }
+                    glassMessage.logFourthCornerTimestamp();
+                    transactionVisibilityClient.logToGlass(glassMessage);
 
 					return syncResponse;
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed");
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();
-					// throw new
-					// LiaisonRuntimeException("Unable to Read Request. " +
-					// e.getMessage());
+					// throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
 			}
@@ -301,7 +305,7 @@ public class HTTPListenerResource extends AuditedResource {
 				} catch (IOException | JAXBException e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed");
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed: " + e.getMessage());
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();

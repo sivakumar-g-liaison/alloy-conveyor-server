@@ -122,8 +122,11 @@ public class TransactionVisibilityClient {
 			item.setValue(message.getMeta());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
-
-		visibilityAPI.setCategory(message.getProtocol() + ":" + message.getCategory().getCode());
+		
+		if (message.getCategory() != null && !message.getCategory().equals("")) {
+			visibilityAPI.setCategory(message.getProtocol() + ":" + message.getCategory().getCode());
+		}
+		
 		visibilityAPI.setId(message.getGlobalPId());
 		visibilityAPI.setGlobalId(message.getGlobalPId());
 		visibilityAPI.setInSize(message.getInSize());
