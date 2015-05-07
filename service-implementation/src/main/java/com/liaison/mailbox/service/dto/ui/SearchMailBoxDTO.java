@@ -152,7 +152,7 @@ public class SearchMailBoxDTO {
 		}
 
 		if(!isMbxHasProcessors) {
-			this.setConfigStatus(MailBoxConstants.INCOMPLETE_STATUS);
+			this.setConfigStatus(MailBoxConstants.INCOMPLETE_CONFIGURATION);
 		}
 		else {
 			this.setConfigStatus(MailBoxConstants.COMPLETE_STATUS);
