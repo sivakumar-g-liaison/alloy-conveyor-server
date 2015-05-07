@@ -12,8 +12,6 @@
 package com.liaison.mailbox.service.core;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -33,14 +31,13 @@ import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
  * Handles all script related operations
- * 
+ *
  * @author OFS
  */
 public class ScriptService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ScriptService.class);
 	private GitLabService gitlab;
-	private static final Map<String, String> cache = new HashMap<>();
 	private static final String SCRIPT = "Script File";
 
 	public ScriptService(String serviceIp, String userId)
@@ -58,7 +55,7 @@ public class ScriptService {
 
 	/**
 	 * Creates User script
-	 * 
+	 *
 	 * @param scriptRequest
 	 * @return ScriptServiceResponseDTO
 	 * @throws JAXBException
@@ -84,15 +81,6 @@ public class ScriptService {
 					+ scriptRequest.getCreatedBy());
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, SCRIPT, Messages.SUCCESS));
-
-			// refresh cache during update
-			String[] urlParts = null;
-			urlParts = uri.split(":/");
-			if ("gitlab".equalsIgnoreCase(urlParts[0])) {
-				uri = urlParts[1];
-			}
-
-			cache.put(uri, scriptRequest.getData());
 			LOGGER.debug("Exit from createScript() method");
 
 			return serviceResponse;
@@ -108,7 +96,7 @@ public class ScriptService {
 
 	/**
 	 * Get the script file from git by given git uri.
-	 * 
+	 *
 	 * @param uri
 	 * @param commitSha
 	 * @return ScriptServiceResponseDTO
@@ -118,7 +106,7 @@ public class ScriptService {
 		LOGGER.debug("Entered into getScript() method");
 		LOGGER.info("The retrieve script uri is {} ", uri);
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
-		String script;
+		String script = null;
 		String[] urlParts = null;
 
 		try {
@@ -132,7 +120,6 @@ public class ScriptService {
 			if ("gitlab".equalsIgnoreCase(urlParts[0])) {
 				uri = urlParts[1];
 			}
-			script = cache.get(uri);
 			if (MailBoxUtil.isEmpty(script)) {
 				// if specific commit is chosen
 				if (commitSha != null && !commitSha.isEmpty()) {
@@ -144,8 +131,6 @@ public class ScriptService {
 					script = gitlab.getFileContent(latestCommit, uri);
 				}
 				script = gitlab.getFileContent(commitSha, uri);
-				cache.put(uri, script);
-				LOGGER.info("Not available in cache, so loading it from GIT.");
 			}
 
 			// response message construction
@@ -168,7 +153,7 @@ public class ScriptService {
 
 	/**
 	 * method revise script file.
-	 * 
+	 *
 	 * @param scriptRequest
 	 * @return
 	 */
@@ -188,13 +173,6 @@ public class ScriptService {
 					+ scriptRequest.getCreatedBy());
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, SCRIPT, Messages.SUCCESS));
-			// refresh cache during update
-			String[] urlParts = null;
-			urlParts = uri.split(":/");
-			if ("gitlab".equalsIgnoreCase(urlParts[0])) {
-				uri = urlParts[1];
-			}
-			cache.put(uri, scriptRequest.getData());
 			LOGGER.debug("Exit from updateScript() method.");
 
 			return serviceResponse;
@@ -211,7 +189,7 @@ public class ScriptService {
 
 	/**
 	 * This method to check script uri contains gitlab or not
-	 * 
+	 *
 	 * @param uri
 	 * @return String
 	 * @throws IOException
