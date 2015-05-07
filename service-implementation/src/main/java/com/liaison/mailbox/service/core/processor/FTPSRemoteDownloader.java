@@ -133,13 +133,13 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given payload URI is Empty.");
-				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
+				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
 			String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
+				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
 			ftpsRequest.changeDirectory(path);
