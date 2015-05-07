@@ -873,7 +873,7 @@ var rest = myApp.controller(
 				  $scope.editScripTemplatetName = $scope.modal.uri;
 				  if ($scope.modal.uri) {	
                       $scope.block.blockUI();			  
-					  $scope.restService.get($scope.base_url + "/git/content/" + $scope.trimScriptTemplateName(),
+					  $scope.restService.get($scope.base_url + "/git/content/" + $.base64.encode($scope.trimScriptTemplateName()),
 					  function (data, status) { 
                          $scope.block.unblockUI();
                         if (status === 200 || status === 400) {
@@ -1226,7 +1226,7 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
      $scope.loadDefaultScript = function() {
 	   if (defaultScriptFile === '' || defaultScriptFile !== $scope.$parent.editor.getSession().getValue()) {
 	    $scope.loader = true;
-     	 $scope.restService.get($scope.base_url + "/git/content/" + $scope.javaProperties.defaultScriptTemplateName,
+     	 $scope.restService.get($scope.base_url + "/git/content/" + $.base64.encode($scope.javaProperties.defaultScriptTemplateName),
           function (data, status) {
 			   $scope.loader = false;
               if (status === 200 || status === 400) { 			
