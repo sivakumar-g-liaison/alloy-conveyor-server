@@ -28,7 +28,7 @@ angular.module(
 					
 					if(attrs.id == "modelscriptUrlName") {
 					    scope.$parent.loader = true;
-						 $rootScope.restService.get($rootScope.base_url + "/git/content/" + res[1],
+						 $rootScope.restService.get($rootScope.base_url + "/git/content/" + $.base64.encode(res[1]),
 							function (data, status) {
 							scope.$parent.loader = false;
 							  if (status === 200 || status === 400) { 			

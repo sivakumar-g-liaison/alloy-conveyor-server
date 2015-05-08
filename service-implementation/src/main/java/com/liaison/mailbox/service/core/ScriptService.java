@@ -16,6 +16,7 @@ import java.io.IOException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -101,16 +102,19 @@ public class ScriptService {
 	 * @param commitSha
 	 * @return ScriptServiceResponseDTO
 	 */
-	public ScriptServiceResponseDTO getScript(String uri, String commitSha) {
+	public ScriptServiceResponseDTO getScript(String encodedUri, String commitSha) {
 
 		LOGGER.debug("Entered into getScript() method");
-		LOGGER.info("The retrieve script uri is {} ", uri);
+		LOGGER.info("The retrieve script uri is {} ", encodedUri);
 		ScriptServiceResponseDTO serviceResponse = new ScriptServiceResponseDTO();
 		String script = null;
 		String[] urlParts = null;
+		String uri = null;
 
 		try {
 
+			//decoding the encoded uri
+		    uri = new String(Base64.decodeBase64(encodedUri));
 			if (StringUtil.isNullOrEmptyAfterTrim(uri)) {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}

@@ -146,7 +146,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             }
 
             var mbxName = "";
-            if (null !== $scope.mailBoxName && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
+            if ($scope.mailBoxName && $scope.mailBoxName.length >= $scope.searchMinCharacterCount) {
                 mbxName = $scope.mailBoxName;
             }
             
