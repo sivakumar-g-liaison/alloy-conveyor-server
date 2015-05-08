@@ -62,6 +62,7 @@ var rest = myApp.controller(
 				$scope.sorting = 'name';
                 $scope.isFileSelected = false;
         		$scope.isEdit = false;
+				$scope.oldSecret = '';
                 $scope.isProcessorTypeSweeper = false;
                 $scope.mailboxName = $location.search().mbxname;				
 				//GIT URL
@@ -379,7 +380,9 @@ var rest = myApp.controller(
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 };
-				
+				if ($scope.creationFailed) {
+				    $scope.clearCredentialProps();
+				}
 			}
 			
 			function readSecretFromKM(url, a, data, profData, procsrId, blockuiFlag) {
@@ -387,6 +390,7 @@ var rest = myApp.controller(
 					function (secretData, status) {
 						if(status === 200) {
 							var decPwd = $.base64.decode($.base64.decode(secretData));
+							$scope.oldSecret = decPwd;
 							data.getProcessorResponse.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = decPwd;
 							$scope.editProcAfterReadSecret(data, profData, procsrId, blockuiFlag);
 						} else if(status === 404) {
@@ -399,6 +403,7 @@ var rest = myApp.controller(
 				);
 			}
 			
+			$scope.oldSecret = '';
             $scope.editProcessor = function (processorId, blockuiFlag) {
                 
 				if (blockuiFlag === true) {
@@ -600,7 +605,9 @@ var rest = myApp.controller(
 							$scope.procName = editRequest.reviseProcessorRequest.processor.name;
 							$scope.credUsrName = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].userId;
 							$scope.secret = editRequest.reviseProcessorRequest.processor.processorPropertiesInTemplateJson.credentialProperties[i].password;
-							
+							if ($scope.oldSecret && ($scope.oldSecret !== $scope.secret)) {					   
+							      $scope.clearSecret = true;
+							}							
 							$scope.secretName = '';
 							
 							// revise secret should be called only if password is available in the login credential
@@ -661,7 +668,7 @@ var rest = myApp.controller(
                 }
             };
 			
-			
+			$scope.clearSecret = false;		
             function reviseSecret(secretUrl, base64EncodedSecret, a) {
 				$scope.restService.put(secretUrl, base64EncodedSecret,
 					function (data, status) {
@@ -700,7 +707,9 @@ var rest = myApp.controller(
 						if (status === 201) {
 							addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = secdata;
 							$scope.processorSaveAfterKM();
-						} else {
+						} else if(status === 409){
+							handleConflictInKMSDuringStoredSecretAddition($scope.secretUrl, base64EncodedSecret, a);
+						}else {
 						    $scope.setTypeDuringProtocolEdit(addRequest.addProcessorToMailBoxRequest.processor.protocol);
 							$scope.block.unblockUI();							
 							showSaveMessage("Key manager failed to add stored secret", 'error');
@@ -710,6 +719,39 @@ var rest = myApp.controller(
 				);
 			}
 			
+			function handleConflictInKMSDuringStoredSecretAddition(secretUrl, base64EncodedSecret, a){
+				$scope.restService.put(secretUrl, base64EncodedSecret,
+					function (data, status) {
+					if (status === 200) {
+							addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password = data;
+							$scope.processorSaveAfterKM();
+							
+						} else if (status === 404) {
+							$scope.restService.post($scope.secretUrl, base64EncodedSecret,
+								function (crdata, status2) {
+									if (status2 === 201) {
+										addRequest.addProcessorToMailBoxRequest.processor.processorPropertiesInTemplateJson.credentialProperties[a].password =crdata;
+										$scope.processorSaveAfterKM();
+									}
+									else {
+									    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+										$scope.block.unblockUI();										
+										showSaveMessage("Key manager failed to revise stored secret", 'error');
+										return;
+									}
+								}, {'Content-Type': 'application/octet-stream'}
+							);
+						} else {
+						    $scope.setTypeDuringProtocolEdit(editRequest.reviseProcessorRequest.processor.protocol);
+							$scope.block.unblockUI();							
+							showSaveMessage("Key manager failed to revise stored secret", 'error');
+							return;
+						}
+					}, {'Content-Type': 'application/octet-stream'}
+				);
+			}
+			
+			$scope.creationFailed = false;
 			$scope.processorReviseAfterKM = function() {
 				//$log.info($filter('json')(editRequest));
 				$scope.restService.put($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + $scope.processor.guid, $filter('json')(editRequest),
@@ -721,14 +763,16 @@ var rest = myApp.controller(
 								$scope.isPrivateKeySelected = false;
 								$scope.isPublicKeySelected = false;
 								showSaveMessage(data.reviseProcessorResponse.response.message, 'success');
-							} else {
-								showSaveMessage(data.reviseProcessorResponse.response.message, 'error');
+							} else {	
+                                $scope.creationFailed = true;						    
+								showSaveMessage(data.reviseProcessorResponse.response.message, 'error');								
 							}
 							//$scope.readOnlyProcessors = true;
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 						} else {
-						   $scope.setTypeDuringProtocolEdit($scope.processor.protocol);	
+							$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
+                            $scope.creationFailed = true;
 							showSaveMessage("Error while saving processor", 'error');
 						}
 						$scope.block.unblockUI();
@@ -754,10 +798,12 @@ var rest = myApp.controller(
 								$scope.isPublicKeySelected = false;
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
 							} else {
+							    $scope.clearCredentialProps();								
 								$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'error');
 							}
 						} else {
+						    $scope.clearCredentialProps();
 						    $scope.setTypeDuringProtocolEdit($scope.processor.protocol);	
 							showSaveMessage("Error while saving processor", 'error');
 						}
@@ -766,7 +812,19 @@ var rest = myApp.controller(
 					}
 				);
 			};
-			
+			//clear Credential properties if processor creation failed.
+			$scope.clearCredentialProps = function () {	              			 					   
+				   if ($scope.clearSecret || !$scope.isEdit) {
+					   for (var i = 0; i < $scope.processorCredProperties.length; i++) {
+						   if ($scope.processorCredProperties[i].credentialType === "LOGIN_CREDENTIAL"){
+							  $scope.processorCredProperties[i].password = ''; 
+							  $scope.clearSecret = false;
+                              $scope.creationFailed	= false;						  
+						   }                    				   
+                       }		   
+					   
+					}					   	   		
+			}
             $scope.clearProps = function () {
                 $scope.processor.processorPropertiesInTemplateJson.credentialProperties = [];
                 //$scope.processor.remoteProcessorProperties.otherRequestHeader = [];
@@ -787,6 +845,9 @@ var rest = myApp.controller(
                     $scope.disableSSHKeys = true;
                     $scope.disableCertificates = true;
                     $scope.isEdit = false;
+					$scope.oldSecret = '';
+					$scope.creationFailed = false;
+					$scope.clearSecret = false;
                     $scope.isProcessorTypeHTTPListener = false;
 					//GIT URL
 				    $scope.script = '';
