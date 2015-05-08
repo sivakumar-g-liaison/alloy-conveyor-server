@@ -130,6 +130,12 @@ war {
 	rootSpec.exclude "*wadl*"
 	//exclude webapp/ui
 	rootSpec.exclude 'ui/**'
+
+	// copy error html files
+	from('src/main/webapp/ui/') {
+		include 'error-403.html', 'error-404.html', 'error-500.html'
+		into '/ui'
+	}
 }
 
 war.dependsOn('configureTomcat')
