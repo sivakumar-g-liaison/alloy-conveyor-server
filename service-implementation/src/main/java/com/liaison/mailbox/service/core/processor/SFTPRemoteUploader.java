@@ -103,7 +103,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			if (MailBoxUtil.isEmpty(path)) {
 				LOGGER.info("The given payload URI is Empty.");
-				throw new MailBoxServicesException("The given payload configuration is Empty.", Response.Status.CONFLICT);
+				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
 			if (sftpRequest.openChannel()) {
@@ -111,7 +111,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			    String remotePath = getWriteResponseURI();
 				if (MailBoxUtil.isEmpty(remotePath)) {
 					LOGGER.info("The given remote URI is Empty.");
-					throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
+					throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 				}
 
 				//GMB-320 - Creates directory to the remote folder
@@ -292,7 +292,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		    String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info("The given remote URI is Empty.");
-				throw new MailBoxServicesException("The given remote configuration is Empty.", Response.Status.CONFLICT);
+				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
 			List <String> files = sftpRequest.listFiles(remotePath);

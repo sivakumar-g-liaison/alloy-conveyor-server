@@ -176,7 +176,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 				} else {
 					LOGGER.info("The given HTTP Uploader payload URI is Empty.");
-					throw new MailBoxServicesException("The given payload configuration is Empty.",
+					throw new MailBoxServicesException("The given HTTP Uploader payload URI is Empty.",
 							Response.Status.CONFLICT);
 				}
 			}
