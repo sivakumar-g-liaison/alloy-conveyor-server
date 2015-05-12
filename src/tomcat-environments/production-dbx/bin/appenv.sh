@@ -26,7 +26,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 # ==================================================================
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$APP_ENV.xml"
 # Shortcode for APP_NAME:
-export SYSLOG_APPNAME="dbx"
+export SYSLOG_APPNAME="GDB"
 export SYSLOG_HOST="at4p-sysl01.liaison.prod"
 export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
