@@ -728,7 +728,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String pattern = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.data.folder.pattern","glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**");
 		PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
 		if(!pathMatcher.matches(filePathToCreate)){
-			throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN,pattern.substring(5), Response.Status.BAD_REQUEST);	
+			throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, pattern.substring(5), Response.Status.BAD_REQUEST);	
 		}
 		
 		//check availability of /data/*/* folder

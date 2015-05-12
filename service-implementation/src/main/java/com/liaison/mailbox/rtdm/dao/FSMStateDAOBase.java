@@ -104,18 +104,19 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 	@Override
 	public void deleteStates(List<String> arg0) {
 		// TODO Auto-generated method stub
+		throw new RuntimeException("NotImplemented");
 	}
 
 	@Override
 	public List<ExecutionEvents> getEvents() {
 		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("NotImplemented");
 	}
 
 	@Override
 	public Map<String, ProcessorStateDTO> getStates() {
 		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("NotImplemented");
 	}
 
 	/**
