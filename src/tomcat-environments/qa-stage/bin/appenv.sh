@@ -75,7 +75,7 @@ export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 
 export LOGSTASH_LOG_DIR="/var/log/tomcat/logstash_failover"
-export LOGSTASH_RING_BUFFER_SIZE=128
+export LOGSTASH_RING_BUFFER_SIZE=262144
 # ==================================================================
 # log overrides
 # ==================================================================
