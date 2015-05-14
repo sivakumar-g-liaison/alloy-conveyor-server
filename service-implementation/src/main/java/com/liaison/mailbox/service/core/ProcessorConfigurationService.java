@@ -394,7 +394,7 @@ public class ProcessorConfigurationService {
 		try {
 
 			HttpResponse response = KMSUtil.uploadSelfSignedTrustStoreCertificate();
-			
+
 			if ((response.getStatusLine().getStatusCode() >= 200) && (response.getStatusLine().getStatusCode() < 300)) {
 
 				JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));

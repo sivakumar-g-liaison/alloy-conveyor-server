@@ -26,9 +26,9 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.
 # ==================================================================
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$APP_ENV.xml"
 # Shortcode for APP_NAME:
-export SYSLOG_APPNAME="g2mailboxservice"
+export SYSLOG_APPNAME="GDB"
 export SYSLOG_HOST="at4p-sysl01.liaison.prod"
-export SYSLOG_PORT="6515"
+export SYSLOG_PORT="514"
 export SYSLOG_PROTO="UDP"
 export SYSLOG_ENTERPRISE_NUMBER="99999"
 export SYSLOG_ID="App"
@@ -79,7 +79,7 @@ export LOGSTASHPORT=4560
 export LOGSTASH_ROLLING_SIZE="250 MB"
 
 export LOGSTASH_LOG_DIR=/var/log/tomcat
-export LOGSTASH_RING_BUFFER_SIZE=128
+export LOGSTASH_RING_BUFFER_SIZE=262144
 # ==================================================================
 # log overrides
 # ==================================================================
