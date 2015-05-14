@@ -61,7 +61,7 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
  * Utilities for KMS.
- * 
+ *
  * @author OFS
  */
 public class KMSUtil {
@@ -71,7 +71,7 @@ public class KMSUtil {
 
 	/**
 	 * Util method get stored secret from KMS
-	 * 
+	 *
 	 * @param guid
 	 * @return String
 	 * @throws CertificateEncodingException
@@ -112,9 +112,9 @@ public class KMSUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * Method for fetching SSH Privatekey as an InputStream
-	 * 
+	 *
 	 * @return InputStream
 	 * @throws LiaisonException
 	 * @throws JSONException
@@ -161,9 +161,9 @@ public class KMSUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * Method for fetching TrustStore as an InputStream
-	 * 
+	 *
 	 * @return InputStream
 	 * @throws LiaisonException
 	 * @throws JSONException
@@ -216,7 +216,7 @@ public class KMSUtil {
 
 	/**
 	 * Construct a KMS URL from a partial path. Base URL comes from properties.
-	 * 
+	 *
 	 * @param path
 	 * @return String
 	 * @throws IOException
@@ -234,6 +234,7 @@ public class KMSUtil {
 		}
 		return baseUrl + path;
 	}
+
 	public static HttpResponse uploadSelfSignedTrustStoreCertificate () throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
 		String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 
@@ -254,14 +255,14 @@ public class KMSUtil {
 		dataTransferObject.put("containerPassphrase", containerPassphrase);
 
 		LOGGER.debug("Request  to key manager new deploy {}", jsonRequest.toString());
-		
+
 		// get gem manifest response from GEM
 		GEMACLClient gemClient = new GEMACLClient();
 		GEMManifestResponse gemManifestFromGEM = gemClient.getACLManifest();
 		String gemManifest = (gemManifestFromGEM != null)? gemManifestFromGEM.getManifest():null;
         String signedGEMManifest = (gemManifestFromGEM != null)? gemManifestFromGEM.getSignature():null;
         String gemSignerPublicKey = (gemManifestFromGEM != null)?gemManifestFromGEM.getPublicKeyGuid():null;
-        		
+
 		HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")
 				+ "upload/truststore");
 		StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
@@ -275,13 +276,11 @@ public class KMSUtil {
 		httpPost.setHeader(HEADER_KEY_ACL_MANIFEST, gemManifest);
 		httpPost.setHeader(HEADER_KEY_ACL_SIGNATURE, signedGEMManifest);
 		httpPost.setHeader(HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID, gemSignerPublicKey);
-		
+
 		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		HttpClient httpClient = httpClientBuilder.build();
 		HttpResponse response = httpClient.execute(httpPost);
 		return response;
-		
+
 	}
-
-
 }

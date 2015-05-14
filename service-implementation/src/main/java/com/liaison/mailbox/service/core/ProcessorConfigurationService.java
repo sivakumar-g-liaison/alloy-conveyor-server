@@ -395,8 +395,6 @@ public class ProcessorConfigurationService {
 
 			HttpResponse response = KMSUtil.uploadSelfSignedTrustStoreCertificate();
 
-			// TODO Check for 200 Status code, Consume entity then get GUID and return
-
 			if ((response.getStatusLine().getStatusCode() >= 200) && (response.getStatusLine().getStatusCode() < 300)) {
 
 				JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));

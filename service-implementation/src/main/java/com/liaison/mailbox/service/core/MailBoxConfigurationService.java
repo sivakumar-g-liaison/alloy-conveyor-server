@@ -470,7 +470,6 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			List<MailBox> mailboxes = new ArrayList<MailBox>();
 			// retrieve the actual tenancykey guids from DTO
@@ -484,7 +483,7 @@ public class MailBoxConfigurationService {
 
 			if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
 
-				totalCount = configDao.getMailboxCountByProtocol(searchFilter.getMbxName(),
+				totalCount = configDao.getMailboxCountByProfile(searchFilter.getMbxName(),
 						searchFilter.getProfileName(), tenancyKeyGuids);
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 						searchFilter.getPageSize(), totalCount);
@@ -505,13 +504,21 @@ public class MailBoxConfigurationService {
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
-			SearchMailBoxDTO serachMailBoxDTO = null;
+			SearchMailBoxDTO searchMailBoxDTO = null;
+			boolean hasProcessor;
 			for (MailBox mbx : mailboxes) {
 
-				serachMailBoxDTO = new SearchMailBoxDTO();
-				serachMailBoxDTO.copyFromEntity(mbx,
-						dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId()));
-				searchMailBoxDTOList.add(serachMailBoxDTO);
+				hasProcessor = false;
+				for (MailboxServiceInstance serviceInstance : mbx.getMailboxServiceInstances()) {
+
+					if (serviceInstance.getServiceInstance().getName().equals(searchFilter.getServiceInstanceId())) {
+						hasProcessor = true;
+						break;
+					}
+				}
+				searchMailBoxDTO = new SearchMailBoxDTO();
+				searchMailBoxDTO.copyFromEntity(mbx, hasProcessor);
+				searchMailBoxDTOList.add(searchMailBoxDTO);
 			}
 
 			// Constructing the responses.
