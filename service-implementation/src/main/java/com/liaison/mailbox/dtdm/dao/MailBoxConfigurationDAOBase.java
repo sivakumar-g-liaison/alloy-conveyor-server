@@ -46,7 +46,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return count of mailbox retrieved
 	 */
 	@Override
-	public int getMailboxCountByProtocol(String mbxName, String profName, List <String> tenancyKeys) {
+	public int getMailboxCountByProfile(String mbxName, String profName, List <String> tenancyKeys) {
 
 		Long totalItems = null;
 		int count = 0;

@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.core;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -25,16 +24,8 @@ import java.util.Set;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,9 +37,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.commons.util.ISO8601Util;
 import com.liaison.commons.util.client.sftp.StringUtil;
-import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -102,6 +91,7 @@ import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
+import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -403,39 +393,7 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
-
-			JSONObject jsonRequest = new JSONObject(request);
-			JSONObject dataTransferObject = jsonRequest.getJSONObject("dataTransferObject");
-			jsonRequest.put("serviceInstanceId", MailBoxUtil.getGUID());// Some random string
-			ISO8601Util isoDateUtil = new ISO8601Util();
-			Calendar cal = Calendar.getInstance();
-			dataTransferObject.put("validityDateFrom", isoDateUtil.fromCalendar(cal));
-			dataTransferObject.put("name", "MailBxRt" + cal.getTime()); // Some random string
-			cal.add(Calendar.YEAR, 1);
-			dataTransferObject.put("validityDateTo", isoDateUtil.fromCalendar(cal));
-
-			// read the container passphrase from properties file for the self signed trustore
-			String containerPassphrase = MailBoxUtil.getEnvironmentProperties().getString(
-					MailBoxConstants.SELF_SIGNED_TRUSTORE_PASSPHRASE);
-			dataTransferObject.put("containerPassphrase", containerPassphrase);
-
-			LOGGER.debug("Request  to key manager new deploy {}", jsonRequest.toString());
-
-			HttpPost httpPost = new HttpPost(MailBoxUtil.getEnvironmentProperties().getString("kms-base-url")
-					+ "upload/truststore");
-			StringBody jsonRequestBody = new StringBody(jsonRequest.toString(), ContentType.APPLICATION_JSON);
-			FileBody trustStore = new FileBody(new File(MailBoxUtil.getEnvironmentProperties().getString(
-					"certificateDirectory")));
-
-			HttpEntity reqEntity = MultipartEntityBuilder.create().addPart("request", jsonRequestBody).addPart("key",
-					trustStore).build();
-			httpPost.setEntity(reqEntity);
-			HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-			HttpClient httpClient = httpClientBuilder.build();
-			HttpResponse response = httpClient.execute(httpPost);
-
-			// TODO Check for 200 Status code, Consume entity then get GUID and return
+			HttpResponse response = KMSUtil.uploadSelfSignedTrustStoreCertificate();
 
 			if ((response.getStatusLine().getStatusCode() >= 200) && (response.getStatusLine().getStatusCode() < 300)) {
 
