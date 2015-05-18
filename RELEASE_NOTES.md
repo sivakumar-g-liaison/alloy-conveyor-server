@@ -1,4 +1,7 @@
-2.1.7-SNAPSHOT
+2.2.0
+-------------------------------
+
+2.1.7
 -------------------------------
 * GMB-376 - Creating an HTTPS processor with self signed key fails
 * GMB-420 - Search query optimization
@@ -60,7 +63,7 @@
 * GMB-430 Fix to set the TTL as seconds in fs2header
 * passive value of static properties always display in grid without adding explicitly was fixed
 
-2.1.1-SNAPSHOT
+2.1.1
 -------------------------------
 
 2.0.1
@@ -111,7 +114,7 @@ hornetq properties changes
 RELEASE VERSION
 
 
-1.0.0-SNAPSHOT
+1.0.0
 -------------------------------
 
 Initial version
