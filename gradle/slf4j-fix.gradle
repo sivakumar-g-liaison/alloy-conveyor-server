@@ -6,7 +6,7 @@ allprojects {
 				if (details.requested.name == 'slf4j-simple') {
 					//prefer 'slf4j-log4j2' over 'slf4j-simple', because
 					//it's required that only one logger.jar be present for deterministic behavior of slf4j
-					details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.+"
+					details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.3+"
 				}
 			}
 		}
