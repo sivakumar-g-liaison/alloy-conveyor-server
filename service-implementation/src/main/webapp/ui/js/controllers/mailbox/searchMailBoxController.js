@@ -37,7 +37,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
 
-           if (($scope.mailBoxName != null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount && $scope.mailBoxName != null)  || typeof($scope.mailBoxName) == 'undefined' || $scope.mailBoxName == null || $scope.mailBoxName == "") {
+        	if (($scope.mailBoxName != null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount && $scope.mailBoxName != null)  || typeof($scope.mailBoxName) !== 'undefined' || $scope.mailBoxName !== null || $scope.mailBoxName === "") {
             	            	
             	$scope.pagingOptions.currentPage = 1;
                 $scope.search();
@@ -85,7 +85,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             $scope.totalServerItems = data.totalItems;
             if ( $scope.mailboxes.length === 0)
 			{
-			showSaveMessage("No Results Found", 'error');
+            	showSaveMessage("No Results Found", 'error');
 			}
             if (!$scope.$$phase) {
                 $scope.$apply();
