@@ -317,6 +317,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.saveMailbox = function () {
             fromAddProcsr = false;
             $scope.saveForm();
+            $scope.valueSelectedinSelectionBox.value = '';
+		    $scope.showAddNew.value = false ;      
         };
         
        

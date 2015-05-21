@@ -527,6 +527,7 @@ var rest = myApp.controller(
                 $scope.doSend();
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
+                $scope.showAddNewComponent.value=false;
                
             };
 			
