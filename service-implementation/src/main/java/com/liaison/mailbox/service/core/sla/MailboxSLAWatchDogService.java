@@ -439,7 +439,7 @@ public class MailboxSLAWatchDogService {
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed");
+			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed :" + e.getMessage());
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 			

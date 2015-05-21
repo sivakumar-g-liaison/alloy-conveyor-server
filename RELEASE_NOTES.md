@@ -1,5 +1,29 @@
-2.1.7-SNAPSHOT
+2.3.0-SNAPSHOT
 -------------------------------
+
+2.2.0
+-------------------------------
+
+2.1.7
+-------------------------------
+* GMB-376 - Creating an HTTPS processor with self signed key fails
+* GMB-420 - Search query optimization
+* GMB-453 - Throw RuntimeException with NotImplemented message for not implemented methods
+* GMB-445 - Logger and exception message are saying something different
+* GMB-452 - Show proper error message when invalid target/payload location is given
+* GMB-450 - Unable to create Mailbox processor script url with directory
+* GMB-447 - Code review comments changes (I would match the name to the value here if possible.)
+* GMB-383 - Do not use cache for Processor Javascript
+* GMB-375 - Creating a SFTP processor fails when adding keys
+* GMB-438 - Clear text password stored in the processor credentials table in Database
+* GMB-441 - Cannot create SFTP directory sweeper: protocol required
+* GMB-442 - If Processor revision/creation got failed then protocol is getting disappeared in Processor screen in Mailbox.
+* GMB-439 - reverted back as clearing of password on failure from KMS is the expected behavior
+* GMB-436 - Processor execution through JS is not working
+* GMB-440 - NPE occurs during file staging if the given mailbox corresponding to given mailbox Id in workTicket from serviceBroker is inactive
+
+* HTTP SYNC STATUS LOGGIN DURING SB ERROR CASE - LOG FAILURE STATUS INSTEAD OF SUCCESS RAW PASSWORD GETTING STORED IN CREDENTIALS TABLE
+* Fixed the console error when try search mail Box
 
 2.1.6
 -------------------------------
@@ -42,7 +66,7 @@
 * GMB-430 Fix to set the TTL as seconds in fs2header
 * passive value of static properties always display in grid without adding explicitly was fixed
 
-2.1.1-SNAPSHOT
+2.1.1
 -------------------------------
 
 2.0.1
@@ -93,7 +117,7 @@ hornetq properties changes
 RELEASE VERSION
 
 
-1.0.0-SNAPSHOT
+1.0.0
 -------------------------------
 
 Initial version
