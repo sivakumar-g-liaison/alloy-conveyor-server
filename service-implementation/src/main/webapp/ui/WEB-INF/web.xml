@@ -123,6 +123,7 @@
     
     <servlet-mapping>
 		<servlet-name>default</servlet-name>
+		<url-pattern>/ui/*</url-pattern>
 		<url-pattern>/config/ui/*</url-pattern>
 		<url-pattern>/api-docs/swagger-ui/*</url-pattern>
 	</servlet-mapping>
