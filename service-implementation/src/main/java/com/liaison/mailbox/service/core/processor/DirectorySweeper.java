@@ -22,6 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -133,10 +134,42 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		//GLASS LOGGING ENDS//
 		// Get root from folders input_folder
 		String inputLocation = getPayloadURI();
-
 		// retrieve required properties
 		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
 		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
+		String includedFiles = sweeperStaticProperties.getIncludedFiles();
+		String excludedFiles = sweeperStaticProperties.getExcludedFiles();
+		List<String> includeList = includedFiles!= null ? Arrays.asList(includedFiles.split(",")) : null;
+		List<String> excludedList = excludedFiles!= null ? Arrays.asList(excludedFiles.split(",")) : null;
+		String sweepedLocation = sweeperStaticProperties.getSweepedFileLocation();
+		File dirToList = new File(inputLocation);
+		File[] files = dirToList.listFiles();
+		for (File file : files) {
+
+			if (file.getName().equals(".") || file.getName().equals("..")) {
+				// skip parent directory and the directory itself
+				continue;
+			}
+			String currentFileName = file.getName();
+			if (file.isFile()) {
+				// Check whether user preferred specific files to include or exclude during downloading process.
+				currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
+
+				if(currentFileName != null){
+					Path oldPath =file.toPath();
+					if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
+		                LOGGER.debug("Deleting file after sweep");
+		                delete(oldPath);
+		            } else {
+		            	String sweepPath = sweepedLocation+ file.separator + currentFileName;
+						Path newPath=Paths.get(sweepPath);
+		                LOGGER.debug("Moving file after sweep");
+		                move(oldPath, newPath);
+
+		            }
+				}
+			}
+		}
 		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : "."+fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);

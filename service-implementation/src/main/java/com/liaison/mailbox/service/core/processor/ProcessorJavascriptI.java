@@ -156,6 +156,11 @@ public interface ProcessorJavascriptI {
 	
 	/**
 	 * Method to download the file or folder for FTP/SFTP processor
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -163,7 +168,7 @@ public interface ProcessorJavascriptI {
 	 * @throws SftpException
 	 *
 	 */
-	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation);
+	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException;
 	
 	
 	/**

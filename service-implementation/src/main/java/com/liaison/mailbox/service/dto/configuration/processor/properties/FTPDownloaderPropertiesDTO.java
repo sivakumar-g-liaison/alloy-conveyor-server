@@ -29,6 +29,10 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean passive;
 	private boolean binary;
 	private int retryInterval;
+	private String fileTransferStatusIndicator;
+	private boolean deleteFiles;
+	private String includeFiles;
+	private String excludeFiles;
 
 	public String getUrl() {
 		return url;
@@ -89,6 +93,30 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setRetryInterval(int retryInterval) {
 		this.retryInterval = retryInterval;
+	}
+	public String getFileTransferStatusIndicator() {
+		return fileTransferStatusIndicator;
+	}
+	public void setFileTransferStatusIndicator(String fileTransferStatusIndicator) {
+		this.fileTransferStatusIndicator = fileTransferStatusIndicator;
+	}
+	public boolean getDeleteFiles() {
+		return deleteFiles;
+	}
+	public void setDeleteFiles(boolean deleteFiles) {
+		this.deleteFiles = deleteFiles;
+	}
+	public String getIncludedFiles() {
+		return includeFiles;
+	}
+	public void setIncludedFiles(String includeFiles) {
+		this.includeFiles = includeFiles;
+	}
+	public String getExcludedFiles() {
+		return excludeFiles;
+	}
+	public void setExcludedFiles(String excludeFiles) {
+		this.excludeFiles = excludeFiles;
 	}
 
 }

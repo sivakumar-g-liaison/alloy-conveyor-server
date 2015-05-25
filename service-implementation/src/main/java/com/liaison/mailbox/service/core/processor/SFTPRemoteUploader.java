@@ -18,6 +18,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CertificateEncodingException
 	 *
 	 */
-	private void executeRequest(String executionId, MailboxFSM fsm) {
+	private void executeRequest(String executionId, MailboxFSM fsm) throws URISyntaxException {
 
 		try {
 
@@ -159,24 +160,32 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws IllegalArgumentException 
 	 * @throws SecurityException 
 	 * @throws NoSuchFieldException 
+	 * @throws URISyntaxException 
 	 *
 	 */
 	
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-
+			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
+ 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
-		// variable to hold the status of file upload request execution
-		int replyCode = -1;
+		SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();			
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 		if (subFiles != null && subFiles.length > 0) {
+			String statusIndicator = sftpUploaderStaticProperties.getFileTransferStatusIndicator();
+			String tempExtension = statusIndicator!=null && (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
+			String includedFiles = sftpUploaderStaticProperties.getIncludedFiles();			
+			String excludedFiles = sftpUploaderStaticProperties.getExcludedFiles();			
+			List<String> includeList = includedFiles!= null ? Arrays.asList(includedFiles.split(",")):null;
+			List<String> excludeList =excludedFiles!= null? Arrays.asList(excludedFiles.split(",")):null;			
 			for (File item : subFiles) {
-
+             
+				// variable to hold the status of file upload request execution
+				int replyCode = -1;
 				//interrupt signal check has to be done only if execution Id is present
 				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					lastCheckTime = new Date();
@@ -220,17 +229,52 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					replyCode = 0;
 
 				} else {
+					String currentFileName = item.getName();
+					// Check whether user preferred specific files to include or exclude during downloading process.
+					currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludeList);
+
+					if (currentFileName != null) {
+						String uploadingFileName = tempExtension.length() > 0 ? currentFileName + "." + tempExtension : currentFileName;
+						String remoteDir = remoteParentDir + File.separatorChar + uploadingFileName;						
+						createResponseDirectory(remoteDir);
 
 				    // upload the file
 				    try (InputStream inputStream = new FileInputStream(item)) {
 				        sftpRequest.changeDirectory(remoteParentDir);
-	                    replyCode = sftpRequest.putFile(item.getName(), inputStream);
+	                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
+	                    
+	                 // Check whether the file uploaded successfully if so rename it.
+						if (replyCode == 0) {
+							LOGGER.info("File uploaded successfully");
+							inputStream.close();
+							// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
+							if (tempExtension.length() > 0) {								
+								int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);															
+								if (renameStatus == 0) {
+									LOGGER.info("File renamed successfully");
+								} else {
+									LOGGER.info("File renaming failed");
+								}
+							}
+							// Delete the local files after successful download if user opt for it
+								if (sftpUploaderStaticProperties.getDeleteFiles()) {
+									item.delete();
+									if (!item.exists()) {
+										item = null;										
+										LOGGER.info("File deleted successfully");
+									} else {
+										LOGGER.info("File deletion failed");
+									}
+								}
+
+						}
 				    }
+					}
 				}
 			
 				if (null != item) {
 					
-					SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
+					//SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
 					// File Uploading done successfully so move the file to processed folder
 					if (replyCode == 0) {
 
@@ -275,9 +319,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// SFTPRequest executed through Java
 				executeRequest(executionId, fsm);
 			}
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException | URISyntaxException e) {			
 			throw new RuntimeException(e);
-		}
+		} 
 	 }
 
 	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
@@ -322,9 +366,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 			uploadDirectory(sftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
 		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException 
-				| NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
+				| NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | URISyntaxException e) {
 			throw new RuntimeException(e);
-		}
+		} 
 		
 	}
 

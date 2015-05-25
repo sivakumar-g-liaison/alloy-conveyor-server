@@ -26,6 +26,8 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String numOfFilesThreshold;
 	private String payloadSizeThreshold;
 	private String sweepedFileLocation;
+	private String includeFiles;
+	private String excludeFiles;
 
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -68,5 +70,17 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setSweepedFileLocation(String sweepedFileLocation) {
 		this.sweepedFileLocation = sweepedFileLocation;
+	}
+	public String getIncludedFiles() {
+		return includeFiles;
+	}
+	public void setIncludedFiles(String includedFiles) {
+		this.includeFiles = includedFiles;
+	}
+	public String getExcludedFiles() {
+		return excludeFiles;
+	}
+	public void setExcludedFiles(String excludedFiles) {
+		this.excludeFiles = excludedFiles;
 	}
 }
