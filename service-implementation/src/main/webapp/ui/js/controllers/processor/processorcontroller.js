@@ -14,10 +14,15 @@ var rest = myApp.controller(
             		$scope.isJavaScriptExecution = true;
             	} 	            	
             } 
-                       
-             //ssh key implementation
-            $scope.disableSSHKeys = true;
-            $scope.disableCertificates = true;    	    
+                 
+            // variable to show or hide ssh keys section
+            $scope.showSSHKeysSection = false;
+            // variable to determine enable or disable add ssh keypair button
+            $scope.disableSSHKeysAddition = true;
+            // variable to show or hide truststore section
+            $scope.showTruststoreSection = false;   
+            //variable to determine enable or disable add Truststore button
+            $scope.disableTrustoreAddition = true;
 			//check directory path in choose file
 			$scope.isDirectoryPath = true;
 		
@@ -77,9 +82,6 @@ var rest = myApp.controller(
                 // to disable protocol for file writer
                 $scope.isProcessorTypeDropbox = false;
                 
-                $scope.isPrivateKeySelected = false;
-                $scope.isPublicKeySelected = false;
-                
                 //Model for Add MB
                 addRequest = $scope.addRequest = {
                     addProcessorToMailBoxRequest: {
@@ -120,25 +122,13 @@ var rest = myApp.controller(
                     "uri": ''
                 };
 				
-                $scope.certificateModal = {
-                    "certificates": '',
-                    "certificateURI": '',
-                    "isGlobalTrustore": '1',
+                $scope.truststoreModal = {
                     "trustStoreGroupId": ''
                 };
                 
               // ssh key implementation
                 $scope.sshkeyModal = {
-                    "sshKeys": '',
-                    "sshPrivateKeyURI": '',
-                    "sshPublicKeyURI": '',
-                    "sshKeyPairPguid": '',
-                    "sshKeyPairPassphrase":'',
-                    "sshKeyPairConfirmPassphrase":''
-                };
-                $scope.sshKeys = {
-                    "privatekey":'',
-                    "publickey":''
+                    "sshKeyPairGroupId": ''
                 };
                 $scope.status = $scope.initialProcessorData.supportedStatus.options[0];                
                 $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[0];				
@@ -315,12 +305,12 @@ var rest = myApp.controller(
                 }
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-					$scope.disableCertificates = false;	
+					$scope.showTrusstoreSection = true;	
 									
 				} else {
-					$scope.disableCertificates = true;
+					$scope.showTrusstoreSection = false;
 				}
-				$scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
+				$scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
 				
 				$scope.propertiesAddedToProcessor = [];
 			    $scope.availableProperties = [];
@@ -793,9 +783,6 @@ var rest = myApp.controller(
 							$scope.isEdit = true;
 							$scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
 							$scope.editProcessor($scope.processor.guid, false);
-								if($scope.isFileSelected)  $scope.isFileSelected = false;
-								$scope.isPrivateKeySelected = false;
-								$scope.isPublicKeySelected = false;
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
 							} else {
 							    $scope.clearCredentialProps();								
@@ -842,8 +829,8 @@ var rest = myApp.controller(
                     $scope.closeDelete();
                     //To notify passwordDirective to clear the password and error message
                     $scope.doSend();
-                    $scope.disableSSHKeys = true;
-                    $scope.disableCertificates = true;
+                    $scope.showSSHKeysSection = false;
+                    $scope.showTruststoreSection = false;
                     $scope.isEdit = false;
 					$scope.oldSecret = '';
 					$scope.creationFailed = false;
@@ -863,12 +850,8 @@ var rest = myApp.controller(
             };		    
             
             //GMB-201
-			if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-				$scope.disableCertificates = false;
-			} else {
-                $scope.disableCertificates = true;
-			}
-            $scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
+			$scope. showTruststoreSection = ($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") ? true : false;
+            $scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
             
 			$scope.appendPortToUrl = function() {
 			    
@@ -1111,12 +1094,8 @@ var rest = myApp.controller(
 				    break;				   
 				}
                 //GMB-201
-                if(protocalName === "FTPS" || protocalName === "HTTPS") {
-					$scope.disableCertificates = false;
-     			} else {
-					$scope.disableCertificates = true;
- 				}
-                $scope.disableSSHKeys = (protocalName === "SFTP")?false:true; 
+                $scope.showTruststoreSection = (protocalName === "FTPS" || protocalName === "HTTPS") ? true : false;
+                $scope.showSSHKeysSection = (protocalName === "SFTP") ? true : false; 
                 $scope.$broadcast("resetCredentialSection");				
 			};			
 			
@@ -1269,8 +1248,7 @@ var rest = myApp.controller(
             $rootScope.$on("propertyModificationActionEvent", function() {
                $scope.cleanup(); 
             });
-
-        }
+         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
      

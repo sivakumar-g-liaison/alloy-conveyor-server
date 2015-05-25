@@ -193,7 +193,7 @@ public interface MailBoxConstants {
 
 	// added for self signed truststore
 	public static final String SELF_SIGNED_TRUSTORE_PASSPHRASE = "mailbox.self.signed.trustore.passphrase";
-	
+
 	public static final String DEFAULT_FIRST_CORNER_NAME = "SECOND CORNER";
 	public static final String PROPERTY_FIRST_CORNER_NAME = "com.liaison.secondcorner.name";
 	public static final String DEFAULT_SECOND_CORNER_NAME = "SECOND CORNER";
@@ -270,17 +270,16 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_LOCAL_PAYLOAD_LOCATION_DISPLAYTYPE = "Local Payload Location";
 	public static final String PROPERTY_REMOTE_TARGET_LOCATION_DISPLAYTYPE = "Remote Target Location";
 	public static final String PROPERTY_REMOTE_PAYLOAD_LOCATION_DISPLAYTYPE = "Remote Payload Location";
-	
+
 	//Credential Properties
 	public static final String PROPERTY_LOGIN_CREDENTIAL_DISPLAY_TYPE = "Login Credential";
 	public static final String PROPERTY_TRUSTORE_DISPLAY_TYPE = "Trustore Certificate";
-	public static final String PROPERTY_SSH_PRIVATE_KEY_DISPLAY_TYPE = "SSH Private Key";
-	public static final String PROPERTY_SSH_PUBLIC_KEY_DISPLAY_TYPE = "SSH Public Key";
-	
+	public static final String PROPERTY_SSH_KEYPAIR_DISPLAY_TYPE = "SSH KeyPair";
+
 	public static final String PROPERTY_LOGIN_CREDENTIAL = "LOGIN_CREDENTIAL";
     public static final String PROPERTY_TRUSTORE = "TRUSTSTORE_CERT";
     public static final String PROPERTY_SSH_KEYPAIR = "SSH_KEYPAIR";
-    
+
     // glass log messages
     public static final String DROPBOX_FILE_TRANSFER = "dropbox_file_transfer";
     public static final String FILE_QUEUED_SUCCESSFULLY = "MFT:File queued for transfer successfully";

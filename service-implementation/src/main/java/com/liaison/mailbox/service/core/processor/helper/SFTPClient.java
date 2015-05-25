@@ -43,7 +43,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author VNagarajan
- * 
+ *
  */
 public class SFTPClient {
 
@@ -121,7 +121,7 @@ public class SFTPClient {
 
 				String privateKeyPath = MailBoxUtil.getEnvironmentProperties().getString(
 						"ssh.private.key.temp.location")
-						+ sshKeyPairCredential.getCredsUri() + ".txt";
+						+ sshKeyPairCredential.getCredsIdpUri() + ".txt";
 				// write to a file
 				try (FileOutputStream out = new FileOutputStream(privateKeyPath)) {
 					out.write(privateKeyStream);

@@ -193,105 +193,32 @@
             </div>
 
             <div ng-controller = "CredentialHanlderCntrlr" class="form-group" ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeSweeper">
-
-                <div>
-                    <h4>Credentials</h4>
-                    <div class ="row" ng-show="!disableSSHKeys">
-						<div class="col-sm-6 col-md-6">
-						<div class ="row">
-							<div class="col-sm-10 col-md-10 adjustPaddingRight">
-								<label>
-									SSH Private Key 
-								</label>
-								<input id="mbx-procsr-sshprivatekeypath" type="text" ng-model="sshkeyModal.sshPrivateKeyURI" class="form-control" ng-disabled="true">
-							</div>
-							<div class="col-sm-2 col-md-2 processor_removePaddingLeft">
-								<br>
-								<div class="processor_fileUpload btn btn-primary">
-									<span>Browse</span>
-									<input id="mbx-procsr-sshprivatekeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPrivateKey(this)" /> 
-								</div>
-							</div>
-							</div>
-							<div class ="row">
-							<div class="col-sm-10 col-md-10 adjustPaddingRight processor_adjustPaddingTop">
-								<label>
-									SSH Public Key 
-								</label>
-								<input id="mbx-procsr-sshpublickeypath" type="text" ng-model="sshkeyModal.sshPublicKeyURI" class="form-control" ng-disabled="true">
-							</div>
-							<div class="col-sm-2 col-md-2 processor_removePaddingLeft processor_adjustPaddingTop">
-								<br>
-								<div class="processor_fileUpload btn btn-primary">
-									<span>Browse</span>
-									<input id="mbx-procsr-sshpublickeyAdd" type="file" class="upload" ng-model-instant ng-click="angular.element(this).scope().resetSSHKeys(this)" onchange="angular.element(this).scope().setSSHPublicKey(this)" /> 
-								</div>
-						   </div>
-						   </div>
-						   </div>
-						   <div class="col-md-6">
-							   <!-- <div class = "row" ng-show="!disableSSHKeys"> -->
-							<div class="form-group">
-							<label>
-								Passphrase
-							</label>
-							<input id="mbx-procsr-sshkeypair-passphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairPassphrase" name="sshkeypassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
-							<!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-								 <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
-							</div> -->
-							</div>
-							<div class="form-group">
-								 <label>
-								Confirm Passphrase
-								</label>
-								<input id="mbx-procsr-sshkeypair-confirmpassphrase" type = "password" width="40px" height="20px" rows="2" ng-model="sshkeyModal.sshKeyPairConfirmPassphrase" name="sshkeyconfirmpassphrase" ng-change="confirmPasswordColor()" class="form-control"/>
-								<!--<div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-									 <span id="mbx-sshKeyPairPassphrase-mandatory" class="customHide" ng-class = "{'help-block-custom':formAddPrcsr.sshkeypassphrase.$error.required}" ng-show="formAddPrcsr.sshkeypassphrase.$error.required">Passphrase is Mandatory.</span>
-								</div>-->
-							</div>
-						   </div>
-                      </div>
-					  </div>
-					  <div class="processor_adjustUploadPaddingTop" ng-show="!disableSSHKeys">
-						<button id="mbx-procsr-sshkeyupload" ng-disabled="!(isPrivateKeySelected && isPublicKeySelected)" class="btn btn-primary processor_buttonMargin_Top" ng-click="uploadSSHKey()">Upload</button>
-					    <br/><br/>
-					 </div>
-                   <div class="row" ng-show="!disableCertificates">
-
-                        <div class="col-sm-4 col-md-4 adjustPaddingRight">
-                            <label>
-                                Certificate 
-                            </label>
-                            <input id="mbx-procsr-certificatePath" type="text" ng-model="certificateModal.certificateURI" class="form-control" ng-disabled="true">
-                        </div>
-                        <div class="col-sm-1 col-md-1 adjustPaddingRight processor_removePaddingLeft">
-                            <br>
-                            <div class="processor_fileUpload btn btn-primary" ng-disabled="disableCertificates">
-                                <span>Browse</span>
-                                <input id="mbx-procsr-certificatebrowse" ng-disabled="disableCertificates" type="file" class="upload" ng-model-instant ng-click="resetFiles()" onchange="angular.element(this).scope().setFiles(this)" /> 
-						    </div>
-                        </div>
-                        <div class="col-sm-1 col-md-1">
-                            <button id="mbx-procsr-certificateupload" ng-disabled="!isFileSelected" class="btn btn-primary processor_buttonMargin_Top processor_buttonMargin_Left" ng-click="uploadFile()">Upload</button>
-                        </div>
-                        <br>
-                        <div class="col-sm-6 col-md-6">
-                            <div class="form-group">
-                                <label>
-                                    Add certificate to global trust store?
-                                </label>
-                                <br/>
-                                <input id="mbx-procsr-signed" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="1">  Yes
-                              
-                                <input id="mbx-procsr-unsigned" type="radio" ng-disabled="!isFileSelected" ng-model="certificateModal.isGlobalTrustore" value="0" class="processor_inputMargin_Left">  No
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="gridStyle" ng-grid="gridOptionsForProcessorCredential">
-                    </div>
-                </div>
-                <br>
+			 	<h4>Credentials</h4>
+	            <div class ="row" ng-show="showTruststoreSection">
+	                    <div class="col-sm-4 col-md-4 adjustPaddingRight">
+	                            <label>
+	                                Truststore Group ID
+	                            </label>
+	                            <input id="mbx-procsr-truststoregroupid" type="text" ng-model="truststoreModal.trustStoreGroupId" ng-blur="trustoreAdditonEnabler()" class="form-control">
+	                    </div>
+	                    <div class="col-sm-2 col-md-2">
+	                            <button id="mbx-procsr-truststoreadd" ng-disabled="disableTrustoreAddition" class="btn btn-primary processor_buttonMargin_Top" ng-click="addTruststoreDetails()">Add Truststore</button>
+	                    </div>
+	                </div>
+	                <div class ="row" ng-show="showSSHKeysSection">
+	                    <div class="col-sm-4 col-md-4 adjustPaddingRight">
+	                            <label>
+	                                SSH KeyPair Group ID 
+	                            </label>
+	                            <input id="mbx-procsr-sshkeypairgroupid" type="text" ng-model="sshkeyModal.sshKeyPairGroupId" ng-blur="sshKeysAdditonEnabler()" class="form-control">
+	                    </div>
+	                    <div class="col-sm-2 col-md-2">
+	                            <button id="mbx-procsr-sshkeypairadd" ng-disabled="disableSSHKeysAddition" class="btn btn-primary processor_buttonMargin_Top" ng-click="addSSHKeyDetails()">Add SSH KeyPair</button>
+	                    </div>
+	                </div>
+	                <br/>
+	                <div class="gridStyle" ng-grid="gridOptionsForProcessorCredential">
+	                </div>
             </div>
             <h3 ng-hide = "isProcessorTypeDropbox || isProcessorTypeHTTPListener || isProcessorTypeFileWriter ">
                 Scheduling
