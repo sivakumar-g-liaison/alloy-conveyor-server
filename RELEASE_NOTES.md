@@ -1,5 +1,6 @@
-2.3.0-SNAPSHOT
+2.2.2
 -------------------------------
+Remove version number accidentally brought in from the "develop" branch.
 
 2.2.1
 -------------------------------
