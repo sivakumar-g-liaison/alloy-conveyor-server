@@ -180,8 +180,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			String tempExtension = statusIndicator!=null && (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
 			String includedFiles = sftpUploaderStaticProperties.getIncludedFiles();			
 			String excludedFiles = sftpUploaderStaticProperties.getExcludedFiles();			
-			List<String> includeList = includedFiles!= null ? Arrays.asList(includedFiles.split(",")):null;
-			List<String> excludeList =excludedFiles!= null? Arrays.asList(excludedFiles.split(",")):null;			
+			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludeList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;			
 			for (File item : subFiles) {
              
 				// variable to hold the status of file upload request execution

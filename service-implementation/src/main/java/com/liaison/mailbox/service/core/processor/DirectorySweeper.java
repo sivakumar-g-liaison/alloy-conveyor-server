@@ -139,8 +139,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
 		String includedFiles = sweeperStaticProperties.getIncludedFiles();
 		String excludedFiles = sweeperStaticProperties.getExcludedFiles();
-		List<String> includeList = includedFiles!= null ? Arrays.asList(includedFiles.split(",")) : null;
-		List<String> excludedList = excludedFiles!= null ? Arrays.asList(excludedFiles.split(",")) : null;
+		List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
+		List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
 		String sweepedLocation = sweeperStaticProperties.getSweepedFileLocation();
 		File dirToList = new File(inputLocation);
 		File[] files = dirToList.listFiles();
