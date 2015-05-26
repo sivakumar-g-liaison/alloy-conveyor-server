@@ -842,6 +842,7 @@ var rest = myApp.controller(
                     $scope.isJavaScriptExecution = false;
                     $scope.isCreateConfiguredLocation = true;
                     $scope.formAddPrcsr.scriptName.$setValidity('allowed', true);
+                    $scope.scriptUrlIsValid=false;
                     $scope.$broadcast("resetCredentialSection");
             };            
             // Close the modal
