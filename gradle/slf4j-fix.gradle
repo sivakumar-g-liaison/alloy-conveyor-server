@@ -3,10 +3,8 @@ allprojects {
 		all {
 			// force the version of transient dependencies for the entire project
 			resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-				if (details.requested.name == 'slf4j-simple') {
-					//prefer 'slf4j-log4j2' over 'slf4j-simple', because
-					//it's required that only one logger.jar be present for deterministic behavior of slf4j
-					details.useTarget "org.apache.logging.log4j:log4j-slf4j-impl:2.+"
+				if(details.requested.group == 'org.apache.logging.log4j'){
+					details.useVersion '2.3+'
 				}
 			}
 		}
