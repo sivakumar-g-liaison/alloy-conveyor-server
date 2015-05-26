@@ -587,3 +587,9 @@ input::-moz-focus-inner {
 .img_Width{
 	width: 70%;
 }
+.buttonalign {
+	margin-top: 5px;
+}
+.marginalign{
+	margin-left: 15px!important;
+}
