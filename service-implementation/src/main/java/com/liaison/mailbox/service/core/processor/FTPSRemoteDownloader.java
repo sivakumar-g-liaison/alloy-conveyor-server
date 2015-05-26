@@ -197,8 +197,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			String tempExtension = ((!MailBoxUtil.isEmpty(statusIndicator)) && statusIndicator.length() > 1) ? statusIndicator : "";
 			String excludedFiles = ftpDownloaderStaticProperties.getExcludedFiles();
 			String includedFiles = ftpDownloaderStaticProperties.getIncludedFiles();
-			List<String> includeList = includedFiles != null ? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludedList = excludedFiles != null ? Arrays.asList(excludedFiles.split(",")) : null;
+			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
 			for (FTPFile file : files) {
 				if (file.getName().equals(".") || file.getName().equals("..")) {
 					// skip parent directory and the directory itself

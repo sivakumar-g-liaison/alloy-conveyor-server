@@ -203,8 +203,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			String tempExtension = statusIndicator!=null && (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
 			String includedFiles = ftpUploaderStaticProperties.getIncludedFiles();
 			String excludedFiles = ftpUploaderStaticProperties.getExcludedFiles();
-			List<String> includeList = includedFiles!= null ? Arrays.asList(includedFiles.split(",")):null;
-			List<String> excludeList =excludedFiles!= null? Arrays.asList(excludedFiles.split(",")):null;
+			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludeList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
 			for (File item : subFiles) {
 
 				//interrupt signal check has to be done only if execution Id is present
