@@ -1,3 +1,7 @@
+2.1.7
+-------------------------------
+* Patch/Syslog Production
+
 2.1.6
 -------------------------------
 * Add missing properties - MSOPS-2325
