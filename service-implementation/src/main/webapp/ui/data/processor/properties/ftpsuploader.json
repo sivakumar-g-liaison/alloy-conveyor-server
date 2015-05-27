@@ -187,7 +187,11 @@
 			"mandatory": false,
 			"dynamic": false,
 	        "valueProvided":false,
-			"validationRules": null
+			  "validationRules": {  
+            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "minLength": "",
+            "maxLength": ""
+        }
 		},
 		{
 		    "name": "excludeFiles",
@@ -198,7 +202,11 @@
 			"mandatory": false,
 			"dynamic": false,
 	        "valueProvided":false,
-			"validationRules": null
+			 "validationRules": {  
+            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "minLength": "",
+            "maxLength": ""
+        }
 		},
          {
 	        "name": "fileTransferStatusIndicator",
