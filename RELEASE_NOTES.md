@@ -1,6 +1,14 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.2
+-------------------------------
+Remove version number accidentally brought in from the "develop" branch.
+
+2.2.1
+-------------------------------
+Updated the web.xml to apply the tomcat harden changes.
+
 2.2.0
 -------------------------------
 
