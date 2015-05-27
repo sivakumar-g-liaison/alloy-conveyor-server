@@ -19,6 +19,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -171,49 +172,91 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws com.liaison.commons.exception.LiaisonException
+	 * @throws JAXBException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
 	 * @throws SftpException
 	 *
 	 */
 	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, MailBoxServicesException {
+			LiaisonException, URISyntaxException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		String dirToList = "";
+		FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
+		
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
 		}
 		FTPFile[] files = ftpClient.getNative().listFiles(dirToList);
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
-
 		if (files != null) {
-
+			String statusIndicator = ftpDownloaderStaticProperties.getFileTransferStatusIndicator();
+			String tempExtension = ((!MailBoxUtil.isEmpty(statusIndicator)) && statusIndicator.length() > 1) ? statusIndicator : "";
+			String excludedFiles = ftpDownloaderStaticProperties.getExcludedFiles();
+			String includedFiles = ftpDownloaderStaticProperties.getIncludedFiles();
+			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
 			for (FTPFile file : files) {
-
 				if (file.getName().equals(".") || file.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
 				}
-
 				String currentFileName = file.getName();
 				if (file.isFile()) {
+					// Check whether user preferred specific files to include or exclude during downloading process.
+					currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
+					if (currentFileName != null) {
+						String downloadingFileName = currentFileName + "." + tempExtension;
+						String localDir = localFileDir + File.separatorChar + downloadingFileName;
+						ftpClient.changeDirectory(dirToList);
+						createResponseDirectory(localDir);
 
-					String localDir = localFileDir + File.separatorChar + currentFileName;
-				   	ftpClient.changeDirectory(dirToList);
-					createResponseDirectory(localDir);
+						try {// GSB-1337,GSB-1336
 
-					try {// GSB-1337,GSB-1336
+							fos = new FileOutputStream(localDir);
+							bos = new BufferedOutputStream(fos);
+							int statusCode = ftpClient.getFile(currentFileName,
+									bos);
+							// Check whether the file downloaded successfully if so rename it.
+							if (statusCode == 226) {
+								LOGGER.info("File downloaded successfully");
+								// Renames the downloaded file to original extension once the fileStatusIndicator is  given by User
+								if (tempExtension.length() > 0) {
+									if (null != fos) {
+										fos.close();
+									}
+									if (null != bos) {
+										bos.close();
+									}
+									//Constructs the original file filename
+									File actualFileName = new File(localFileDir + currentFileName);
+									boolean renameStatus =  new File(localDir).renameTo(actualFileName);
+									if (renameStatus) {
+										LOGGER.info("File renamed successfully");
+									} else {
+										LOGGER.info("File renaming failed");
+									}
+								}
+								// Delete the remote files after successful download if user opt for it
+								if (ftpDownloaderStaticProperties.getDeleteFiles()) {
+									ftpClient.deleteFile(file.getName());
+								}
+							}
+						} finally {
+							if (bos != null)
+								bos.close();
+							if (fos != null)
+								fos.close();
+						}
 
-						fos = new FileOutputStream(localDir);
-						bos = new BufferedOutputStream(fos);
-						ftpClient.getFile(currentFileName, bos);
-					} finally {
-					    if (bos != null) bos.close();
-					    if (fos != null) fos.close();
 					}
 				} else {
 
-					String localDir = localFileDir + File.separatorChar + currentFileName;
-					String remotePath = dirToList + File.separatorChar + currentFileName;
+					String localDir = localFileDir + File.separatorChar+ currentFileName;
+					String remotePath = dirToList + File.separatorChar+ currentFileName;
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
@@ -236,7 +279,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		G2FTPSClient ftpClient = (G2FTPSClient)client;
 		try {
 			downloadDirectory(ftpClient, remotePayloadLocation, localTargetLocation);
-		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException e) {
+		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
 			throw new RuntimeException(e);
 		}
 	}

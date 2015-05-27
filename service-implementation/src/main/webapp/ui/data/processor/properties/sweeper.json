@@ -118,7 +118,29 @@
                "minLength": "",
                "maxLength":""               
             }
-         }
+         },
+         {
+		 "name": "includeFiles",
+		  "displayName": "IncludeFiles",
+		  "type": "textarea",
+		  "value": "",
+		  "readOnly": false,
+		  "mandatory": false,
+		  "dynamic": false,
+	      "valueProvided":false,
+		  "validationRules": null
+	  },
+	  {
+		  "name": "excludeFiles",
+		  "displayName": "ExcludeFiles",
+		  "type": "textarea",
+		  "value": "",
+		  "readOnly": false,
+		  "mandatory": false,
+		  "dynamic": false,
+	      "valueProvided":false,
+		  "validationRules": null
+	  }
       ],
       "folderProperties":[
 		  {

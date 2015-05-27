@@ -133,7 +133,53 @@
             "defaultValue":"false",
             "validationRules": null,
             "options":["false","true"]
-		 }
+		 },
+		 {
+			"name":"deleteFiles",
+			"displayName":"Delete Files",	
+		    "value":"false",
+            "type":"select",            
+			"mandatory": false,
+			"dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]
+		 },
+		  {
+		    "name": "includeFiles",
+		    "displayName": "IncludeFiles",
+		    "type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"mandatory": false,
+			"dynamic": false,
+	        "valueProvided":false,
+			"validationRules": null
+		},
+		{
+		    "name": "excludeFiles",
+		    "displayName": "ExcludeFiles",
+		    "type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"mandatory": false,
+			"dynamic": false,
+	        "valueProvided":false,
+			"validationRules": null
+		},
+		 {
+	        "name": "fileTransferStatusIndicator",
+	        "displayName": "File Transfer Status Indicator",
+	        "type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"mandatory": false,
+		    "dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"prg",
+			"validationRules": null
+	     }
       ],
       "folderProperties":[
 		  {

@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -399,6 +400,44 @@ public class MailBoxUtil {
 		cal.setTimeInMillis(currentTimeStamp.getTime());
 		cal.add(Calendar.SECOND, seconds);
 		return new Timestamp(cal.getTime().getTime());
+	}
+	
+	/**
+	 * Method to check whether the user has opt for including/excluding specific files during uploading,downloading and directory sweeping process.
+	 * When both include and exclude  are specified take include option as priority.
+	 * 
+	 * @param includeList
+	 * @param currentFileName
+	 * @param excludedList
+	 * @return
+	 */
+	
+	public static String checkIncludeorExclude(List<String> includeList,String currentFileName,List<String> excludedList ){
+		boolean includeEnabled = false;
+		boolean excludeEnabled = false;
+		if (null!=includeList && includeList.size()>0) {
+			 for(String includefile : includeList){
+                   if ((currentFileName.substring(currentFileName.lastIndexOf("."), currentFileName.length())
+                           .equals(includefile))) {
+                   	includeEnabled=true;
+                   }
+             }
+			if(!includeEnabled){
+				currentFileName = null;
+			}
+		}
+		else if(null!=excludedList && excludedList.size()>0) {
+			 for(String excludefile : excludedList){
+                   if ((currentFileName.substring(currentFileName.lastIndexOf("."), currentFileName.length())
+                           .equals(excludefile))) {
+                   	excludeEnabled=true;
+                   }
+             }
+			if(excludeEnabled){
+				currentFileName = null;
+			}
+		}
+		return currentFileName;
 	}
 
 }
