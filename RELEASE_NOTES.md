@@ -1,5 +1,7 @@
 2.3.0-SNAPSHOT
 -------------------------------
+* Updated the glass_log4j2_lib version to 2.2.+
+* Updated UserMgmt Client to release version
 
 2.2.2
 -------------------------------
@@ -131,4 +133,3 @@ RELEASE VERSION
 Initial version
 
 Add to the top of this file. Don't edit existing notes.
-
