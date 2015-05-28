@@ -125,21 +125,17 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             if (newVal !== oldVal  && $scope.validatePageNumberValue(newVal, oldVal)) {
             	$scope.loadProfiles();
             }
-
-            if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-            	$scope.loadProfiles();
-				newVal.currentPage = 1;
-            }
         }, true);
         
 		$scope.$watch('pagingOptions.pageSize', function (newVal, oldVal) {
             if (newVal !== oldVal) {
-            	$scope.loadProfiles();
-            }
-
-            if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-            	$scope.loadProfiles();
-				newVal.currentPage = 1;
+               //Get data when in first page
+               if ( $scope.pagingOptions.currentPage === 1) {
+                    $scope.loadProfiles();
+               } else {
+                    //If on other page than 1 go back
+                    $scope.pagingOptions.currentPage = 1;
+               }               
             }
         }, true);
 

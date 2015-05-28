@@ -755,6 +755,7 @@ var rest = myApp.controller(
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 						} else {
+							$scope.editProcessor($scope.processor.guid, false);
 							$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
                             $scope.creationFailed = true;
 							showSaveMessage("Error while saving processor", 'error');

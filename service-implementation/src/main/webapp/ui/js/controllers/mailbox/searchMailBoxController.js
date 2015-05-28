@@ -37,7 +37,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         // Whenever changes occur in the mbx Name it calls search method
         $scope.$watch('mailBoxName', function () {
 
-        	if (($scope.mailBoxName != null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount && $scope.mailBoxName != null)  || typeof($scope.mailBoxName) !== 'undefined' || $scope.mailBoxName !== null || $scope.mailBoxName === "") {
+        	if ((typeof $scope.mailBoxName !== 'undefined' && $scope.mailBoxName !== null && $scope.mailBoxName.length >= $scope.searchMinCharacterCount)  || $scope.mailBoxName === null || $scope.mailBoxName === "" || (typeof $scope.mailBoxName !== 'undefined' && $scope.mailBoxName !== null && $scope.mailBoxName.length === 0)) {
             	            	
             	$scope.pagingOptions.currentPage = 1;
                 $scope.search();
