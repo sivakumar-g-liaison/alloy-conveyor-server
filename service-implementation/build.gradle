@@ -228,7 +228,7 @@ dependencies {
 	jdbc "com.oracle:ojdbc6:${oracleVersion}"
 
 	//Dependency for UM integration
-	compile group: "com.liaison.commons.usermanagement:usermanagement-client:2.2.0"
+	compile "com.liaison.commons.usermanagement:usermanagement-client:2.2.0"
 
 	// Dependency for KeyManager
 	//compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.4', classifier: 'grammar', changing: true
