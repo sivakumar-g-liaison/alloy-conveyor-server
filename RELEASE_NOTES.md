@@ -1,3 +1,8 @@
+2.1.8
+-------------------------------
+* Updated the glass_log4j2_lib version to 2.2.+
+* Updated UserMgmt Client to release version
+
 2.1.7
 -------------------------------
 * Patch/Syslog Production

@@ -202,7 +202,7 @@ dependencies {
 
 	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
 	compile 'net.logstash.log4j2:log4j2-logstash-jsonevent-layout:3.+'
-	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
+	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.2.+'
 
 
 	//TODO change to 2.+ after logging updATE
@@ -222,7 +222,7 @@ dependencies {
 	jdbc "com.oracle:ojdbc6:${oracleVersion}"
 
 	//Dependency for UM integration
-	compile group: "com.liaison.commons.usermanagement", name: "usermanagement-client", version: "2.0.0-SNAPSHOT", changing: true
+	compile "com.liaison.commons.usermanagement:usermanagement-client:2.2.0"
 
 	// Dependency for KeyManager
 	//compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.4', classifier: 'grammar', changing: true
