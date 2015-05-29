@@ -12,6 +12,11 @@ Updated the web.xml to apply the tomcat harden changes.
 2.2.0
 -------------------------------
 
+2.1.8
+-------------------------------
+* Updated the glass_log4j2_lib version to 2.2.+
+* Updated UserMgmt Client to release version
+
 2.1.7
 -------------------------------
 * GMB-376 - Creating an HTTPS processor with self signed key fails
