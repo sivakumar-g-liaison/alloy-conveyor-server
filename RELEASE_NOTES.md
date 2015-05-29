@@ -12,6 +12,11 @@ Updated the web.xml to apply the tomcat harden changes.
 2.2.0
 -------------------------------
 
+2.1.8
+-------------------------------
+* Updated the glass_log4j2_lib version to 2.2.+
+* Updated UserMgmt Client to release version
+
 2.1.7
 -------------------------------
 * GMB-376 - Creating an HTTPS processor with self signed key fails
@@ -29,9 +34,9 @@ Updated the web.xml to apply the tomcat harden changes.
 * GMB-439 - reverted back as clearing of password on failure from KMS is the expected behavior
 * GMB-436 - Processor execution through JS is not working
 * GMB-440 - NPE occurs during file staging if the given mailbox corresponding to given mailbox Id in workTicket from serviceBroker is inactive
-
 * HTTP SYNC STATUS LOGGIN DURING SB ERROR CASE - LOG FAILURE STATUS INSTEAD OF SUCCESS RAW PASSWORD GETTING STORED IN CREDENTIALS TABLE
 * Fixed the console error when try search mail Box
+* Patch/Syslog Production
 
 2.1.6
 -------------------------------
