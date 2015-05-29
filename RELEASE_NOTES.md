@@ -1,7 +1,6 @@
-2.3.0-SNAPSHOT
+2.2.3
 -------------------------------
-* Updated the glass_log4j2_lib version to 2.2.+
-* Updated UserMgmt Client to release version
+Patch/2.1.X/Lib Glass Message
 
 2.2.2
 -------------------------------
