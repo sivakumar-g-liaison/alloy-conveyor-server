@@ -39,8 +39,7 @@ angular.module(
                     }
                     property.folderURI = scope.currentRowObject.folderURI;
                     property.folderDesc = scope.currentRowObject.folderDesc;
-                    angular.copy(property, scope.currentRowObject);
-                    console.log("currentRowObject"+scope.currentRowObject);                  	
+                    angular.copy(property, scope.currentRowObject);                 	
                  };          
 			}
         };
