@@ -190,20 +190,43 @@ var rest = myApp.controller(
                     $scope.$apply();
                 }
             };
-            $scope.$watch('pagingOptions', function (newVal, oldVal) {
-                if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+		$scope.$watch('pagingOptions.currentPage', function (newVal, oldVal) {
+            if (newVal !== oldVal  && $scope.validatePageNumberValue(newVal, oldVal)) {
+            	$scope.readAllProcessors();
+            }
+        }, true);
+
+        $scope.$watch('pagingOptions.pageSize', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+               //Get data when in first page
+               if ( $scope.pagingOptions.currentPage === 1) {
                     $scope.readAllProcessors();
-                }
-                if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-                    $scope.readAllProcessors();
-                    newVal.currentPage = 1;
-                }
-            }, true);
-            $scope.$watch('filterOptions', function (newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    $scope.readAllProcessors();
-                }
-            }, true);
+               } else {
+                    //If on other page than 1 go back
+                    $scope.pagingOptions.currentPage = 1;
+               }               
+            }
+        }, true);
+
+		// Check that value in page number field is valid. Shows error if not valid value and set current page to 1
+        $scope.validatePageNumberValue = function(newVal, oldVal) {
+            // Value cannot be empty, non number or zero
+            var valid = true;
+            if(newVal === '' || !/^\d+$/.test(newVal) || newVal*1 == 0) {
+                valid = false;
+            }
+            // Value cannot be bigger than calculated max page count
+            else if($scope.totalServerItems !== undefined && $scope.totalServerItems !== 0 && newVal*1 > Math.ceil($scope.totalServerItems / $scope.pagingOptions.pageSize)) {
+                valid = false;
+            }
+
+            if(!valid)
+            {
+                $scope.pagingOptions.currentPage = oldVal;
+                showSaveMessage("Invalid input value. Page "+$scope.pagingOptions.currentPage+" is shown.", 'error');
+            }
+            return valid;
+        }			
 
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{

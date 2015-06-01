@@ -196,22 +196,52 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             $scope.search();
 
         };
-
-        // Watch for paging options
-        $scope.$watch('pagingOptions', function (newVal, oldVal) {
-
-        	if(newVal.currentPage === null) {
-				newVal.currentPage = 1;
+		
+		// Sort listener for Scripts grid
+		$scope.$watch('sortInfo.directions + sortInfo.fields', function (newVal, oldVal) {
+			if (newVal !== oldVal) {
+				 $scope.search();
 			}
-        	if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
-                $scope.search();
-            }
-        	if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-                $scope.search();
-                newVal.currentPage = 1;
+
+		}, true);
+		
+		$scope.$watch('pagingOptions.currentPage', function (newVal, oldVal) {
+            if (newVal !== oldVal  && $scope.validatePageNumberValue(newVal, oldVal)) {
+            	$scope.search();
             }
         }, true);
 
+        $scope.$watch('pagingOptions.pageSize', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+               //Get data when in first page
+               if ( $scope.pagingOptions.currentPage === 1) {
+                    $scope.search();
+               } else {
+                    //If on other page than 1 go back
+                    $scope.pagingOptions.currentPage = 1;
+               }               
+            }
+        }, true);
+
+		// Check that value in page number field is valid. Shows error if not valid value and set current page to 1
+        $scope.validatePageNumberValue = function(newVal, oldVal) {
+            // Value cannot be empty, non number or zero
+            var valid = true;
+            if(newVal === '' || !/^\d+$/.test(newVal) || newVal*1 == 0) {
+                valid = false;
+            }
+            // Value cannot be bigger than calculated max page count
+            else if($scope.totalServerItems !== undefined && $scope.totalServerItems !== 0 && newVal*1 > Math.ceil($scope.totalServerItems / $scope.pagingOptions.pageSize)) {
+                valid = false;
+            }
+
+            if(!valid)
+            {
+                $scope.pagingOptions.currentPage = oldVal;
+                showSaveMessage("Invalid input value. Page "+$scope.pagingOptions.currentPage+" is shown.", 'error');
+            }
+            return valid;
+        }
         // Customized column in the grid.
         $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
         <div ng-switch-when="INACTIVE" style="cursor: default;"><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
