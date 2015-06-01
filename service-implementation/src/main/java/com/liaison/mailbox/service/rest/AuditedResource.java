@@ -43,7 +43,9 @@ public abstract class AuditedResource extends BaseResource {
 	// *************************************************
 	// ************ LOGGING STUFF **************
 	private static final Logger logger = LogManager.getLogger(AuditedResource.class);
-
+	public static final String HEADER_GUID = "guid";
+	public static final String MULTIPLE = "MULTIPLE";
+	
 	// global KPIs
 	@Monitor(name = "Global_failureCounter", type = DataSourceType.COUNTER)
 	protected static final AtomicInteger globalFailureCounter = new AtomicInteger(0);
@@ -71,18 +73,19 @@ public abstract class AuditedResource extends BaseResource {
 		// *****************************************************
 		// Log boiler plate (hopefully to be added to filter soon).
 		worker.id = getUserIdFromHeader(request);
-		initLogContext(worker); // enable when fish tag is needed
+		//initLogContext(worker); // enable when fish tag is needed
 		logger.info(getInitialAuditStatement(worker.getActionLabel()));
 		Response response = null;
 		try {
 			// *****************************************************
 
 			response = performServiceRequest(request, worker, expectedMediaTypes);
-
+			initLogContext(worker);
 			// *****************************************************
 			// Log boiler plate (hopefully to be added to filter soon).
 
 		} catch (Throwable t) {
+			initLogContext(worker);
 			if (t instanceof LiaisonAuditableRuntimeException) {
 				logger.error(t); // Hack
 				throw (LiaisonAuditableRuntimeException) t; // Hack

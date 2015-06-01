@@ -160,6 +160,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "DropboxFileTransferResource.getTransferProfiles()";
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
 		// hand the delegate to the framework for calling
 		try {

@@ -40,6 +40,7 @@ import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.ui.SearchMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -112,7 +113,10 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					String manifestJson = request.getHeader("acl-manifest");
 					// creates new mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
-					return mailbox.createMailBox(serviceRequest, serviceInstanceId, manifestJson);
+					AddMailBoxResponseDTO serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId, manifestJson);
+					//Added the guid
+					queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getMailBox().getGuid());
+					return serviceResponse;
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -192,6 +196,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 		worker.actionLabel = "MailboxConfigurationResource.searchMailBox()";
 		worker.queryParams.put("name", mbxName);
 		worker.queryParams.put("profile", profileName);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
 		// hand the delegate to the framework for calling
 		try {

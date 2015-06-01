@@ -116,6 +116,7 @@ public class ProcessorAdminResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "ProcessorAdminResource.getExecutingProcessors()";
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 		worker.queryParams.put("frmDate", frmDate);
 		worker.queryParams.put("toDate", toDate);
 

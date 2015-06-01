@@ -41,6 +41,8 @@ import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -107,7 +109,10 @@ public class MailBoxProfileResource extends AuditedResource {
 							AddProfileRequestDTO.class);
 					// creates new profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
-					return profile.createProfile(serviceRequest);
+					AddProfileResponseDTO serviceResponse = profile.createProfile(serviceRequest); 
+					//Added the guid
+					queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getProfile().getGuId());
+					return serviceResponse;
 
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
@@ -154,15 +159,15 @@ public class MailBoxProfileResource extends AuditedResource {
 					requestString = getRequestBody(request);
 					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
 							ReviseProfileRequestDTO.class);
+					//Added the guid
+					queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getProfile().getId());
 					// update profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					return profile.updateProfile(serviceRequest);
-
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
-
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.updateProfile()";
@@ -207,6 +212,7 @@ public class MailBoxProfileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.readProfiles()";
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 		worker.queryParams.put("filterText", filterText);
 
 		// hand the delegate to the framework for calling
