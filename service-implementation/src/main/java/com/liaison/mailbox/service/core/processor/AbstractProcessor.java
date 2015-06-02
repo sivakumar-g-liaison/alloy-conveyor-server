@@ -93,10 +93,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @return the remoteProcessorProperties
 	 * @throws IOException
 	 * @throws JAXBException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 * @throws JsonMappingException
 	 * @throws JsonParseException
 	 */
@@ -108,10 +108,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		return processorPropertiesTemplate;
 	}
-	
+
 	/**
 	 * Method to return static properties stored in DB of a processor
-	 * 
+	 *
 	 * @return StaticProcessorPropertiesDTO
 	 * @throws JAXBException
 	 * @throws IOException
@@ -309,7 +309,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Get the URI to which the mailbox sweeper should be happen
 	 *
@@ -632,12 +632,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 				if (credential.getCredsType() == null) {
 					throw new MailBoxServicesException(Messages.CREDENTIAL_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (foundCredentailType.equals(type)) {
-
-					if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR) && credential.getCredsIdpType().equalsIgnoreCase("PRIVATE")) {
-						return credential;
-					}
-					if (!credential.getCredsIdpType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR))
-						return credential;
+					return credential;
 				}
 			}
 		}
@@ -688,8 +683,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		LOGGER.info("Trigerring - Remove privateKey downloaded from keyManager");
 		Credential sshKeyPairCredential = getCredentialOfSpecificType(CredentialType.SSH_KEYPAIR);
-		if (null != sshKeyPairCredential && sshKeyPairCredential.getCredsUri() != null) {
-			String fileLocation = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsUri()
+		if (null != sshKeyPairCredential && sshKeyPairCredential.getCredsIdpUri() != null) {
+			String fileLocation = MailBoxUtil.getEnvironmentProperties().getString("ssh.private.key.temp.location") + sshKeyPairCredential.getCredsIdpUri()
 					+ ".txt";
 			File privateKeyFile = new File(fileLocation);
 			if (privateKeyFile.exists())
@@ -701,12 +696,12 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		LOGGER.info("Trigerring - The private key file path not configured.");
 	}
 
-	
+
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public void createPathIfNotAvailable(String localPath) throws IOException {
@@ -724,38 +719,38 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		Path filePathToCreate = fileDirectory.toPath();
 		LOGGER.debug("Setting on to create - {}", filePathToCreate);
-		FileSystem fileSystem = FileSystems.getDefault();	
+		FileSystem fileSystem = FileSystems.getDefault();
 		String pattern = MailBoxUtil.getEnvironmentProperties().getString("com.liaison.data.folder.pattern","glob:/data/{sftp,ftp,ftps}/*/{inbox,outbox}/**");
 		PathMatcher pathMatcher = fileSystem.getPathMatcher(pattern);
 		if(!pathMatcher.matches(filePathToCreate)){
-			throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, pattern.substring(5), Response.Status.BAD_REQUEST);	
+			throw new MailBoxConfigurationServicesException(Messages.FOLDER_DOESNT_MATCH_PATTERN, pattern.substring(5), Response.Status.BAD_REQUEST);
 		}
-		
+
 		//check availability of /data/*/* folder
 		if(!Files.exists(filePathToCreate.subpath(0, 3))){
 			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
 		}
-		
-		
+
+
 		Files.createDirectories(filePathToCreate);
 		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
 		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
-		LOGGER.debug("group  name - {}", group);				
+		LOGGER.debug("group  name - {}", group);
 		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
 		//skip when reaching inbox/outbox
 		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
-			
-			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);	
+
+			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
 			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
 			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString("rwxrwx---"));
 			filePathToCreate = filePathToCreate.getParent();
 		 }
-		
+
 		LOGGER.debug("Done setting group");
-		
+
 	}
-	
+
 	private String getGroupFor(String protocol) {
 		return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
  	}

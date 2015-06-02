@@ -200,7 +200,7 @@ public class HTTPListenerResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "HttpListener.handleSync()";
-		worker.queryParams.put("guid", mailboxPguid);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxPguid);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);
@@ -314,7 +314,8 @@ public class HTTPListenerResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "HttpListener.handleAsync()";
-
+		// Added the guid
+		worker.queryParams.put(AuditedResource.HEADER_GUID, mailboxPguid);
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(request, worker);

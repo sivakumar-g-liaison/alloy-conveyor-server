@@ -14,10 +14,15 @@ var rest = myApp.controller(
             		$scope.isJavaScriptExecution = true;
             	} 	            	
             } 
-                       
-             //ssh key implementation
-            $scope.disableSSHKeys = true;
-            $scope.disableCertificates = true;    	    
+                 
+            // variable to show or hide ssh keys section
+            $scope.showSSHKeysSection = false;
+            // variable to determine enable or disable add ssh keypair button
+            $scope.disableSSHKeysAddition = true;
+            // variable to show or hide truststore section
+            $scope.showTruststoreSection = false;   
+            //variable to determine enable or disable add Truststore button
+            $scope.disableTrustoreAddition = true;
 			//check directory path in choose file
 			$scope.isDirectoryPath = true;
 		
@@ -77,9 +82,6 @@ var rest = myApp.controller(
                 // to disable protocol for file writer
                 $scope.isProcessorTypeDropbox = false;
                 
-                $scope.isPrivateKeySelected = false;
-                $scope.isPublicKeySelected = false;
-                
                 //Model for Add MB
                 addRequest = $scope.addRequest = {
                     addProcessorToMailBoxRequest: {
@@ -120,25 +122,13 @@ var rest = myApp.controller(
                     "uri": ''
                 };
 				
-                $scope.certificateModal = {
-                    "certificates": '',
-                    "certificateURI": '',
-                    "isGlobalTrustore": '1',
+                $scope.truststoreModal = {
                     "trustStoreGroupId": ''
                 };
                 
               // ssh key implementation
                 $scope.sshkeyModal = {
-                    "sshKeys": '',
-                    "sshPrivateKeyURI": '',
-                    "sshPublicKeyURI": '',
-                    "sshKeyPairPguid": '',
-                    "sshKeyPairPassphrase":'',
-                    "sshKeyPairConfirmPassphrase":''
-                };
-                $scope.sshKeys = {
-                    "privatekey":'',
-                    "publickey":''
+                    "sshKeyPairGroupId": ''
                 };
                 $scope.status = $scope.initialProcessorData.supportedStatus.options[0];                
                 $scope.procsrType = $scope.initialProcessorData.supportedProcessors.options[0];				
@@ -200,20 +190,43 @@ var rest = myApp.controller(
                     $scope.$apply();
                 }
             };
-            $scope.$watch('pagingOptions', function (newVal, oldVal) {
-                if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+		$scope.$watch('pagingOptions.currentPage', function (newVal, oldVal) {
+            if (newVal !== oldVal  && $scope.validatePageNumberValue(newVal, oldVal)) {
+            	$scope.readAllProcessors();
+            }
+        }, true);
+
+        $scope.$watch('pagingOptions.pageSize', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+               //Get data when in first page
+               if ( $scope.pagingOptions.currentPage === 1) {
                     $scope.readAllProcessors();
-                }
-                if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-                    $scope.readAllProcessors();
-                    newVal.currentPage = 1;
-                }
-            }, true);
-            $scope.$watch('filterOptions', function (newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    $scope.readAllProcessors();
-                }
-            }, true);
+               } else {
+                    //If on other page than 1 go back
+                    $scope.pagingOptions.currentPage = 1;
+               }               
+            }
+        }, true);
+
+		// Check that value in page number field is valid. Shows error if not valid value and set current page to 1
+        $scope.validatePageNumberValue = function(newVal, oldVal) {
+            // Value cannot be empty, non number or zero
+            var valid = true;
+            if(newVal === '' || !/^\d+$/.test(newVal) || newVal*1 == 0) {
+                valid = false;
+            }
+            // Value cannot be bigger than calculated max page count
+            else if($scope.totalServerItems !== undefined && $scope.totalServerItems !== 0 && newVal*1 > Math.ceil($scope.totalServerItems / $scope.pagingOptions.pageSize)) {
+                valid = false;
+            }
+
+            if(!valid)
+            {
+                $scope.pagingOptions.currentPage = oldVal;
+                showSaveMessage("Invalid input value. Page "+$scope.pagingOptions.currentPage+" is shown.", 'error');
+            }
+            return valid;
+        }			
 
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
@@ -315,12 +328,12 @@ var rest = myApp.controller(
                 }
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-					$scope.disableCertificates = false;	
+					$scope.showTrusstoreSection = true;	
 									
 				} else {
-					$scope.disableCertificates = true;
+					$scope.showTrusstoreSection = false;
 				}
-				$scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
+				$scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
 				
 				$scope.propertiesAddedToProcessor = [];
 			    $scope.availableProperties = [];
@@ -334,7 +347,7 @@ var rest = myApp.controller(
 					 var property = $scope.staticProperties[i];
 					 if (property.mandatory === true || property.valueProvided === true) {
                         $scope.propertiesAddedToProcessor.push(property);
-                    } else if (property.mandatory === false || property.valueProvided === false) {
+                     } else {
                         $scope.availableProperties.push(property);
                     }
 				}
@@ -527,6 +540,7 @@ var rest = myApp.controller(
                 $scope.doSend();
                 $scope.saveProcessor();
                 $scope.formAddPrcsr.$setPristine();
+                $scope.showAddNewComponent.value=false;
                
             };
 			
@@ -539,25 +553,18 @@ var rest = myApp.controller(
                 //add static properties	
                 for (var i = 0; i < $scope.propertiesAddedToProcessor.length; i++) {
                     var property = $scope.propertiesAddedToProcessor[i];
-                     if ($scope.propertiesAddedToProcessor[i].name === "") {
-				    	 continue;				    	 
-				    } else if (property.valueProvided === false && property.mandatory === false) {
-					      property.value = '';
-					}				
-					$scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				
-                }                
-                $scope.processor.processorPropertiesInTemplateJson.staticProperties = 
-    				$scope.processor.processorPropertiesInTemplateJson.staticProperties.concat($scope.availableProperties);
-				
+                     if ($scope.propertiesAddedToProcessor[i].name !== "" 
+					     && (property.valueProvided === true || property.mandatory === true)) {
+				    	 $scope.processor.processorPropertiesInTemplateJson.staticProperties.push(property);				    	 
+				    }					
+                }				
 				//add folder properties
 				for (var i = 0; i < $scope.folderAddedToProcessor.length; i++) {
 				     var property = $scope.folderAddedToProcessor[i];
-					 if ($scope.folderAddedToProcessor[i].folderURI === "") {
-				    	 continue;				    	 
-				    } else if (property.valueProvided === false && property.mandatory === false) {
-				    	continue;
-					}
-                    $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);						
+					 if ($scope.folderAddedToProcessor[i].folderURI !== "" && 
+					     (property.valueProvided === true || property.mandatory === true)) {
+				    	 $scope.processor.processorPropertiesInTemplateJson.folderProperties.push(property);				    	 
+				    }                   					
 				}			
 				
                 $scope.processor.processorPropertiesInTemplateJson.handOverExecutionToJavaScript = $scope.isJavaScriptExecution;
@@ -771,6 +778,7 @@ var rest = myApp.controller(
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 						} else {
+							$scope.editProcessor($scope.processor.guid, false);
 							$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
                             $scope.creationFailed = true;
 							showSaveMessage("Error while saving processor", 'error');
@@ -793,9 +801,6 @@ var rest = myApp.controller(
 							$scope.isEdit = true;
 							$scope.processor.guid = data.addProcessorToMailBoxResponse.processor.guId;
 							$scope.editProcessor($scope.processor.guid, false);
-								if($scope.isFileSelected)  $scope.isFileSelected = false;
-								$scope.isPrivateKeySelected = false;
-								$scope.isPublicKeySelected = false;
 								showSaveMessage(data.addProcessorToMailBoxResponse.response.message, 'success');
 							} else {
 							    $scope.clearCredentialProps();								
@@ -842,8 +847,8 @@ var rest = myApp.controller(
                     $scope.closeDelete();
                     //To notify passwordDirective to clear the password and error message
                     $scope.doSend();
-                    $scope.disableSSHKeys = true;
-                    $scope.disableCertificates = true;
+                    $scope.showSSHKeysSection = false;
+                    $scope.showTruststoreSection = false;
                     $scope.isEdit = false;
 					$scope.oldSecret = '';
 					$scope.creationFailed = false;
@@ -855,6 +860,7 @@ var rest = myApp.controller(
                     $scope.isJavaScriptExecution = false;
                     $scope.isCreateConfiguredLocation = true;
                     $scope.formAddPrcsr.scriptName.$setValidity('allowed', true);
+                    $scope.scriptUrlIsValid=false;
                     $scope.$broadcast("resetCredentialSection");
             };            
             // Close the modal
@@ -863,12 +869,8 @@ var rest = myApp.controller(
             };		    
             
             //GMB-201
-			if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-				$scope.disableCertificates = false;
-			} else {
-                $scope.disableCertificates = true;
-			}
-            $scope.disableSSHKeys = ($scope.processor.protocol.value === "SFTP")?false:true;
+			$scope. showTruststoreSection = ($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") ? true : false;
+            $scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
             
 			$scope.appendPortToUrl = function() {
 			    
@@ -1111,12 +1113,8 @@ var rest = myApp.controller(
 				    break;				   
 				}
                 //GMB-201
-                if(protocalName === "FTPS" || protocalName === "HTTPS") {
-					$scope.disableCertificates = false;
-     			} else {
-					$scope.disableCertificates = true;
- 				}
-                $scope.disableSSHKeys = (protocalName === "SFTP")?false:true; 
+                $scope.showTruststoreSection = (protocalName === "FTPS" || protocalName === "HTTPS") ? true : false;
+                $scope.showSSHKeysSection = (protocalName === "SFTP") ? true : false; 
                 $scope.$broadcast("resetCredentialSection");				
 			};			
 			
@@ -1269,8 +1267,7 @@ var rest = myApp.controller(
             $rootScope.$on("propertyModificationActionEvent", function() {
                $scope.cleanup(); 
             });
-
-        }
+         }
     ]);
 var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $blockUI)  {
      

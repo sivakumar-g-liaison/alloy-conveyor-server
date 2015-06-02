@@ -65,7 +65,6 @@ angular.module(
                         scope.showAddNewComponent.value = false;                      
                     }
                     angular.copy(property, scope.currentRowObject);
-                    console.log("currentRowObject"+scope.currentRowObject);
                  };
                  
                  // function that constructs the currentRowObject correctly according to 
@@ -76,7 +75,6 @@ angular.module(
                        scope.currentRowObject.name = attrName;
                        scope.currentRowObject.displayName = attrName;
                        scope.currentRowObject.dynamic = true;
-                       console.log("currentRowObject in onblur"+scope.currentRowObject);
                  };
             }
         };

@@ -29,7 +29,7 @@ angular.module(
                     <select ng-change="shouldIShowAddTextBox()" ng-model="selectedValue.value" ng-options="property.name for property in allStaticProperties | orderBy:sortName ">\n\
                          <option value="">-- select--</option>\n\
                     </select> <i>&nbsp</i>\n\
-                    <textarea class="form-control alignDynamicTextarea" ng-input="COL_FIELD" ng-show="addNew.value" ng-model="addedProperty.value" placeholder="required" style="width:47%;height:45px;"></textarea></div>\n\
+                    <textarea class="form-control alignDynamicTextarea" ng-input="COL_FIELD" ng-show="addNew.value" ng-model="addedProperty.value" placeholder="required" style="width:46%;height:45px;"></textarea></div>\n\
                   </div>',
             link: function (scope) {
                 //scope.showAddnew = false;

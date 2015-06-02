@@ -61,7 +61,6 @@ angular.module(
                      
                      // funtion that determines whether + icon to be displayed or not in the Action column
                      scope.isAdditionAllowed = function() {
-					  console.log("added properties"+scope.folderAddedProperties);
                         var initialStateObject = angular.copy(angular.fromJson(scope.initialStateObject));
                         if(!initialStateObject.mandatory && !initialStateObject.valueProvided ) return true;
                         return false;

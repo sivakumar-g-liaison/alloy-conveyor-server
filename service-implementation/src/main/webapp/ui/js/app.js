@@ -95,9 +95,6 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.base_url = '../mailbox';
     $rootScope.kms_base_url='/kms/key-management';
     //$rootScope.kms_base_url='http://10.0.24.129:8989/key-management';
-    $rootScope.url_upload_key = $rootScope.kms_base_url+'/upload/public';
-    $rootScope.url_ssh_upload_key = $rootScope.kms_base_url+'/upload/keypair';
-    $rootScope.url_link_key_store = $rootScope.kms_base_url+'/update/truststore/';
 	$rootScope.url_secret_service = $rootScope.kms_base_url+'/secret/';
     //$rootScope.url_secret_service = 'http://10.0.24.129:8989/key-management/secret/';
     

@@ -119,6 +119,10 @@ public class DropboxFileStagedResource extends AuditedResource {
 					requestString = getRequestBody(request);
 					StagePayloadRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
 							StagePayloadRequestDTO.class);
+					//Added the quid from service Request
+					if(serviceRequest != null) {
+						queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getStagedFile().getId());
+					}
 					// create the new staged file
 					DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
 					return stagedFileService.addStagedFile(serviceRequest, null);
@@ -242,6 +246,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "DropboxFileTransferResource.getStagedFiles()";
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
 		// hand the delegate to the framework for calling
 		try {
