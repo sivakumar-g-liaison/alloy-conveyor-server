@@ -1,6 +1,10 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.3
+-------------------------------
+Patch/2.1.X/Lib Glass Message
+
 2.2.2
 -------------------------------
 Remove version number accidentally brought in from the "develop" branch.
@@ -136,4 +140,3 @@ RELEASE VERSION
 Initial version
 
 Add to the top of this file. Don't edit existing notes.
-
