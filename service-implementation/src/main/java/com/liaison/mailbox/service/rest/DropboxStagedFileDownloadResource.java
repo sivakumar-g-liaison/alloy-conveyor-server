@@ -223,6 +223,8 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "DropboxStagedFileDownloadResource.downloadStagedFile()";
+		//Added the guid
+		worker.queryParams.put(AuditedResource.HEADER_GUID, stagedFileId);
 
 		// hand the delegate to the framework for calling
 		try {
@@ -317,8 +319,10 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 				}
 			}
 		};
-		worker.actionLabel = "DropboxFileTransferResource.getTransferProfiles()";
-
+		worker.actionLabel = "DropboxFileTransferResource.deleteStagedFile()";
+		//Added the guid
+		worker.queryParams.put(AuditedResource.HEADER_GUID, stagedFileId);
+		
 		// hand the delegate to the framework for calling
 		try {
 			return handleAuditedServiceRequest(serviceRequest, worker);

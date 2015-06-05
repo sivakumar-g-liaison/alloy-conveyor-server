@@ -112,6 +112,7 @@ public class MailBoxFileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxFileResource.getFileList()";
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
 		// hand the delegate to the framework for calling
 		try {

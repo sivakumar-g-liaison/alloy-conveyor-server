@@ -123,7 +123,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.reviseMailBox()";
-		worker.queryParams.put("guid", guid);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
 
 		// hand the delegate to the framework for calling
 		try {
@@ -173,7 +173,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.deactivateMailBox()";
-		worker.queryParams.put("guid", guid);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
 
 		// hand the delegate to the framework for calling
 		try {
@@ -229,7 +229,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailboxConfigurationDetailsResource.readMailBox()";
-		worker.queryParams.put("guid", guid);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, guid);
 
 		// hand the delegate to the framework for calling
 		try {

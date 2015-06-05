@@ -3,7 +3,6 @@ angular.module(
     ).directive (
        'dynamicActionFieldDirective', 
         function($rootScope) {
-            console.log("Action Directive");
              return {
                 restrict: 'E', 
                 scope:{
@@ -23,7 +22,6 @@ angular.module(
                              showAlert('It is mandatory to set the name and value of the property being added.', 'error');
                              return;
                         }
-                        console.log("addedProperties"+scope.addedProperties);
                          var isPropertyFound = false;
                          scope.currentRowObject.valueProvided = true;
                         for (var i = 0; i < scope.availableProperties.length; i ++) {
@@ -53,8 +51,6 @@ angular.module(
                                 break;
                             }
                         };
-                        console.log("added properties"+scope.addedProperties);
-                        console.log("available properties"+scope.availableProperties);
                      };
                      
                      // funtion that determines whether + icon to be displayed or not in the Action column

@@ -31,7 +31,12 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private int retryInterval;
 	private String errorFileLocation;
 	private String processedFileLocation;
+	private String fileTransferStatusIndicator;
+	private boolean deleteFiles;
+	private String includeFiles;
+	private String excludeFiles;
 
+	
 	public String getUrl() {
 		return url;
 	}
@@ -104,5 +109,28 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setProcessedFileLocation(String processedFileLocation) {
 		this.processedFileLocation = processedFileLocation;
 	}
-
+	public String getFileTransferStatusIndicator() {
+		return fileTransferStatusIndicator;
+	}
+	public void setFileTransferStatusIndicator(String fileTransferStatusIndicator) {
+		this.fileTransferStatusIndicator = fileTransferStatusIndicator;
+	}
+	public boolean getDeleteFiles() {
+		return deleteFiles;
+	}
+	public void setDeleteFiles(boolean deleteFiles) {
+		this.deleteFiles = deleteFiles;
+	}
+	public String getIncludedFiles() {
+		return includeFiles;
+	}
+	public void setIncludedFiles(String includedFiles) {
+		this.includeFiles = includedFiles;
+	}
+	public String getExcludedFiles() {
+		return excludeFiles;
+	}
+	public void setExcludedFiles(String excludedFiles) {
+		this.excludeFiles = excludedFiles;
+	}
 }

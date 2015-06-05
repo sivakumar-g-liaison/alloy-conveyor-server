@@ -18,6 +18,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -87,14 +88,16 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				executeRequest(executionId, fsm);
 			}
 
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
+		} catch(IOException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | MailBoxServicesException | URISyntaxException e) {
 			throw new RuntimeException(e);
-		}
+		} 
 
 	}
 
 	/**
 	 * Java method to execute the SFTPrequest to upload the file or folder
+	 * @throws IllegalArgumentException 
+	 * @throws SecurityException 
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -116,7 +119,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws UnrecoverableKeyException
 	 *
 	 */
-	protected void executeRequest(String executionId, MailboxFSM fsm) {
+	protected void executeRequest(String executionId, MailboxFSM fsm) throws MailBoxServicesException, SecurityException, IllegalArgumentException, URISyntaxException {
 
 		try {
 
@@ -178,24 +181,30 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
+	 * @throws URISyntaxException 
 	 * @throws SftpException
 	 *
 	 */
 	
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
-			throws IOException, LiaisonException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+			throws IOException, LiaisonException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
 
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
-		// variable to hold the status of file upload request execution
-		int replyCode = 0;
-
+		FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();		
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		if (subFiles != null && subFiles.length > 0) {
+			
+			String statusIndicator = ftpUploaderStaticProperties.getFileTransferStatusIndicator();
+			String tempExtension = statusIndicator!=null && (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
+			String includedFiles = ftpUploaderStaticProperties.getIncludedFiles();
+			String excludedFiles = ftpUploaderStaticProperties.getExcludedFiles();
+			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludeList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
 			for (File item : subFiles) {
 
 				//interrupt signal check has to be done only if execution Id is present
@@ -215,12 +224,50 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					// skip parent directory and the directory itself
 					continue;
 				}
+				String currentFileName = item.getName();
+				// variable to hold the status of file upload request execution		
+				int replyCode = 0;
 				if (item.isFile()) {
+					// Check whether user preferred specific files to include or exclude during downloading process.
+					currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludeList);
+
+					if (currentFileName != null) {
+						String uploadingFileName = tempExtension.length() > 0 ?currentFileName + "." + tempExtension : currentFileName;
+						String remoteDir = remoteParentDir + File.separatorChar + uploadingFileName;						
+						createResponseDirectory(remoteDir);
 				    // upload file
 				    try (InputStream inputStream = new FileInputStream(item)) {
+				    	
 				        ftpsRequest.changeDirectory(remoteParentDir);
-	                    replyCode = ftpsRequest.putFile(item.getName(), inputStream);
+	                    replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
+	                    if (replyCode == 226) {
+	                    	
+							LOGGER.info("File uploaded successfully");
+							// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
+							if (tempExtension.length() > 0) {
+								
+								int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);	
+								if (renameStatus == 250) {
+									
+									LOGGER.info("File renamed successfully");
+								} else {
+									
+									LOGGER.info("File renaming failed");
+								}
+							}
+							// Delete the local files after successful upload if user opt for it
+							if (ftpUploaderStaticProperties.getDeleteFiles()) {
+								item.delete();
+								if (!item.exists()) {
+									item = null;										
+									LOGGER.info("File deleted successfully");
+								} else {
+									LOGGER.info("File deletion failed");
+								}
+							}
+						}
 				    }
+					}
 
 				} else {
 
@@ -242,8 +289,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 
 				if (null != item) {
-
-					FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
+					
 					// File Uploading done successfully so move the file to processed folder
 					if(replyCode == 226 || replyCode == 250) {
 
@@ -350,10 +396,9 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		G2FTPSClient ftpRequest = (G2FTPSClient)client;
 		try {
 			uploadDirectory(ftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException  e) {
+		} catch (MailBoxServicesException | IOException | LiaisonException | URISyntaxException   e) {
 			throw new RuntimeException(e);
 		}
-
 	}
 
 	@Override

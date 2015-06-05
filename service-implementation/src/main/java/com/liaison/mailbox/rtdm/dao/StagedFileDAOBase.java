@@ -59,7 +59,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
+					.append(" and sf.mailboxId in (?1)")
 					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
 					.append(" and sf.stagedFileStatus = :"+ STATUS);
 			
@@ -73,6 +73,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+					.setParameter(1, QueryBuilderUtil.collectionToSqlString(mailboxIds))
 				    .setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
 				    .setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
 					.setFirstResult(pagingOffset)
@@ -108,11 +109,12 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where (sf.pguid) = :" + StagedFileDAO.GUID)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+					.append(" and sf.mailboxId in (?1)");
 			 
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
+					.setParameter(1, QueryBuilderUtil.collectionToSqlString(mailboxIds))
 					.getResultList();
 
 			Iterator<?> iterator = files.iterator();

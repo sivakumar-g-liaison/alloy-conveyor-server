@@ -36,6 +36,7 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -95,7 +96,10 @@ public class MailboxKeyResource extends AuditedResource {
 				try {
 					// add the new profile details
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
-					return processor.uploadSelfSignedTrustStore();
+					GetTrustStoreResponseDTO serviceResponse = processor.uploadSelfSignedTrustStore(); 
+					//Added the guid
+					queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getTrustStore().getTrustStoreId());
+					return serviceResponse;
 
 				} catch (IOException | JSONException e) {
 					LOG.error(e.getMessage(), e);
