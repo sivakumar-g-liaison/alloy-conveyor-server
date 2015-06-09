@@ -139,90 +139,90 @@
         <!-- ############################################################## -->
 
         <!-- primary appender to lens -->
-        <GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData" ignoreExceptions="false" clientId="LSG2DEV-PUBLISHER" proxy="amqproxy">
-            <GSAMessageXMLLayout />
-            <filters>
-                <MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
-            </filters>
-        </GSAMessageLENS>
+        <!--<GSAMessageLENS name="OrgGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="OrganizationData" ignoreExceptions="false" clientId="LSG2DEV-PUBLISHER" proxy="amqproxy">-->
+            <!--<GSAMessageXMLLayout />-->
+            <!--<filters>-->
+                <!--<MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <!--</filters>-->
+        <!--</GSAMessageLENS>-->
 
 
-        <!-- failover destination -->
-        <RollingFile name="OrgGSALENSAppenderFailoverFile" fileName="${env:LENS_LOG_DIR}/OrgGSALENSAppender.failover.log"
-                     filePattern="${env:LENS_LOG_DIR}/OrgGSALENSAppender.failover-%d{MM-dd-yyyy}.log.gz"
-                     ignoreExceptions="false">
-            <GSAMessageXMLLayout />
-            <filters>
-                <MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>
-            </filters>
+        <!--&lt;!&ndash; failover destination &ndash;&gt;-->
+        <!--<RollingFile name="OrgGSALENSAppenderFailoverFile" fileName="${env:LENS_LOG_DIR}/OrgGSALENSAppender.failover.log"-->
+                     <!--filePattern="${env:LENS_LOG_DIR}/OrgGSALENSAppender.failover-%d{MM-dd-yyyy}.log.gz"-->
+                     <!--ignoreExceptions="false">-->
+            <!--<GSAMessageXMLLayout />-->
+            <!--<filters>-->
+                <!--<MarkerFilter marker="ORGANIZATION_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <!--</filters>-->
 
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="${env:ORGANIZATION_GSA_ROLLING_SIZE}" />
-            </Policies>
-        </RollingFile>
+            <!--<Policies>-->
+                <!--<TimeBasedTriggeringPolicy />-->
+                <!--<SizeBasedTriggeringPolicy size="${env:ORGANIZATION_GSA_ROLLING_SIZE}" />-->
+            <!--</Policies>-->
+        <!--</RollingFile>-->
 
-        <!-- Failover when either LENS appender fails or we run out of slots in buffer (overrun) -->
-        <Async name="AsyncOrgGSALENSAppenderWithFailover"
-               blocking="false"
-               bufferSize="${env:ORGANIZATION_GSA_RING_BUFFER_SIZE}"
-               errorRef="OrgGSALENSAppenderFailoverFile"
-               ignoreExceptions="false"
-                >
-            <AppenderRef ref="OrgGSALENSAppender" />
-        </Async>
+        <!--&lt;!&ndash; Failover when either LENS appender fails or we run out of slots in buffer (overrun) &ndash;&gt;-->
+        <!--<Async name="AsyncOrgGSALENSAppenderWithFailover"-->
+               <!--blocking="false"-->
+               <!--bufferSize="${env:ORGANIZATION_GSA_RING_BUFFER_SIZE}"-->
+               <!--errorRef="OrgGSALENSAppenderFailoverFile"-->
+               <!--ignoreExceptions="false"-->
+                <!-->-->
+            <!--<AppenderRef ref="OrgGSALENSAppender" />-->
+        <!--</Async>-->
 
-        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
-        <Failover name="AsyncOrgGSALENSAppenderWithFailoverFailover" primary="AsyncOrgGSALENSAppenderWithFailover">
-            <Failovers>
-                <AppenderRef ref="Console" />
-            </Failovers>
-        </Failover>
+        <!--&lt;!&ndash; If the Async appender itself dies (ring buffer thread dies), finally fail to console &ndash;&gt;-->
+        <!--<Failover name="AsyncOrgGSALENSAppenderWithFailoverFailover" primary="AsyncOrgGSALENSAppenderWithFailover">-->
+            <!--<Failovers>-->
+                <!--<AppenderRef ref="Console" />-->
+            <!--</Failovers>-->
+        <!--</Failover>-->
 
 
         <!-- ############################################################## -->
         <!-- ######### Pairwise GSA APPENDER ############ -->
         <!-- ############################################################## -->
 
-        <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData" clientId="LSG2DEV-PUBLISHER" proxy="amqproxy">
-            <GSAMessageXMLLayout />
-            <filters>
-                <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
-            </filters>
-        </GSAMessageLENS>
+        <!--<GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData" clientId="LSG2DEV-PUBLISHER" proxy="amqproxy">-->
+            <!--<GSAMessageXMLLayout />-->
+            <!--<filters>-->
+                <!--<MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />-->
+            <!--</filters>-->
+        <!--</GSAMessageLENS>-->
 
 
-        <!-- failover destination -->
-        <RollingFile name="PairwiseGSALENSAppenderFailoverFile" fileName="${env:LENS_LOG_DIR}/PairwiseGSALENSAppender.failover.log"
-                     filePattern="${env:LENS_LOG_DIR}/PairwiseGSALENSAppender.failover-%d{MM-dd-yyyy}.log.gz"
-                     ignoreExceptions="false">
-            <GSAMessageXMLLayout />
-            <filters>
-                <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
-            </filters>
+        <!--&lt;!&ndash; failover destination &ndash;&gt;-->
+        <!--<RollingFile name="PairwiseGSALENSAppenderFailoverFile" fileName="${env:LENS_LOG_DIR}/PairwiseGSALENSAppender.failover.log"-->
+                     <!--filePattern="${env:LENS_LOG_DIR}/PairwiseGSALENSAppender.failover-%d{MM-dd-yyyy}.log.gz"-->
+                     <!--ignoreExceptions="false">-->
+            <!--<GSAMessageXMLLayout />-->
+            <!--<filters>-->
+                <!--<MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />-->
+            <!--</filters>-->
 
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="${env:PAIRWISE_GSA_ROLLING_SIZE}" />
-            </Policies>
-        </RollingFile>
+            <!--<Policies>-->
+                <!--<TimeBasedTriggeringPolicy />-->
+                <!--<SizeBasedTriggeringPolicy size="${env:PAIRWISE_GSA_ROLLING_SIZE}" />-->
+            <!--</Policies>-->
+        <!--</RollingFile>-->
 
-        <!-- Failover when either LENS appender fails or we run out of slots in buffer (overrun) -->
-        <Async name="AsyncPairwiseGSALENSAppenderWithFailover"
-               blocking="false"
-               bufferSize="${env:PAIRWISE_GSA_RING_BUFFER_SIZE}"
-               errorRef="PairwiseGSALENSAppenderFailoverFile"
-               ignoreExceptions="false"
-                >
-            <AppenderRef ref="PairwiseGSALENSAppender" />
-        </Async>
+        <!--&lt;!&ndash; Failover when either LENS appender fails or we run out of slots in buffer (overrun) &ndash;&gt;-->
+        <!--<Async name="AsyncPairwiseGSALENSAppenderWithFailover"-->
+               <!--blocking="false"-->
+               <!--bufferSize="${env:PAIRWISE_GSA_RING_BUFFER_SIZE}"-->
+               <!--errorRef="PairwiseGSALENSAppenderFailoverFile"-->
+               <!--ignoreExceptions="false"-->
+                <!-->-->
+            <!--<AppenderRef ref="PairwiseGSALENSAppender" />-->
+        <!--</Async>-->
 
-        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
-        <Failover name="AsyncPairwiseGSALENSAppenderWithFailoverFailover" primary="AsyncPairwiseGSALENSAppenderWithFailover">
-            <Failovers>
-                <AppenderRef ref="Console" />
-            </Failovers>
-        </Failover>
+        <!--&lt;!&ndash; If the Async appender itself dies (ring buffer thread dies), finally fail to console &ndash;&gt;-->
+        <!--<Failover name="AsyncPairwiseGSALENSAppenderWithFailoverFailover" primary="AsyncPairwiseGSALENSAppenderWithFailover">-->
+            <!--<Failovers>-->
+                <!--<AppenderRef ref="Console" />-->
+            <!--</Failovers>-->
+        <!--</Failover>-->
 
 
 
@@ -394,8 +394,8 @@
 
     <loggers>
         <root level="DEBUG">
-            <appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />
-            <appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />
+            <!--<appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />-->
+            <!--<appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />-->
             <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
             <appender-ref ref="AsyncMetricsGMSpectrumAppenderWithFailoverFailover" />
             <appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
