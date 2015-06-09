@@ -328,10 +328,10 @@ var rest = myApp.controller(
                 }
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-					$scope.showTrusstoreSection = true;	
+					$scope.showTruststoreSection = true;	
 									
 				} else {
-					$scope.showTrusstoreSection = false;
+					$scope.showTruststoreSection = false;
 				}
 				$scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
 				
