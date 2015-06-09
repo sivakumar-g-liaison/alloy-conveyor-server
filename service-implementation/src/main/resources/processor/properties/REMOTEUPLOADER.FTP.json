@@ -207,9 +207,8 @@
             "minLength": "",
             "maxLength": ""
         }
-        }
-		},
-         {
+        },
+		{
 	        "name": "fileTransferStatusIndicator",
 	        "displayName": "File Transfer Status Indicator",
 	        "type": "textarea",
