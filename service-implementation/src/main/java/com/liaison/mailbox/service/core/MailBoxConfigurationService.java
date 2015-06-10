@@ -470,6 +470,7 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			List<MailBox> mailboxes = new ArrayList<MailBox>();
 			// retrieve the actual tenancykey guids from DTO
@@ -504,22 +505,14 @@ public class MailBoxConfigurationService {
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
-			SearchMailBoxDTO searchMailBoxDTO = null;
-			boolean hasProcessor;
+			SearchMailBoxDTO serachMailBoxDTO = null;
 			for (MailBox mbx : mailboxes) {
 
-				hasProcessor = false;
-				for (MailboxServiceInstance serviceInstance : mbx.getMailboxServiceInstances()) {
-
-					if (serviceInstance.getServiceInstance().getName().equals(searchFilter.getServiceInstanceId())) {
-						hasProcessor = true;
-						break;
-					}
-				}
-				searchMailBoxDTO = new SearchMailBoxDTO();
-				searchMailBoxDTO.copyFromEntity(mbx, hasProcessor);
-				searchMailBoxDTOList.add(searchMailBoxDTO);
-			}
+                serachMailBoxDTO = new SearchMailBoxDTO();
+                serachMailBoxDTO.copyFromEntity(mbx,
+                        dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId()));
+                searchMailBoxDTOList.add(serachMailBoxDTO);
+            }
 
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
