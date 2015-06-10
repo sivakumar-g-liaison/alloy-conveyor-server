@@ -77,6 +77,14 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public List<Processor> findByProfileAndMbxNamePattern(String profileName, String mbxNamePattern, String shardKey);
 
 	/**
+     * Checks the mailbox has the processor or not.
+     * 
+     * @param guid pguid of the mailbox
+     * @return boolean
+     */
+    public boolean isMailboxHasProcessor(String siid, String mbxGuid);
+
+	/**
 	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
 	 * 
 	 * @param mbxGuid pguid of the mailbox
