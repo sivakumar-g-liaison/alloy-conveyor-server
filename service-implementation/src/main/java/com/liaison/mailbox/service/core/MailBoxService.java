@@ -27,6 +27,7 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
@@ -245,6 +246,9 @@ public class MailBoxService {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			}
 
+			MailBox mbx = processor.getMailbox();
+            LOG.info("The execution started for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
+                    processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
 			LOG.info("The Processer type is {}", processor.getProcessorType());
 			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
@@ -254,6 +258,8 @@ public class MailBoxService {
 			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+			LOG.info("The execution completed for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
+                    processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
 			LOG.info("#################################################################");
 
 		} catch (MailBoxServicesException e) {
@@ -263,9 +269,14 @@ public class MailBoxService {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-			sendEmail(processor.getEmailAddress(), "Processor:" + processor.getProcsrName() + " execution failed", e,
-					"HTML");
-			LOG.error("Processor execution failed", e);
+
+			String sub = "Processor:" + processor.getProcsrName()
+			        + " execution failed for the mailbox " + processor.getMailbox().getMbxName()
+			        + "(" + processor.getMailbox().getPguid() + ")";
+			if (processor.getEmailAddress() != null) {
+			    sendEmail(processor.getEmailAddress(), sub, e, "HTML");
+			}
+			LOG.error(sub, e);
 
 		} catch (Exception e) {
 
@@ -274,9 +285,14 @@ public class MailBoxService {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-			sendEmail(processor.getEmailAddress(), "Processor:" + processor.getProcsrName() + " execution failed", e,
-					"HTML");
-			LOG.error("Processor execution failed", e);
+
+			String sub = "Processor:" + processor.getProcsrName()
+                    + " execution failed for the mailbox " + processor.getMailbox().getMbxName()
+                    + "(" + processor.getMailbox().getPguid() + ")";
+            if (processor.getEmailAddress() != null) {
+                sendEmail(processor.getEmailAddress(), sub, e, "HTML");
+            }
+            LOG.error(sub, e);
 		}
 	}
 
