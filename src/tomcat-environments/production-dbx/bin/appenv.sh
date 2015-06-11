@@ -39,7 +39,7 @@ export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
 export SYSLOG_RING_BUFFER_SIZE=128
  
 export GLASS_SPECTRUM_PORT=443
-export GLASS_SPECTRUM_IP=at4p-vpLENSIndex.liaison.prod
+export GLASS_SPECTRUM_IP=at4p-spectrum-lens.liaison.prod
 export GLASS_SPECTRUM_USER=g2-aa-prod
 export GLASS_SPECTRUM_PASSWORD=L3nsAdm2
 export GLASS_SPECTRUM_DATASPACE=g2-glass
