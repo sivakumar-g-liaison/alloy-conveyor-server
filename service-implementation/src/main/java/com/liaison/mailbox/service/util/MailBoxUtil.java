@@ -415,6 +415,7 @@ public class MailBoxUtil {
 	public static String checkIncludeorExclude(List<String> includeList,String currentFileName,List<String> excludedList ){
 		boolean includeEnabled = false;
 		boolean excludeEnabled = false;
+		if (currentFileName.contains(".")) {
 		if (null!=includeList && includeList.size()>0) {
 			 for(String includefile : includeList){
                    if ((currentFileName.substring(currentFileName.lastIndexOf("."), currentFileName.length())
@@ -437,6 +438,7 @@ public class MailBoxUtil {
 				currentFileName = null;
 			}
 		}
+	  }
 		return currentFileName;
 	}
 
