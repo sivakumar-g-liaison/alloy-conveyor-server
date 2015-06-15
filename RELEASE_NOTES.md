@@ -1,3 +1,7 @@
+2.2.7
+-------------------------------
+prod properties updates
+
 2.2.6
 -------------------------------
 lens property changes
