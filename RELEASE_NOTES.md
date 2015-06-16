@@ -1,3 +1,8 @@
+2.2.8
+-------------------------------
+* bumped up commons script
+* TTL updates
+
 2.2.7
 -------------------------------
 prod properties updates
