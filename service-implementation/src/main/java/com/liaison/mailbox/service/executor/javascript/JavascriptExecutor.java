@@ -119,8 +119,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 			throw new RuntimeException(String.format("Script '%s' has an invalid URI", script), e);
 		}
 
-		try {
-
+    	try {
     		// Eval the script so we can check to be sure it is valid (has the expected functions).
     		// Passing fqn as the function name will just eval the script and not run anything.
     		je.executeInContext(scriptContext, script, scriptUri, null);

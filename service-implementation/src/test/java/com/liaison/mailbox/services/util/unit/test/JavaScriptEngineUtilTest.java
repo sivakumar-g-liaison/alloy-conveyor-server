@@ -50,7 +50,7 @@ public class JavaScriptEngineUtilTest {
 		
 		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 		JavascriptScriptContext scriptContext = null;
-		String testJs = "gitlab:/src/test/resources/sandbox-tests.js";
+		String testJs = "gitlab:/processor-scripts/veera_sftp_downloader";
 		URI myUri = null;
 		try {
 			myUri = new URI(testJs);
