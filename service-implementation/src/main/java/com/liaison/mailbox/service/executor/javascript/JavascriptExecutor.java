@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -118,36 +119,42 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 			throw new RuntimeException(String.format("Script '%s' has an invalid URI", script), e);
 		}
 
-		// Eval the script so we can check to be sure it is valid (has the expected functions).
-		// Passing fqn as the function name will just eval the script and not run anything.
-		je.executeInContext(scriptContext, script, scriptUri, null);
-		if (logger.isDebugEnabled()) {
-			logger.debug("mailbox: JavascriptExecutor.runScript(): executeInContext() called. No function name.");
-		}
-		ScriptEngine scriptEngine = je.getScriptEngine();
+		try {
 
-		if (scriptEngine == null) {
-			throw new RuntimeException(
-					String.format(
-							"After evaluating script '%s', script engine is null. There must have been an error evaluating the script.",
-							script));
-		}
+    		// Eval the script so we can check to be sure it is valid (has the expected functions).
+    		// Passing fqn as the function name will just eval the script and not run anything.
+    		je.executeInContext(scriptContext, script, scriptUri, null);
+    		if (logger.isDebugEnabled()) {
+    			logger.debug("mailbox: JavascriptExecutor.runScript(): executeInContext() called. No function name.");
+    		}
+    		ScriptEngine scriptEngine = je.getScriptEngine();
+    
+    		if (scriptEngine == null) {
+    			throw new RuntimeException(
+    					String.format(
+    							"After evaluating script '%s', script engine is null. There must have been an error evaluating the script.",
+    							script));
+    		}
+    
+    		scriptEngine.setContext(scriptContext);
+    
+    		validateScript(scriptEngine);
+    		handleRequires(je, scriptContext, scriptUri);
+    		callProcess(je, scriptContext, scriptUri);
+    		callCleanup(je, scriptContext, scriptUri);
+    		logContext(scriptContext);
+    
+    		String elapsedTime = String.valueOf(System.currentTimeMillis() - start);
+    		if (logger.isDebugEnabled()) {
+    			logger.debug("mailbox: JavascriptExecutor.runScript() end: : Script FQN: " + script + " Elapsed time: "
+    					+ elapsedTime + " ms.");
+    		}
+    
+    		logMetrics(elapsedTime, je.getMetricData());
+		} catch (ScriptException e) {
+            throw new RuntimeException(e.getMessage());
+        }
 
-		scriptEngine.setContext(scriptContext);
-
-		validateScript(scriptEngine);
-		handleRequires(je, scriptContext, scriptUri);
-		callProcess(je, scriptContext, scriptUri);
-		callCleanup(je, scriptContext, scriptUri);
-		logContext(scriptContext);
-
-		String elapsedTime = String.valueOf(System.currentTimeMillis() - start);
-		if (logger.isDebugEnabled()) {
-			logger.debug("mailbox: JavascriptExecutor.runScript() end: : Script FQN: " + script + " Elapsed time: "
-					+ elapsedTime + " ms.");
-		}
-
-		logMetrics(elapsedTime, je.getMetricData());
 		return scriptContext;
 	}
 
@@ -224,7 +231,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 	}
 
 	protected void handleRequires(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
-			JavascriptScriptContext scriptContext, URI scriptUri)
+			JavascriptScriptContext scriptContext, URI scriptUri) throws ScriptException
 	{
 
 		if (logger.isDebugEnabled())
@@ -255,7 +262,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 	}
 
 	protected void handleRequiredScript(String scriptUri,
-			com.liaison.commons.scripting.javascript.JavascriptExecutor je, JavascriptScriptContext scriptContext)
+			com.liaison.commons.scripting.javascript.JavascriptExecutor je, JavascriptScriptContext scriptContext) throws ScriptException
 	{
 		if (logger.isDebugEnabled())
 		{
@@ -278,7 +285,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 	}
 
 	protected void callProcess(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
-			JavascriptScriptContext scriptContext, URI scriptUri)
+			JavascriptScriptContext scriptContext, URI scriptUri) throws ScriptException
 	{
 		if (logger.isDebugEnabled())
 		{
@@ -299,7 +306,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 	}
 
 	protected void callCleanup(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
-			JavascriptScriptContext scriptContext, URI scriptUri)
+			JavascriptScriptContext scriptContext, URI scriptUri) throws ScriptException
 	{
 		if (logger.isDebugEnabled())
 		{
@@ -318,7 +325,7 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 	@SuppressWarnings("rawtypes")
 	protected ArrayList<String> callScriptFunctionReturningListOfStrings(com.liaison.commons.scripting.javascript.JavascriptExecutor je,
-			JavascriptScriptContext scriptContext, URI scriptUri, String functionName)
+			JavascriptScriptContext scriptContext, URI scriptUri, String functionName) throws ScriptException
 	{
 
 		Object listObject = je.executeInContext(scriptContext, script, scriptUri, functionName);
