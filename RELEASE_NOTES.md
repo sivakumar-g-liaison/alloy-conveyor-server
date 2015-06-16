@@ -32,6 +32,10 @@ Updated the web.xml to apply the tomcat harden changes.
 2.2.0
 -------------------------------
 
+2.1.9
+-------------------------------
+* GMB-485 : upgrade commons scripting library
+
 2.1.8
 -------------------------------
 * Updated the glass_log4j2_lib version to 2.2.+
