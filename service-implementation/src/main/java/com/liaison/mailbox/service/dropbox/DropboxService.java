@@ -56,7 +56,7 @@ public class DropboxService {
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
-        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 	    GlassMessage glassMessage = new GlassMessage(workTicket);
 	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
 	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());

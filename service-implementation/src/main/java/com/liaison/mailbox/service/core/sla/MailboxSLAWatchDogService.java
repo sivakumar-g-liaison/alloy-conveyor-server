@@ -309,7 +309,7 @@ public class MailboxSLAWatchDogService {
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		GlassMessage glassMessage = null;
 
 		try {

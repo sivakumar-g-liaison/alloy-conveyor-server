@@ -253,7 +253,7 @@ public class GlassMessage {
 		}
 	}
 
-	public void logFirstCornerTimestamps() {
+	public void logFirstCornerTimestamp() {
 		firstCornerTimestamp = logBeginTimestamp(config.getString(PROPERTY_FIRST_CORNER_NAME, DEFAULT_FIRST_CORNER_NAME));
 	}
 
@@ -273,7 +273,7 @@ public class GlassMessage {
 		logEndTimestamp(config.getString(PROPERTY_FOURTH_CORNER_NAME, DEFAULT_FOURTH_CORNER_NAME));
 	}
 
-	private ExecutionTimestamp logBeginTimestamp(String name) {
+	public ExecutionTimestamp logBeginTimestamp(String name) {
 		ExecutionTimestamp timeStamp = ExecutionTimestamp.beginTimestamp(name);
 		logTimeStamp(timeStamp);
 		return timeStamp;
