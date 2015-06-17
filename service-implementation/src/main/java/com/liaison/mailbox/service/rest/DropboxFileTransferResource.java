@@ -60,6 +60,7 @@ import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifest
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -108,8 +109,10 @@ public class DropboxFileTransferResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call()
-					throws Exception {
+			public Object call() throws Exception {
+
+                //first corner timestamp
+                ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
 				serviceCallCounter.incrementAndGet();
 
@@ -123,8 +126,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 				long startTime = 0;
 				long endTime = 0;
 
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
 
 				try {
@@ -211,7 +213,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					glassMessage.setProcessId(processId);
 					glassMessage.setSenderId(loginId);
 					// Log time stamp
-					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
 
 					// Log running status
 					glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Recevived");

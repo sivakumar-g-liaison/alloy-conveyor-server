@@ -253,9 +253,13 @@ public class GlassMessage {
 		}
 	}
 
-	public void logFirstCornerTimestamp() {
+	public void logFirstCornerTimestamps() {
 		firstCornerTimestamp = logBeginTimestamp(config.getString(PROPERTY_FIRST_CORNER_NAME, DEFAULT_FIRST_CORNER_NAME));
 	}
+
+	public void logFirstCornerTimestamp(ExecutionTimestamp timeStamp) {
+        logTimeStamp(timeStamp);
+    }
 
 	public void logSecondCornerTimestamp() {
 		logEndTimestamp(config.getString(DEFAULT_SECOND_CORNER_NAME, PROPERTY_SECOND_CORNER_NAME));
@@ -269,12 +273,12 @@ public class GlassMessage {
 		logEndTimestamp(config.getString(PROPERTY_FOURTH_CORNER_NAME, DEFAULT_FOURTH_CORNER_NAME));
 	}
 
-	public ExecutionTimestamp logBeginTimestamp(String name) {
+	private ExecutionTimestamp logBeginTimestamp(String name) {
 		ExecutionTimestamp timeStamp = ExecutionTimestamp.beginTimestamp(name);
 		logTimeStamp(timeStamp);
 		return timeStamp;
 	}
-
+	
 	public void logEndTimestamp(String name, String sessionId) {
 		ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name, sessionId);
 		logTimeStamp(timeStamp);
