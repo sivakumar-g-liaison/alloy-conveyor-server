@@ -1,6 +1,27 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.8
+-------------------------------
+* bumped up commons script
+* TTL updates
+
+2.2.7
+-------------------------------
+prod properties updates
+
+2.2.6
+-------------------------------
+lens property changes
+
+2.2.5
+-------------------------------
+properties updates
+
+2.2.4
+-------------------------------
+fix for GMB-473
+
 2.2.3
 -------------------------------
 Patch/2.1.X/Lib Glass Message
@@ -15,6 +36,10 @@ Updated the web.xml to apply the tomcat harden changes.
 
 2.2.0
 -------------------------------
+
+2.1.9
+-------------------------------
+* GMB-485 : upgrade commons scripting library
 
 2.1.8
 -------------------------------

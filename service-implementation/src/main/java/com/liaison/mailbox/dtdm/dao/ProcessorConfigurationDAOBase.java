@@ -90,6 +90,46 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	}
 
+	/**
+     * Checks the mailbox has the processor or not.
+     *
+     *
+     * @param siid service instance id(name)
+     * @param mbxGuid pguid of the mailbox
+     * @return boolean
+     */
+    @Override
+    public boolean isMailboxHasProcessor( String mbxGuid, String siid) {
+
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        boolean status = false;
+
+        try {
+
+            LOG.info("Fetching the processor count starts.");
+            StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor")
+                    .append(" inner join processor.mailbox mbx")
+                    .append(" where mbx.pguid = :" + PGUID)
+                    .append(" and processor.serviceInstance.name like :" + SERV_INST_ID);
+
+            long count = (long) entityManager.createQuery(query.toString())
+                    .setParameter(PGUID , mbxGuid)
+                    .setParameter(SERV_INST_ID, siid)
+                    .getSingleResult();
+
+            if (count > 0) {
+                status = true;
+            }
+
+        } finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+
+        LOG.info("Fetching the processor count ends.");
+        return status;
+    }
 
 	/**
 	 * Retrieves the list of processor from the given mailbox guid and service instance guid(name).
