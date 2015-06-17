@@ -167,6 +167,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
  
+		// variable to hold the status of file upload request execution
+		int replyCode = -1;
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
 		SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();			
@@ -177,15 +179,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		if (subFiles != null && subFiles.length > 0) {
 			String statusIndicator = sftpUploaderStaticProperties.getFileTransferStatusIndicator();
-			String tempExtension = statusIndicator!=null && (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
 			String includedFiles = sftpUploaderStaticProperties.getIncludedFiles();			
 			String excludedFiles = sftpUploaderStaticProperties.getExcludedFiles();			
-			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludeList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;			
+			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;			
 			for (File item : subFiles) {
-             
-				// variable to hold the status of file upload request execution
-				int replyCode = -1;
 				//interrupt signal check has to be done only if execution Id is present
 				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
 					lastCheckTime = new Date();
@@ -229,26 +227,31 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					replyCode = 0;
 
 				} else {
+					
 					String currentFileName = item.getName();
-					// Check whether user preferred specific files to include or exclude during downloading process.
-					currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludeList);
-
-					if (currentFileName != null) {
-						String uploadingFileName = tempExtension.length() > 0 ? currentFileName + "." + tempExtension : currentFileName;
-						String remoteDir = remoteParentDir + File.separatorChar + uploadingFileName;						
-						createResponseDirectory(remoteDir);
-
-				    // upload the file
+					// Check if the file to be uploaded is included or not excluded
+					boolean uploadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludeList);
+					//file must not be uploaded
+					if(!uploadFile) {
+						continue;
+					}
+					
+					//add status indicator if specified to indicate that uploading is in progress
+					String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
+							+ statusIndicator : currentFileName;
+				    
+					// upload the file
 				    try (InputStream inputStream = new FileInputStream(item)) {
 				        sftpRequest.changeDirectory(remoteParentDir);
 	                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
-	                    
-	                 // Check whether the file uploaded successfully if so rename it.
+
+	                    // Check whether the file uploaded successfully
 						if (replyCode == 0) {
 							LOGGER.info("File uploaded successfully");
 							inputStream.close();
-							// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
-							if (tempExtension.length() > 0) {								
+							
+							// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+							if (!MailBoxUtil.isEmpty(statusIndicator)) {								
 								int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);															
 								if (renameStatus == 0) {
 									LOGGER.info("File renamed successfully");
@@ -256,45 +259,31 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 									LOGGER.info("File renaming failed");
 								}
 							}
-							// Delete the local files after successful download if user opt for it
-								if (sftpUploaderStaticProperties.getDeleteFiles()) {
-									item.delete();
-									if (!item.exists()) {
-										item = null;										
-										LOGGER.info("File deleted successfully");
-									} else {
-										LOGGER.info("File deletion failed");
-									}
+							// Delete the local files after successful upload if user opt for it
+							if (sftpUploaderStaticProperties.getDeleteFiles()) {
+								item.delete();
+								LOGGER.info("File deleted successfully");
+							} else {
+								// File is not opted to be deleted. Hence moved to processed folder
+								String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
+								if (MailBoxUtil.isEmpty(processedFileLocation)) {
+									archiveFile(item.getAbsolutePath(), false);
+								} else {
+									archiveFile(item, processedFileLocation);
 								}
+							}
 
+						} else {
+
+							// File Uploading failed so move the file to error folder
+							String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
+							if (MailBoxUtil.isEmpty(errorFileLocation)) {
+								archiveFile(item.getAbsolutePath(), true);
+							} else {
+								archiveFile(item, errorFileLocation);
+							}
 						}
 				    }
-					}
-				}
-			
-				if (null != item) {
-					
-					//SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
-					// File Uploading done successfully so move the file to processed folder
-					if (replyCode == 0) {
-
-						String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
-						if (MailBoxUtil.isEmpty(processedFileLocation)) {
-							archiveFile(item.getAbsolutePath(), false);
-						} else {
-							archiveFile(item, processedFileLocation);
-						}
-					} else {
-
-						// File Uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
-						if (MailBoxUtil.isEmpty(errorFileLocation)) {
-							archiveFile(item.getAbsolutePath(), true);
-						} else {
-							archiveFile(item, errorFileLocation);
-						}
-					}
-
 				}
 			}
 		}

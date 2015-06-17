@@ -182,8 +182,13 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				}else{
 
 				String currentFileName = aFile;
-				// Check whether user preferred specific files to include or exclude during downloading process.
-				currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
+				// Check if the file to be downloaded is included or not excluded
+				boolean downloadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludedList);
+				//file must not be downloaded
+				if(!downloadFile) {
+					continue;
+				}
+				
 				if (currentFileName != null) {
 					String downloadingFileName = currentFileName + "." + tempExtension;
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
