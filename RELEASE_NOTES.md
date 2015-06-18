@@ -1,6 +1,10 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.9
+-------------------------------
+making glass message appender sync
+
 2.2.8
 -------------------------------
 * bumped up commons script
