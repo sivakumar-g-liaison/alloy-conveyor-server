@@ -249,6 +249,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	                    if (replyCode == 226 || replyCode == 250) {
 	                    	
 							LOGGER.info("File uploaded successfully");
+							inputStream.close();
 							
 							// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
 							if (!MailBoxUtil.isEmpty(statusIndicator)) {
