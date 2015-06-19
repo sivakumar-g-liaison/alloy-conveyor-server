@@ -76,8 +76,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	protected Processor configurationInstance;
 	protected int totalNumberOfProcessedFiles;
-	protected String logPrefix;
-	protected TriggerProcessorRequestDTO dto;
+	protected StringBuffer logPrefix;
+	protected TriggerProcessorRequestDTO reqDTO;
 
 	public Properties mailBoxProperties;
 	public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
@@ -87,11 +87,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	public AbstractProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
-		logPrefix = configurationInstance.getProcessorType().name()
-		        + seperator + configurationInstance.getProcsrName()
-		        + seperator + configurationInstance.getMailbox().getMbxName()
-		        + seperator + configurationInstance.getMailbox().getPguid()
-		        + seperator;
+		logPrefix = new StringBuffer()
+		        .append(configurationInstance.getProcessorType().name())
+		        .append(seperator)
+		        .append(configurationInstance.getProcsrName())
+		        .append(seperator)
+		        .append(configurationInstance.getMailbox().getMbxName())
+		        .append(seperator)
+		        .append(configurationInstance.getMailbox().getPguid())
+		        .append(seperator);
 	}
 
 
@@ -107,13 +111,26 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		this.totalNumberOfProcessedFiles = totalNumberOfProcessedFiles;
 	}
 
-	public String getLogPrefix() {
+    public TriggerProcessorRequestDTO getReqDTO() {
+        return reqDTO;
+    }
 
-	    if (dto == null || logPrefix.startsWith("CronJob")) {
-	        return logPrefix;
+    public void setReqDTO(TriggerProcessorRequestDTO reqDTO) {
+        this.reqDTO = reqDTO;
+    }
+
+    public String getLogPrefix() {
+
+        String tempStr = logPrefix.toString();
+	    if (reqDTO == null || tempStr.startsWith("CronJob")) {
+	        return tempStr;
 	    } else {
-	        logPrefix = "CronJob" + seperator + dto.getProfileName() + seperator + logPrefix;
-	        return logPrefix;
+	        logPrefix = new StringBuffer()
+	        .append("CronJob")
+	        .append(seperator)
+	        .append(reqDTO.getProfileName())
+	        .append(seperator).append(tempStr);
+	        return logPrefix.toString();
 	    }
     }
 

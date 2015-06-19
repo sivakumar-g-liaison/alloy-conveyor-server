@@ -104,6 +104,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 		try {
 
+		    setReqDTO(dto);
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
@@ -215,8 +216,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				transactionVisibilityClient.logToGlass(glassMessage);
             				// Log running status
             				glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
-            				LOGGER.info(getLogPrefix() + "Global PID" + seperator + wrkTicket.getGlobalProcessId()
-            	                    + " submitted for file " + wrkTicket.getFileName());
+            				LOGGER.info(getLogPrefix()
+            				        + "Global PID"
+            				        + seperator
+            				        + wrkTicket.getGlobalProcessId()
+            	                    + " submitted for file "
+            				        + wrkTicket.getFileName());
 
             			}
             		}
@@ -234,6 +239,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         } catch (MailBoxServicesException | IOException | URISyntaxException
         		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
         		| JSONException | IllegalAccessException | NoSuchFieldException e) {
+            LOGGER.error(getLogPrefix() + "Error occured while scanning the mailbox", e);
         	throw new RuntimeException(e);
         }
 	}
@@ -445,10 +451,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
 				payloadToPersist.close();
 			}
-			LOGGER.info("Global PID: {} submitted for file {} while running Processor {} of type {}",
-					workTicket.getGlobalProcessId(),
-					workTicket.getPayloadURI(),
-					configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode());
             if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
                 LOGGER.debug("Deleting file after sweep");
                 delete(oldPath);
@@ -585,8 +587,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
 
-			LOGGER.info(getLogPrefix() + "Global PID" + seperator + workTicket.getGlobalProcessId()
-			        + " generated for file " + path.toAbsolutePath());
+			LOGGER.info(getLogPrefix()
+			        + "Global PID"
+			        + seperator
+			        + workTicket.getGlobalProcessId()
+			        + " generated for file "
+			        + path.toAbsolutePath());
 		}
 
         LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());
