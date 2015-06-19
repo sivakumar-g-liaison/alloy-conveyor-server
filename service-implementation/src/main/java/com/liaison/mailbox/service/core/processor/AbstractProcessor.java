@@ -87,15 +87,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	public AbstractProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
-		logPrefix = new StringBuffer()
-		        .append(configurationInstance.getProcessorType().name())
-		        .append(seperator)
-		        .append(configurationInstance.getProcsrName())
-		        .append(seperator)
-		        .append(configurationInstance.getMailbox().getMbxName())
-		        .append(seperator)
-		        .append(configurationInstance.getMailbox().getPguid())
-		        .append(seperator);
 	}
 
 
@@ -111,27 +102,41 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		this.totalNumberOfProcessedFiles = totalNumberOfProcessedFiles;
 	}
 
-    public TriggerProcessorRequestDTO getReqDTO() {
-        return reqDTO;
-    }
-
     public void setReqDTO(TriggerProcessorRequestDTO reqDTO) {
         this.reqDTO = reqDTO;
     }
 
-    public String getLogPrefix() {
+    /**
+     * Method to construct log messages for easy visibility
+     * 
+     * @param messages append to prefix, please make sure the order of the inputs
+     * @return constructed string
+     */
+    public String constructMessage(String... messages) {
 
-        String tempStr = logPrefix.toString();
-	    if (reqDTO == null || tempStr.startsWith("CronJob")) {
-	        return tempStr;
-	    } else {
-	        logPrefix = new StringBuffer()
-	        .append("CronJob")
-	        .append(seperator)
-	        .append(reqDTO.getProfileName())
-	        .append(seperator).append(tempStr);
-	        return logPrefix.toString();
-	    }
+        if (null == logPrefix) {
+
+            logPrefix = new StringBuffer()
+            .append("CronJob")
+            .append(seperator)
+            .append((reqDTO != null) ? reqDTO.getProfileName() : "NONE")
+            .append(seperator)
+            .append(configurationInstance.getProcessorType().name())
+            .append(seperator)
+            .append(configurationInstance.getProcsrName())
+            .append(seperator)
+            .append(configurationInstance.getMailbox().getMbxName())
+            .append(seperator)
+            .append(configurationInstance.getMailbox().getPguid())
+            .append(seperator);
+        }
+
+        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        for(String str : messages) {
+            msgBuf.append(str);
+        }
+
+        return msgBuf.toString();
     }
 
     /**
