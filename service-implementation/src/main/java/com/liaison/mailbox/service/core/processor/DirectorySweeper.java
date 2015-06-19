@@ -83,7 +83,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	private String pipeLineID;
 	private  List<Path> activeFiles = new ArrayList<>();
-	
+
 
 	public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
@@ -117,14 +117,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	private void run(String executionId) {
-		
-		
+
+
 		TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient(executionId);
 		GlassMessage glassMessage = new GlassMessage();
-		
+
 
 	try {
-		
+
 		//GLASS LOGGING BEGINS//
 		glassMessage.setCategory(ProcessorType.SWEEPER);
 		glassMessage.setProtocol(Protocol.SWEEPER.getCode());
@@ -136,40 +136,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		String inputLocation = getPayloadURI();
 		// retrieve required properties
 		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
-		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
 		String includedFiles = sweeperStaticProperties.getIncludedFiles();
 		String excludedFiles = sweeperStaticProperties.getExcludedFiles();
-		List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
-		List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
-		String sweepedLocation = sweeperStaticProperties.getSweepedFileLocation();
-		File dirToList = new File(inputLocation);
-		File[] files = dirToList.listFiles();
-		for (File file : files) {
+		List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
+		List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
 
-			if (file.getName().equals(".") || file.getName().equals("..")) {
-				// skip parent directory and the directory itself
-				continue;
-			}
-			String currentFileName = file.getName();
-			if (file.isFile()) {
-				// Check whether user preferred specific files to include or exclude during downloading process.
-				currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
-
-				if(currentFileName != null){
-					Path oldPath =file.toPath();
-					if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
-		                LOGGER.debug("Deleting file after sweep");
-		                delete(oldPath);
-		            } else {
-		            	String sweepPath = sweepedLocation+ file.separator + currentFileName;
-						Path newPath=Paths.get(sweepPath);
-		                LOGGER.debug("Moving file after sweep");
-		                move(oldPath, newPath);
-
-		            }
-				}
-			}
-		}
 		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : "."+fileRenameFormat;
 
 		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
@@ -178,9 +150,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
 		}
 
+		long startTime = System.currentTimeMillis();
+		LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
+				configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+				configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
         LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
-        List<WorkTicket> workTickets = (activeFiles.isEmpty())	
-        								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit)
+        List<WorkTicket> workTickets = (activeFiles.isEmpty())
+        								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit, includeList, excludeList)
         								: retryGenWrkTktForActiveFiles(activeFiles, timeLimit);
 
 		if (workTickets.isEmpty()) {
@@ -250,7 +226,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		if (!activeFiles.isEmpty()) {
 			run(executionId);
 		}
-
+		long endTime = System.currentTimeMillis();
+		LOGGER.info("Processor {} of type {} belongs to Mailbox  {} ends processing of files",
+				configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
+				configurationInstance.getMailbox().getPguid());
+		LOGGER.info("Number of files Processed {}", workTickets.size());
+		LOGGER.info("Total time taken to process files {}", endTime - startTime);
 		} catch (MailBoxServicesException | IOException | URISyntaxException
 				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
 				| JSONException | IllegalAccessException | NoSuchFieldException e) {
@@ -277,11 +258,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	
-	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly,String fileRenameFormat, long lastModifiedLmt) throws IOException, URISyntaxException,
+
+	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly,String fileRenameFormat, long lastModifiedLmt, List <String> includeList, List <String> excludeList) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-        LOGGER.debug("SweepingDirectory: {}", root);
+        LOGGER.info("Sweeping Directory: {}", root);
 		Path rootPath = Paths.get(root);
 		if (!Files.isDirectory(rootPath)) {
 			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
@@ -290,8 +271,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<Path> result = new ArrayList<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
 			for (Path file : stream) {
+
+				String fileName = file.getFileName().toString();
+				if (!checkFileIncludeorExclude(includeList, fileName, excludeList)) {
+					continue;
+				}
                 LOGGER.debug("Sweeping file {}", file.toString());
-				if (!file.getFileName().toString().endsWith(fileRenameFormat)) {
+				if (!fileName.endsWith(fileRenameFormat)) {
 
 					if (validateLastModifiedTolerance(lastModifiedLmt, file)) {
 						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.toString());
@@ -458,12 +444,16 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
 			properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperStaticProperties.getPipeLineID());
 
+			LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
 				payloadToPersist.close();
 			}
-
+			LOGGER.info("Global PID: {} submitted for file {} while running Processor {} of type {}",
+					workTicket.getGlobalProcessId(),
+					workTicket.getPayloadURI(),
+					configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode());
             if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
                 LOGGER.debug("Deleting file after sweep");
                 delete(oldPath);
@@ -663,7 +653,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		return generateWorkTickets(files);
 	}
 
-	
+
 	/**
 	 * Use to validate the given file can be added in the given group.
 	 *
@@ -762,12 +752,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {

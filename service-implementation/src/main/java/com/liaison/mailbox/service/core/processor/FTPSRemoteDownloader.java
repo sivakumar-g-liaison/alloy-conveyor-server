@@ -118,6 +118,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			ftpsRequest.enableSessionReuse(true);
 			ftpsRequest.connect();
 			ftpsRequest.login();
+			long startTime = 0;
 			//GMB-345
 			//ftpsRequest.enableDataChannelEncryption();
 
@@ -143,6 +144,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
+					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+			startTime = System.currentTimeMillis();
+
 			ftpsRequest.changeDirectory(path);
 
 			// For testing purpose
@@ -156,9 +162,17 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				LOGGER.debug("The payload location({}) is empty", path);
 			}
 			// For testing purpose
-
+			LOGGER.debug("Going to download files from remote directory {} to local directory {}", remotePath, path);
 			downloadDirectory(ftpsRequest, path, remotePath);
 			ftpsRequest.disconnect();
+
+			// to calculate the elapsed time for running a processor
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox  {} ends processing of files",
+					configurationInstance.getProcsrName(),configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
+					configurationInstance.getMailbox().getPguid());
+			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
+			LOGGER.info("Total time taken to process files {}", endTime - startTime);
 
 		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException
 				| URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
@@ -172,11 +186,11 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 * @throws SftpException
 	 *
 	 */
@@ -187,7 +201,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		int statusCode = 0;
 		String dirToList = "";
 		FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
-		
+
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
 		}
@@ -201,7 +215,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
 			List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
 			for (FTPFile file : files) {
-				
+
 				if (file.getName().equals(".") || file.getName().equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
@@ -214,7 +228,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					if(!downloadFile) {
 						continue;
 					}
-					
+
 					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
@@ -225,27 +239,33 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 							fos = new FileOutputStream(localDir);
 							bos = new BufferedOutputStream(fos);
+							LOGGER.info("downloading file {}  from remote folder {} to local folder {} while running Processor {} of type {}",
+									currentFileName, currentDir, localFileDir, configurationInstance.getPguid(),
+									configurationInstance.getProcessorType().getCode());
 							statusCode = ftpClient.getFile(currentFileName, bos);
 						// Check whether the file downloaded successfully if so rename it.
 						if (statusCode == 226 || statusCode == 250) {
-							LOGGER.info("File downloaded successfully");
+							LOGGER.info("File {} downloaded successfully", currentFileName);
+							totalNumberOfProcessedFiles++;
 							fos.close();
 							bos.close();
-							
+
 							// Renames the downloaded file to original extension once the fileStatusIndicator is  given by User
 							if (!MailBoxUtil.isEmpty(statusIndicator)) {
 								//Constructs the original file filename
 								File actualFileName = new File(localFileDir + File.separatorChar + currentFileName);
 								boolean renameStatus =  new File(localDir).renameTo(actualFileName);
 								if (renameStatus) {
-									LOGGER.info("File renamed successfully");
+									LOGGER.info("File {} renamed successfully", currentFileName);
 								} else {
-									LOGGER.info("File renaming failed");
+									LOGGER.info("File {} renaming failed", currentFileName);
 								}
 							}
 							// Delete the remote files after successful download if user opt for it
 							if (ftpDownloaderStaticProperties.getDeleteFiles()) {
 								ftpClient.deleteFile(file.getName());
+								LOGGER.info("File {} deleted successfully", currentFileName);
+
 							}
 						}
 						} finally {
@@ -297,10 +317,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override

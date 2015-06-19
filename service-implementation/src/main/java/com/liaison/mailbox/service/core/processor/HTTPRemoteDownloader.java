@@ -53,7 +53,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Http remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author OFS
  */
 public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
@@ -94,14 +94,14 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws JAXBException
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
 	 * @throws KeyStoreException
@@ -114,7 +114,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws CMSException
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
-	 * 
+	 *
 	 */
 	protected void executeRequest() {
 
@@ -124,13 +124,16 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		HTTPResponse response = null;
 		boolean failedStatus = false;
-
+		long startTime = 0;
 		// Set the pay load value to http client input data for POST & PUT
 		// request
 		File[] files = null;
-
 		try {
 
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
+					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+			startTime = System.currentTimeMillis();
 			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
 				HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
@@ -162,6 +165,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 								if (null != entry) {
 									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
 								}
+								totalNumberOfProcessedFiles++;
 							}
 						}
 					}
@@ -172,7 +176,15 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			} else {
 				response = request.execute();
 				writeResponseToMailBox(responseStream);
+				totalNumberOfProcessedFiles++;
 			}
+			// to calculate the elapsed time for running a processor
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} ends processing of files",
+					configurationInstance.getProcsrName(), configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
+					configurationInstance.getMailbox().getPguid());
+			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
+			LOGGER.info("Total time taken to process files {}", endTime - startTime);
 
 		} catch (MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException
 				| IllegalAccessException | NoSuchFieldException e) {
@@ -188,7 +200,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Delegate method to archive the file.
-	 * 
+	 *
 	 * @param file
 	 * @param locationName
 	 * @param isError
@@ -233,7 +245,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override

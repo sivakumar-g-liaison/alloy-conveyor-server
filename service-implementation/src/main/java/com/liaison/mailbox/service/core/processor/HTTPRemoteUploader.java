@@ -55,7 +55,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Http remote uploader to perform push operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author veerasamyn
  */
 public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
@@ -73,7 +73,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
@@ -91,9 +91,9 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CMSException
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	public void executeRequest(String executionId, MailboxFSM fsm) {
 
@@ -108,15 +108,20 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			// Set the pay load value to http client input data for POST & PUT
 			// request
 			File[] files = null;
-
 			// retrieve required properties
 			String httpVerb = httpUploaderStaticProperties.getHttpVerb();
 			String contentType = httpUploaderStaticProperties.getContentType();
+			long startTime = 0;
 
 			if ("POST".equals(httpVerb) || "PUT".equals(httpVerb)) {
 
 				files = getFilesToUpload();
 				if (null != files) {
+
+					LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
+							configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+							configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+					startTime = System.currentTimeMillis();
 
 					FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 					Date lastCheckTime = new Date();
@@ -145,6 +150,10 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						try (InputStream contentStream = FileUtils.openInputStream(entry);
 								ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
 
+							LOGGER.info("uploading file {}  while running Processor {} of type {}",
+									entry.getName(), configurationInstance.getPguid(),
+									configurationInstance.getProcessorType().getCode());
+
 							request = (HTTPRequest) getClient();
 							request.setOutputStream(responseStream);
 							request.inputData(contentStream, contentType);
@@ -162,7 +171,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 								// continue;
 
 							} else {
-
+								totalNumberOfProcessedFiles++;
 								if (null != entry) {
 									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
 								}
@@ -180,6 +189,14 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 							Response.Status.CONFLICT);
 				}
 			}
+
+			// to calculate the elapsed time for running a processor
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} ends processing of files",
+					configurationInstance.getProcsrName(), configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
+					configurationInstance.getMailbox().getPguid());
+			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
+			LOGGER.info("Total time taken to process files {}", endTime - startTime);
 		} catch (JAXBException | IOException | LiaisonException | IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
@@ -188,7 +205,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Delegate method to archive the file.
-	 * 
+	 *
 	 * @param file
 	 * @param locationName
 	 * @param isError
@@ -265,9 +282,9 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {

@@ -76,6 +76,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	public Properties mailBoxProperties;
 	public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
 	public StaticProcessorPropertiesDTO staticProcessorProperties;
+	protected int totalNumberOfProcessedFiles;
 
 	public AbstractProcessor() {}
 
@@ -86,6 +87,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	public Processor getConfigurationInstance() {
 		return configurationInstance;
+	}
+
+	public int getTotalNumberOfProcessedFiles() {
+		return totalNumberOfProcessedFiles;
+	}
+
+	public void setTotalNumberOfProcessedFiles(int totalNumberOfProcessedFiles) {
+		this.totalNumberOfProcessedFiles = totalNumberOfProcessedFiles;
 	}
 
 	/**
