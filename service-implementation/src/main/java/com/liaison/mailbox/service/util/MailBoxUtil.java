@@ -403,27 +403,4 @@ public class MailBoxUtil {
 		return new Timestamp(cal.getTime().getTime());
 	}
 	
-	/**
-	 * Returns false if file is excluded. Otherwise returns true. Include is higher priority then exclude. 
-	 * @param includeList - List of extensions to be included
-	 * @param currentFileName - name of the file to be uploaded
-	 * @param excludedList - List of extensions to be excluded
-	 * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
-	 */
-	public static boolean checkFileIncludeorExclude(List<String> includeList, String currentFileName, List<String> excludedList){
-		
-		//Add period to fileExtension since include/exclude list contains extension with period
-		String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
-		//check if file is in include list
-		if(null != includeList && !includeList.isEmpty()) {
-			boolean fileIncluded = (includeList.contains(fileExtension))? true : false;
-			return fileIncluded;
-		}
-		
-		//check if file is not in excluded list
-		if(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
-			return false;
-		}
-		return true;
-	}
 }

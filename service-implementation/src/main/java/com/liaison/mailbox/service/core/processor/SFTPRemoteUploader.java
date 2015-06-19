@@ -230,7 +230,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					
 					String currentFileName = item.getName();
 					// Check if the file to be uploaded is included or not excluded
-					boolean uploadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludeList);
+					boolean uploadFile = checkFileIncludeorExclude(includeList, currentFileName, excludeList);
 					//file must not be uploaded
 					if(!uploadFile) {
 						continue;
@@ -244,46 +244,44 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				    try (InputStream inputStream = new FileInputStream(item)) {
 				        sftpRequest.changeDirectory(remoteParentDir);
 	                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
-
-	                    // Check whether the file uploaded successfully
-						if (replyCode == 0) {
-							LOGGER.info("File uploaded successfully");
-							inputStream.close();
-							
-							// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
-							if (!MailBoxUtil.isEmpty(statusIndicator)) {								
-								int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);															
-								if (renameStatus == 0) {
-									LOGGER.info("File renamed successfully");
-								} else {
-									LOGGER.info("File renaming failed");
-								}
-							}
-							// Delete the local files after successful upload if user opt for it
-							if (sftpUploaderStaticProperties.getDeleteFiles()) {
-								item.delete();
-								LOGGER.info("File deleted successfully");
+				    }
+				    
+				    // Check whether the file uploaded successfully
+					if (replyCode == 0) {
+						LOGGER.info("File uploaded successfully");
+						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+						if (!MailBoxUtil.isEmpty(statusIndicator)) {								
+							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);															
+							if (renameStatus == 0) {
+								LOGGER.info("File renamed successfully");
 							} else {
-								// File is not opted to be deleted. Hence moved to processed folder
-								String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
-								if (MailBoxUtil.isEmpty(processedFileLocation)) {
-									archiveFile(item.getAbsolutePath(), false);
-								} else {
-									archiveFile(item, processedFileLocation);
-								}
-							}
-
-						} else {
-
-							// File Uploading failed so move the file to error folder
-							String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
-							if (MailBoxUtil.isEmpty(errorFileLocation)) {
-								archiveFile(item.getAbsolutePath(), true);
-							} else {
-								archiveFile(item, errorFileLocation);
+								LOGGER.info("File renaming failed");
 							}
 						}
-				    }
+						// Delete the local files after successful upload if user opt for it
+						if (sftpUploaderStaticProperties.getDeleteFiles()) {
+							item.delete();
+							LOGGER.info("File deleted successfully");
+						} else {
+							// File is not opted to be deleted. Hence moved to processed folder
+							String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
+							if (MailBoxUtil.isEmpty(processedFileLocation)) {
+								archiveFile(item.getAbsolutePath(), false);
+							} else {
+								archiveFile(item, processedFileLocation);
+							}
+						}
+
+					} else {
+
+						// File Uploading failed so move the file to error folder
+						String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
+						if (MailBoxUtil.isEmpty(errorFileLocation)) {
+							archiveFile(item.getAbsolutePath(), true);
+						} else {
+							archiveFile(item, errorFileLocation);
+						}
+					}
 				}
 			}
 		}

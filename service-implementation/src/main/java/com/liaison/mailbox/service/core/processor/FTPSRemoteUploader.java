@@ -229,7 +229,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				String currentFileName = item.getName();
 				if (item.isFile()) {
 					// Check if the file to be uploaded is included or not excluded
-					boolean uploadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludeList);
+					boolean uploadFile = checkFileIncludeorExclude(includeList, currentFileName, excludeList);
 					//file must not be uploaded
 					if(!uploadFile) {
 						continue;
@@ -241,50 +241,47 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					// upload file
 				    try (InputStream inputStream = new FileInputStream(item)) {
-				    	
 				        ftpsRequest.changeDirectory(remoteParentDir);
 	                    replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
-	                    
-	                    // Check whether the file is uploaded successfully
-	                    if (replyCode == 226 || replyCode == 250) {
-	                    	
-							LOGGER.info("File uploaded successfully");
-							inputStream.close();
-							
-							// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
-							if (!MailBoxUtil.isEmpty(statusIndicator)) {
-								int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);	
-								if (renameStatus == 250) {
-									LOGGER.info("File renamed successfully");
-								} else {
-									LOGGER.info("File renaming failed");
-								}
-							}
-							
-							// Delete the local files after successful upload if user opt for it
-							if (ftpUploaderStaticProperties.getDeleteFiles()) {
-								item.delete();
-								LOGGER.info("File deleted successfully");
+				    }
+
+                    // Check whether the file is uploaded successfully
+                    if (replyCode == 226 || replyCode == 250) {
+                    	
+						LOGGER.info("File uploaded successfully");
+						// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
+						if (!MailBoxUtil.isEmpty(statusIndicator)) {
+							int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);	
+							if (renameStatus == 250) {
+								LOGGER.info("File renamed successfully");
 							} else {
-								// File is not opted to be deleted. Hence moved to processed folder
-								String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
-								if (MailBoxUtil.isEmpty(processedFileLocation)) {
-									archiveFile(item.getAbsolutePath(), false);
-								} else {
-									archiveFile(item, processedFileLocation);
-								}
-							}
-						} else {
-							
-							// File uploading failed so move the file to error folder
-							String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
-							if (MailBoxUtil.isEmpty(errorFileLocation)) {
-								archiveFile(item.getAbsolutePath(), true);
-							} else {
-								archiveFile(item, errorFileLocation);
+								LOGGER.info("File renaming failed");
 							}
 						}
-				    }
+						
+						// Delete the local files after successful upload if user opt for it
+						if (ftpUploaderStaticProperties.getDeleteFiles()) {
+							item.delete();
+							LOGGER.info("File deleted successfully");
+						} else {
+							// File is not opted to be deleted. Hence moved to processed folder
+							String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
+							if (MailBoxUtil.isEmpty(processedFileLocation)) {
+								archiveFile(item.getAbsolutePath(), false);
+							} else {
+								archiveFile(item, processedFileLocation);
+							}
+						}
+					} else {
+						
+						// File uploading failed so move the file to error folder
+						String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
+						if (MailBoxUtil.isEmpty(errorFileLocation)) {
+							archiveFile(item.getAbsolutePath(), true);
+						} else {
+							archiveFile(item, errorFileLocation);
+						}
+					}
 
 				} else {
 
