@@ -107,6 +107,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
+					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+			long startTime = System.currentTimeMillis();
 			if (sftpRequest.openChannel()) {
 
 			    String remotePath = getWriteResponseURI();
@@ -117,7 +121,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				//GMB-320 - Creates directory to the remote folder
 				for (String directory : remotePath.split(File.separatorChar=='\\' ? "\\\\" : File.separator)) {
-				
+
 					if (directory.isEmpty()) {//For when path starts with /
 						continue;
 					}
@@ -132,15 +136,22 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						sftpRequest.changeDirectory(directory);
 					}
 				}
+				LOGGER.debug("Going to upload files from local directory {} to remote directory {}", path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 			}
 			// remove the private key once connection established successfully
 			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("Processor {} of type {} belongs to Mailbox  {} ends processing of files",
+					configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
+					configurationInstance.getMailbox().getPguid());
+			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
+			LOGGER.info("Total time taken to process files {}", endTime - startTime);
 
 		} catch (LiaisonException | MailBoxServicesException | IOException
-				| SftpException | SymmetricAlgorithmException | NoSuchFieldException 
+				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
 				| SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
 			throw new RuntimeException(e);
 		}
@@ -155,23 +166,23 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws SftpException
 	 * @throws MailBoxServicesException
 	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 * @throws URISyntaxException 
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 * @throws URISyntaxException
 	 *
 	 */
-	
+
 	public void uploadDirectory(G2SFTPClient sftpRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, SftpException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
- 
+
 		// variable to hold the status of file upload request execution
 		int replyCode = -1;
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
-		SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();			
+		SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		Date lastCheckTime = new Date();
@@ -179,10 +190,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		if (subFiles != null && subFiles.length > 0) {
 			String statusIndicator = sftpUploaderStaticProperties.getFileTransferStatusIndicator();
-			String includedFiles = sftpUploaderStaticProperties.getIncludedFiles();			
-			String excludedFiles = sftpUploaderStaticProperties.getExcludedFiles();			
+			String includedFiles = sftpUploaderStaticProperties.getIncludedFiles();
+			String excludedFiles = sftpUploaderStaticProperties.getExcludedFiles();
 			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;			
+			List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
 			for (File item : subFiles) {
 				//interrupt signal check has to be done only if execution Id is present
 				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
@@ -209,7 +220,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 
 					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
-					
+
 					Boolean fileExists = true;
 					try {
 						sftpRequest.getNative().lstat(remoteFilePath);
@@ -227,63 +238,64 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					replyCode = 0;
 
 				} else {
-					
+
 					String currentFileName = item.getName();
 					// Check if the file to be uploaded is included or not excluded
-					boolean uploadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludeList);
+					boolean uploadFile = checkFileIncludeorExclude(includeList, currentFileName, excludeList);
 					//file must not be uploaded
 					if(!uploadFile) {
 						continue;
 					}
-					
+
 					//add status indicator if specified to indicate that uploading is in progress
 					String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
-				    
+
 					// upload the file
 				    try (InputStream inputStream = new FileInputStream(item)) {
 				        sftpRequest.changeDirectory(remoteParentDir);
+						LOGGER.info("uploading file {}  from local folder {} to remote folder {} while running Processor {} of type {}",
+								currentFileName, localParentDir, remoteParentDir, configurationInstance.getPguid(),
+								configurationInstance.getProcessorType().getCode());
 	                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
+				    }
 
-	                    // Check whether the file uploaded successfully
-						if (replyCode == 0) {
-							LOGGER.info("File uploaded successfully");
-							inputStream.close();
-							
-							// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
-							if (!MailBoxUtil.isEmpty(statusIndicator)) {								
-								int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);															
-								if (renameStatus == 0) {
-									LOGGER.info("File renamed successfully");
-								} else {
-									LOGGER.info("File renaming failed");
-								}
-							}
-							// Delete the local files after successful upload if user opt for it
-							if (sftpUploaderStaticProperties.getDeleteFiles()) {
-								item.delete();
-								LOGGER.info("File deleted successfully");
+				    // Check whether the file uploaded successfully
+					if (replyCode == 0) {
+						LOGGER.info("File {} uploaded successfully", currentFileName);
+						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
+						if (!MailBoxUtil.isEmpty(statusIndicator)) {
+							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
+							if (renameStatus == 0) {
+								LOGGER.info("File {} renamed successfully", currentFileName);
 							} else {
-								// File is not opted to be deleted. Hence moved to processed folder
-								String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
-								if (MailBoxUtil.isEmpty(processedFileLocation)) {
-									archiveFile(item.getAbsolutePath(), false);
-								} else {
-									archiveFile(item, processedFileLocation);
-								}
-							}
-
-						} else {
-
-							// File Uploading failed so move the file to error folder
-							String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
-							if (MailBoxUtil.isEmpty(errorFileLocation)) {
-								archiveFile(item.getAbsolutePath(), true);
-							} else {
-								archiveFile(item, errorFileLocation);
+								LOGGER.info("File {} renaming failed", currentFileName);
 							}
 						}
-				    }
+						// Delete the local files after successful upload if user opt for it
+						if (sftpUploaderStaticProperties.getDeleteFiles()) {
+							item.delete();
+							LOGGER.info("File {} deleted successfully", currentFileName);
+						} else {
+							// File is not opted to be deleted. Hence moved to processed folder
+							String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
+							if (MailBoxUtil.isEmpty(processedFileLocation)) {
+								archiveFile(item.getAbsolutePath(), false);
+							} else {
+								archiveFile(item, processedFileLocation);
+							}
+						}
+
+					} else {
+
+						// File Uploading failed so move the file to error folder
+						String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
+						if (MailBoxUtil.isEmpty(errorFileLocation)) {
+							archiveFile(item.getAbsolutePath(), true);
+						} else {
+							archiveFile(item, errorFileLocation);
+						}
+					}
 				}
 			}
 		}
@@ -293,9 +305,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	public void runProcessor(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
-		
+
 		try {
-			
+
 			// SFTPRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 
@@ -308,9 +320,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// SFTPRequest executed through Java
 				executeRequest(executionId, fsm);
 			}
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException | URISyntaxException e) {			
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException | URISyntaxException e) {
 			throw new RuntimeException(e);
-		} 
+		}
 	 }
 
 	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
@@ -345,42 +357,42 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	@Override
 	public void downloadDirectory(Object client, String localTargetLocation, String remotePayloadLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-		
+
 		G2SFTPClient sftpRequest = (G2SFTPClient)client;
 		try {
 			uploadDirectory(sftpRequest, localPayloadLocation, remoteTargetLocation, null, null);
-		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException 
+		} catch (MailBoxServicesException | IOException | LiaisonException | SftpException
 				| NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | URISyntaxException e) {
 			throw new RuntimeException(e);
-		} 
-		
+		}
+
 	}
 
 	@Override
 	public void cleanup() {
-		// To remove the private key retrieved from key manager	
+		// To remove the private key retrieved from key manager
 		try {
 			removePrivateKeyFromTemp();
 		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {
-		
+
 		String configuredPath = null;
 		try {
 			configuredPath = getPayloadURI();

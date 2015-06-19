@@ -98,6 +98,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		try {
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.connect();
+			long startTime = 0;
 
 			if (sftpRequest.openChannel()) {
 
@@ -112,11 +113,25 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 				}
 
+				LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
+						configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+						configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+				startTime = System.currentTimeMillis();
+				LOGGER.debug("Going to download files from remote directory {} to local directory {}", remotePath, path);
 				downloadDirectory(sftpRequest, path, remotePath);
 			}
 			// remove the private key once connection established successfully
 			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
+
+			// to calculate the elapsed time for running a processor
+			long endTime = System.currentTimeMillis();
+			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox  {} ends processing of files",
+					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
+					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
+			LOGGER.info("Total time taken to process files {}", endTime - startTime);
+
 		} catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
 				| SftpException | SymmetricAlgorithmException e) {
 			throw new RuntimeException(e);
@@ -143,6 +158,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
 			LiaisonException, URISyntaxException, MailBoxServicesException, SftpException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
+		//variable to hold the status of file download request execution
+		int statusCode = 0;
 		String dirToList = "";
 		SFTPDownloaderPropertiesDTO sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)getProperties();
 
@@ -155,19 +172,18 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		FileOutputStream fos = null;
 		if (files != null && files.size() > 0) {
 			String statusIndicator = sftpDownloaderStaticProperties.getFileTransferStatusIndicator();
-			String tempExtension = (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
 			String excludedFiles = sftpDownloaderStaticProperties.getExcludedFiles();
 			String includedFiles = sftpDownloaderStaticProperties.getIncludedFiles();
-			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
+			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
+			List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+
 			for (String aFile : files) {
 				if (aFile.equals(".") || aFile.equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
 				}
 
-             boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
-
+				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + aFile;
@@ -179,18 +195,18 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					sftpRequest.changeDirectory(remotePath);
 					downloadDirectory(sftpRequest, remotePath, localDir);
 
-				}else{
+				} else {
 
-				String currentFileName = aFile;
-				// Check if the file to be downloaded is included or not excluded
-				boolean downloadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludedList);
-				//file must not be downloaded
-				if(!downloadFile) {
-					continue;
-				}
-				
-				if (currentFileName != null) {
-					String downloadingFileName = currentFileName + "." + tempExtension;
+					String currentFileName = aFile;
+					// Check if the file to be downloaded is included or not excluded
+					boolean downloadFile = checkFileIncludeorExclude(includeList, currentFileName, excludedList);
+					//file must not be downloaded
+					if(!downloadFile) {
+						continue;
+					}
+
+					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
+							+ statusIndicator : currentFileName;
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
 					sftpRequest.changeDirectory(dirToList);
 					createResponseDirectory(localDir);
@@ -199,46 +215,42 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 						fos = new FileOutputStream(localDir);
 						bos = new BufferedOutputStream(fos);
-						int statusCode = sftpRequest.getFile(currentFileName, bos);
+						LOGGER.info("downloading file {}  from remote folder {} to local folder {} while running Processor {} of type {}",
+								currentFileName, currentDir, localFileDir, configurationInstance.getPguid(),
+								configurationInstance.getProcessorType().getCode());
+						statusCode = sftpRequest.getFile(currentFileName, bos);
 						// Check whether the file downloaded successfully if so rename it.
 						if (statusCode == 0) {
-							LOGGER.info("File downloaded successfully");
+							LOGGER.info("File {} downloaded successfully", currentFileName);
+							if (fos != null) fos.close();
+							if (bos != null) bos.close();
+
 							// Renames the downloaded file to original extension once the fileStatusIndicator is given by User
-							if (tempExtension.length() > 0) {
-								if (null != fos) {
-				                    fos.close();
-				                }
-				                if (null != bos) {
-				                    bos.close();
-				                }
+							if (!MailBoxUtil.isEmpty(statusIndicator)) {
 								File downloadedFile = new File(localDir);
-								String actualFile = localFileDir + currentFileName;
-								File actual = new File(actualFile);
-								boolean renameStatus = downloadedFile.renameTo(actual);
+								File currentFile = new File(localFileDir + File.separatorChar + currentFileName);
+								boolean renameStatus = downloadedFile.renameTo(currentFile);
 								if (renameStatus) {
-									LOGGER.info("File renamed successfully");
+									LOGGER.info("File {} renamed successfully", currentFileName);
 								} else {
-									LOGGER.info("File renaming failed");
+									LOGGER.info("File {} renaming failed", currentFileName);
 								}
 							}
 							// Delete the remote files after successful download if user optioned for it
 							if (sftpDownloaderStaticProperties.getDeleteFiles()) {
 								sftpRequest.deleteFile(aFile);
+								LOGGER.info("File {} deleted successfully", currentFileName);
 							}
-
 						}
 					} finally {
-						if (bos != null)
-							bos.close();
-						if (fos != null)
-							fos.close();
+						if (bos != null) bos.close();
+						if (fos != null) fos.close();
 					}
 
 				}
 			}
 		}
 	}
-}
 
 	@Override
 	public void runProcessor(String executionId,MailboxFSM fsm) {

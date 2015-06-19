@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -34,15 +35,18 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.core.processor.DirectorySweeper;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class DirectorySweeperTest extends BaseServiceTest {
 
 	private String inbox;
 	private String fileRenameFormat;
+	private String includeFiles;
+	private String excludeFiles;
 
 	/**
 	 * @throws java.lang.Exception
@@ -53,20 +57,22 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		Files.deleteIfExists(Paths.get(inbox));
 		Files.createDirectory(Paths.get(inbox));
 		fileRenameFormat = ".tested";
+		includeFiles = ".txt,.test";
+		excludeFiles = ".js";
 	}
-    
+
 	/**
 	 * Method to test Sweeper with valid data.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JAXBException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@Test
 	public void testSweeper() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -89,15 +95,17 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeper downloader = new DirectorySweeper(processor);
-		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0);
+		List<String> includeList = (!MailBoxUtil.isEmpty(includeFiles))? Arrays.asList(includeFiles.split(",")) : null;
+		List<String> excludeList = (!MailBoxUtil.isEmpty(excludeFiles)) ? Arrays.asList(excludeFiles.split(",")) : null;
+		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0, includeList, excludeList);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFileName());
 	}
-    
+
 	/**
 	 * Method to test Sweeper without file permission.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
@@ -128,26 +136,28 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeper downloader = new DirectorySweeper(processor);
-		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0);
+		List<String> includeList = (!MailBoxUtil.isEmpty(includeFiles))? Arrays.asList(includeFiles.split(",")) : null;
+		List<String> excludeList = (!MailBoxUtil.isEmpty(excludeFiles)) ? Arrays.asList(excludeFiles.split(",")) : null;
+		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0, includeList, excludeList);
 		target.toFile().setReadable(true);
 		target.toFile().setWritable(true);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFileName());
 	}
-    
+
 	/**
 	 * Method to test Sweeper with space in file name.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JAXBException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@Test
 	public void testSweeperWithSpaceInFileName() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
@@ -171,25 +181,27 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeper downloader = new DirectorySweeper(processor);
-		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0);
+		List<String> includeList = (!MailBoxUtil.isEmpty(includeFiles))? Arrays.asList(includeFiles.split(",")) : null;
+		List<String> excludeList = (!MailBoxUtil.isEmpty(excludeFiles)) ? Arrays.asList(excludeFiles.split(",")) : null;
+		List<WorkTicket> path = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0, includeList, excludeList);
 		Files.delete(target);
 		Assert.assertEquals(1, path.size());
 		Assert.assertEquals(name, path.get(0).getFileName());
 	}
-    
+
 	/**
 	 * Method to test mark as sweeped.
-	 * 
+	 *
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws JSONException
 	 * @throws JAXBException
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	@Test
 	public void testMarkAsSweeped() throws IOException, URISyntaxException, MailBoxServicesException, FS2Exception,
@@ -213,7 +225,9 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		processor.setFolders(folders);
 
 		DirectorySweeper downloader = new DirectorySweeper(processor);
-		List<WorkTicket> files = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0);
+		List<String> includeList = (!MailBoxUtil.isEmpty(includeFiles))? Arrays.asList(includeFiles.split(",")) : null;
+		List<String> excludeList = (!MailBoxUtil.isEmpty(excludeFiles)) ? Arrays.asList(excludeFiles.split(",")) : null;
+		List<WorkTicket> files = downloader.sweepDirectory(inbox, false, fileRenameFormat, 0, includeList, excludeList);
 		Files.delete(target);
 		Assert.assertEquals(1, files.size());
 		Assert.assertEquals(name, files.get(0).getFileName());
