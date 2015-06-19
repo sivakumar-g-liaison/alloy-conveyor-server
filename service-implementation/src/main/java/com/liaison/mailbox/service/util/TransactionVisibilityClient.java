@@ -45,8 +45,6 @@ public class TransactionVisibilityClient {
 
 		visibilityAPI = new TransactionVisibilityAPI();
 		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
-		visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
-		visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
 		visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 	}
 
@@ -130,6 +128,8 @@ public class TransactionVisibilityClient {
 
 		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.P);
+		    visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
+		    visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
 		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.B);
 		} else if (ExecutionState.READY.value().equals(message.getStatus().value())) {

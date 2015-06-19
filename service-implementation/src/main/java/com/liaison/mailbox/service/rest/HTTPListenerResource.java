@@ -178,16 +178,15 @@ public class HTTPListenerResource extends AuditedResource {
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
 							httpListenerProperties, request.getContentType(), mailboxPguid);
 
-                    // GLASS LOGGING //
-                    if (syncResponse.getStatus() > 299) {
+                    // GLASS LOGGING TVAPI success/fail is not allowed to be logged here//
+                    /*if (syncResponse.getStatus() > 299) {
                         glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity());;
                         glassMessage.setStatus(ExecutionState.FAILED);
-                    } /*else { //GMB-483
+                    } else { //GMB-483
                         glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
                         glassMessage.setStatus(ExecutionState.COMPLETED);
                     }*/
                     glassMessage.logFourthCornerTimestamp();
-                    transactionVisibilityClient.logToGlass(glassMessage);
 
 					return syncResponse;
 				} catch (IOException | JAXBException e) {
