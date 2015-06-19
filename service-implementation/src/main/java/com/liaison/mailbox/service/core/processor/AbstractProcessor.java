@@ -132,7 +132,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
         }
 
         StringBuffer msgBuf = new StringBuffer().append(logPrefix);
-        for(String str : messages) {
+        for (String str : messages) {
             msgBuf.append(str);
         }
 
