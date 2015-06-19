@@ -120,8 +120,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 				DropboxAuthenticationService authService = new DropboxAuthenticationService();
 				DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
 
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
 
 				try {

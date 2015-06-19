@@ -260,7 +260,7 @@ public class DropboxFileTransferService {
 		glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 
 		// Log TVA status
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		transactionVisibilityClient.logToGlass(glassMessage);
 
 		// log activity status before posting to queue

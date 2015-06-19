@@ -44,6 +44,7 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -67,7 +68,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void runProcessor(String executionId, MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 	    try {

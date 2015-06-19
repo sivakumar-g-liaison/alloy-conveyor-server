@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

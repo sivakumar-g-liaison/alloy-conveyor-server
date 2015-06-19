@@ -12,8 +12,6 @@ package com.liaison.mailbox.service.util;
 
 import java.util.Date;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,14 +41,11 @@ public class TransactionVisibilityClient {
 
 	private TransactionVisibilityAPI visibilityAPI;
 
-	public TransactionVisibilityClient(String glassMessageId) {
-		visibilityAPI = new TransactionVisibilityAPI();
-		visibilityAPI.setGlassMessageId(glassMessageId);
-		visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
-		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
-		visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
-		visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
+	public TransactionVisibilityClient() {
 
+		visibilityAPI = new TransactionVisibilityAPI();
+		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
+		visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 	}
 
 	public void logToGlass(GlassMessage message) {
@@ -133,6 +128,8 @@ public class TransactionVisibilityClient {
 
 		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.P);
+		    visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
+		    visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
 		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.B);
 		} else if (ExecutionState.READY.value().equals(message.getStatus().value())) {
@@ -148,9 +145,9 @@ public class TransactionVisibilityClient {
 		}
 
 		visibilityAPI.setInAgent(message.getInAgent());
-		XMLGregorianCalendar t = GlassMessageUtil.convertToXMLGregorianCalendar(new Date());
-		visibilityAPI.setArrivalTime(t);
-		visibilityAPI.setStatusDate(t);
+		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
+		visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
+		visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.debug("TransactionVisibilityAPI with status {} logged for GPID :{}", message.getStatus().value(),

@@ -46,6 +46,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -73,7 +74,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(String executionId,MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {
@@ -85,7 +86,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// FTPSRequest executed through Java
-				executeRequest(executionId, fsm);
+				executeRequest(dto.getExecutionId(), fsm);
 			}
 
 		} catch(IOException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | MailBoxServicesException | URISyntaxException e) {

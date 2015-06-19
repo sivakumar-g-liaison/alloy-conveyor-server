@@ -28,7 +28,6 @@ import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.util.GlassMessage;
-import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
@@ -56,7 +55,7 @@ public class DropboxService {
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
-        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 	    GlassMessage glassMessage = new GlassMessage(workTicket);
 	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
 	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());

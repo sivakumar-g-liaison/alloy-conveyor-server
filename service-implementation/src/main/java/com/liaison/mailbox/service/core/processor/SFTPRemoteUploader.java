@@ -46,6 +46,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -302,7 +303,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(String executionId,MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 
@@ -318,7 +319,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// SFTPRequest executed through Java
-				executeRequest(executionId, fsm);
+				executeRequest(dto.getExecutionId(), fsm);
 			}
 		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException | URISyntaxException e) {
 			throw new RuntimeException(e);

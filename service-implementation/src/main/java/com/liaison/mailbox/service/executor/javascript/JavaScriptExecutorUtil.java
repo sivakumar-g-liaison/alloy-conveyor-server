@@ -31,7 +31,6 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public final class JavaScriptExecutorUtil {
 
-	//TODO use logging
 	private static final Logger LOGGER = LogManager.getLogger(JavaScriptExecutorUtil.class);
 
 	/**
@@ -62,6 +61,7 @@ public final class JavaScriptExecutorUtil {
 
 			if(scriptPath.contains("gitlab:")) {
 				myUri = new URI(scriptPath);
+				LOGGER.debug("The process script uri is {}" + myUri);
 			}
 
 			if (scriptContext == null) {
