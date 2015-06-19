@@ -57,6 +57,7 @@ import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -71,17 +72,26 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
+	protected static final String seperator = ": ";
 
 	protected Processor configurationInstance;
+	protected int totalNumberOfProcessedFiles;
+	protected String logPrefix;
+	protected TriggerProcessorRequestDTO dto;
+
 	public Properties mailBoxProperties;
 	public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
 	public StaticProcessorPropertiesDTO staticProcessorProperties;
-	protected int totalNumberOfProcessedFiles;
 
 	public AbstractProcessor() {}
 
 	public AbstractProcessor(Processor configurationInstance) {
 		this.configurationInstance = configurationInstance;
+		logPrefix = configurationInstance.getProcessorType().name()
+		        + seperator + configurationInstance.getProcsrName()
+		        + seperator + configurationInstance.getMailbox().getMbxName()
+		        + seperator + configurationInstance.getMailbox().getPguid()
+		        + seperator;
 	}
 
 
@@ -97,7 +107,17 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		this.totalNumberOfProcessedFiles = totalNumberOfProcessedFiles;
 	}
 
-	/**
+	public String getLogPrefix() {
+
+	    if (dto == null || logPrefix.startsWith("CronJob")) {
+	        return logPrefix;
+	    } else {
+	        logPrefix = "CronJob" + seperator + dto.getProfileName() + seperator + logPrefix;
+	        return logPrefix;
+	    }
+    }
+
+    /**
 	 * Construct DTO from Entity.
 	 *
 	 * @return the remoteProcessorProperties

@@ -11,16 +11,11 @@ package com.liaison.mailbox.service.util;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * 
  * @author OFS
  */
 public class QueryBuilderUtil {
-
-	private static final Logger LOGGER = LogManager.getLogger(QueryBuilderUtil.class);
 
 	/**
 	 * This method will construct a string of processor types appended by OR operator instead of using IN Clause because

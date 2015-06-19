@@ -254,7 +254,7 @@ public class MailBoxService {
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
 
-			processorService.runProcessor(executionId, fsm);
+			processorService.runProcessor(dto, fsm);
 			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
