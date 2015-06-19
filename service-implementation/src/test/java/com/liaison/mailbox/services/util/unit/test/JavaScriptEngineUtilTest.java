@@ -17,6 +17,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import javax.script.ScriptException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
@@ -36,18 +38,19 @@ public class JavaScriptEngineUtilTest {
 	
 	/**
 	 * Method to test execute JavaScript.
+	 * @throws ScriptException 
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testExecuteJavaScript() {
+	public void testExecuteJavaScript() throws ScriptException {
 		
 		System.setProperty("archaius.deployment.applicationId", "g2mailboxservice");
 		System.setProperty("archaius.deployment.environment", "dev-int");
 		
 		JavascriptExecutor scriptExecutor = new JavascriptExecutor();
 		JavascriptScriptContext scriptContext = null;
-		String testJs = "gitlab:/src/test/resources/sandbox-tests.js";
+		String testJs = "gitlab:/processor-scripts/veera_sftp_downloader";
 		URI myUri = null;
 		try {
 			myUri = new URI(testJs);

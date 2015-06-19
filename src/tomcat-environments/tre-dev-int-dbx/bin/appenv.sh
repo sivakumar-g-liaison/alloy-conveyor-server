@@ -21,6 +21,10 @@ export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.includeLocation=true"
 # log4j will look for updates to log4j xml every 5 minutes
 export CATALINA_OPTS="$CATALINA_OPTS -Dcom.liaison.log4j2.configuration.refresh.interval.sec=300"
 
+#NOT FOR PRODUCTION
+#Enable Remote Debug
+export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=12345,server=y,suspend=n"
+
 # ==================================================================
 # log overrides
 # ==================================================================

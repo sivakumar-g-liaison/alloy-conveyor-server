@@ -1,6 +1,15 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.9
+-------------------------------
+making glass message appender sync
+
+2.2.8
+-------------------------------
+* bumped up commons script
+* TTL updates
+
 2.2.7
 -------------------------------
 prod properties updates
@@ -31,6 +40,10 @@ Updated the web.xml to apply the tomcat harden changes.
 
 2.2.0
 -------------------------------
+
+2.1.9
+-------------------------------
+* GMB-485 : upgrade commons scripting library
 
 2.1.8
 -------------------------------
