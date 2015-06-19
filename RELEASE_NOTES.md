@@ -1,3 +1,7 @@
+2.2.10
+-------------------------------
+added remote debug for uat, qa, dev
+
 2.2.9
 -------------------------------
 making glass message appender sync
