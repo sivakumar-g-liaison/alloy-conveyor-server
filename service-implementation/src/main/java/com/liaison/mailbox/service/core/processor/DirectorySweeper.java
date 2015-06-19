@@ -436,8 +436,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
-			String globalProcessId  = MailBoxUtil.getGUID();
-			workTicket.setGlobalProcessId(globalProcessId);
 
 			Map <String, String> properties = new HashMap <String, String>();
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
@@ -585,6 +583,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		    workTicket.setAdditionalContext(additionalContext);
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
+			workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 
 			LOGGER.info(constructMessage(
 			        "Global PID",
