@@ -69,10 +69,10 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Java method to execute the SFTPrequest
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -133,11 +133,11 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws MailBoxServicesException
 	 * @throws SftpException
 	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 *
 	 */
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
@@ -145,7 +145,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		String dirToList = "";
 		SFTPDownloaderPropertiesDTO sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)getProperties();
-		
+
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
 		}
@@ -155,7 +155,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		FileOutputStream fos = null;
 		if (files != null && files.size() > 0) {
 			String statusIndicator = sftpDownloaderStaticProperties.getFileTransferStatusIndicator();
-			String tempExtension = (MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
+			String tempExtension = (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
 			String excludedFiles = sftpDownloaderStaticProperties.getExcludedFiles();
 			String includedFiles = sftpDownloaderStaticProperties.getIncludedFiles();
 			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
@@ -165,9 +165,9 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					// skip parent directory and the directory itself
 					continue;
 				}
-				
+
              boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
-				
+
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + aFile;
@@ -180,10 +180,15 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					downloadDirectory(sftpRequest, remotePath, localDir);
 
 				}else{
-				
+
 				String currentFileName = aFile;
-				// Check whether user preferred specific files to include or exclude during downloading process.
-				currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
+				// Check if the file to be downloaded is included or not excluded
+				boolean downloadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludedList);
+				//file must not be downloaded
+				if(!downloadFile) {
+					continue;
+				}
+				
 				if (currentFileName != null) {
 					String downloadingFileName = currentFileName + "." + tempExtension;
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
@@ -229,7 +234,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 							fos.close();
 					}
 
-				} 
+				}
 			}
 		}
 	}
@@ -239,7 +244,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	public void runProcessor(String executionId,MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
-		try {			
+		try {
 			// G2SFTP executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 
@@ -252,11 +257,11 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				// G2SFTP executed through Java
 				executeSFTPRequest();
 			}
-			
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {			
+
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	@Override
@@ -266,7 +271,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
-		
+
 		G2SFTPClient sftpClient = (G2SFTPClient)client;
 	    try {
 			downloadDirectory(sftpClient, remotePayloadLocation, localTargetLocation);
@@ -278,12 +283,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void cleanup() {
-		// To remove the private key retrieved from key manager	
+		// To remove the private key retrieved from key manager
 		try {
 			removePrivateKeyFromTemp();
 		} catch (MailBoxServicesException | IOException | SymmetricAlgorithmException e) {
@@ -293,7 +298,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override

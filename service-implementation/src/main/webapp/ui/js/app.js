@@ -32,6 +32,15 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     function ($routeProvider, $locationProvider, $httpProvider) {
         // TODO use html5 *no hash) where possible
         //$locationProvider.html5Mode(true);
+		
+		//GMB-472 Fix - Disable $http request cache
+		$httpProvider.defaults.cache = false;
+		if (!$httpProvider.defaults.headers.common) {
+	        $httpProvider.defaults.headers.common = {};
+	    }
+	    $httpProvider.defaults.headers.common["Cache-Control"] = "no-cache";
+	    $httpProvider.defaults.headers.common.Pragma = "no-cache";
+    
         $routeProvider.when('/', {
             templateUrl: 'partials/home.html'
         });

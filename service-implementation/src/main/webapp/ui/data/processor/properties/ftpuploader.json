@@ -178,6 +178,21 @@
             "validationRules": null,
             "options":["false","true"]
 		 },
+		 {
+		    "name": "excludeFiles",
+		    "displayName": "ExcludeFiles",
+		    "type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"mandatory": false,
+			"dynamic": false,
+	        "valueProvided":false,
+			 "validationRules": {  
+            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "minLength": "",
+            "maxLength": ""
+        }
+		},
          {
 	        "name": "fileTransferStatusIndicator",
 	        "displayName": "File Transfer Status Indicator",
@@ -189,7 +204,22 @@
             "valueProvided":false,
             "defaultValue":"prg",
 			"validationRules": null
-	     }
+	     },
+	     {
+		    "name": "includeFiles",
+		    "displayName": "IncludeFiles",
+		    "type": "textarea",
+			"value": "",
+			"readOnly": false,
+			"mandatory": false,
+			"dynamic": false,
+			"valueProvided":false,
+	        "validationRules": {  
+            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "minLength": "",
+            "maxLength": ""
+        }
+		}
       ],
       "folderProperties":[
 		   {
