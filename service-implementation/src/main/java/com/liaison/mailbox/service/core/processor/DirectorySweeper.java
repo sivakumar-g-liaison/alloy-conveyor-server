@@ -153,7 +153,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             }
 
             long startTime = System.currentTimeMillis();
-            LOGGER.info(getLogPrefix() + "Starts to process files");
+            LOGGER.info(constructMessage("Starts to process files"));
             LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
             								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit, includeList, excludeList)
@@ -190,7 +190,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
             
             			String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
-            			LOGGER.info(getLogPrefix() + "JSON POSTED TO SB.{}", new JSONObject(wrkTcktToSbr).toString(2));
+            			LOGGER.info(constructMessage("JSON POSTED TO SB.{}"), new JSONObject(wrkTcktToSbr).toString(2));
             			postToSweeperQueue(wrkTcktToSbr);
             
             			// For glass logging
@@ -216,12 +216,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				transactionVisibilityClient.logToGlass(glassMessage);
             				// Log running status
             				glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
-            				LOGGER.info(getLogPrefix()
-            				        + "Global PID"
-            				        + seperator
-            				        + wrkTicket.getGlobalProcessId()
-            	                    + " submitted for file "
-            				        + wrkTicket.getFileName());
+            				LOGGER.info(constructMessage("Global PID",
+            				        seperator,
+            				        wrkTicket.getGlobalProcessId(),
+            				        " submitted for file ",
+            				        wrkTicket.getFileName()));
 
             			}
             		}
@@ -233,13 +232,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	run(executionId);
             }
             long endTime = System.currentTimeMillis();
-            LOGGER.info(getLogPrefix() + "Number of files processed {}", workTickets.size());
-            LOGGER.info(getLogPrefix() + "Total time taken to process files {}", endTime - startTime);
-            LOGGER.info(getLogPrefix() + "End of Process");
+            LOGGER.info(constructMessage("Number of files processed {}"), workTickets.size());
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End of Process"));
         } catch (MailBoxServicesException | IOException | URISyntaxException
         		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
         		| JSONException | IllegalAccessException | NoSuchFieldException e) {
-            LOGGER.error(getLogPrefix() + "Error occured while scanning the mailbox", e);
+            LOGGER.error(constructMessage("Error occured while scanning the mailbox"), e);
         	throw new RuntimeException(e);
         }
 	}
@@ -267,7 +266,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly,String fileRenameFormat, long lastModifiedLmt, List <String> includeList, List <String> excludeList) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-        LOGGER.info(getLogPrefix() + "Scanning Directory: {}", root);
+        LOGGER.info(constructMessage("Scanning Directory: {}"), root);
 		Path rootPath = Paths.get(root);
 		if (!Files.isDirectory(rootPath)) {
 			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
@@ -285,7 +284,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 				if (!fileName.endsWith(fileRenameFormat)) {
 
 					if (validateLastModifiedTolerance(lastModifiedLmt, file)) {
-						LOGGER.info(getLogPrefix() + "The file {} is in progress. So added in the in-progress list.", file.toString());
+						LOGGER.info(constructMessage("The file {} is in progress. So added in the in-progress list."), file.toString());
                         activeFiles.add(file);
 						continue;
 					}
@@ -353,7 +352,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		} else {
 
 			if (workTickets.isEmpty()) {
-				LOGGER.info(getLogPrefix() + seperator + "There are no files available in the directory.");
+				LOGGER.info(constructMessage("There are no files available in the directory."));
 			}
 
 			WorkTicketGroup workTicketGroup = new WorkTicketGroup();
@@ -587,12 +586,14 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
 
-			LOGGER.info(getLogPrefix()
-			        + "Global PID"
-			        + seperator
-			        + workTicket.getGlobalProcessId()
-			        + " generated for file "
-			        + path.toAbsolutePath());
+			LOGGER.info(constructMessage(
+			        "Global PID",
+			        seperator,
+			        workTicket.getGlobalProcessId(),
+			        " generated for file ",
+			        folderName,
+			        String.valueOf(File.separatorChar),
+			        fileName));
 		}
 
         LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());
