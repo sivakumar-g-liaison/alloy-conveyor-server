@@ -94,29 +94,28 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CertificateEncodingException
 	 *
 	 */
-	private void executeRequest(String executionId, MailboxFSM fsm) throws URISyntaxException {
+	private void executeRequest(String executionId, MailboxFSM fsm) {
 
 		try {
 
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.connect();
 
+			LOGGER.info(constructMessage("Start run"));
+			long startTime = System.currentTimeMillis();
+
 			String path = getPayloadURI();
 
 			if (MailBoxUtil.isEmpty(path)) {
-				LOGGER.info("The given payload URI is Empty.");
+				LOGGER.info(constructMessage("The given payload URI is Empty."));
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
-			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
-					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
-					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
-			long startTime = System.currentTimeMillis();
 			if (sftpRequest.openChannel()) {
 
 			    String remotePath = getWriteResponseURI();
 				if (MailBoxUtil.isEmpty(remotePath)) {
-					LOGGER.info("The given remote URI is Empty.");
+					LOGGER.info(constructMessage("The given remote URI is Empty."));
 					throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 				}
 
@@ -129,15 +128,15 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					try {
 						sftpRequest.getNative().lstat(directory);
-						LOGGER.info("The remote directory{} already exists.", directory);
+						LOGGER.info(constructMessage("The remote directory{} already exists."), directory);
 						sftpRequest.changeDirectory(directory);
 					} catch (Exception ex) {
 						sftpRequest.getNative().mkdir(directory);
-						LOGGER.info("The remote directory{} is not exist.So created that.", directory);
+						LOGGER.info(constructMessage("The remote directory{} is not exist.So created that."), directory);
 						sftpRequest.changeDirectory(directory);
 					}
 				}
-				LOGGER.debug("Going to upload files from local directory {} to remote directory {}", path, remotePath);
+				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 
 			}
@@ -145,15 +144,15 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
 			long endTime = System.currentTimeMillis();
-			LOGGER.info("Processor {} of type {} belongs to Mailbox  {} ends processing of files",
-					configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
-					configurationInstance.getMailbox().getPguid());
-			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
-			LOGGER.info("Total time taken to process files {}", endTime - startTime);
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
 
 		} catch (LiaisonException | MailBoxServicesException | IOException
 				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
-				| SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException e) {
+				| SecurityException | IllegalArgumentException | IllegalAccessException
+				| JAXBException | URISyntaxException e) {
+		    LOGGER.error(constructMessage("Error occured during sftp upload"), e);
 			throw new RuntimeException(e);
 		}
 
@@ -255,35 +254,39 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					// upload the file
 				    try (InputStream inputStream = new FileInputStream(item)) {
 				        sftpRequest.changeDirectory(remoteParentDir);
-						LOGGER.info("uploading file {}  from local folder {} to remote folder {} while running Processor {} of type {}",
-								currentFileName, localParentDir, remoteParentDir, configurationInstance.getPguid(),
-								configurationInstance.getProcessorType().getCode());
+						LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
+								currentFileName, localParentDir, remoteParentDir);
 	                    replyCode = sftpRequest.putFile(uploadingFileName, inputStream);
 				    }
 
 				    // Check whether the file uploaded successfully
 					if (replyCode == 0) {
-						LOGGER.info("File {} uploaded successfully", currentFileName);
+						totalNumberOfProcessedFiles++;
+						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
 						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
 						if (!MailBoxUtil.isEmpty(statusIndicator)) {
 							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
 							if (renameStatus == 0) {
-								LOGGER.info("File {} renamed successfully", currentFileName);
+								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 							} else {
-								LOGGER.info("File {} renaming failed", currentFileName);
+								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 							}
 						}
 						// Delete the local files after successful upload if user opt for it
 						if (sftpUploaderStaticProperties.getDeleteFiles()) {
 							item.delete();
-							LOGGER.info("File {} deleted successfully", currentFileName);
+							LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), currentFileName);
 						} else {
 							// File is not opted to be deleted. Hence moved to processed folder
 							String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
 							if (MailBoxUtil.isEmpty(processedFileLocation)) {
+							    LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
 								archiveFile(item.getAbsolutePath(), false);
+								LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
 							} else {
+							    LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
 								archiveFile(item, processedFileLocation);
+                                LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
 							}
 						}
 
@@ -292,9 +295,13 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						// File Uploading failed so move the file to error folder
 						String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
 						if (MailBoxUtil.isEmpty(errorFileLocation)) {
+						    LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
 							archiveFile(item.getAbsolutePath(), true);
+							LOGGER.info(constructMessage("Archive the file to the default error file location {} - end"));
 						} else {
+						    LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
 							archiveFile(item, errorFileLocation);
+							LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
 						}
 					}
 				}
@@ -309,6 +316,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		try {
 
+		    setReqDTO(dto);
 			// SFTPRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 
@@ -321,7 +329,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				// SFTPRequest executed through Java
 				executeRequest(dto.getExecutionId(), fsm);
 			}
-		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException | URISyntaxException e) {
+		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
 		}
 	 }

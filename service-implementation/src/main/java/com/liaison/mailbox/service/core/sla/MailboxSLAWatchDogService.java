@@ -38,6 +38,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
@@ -105,6 +106,8 @@ public class MailboxSLAWatchDogService {
 	private static final String MAILBOX = "Mailbox";
 	private static final String MAILBOX_SLA = "mailbox_sla";
 	private static final String CUSTOMER_SLA = "customer_sla";
+	protected static final String seperator = ": ";
+	protected StringBuffer logPrefix;
 
 	/**
 	 * Check Mailbox satisfies the SLA Rules or not.
@@ -340,12 +343,22 @@ public class MailboxSLAWatchDogService {
 			processor = getSpecificProcessorofMailbox(mailboxId);
 
 			if (processor == null) {
-				LOG.error("Processor of type uploader is not available for mailbox {}", mailboxId);
+				LOG.error(constructMessage(processor, "Processor of type uploader/filewriter is not available for mailbox {}"), mailboxId);
 				throw new MailBoxServicesException(Messages.UPLOADER_OR_FILEWRITER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
+
+			LOG.info(constructMessage(processor, "Start Run"));
+			LOG.info(constructMessage(processor, "JSON received from SB {}"), new JSONObject(request).toString(2));
+			long startTime = System.currentTimeMillis();
+
+			// check if file Name is available in the payloadTicketRequest if so save the file with the
+			// provided file Name if not save with processor Name with Timestamp
+			String fileName = (workTicket.getFileName() == null)?(processor.getProcsrName() + System.nanoTime()):workTicket.getFileName();
+
+			LOG.info(constructMessage(processor, "Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
 			glassMessage.setCategory(processor.getProcessorType());
 			glassMessage.setProtocol(processor.getProcessorType().getCode());
-			LOG.debug("Processor {} of type uploader or filewriter is available for mailbox {}", processor.getProcsrName(), mailboxId);
+			LOG.info(constructMessage(processor, "Found the processor to write the payload in the local payload location"), mailboxId);
 
 			// retrieve the processor execution status of corresponding uploader from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
@@ -354,7 +367,12 @@ public class MailboxSLAWatchDogService {
 			InputStream payload = StorageUtilities.retrievePayload(payloadURI);
 
 			if (null == payload) {
-				LOG.error("Failed to retrieve payload from spectrum");
+				LOG.error(constructMessage(processor,
+				        "Global PID",
+				        seperator,
+				        workTicket.getGlobalProcessId(),
+				        seperator,
+				        "Failed to retrieve payload from spectrum"));
 				throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
 			}
 
@@ -362,19 +380,19 @@ public class MailboxSLAWatchDogService {
 			String processorPayloadLocation = getLocationToWritePayloadFromSpectrum(processor);
 
 			if (null == processorPayloadLocation) {
-				LOG.error("payload or filewrite location  not configured for processor {}", processor.getProcsrName());
+				LOG.error(constructMessage(processor,
+				        "Global PID",
+                        seperator,
+                        workTicket.getGlobalProcessId(),
+                        seperator,
+                        "payload or filewrite location not configured for processor {}"), processor.getProcsrName());
 				throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
 			}
-
-			// check if file Name is available in the payloadTicketRequest if so save the file with the
-			// provided file Name if not save with processor Name with Timestamp
-			String fileName = (workTicket.getFileName() == null)?(processor.getProcsrName() + System.nanoTime()):workTicket.getFileName();
-
 			// get the very first profile configured in the processor
 			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().get(0).getScheduleProfilesRef().getSchProfName():null;
 
 			if (null == profileName && processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
-				LOG.error("profile not configured for processor {}", processor.getProcsrName());
+				LOG.error(constructMessage(processor, "profile not configured for processor {}"), processor.getProcsrName());
 				throw new MailBoxServicesException(Messages.PROFILE_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
 
@@ -383,10 +401,27 @@ public class MailboxSLAWatchDogService {
 			}
 
 			boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE)?true:false;
-			LOG.debug("Started writing payload from spectrum to processor payload location");
+			LOG.info(constructMessage(processor,
+			        "Global PID",
+                    seperator,
+                    workTicket.getGlobalProcessId(),
+                    seperator,
+                    "Started writing payload to ",
+                    processorPayloadLocation,
+                    seperator,
+                    fileName));
+
 			// write the payload retrieved from spectrum to the configured location of processor
 			MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-			LOG.debug("Payload from spectrum is successfully written to given payload location");
+			LOG.info(constructMessage(processor,
+			        "Global PID",
+                    seperator,
+                    workTicket.getGlobalProcessId(),
+                    seperator,
+                    "Payload is successfully written to ",
+                    processorPayloadLocation,
+                    seperator,
+                    fileName));
 
 			//Initiate FSM
 			ProcessorStateDTO processorStaged = new ProcessorStateDTO();
@@ -412,12 +447,18 @@ public class MailboxSLAWatchDogService {
             glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
+
+            long endTime = System.currentTimeMillis();
+            LOG.info(constructMessage(processor, "Number of files processed 1"));
+            LOG.info(constructMessage(processor, "Total time taken to process files {}"), endTime - startTime);
+            LOG.info(constructMessage(processor, "End run"));
+
 		} catch (JAXBException | JsonParseException | JsonMappingException e) {
 			//cannot send email since the request json cannot be parsed
 			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 
 		} catch (Exception e) {
-			LOG.error("File Staging failed", e);
+			LOG.error(constructMessage(processor, "File Staging failed"), e);
 			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
 			processorStageFailed.setExecutionId(executionId);
 			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
@@ -442,10 +483,7 @@ public class MailboxSLAWatchDogService {
 			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed :" + e.getMessage());
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
-			
-
 		}
-
 	}
 
 	private List <String> getEmailAddress (Processor processor, String mailboxId) {
@@ -872,5 +910,41 @@ public class MailboxSLAWatchDogService {
 		return isFileExists;
 
 	}
+
+    /**
+     * Method to construct log messages for easy visibility
+     *
+     * @param messages append to prefix, please make sure the order of the inputs
+     * @return constructed string
+     */
+    public String constructMessage(Processor processor, String... messages) {
+
+        if (null == logPrefix && null == processor) {
+
+            logPrefix = new StringBuffer()
+                .append("WatchDog")
+                .append(seperator);
+        } else {
+            logPrefix = new StringBuffer()
+                .append("WatchDog")
+                .append(seperator)
+                .append(processor.getProcessorType().name())
+                .append(seperator)
+                .append(processor.getProcsrName())
+                .append(seperator)
+                .append(processor.getMailbox().getMbxName())
+                .append(seperator)
+                .append(processor.getMailbox().getPguid())
+                .append(seperator);
+        }
+
+        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        for (String str : messages) {
+            msgBuf.append(str);
+        }
+
+        return msgBuf.toString();
+    }
+
 
 }

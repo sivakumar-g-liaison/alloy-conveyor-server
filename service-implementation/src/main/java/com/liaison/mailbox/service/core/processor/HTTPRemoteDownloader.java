@@ -131,9 +131,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		File[] files = null;
 		try {
 
-			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
-					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
-					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
+			LOGGER.info(constructMessage("Start run"));
 			startTime = System.currentTimeMillis();
 			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
@@ -179,16 +177,15 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				writeResponseToMailBox(responseStream);
 				totalNumberOfProcessedFiles++;
 			}
-			// to calculate the elapsed time for running a processor
+			// to calculate the elapsed time for processing files
 			long endTime = System.currentTimeMillis();
-			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} ends processing of files",
-					configurationInstance.getProcsrName(), configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
-					configurationInstance.getMailbox().getPguid());
-			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
-			LOGGER.info("Total time taken to process files {}", endTime - startTime);
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
 
 		} catch (MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException
 				| IllegalAccessException | NoSuchFieldException e) {
+		    LOGGER.error(constructMessage("Error occured during http(s) download"), e);
 			throw new RuntimeException(e);
 		}
 

@@ -73,6 +73,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		LOGGER.debug("Entering in invoke.");
 	    try {
 
+	    	setReqDTO(dto);
 		// FTPSRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -83,6 +84,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				run();
 			}
 	   } catch(JAXBException |IOException | IllegalAccessException | NoSuchFieldException e) {
+	       LOGGER.error(constructMessage("Error occured during ftp(s) download"), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -133,22 +135,20 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				ftpsRequest.setPassive(passive);
 			}
 
+			LOGGER.info(constructMessage("Start run"));
+			startTime = System.currentTimeMillis();
+
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
-				LOGGER.info("The given payload URI is Empty.");
+				LOGGER.info(constructMessage("The given payload URI is Empty."));
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
 			String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI is Empty.");
+				LOGGER.info(constructMessage("The given remote URI is Empty."));
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
-
-			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
-					configurationInstance.getProcsrName(), configurationInstance.getPguid(),
-					configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
-			startTime = System.currentTimeMillis();
 
 			ftpsRequest.changeDirectory(path);
 
@@ -163,17 +163,15 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				LOGGER.debug("The payload location({}) is empty", path);
 			}
 			// For testing purpose
-			LOGGER.debug("Going to download files from remote directory {} to local directory {}", remotePath, path);
+			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}", remotePath, path));
 			downloadDirectory(ftpsRequest, path, remotePath);
 			ftpsRequest.disconnect();
 
-			// to calculate the elapsed time for running a processor
+			// to calculate the elapsed time for processing files
 			long endTime = System.currentTimeMillis();
-			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox  {} ends processing of files",
-					configurationInstance.getProcsrName(),configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
-					configurationInstance.getMailbox().getPguid());
-			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
-			LOGGER.info("Total time taken to process files {}", endTime - startTime);
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
 
 		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException
 				| URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
@@ -240,32 +238,35 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 							fos = new FileOutputStream(localDir);
 							bos = new BufferedOutputStream(fos);
-							LOGGER.info("downloading file {}  from remote folder {} to local folder {} while running Processor {} of type {}",
-									currentFileName, currentDir, localFileDir, configurationInstance.getPguid(),
-									configurationInstance.getProcessorType().getCode());
+							LOGGER.info(constructMessage("downloading file {}  from remote path {} to local path {}"),
+									currentFileName, currentDir, localFileDir);
 							statusCode = ftpClient.getFile(currentFileName, bos);
+
 						// Check whether the file downloaded successfully if so rename it.
 						if (statusCode == 226 || statusCode == 250) {
-							LOGGER.info("File {} downloaded successfully", currentFileName);
+
+							LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
 							totalNumberOfProcessedFiles++;
 							fos.close();
 							bos.close();
 
 							// Renames the downloaded file to original extension once the fileStatusIndicator is  given by User
 							if (!MailBoxUtil.isEmpty(statusIndicator)) {
+
 								//Constructs the original file filename
 								File actualFileName = new File(localFileDir + File.separatorChar + currentFileName);
 								boolean renameStatus =  new File(localDir).renameTo(actualFileName);
 								if (renameStatus) {
-									LOGGER.info("File {} renamed successfully", currentFileName);
+									LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 								} else {
-									LOGGER.info("File {} renaming failed", currentFileName);
+									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 								}
 							}
 							// Delete the remote files after successful download if user opt for it
 							if (ftpDownloaderStaticProperties.getDeleteFiles()) {
+
 								ftpClient.deleteFile(file.getName());
-								LOGGER.info("File {} deleted successfully", currentFileName);
+								LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
 
 							}
 						}

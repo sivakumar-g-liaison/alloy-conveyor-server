@@ -112,17 +112,14 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			// retrieve required properties
 			String httpVerb = httpUploaderStaticProperties.getHttpVerb();
 			String contentType = httpUploaderStaticProperties.getContentType();
-			long startTime = 0;
+
+			LOGGER.info(constructMessage("Start run"));
+			long startTime = System.currentTimeMillis();
 
 			if ("POST".equals(httpVerb) || "PUT".equals(httpVerb)) {
 
 				files = getFilesToUpload();
 				if (null != files) {
-
-					LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} starts to process files",
-							configurationInstance.getProcsrName(), configurationInstance.getPguid(),
-							configurationInstance.getProcessorType().getCode(), configurationInstance.getMailbox().getPguid());
-					startTime = System.currentTimeMillis();
 
 					FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 					Date lastCheckTime = new Date();
@@ -151,21 +148,20 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						try (InputStream contentStream = FileUtils.openInputStream(entry);
 								ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
 
-							LOGGER.info("uploading file {}  while running Processor {} of type {}",
-									entry.getName(), configurationInstance.getPguid(),
-									configurationInstance.getProcessorType().getCode());
+							LOGGER.info(constructMessage("uploading file {}"), entry.getName());
 
 							request = (HTTPRequest) getClient();
 							request.setOutputStream(responseStream);
 							request.inputData(contentStream, contentType);
 
 							response = request.execute();
-							LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(),
+							LOGGER.info(constructMessage("The reponse code received is {} for a request {} "),
+							        response.getStatusCode(),
 									entry.getName());
 							if (response.getStatusCode() != 200) {
 
-								LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-								LOGGER.info("Execution failure for ", entry.getAbsolutePath());
+								LOGGER.warn(constructMessage("The reponse code received is {} "), response.getStatusCode());
+								LOGGER.warn(constructMessage("Execution failure for "), entry.getAbsolutePath());
 
 								failedStatus = true;
 								delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
@@ -185,20 +181,19 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
 					}
 				} else {
-					LOGGER.info("The given HTTP Uploader payload URI is Empty.");
+					LOGGER.error(constructMessage("The given HTTP Uploader payload URI is Empty."));
 					throw new MailBoxServicesException("The given HTTP Uploader payload URI is Empty.",
 							Response.Status.CONFLICT);
 				}
 			}
 
-			// to calculate the elapsed time for running a processor
+			// to calculate the elapsed time for processing files
 			long endTime = System.currentTimeMillis();
-			LOGGER.info("Processor named {} with pguid {} of type {} belongs to Mailbox {} ends processing of files",
-					configurationInstance.getProcsrName(), configurationInstance.getPguid(), configurationInstance.getProcessorType().getCode(),
-					configurationInstance.getMailbox().getPguid());
-			LOGGER.info("Number of files Processed {}", totalNumberOfProcessedFiles);
-			LOGGER.info("Total time taken to process files {}", endTime - startTime);
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
 		} catch (JAXBException | IOException | LiaisonException | IllegalAccessException | NoSuchFieldException e) {
+		    LOGGER.error(constructMessage("Error occured during http(s) upload"), e);
 			throw new RuntimeException(e);
 		}
 
