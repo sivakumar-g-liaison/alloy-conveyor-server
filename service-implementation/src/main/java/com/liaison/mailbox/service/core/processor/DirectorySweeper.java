@@ -153,7 +153,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             }
 
             long startTime = System.currentTimeMillis();
-            LOGGER.info(constructMessage("Starts to process files"));
+            LOGGER.info(constructMessage("Start run"));
             LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
             								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit, includeList, excludeList)
@@ -169,7 +169,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	String sweepedFileLocation = replaceTokensInFolderPath(sweeperStaticProperties.getSweepedFileLocation());
             	if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
                     LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
-            
+
             		// If the given sweeped file location is not available then system will create that.
             		Path path = Paths.get(sweepedFileLocation);
             		if (!Files.isDirectory(path)) {
@@ -179,30 +179,30 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                         LOGGER.info("Not creating, {} Is Directory", path);
                     }
             	}
-            
+
             	// Renaming the file
                 LOGGER.debug("ABOUT TO MARK AS SWEEPED");
             	markAsSweeped(workTickets, fileRenameFormat, sweepedFileLocation);
-            
+
             	if (workTicketGroups.isEmpty()) {
             		LOGGER.info("The file group is empty, so NOP");
             	} else {
             		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
-            
+
             			String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
             			LOGGER.info(constructMessage("JSON POSTED TO SB.{}"), new JSONObject(wrkTcktToSbr).toString(2));
             			postToSweeperQueue(wrkTcktToSbr);
-            
+
             			// For glass logging
             			for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
-            
+
             				glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
             				glassMessage.setStatus(ExecutionState.PROCESSING);
             				Long payloadSize = wrkTicket.getPayloadSize();
             				if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
             					glassMessage.setInSize((int) (long) payloadSize);
             				}
-            
+
             				if (inputLocation.contains("ftps")) {
             					glassMessage.setInAgent(GatewayType.FTPS);
             				} else if (inputLocation.contains("sftp")) {
@@ -210,7 +210,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				} else if (inputLocation.contains("ftp")) {
             					glassMessage.setInAgent(GatewayType.FTP);
             				}
-            
+
             				// Log FIRST corner
             				glassMessage.logFirstCornerTimestamp();
             				transactionVisibilityClient.logToGlass(glassMessage);
@@ -226,7 +226,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             		}
             	}
             }
-            
+
             // retry when in-progress file list is not empty
             if (!activeFiles.isEmpty()) {
             	run(executionId);
@@ -234,7 +234,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             long endTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Number of files processed {}"), workTickets.size());
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
-            LOGGER.info(constructMessage("End of Process"));
+            LOGGER.info(constructMessage("End run"));
         } catch (MailBoxServicesException | IOException | URISyntaxException
         		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
         		| JSONException | IllegalAccessException | NoSuchFieldException e) {
