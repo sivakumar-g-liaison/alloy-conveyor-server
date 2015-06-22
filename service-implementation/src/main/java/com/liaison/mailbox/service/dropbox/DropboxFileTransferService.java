@@ -81,7 +81,7 @@ public class DropboxFileTransferService {
 			long endTime = 0;
 
 			List<Processor> dropboxProcessors = new ArrayList<Processor>();
-			LOG.info("Retrieving tenancy keys from acl-manifest");
+			LOG.info(MailBoxUtil.constructMessage(null, fileTransferDTO.getTransferProfileName(), "Retrieving tenancy keys from acl-manifest"));
 
 			// start time to calculate elapsed time for retrieving tenancy keys
 			// from manifest
@@ -90,7 +90,7 @@ public class DropboxFileTransferService {
 			// retrieve the tenancy key from acl manifest
 			List<String> tenancyKeys = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
 			if (tenancyKeys.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
+				LOG.error(MailBoxUtil.constructMessage(null, fileTransferDTO.getTransferProfileName(), "retrieval of tenancy key from acl manifest failed"));
 				throw new MailBoxServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED, Response.Status.BAD_REQUEST);
 			}
 
@@ -123,7 +123,8 @@ public class DropboxFileTransferService {
 				// if there are no dropbox processors available for this tenancy
 				// key continue to next one.
 				if (processors.isEmpty()) {
-					LOG.error("There are no processors available for the profile id - {} with tenancykey - {}",
+					LOG.error(MailBoxUtil.constructMessage(null, fileTransferDTO.getTransferProfileName(),
+							"There are no processors available for the profile id - {} with tenancykey - {}"),
 							profileId, tenancyKey);
 					continue;
 				}
@@ -133,7 +134,7 @@ public class DropboxFileTransferService {
 				}
 			}
 			if (dropboxProcessors.isEmpty()) {
-				LOG.error("There are no dropbox processors available");
+				LOG.error(MailBoxUtil.constructMessage(null, null, "There are no dropbox processors available"));
 				throw new MailBoxServicesException("There are no Dropbox Processor available",
 						Response.Status.NOT_FOUND);
 			}
@@ -233,6 +234,14 @@ public class DropboxFileTransferService {
 		workTicket.setProcessMode(ProcessMode.ASYNC);
 		workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 
+		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
+						"GLOBAL PID",
+						MailBoxUtil.seperator,
+						workTicket.getGlobalProcessId(),
+						"generated for file",
+						MailBoxUtil.seperator),
+						fileTransferDTO.getFileName());
+
 		// start time to calculate elapsed time for storing payload in spectrum
 		startTime = System.currentTimeMillis();
 
@@ -269,6 +278,14 @@ public class DropboxFileTransferService {
 		glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
 		WorkTicketUtil.postWrkTcktToQ(workTicket);
+
+		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
+						"GLOBAL PID",
+						MailBoxUtil.seperator,
+						workTicket.getGlobalProcessId(),
+						"Posted workticket to Service Broker for file",
+						MailBoxUtil.seperator),
+						fileTransferDTO.getFileName());
 	}
 
 	/**

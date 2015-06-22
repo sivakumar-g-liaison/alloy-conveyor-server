@@ -172,7 +172,7 @@ public class DropboxStagedFilesService {
 
 			StagedFileDTO stagedFileDTO = request.getStagedFile();
 			if (stagedFileDTO == null) {
-				LOG.error("Invalid request json.");
+				LOG.error(MailBoxUtil.constructMessage(null, null, "Invalid request json."));
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 
@@ -195,14 +195,14 @@ public class DropboxStagedFilesService {
 				glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
 			}
-
-
+			LOG.info(MailBoxUtil.constructMessage(null, null, "File {} staged successfully for mailbox {} with stagedFileId {}"),
+					stagedFileDTO.getName(), stagedFileDTO.getMailboxGuid(), stagedFile.getPrimaryKey());
 			LOG.debug("Exit from add staged file.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
-			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			LOG.error(MailBoxUtil.constructMessage(null, null, Messages.CREATE_OPERATION_FAILED.name()), e);
 
 			if (null != glassMessage) {
 
