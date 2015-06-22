@@ -1,6 +1,16 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.11
+-------------------------------
+turn off async logger
+made logj2 production xml files the same for dbx and vanilla
+removed async appender for glass and root async logger for uat and uatdbx
+
+2.2.10
+-------------------------------
+added remote debug for uat, qa, dev
+
 2.2.9
 -------------------------------
 making glass message appender sync
