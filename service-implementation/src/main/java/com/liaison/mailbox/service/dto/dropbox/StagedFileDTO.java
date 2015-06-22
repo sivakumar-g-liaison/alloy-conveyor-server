@@ -35,11 +35,13 @@ public class StagedFileDTO {
 	}
 
 	public StagedFileDTO(WorkTicket workTicket) {
-		this.setName(workTicket.getFileName());		
-		this.setPath(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString());
+		this.setName(workTicket.getFileName());
+		this.setPath(null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH) ? workTicket.getAdditionalContext().get(
+				MailBoxConstants.KEY_FILE_PATH).toString() : null);
 		this.setFileSize(workTicket.getPayloadSize()
 				.toString());
-		this.setMailboxGuid(workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString());
+		this.setMailboxGuid((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID)) ? workTicket.getAdditionalContext().get(
+				MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
 		this.setSpectrumUri(workTicket.getPayloadURI());
 		this.setMeta(workTicket.getHeader(MailBoxConstants.UPLOAD_META));
 		this.setStatus(EntityStatus.ACTIVE.value());
@@ -101,7 +103,7 @@ public class StagedFileDTO {
 	public void setMeta(String meta) {
 		this.meta = meta;
 	}
-	
+
 	public String getExpirationTime() {
 		return expirationTime;
 	}
@@ -109,7 +111,7 @@ public class StagedFileDTO {
 	public void setExpirationTime(String expirationTime) {
 		this.expirationTime = expirationTime;
 	}
-	
+
 	public String getStatus() {
 		return status;
 	}
