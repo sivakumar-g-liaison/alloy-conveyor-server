@@ -46,6 +46,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.FTPSClient;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -73,11 +74,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(String executionId,MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {
 
+		    setReqDTO(dto);
 			// FTPSRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -85,19 +87,19 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// FTPSRequest executed through Java
-				executeRequest(executionId, fsm);
+				executeRequest(dto.getExecutionId(), fsm);
 			}
 
 		} catch(IOException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | MailBoxServicesException | URISyntaxException e) {
 			throw new RuntimeException(e);
-		} 
+		}
 
 	}
 
 	/**
 	 * Java method to execute the SFTPrequest to upload the file or folder
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -143,15 +145,18 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			}
 
+			LOGGER.info(constructMessage("Start run"));
+			long startTime = System.currentTimeMillis();
+
 			String path = getPayloadURI();
 			if (MailBoxUtil.isEmpty(path)) {
-				LOGGER.info("The given payload URI is Empty.");
+				LOGGER.info(constructMessage("The given payload URI is Empty."));
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
 			String remotePath = getWriteResponseURI();
 			if (MailBoxUtil.isEmpty(remotePath)) {
-				LOGGER.info("The given remote URI is Empty.");
+				LOGGER.info(constructMessage("The given remote URI is Empty."));
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
@@ -162,10 +167,17 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			}
 			ftpsRequest.changeDirectory(remotePath);
 
+			LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 			uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm);
 			ftpsRequest.disconnect();
 
+			long endTime = System.currentTimeMillis();
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
+
 		} catch (LiaisonException | JAXBException | IOException | NoSuchFieldException | IllegalAccessException e) {
+		    LOGGER.error(constructMessage("Error occured during ftp(s) download"), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -181,26 +193,26 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
-	 * @throws URISyntaxException 
+	 * @throws URISyntaxException
 	 * @throws SftpException
 	 *
 	 */
-	
+
 	public void uploadDirectory(G2FTPSClient ftpsRequest, String localParentDir, String remoteParentDir, String executionId, MailboxFSM fsm)
 			throws IOException, LiaisonException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException, URISyntaxException {
 
-		// variable to hold the status of file upload request execution		
+		// variable to hold the status of file upload request execution
 		int replyCode = 0;
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
-		FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();		
+		FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		if (subFiles != null && subFiles.length > 0) {
-			
+
 			String statusIndicator = ftpUploaderStaticProperties.getFileTransferStatusIndicator();
 			String includedFiles = ftpUploaderStaticProperties.getIncludedFiles();
 			String excludedFiles = ftpUploaderStaticProperties.getExcludedFiles();
@@ -225,66 +237,74 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					// skip parent directory and the directory itself
 					continue;
 				}
-				
+
 				String currentFileName = item.getName();
 				if (item.isFile()) {
 					// Check if the file to be uploaded is included or not excluded
-					boolean uploadFile = MailBoxUtil.checkFileIncludeorExclude(includeList, currentFileName, excludeList);
+					boolean uploadFile = checkFileIncludeorExclude(includeList, currentFileName, excludeList);
 					//file must not be uploaded
 					if(!uploadFile) {
 						continue;
 					}
-					
+
 					//add status indicator if specified to indicate that uploading is in progress
 					String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
 
 					// upload file
 				    try (InputStream inputStream = new FileInputStream(item)) {
-				    	
 				        ftpsRequest.changeDirectory(remoteParentDir);
+						LOGGER.info(constructMessage("uploading file {} from local path {} to remote path {}"),
+								currentFileName, localParentDir, remoteParentDir);
 	                    replyCode = ftpsRequest.putFile(uploadingFileName, inputStream);
-	                    
-	                    // Check whether the file is uploaded successfully
-	                    if (replyCode == 226 || replyCode == 250) {
-	                    	
-							LOGGER.info("File uploaded successfully");
-							inputStream.close();
-							
-							// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
-							if (!MailBoxUtil.isEmpty(statusIndicator)) {
-								int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);	
-								if (renameStatus == 250) {
-									LOGGER.info("File renamed successfully");
-								} else {
-									LOGGER.info("File renaming failed");
-								}
-							}
-							
-							// Delete the local files after successful upload if user opt for it
-							if (ftpUploaderStaticProperties.getDeleteFiles()) {
-								item.delete();
-								LOGGER.info("File deleted successfully");
+				    }
+
+                    // Check whether the file is uploaded successfully
+                    if (replyCode == 226 || replyCode == 250) {
+
+						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
+						totalNumberOfProcessedFiles++;
+						// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
+						if (!MailBoxUtil.isEmpty(statusIndicator)) {
+							int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);
+							if (renameStatus == 250) {
+								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 							} else {
-								// File is not opted to be deleted. Hence moved to processed folder
-								String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
-								if (MailBoxUtil.isEmpty(processedFileLocation)) {
-									archiveFile(item.getAbsolutePath(), false);
-								} else {
-									archiveFile(item, processedFileLocation);
-								}
-							}
-						} else {
-							
-							// File uploading failed so move the file to error folder
-							String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
-							if (MailBoxUtil.isEmpty(errorFileLocation)) {
-								archiveFile(item.getAbsolutePath(), true);
-							} else {
-								archiveFile(item, errorFileLocation);
+								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 							}
 						}
-				    }
+
+						// Delete the local files after successful upload if user opt for it
+						if (ftpUploaderStaticProperties.getDeleteFiles()) {
+							item.delete();
+							LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
+						} else {
+							// File is not opted to be deleted. Hence moved to processed folder
+							String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
+							if (MailBoxUtil.isEmpty(processedFileLocation)) {
+							    LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
+								archiveFile(item.getAbsolutePath(), false);
+								LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
+							} else {
+							    LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
+								archiveFile(item, processedFileLocation);
+								LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
+							}
+						}
+					} else {
+
+						// File uploading failed so move the file to error folder
+						String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
+						if (MailBoxUtil.isEmpty(errorFileLocation)) {
+						    LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
+							archiveFile(item.getAbsolutePath(), true);
+							LOGGER.info(constructMessage("Archive the file to the default error file location - end"));
+						} else {
+						    LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
+							archiveFile(item, errorFileLocation);
+							LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
+						}
+					}
 
 				} else {
 
@@ -294,7 +314,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 
 					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
-					
+
 					boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remoteFilePath);
 					if (!dirExists) {
 						// create directory on the server
@@ -400,12 +420,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		// TODO Auto-generated method stub
 
 	}
-    
+
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {

@@ -34,6 +34,7 @@ import java.util.Properties;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -56,6 +57,7 @@ import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -70,8 +72,13 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
+	protected static final String seperator = ": ";
 
 	protected Processor configurationInstance;
+	protected int totalNumberOfProcessedFiles;
+	protected StringBuffer logPrefix;
+	protected TriggerProcessorRequestDTO reqDTO;
+
 	public Properties mailBoxProperties;
 	public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
 	public StaticProcessorPropertiesDTO staticProcessorProperties;
@@ -87,7 +94,52 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		return configurationInstance;
 	}
 
-	/**
+	public int getTotalNumberOfProcessedFiles() {
+		return totalNumberOfProcessedFiles;
+	}
+
+	public void setTotalNumberOfProcessedFiles(int totalNumberOfProcessedFiles) {
+		this.totalNumberOfProcessedFiles = totalNumberOfProcessedFiles;
+	}
+
+    public void setReqDTO(TriggerProcessorRequestDTO reqDTO) {
+        this.reqDTO = reqDTO;
+    }
+
+    /**
+     * Method to construct log messages for easy visibility
+     * 
+     * @param messages append to prefix, please make sure the order of the inputs
+     * @return constructed string
+     */
+    public String constructMessage(String... messages) {
+
+        if (null == logPrefix) {
+
+            logPrefix = new StringBuffer()
+            .append("CronJob")
+            .append(seperator)
+            .append((reqDTO != null) ? reqDTO.getProfileName() : "NONE")
+            .append(seperator)
+            .append(configurationInstance.getProcessorType().name())
+            .append(seperator)
+            .append(configurationInstance.getProcsrName())
+            .append(seperator)
+            .append(configurationInstance.getMailbox().getMbxName())
+            .append(seperator)
+            .append(configurationInstance.getMailbox().getPguid())
+            .append(seperator);
+        }
+
+        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        for (String str : messages) {
+            msgBuf.append(str);
+        }
+
+        return msgBuf.toString();
+    }
+
+    /**
 	 * Construct DTO from Entity.
 	 *
 	 * @return the remoteProcessorProperties
@@ -754,7 +806,31 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	private String getGroupFor(String protocol) {
 		return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
  	}
-
+	
+	/**
+	 * Returns false if file is excluded. Otherwise returns true. Include is higher priority then exclude. 
+	 * @param includeList - List of extensions to be included
+	 * @param currentFileName - name of the file to be uploaded
+	 * @param excludedList - List of extensions to be excluded
+	 * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
+	 */
+	public boolean checkFileIncludeorExclude(List<String> includeList, String currentFileName, List<String> excludedList){
+		
+		//Add period to fileExtension since include/exclude list contains extension with period
+		String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
+		//check if file is in include list
+		if(null != includeList && !includeList.isEmpty()) {
+			boolean fileIncluded = (includeList.contains(fileExtension))? true : false;
+			return fileIncluded;
+		}
+		
+		//check if file is not in excluded list
+		if(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
+			return false;
+		}
+		return true;
+	}
+	
 	@Override
 	public void updateState() {
 		// TODO Auto-generated method stub

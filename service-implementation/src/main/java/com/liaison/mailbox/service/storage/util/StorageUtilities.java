@@ -40,6 +40,7 @@ import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
 import com.liaison.fs2.storage.spectrum.FS2DefaultSpectrumStorageConfig;
 import com.liaison.fs2.storage.spectrum.SpectrumConfigBuilder;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -121,9 +122,7 @@ public class StorageUtilities {
 			return FS2.getFS2PayloadInputStream(spectrumURI);
 		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
 			LOGGER.error("Failed to retrieve payload from spectrum due to error", e);
-			throw new MailBoxServicesException(
-					"Failed to retrieve payload from spectrum due to error" + e.getMessage(),
-					Response.Status.BAD_REQUEST);
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.BAD_REQUEST);
 		}
 	}
 
@@ -180,12 +179,11 @@ public class StorageUtilities {
 			return detail;
 
 		} catch (FS2ObjectAlreadyExistsException e) {
-			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write the payload in spectrum : " + e.getMessage()
-					+ ". Becuase it already exists in the system.", Response.Status.CONFLICT);
+			LOGGER.error("Failed to persist the payload in spectrum because it already exists.", e);
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.CONFLICT);
 		} catch (FS2Exception | IOException e) {
 			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write payload in spectrum : " + e.getMessage(),
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE,
 					Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -256,7 +254,8 @@ public class StorageUtilities {
 		try {
 			uri = new URI("fs2", authority, path, null, null);
 		} catch (URISyntaxException e) {
-			throw new MailBoxServicesException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+			LOGGER.error("Unable to create a URI", e);
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		return uri;
 	}

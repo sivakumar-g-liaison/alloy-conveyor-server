@@ -46,6 +46,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -55,7 +56,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Http remote uploader to perform push operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author veerasamyn
  */
 public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProcessorI {
@@ -73,7 +74,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
@@ -91,9 +92,9 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CMSException
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
-	 * 
+	 *
 	 */
 	public void executeRequest(String executionId, MailboxFSM fsm) {
 
@@ -108,10 +109,12 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 			// Set the pay load value to http client input data for POST & PUT
 			// request
 			File[] files = null;
-
 			// retrieve required properties
 			String httpVerb = httpUploaderStaticProperties.getHttpVerb();
 			String contentType = httpUploaderStaticProperties.getContentType();
+
+			LOGGER.info(constructMessage("Start run"));
+			long startTime = System.currentTimeMillis();
 
 			if ("POST".equals(httpVerb) || "PUT".equals(httpVerb)) {
 
@@ -145,24 +148,27 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						try (InputStream contentStream = FileUtils.openInputStream(entry);
 								ByteArrayOutputStream responseStream = new ByteArrayOutputStream(4096)) {
 
+							LOGGER.info(constructMessage("uploading file {}"), entry.getName());
+
 							request = (HTTPRequest) getClient();
 							request.setOutputStream(responseStream);
 							request.inputData(contentStream, contentType);
 
 							response = request.execute();
-							LOGGER.info("The reponse code received is {} for a request {} ", response.getStatusCode(),
+							LOGGER.info(constructMessage("The reponse code received is {} for a request {} "),
+							        response.getStatusCode(),
 									entry.getName());
 							if (response.getStatusCode() != 200) {
 
-								LOGGER.info("The reponse code received is {} ", response.getStatusCode());
-								LOGGER.info("Execution failure for ", entry.getAbsolutePath());
+								LOGGER.warn(constructMessage("The reponse code received is {} "), response.getStatusCode());
+								LOGGER.warn(constructMessage("Execution failure for "), entry.getAbsolutePath());
 
 								failedStatus = true;
 								delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
 								// continue;
 
 							} else {
-
+								totalNumberOfProcessedFiles++;
 								if (null != entry) {
 									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
 								}
@@ -175,12 +181,19 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
 					}
 				} else {
-					LOGGER.info("The given HTTP Uploader payload URI is Empty.");
+					LOGGER.error(constructMessage("The given HTTP Uploader payload URI is Empty."));
 					throw new MailBoxServicesException("The given HTTP Uploader payload URI is Empty.",
 							Response.Status.CONFLICT);
 				}
 			}
+
+			// to calculate the elapsed time for processing files
+			long endTime = System.currentTimeMillis();
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
 		} catch (JAXBException | IOException | LiaisonException | IllegalAccessException | NoSuchFieldException e) {
+		    LOGGER.error(constructMessage("Error occured during http(s) upload"), e);
 			throw new RuntimeException(e);
 		}
 
@@ -188,7 +201,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * Delegate method to archive the file.
-	 * 
+	 *
 	 * @param file
 	 * @param locationName
 	 * @param isError
@@ -215,7 +228,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(String executionId, MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 
 		try {
 
@@ -226,7 +239,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// HTTPRequest executed through Java
-				executeRequest(executionId, fsm);
+				executeRequest(dto.getExecutionId(), fsm);
 			}
 
 		} catch (JAXBException | IOException | IllegalAccessException | NoSuchFieldException e) {
@@ -265,9 +278,9 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {

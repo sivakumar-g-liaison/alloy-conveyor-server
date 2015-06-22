@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
@@ -47,7 +48,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	}
 
 	@Override
-	public void runProcessor(String executionId, MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 		// TODO Auto-generated method stub
 		
 	}

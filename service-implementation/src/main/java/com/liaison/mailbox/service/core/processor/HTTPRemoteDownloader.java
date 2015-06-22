@@ -43,6 +43,7 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPUploaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -53,7 +54,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 /**
  * Http remote downloader to perform pull operation, also it has support methods
  * for JavaScript.
- * 
+ *
  * @author OFS
  */
 public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
@@ -71,7 +72,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void runProcessor(String executionId, MailboxFSM fsm) {
+	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 
@@ -94,14 +95,14 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Java method to execute the HTTPRequest and write in FS location
-	 * 
+	 *
 	 * @throws MailBoxServicesException
 	 * @throws FS2Exception
 	 * @throws IOException
 	 * @throws LiaisonException
 	 * @throws URISyntaxException
 	 * @throws JAXBException
-	 * 
+	 *
 	 * @throws MailBoxConfigurationServicesException
 	 * @throws SymmetricAlgorithmException
 	 * @throws KeyStoreException
@@ -114,7 +115,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws CMSException
 	 * @throws OperatorCreationException
 	 * @throws UnrecoverableKeyException
-	 * 
+	 *
 	 */
 	protected void executeRequest() {
 
@@ -124,13 +125,14 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		HTTPResponse response = null;
 		boolean failedStatus = false;
-
+		long startTime = 0;
 		// Set the pay load value to http client input data for POST & PUT
 		// request
 		File[] files = null;
-
 		try {
 
+			LOGGER.info(constructMessage("Start run"));
+			startTime = System.currentTimeMillis();
 			if ("POST".equals(request.getMethod()) || "PUT".equals(request.getMethod())) {
 
 				HTTPDownloaderPropertiesDTO httpDownloaderStaticProperties = (HTTPDownloaderPropertiesDTO) getProperties();
@@ -162,6 +164,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 								if (null != entry) {
 									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
 								}
+								totalNumberOfProcessedFiles++;
 							}
 						}
 					}
@@ -172,10 +175,17 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			} else {
 				response = request.execute();
 				writeResponseToMailBox(responseStream);
+				totalNumberOfProcessedFiles++;
 			}
+			// to calculate the elapsed time for processing files
+			long endTime = System.currentTimeMillis();
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
 
 		} catch (MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException
 				| IllegalAccessException | NoSuchFieldException e) {
+		    LOGGER.error(constructMessage("Error occured during http(s) download"), e);
 			throw new RuntimeException(e);
 		}
 
@@ -188,7 +198,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Delegate method to archive the file.
-	 * 
+	 *
 	 * @param file
 	 * @param locationName
 	 * @param isError
@@ -233,7 +243,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
 	 */
 	@Override
