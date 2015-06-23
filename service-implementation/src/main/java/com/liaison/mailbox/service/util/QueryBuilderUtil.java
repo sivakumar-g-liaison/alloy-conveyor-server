@@ -54,12 +54,9 @@ public class QueryBuilderUtil {
 
 		StringBuilder s = new StringBuilder();
 		for (final String str : list) {
-			if (s.length() > 0) {
-			s.append(", ");
-			}
-			 s.append(str);
+			s.append("'").append(str).append("'").append(",");
 		}
 
-		return s.toString();
+		return s.toString().substring(0, s.toString().length() - 1);
 	}
 }

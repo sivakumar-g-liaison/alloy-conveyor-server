@@ -59,13 +59,12 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (?1)")
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 
 			totalItems = (Long)em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-					.setParameter(1, QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.getSingleResult();
 
@@ -104,7 +103,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (?1)")
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")")
 					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 
@@ -126,7 +125,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			mailBoxes = em
 					.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + (mbxName == null ? "" : mbxName.toLowerCase()) + "%")
-					.setParameter(1, QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
 					.setParameter(SCHD_PROF_NAME, "%" + (profName == null ? "" : profName) + "%")
 					.setFirstResult( pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 					.setMaxResults( pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
@@ -157,10 +155,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
  
             StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
                     .append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-                    .append(" and LOWER(mbx.tenancyKey) IN  (:"+ TENANCY_KEYS +")");
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
             totalItems = (Long)entityManager.createQuery(query.toString())
                     .setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
-                    .setParameter(TENANCY_KEYS,QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
                     .getSingleResult();
  
             count = totalItems.intValue();
@@ -173,7 +170,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
  
         return count;
     }
-
 
 	/**
 	 * Fetches all  MailBox from  MAILBOX database table by given mailbox name.
@@ -192,7 +188,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
 					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (?1)");
+					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
 			String sortDirection = searchFilter.getSortDirection();
 			String sortField=searchFilter.getSortField();
 
@@ -214,7 +210,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			}
 			mailboxList = entityManager.createQuery(query.toString())
 					.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
-					.setParameter(1, QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
 					.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
 					.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
 					.getResultList();
@@ -274,10 +269,8 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 			
 			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
-							.append(" where mailbox.tenancyKey in (?1)");
-			List<?> mailboxIds = entityManager.createQuery(query.toString())
-					.setParameter(1, QueryBuilderUtil.collectionToSqlString(tenancyKeys))
-					.getResultList();
+							.append(" where mailbox.tenancyKey in (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys) + ")");
+			List<?> mailboxIds = entityManager.createQuery(query.toString()).getResultList();
 			
 			Iterator<?> iter = mailboxIds.iterator();
 			
