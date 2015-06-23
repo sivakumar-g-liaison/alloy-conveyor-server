@@ -554,12 +554,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String targetFolder = (isError) ? MailBoxConstants.ERROR_FOLDER : MailBoxConstants.PROCESSED_FOLDER;
 		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
-			LOGGER.info(constructMessage("Creating target(processed/error) folder"));
-			FileSystem fileSystem = FileSystems.getDefault();
-			String group = getGroupFor(configurationInstance.getProcsrProtocol());
-			// create folders and assign proper permission to owner and group
-			createFilePathAndAssignGroupPermissions(targetDirectory, group, fileSystem);
-
+			LOGGER.info("Creating target(processed/error) folder");
+			Files.createDirectories(targetDirectory);
 		}
 		Path target = targetDirectory.resolve(file.getName());
 		// moving to processed/error folder
@@ -787,9 +783,22 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
 		}
 
+		Files.createDirectories(filePathToCreate);
+		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
+		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
-		// create folders and assign proper permission to owner and group
-		createFilePathAndAssignGroupPermissions(filePathToCreate, group, fileSystem);
+		LOGGER.debug("group  name - {}", group);
+		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+		//skip when reaching inbox/outbox
+		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
+
+			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
+			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
+			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString("rwxrwx---"));
+			filePathToCreate = filePathToCreate.getParent();
+		 }
+
+		LOGGER.debug("Done setting group");
 	}
 
 	private String getGroupFor(String protocol) {
@@ -820,33 +829,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		return true;
 	}
 
-
-	/**
-	 * Method to create folders in the provided path and assign proper permissions to owner and group
-	 * 
-	 * @param filePathToCreate - Path which has to be created
-	 * @param group - group to which permission needs to be assigned
-	 * @param fileSystem - the default file system
-	 * @throws IOException
-	 */
-	public void createFilePathAndAssignGroupPermissions(Path filePathToCreate, String group, FileSystem fileSystem) throws IOException {
-
-		Files.createDirectories(filePathToCreate);
-		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
-		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
-		LOGGER.debug("group  name - {}", group);
-		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
-		//skip when reaching inbox/outbox
-		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
-
-			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
-			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
-			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString("rwxrwx---"));
-			filePathToCreate = filePathToCreate.getParent();
-		 }
-
-		LOGGER.debug("Done setting group");
-	}
 	@Override
 	public void updateState() {
 		// TODO Auto-generated method stub
