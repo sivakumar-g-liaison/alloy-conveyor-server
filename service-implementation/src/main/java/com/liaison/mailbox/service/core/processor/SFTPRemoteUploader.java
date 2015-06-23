@@ -216,6 +216,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())) {
 						// skip processed folder
+						LOGGER.info(constructMessage("skipping processed folder"));
 						continue;
 					}
 

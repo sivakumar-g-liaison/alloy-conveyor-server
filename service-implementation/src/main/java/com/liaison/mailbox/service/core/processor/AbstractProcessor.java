@@ -108,7 +108,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
     /**
      * Method to construct log messages for easy visibility
-     * 
+     *
      * @param messages append to prefix, please make sure the order of the inputs
      * @return constructed string
      */
@@ -554,8 +554,12 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String targetFolder = (isError) ? MailBoxConstants.ERROR_FOLDER : MailBoxConstants.PROCESSED_FOLDER;
 		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
-			LOGGER.info("Creating target(processed/error) folder");
-			Files.createDirectories(targetDirectory);
+			LOGGER.info(constructMessage("Creating target(processed/error) folder"));
+			FileSystem fileSystem = FileSystems.getDefault();
+			String group = getGroupFor(configurationInstance.getProcsrProtocol());
+			// create folders and assign proper permission to owner and group
+			createFilePathAndAssignGroupPermissions(targetDirectory, group, fileSystem);
+
 		}
 		Path target = targetDirectory.resolve(file.getName());
 		// moving to processed/error folder
@@ -783,11 +787,53 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
 		}
 
+		String group = getGroupFor(filePathToCreate.getName(1).toString());
+		// create folders and assign proper permission to owner and group
+		createFilePathAndAssignGroupPermissions(filePathToCreate, group, fileSystem);
+	}
+
+	private String getGroupFor(String protocol) {
+		return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
+ 	}
+
+	/**
+	 * Returns false if file is excluded. Otherwise returns true. Include is higher priority then exclude.
+	 * @param includeList - List of extensions to be included
+	 * @param currentFileName - name of the file to be uploaded
+	 * @param excludedList - List of extensions to be excluded
+	 * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
+	 */
+	public boolean checkFileIncludeorExclude(List<String> includeList, String currentFileName, List<String> excludedList){
+
+		//Add period to fileExtension since include/exclude list contains extension with period
+		String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
+		//check if file is in include list
+		if(null != includeList && !includeList.isEmpty()) {
+			boolean fileIncluded = (includeList.contains(fileExtension))? true : false;
+			return fileIncluded;
+		}
+
+		//check if file is not in excluded list
+		if(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
+			return false;
+		}
+		return true;
+	}
+
+
+	/**
+	 * Method to create folders in the provided path and assign proper permissions to owner and group
+	 * 
+	 * @param filePathToCreate - Path which has to be created
+	 * @param group - group to which permission needs to be assigned
+	 * @param fileSystem - the default file system
+	 * @throws IOException
+	 */
+	public void createFilePathAndAssignGroupPermissions(Path filePathToCreate, String group, FileSystem fileSystem) throws IOException {
 
 		Files.createDirectories(filePathToCreate);
 		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
 		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
-		String group = getGroupFor(filePathToCreate.getName(1).toString());
 		LOGGER.debug("group  name - {}", group);
 		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
 		//skip when reaching inbox/outbox
@@ -800,37 +846,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		 }
 
 		LOGGER.debug("Done setting group");
-
 	}
-
-	private String getGroupFor(String protocol) {
-		return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
- 	}
-	
-	/**
-	 * Returns false if file is excluded. Otherwise returns true. Include is higher priority then exclude. 
-	 * @param includeList - List of extensions to be included
-	 * @param currentFileName - name of the file to be uploaded
-	 * @param excludedList - List of extensions to be excluded
-	 * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
-	 */
-	public boolean checkFileIncludeorExclude(List<String> includeList, String currentFileName, List<String> excludedList){
-		
-		//Add period to fileExtension since include/exclude list contains extension with period
-		String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
-		//check if file is in include list
-		if(null != includeList && !includeList.isEmpty()) {
-			boolean fileIncluded = (includeList.contains(fileExtension))? true : false;
-			return fileIncluded;
-		}
-		
-		//check if file is not in excluded list
-		if(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
-			return false;
-		}
-		return true;
-	}
-	
 	@Override
 	public void updateState() {
 		// TODO Auto-generated method stub
