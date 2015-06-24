@@ -138,6 +138,7 @@ public class TransactionVisibilityClient {
 		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.S);
 			visibilityAPI.setOutSize(message.getOutSize());
+			visibilityAPI.setOutAgent(message.getOutAgent());
 		} else if (ExecutionState.SKIPPED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.N);
 		} else if (ExecutionState.STAGED.value().equals(message.getStatus().value())) {
