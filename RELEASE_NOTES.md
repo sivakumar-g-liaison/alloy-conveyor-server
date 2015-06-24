@@ -1,5 +1,6 @@
 2.3.0-SNAPSHOT
 -------------------------------
+
 2.2.12
 -------------------------------
 GMB-483-TransactionVisibilityAPI logging is invalid
