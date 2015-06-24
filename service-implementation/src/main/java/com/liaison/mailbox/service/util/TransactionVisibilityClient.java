@@ -42,7 +42,6 @@ public class TransactionVisibilityClient {
 	private TransactionVisibilityAPI visibilityAPI;
 
 	public TransactionVisibilityClient() {
-
 		visibilityAPI = new TransactionVisibilityAPI();
 		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 		visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
@@ -124,12 +123,12 @@ public class TransactionVisibilityClient {
 		
 		visibilityAPI.setId(message.getGlobalPId());
 		visibilityAPI.setGlobalId(message.getGlobalPId());
-		visibilityAPI.setInSize(message.getInSize());
 
 		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.P);
-		    visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
-		    visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
+			visibilityAPI.setSenderName(DEFAULT_SENDER_NAME);
+	        visibilityAPI.setSenderId(DEFAULT_SENDER_PGUID);
+	        visibilityAPI.setInSize(message.getInSize());
 		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.B);
 		} else if (ExecutionState.READY.value().equals(message.getStatus().value())) {
@@ -138,6 +137,8 @@ public class TransactionVisibilityClient {
 			visibilityAPI.setStatus(StatusCode.F);
 		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.S);
+			visibilityAPI.setOutSize(message.getOutSize());
+			visibilityAPI.setOutAgent(message.getOutAgent());
 		} else if (ExecutionState.SKIPPED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.N);
 		} else if (ExecutionState.STAGED.value().equals(message.getStatus().value())) {
@@ -145,9 +146,9 @@ public class TransactionVisibilityClient {
 		}
 
 		visibilityAPI.setInAgent(message.getInAgent());
+	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
+	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
-		visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
-		visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.debug("TransactionVisibilityAPI with status {} logged for GPID :{}", message.getStatus().value(),

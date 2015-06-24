@@ -1,5 +1,14 @@
 2.3.0-SNAPSHOT
 -------------------------------
+2.2.12
+-------------------------------
+GMB-483-TransactionVisibilityAPI logging is invalid
+GMB-483-TransactionVisibilityAPI logging in the async receving end
+GMB-483-TransactionVisibilityAPI changes
+GMB-483-TransactionVisibilityAPI set status to success
+GMB-483: http async common error msg and removed unused imports
+GMB-483 : set outsize in the lens logging
+GMB-483 : set out agent
 
 2.2.11
 -------------------------------
