@@ -59,8 +59,8 @@ public class GlassMessage {
 		this.setGlobalPId(wrkTicket.getGlobalProcessId());
 		this.setPipelineId(wrkTicket.getPipelineId());
 		Long payloadSize = wrkTicket.getPayloadSize();
-		if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-			this.setInSize((int) (long) payloadSize);
+		if (payloadSize != null && payloadSize < Integer.MAX_VALUE && payloadSize != -1L) {
+			this.setOutSize(payloadSize.intValue());
 		}
 		this.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 		this.setProcessorId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
@@ -88,11 +88,13 @@ public class GlassMessage {
 	private GatewayType outAgent;
 	private String message;
 	private int inSize;
+	private int outSize;
 	private String processId;
 	private String senderId;
 	private String transferProfileName;
 	private String stagedFileId;
 	private String meta;
+
 
 	public String getTransferProfileName() {
 		return transferProfileName;
@@ -246,7 +248,15 @@ public class GlassMessage {
 		this.processId = processId;
 	}
 
-	public static void logTimestamp(Logger logger, String message, Object... objects) {
+	public int getOutSize() {
+        return outSize;
+    }
+
+    public void setOutSize(int outSize) {
+        this.outSize = outSize;
+    }
+
+    public static void logTimestamp(Logger logger, String message, Object... objects) {
 		if (logger != null) {
 			logger.info(String.format("[TIME] %s | %s", new Date(System.currentTimeMillis()),
 					String.format(message, objects)));
