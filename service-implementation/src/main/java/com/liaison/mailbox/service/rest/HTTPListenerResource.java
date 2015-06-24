@@ -184,7 +184,7 @@ public class HTTPListenerResource extends AuditedResource {
                     glassMessage.logFourthCornerTimestamp();
 
 					return syncResponse;
-				} catch (IOException | JAXBException e) {
+				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
 					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
@@ -299,7 +299,7 @@ public class HTTPListenerResource extends AuditedResource {
 					return Response.ok().status(Status.ACCEPTED).type(MediaType.TEXT_PLAIN).entity(
 							String.format("Payload accepted as process ID '%s'", workTicket.getGlobalProcessId())).build();
 
-				} catch (IOException | JAXBException e) {
+				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
 					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed: " + e.getMessage());
