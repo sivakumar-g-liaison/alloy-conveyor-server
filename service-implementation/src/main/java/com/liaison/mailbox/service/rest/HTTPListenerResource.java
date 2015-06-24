@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -306,7 +304,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
 			}
 		};
