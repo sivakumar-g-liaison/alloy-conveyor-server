@@ -118,7 +118,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	private void run(String executionId) {
-
+		
+		
 		TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient();
 		GlassMessage glassMessage = new GlassMessage();
 

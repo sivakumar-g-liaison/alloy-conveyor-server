@@ -10,7 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -135,6 +133,9 @@ public class HTTPListenerResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 				GlassMessage glassMessage = new GlassMessage();
+				// Log First corner
+				glassMessage.logFirstCornerTimestamp();
+
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				glassMessage.setCategory(ProcessorType.HTTPSYNCPROCESSOR);
 				glassMessage.setProtocol(Protocol.HTTPSYNCPROCESSOR.getCode());
@@ -171,8 +172,6 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 
-					// Log First corner
-					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
 					// Log status running
 					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");
 					transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
@@ -183,19 +182,16 @@ public class HTTPListenerResource extends AuditedResource {
 					logger.info("HTTP(S)-SYNC : Status code received from service broker {} for the mailbox {}",
 					        syncResponse.getStatus(),
 					        mailboxPguid);
-                    // GLASS LOGGING TVAPI success/fail is not allowed to be logged here//
-                    /*if (syncResponse.getStatus() > 299) {
+                    // GLASS LOGGING TVAPI //
+                    if (syncResponse.getStatus() > 299) {
                         glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity());;
-                        glassMessage.setStatus(ExecutionState.FAILED);
-                    } else { //GMB-483
+                    } else {
                         glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
-                        glassMessage.setStatus(ExecutionState.COMPLETED);
-                    }*/
+                    }
                     glassMessage.logFourthCornerTimestamp();
-                    logger.info("HTTP(S)-SYNC : for the mailbox id {} - End", mailboxPguid);
+
 					return syncResponse;
-				} catch (IOException | JAXBException e) {
-				    logger.error("HTTP(S)-SYNC : Error occured", e);
+				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
 					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
@@ -263,7 +259,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 				serviceCallCounter.incrementAndGet();
 
-				logger.info("HTTP(S)-ASYNC : for the mailbox id {} - Start", mailboxPguid);
+				logger.debug("Starting async processing");
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
 
@@ -317,15 +313,14 @@ public class HTTPListenerResource extends AuditedResource {
 					return Response.ok().status(Status.ACCEPTED).type(MediaType.TEXT_PLAIN).entity(
 							String.format("Payload accepted as process ID '%s'", workTicket.getGlobalProcessId())).build();
 
-				} catch (IOException | JAXBException e) {
-				    logger.error("HTTP(S)-ASYNC : Error occured", e);
+				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
 					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed: " + e.getMessage());
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
 			}
 		};
