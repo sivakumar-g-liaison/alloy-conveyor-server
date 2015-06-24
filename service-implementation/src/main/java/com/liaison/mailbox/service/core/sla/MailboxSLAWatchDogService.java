@@ -319,7 +319,7 @@ public class MailboxSLAWatchDogService {
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 			glassMessage = new GlassMessage(workTicket);
-			glassMessage.setStatus(ExecutionState.READY);
+			glassMessage.setStatus(ExecutionState.COMPLETED);
 			glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
 			// validates mandatory value.
