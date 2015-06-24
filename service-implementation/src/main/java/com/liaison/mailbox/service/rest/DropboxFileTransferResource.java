@@ -123,8 +123,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 				long startTime = 0;
 				long endTime = 0;
 
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
 
 				try {
