@@ -319,7 +319,7 @@ public class MailboxSLAWatchDogService {
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 			glassMessage = new GlassMessage(workTicket);
-			glassMessage.setStatus(ExecutionState.STAGED);
+			glassMessage.setStatus(ExecutionState.READY);
 			glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
 			// validates mandatory value.
@@ -397,7 +397,7 @@ public class MailboxSLAWatchDogService {
 	        processorExecutionStateDAO.merge(processorExecutionState);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 
-	      //GLASS LOGGING BEGINS//
+	        //GLASS LOGGING BEGINS//
 
 			if(processorPayloadLocation.contains("ftps")){
 				glassMessage.setOutAgent(GatewayType.FTPS);
@@ -408,7 +408,14 @@ public class MailboxSLAWatchDogService {
 			}
 
 			//GLASS LOGGING CORNER 4 //
-			glassMessage.logProcessingStatus(StatusType.SUCCESS, "Payload delivered at target location");
+            StringBuffer message = new StringBuffer()
+                    .append("Payload delivered at target location : ")
+                    .append(processorPayloadLocation)
+                    .append(File.separatorChar)
+                    .append(fileName);
+
+            transactionVisibilityClient.logToGlass(glassMessage);
+			glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
             glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
