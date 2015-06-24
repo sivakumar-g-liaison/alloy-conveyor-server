@@ -18,7 +18,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -182,18 +181,14 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		int replyCode = -1;
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
-		SFTPUploaderPropertiesDTO sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO)getProperties();
+		SFTPUploaderPropertiesDTO staticProp = (SFTPUploaderPropertiesDTO) getProperties();
 		FSMEventDAOBase eventDAO = new FSMEventDAOBase();
 
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
 		if (subFiles != null && subFiles.length > 0) {
-			String statusIndicator = sftpUploaderStaticProperties.getFileTransferStatusIndicator();
-			String includedFiles = sftpUploaderStaticProperties.getIncludedFiles();
-			String excludedFiles = sftpUploaderStaticProperties.getExcludedFiles();
-			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+
 			for (File item : subFiles) {
 				//interrupt signal check has to be done only if execution Id is present
 				if(!StringUtil.isNullOrEmptyAfterTrim(executionId) && ((new Date().getTime() - lastCheckTime.getTime())/1000) > Long.parseLong(constantInterval)) {
@@ -214,24 +209,21 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 				if (item.isDirectory()) {
 
-					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())) {
+					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName()) ||
+					        MailBoxConstants.ERROR_FOLDER.equals(item.getName())) {
 						// skip processed folder
-						LOGGER.info(constructMessage("skipping processed folder"));
+						LOGGER.info(constructMessage("skipping processed/error folder"));
 						continue;
 					}
 
 					String remoteFilePath = remoteParentDir + File.separatorChar + item.getName();
-
-					Boolean fileExists = true;
 					try {
 						sftpRequest.getNative().lstat(remoteFilePath);
 					} catch (Exception ex) {
-						fileExists = false;
-					}
-					if (!fileExists) {
-						// create directory on the server
+					    //happens when the directory is not available in the remote server
 						sftpRequest.getNative().mkdir(remoteFilePath);
 					}
+
 					// upload the sub directory
 					sftpRequest.changeDirectory(remoteFilePath);
 					String localDr = localParentDir + File.separatorChar + item.getName();
@@ -242,13 +234,14 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					String currentFileName = item.getName();
 					// Check if the file to be uploaded is included or not excluded
-					boolean uploadFile = checkFileIncludeorExclude(includeList, currentFileName, excludeList);
-					//file must not be uploaded
-					if(!uploadFile) {
-						continue;
+					if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+					        currentFileName,
+					        staticProp.getExcludedFiles())) {
+					    continue;
 					}
 
 					//add status indicator if specified to indicate that uploading is in progress
+					String statusIndicator = staticProp.getFileTransferStatusIndicator();
 					String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
 
@@ -262,8 +255,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				    // Check whether the file uploaded successfully
 					if (replyCode == 0) {
+
 						totalNumberOfProcessedFiles++;
 						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
+
 						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
 						if (!MailBoxUtil.isEmpty(statusIndicator)) {
 							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
@@ -273,37 +268,13 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 							}
 						}
-						// Delete the local files after successful upload if user opt for it
-						if (sftpUploaderStaticProperties.getDeleteFiles()) {
-							item.delete();
-							LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), currentFileName);
-						} else {
-							// File is not opted to be deleted. Hence moved to processed folder
-							String processedFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getProcessedFileLocation());
-							if (MailBoxUtil.isEmpty(processedFileLocation)) {
-							    LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
-								archiveFile(item.getAbsolutePath(), false);
-								LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
-							} else {
-							    LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
-								archiveFile(item, processedFileLocation);
-                                LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
-							}
-						}
+
+						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
+						        staticProp.getProcessedFileLocation(), 
+						        item);
 
 					} else {
-
-						// File Uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(sftpUploaderStaticProperties.getErrorFileLocation());
-						if (MailBoxUtil.isEmpty(errorFileLocation)) {
-						    LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
-							archiveFile(item.getAbsolutePath(), true);
-							LOGGER.info(constructMessage("Archive the file to the default error file location {} - end"));
-						} else {
-						    LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
-							archiveFile(item, errorFileLocation);
-							LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
-						}
+						archiveFiles(staticProp.getErrorFileLocation(), item);
 					}
 				}
 			}

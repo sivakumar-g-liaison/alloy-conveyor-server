@@ -22,7 +22,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -84,10 +83,29 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	private String pipeLineID;
 	private List<Path> activeFiles = new ArrayList<>();
+	private String fileRenameFormat = null;
+	private long lastModifiedTolerance = 0L;
 
-	public void setPipeLineID(String pipeLineID) {
+    public long setLastModifiedTolerance() {
+        if (lastModifiedTolerance == 0L) {
+            lastModifiedTolerance = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
+        }
+        return lastModifiedTolerance;
+    }
+
+    public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
 	}
+
+    public String setFileRenameFormat(SweeperPropertiesDTO staticProp) {
+        if (MailBoxUtil.isEmpty(fileRenameFormat)) {
+            fileRenameFormat = (MailBoxUtil.isEmpty(staticProp.getFileRenameFormat()))
+                    ? MailBoxConstants.SWEEPED_FILE_EXTN
+                    : "." + fileRenameFormat;
+        }
+        return fileRenameFormat;
+    }
+
 
 	@SuppressWarnings("unused")
 	private DirectorySweeper() {
@@ -136,17 +154,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             String inputLocation = getPayloadURI();
 
             // retrieve required properties
-            SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) getProperties();
-            String includedFiles = sweeperStaticProperties.getIncludedFiles();
-            String excludedFiles = sweeperStaticProperties.getExcludedFiles();
-            List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles)) ? Arrays.asList(includedFiles.split(",")) : null;
-            List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+            SweeperPropertiesDTO staticProp = (SweeperPropertiesDTO) getProperties();
+            setFileRenameFormat(staticProp);
+            setLastModifiedTolerance();
 
-            //File rename format
-            String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
-            fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : "." + fileRenameFormat;
-
-            long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
             // Validation of the necessary properties
             if (MailBoxUtil.isEmpty(inputLocation)) {
             	throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
@@ -156,8 +167,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             LOGGER.info(constructMessage("Start run"));
             LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
-            								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit, includeList, excludeList)
-            								: retryGenWrkTktForActiveFiles(activeFiles, timeLimit);
+            								? sweepDirectory(inputLocation , false, staticProp)
+            								: retryGenWrkTktForActiveFiles(activeFiles);
 
             if (workTickets.isEmpty()) {
             	LOGGER.info("There are no files to process.");
@@ -166,7 +177,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             	// Read from mailbox property - grouping js location
             	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
-            	String sweepedFileLocation = replaceTokensInFolderPath(sweeperStaticProperties.getSweepedFileLocation());
+            	String sweepedFileLocation = replaceTokensInFolderPath(staticProp.getSweepedFileLocation());
             	if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
                     LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
 
@@ -263,7 +274,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws NoSuchFieldException
 	 */
 
-	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly,String fileRenameFormat, long lastModifiedLmt, List <String> includeList, List <String> excludeList) throws IOException, URISyntaxException,
+	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
         LOGGER.info(constructMessage("Scanning Directory: {}"), root);
@@ -277,13 +288,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			for (Path file : stream) {
 
 				String fileName = file.getFileName().toString();
-				if (!checkFileIncludeorExclude(includeList, fileName, excludeList)) {
-					continue;
-				}
+				// Check if the file to be uploaded is included or not excluded
+                if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                        fileName,
+                        staticProp.getExcludedFiles())) {
+                    continue;
+                }
+
                 LOGGER.debug("Sweeping file {}", file.toString());
 				if (!fileName.endsWith(fileRenameFormat)) {
 
-					if (validateLastModifiedTolerance(lastModifiedLmt, file)) {
+					if (validateLastModifiedTolerance(lastModifiedTolerance, file)) {
 						LOGGER.info(constructMessage("The file {} is in progress. So added in the in-progress list."), file.toString());
                         activeFiles.add(file);
 						continue;
@@ -639,13 +654,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList, long timelimit)
+	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList)
 			throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		List<Path> files = new ArrayList<>();
 		for (Path file : activeFilesList) {
 
-			if (!validateLastModifiedTolerance(timelimit, file)) {
+			if (!validateLastModifiedTolerance(lastModifiedTolerance, file)) {
 				LOGGER.info("There are no changes in the file {} recently. So it is added in the sweeper list.", file.getFileName());
 				files.add(file);
 				continue;

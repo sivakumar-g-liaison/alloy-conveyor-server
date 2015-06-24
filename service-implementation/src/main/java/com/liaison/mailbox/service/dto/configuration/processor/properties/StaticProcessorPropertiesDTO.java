@@ -38,7 +38,4 @@ public class StaticProcessorPropertiesDTO {
 		this.handOverExecutionToJavaScript = handOverExecutionToJavaScript;
 	}
 
-
-
-
 }
