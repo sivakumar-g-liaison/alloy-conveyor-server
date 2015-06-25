@@ -18,7 +18,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -205,7 +204,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		int replyCode = 0;
 		File localDir = new File(localParentDir);
 		File[] subFiles = localDir.listFiles();
-		FTPUploaderPropertiesDTO ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)getProperties();
+		FTPUploaderPropertiesDTO staticProp = (FTPUploaderPropertiesDTO) getProperties();
 		Date lastCheckTime = new Date();
 		String constantInterval = MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC);
 
@@ -213,11 +212,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 		if (subFiles != null && subFiles.length > 0) {
 
-			String statusIndicator = ftpUploaderStaticProperties.getFileTransferStatusIndicator();
-			String includedFiles = ftpUploaderStaticProperties.getIncludedFiles();
-			String excludedFiles = ftpUploaderStaticProperties.getExcludedFiles();
-			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludeList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+			String statusIndicator = staticProp.getFileTransferStatusIndicator();
 			for (File item : subFiles) {
 
 				//interrupt signal check has to be done only if execution Id is present
@@ -240,12 +235,14 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				String currentFileName = item.getName();
 				if (item.isFile()) {
-					// Check if the file to be uploaded is included or not excluded
-					boolean uploadFile = checkFileIncludeorExclude(includeList, currentFileName, excludeList);
-					//file must not be uploaded
-					if(!uploadFile) {
-						continue;
-					}
+
+				    // Check if the file to be uploaded is included or not excluded
+                    //file must not be uploaded
+                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                            currentFileName,
+                            staticProp.getExcludedFiles())) {
+                        continue;
+                    }
 
 					//add status indicator if specified to indicate that uploading is in progress
 					String uploadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
@@ -274,43 +271,19 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 							}
 						}
 
-						// Delete the local files after successful upload if user opt for it
-						if (ftpUploaderStaticProperties.getDeleteFiles()) {
-							item.delete();
-							LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
-						} else {
-							// File is not opted to be deleted. Hence moved to processed folder
-							String processedFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getProcessedFileLocation());
-							if (MailBoxUtil.isEmpty(processedFileLocation)) {
-							    LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
-								archiveFile(item.getAbsolutePath(), false);
-								LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
-							} else {
-							    LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
-								archiveFile(item, processedFileLocation);
-								LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
-							}
-						}
+						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
+						        staticProp.getProcessedFileLocation(),
+                                item);
 					} else {
-
-						// File uploading failed so move the file to error folder
-						String errorFileLocation = replaceTokensInFolderPath(ftpUploaderStaticProperties.getErrorFileLocation());
-						if (MailBoxUtil.isEmpty(errorFileLocation)) {
-						    LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
-							archiveFile(item.getAbsolutePath(), true);
-							LOGGER.info(constructMessage("Archive the file to the default error file location - end"));
-						} else {
-						    LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
-							archiveFile(item, errorFileLocation);
-							LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
-						}
+					    archiveFiles(staticProp.getErrorFileLocation(), item);
 					}
 
 				} else {
 
-					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())) {
+					if (MailBoxConstants.PROCESSED_FOLDER.equals(item.getName())
+					        || MailBoxConstants.ERROR_FOLDER.equals(item.getName())) {
 						// skip processed folder
-						LOGGER.info(constructMessage("skipping processed folder"));
+						LOGGER.info(constructMessage("skipping processed/error folder"));
 						continue;
 					}
 

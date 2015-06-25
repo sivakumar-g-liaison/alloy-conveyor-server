@@ -19,7 +19,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -159,7 +158,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		//variable to hold the status of file download request execution
 		int statusCode = 0;
 		String dirToList = "";
-		SFTPDownloaderPropertiesDTO sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)getProperties();
+		SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
 
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
@@ -169,11 +168,8 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
 		if (files != null && files.size() > 0) {
-			String statusIndicator = sftpDownloaderStaticProperties.getFileTransferStatusIndicator();
-			String excludedFiles = sftpDownloaderStaticProperties.getExcludedFiles();
-			String includedFiles = sftpDownloaderStaticProperties.getIncludedFiles();
-			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+
+			String statusIndicator = staticProp.getFileTransferStatusIndicator();
 
 			for (String aFile : files) {
 				if (aFile.equals(".") || aFile.equals("..")) {
@@ -196,12 +192,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				} else {
 
 					String currentFileName = aFile;
-					// Check if the file to be downloaded is included or not excluded
-					boolean downloadFile = checkFileIncludeorExclude(includeList, currentFileName, excludedList);
-					//file must not be downloaded
-					if(!downloadFile) {
-						continue;
-					}
+					// Check if the file to be uploaded is included or not excluded
+                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                            currentFileName,
+                            staticProp.getExcludedFiles())) {
+                        continue;
+                    }
 
 					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
@@ -236,7 +232,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 								}
 							}
 							// Delete the remote files after successful download if user optioned for it
-							if (sftpDownloaderStaticProperties.getDeleteFiles()) {
+							if (staticProp.getDeleteFiles()) {
 								sftpRequest.deleteFile(aFile);
 								LOGGER.info("File {} deleted successfully in the remote location", currentFileName);
 							}

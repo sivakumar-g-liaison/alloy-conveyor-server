@@ -19,7 +19,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -199,20 +198,18 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		//variable to hold the status of file download request execution
 		int statusCode = 0;
 		String dirToList = "";
-		FTPDownloaderPropertiesDTO ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)getProperties();
+		FTPDownloaderPropertiesDTO staticProp = (FTPDownloaderPropertiesDTO) getProperties();
 
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
 		}
+
 		FTPFile[] files = ftpClient.getNative().listFiles(dirToList);
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
 		if (files != null) {
-			String statusIndicator = ftpDownloaderStaticProperties.getFileTransferStatusIndicator();
-			String excludedFiles = ftpDownloaderStaticProperties.getExcludedFiles();
-			String includedFiles = ftpDownloaderStaticProperties.getIncludedFiles();
-			List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles))? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+
+			String statusIndicator = staticProp.getFileTransferStatusIndicator();
 			for (FTPFile file : files) {
 
 				if (file.getName().equals(".") || file.getName().equals("..")) {
@@ -221,12 +218,13 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				}
 				String currentFileName = file.getName();
 				if (file.isFile()) {
+
 					// Check if the file to be downloaded is included or not excluded
-					boolean downloadFile = checkFileIncludeorExclude(includeList, currentFileName, excludedList);
-					//file must not be downloaded
-					if(!downloadFile) {
-						continue;
-					}
+                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                            currentFileName,
+                            staticProp.getExcludedFiles())) {
+                        continue;
+                    }
 
 					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
 							+ statusIndicator : currentFileName;
@@ -263,7 +261,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 								}
 							}
 							// Delete the remote files after successful download if user opt for it
-							if (ftpDownloaderStaticProperties.getDeleteFiles()) {
+							if (staticProp.getDeleteFiles()) {
 
 								ftpClient.deleteFile(file.getName());
 								LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
