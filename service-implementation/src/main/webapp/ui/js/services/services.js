@@ -3,12 +3,14 @@
 // simple stub that could use a lot of work...
 myApp.factory('RESTService',
     function ($http, $rootScope) {
+        var headers = {'acl-manifest':'H4sIAAAAAAAAAFVQYU/CMBT8L++jAcPKFNgnC0xdVEjGoonGmLo+SbVrl7YsLoT/bgsTNEuWvHf37q63BVQNSl0jJFsoDTKHfO5/kAAZRBf9QdQnpIhIEo+Ti/h8OI6eoQdrqd+ZzDgkaiNlD2pmULk/s9ElWntabCyaMAHHSofhkylCrqRgwmp1zrGBA+laGOsWrMK/l/fs/67LOW1pXUtRMie0OmA77y2Z+9CmguRlexwO13BDvI3REqfMIqdlCDnTyvnVns51xYTqyKs0f8xm6ds0X96luT88oEUbyoJlfkMX2TMtsuXiiGXKoVFMdgpzMhrRdBoP6ISQyeUwiqP4kl7PhnQ8Gg8naRfGW8Mdtg9MsTVWvkjKK6HgNfQoGiFxjft0Bq3emDIon4XTbuwC5Whd/ss4oeF5+O084QvbfnX08JQaTSWs3Zfn5RsmN7/aJ6hTf7rNivQ+WxWwew1fD5T3Q75C04gS51ij4qjKdl+nr8I7vgTmDzsGSP9iAgAA'}; // Dummy Headers
         return {
             get: function (url, callback, params) {
                 return $http({
                     method: 'GET',
                     url: url,
-                    params: params
+                    params: params,
+                    headers: headers
                 }).
                 success(function (data, status, headers, config) {
 					
@@ -27,8 +29,9 @@ myApp.factory('RESTService',
                 });
             },
             post: function (url, body, callback, headers) {
-
-                //alert(body);
+                if (typeof headers == 'undefined') {
+                     headers = {'acl-manifest':'H4sIAAAAAAAAAFVQYU/CMBT8L++jAcPKFNgnC0xdVEjGoonGmLo+SbVrl7YsLoT/bgsTNEuWvHf37q63BVQNSl0jJFsoDTKHfO5/kAAZRBf9QdQnpIhIEo+Ti/h8OI6eoQdrqd+ZzDgkaiNlD2pmULk/s9ElWntabCyaMAHHSofhkylCrqRgwmp1zrGBA+laGOsWrMK/l/fs/67LOW1pXUtRMie0OmA77y2Z+9CmguRlexwO13BDvI3REqfMIqdlCDnTyvnVns51xYTqyKs0f8xm6ds0X96luT88oEUbyoJlfkMX2TMtsuXiiGXKoVFMdgpzMhrRdBoP6ISQyeUwiqP4kl7PhnQ8Gg8naRfGW8Mdtg9MsTVWvkjKK6HgNfQoGiFxjft0Bq3emDIon4XTbuwC5Whd/ss4oeF5+O084QvbfnX08JQaTSWs3Zfn5RsmN7/aJ6hTf7rNivQ+WxWwew1fD5T3Q75C04gS51ij4qjKdl+nr8I7vgTmDzsGSP9iAgAA'} ;
+                }              
                 return $http({
                     method: 'POST',
                     url: url,
@@ -51,8 +54,9 @@ myApp.factory('RESTService',
                 });
             },
             put: function (url, body, callback, headers) {
-
-                //alert(body);
+                if (typeof headers == 'undefined') {
+                     headers = {'acl-manifest':'H4sIAAAAAAAAAFVQYU/CMBT8L++jAcPKFNgnC0xdVEjGoonGmLo+SbVrl7YsLoT/bgsTNEuWvHf37q63BVQNSl0jJFsoDTKHfO5/kAAZRBf9QdQnpIhIEo+Ti/h8OI6eoQdrqd+ZzDgkaiNlD2pmULk/s9ElWntabCyaMAHHSofhkylCrqRgwmp1zrGBA+laGOsWrMK/l/fs/67LOW1pXUtRMie0OmA77y2Z+9CmguRlexwO13BDvI3REqfMIqdlCDnTyvnVns51xYTqyKs0f8xm6ds0X96luT88oEUbyoJlfkMX2TMtsuXiiGXKoVFMdgpzMhrRdBoP6ISQyeUwiqP4kl7PhnQ8Gg8naRfGW8Mdtg9MsTVWvkjKK6HgNfQoGiFxjft0Bq3emDIon4XTbuwC5Whd/ss4oeF5+O084QvbfnX08JQaTSWs3Zfn5RsmN7/aJ6hTf7rNivQ+WxWwew1fD5T3Q75C04gS51ij4qjKdl+nr8I7vgTmDzsGSP9iAgAA'} ;
+                }    
                 return $http({
                     method: 'PUT',
                     url: url,
@@ -76,10 +80,12 @@ myApp.factory('RESTService',
             },
             delete: function (url, callback) {
                 var body = "[{}]"; //Dummy body
+                var headers = {'acl-manifest':'H4sIAAAAAAAAAFVQYU/CMBT8L++jAcPKFNgnC0xdVEjGoonGmLo+SbVrl7YsLoT/bgsTNEuWvHf37q63BVQNSl0jJFsoDTKHfO5/kAAZRBf9QdQnpIhIEo+Ti/h8OI6eoQdrqd+ZzDgkaiNlD2pmULk/s9ElWntabCyaMAHHSofhkylCrqRgwmp1zrGBA+laGOsWrMK/l/fs/67LOW1pXUtRMie0OmA77y2Z+9CmguRlexwO13BDvI3REqfMIqdlCDnTyvnVns51xYTqyKs0f8xm6ds0X96luT88oEUbyoJlfkMX2TMtsuXiiGXKoVFMdgpzMhrRdBoP6ISQyeUwiqP4kl7PhnQ8Gg8naRfGW8Mdtg9MsTVWvkjKK6HgNfQoGiFxjft0Bq3emDIon4XTbuwC5Whd/ss4oeF5+O084QvbfnX08JQaTSWs3Zfn5RsmN7/aJ6hTf7rNivQ+WxWwew1fD5T3Q75C04gS51ij4qjKdl+nr8I7vgTmDzsGSP9iAgAA'}; 
                 return $http({
                     method: 'DELETE',
                     url: url,
-                    data: body
+                    data: body,
+                    headers: headers
                 }).
                 success(function (data, status, headers, config) {
                     callback(data, status);

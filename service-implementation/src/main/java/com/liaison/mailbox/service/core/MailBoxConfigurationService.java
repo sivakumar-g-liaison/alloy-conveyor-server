@@ -506,6 +506,9 @@ public class MailBoxConfigurationService {
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
 			SearchMailBoxDTO serachMailBoxDTO = null;
+			
+			long lStartTime = System.currentTimeMillis();
+						
 			for (MailBox mbx : mailboxes) {
 
                 serachMailBoxDTO = new SearchMailBoxDTO();
@@ -513,7 +516,12 @@ public class MailBoxConfigurationService {
                         dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId()));
                 searchMailBoxDTOList.add(serachMailBoxDTO);
             }
-
+			
+			long lEndTime = System.currentTimeMillis();
+			 
+			long difference = lEndTime - lStartTime;
+		 
+			LOG.info("Elapsed time in milliseconds: " + difference);
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
 			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));

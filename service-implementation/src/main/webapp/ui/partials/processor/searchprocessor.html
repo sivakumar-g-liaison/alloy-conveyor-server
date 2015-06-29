@@ -1,0 +1,17 @@
+<div class="container fade-in">
+
+	<div class="form-row">
+		<h3 id="title" class="ng-binding">Search Processor</h3>
+		<hr />
+		<br />
+	</div>
+	<!-- Loading image will be shown until grid is loaded -->
+	<div  class="loadingSpinner"  id="loader" ng-cloak ng-hide="gridLoaded">
+        <h4>Loading Processors...</h4>
+        <img height="96px" src="img/spinner.gif" />
+	</div>
+	<div>
+		<div class="gridStyle" ng-grid="gridOptionsForGetProcessor" ng-if="gridLoaded"></div>
+		<br>
+	</div>	
+</div>

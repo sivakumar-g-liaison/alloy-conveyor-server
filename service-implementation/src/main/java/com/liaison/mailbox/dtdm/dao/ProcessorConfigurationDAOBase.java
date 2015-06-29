@@ -11,6 +11,7 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -107,6 +108,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         try {
 
             LOG.info("Fetching the processor count starts.");
+            long lStartTime = new Date().getTime(); // start time
+            LOG.info("Start Time of Query Execution : " + lStartTime);
             StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor")
                     .append(" inner join processor.mailbox mbx")
                     .append(" where mbx.pguid = :" + PGUID)
@@ -116,7 +119,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
                     .setParameter(PGUID , mbxGuid)
                     .setParameter(SERV_INST_ID, siid)
                     .getSingleResult();
-
+            long lEndTime = new Date().getTime(); // end time
+            LOG.info("End Time of Query Execution : " + lEndTime);
             if (count > 0) {
                 status = true;
             }
@@ -482,4 +486,32 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 
+	
+	public List<Processor> getAllProcessors() {
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+			
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor");
+
+			List <?> proc = entityManager.createQuery(query.toString()).getResultList();
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return processors;		
+	}
 }

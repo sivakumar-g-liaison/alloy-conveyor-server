@@ -36,6 +36,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
@@ -886,5 +887,57 @@ public class ProcessorConfigurationService {
 
 		return httpListenerProperties;
 
+	}
+	
+	/**
+	 * Get the Processor details of the mailbox using guid.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public GetProcessorResponseDTO getAllProcessors()
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get all processors.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+			List<Processor> processors = config.getAllProcessors();
+			
+			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
+			if (null == processors || processors.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_PROCESSORS_EXIST, Response.Status.NOT_FOUND);
+			}
+			ProcessorDTO processorDTO = null;
+			for (Processor processor : processors) {
+				processorDTO = new ProcessorDTO();
+				processorDTO.copyFromEntity(processor, false);
+				prsDTO.add(processorDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setProcessors(prsDTO);
+			
+			LOGGER.debug("Exit from get all processors.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROCESSOR, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		} 
 	}
 }

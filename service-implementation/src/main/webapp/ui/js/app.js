@@ -54,6 +54,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/processor/processor.html',
             controller: 'ProcessorCntrlr'
         });
+        $routeProvider.when('/mailbox/getProcessor', {
+            templateUrl: 'partials/processor/searchprocessor.html',
+            controller: 'SearchProcessorCntrlr'
+        });
         $routeProvider.when('/profiles/addProfiles', {
             templateUrl: 'partials/profile/addprofile.html',
             controller: 'ProfileCntrlr'

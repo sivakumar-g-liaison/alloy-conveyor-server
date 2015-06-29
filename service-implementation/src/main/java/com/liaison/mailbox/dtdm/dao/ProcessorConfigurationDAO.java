@@ -139,6 +139,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	* @return  processors
  	*/
  	public Processor findProcessorByNameAndMbx(String mbxGuid, String ProcName); 
-
+ 	
+ 	/**
+	 * Retrieves list of all processors  
+	 * @return list of processors
+	 */
+	public List <Processor> getAllProcessors(); 
 
 }

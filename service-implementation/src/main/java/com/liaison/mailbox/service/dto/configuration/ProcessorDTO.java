@@ -74,6 +74,7 @@ public class ProcessorDTO {
 	private List<String> linkedProfiles;
 	private List<ProfileDTO> profiles;
 	private boolean createConfiguredLocation;
+	private String mailboxName;
 
 
 	public ProcessorDTO() {
@@ -188,6 +189,13 @@ public class ProcessorDTO {
 		this.createConfiguredLocation = createConfiguredLocation;
 	}
 
+	public String getMailboxName() {
+		return mailboxName;
+	}
+
+	public void setMailboxName(String mailboxName) {
+		this.mailboxName = mailboxName;
+	}
 
 	/**
 	 * Method is used to copy the values from DTO to Entity. It does not create relationship between
@@ -349,6 +357,8 @@ public class ProcessorDTO {
 		this.setType(processor.getProcessorType().name());
 		this.setJavaScriptURI(processor.getJavaScriptUri());
 		this.setName(processor.getProcsrName());
+		this.setLinkedMailboxId(processor.getMailbox().getPguid());
+		this.setMailboxName(processor.getMailbox().getMbxName());
 
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		// Set protocol

@@ -151,7 +151,8 @@ public enum Messages {
 	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed."),
 	REQUEST_HEADER_PROPERTIES_MISSING("Request header properties are missing"),
 	
-	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details.");
+	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details."),
+	NO_PROCESSORS_EXIST("No Processors available.");
 
 	private String value;
 
