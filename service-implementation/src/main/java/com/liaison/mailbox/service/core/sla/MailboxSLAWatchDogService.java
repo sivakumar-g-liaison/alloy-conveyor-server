@@ -43,7 +43,6 @@ import org.codehaus.jettison.json.JSONObject;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
@@ -433,14 +432,7 @@ public class MailboxSLAWatchDogService {
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 
 	        //GLASS LOGGING BEGINS//
-
-			if(processorPayloadLocation.contains("ftps")){
-				glassMessage.setOutAgent(GatewayType.FTPS);
-			}if(processorPayloadLocation.contains("sftp")){
-				glassMessage.setOutAgent(GatewayType.SFTP);
-			}else if(processorPayloadLocation.contains("ftp")){
-				glassMessage.setOutAgent(GatewayType.FTP);
-			}
+	        glassMessage.setOutAgent(processorPayloadLocation);
 
 			//GLASS LOGGING CORNER 4 //
             StringBuffer message = new StringBuffer()

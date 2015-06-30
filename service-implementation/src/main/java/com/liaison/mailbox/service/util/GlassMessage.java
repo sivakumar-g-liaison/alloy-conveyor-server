@@ -136,6 +136,16 @@ public class GlassMessage {
 		this.outAgent = outAgent;
 	}
 
+	public void setOutAgent(String outAgent) {
+        if (outAgent.contains("ftps")) {
+            this.outAgent = GatewayType.FTPS;
+        } else if (outAgent.contains("sftp")) {
+            this.outAgent = GatewayType.SFTP;
+        } else if (outAgent.contains("ftp")) {
+            this.outAgent = GatewayType.FTP;
+        }
+    }
+
 	public GatewayType getInAgent() {
 		return inAgent;
 	}
@@ -143,6 +153,16 @@ public class GlassMessage {
 	public void setInAgent(GatewayType inAgent) {
 		this.inAgent = inAgent;
 	}
+
+	public void setInAgent(String inAgent) {
+	    if (inAgent.contains("ftps")) {
+	        this.inAgent = GatewayType.FTPS;
+        } else if (inAgent.contains("sftp")) {
+            this.inAgent = GatewayType.SFTP;
+        } else if (inAgent.contains("ftp")) {
+            this.inAgent = GatewayType.FTP;
+        }
+    }
 
 	public String getPipelineId() {
 		return pipelineId;
