@@ -511,10 +511,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 						if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
 							files.add(file);
 						}
-					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
+					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())
+							&& !MailBoxConstants.ERROR_FOLDER.equals(file.getName())) {
 						// recursively get all files from sub directory.
 						fetchFiles(file.getAbsolutePath(), files);
-
 					}
 				}
 			}
@@ -612,6 +612,58 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			archiveFile(file, processedFileLcoation);
 		}
 	}
+
+	/**
+	 * Method deletes or archives the files based on the configuration
+	 *
+	 * @param deleteFiles
+	 * @param processedFileLocation
+	 * @param item
+	 * @param curFileName
+	 * @throws IOException
+	 */
+	protected void deleteOrArchiveTheFiles(boolean deleteFiles, String processedFileLocation, File item) throws IOException {
+
+        // Delete the local files after successful upload if user opt for it
+        if (deleteFiles) {
+            item.delete();
+            LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), item.getName());
+        } else {
+            // File is not opted to be deleted. Hence moved to processed folder
+            processedFileLocation = replaceTokensInFolderPath(processedFileLocation);
+            if (MailBoxUtil.isEmpty(processedFileLocation)) {
+                LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
+                archiveFile(item.getAbsolutePath(), false);
+                LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
+            } else {
+                LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
+                archiveFile(item, processedFileLocation);
+                LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
+            }
+        }
+    }
+
+	/**
+	 * Method archives the files based on the configuration
+	 *
+	 * @param errorFileLocation
+	 * @param item
+	 * @throws IOException
+	 */
+	protected void archiveFiles(String errorFileLocation, File item) throws IOException {
+
+        // File Uploading failed so move the file to error folder
+        errorFileLocation = replaceTokensInFolderPath(errorFileLocation);
+        if (MailBoxUtil.isEmpty(errorFileLocation)) {
+            LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
+            archiveFile(item.getAbsolutePath(), true);
+            LOGGER.info(constructMessage("Archive the file to the default error file location {} - end"));
+        } else {
+            LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
+            archiveFile(item, errorFileLocation);
+            LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
+        }
+    }
 
 	/**
 	 * Method is used to process the folder path given by user and replace the
@@ -812,7 +864,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @param excludedList - List of extensions to be excluded
 	 * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
 	 */
-	public boolean checkFileIncludeorExclude(List<String> includeList, String currentFileName, List<String> excludedList){
+    public boolean checkFileIncludeorExclude(String includedFiles, String currentFileName, String excludedFiles) {
+
+        List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles)) ? Arrays.asList(includedFiles.split(",")) : null;
+        List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
 
 		//Add period to fileExtension since include/exclude list contains extension with period
 		String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
