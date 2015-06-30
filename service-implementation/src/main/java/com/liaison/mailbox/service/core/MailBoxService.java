@@ -24,6 +24,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
@@ -54,7 +55,9 @@ import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.ProcessorQueue;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 
 /**
@@ -319,11 +322,19 @@ public class MailBoxService {
         ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
         ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+        GlassMessage glassMessage = null;
+
         try {
 
             LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
             WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+
+            //Glass message begins
+            glassMessage = new GlassMessage(workTicket);
+            glassMessage.setStatus(ExecutionState.COMPLETED);
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
             // validates mandatory value.
             mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
@@ -370,6 +381,8 @@ public class MailBoxService {
             LOG.info("The Processer type is {}", processor.getProcessorType());
 
             processorService.runProcessor(workTicket, fsm);
+            transactionVisibilityClient.logToGlass(glassMessage);
+            glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Stage is completed");
 
             LOG.info("The execution completed for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
                     processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
@@ -377,11 +390,21 @@ public class MailBoxService {
 
             //persist staged file to get the gpid during uploader
             StagedFileDAOBase dao = new StagedFileDAOBase();
-            dao.persistStagedFile(workTicket, processorId);
+            dao.persistStagedFile(workTicket, processor.getPguid());
 
         } catch (Exception e) {
 
             LOG.error("File Staging failed", e);
+
+            //GLASS LOGGING CORNER 4 //
+            if (null != glassMessage) {
+                glassMessage.setStatus(ExecutionState.FAILED);
+                transactionVisibilityClient.logToGlass(glassMessage);
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage());
+                glassMessage.logFourthCornerTimestamp();
+            }
+            //GLASS LOGGING ENDS//
+
             fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
             if (processorExecutionState != null) {
                 processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
@@ -406,6 +429,7 @@ public class MailBoxService {
             if (processor.getEmailAddress() != null) {
                 sendEmail(processor.getEmailAddress(), sub.toString(), e, "HTML");
             }
+
         }
 	    
 	}

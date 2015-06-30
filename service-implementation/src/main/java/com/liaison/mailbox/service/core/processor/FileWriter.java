@@ -23,7 +23,6 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
     
@@ -42,7 +41,6 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	public void runProcessor(Object dto, MailboxFSM fsm) {
 	    
 	    WorkTicket workTicket = (WorkTicket) dto;
-        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
         GlassMessage glassMessage = null;
 
         try {
@@ -51,7 +49,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.COMPLETED);
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Started to write the payload in local location");
 
             LOG.info(constructMessage("Start Run"));
             LOG.info(constructMessage("JSON received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
@@ -117,12 +115,11 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             //GLASS LOGGING CORNER 4 //
             StringBuffer message = new StringBuffer()
-                    .append("Payload delivered at target location : ")
+                    .append("Payload written at target location : ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
                     .append(fileName);
 
-            transactionVisibilityClient.logToGlass(glassMessage);
             glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
             glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
@@ -138,9 +135,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             //GLASS LOGGING CORNER 4 //
             glassMessage.setStatus(ExecutionState.FAILED);
-            transactionVisibilityClient.logToGlass(glassMessage);
             glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage());
-            glassMessage.logFourthCornerTimestamp();
              //GLASS LOGGING ENDS//
         }
 		
