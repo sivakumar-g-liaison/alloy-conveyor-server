@@ -511,10 +511,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 						if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
 							files.add(file);
 						}
-					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
+					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())
+							&& !MailBoxConstants.ERROR_FOLDER.equals(file.getName())) {
 						// recursively get all files from sub directory.
 						fetchFiles(file.getAbsolutePath(), files);
-
 					}
 				}
 			}
@@ -615,7 +615,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	/**
 	 * Method deletes or archives the files based on the configuration
-	 * 
+	 *
 	 * @param deleteFiles
 	 * @param processedFileLocation
 	 * @param item
@@ -645,7 +645,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	/**
 	 * Method archives the files based on the configuration
-	 * 
+	 *
 	 * @param errorFileLocation
 	 * @param item
 	 * @throws IOException
