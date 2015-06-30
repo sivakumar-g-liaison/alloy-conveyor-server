@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -67,13 +68,13 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 	    try {
 
-	    	setReqDTO(dto);
-		// FTPSRequest executed through JavaScript
+	    	setReqDTO((TriggerProcessorRequestDTO) dto);
+	    	// FTPSRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
@@ -282,6 +283,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
+						Files.setPosixFilePermissions(directory.toPath(), PosixFilePermissions.fromString("rwxrwx---"));
 					}
 					ftpClient.changeDirectory(remotePath);
 					downloadDirectory(ftpClient, remotePath, localDir);

@@ -73,12 +73,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {
 
-		    setReqDTO(dto);
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// FTPSRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -86,7 +86,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// FTPSRequest executed through Java
-				executeRequest(dto.getExecutionId(), fsm);
+				executeRequest(getReqDTO().getExecutionId(), fsm);
 			}
 
 		} catch(IOException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | MailBoxServicesException | URISyntaxException e) {

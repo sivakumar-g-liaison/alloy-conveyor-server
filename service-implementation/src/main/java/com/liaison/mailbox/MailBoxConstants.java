@@ -122,6 +122,7 @@ public interface MailBoxConstants {
 	public final static String KEY_FILE_CREATED_NAME = "createdTime";
 	public final static String KEY_FILE_MODIFIED_NAME = "modifiedTime";
 	public final static String KEY_MAILBOX_ID = "mailboxId";
+	public final static String KEY_PROCESSOR_ID = "processorId";
 	public final static String KEY_OVERWRITE = "overwrite";
 	public final static String KEY_FILE_PATH = "path";
 	public final static String KEY_WORKTICKET_PROCESSOR_ID = "processorId";

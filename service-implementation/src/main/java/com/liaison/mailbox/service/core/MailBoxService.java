@@ -23,6 +23,9 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
@@ -37,12 +40,15 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
+import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
+import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
@@ -167,7 +173,7 @@ public class MailBoxService {
 	}
 
 	/**
-	 * The method gets the processor based on given processor id.
+	 * The method executes the processor based on given processor id.
 	 *
 	 * Unique id for processor
 	 *
@@ -294,6 +300,114 @@ public class MailBoxService {
             }
             LOG.error(sub, e);
 		}
+	}
+
+	/**
+	 * The method writes the payload into local payload location using filewriter or uploaders
+	 * This servers watchdog functionality
+	 * 
+	 * @param request
+	 */
+	public void executeFileWriter(String request) {
+
+	    Processor processor = null;
+        ProcessorExecutionState processorExecutionState = null;
+        String mailboxId = null;
+        String processorId = null;
+        String payloadURI = null;
+        MailboxFSM fsm = new MailboxFSM();
+        ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+        ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
+
+        try {
+
+            LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
+
+            WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+
+            // validates mandatory value.
+            mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
+            if (MailBoxUtil.isEmpty(mailboxId)) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id", Response.Status.CONFLICT);
+            }
+
+            payloadURI = workTicket.getPayloadURI();
+            if (MailBoxUtil.isEmpty(payloadURI)) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL", Response.Status.CONFLICT);
+            }
+
+            LOG.info("Received mailbox id - {}", mailboxId);
+            LOG.info("Received payloadURI is {}", payloadURI);
+
+            processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
+
+            if (!MailBoxUtil.isEmpty(processorId)) {
+                processor = processorDAO.find(Processor.class, processorId);
+            } else {
+                processor = new MailboxSLAWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+            }
+
+            // Initiate FSM Starts
+            // retrieve the processor execution status of corresponding uploader from run-time DB
+            processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
+            ProcessorStateDTO processorStaged = new ProcessorStateDTO();
+            processorStaged.setValues(workTicket.getGlobalProcessId(),
+                    processor,
+                    workTicket.getFileName(),
+                    ExecutionState.STAGED,
+                    SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode());
+            fsm.addState(processorStaged);
+
+            processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
+            processorExecutionStateDAO.merge(processorExecutionState);
+            fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
+            //Initiate FSM Ends
+
+            MailBoxProcessorI processorService = new FileWriter(processor);
+            MailBox mbx = processor.getMailbox();
+            LOG.info("The execution started for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
+                    processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
+            LOG.info("The Processer type is {}", processor.getProcessorType());
+
+            processorService.runProcessor(workTicket, fsm);
+
+            LOG.info("The execution completed for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
+                    processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
+            LOG.info("#################################################################");
+
+            //persist staged file to get the gpid during uploader
+            StagedFileDAOBase dao = new StagedFileDAOBase();
+            dao.persistStagedFile(workTicket, processorId);
+
+        } catch (Exception e) {
+
+            LOG.error("File Staging failed", e);
+            fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+            if (processorExecutionState != null) {
+                processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+                processorExecutionStateDAO.merge(processorExecutionState);
+            }
+
+            StringBuffer sub = new StringBuffer("File Staging failed");
+            if (processor != null) {
+                sub.append(" for ")
+                   .append("Processor (")
+                   .append(processor.getProcsrName())
+                   .append(") Type (")
+                   .append(processor.getProcessorType().getCode())
+                   .append(") and it belongs to Mailbox (")
+                   .append(processor.getMailbox().getMbxName())
+                   .append(" - ")
+                   .append(processor.getMailbox().getPguid())
+                   .append(" )");
+                LOG.error(sub, e);
+            }
+
+            if (processor.getEmailAddress() != null) {
+                sendEmail(processor.getEmailAddress(), sub.toString(), e, "HTML");
+            }
+        }
+	    
 	}
 
 	/**

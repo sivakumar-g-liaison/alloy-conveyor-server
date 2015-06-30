@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -246,7 +248,9 @@ public class MailBoxUtil {
 		LOGGER.info("Started writing given inputstream to given location {}", targetLocation);
 		File directory = new File(targetLocation);
 		if (!directory.exists()) {
-			Files.createDirectories(directory.toPath());
+		    Path dirPath = directory.toPath();
+			Files.createDirectories(dirPath);
+			Files.setPosixFilePermissions(dirPath, PosixFilePermissions.fromString("rwxrwx---"));
 		}
 
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
@@ -254,7 +258,9 @@ public class MailBoxUtil {
 		if (file.exists() && !isOverwrite) {
 			LOGGER.info("File {} already exists and should not be overwritten", file.getName());
 		} else {
-			Files.write(file.toPath(), IOUtils.toByteArray(response));
+		    Path path = file.toPath();
+			Files.write(path, IOUtils.toByteArray(response));
+			Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-rw----"));
 		}
 		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
 		if (response != null) {

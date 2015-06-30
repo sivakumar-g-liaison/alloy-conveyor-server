@@ -646,7 +646,7 @@ public class MailboxSLAWatchDogService {
 	 * @param mailboxId
 	 * @return
 	 */
-	private Processor getSpecificProcessorofMailbox(String mailboxId) {
+	public Processor getSpecificProcessorofMailbox(String mailboxId) {
 
 		LOG.info("Retrieving processors of type uploader for mailbox {}", mailboxId);
 		// get processor of type remote uploader of given mailbox id

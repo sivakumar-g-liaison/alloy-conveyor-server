@@ -228,10 +228,11 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		try {
 
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// HTTPRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
@@ -239,7 +240,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// HTTPRequest executed through Java
-				executeRequest(dto.getExecutionId(), fsm);
+				executeRequest(getReqDTO().getExecutionId(), fsm);
 			}
 
 		} catch (JAXBException | IOException | IllegalAccessException | NoSuchFieldException e) {

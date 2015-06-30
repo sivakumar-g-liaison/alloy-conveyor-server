@@ -282,13 +282,13 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	}
 
 	@Override
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 
 		try {
 
-		    setReqDTO(dto);
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// SFTPRequest executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 
@@ -299,7 +299,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// SFTPRequest executed through Java
-				executeRequest(dto.getExecutionId(), fsm);
+				executeRequest(getReqDTO().getExecutionId(), fsm);
 			}
 		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);

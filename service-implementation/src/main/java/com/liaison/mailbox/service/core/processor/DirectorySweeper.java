@@ -117,17 +117,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 
 	@Override
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		try {
 
-		    setReqDTO(dto);
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 			 } else {
-				run(dto.getExecutionId());
+				run(getReqDTO().getExecutionId());
 			}
 		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
