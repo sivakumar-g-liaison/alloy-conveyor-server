@@ -40,7 +40,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
@@ -209,24 +208,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
             				glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
             				glassMessage.setStatus(ExecutionState.PROCESSING);
+            				glassMessage.setInAgent(inputLocation);
             				Long payloadSize = wrkTicket.getPayloadSize();
             				if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-            					glassMessage.setInSize((int) (long) payloadSize);
-            				}
-
-            				if (inputLocation.contains("ftps")) {
-            					glassMessage.setInAgent(GatewayType.FTPS);
-            				} else if (inputLocation.contains("sftp")) {
-            					glassMessage.setInAgent(GatewayType.SFTP);
-            				} else if (inputLocation.contains("ftp")) {
-            					glassMessage.setInAgent(GatewayType.FTP);
+            					glassMessage.setInSize(payloadSize.intValue());
             				}
 
             				// Log FIRST corner
             				glassMessage.logFirstCornerTimestamp();
             				transactionVisibilityClient.logToGlass(glassMessage);
             				// Log running status
-            				glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
+            				glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
