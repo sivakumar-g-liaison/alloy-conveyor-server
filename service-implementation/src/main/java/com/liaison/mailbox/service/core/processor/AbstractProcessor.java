@@ -55,6 +55,7 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
@@ -729,8 +730,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			toEmailAddrList = configuredEmailAddress;
 		}
 
+		// construct the email helper dto which contains all details
+		EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
+		emailInfoDTO.setEmailBody(emailBody);
+		emailInfoDTO.setSubject(subject);
+		emailInfoDTO.setType(type);
+		emailInfoDTO.setToEmailAddrList(toEmailAddrList);
+
 		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
+		notifier.sendEmail(emailInfoDTO);
 	}
 
 	/**

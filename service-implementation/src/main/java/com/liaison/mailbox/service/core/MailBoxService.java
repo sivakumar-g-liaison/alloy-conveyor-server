@@ -17,7 +17,6 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
@@ -43,7 +42,6 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FileWriter;
@@ -55,6 +53,7 @@ import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.ProcessorQueue;
+import com.liaison.mailbox.service.util.EmailUtil;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -279,13 +278,10 @@ public class MailBoxService {
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
 
-			String sub = "Processor:" + processor.getProcsrName()
-			        + " execution failed for the mailbox " + processor.getMailbox().getMbxName()
-			        + "(" + processor.getMailbox().getPguid() + ")";
-			if (processor.getEmailAddress() != null) {
-			    sendEmail(processor.getEmailAddress(), sub, e, "HTML");
-			}
-			LOG.error(sub, e);
+			// send email to the configured mail id in case of failure
+			String emailSubject = EmailUtil.constructSubject(processor);
+			EmailUtil.sendEmail(processor, emailSubject, e);
+			LOG.error(emailSubject, e);
 
 		} catch (Exception e) {
 
@@ -295,13 +291,10 @@ public class MailBoxService {
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
 
-			String sub = "Processor:" + processor.getProcsrName()
-                    + " execution failed for the mailbox " + processor.getMailbox().getMbxName()
-                    + "(" + processor.getMailbox().getPguid() + ")";
-            if (processor.getEmailAddress() != null) {
-                sendEmail(processor.getEmailAddress(), sub, e, "HTML");
-            }
-            LOG.error(sub, e);
+			// send email to the configured mail id in case of failure
+			String emailSubject = EmailUtil.constructSubject(processor);
+			EmailUtil.sendEmail(processor, emailSubject, e);
+			LOG.error(emailSubject, e);
 		}
 	}
 
@@ -333,7 +326,7 @@ public class MailBoxService {
 
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
-            glassMessage.setStatus(ExecutionState.COMPLETED);
+            glassMessage.setStatus(ExecutionState.READY);
             glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
             // validates mandatory value.
@@ -411,55 +404,13 @@ public class MailBoxService {
                 processorExecutionStateDAO.merge(processorExecutionState);
             }
 
-            StringBuffer sub = new StringBuffer("File Staging failed");
-            if (processor != null) {
-                sub.append(" for ")
-                   .append("Processor (")
-                   .append(processor.getProcsrName())
-                   .append(") Type (")
-                   .append(processor.getProcessorType().getCode())
-                   .append(") and it belongs to Mailbox (")
-                   .append(processor.getMailbox().getMbxName())
-                   .append(" - ")
-                   .append(processor.getMailbox().getPguid())
-                   .append(" )");
-                LOG.error(sub, e);
-            }
-
-            if (processor.getEmailAddress() != null) {
-                sendEmail(processor.getEmailAddress(), sub.toString(), e, "HTML");
-            }
+            // send email to the configured mail id in case of failure
+            String emailSubject = EmailUtil.constructSubject(processor);
+            EmailUtil.sendEmail(processor, emailSubject, e);
+            LOG.error(emailSubject, e);
 
         }
 	    
-	}
-
-	/**
-	 * Sent notifications for trigger system failure.
-	 *
-	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
-	 * @param subject The notification subject
-	 * @param emailBody The body of the notification
-	 * @param type The notification type(TEXT/HTML).
-	 */
-
-	private void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
-
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
-	}
-
-	/**
-	 * Sent notifications for trigger system failure.
-	 *
-	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
-	 * @param subject The notification subject
-	 * @param exc The exception as body content
-	 * @param type The notification type(TEXT/HTML).
-	 */
-	private void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
-
-		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
 	}
 
 }
