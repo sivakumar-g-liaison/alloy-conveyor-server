@@ -47,6 +47,8 @@ import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.email.GenericEmailInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
@@ -442,6 +444,20 @@ public class MailBoxUtil {
         }
 
         return msgBuf.toString();
+    }
+
+    /**
+     * Method to send emails according to the details provided in the email helper dto.
+     *
+     * @param emailInfoDTO - EmailHelper DTO which contain all email details
+     */
+    public static void sendEmail(GenericEmailInfoDTO emailInfoDTO) {
+
+    	LOGGER.info("Ready to send email to {}", emailInfoDTO.getToEmailAddrList());
+    	EmailNotifier emailNotifier = new EmailNotifier();
+    	emailNotifier.sendEmail(emailInfoDTO);
+    	LOGGER.info("Email sent successfully to {}", emailInfoDTO.getToEmailAddrList());
+
     }
 
 

@@ -73,7 +73,7 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMState;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.email.GenericEmailInfoDTO;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FTPSRemoteUploader;
@@ -97,7 +97,7 @@ public class MailboxSLAWatchDogService {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxSLAWatchDogService.class);
 
-	private static String SLA_VIOLATION_NOTIFICATION = "Mailbox %s does not adhere to SLA";
+	private static String SLA_VIOLATION_NOTIFICATION = "Mailbox %s(%s) does not adhere to SLA";
 	private static String SLA_VIOLATION_NOTIFICATION_MESSAGE = "Mailbox %s does not adhere to SLA Rule \"%s - %s\".";
 	private static String SLA_NOTIFICATION_FAILURE_INFO = "\n\n The last execution dated %s got failed.";
 	private static String MAILBOX_SLA_RULE = "Time to pick up file posted to mailbox";
@@ -198,17 +198,19 @@ public class MailboxSLAWatchDogService {
 
 			String mailboxName = null;
 			String emailSubject = null;
-			StringBuilder emailBody = null;
+			StringBuilder failureReason = null;
+			List<String> emailAddress = null;
 			// If the list is empty then the processor is not executed at all during the specified sla time.
 			if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
 
 				LOG.debug("The processor was not executed with in the specified mailbox SLA configuration time");
 				mailboxName = procsr.getMailbox().getMbxName();
 				slaViolatedMailboxes.add(mailboxName);
-				emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
-				emailBody = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox));
+				emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
+				failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox));
+				emailAddress = procsr.getEmailAddress();
+				notifyUser(procsr, emailAddress, emailSubject, failureReason.toString());
 				LOG.info("The SLA violations are notified to the user by sending email");
-				sendEmail(procsr.getEmailAddress(), emailSubject, emailBody.toString(), "HTML");
 				continue;
 			}
 
@@ -217,14 +219,17 @@ public class MailboxSLAWatchDogService {
 				for (FSMStateValue fsmStateVal : listfsmStateVal) {
 
 					if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
+
 						LOG.debug("The processor was executed but got failed with in the specified mailbox SLA configuration time");
 						mailboxName = procsr.getMailbox().getMbxName();
 						slaViolatedMailboxes.add(mailboxName);
-						emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
+						emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
 						ISO8601Util dateUtil = new ISO8601Util();
-						emailBody = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox)).append(String.format(SLA_NOTIFICATION_FAILURE_INFO, dateUtil.fromTimestamp(fsmStateVal.getCreatedDate())));
+						failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox)).append(String.format(SLA_NOTIFICATION_FAILURE_INFO, dateUtil.fromTimestamp(fsmStateVal.getCreatedDate())));
+						emailAddress = procsr.getEmailAddress();
+						notifyUser(procsr, emailAddress, emailSubject, failureReason.toString());
 						LOG.info("The SLA violations are notified to the user by sending email");
-						sendEmail(procsr.getEmailAddress(), emailSubject, emailBody.toString(), "HTML");
+
 					}
 				}
 
@@ -239,26 +244,6 @@ public class MailboxSLAWatchDogService {
 		LOG.debug("Exit from validateMailboxSLARules.");
 		return slaViolatedMailboxes.isEmpty();
 
-	}
-
-	/**
-	 * Sent notifications for SLA non adherence.
-	 *
-	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
-	 * @param subject
-	 *            The notification subject
-	 * @param emailBody
-	 *            The body of the notification
-	 * @param type
-	 *            The notification type(TEXT/HTML).
-	 */
-
-	private void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
-
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
 	}
 
 	private Timestamp getSLAConfigurationAsTimeStamp(String slaConfiguration) throws IOException {
@@ -475,7 +460,18 @@ public class MailboxSLAWatchDogService {
 
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			notifyUser(processor, mailboxId, e);
+
+			// send email in case of exception
+			String emailSubject = null;
+			List <String> emailAddress = getEmailAddress(processor, mailboxId);
+			if (null != processor) {
+				emailSubject = processor.getProcsrName() + ":" + e.getMessage();
+			} else {
+				emailSubject = e.getMessage();
+			}
+			String failureReason = ExceptionUtils.getStackTrace(e);
+			// email will be sent only if emailAddress is available
+			notifyUser(processor, emailAddress, emailSubject, failureReason);
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
@@ -516,17 +512,18 @@ public class MailboxSLAWatchDogService {
 		return null;
 	}
 
-	private void notifyUser (Processor processor, String mailboxId, Exception e) {
+	/**
+	 * Method to construct the Email Helper DTO from given processor details and the failure Reason.
+	 *
+	 * @param processor - Processor for which the execution failed
+	 * @param failureReason - Reason for failure
+	 * @param emailAddress - Address to which email has to be sent
+	 * @param emailSubject - subject of the email
+	 */
+	private void notifyUser (Processor processor, List<String> emailAddress, String emailSubject, String failureReason) {
 
-		String emailSubject = null;
-		List <String> emailAddress = getEmailAddress(processor, mailboxId);
-		if (null != processor) {
-			emailSubject = processor.getProcsrName() + ":" + e.getMessage();
-		} else {
-			emailSubject = e.getMessage();
-		}
-		// Email will be sent only if email address is available
-		if (null != emailAddress) sendEmail(emailAddress, emailSubject, ExceptionUtils.getStackTrace(e), "HTML");
+		GenericEmailInfoDTO emailInfoDTO = constructEmailHelperDTO(processor, emailAddress, emailSubject, failureReason);
+		MailBoxUtil.sendEmail(emailInfoDTO);
 	}
 
 	/**
@@ -758,9 +755,10 @@ public class MailboxSLAWatchDogService {
 
 				String mailboxName = procsr.getMailbox().getMbxName();
 				slaViolatedMailboxes.add(mailboxName);
-				String emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
-				StringBuilder emailBody = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, CUSTOMER_SLA_RULE, timeToPickUpFilePostedByMailbox));
-				sendEmail(procsr.getEmailAddress(), emailSubject, emailBody.toString(), "HTML");
+				String emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
+				StringBuilder failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, CUSTOMER_SLA_RULE, timeToPickUpFilePostedByMailbox));
+				List <String> emailAddress = procsr.getEmailAddress();
+				notifyUser(procsr, emailAddress, emailSubject, failureReason.toString());
 			}
 
 			// update the sla verfication of processor execution FSM state if sla verfication
@@ -875,7 +873,11 @@ public class MailboxSLAWatchDogService {
             LOG.error("Error occured during file existence check of processor {} , {}", processor.getProcsrName(), e.getMessage());
             // if any exception occurs during file existence check, a notification will be send to the user
             // and the mailbox corresponding to this processor will not be considered for sla validation
-            notifyUser(processor, processor.getMailbox().getPguid(), e);
+            String emailSubject = null;
+    		List <String> emailAddress = processor.getEmailAddress();
+   			emailSubject = processor.getProcsrName() + ":" + e.getMessage();
+    		String failureReason = ExceptionUtils.getStackTrace(e);
+    		notifyUser(processor, emailAddress, emailSubject, failureReason);
             return isCustomerSLAViolated;
         }
 
@@ -945,5 +947,29 @@ public class MailboxSLAWatchDogService {
         return msgBuf.toString();
     }
 
+	/**
+	 * Method to construct the Email Helper DTO from given processor details and the failure Reason.
+	 *
+	 * @param processor - Processor for which the execution failed
+	 * @param emailAddress - Address to which email has to be sent
+	 * @param emailSubject - subject of the email
+	 * @param failureReason - Reason for failure
+	 * @return GenericEmailInfoDTO instance
+	 */
+	private GenericEmailInfoDTO constructEmailHelperDTO(Processor processor, List<String> emailAddress, String emailSubject, String failureReason) {
+
+		LOG.debug("Ready to construct Email Helper DTO for the mail to be sent for processor execution failure");
+		GenericEmailInfoDTO emailInfoDTO = new GenericEmailInfoDTO();
+		emailInfoDTO.setMailboxId(null != processor ? processor.getMailbox().getPguid() : null);
+		emailInfoDTO.setMailboxName(null != processor ? processor.getMailbox().getMbxName() : null);
+		emailInfoDTO.setProcessorName(null !=  processor ? processor.getProcsrName() : null);
+		emailInfoDTO.setType("HTML");
+		emailInfoDTO.setEmailBody(failureReason);
+		emailInfoDTO.setToEmailAddrList(emailAddress);
+		emailInfoDTO.setSubject(emailSubject);
+		LOG.debug("Email Helper DTO Constructed for the mail to be sent for processor execution failure");
+		return emailInfoDTO;
+
+	}
 
 }

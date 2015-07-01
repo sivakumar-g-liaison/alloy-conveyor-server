@@ -38,7 +38,7 @@ import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.email.GenericEmailInfoDTO;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
@@ -270,15 +270,14 @@ public class MailBoxService {
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
 
-			String sub = "Processor:" + processor.getProcsrName()
-			        + " execution failed for the mailbox " + processor.getMailbox().getMbxName()
-			        + "(" + processor.getMailbox().getPguid() + ")";
-			if (processor.getEmailAddress() != null) {
-			    sendEmail(processor.getEmailAddress(), sub, e, "HTML");
-			}
-			LOG.error(sub, e);
+			// send email to the configured mail id in case of failure
+			String emailSubject = constructSubject(processor);
+			List <String> emailAddress = processor.getEmailAddress();
+			notifyUser(processor, emailAddress, emailSubject, ExceptionUtils.getStackTrace(e));
+			LOG.error(emailSubject, e);
 
 		} catch (Exception e) {
+
 
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
@@ -286,42 +285,71 @@ public class MailBoxService {
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
 
-			String sub = "Processor:" + processor.getProcsrName()
-                    + " execution failed for the mailbox " + processor.getMailbox().getMbxName()
-                    + "(" + processor.getMailbox().getPguid() + ")";
-            if (processor.getEmailAddress() != null) {
-                sendEmail(processor.getEmailAddress(), sub, e, "HTML");
-            }
-            LOG.error(sub, e);
+			// send email to the configured mail id in case of failure
+			String emailSubject = constructSubject(processor);
+			List <String> emailAddress = processor.getEmailAddress();
+			notifyUser(processor, emailAddress, emailSubject, ExceptionUtils.getStackTrace(e));
+			LOG.error(emailSubject, e);
 		}
 	}
 
 	/**
-	 * Sent notifications for trigger system failure.
+	 * Method to construct subject based on details of processor
 	 *
-	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
-	 * @param subject The notification subject
-	 * @param emailBody The body of the notification
-	 * @param type The notification type(TEXT/HTML).
+	 * @param processor - The processor for which execution fails
+	 * @return email Subject as String
 	 */
+	private String constructSubject(Processor processor) {
 
-	private void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
-
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
+		LOG.debug("constructing subject for the mail to be sent for processor execution failure");
+		StringBuilder subjectBuilder = new StringBuilder()
+											.append("Processor:")
+											.append(processor.getProcsrName())
+											.append(" execution failed for the mailbox ")
+											.append(processor.getMailbox().getMbxName())
+											.append("(")
+											.append(processor.getMailbox().getPguid())
+											.append(")");
+		return subjectBuilder.toString();
 	}
 
 	/**
-	 * Sent notifications for trigger system failure.
+	 * Method to construct the Email Helper DTO from given processor details and the failure Reason.
 	 *
-	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
-	 * @param subject The notification subject
-	 * @param exc The exception as body content
-	 * @param type The notification type(TEXT/HTML).
+	 * @param processor - Processor for which the execution failed
+	 * @param emailAddress - Address to which email has to be sent
+	 * @param emailSubject - subject of the email
+	 * @param failureReason - Reason for failure
+	 * @return GenericEmailInfoDTO instance
 	 */
-	private void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
+	private GenericEmailInfoDTO constructEmailHelperDTO(Processor processor, List<String> emailAddress, String emailSubject, String failureReason) {
 
-		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
+		LOG.debug("Ready to construct Email Helper DTO for the mail to be sent for processor execution failure");
+		GenericEmailInfoDTO emailInfoDTO = new GenericEmailInfoDTO();
+		emailInfoDTO.setMailboxId(null != processor ? processor.getMailbox().getPguid() : null);
+		emailInfoDTO.setMailboxName(null != processor ? processor.getMailbox().getMbxName() : null);
+		emailInfoDTO.setProcessorName(null !=  processor ? processor.getProcsrName() : null);
+		emailInfoDTO.setType("HTML");
+		emailInfoDTO.setEmailBody(failureReason);
+		emailInfoDTO.setToEmailAddrList(emailAddress);
+		emailInfoDTO.setSubject(emailSubject);
+		LOG.debug("Email Helper DTO Constructed for the mail to be sent for processor execution failure");
+		return emailInfoDTO;
+
+	}
+
+	/**
+	 * Method to construct the Email Helper DTO from given processor details and the failure Reason.
+	 *
+	 * @param processor - Processor for which the execution failed
+	 * @param failureReason - Reason for failure
+	 * @param emailAddress - Address to which email has to be sent
+	 * @param emailSubject - subject of the email
+	 */
+	private void notifyUser (Processor processor, List<String> emailAddress, String emailSubject, String failureReason) {
+
+		GenericEmailInfoDTO emailInfoDTO = constructEmailHelperDTO(processor, emailAddress, emailSubject, failureReason);
+		MailBoxUtil.sendEmail(emailInfoDTO);
 	}
 
 }
