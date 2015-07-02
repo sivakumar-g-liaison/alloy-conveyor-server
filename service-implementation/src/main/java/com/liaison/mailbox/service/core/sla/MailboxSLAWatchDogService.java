@@ -279,6 +279,7 @@ public class MailboxSLAWatchDogService {
 	 *
 	 * @param request
 	 */
+	@Deprecated
 	public void invokeWatchDog(String request) {
 
 		Processor processor = null;
@@ -481,6 +482,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
+	@Deprecated
 	public void writeSpectrumPayloadToProcessorLocation(InputStream response, String payloadLocation, String filename, Boolean isOverwrite) throws IOException {
 
 		LOG.info("Started writing payload from spectrum to processor payload location");

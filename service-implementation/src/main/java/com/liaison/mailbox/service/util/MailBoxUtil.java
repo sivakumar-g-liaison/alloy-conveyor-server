@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -250,7 +249,6 @@ public class MailBoxUtil {
 		if (!directory.exists()) {
 		    Path dirPath = directory.toPath();
 			Files.createDirectories(dirPath);
-			Files.setPosixFilePermissions(dirPath, PosixFilePermissions.fromString("rwxrwx---"));
 		}
 
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
@@ -260,7 +258,6 @@ public class MailBoxUtil {
 		} else {
 		    Path path = file.toPath();
 			Files.write(path, IOUtils.toByteArray(response));
-			Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-rw----"));
 		}
 		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
 		if (response != null) {

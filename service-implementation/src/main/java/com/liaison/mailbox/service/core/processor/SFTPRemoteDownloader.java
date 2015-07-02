@@ -186,7 +186,6 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
-						Files.setPosixFilePermissions(directory.toPath(), PosixFilePermissions.fromString("rwxrwx---"));
 					}
 					sftpRequest.changeDirectory(remotePath);
 					downloadDirectory(sftpRequest, remotePath, localDir);

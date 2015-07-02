@@ -437,14 +437,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 		File directory = new File(responseLocation);
 		if (!directory.exists()) {
-		    Path dirPath = directory.toPath();
 			Files.createDirectories(directory.toPath());
-			Files.setPosixFilePermissions(dirPath, PosixFilePermissions.fromString("rwxrwx---"));
 		}
 
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
 		Files.write(file.toPath(), response.toByteArray());
-		Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-rw----"));
 		LOGGER.info("Reponse is successfully written" + file.getAbsolutePath());
 		if (response != null) {
 		    response.close();
@@ -787,7 +784,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		File directory = new File(responseLocation);
 		if (!directory.exists()) {
 			Files.createDirectories(directory.toPath());
-			Files.setPosixFilePermissions(directory.toPath(), PosixFilePermissions.fromString("rwxrwx---"));
 		}
 
 		if (MailBoxUtil.isEmpty(fileName)) {
@@ -864,8 +860,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
 		LOGGER.debug("group  name - {}", group);
 		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+
 		//skip when reaching inbox/outbox
-		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
+		while(!(filePathToCreate.getFileName().toString().equals("inbox")
+		        || filePathToCreate.getFileName().toString().equals("outbox"))){
 
 			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
 			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);

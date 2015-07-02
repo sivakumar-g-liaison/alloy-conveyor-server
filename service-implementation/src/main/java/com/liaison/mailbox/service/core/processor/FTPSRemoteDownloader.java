@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -283,7 +282,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					File directory = new File(localDir);
 					if (!directory.exists()) {
 						Files.createDirectories(directory.toPath());
-						Files.setPosixFilePermissions(directory.toPath(), PosixFilePermissions.fromString("rwxrwx---"));
 					}
 					ftpClient.changeDirectory(remotePath);
 					downloadDirectory(ftpClient, remotePath, localDir);
