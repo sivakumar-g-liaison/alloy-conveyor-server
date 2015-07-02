@@ -38,6 +38,8 @@ import org.codehaus.jettison.json.JSONObject;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.commons.util.settings.DecryptableConfiguration;
+import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
@@ -52,6 +54,7 @@ import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
@@ -109,6 +112,7 @@ public class ProcessorConfigurationService {
 	private static final String PROCESSOR_STATUS = "Processor Status";
 	private static String INTERRUPT_SIGNAL = "Interrupt Signal";
 	private static String EXECUTING_PROCESSORS = "Executing Processors";
+	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
 
 	/**
@@ -864,7 +868,22 @@ public class ProcessorConfigurationService {
 							String.valueOf(securedPayload));
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
 							String.valueOf(authCheckRequired));
-
+					String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
+							MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
+					
+					String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
+					for (MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
+						if (mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
+							ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
+							LOGGER.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
+						}
+						if (mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
+							ttlUnit = (mbp.getMbxPropValue() == null) ? ttlUnit : mbp.getMbxPropValue();
+							LOGGER.debug("TTL Unit in uploadContentAsyncToSpectrum() is %s", ttlUnit);
+						}
+					}
+					Integer ttlNumber = Integer.parseInt(ttl);
+					httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlUnit, ttlNumber)));
 					if (!MailBoxUtil.isEmpty(pipeLineId))
 						httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
 					break;
