@@ -42,6 +42,7 @@ import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -51,6 +52,7 @@ import com.liaison.mailbox.service.core.processor.HTTPSyncProcessor;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.util.GlassMessage;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -303,7 +305,8 @@ public class HTTPListenerResource extends AuditedResource {
 
 					// Log TVA status
 					transactionVisibilityClient.logToGlass(glassMessage);
-
+					Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
+					workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
 					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
