@@ -10,7 +10,6 @@
 package com.liaison.mailbox.service.core.processor;
 
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 
 /**
  * @author Ganesh
@@ -18,7 +17,7 @@ import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
  */
 public interface MailBoxProcessorI {
 
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm);
+	public void runProcessor(Object object, MailboxFSM fsm);
 
 	public void createLocalPath();
 

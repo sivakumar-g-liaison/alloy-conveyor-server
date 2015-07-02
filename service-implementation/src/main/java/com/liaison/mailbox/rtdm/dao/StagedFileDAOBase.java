@@ -21,10 +21,12 @@ import javax.persistence.EntityManager;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -167,4 +169,28 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			}
 		}
 	}
+
+    @Override
+    public void persistStagedFile(WorkTicket workticket, String processorId) {
+
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+        try {
+
+            StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
+            stagedFileDto.setExpirationTime("0");
+            stagedFileDto.setMeta(processorId);
+
+            StagedFile stagedFileEntity = new StagedFile();
+            stagedFileEntity.copyFromDto(stagedFileDto, true);
+            stagedFileEntity.setPguid(workticket.getGlobalProcessId());
+
+            persist(stagedFileEntity);
+        } finally {
+
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
 }

@@ -188,7 +188,7 @@ public class StagedFile implements Identifiable {
 	 * @throws JsonMappingException 
 	 * @throws JsonGenerationException 
 	 */
-	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) throws JsonGenerationException, JsonMappingException, JAXBException, IOException {		
+	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {		
 		
 		if(isCreate){
 			this.setPguid(MailBoxUtil.getGUID()); 
@@ -199,7 +199,7 @@ public class StagedFile implements Identifiable {
 		this.setMailboxId(stagedFileDto.getMailboxGuid());
 		this.setSpectrumUri(stagedFileDto.getSpectrumUri());
 		this.setFileMetaData(stagedFileDto.getMeta());
-		EntityStatus status =MailBoxUtil.isEmpty(stagedFileDto.getStatus())?EntityStatus.ACTIVE: EntityStatus.findByCode(stagedFileDto.getStatus());
+		EntityStatus status = MailBoxUtil.isEmpty(stagedFileDto.getStatus())?EntityStatus.ACTIVE: EntityStatus.findByCode(stagedFileDto.getStatus());
 		this.setStagedFileStatus(status.name());
 		this.setExpirationTime(MailBoxUtil.addTTLToCurrentTime(Integer.parseInt(stagedFileDto.getExpirationTime())));
 	}

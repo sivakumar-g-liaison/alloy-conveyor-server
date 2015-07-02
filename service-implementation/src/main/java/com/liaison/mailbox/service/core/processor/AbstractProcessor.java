@@ -52,8 +52,10 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
+import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
@@ -72,6 +74,9 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
+	protected static final String FILE_PERMISSION = "rw-rw----";
+	protected static final String FOLDER_PERMISSION = "rwxrwx---";
+
 	protected static final String seperator = ": ";
 
 	protected Processor configurationInstance;
@@ -104,6 +109,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
     public void setReqDTO(TriggerProcessorRequestDTO reqDTO) {
         this.reqDTO = reqDTO;
+    }
+
+    public TriggerProcessorRequestDTO getReqDTO() {
+        return this.reqDTO;
     }
 
     /**
@@ -356,7 +365,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
 					return replaceTokensInFolderPath(folder.getFldrUri());
-				}
+				} else if (configurationInstance.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)
+				        && FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
+                    return replaceTokensInFolderPath(folder.getFldrUri());
+                }
 			}
 		}
 		return null;
@@ -715,8 +727,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			toEmailAddrList = configuredEmailAddress;
 		}
 
+		// construct the email helper dto which contains all details
+		EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
+		emailInfoDTO.setEmailBody(emailBody);
+		emailInfoDTO.setSubject(subject);
+		emailInfoDTO.setType(type);
+		emailInfoDTO.setToEmailAddrList(toEmailAddrList);
+
 		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
+		notifier.sendEmail(emailInfoDTO);
 	}
 
 	/**
@@ -841,12 +860,14 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
 		LOGGER.debug("group  name - {}", group);
 		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+
 		//skip when reaching inbox/outbox
-		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
+		while(!(filePathToCreate.getFileName().toString().equals("inbox")
+		        || filePathToCreate.getFileName().toString().equals("outbox"))){
 
 			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
 			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
-			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString("rwxrwx---"));
+			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
 			filePathToCreate = filePathToCreate.getParent();
 		 }
 

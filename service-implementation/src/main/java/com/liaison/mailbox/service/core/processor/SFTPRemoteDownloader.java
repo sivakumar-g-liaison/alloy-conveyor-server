@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -248,12 +249,12 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	}
 
 	@Override
-	public void runProcessor(TriggerProcessorRequestDTO dto, MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {
 
-			setReqDTO(dto);
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// G2SFTP executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 

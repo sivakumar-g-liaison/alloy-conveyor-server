@@ -84,7 +84,7 @@ export JAVA_OPTS="$JAVA_OPTS -XX:-UseSplitVerifier"
 
 # NOT FOR PRODUCTION:
 # enable remote debugging
-# export JAVA_OPTS="$JAVA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
+export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
 # Dump heap when out of memory to /var/log/tomcat
 export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/tomcat"

@@ -47,6 +47,8 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 		logger.info("Starting to forward request...");
 
 		// persist payload in spectrum
+		Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
+		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
 		StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
 		workTicket.setProcessMode(ProcessMode.SYNC);
 
