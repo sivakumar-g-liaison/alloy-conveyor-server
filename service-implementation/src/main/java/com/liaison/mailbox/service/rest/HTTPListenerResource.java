@@ -168,17 +168,8 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
-					//Fix for GMB-502 
-					Class<?> classObj = this.getClass();
-					Method enclosingMethod = classObj.getEnclosingMethod();
-					StringBuilder path = new StringBuilder()
-											.append(enclosingMethod.getDeclaringClass().getAnnotation(Path.class).value())
-											.append("/")
-											.append(enclosingMethod.getAnnotation(Path.class).value());
-					String className = classObj.getEnclosingClass().getSimpleName();
-					String methodName = enclosingMethod.getName();
-					// initialize log context
-					initLogContext(path.toString(), className, methodName, workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+					//Fix for GMB-502
+					logGlobalProcessorId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setProcessId(processId);
@@ -305,18 +296,8 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
-					//Fix for GMB-502 
-					Class<?> classObj = this.getClass();
-					Method enclosingMethod = classObj.getEnclosingMethod();
-					StringBuilder path = new StringBuilder()
-											.append(enclosingMethod.getDeclaringClass().getAnnotation(Path.class).value())
-											.append("/")
-											.append(enclosingMethod.getAnnotation(Path.class).value());
-					String className = classObj.getEnclosingClass().getSimpleName();
-					String methodName = enclosingMethod.getName();
-					// initialize log context
-					initLogContext(path.toString(), className, methodName, workTicket.getGlobalProcessId(), workTicket.getPipelineId());
-
+					//Fix for GMB-502
+					logGlobalProcessorId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
@@ -395,6 +376,31 @@ public class HTTPListenerResource extends AuditedResource {
 	protected void endMetricsCollection(boolean success) {
 		// TODO Auto-generated method stub
 
+	}
+
+	/**
+	 * Method to log gpid and pipeline id in the audit logs.
+	 *
+	 * @param globalProcessId - global process id
+	 * @param pipeLineId - pipeline id
+	 */
+	private void logGlobalProcessorId(Class<?> workerClass, String globalProcessId, String pipeLineId) {
+
+		Method enclosingMethod = workerClass.getEnclosingMethod();
+
+		// getting the path value
+		Path classLevelPathAnnotation = enclosingMethod.getDeclaringClass().getAnnotation(Path.class);
+		Path methodLevelPathAnnotation = enclosingMethod.getAnnotation(Path.class);
+		StringBuilder path = new StringBuilder();
+		if (null != classLevelPathAnnotation) path.append(classLevelPathAnnotation.value());
+		if (null != methodLevelPathAnnotation) path.append("/").append(methodLevelPathAnnotation.value());
+
+		// getting the class Name
+		String className = workerClass.getEnclosingClass().getSimpleName();
+		// getting the method Name
+		String methodName = enclosingMethod.getName();
+		// initialize log context
+		initLogContext(path.toString(), className, methodName, globalProcessId, pipeLineId);
 	}
 
 }
