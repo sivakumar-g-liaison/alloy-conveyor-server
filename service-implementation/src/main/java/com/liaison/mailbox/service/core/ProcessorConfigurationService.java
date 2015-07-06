@@ -868,22 +868,12 @@ public class ProcessorConfigurationService {
 							String.valueOf(securedPayload));
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
 							String.valueOf(authCheckRequired));
-					String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
-							MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
-					
-					String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-					for (MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
-						if (mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
-							ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
-							LOGGER.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
-						}
-						if (mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
-							ttlUnit = (mbp.getMbxPropValue() == null) ? ttlUnit : mbp.getMbxPropValue();
-							LOGGER.debug("TTL Unit in uploadContentAsyncToSpectrum() is %s", ttlUnit);
-						}
+					Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
+					if(!ttlMap.isEmpty())
+					{
+					Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+					httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
 					}
-					Integer ttlNumber = Integer.parseInt(ttl);
-					httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlUnit, ttlNumber)));
 					if (!MailBoxUtil.isEmpty(pipeLineId))
 						httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
 					break;

@@ -176,6 +176,8 @@ public interface MailBoxConstants {
 	public static final String VALUE_FOR_DEFAULT_TTL = "30";
 	public static final String TTL_UNIT_SECONDS = "Seconds";
 	public static final String TTL_UNIT_MINUTES = "Minutes";
+	public static final String CUSTOM_TTL_UNIT = "CustomTTL";
+	public static final String TTL_NUMBER = "TTLnumber";
 	public static final String TTL_UNIT_HOURS = "Hours";
 	public static final String TTL_UNIT_DAYS = "Days";
 	public static final String TTL_UNIT_WEEKS = "Weeks";

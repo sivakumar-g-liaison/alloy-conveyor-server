@@ -447,28 +447,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
-			String ttl = configuration.getString(MailBoxConstants.DROPBOX_PAYLOAD_TTL_DAYS,
-					MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
-			String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
-			
-			for (MailBoxProperty mbp : configurationInstance.getMailbox().getMailboxProperties()) {
-				if (mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
-					ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
-					LOGGER.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
-				}
-				if (mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
-					ttlUnit = (mbp.getMbxPropValue() == null) ? ttlUnit : mbp.getMbxPropValue();
-					LOGGER.debug("TTL Unit in uploadContentAsyncToSpectrum() is %s", ttlUnit);
-				}
-			}
-
 			Map <String, String> properties = new HashMap <String, String>();
-			Integer ttlNumber = Integer.parseInt(ttl);
-			properties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlUnit, ttlNumber)));
+			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
+			if(!ttlMap.isEmpty())
+			{
+			Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+			properties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
+			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+			}
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
 			properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperStaticProperties.getPipeLineID());
-			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
 
 			LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 			// persist payload in spectrum

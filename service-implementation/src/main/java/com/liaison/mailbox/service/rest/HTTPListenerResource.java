@@ -192,6 +192,11 @@ public class HTTPListenerResource extends AuditedResource {
 					transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+					if(httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS))
+					{
+					Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
+					workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
+					}
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
 							httpListenerProperties, request.getContentType(), mailboxPguid);
 					logger.info("HTTP(S)-SYNC : Status code received from service broker {} for the mailbox {}",
@@ -332,9 +337,11 @@ public class HTTPListenerResource extends AuditedResource {
 
 					// Log TVA status
 					transactionVisibilityClient.logToGlass(glassMessage);
-
+					if(httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS))
+					{
 					Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
 					workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
+					}
 					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
 					workTicket.setProcessMode(ProcessMode.ASYNC);
 					logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
