@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -166,6 +167,19 @@ public class HTTPListenerResource extends AuditedResource {
 					logger.debug("construct workticket");
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
+
+					//Fix for GMB-502 
+					Class<?> classObj = this.getClass();
+					Method enclosingMethod = classObj.getEnclosingMethod();
+					StringBuilder path = new StringBuilder()
+											.append(enclosingMethod.getDeclaringClass().getAnnotation(Path.class).value())
+											.append("/")
+											.append(enclosingMethod.getAnnotation(Path.class).value());
+					String className = classObj.getEnclosingClass().getSimpleName();
+					String methodName = enclosingMethod.getName();
+					// initialize log context
+					initLogContext(path.toString(), className, methodName, workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setProcessId(processId);
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
@@ -286,6 +300,19 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
+					//Fix for GMB-502 
+					Class<?> classObj = this.getClass();
+					Method enclosingMethod = classObj.getEnclosingMethod();
+					StringBuilder path = new StringBuilder()
+											.append(enclosingMethod.getDeclaringClass().getAnnotation(Path.class).value())
+											.append("/")
+											.append(enclosingMethod.getAnnotation(Path.class).value());
+					String className = classObj.getEnclosingClass().getSimpleName();
+					String methodName = enclosingMethod.getName();
+					// initialize log context
+					initLogContext(path.toString(), className, methodName, workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+
+
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
 					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
@@ -305,6 +332,7 @@ public class HTTPListenerResource extends AuditedResource {
 
 					// Log TVA status
 					transactionVisibilityClient.logToGlass(glassMessage);
+
 					Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
 					workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
 					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
