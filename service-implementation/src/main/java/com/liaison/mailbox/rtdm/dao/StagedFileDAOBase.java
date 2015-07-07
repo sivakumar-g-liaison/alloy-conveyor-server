@@ -193,4 +193,36 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             }
         }
     }
+    
+
+	@Override
+	public StagedFile findStagedFilesOfUploadersBasedOnMeta(String processorId) {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		StagedFile stagedFile = null;
+
+		try {
+
+			// query
+			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
+					.append(" where sf.fileMetaData =:" + PROCESSOR_ID)
+					.append(" and sf.stagedFileStatus =:" + STATUS);
+
+			List<?> stagedFiles = entityManager
+								.createQuery(query.toString())
+								.setParameter(PROCESSOR_ID, processorId)
+								.setParameter(STATUS, EntityStatus.ACTIVE.value())
+								.getResultList();
+
+			Iterator<?> iterator = stagedFiles.iterator();
+			while (iterator.hasNext()) {
+				stagedFile = (StagedFile) iterator.next();
+			}
+		} finally {
+
+			if (null != entityManager) entityManager.close();
+		}
+		return stagedFile;
+	}
+
 }

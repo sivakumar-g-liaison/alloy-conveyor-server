@@ -34,15 +34,23 @@ import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -50,7 +58,9 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
@@ -94,9 +104,19 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 *
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) {
+		
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+		GlassMessage glassMessage = new GlassMessage();
 
 		try {
-
+			
+			//GLASS LOGGING BEGINS//
+            glassMessage.setCategory(ProcessorType.REMOTEUPLOADER);
+            glassMessage.setProtocol(Protocol.SFTP.getCode());
+            //Log running status
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to upload files");
+            //GLASS LOGGING ENDS//
+            
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.connect();
 
@@ -137,6 +157,13 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
+				
+				// Log Fourth corner
+				glassMessage.setStatus(ExecutionState.COMPLETED);
+				glassMessage.logFourthCornerTimestamp();
+				transactionVisibilityClient.logToGlass(glassMessage);
+				// Log running status
+				glassMessage.logProcessingStatus(StatusType.SUCCESS, "SFTP Uploader - Execution Compeleted Successfully");
 
 			}
 			// remove the private key once connection established successfully
@@ -152,6 +179,12 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
 		    LOGGER.error(constructMessage("Error occured during sftp upload"), e);
+		    
+			glassMessage.setStatus(ExecutionState.FAILED);
+			glassMessage.logFourthCornerTimestamp();
+			transactionVisibilityClient.logToGlass(glassMessage);
+			// Log running status
+			glassMessage.logProcessingStatus(StatusType.ERROR, "SFTP Uploader - Execution Failed.");
 			throw new RuntimeException(e);
 		}
 
@@ -272,9 +305,28 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
 						        staticProp.getProcessedFileLocation(), 
 						        item);
-
+						StringBuilder message = new StringBuilder()
+													.append("File ")
+													.append(currentFileName)
+													.append(" uploaded successfully")
+													.append(" from local path ")
+													.append(localDir)
+													.append(" to remote path ")
+													.append(remoteParentDir);
+						// Glass Logging 
+						logGlassMessage(message.toString(), StatusType.SUCCESS);
 					} else {
+						
 						archiveFiles(staticProp.getErrorFileLocation(), item);
+						StringBuilder message = new StringBuilder()
+													.append("Failed to upload file ")
+													.append(currentFileName)
+													.append(" from local path ")
+													.append(localDir)
+													.append(" to remote path ")
+													.append(remoteParentDir);
+						// Glass Logging 
+						logGlassMessage(message.toString(), StatusType.ERROR);
 					}
 				}
 			}
@@ -385,4 +437,31 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 	}
+	
+	/**
+	 * Method to log global process Id
+	 * 
+	 * @param message
+	 * @param status
+	 */
+	private void logGlassMessage(String message, StatusType status) {
+		
+		StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+		StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid());
+		
+		GlassMessage glassMessage = new GlassMessage();
+		if (null != stagedFile) {
+
+			glassMessage.setGlobalPId(stagedFile.getPguid());
+			glassMessage.setStatus(ExecutionState.COMPLETED);
+			glassMessage.setInAgent(Protocol.SFTP.getCode());
+			// Log running status
+			glassMessage.logProcessingStatus(status, message);
+			
+			// Inactivate the stagedFile
+			stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+			stagedFileDAO.merge(stagedFile);
+		}
+	}
+	
 }
