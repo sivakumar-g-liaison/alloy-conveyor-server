@@ -193,7 +193,7 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 		} catch (JAXBException | IOException | LiaisonException | IllegalAccessException | NoSuchFieldException e) {
-		    LOGGER.error(constructMessage("Error occurred during http(s) upload"), e);
+		    LOGGER.error(constructMessage("Error occurred during http(s) upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 

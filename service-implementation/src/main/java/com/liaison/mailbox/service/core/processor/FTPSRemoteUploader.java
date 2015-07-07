@@ -86,10 +86,10 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 			} else {
 				// FTPSRequest executed through Java
-				executeRequest(getReqDTO().getExecutionId(), fsm);
+				run(getReqDTO().getExecutionId(), fsm);
 			}
 
-		} catch(IOException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | JAXBException | MailBoxServicesException | URISyntaxException e) {
+		} catch(Exception e) {
 			throw new RuntimeException(e);
 		}
 
@@ -120,7 +120,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws UnrecoverableKeyException
 	 *
 	 */
-	protected void executeRequest(String executionId, MailboxFSM fsm) throws MailBoxServicesException, SecurityException, IllegalArgumentException, URISyntaxException {
+	protected void run(String executionId, MailboxFSM fsm) {
 
 		try {
 
@@ -162,6 +162,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
 			if (!dirExists) {
 				// create directory on the server
+			    LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), remotePath);
 				ftpsRequest.getNative().makeDirectory(remotePath);
 			}
 			ftpsRequest.changeDirectory(remotePath);
@@ -175,8 +176,16 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
             LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
             LOGGER.info(constructMessage("End run"));
 
-		} catch (LiaisonException | JAXBException | IOException | NoSuchFieldException | IllegalAccessException e) {
-		    LOGGER.error(constructMessage("Error occurred during ftp(s) download"), e);
+		} catch (LiaisonException
+		        | MailBoxServicesException
+		        | JAXBException
+		        | IOException
+		        | NoSuchFieldException
+		        | IllegalAccessException
+		        | SecurityException
+		        | IllegalArgumentException
+		        | URISyntaxException e) {
+		    LOGGER.error(constructMessage("Error occurred during ftp(s) upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}

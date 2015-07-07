@@ -127,11 +127,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					try {
 						sftpRequest.getNative().lstat(directory);
-						LOGGER.info(constructMessage("The remote directory{} already exists."), directory);
+						LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
 						sftpRequest.changeDirectory(directory);
 					} catch (Exception ex) {
 						sftpRequest.getNative().mkdir(directory);
-						LOGGER.info(constructMessage("The remote directory{} is not exist.So created that."), directory);
+						LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
 						sftpRequest.changeDirectory(directory);
 					}
 				}
@@ -151,7 +151,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
-		    LOGGER.error(constructMessage("Error occurred during sftp upload"), e);
+		    LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 

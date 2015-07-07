@@ -241,7 +241,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         } catch (MailBoxServicesException | IOException | URISyntaxException
         		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
         		| JSONException | IllegalAccessException | NoSuchFieldException e) {
-            LOGGER.error(constructMessage("Error occurred while scanning the mailbox"), e);
+            LOGGER.error(constructMessage("Error occurred while scanning the mailbox", seperator, e.getMessage()), e);
         	throw new RuntimeException(e);
         }
 	}
@@ -597,15 +597,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
 			workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-
-			LOGGER.info(constructMessage(
-			        "Global PID",
-			        seperator,
-			        workTicket.getGlobalProcessId(),
-			        " generated for file ",
-			        folderName,
-			        String.valueOf(File.separatorChar),
-			        fileName));
 		}
 
         LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());

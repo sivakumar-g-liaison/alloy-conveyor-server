@@ -255,9 +255,14 @@ public class MailBoxService {
 			}
 
 			MailBox mbx = processor.getMailbox();
-            LOG.info("The execution started for the Processor named {} which is linked to profile {}  and it belongs to the mbx {} and mbx pguid is {}",
-                    processor.getProcsrName(), dto.getProfileName(), mbx.getMbxName(), mbx.getPguid());
-			LOG.info("The Processor type is {}", processor.getProcessorType());
+            LOG.info("CronJob : {} : {} : {} : {} : {} : Handover execution to the processor service",
+                    dto.getProfileName(),
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid());
+
+			LOG.debug("The Processor type is {}", processor.getProcessorType());
 			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
@@ -266,12 +271,28 @@ public class MailBoxService {
 			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-			LOG.info("The execution completed for the Processor named {} which is linked to profile {} and it belongs to the mbx {} and mbx pguid is {}",
-                    processor.getProcsrName(), dto.getProfileName(), mbx.getMbxName(), mbx.getPguid());
+
+			LOG.info("CronJob : {} : {} : {} : {} : {} : Processor service exectuion is completed",
+                    dto.getProfileName(),
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid());
 			LOG.info("#################################################################");
 
 		} catch (MailBoxServicesException e) {
 
+		    if (processor == null) {
+                LOG.error("Processor execution failed", e);
+            } else {
+                LOG.error("CronJob : NONE : {} : {} : {} : {} : Processor execution failed : {}",
+                        processor.getProcessorType().name(),
+                        processor.getProcsrName(),
+                        processor.getMailbox().getMbxName(),
+                        processor.getMailbox().getPguid(),
+                        e.getMessage(), e);
+            }
+
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
@@ -281,10 +302,20 @@ public class MailBoxService {
 			// send email to the configured mail id in case of failure
 			String emailSubject = EmailUtil.constructSubject(processor);
 			EmailUtil.sendEmail(processor, emailSubject, e);
-			LOG.error(emailSubject, e);
 
 		} catch (Exception e) {
 
+		    if (processor == null) {
+                LOG.error("Processor execution failed", e);
+            } else {
+                LOG.error("CronJob : NONE : {} : {} : {} : {} : Processor execution failed : {}",
+                        processor.getProcessorType().name(),
+                        processor.getProcsrName(),
+                        processor.getMailbox().getMbxName(),
+                        processor.getMailbox().getPguid(),
+                        e.getMessage(), e);
+            }
+
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
@@ -292,9 +323,7 @@ public class MailBoxService {
 			}
 
 			// send email to the configured mail id in case of failure
-			String emailSubject = EmailUtil.constructSubject(processor);
-			EmailUtil.sendEmail(processor, emailSubject, e);
-			LOG.error(emailSubject, e);
+			EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor), e);
 		}
 	}
 
@@ -306,11 +335,14 @@ public class MailBoxService {
 	 */
 	public void executeFileWriter(String request) {
 
+	    String mailboxId = null;
+	    String processorId = null;
+	    String payloadURI = null;
+
+	    WorkTicket workTicket = null;
 	    Processor processor = null;
         ProcessorExecutionState processorExecutionState = null;
-        String mailboxId = null;
-        String processorId = null;
-        String payloadURI = null;
+
         MailboxFSM fsm = new MailboxFSM();
         ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
         ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
@@ -322,7 +354,7 @@ public class MailBoxService {
 
             LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
-            WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+            workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
@@ -369,25 +401,42 @@ public class MailBoxService {
 
             MailBoxProcessorI processorService = new FileWriter(processor);
             MailBox mbx = processor.getMailbox();
-            LOG.info("The execution started for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
-                    processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
-            LOG.info("The Processer type is {}", processor.getProcessorType());
+            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid(),
+                    workTicket.getGlobalProcessId());
 
             processorService.runProcessor(workTicket, fsm);
             transactionVisibilityClient.logToGlass(glassMessage);
             glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Stage is completed");
 
-            LOG.info("The execution completed for the prcsr named {} and it belongs to the mbx {} and mbx pguid is {}",
-                    processor.getProcsrName(), mbx.getMbxName(), mbx.getPguid());
-            LOG.info("#################################################################");
+            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service exeuciton is completed",
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid(),
+                    workTicket.getGlobalProcessId());
 
             //persist staged file to get the gpid during uploader
             StagedFileDAOBase dao = new StagedFileDAOBase();
             dao.persistStagedFile(workTicket, processor.getPguid());
+            LOG.info("#################################################################");
 
         } catch (Exception e) {
 
-            LOG.error("File Staging failed", e);
+            if (processor == null) {
+                LOG.error("File Staging failed", e);
+            } else {
+                LOG.error("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : File Staging failed : {}",
+                        processor.getProcessorType().name(),
+                        processor.getProcsrName(),
+                        processor.getMailbox().getMbxName(),
+                        processor.getMailbox().getPguid(),
+                        (workTicket == null ? "NONE" : workTicket.getGlobalProcessId()),
+                        e.getMessage(), e);
+            }
 
             //GLASS LOGGING CORNER 4 //
             if (null != glassMessage) {
@@ -405,9 +454,7 @@ public class MailBoxService {
             }
 
             // send email to the configured mail id in case of failure
-            String emailSubject = EmailUtil.constructSubject(processor);
-            EmailUtil.sendEmail(processor, emailSubject, e);
-            LOG.error(emailSubject, e);
+            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor), e);
 
         }
 	    
