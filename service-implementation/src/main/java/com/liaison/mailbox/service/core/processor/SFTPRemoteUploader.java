@@ -34,21 +34,16 @@ import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
-import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
-import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
-import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
@@ -56,9 +51,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPUp
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
-import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * SFTP remote uploader to perform push operation, also it has support methods
@@ -102,9 +95,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 *
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) {
-		
+
 		try {
-			
+
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.connect();
 
@@ -145,7 +138,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
-				
+
 			}
 			// remove the private key once connection established successfully
 			removePrivateKeyFromTemp();
@@ -409,47 +402,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					configuredPath, Response.Status.BAD_REQUEST);
 		}
 
-	}
-	
-	/**
-	 * Method to log global process Id
-	 * 
-	 * @param message
-	 * @param status
-	 */
-	private void logGlassMessage(StringBuilder message, File file, ExecutionState status) {
-		
-		StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-		StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid(), file.getName());
-		
-		if (null != stagedFile) {
-
-		    TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-	        GlassMessage glassMessage = new GlassMessage();
-	        glassMessage.setGlobalPId(stagedFile.getPguid());
-            glassMessage.setCategory(configurationInstance.getProcessorType());
-            glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
-
-			glassMessage.setGlobalPId(stagedFile.getPguid());
-			glassMessage.setStatus(status);
-			glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
-			glassMessage.setOutSize((int) file.length());
-
-			// Log running status
-			if (ExecutionState.COMPLETED.equals(status)) {
-			    glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
-			    //Fourth corner timestamp
-			    glassMessage.logFourthCornerTimestamp();
-			} else {
-			    glassMessage.logProcessingStatus(StatusType.ERROR, message.toString());
-			}
-			//TVAPI
-			transactionVisibilityClient.logToGlass(glassMessage);
-			
-			// Inactivate the stagedFile
-			stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
-			stagedFileDAO.merge(stagedFile);
-		}
 	}
 	
 }

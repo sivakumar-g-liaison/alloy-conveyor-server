@@ -41,6 +41,7 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -283,8 +284,29 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
 						        staticProp.getProcessedFileLocation(),
                                 item);
+
+						StringBuilder message = new StringBuilder()
+                            .append("File ")
+                            .append(currentFileName)
+                            .append(" uploaded successfully")
+                            .append(" to remote path ")
+                            .append(remoteParentDir);
+
+                        // Glass Logging 
+                        logGlassMessage(message, item, ExecutionState.COMPLETED);
 					} else {
 					    archiveFiles(staticProp.getErrorFileLocation(), item);
+
+					    StringBuilder message = new StringBuilder()
+                            .append("Failed to upload file ")
+                            .append(currentFileName)
+                            .append(" from local path ")
+                            .append(localDir)
+                            .append(" to remote path ")
+                            .append(remoteParentDir);
+
+                            // Glass Logging 
+                            logGlassMessage(message, item, ExecutionState.FAILED);
 					}
 
 				} else {
