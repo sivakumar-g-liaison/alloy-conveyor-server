@@ -169,7 +169,7 @@ public class HTTPListenerResource extends AuditedResource {
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
 					//Fix for GMB-502
-					logGlobalProcessorId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+					logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setProcessId(processId);
@@ -297,7 +297,7 @@ public class HTTPListenerResource extends AuditedResource {
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
 					//Fix for GMB-502
-					logGlobalProcessorId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+					logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
@@ -384,7 +384,7 @@ public class HTTPListenerResource extends AuditedResource {
 	 * @param globalProcessId - global process id
 	 * @param pipeLineId - pipeline id
 	 */
-	private void logGlobalProcessorId(Class<?> workerClass, String globalProcessId, String pipeLineId) {
+	private void logGlobalProcessId(Class<?> workerClass, String globalProcessId, String pipeLineId) {
 
 		Method enclosingMethod = workerClass.getEnclosingMethod();
 
