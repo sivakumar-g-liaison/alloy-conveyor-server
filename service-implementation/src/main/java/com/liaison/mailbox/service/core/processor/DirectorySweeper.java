@@ -42,14 +42,11 @@ import org.codehaus.jettison.json.JSONObject;
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.ISO8601Util;
-import com.liaison.commons.util.settings.DecryptableConfiguration;
-import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.dto.queue.WorkTicketGroup;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
@@ -87,7 +84,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private List<Path> activeFiles = new ArrayList<>();
 	private String fileRenameFormat = null;
 	private long lastModifiedTolerance = 0L;
-	private static final DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 
     public long setLastModifiedTolerance() {
         if (lastModifiedTolerance == 0L) {
@@ -245,7 +241,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         } catch (MailBoxServicesException | IOException | URISyntaxException
         		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
         		| JSONException | IllegalAccessException | NoSuchFieldException e) {
-            LOGGER.error(constructMessage("Error occured while scanning the mailbox"), e);
+            LOGGER.error(constructMessage("Error occurred while scanning the mailbox", seperator, e.getMessage()), e);
         	throw new RuntimeException(e);
         }
 	}
@@ -601,15 +597,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
 			workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-
-			LOGGER.info(constructMessage(
-			        "Global PID",
-			        seperator,
-			        workTicket.getGlobalProcessId(),
-			        " generated for file ",
-			        folderName,
-			        String.valueOf(File.separatorChar),
-			        fileName));
 		}
 
         LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());

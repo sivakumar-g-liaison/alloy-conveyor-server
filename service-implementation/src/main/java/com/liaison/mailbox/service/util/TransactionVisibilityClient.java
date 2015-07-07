@@ -147,7 +147,7 @@ public class TransactionVisibilityClient {
 		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
-		logger.debug("TransactionVisibilityAPI with status {} logged for GPID :{}", message.getStatus().value(),
+		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{}", message.getStatus().value(),
 				visibilityAPI.getGlobalId());
 
 	}
