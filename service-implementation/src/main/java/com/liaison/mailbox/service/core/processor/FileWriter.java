@@ -131,7 +131,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             LOG.info(constructMessage("End run"));
 
         } catch (Exception e) {
-            LOG.error(constructMessage("File Staging failed"), e);
+            LOG.error(constructMessage("File Staging failed", seperator, e.getMessage()), e);
              //GLASS LOGGING ENDS//
             throw new RuntimeException(e);
         }
