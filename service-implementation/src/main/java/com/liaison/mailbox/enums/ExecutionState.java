@@ -26,7 +26,7 @@ public enum ExecutionState {
 	QUEUED("QUEUED","Processor is queued for execution"),
 	STAGED("STAGED","File is staged"),
 	STAGING_FAILED("STAGING_FAILED", "File Staging got failed"),
-	HANDED_TO_JS("HANDED_TO_JS","Processer Execution Handed over to JS"),
+	HANDED_TO_JS("HANDED_TO_JS","Processor Execution Handed over to JS"),
 	INTERRUPTED("INTERRUPTED","Processor is gracefully Interrupted"),
 	SKIPPED("SKIPPED","Processor is already running so skipped execution");
 

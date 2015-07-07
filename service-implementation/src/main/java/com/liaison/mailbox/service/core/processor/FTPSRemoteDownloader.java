@@ -83,7 +83,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				run();
 			}
 	   } catch(JAXBException |IOException | IllegalAccessException | NoSuchFieldException e) {
-	       LOGGER.error(constructMessage("Error occured during ftp(s) download"), e);
+	       LOGGER.error(constructMessage("Error occurred during ftp(s) download"), e);
 			throw new RuntimeException(e);
 		}
 	}

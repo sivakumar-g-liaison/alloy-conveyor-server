@@ -176,7 +176,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
             LOGGER.info(constructMessage("End run"));
 
 		} catch (LiaisonException | JAXBException | IOException | NoSuchFieldException | IllegalAccessException e) {
-		    LOGGER.error(constructMessage("Error occured during ftp(s) download"), e);
+		    LOGGER.error(constructMessage("Error occurred during ftp(s) download"), e);
 			throw new RuntimeException(e);
 		}
 	}

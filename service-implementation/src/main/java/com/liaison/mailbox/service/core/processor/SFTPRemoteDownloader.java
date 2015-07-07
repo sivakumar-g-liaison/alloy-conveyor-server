@@ -131,7 +131,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		} catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
 				| SftpException | SymmetricAlgorithmException | NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException | JAXBException e) {
-		    LOGGER.error(constructMessage("Error occured during sftp download"), e);
+		    LOGGER.error(constructMessage("Error occurred during sftp download"), e);
 			throw new RuntimeException(e);
 		}
 	}

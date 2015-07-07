@@ -184,7 +184,7 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		} catch (MailBoxServicesException | IOException | JAXBException | LiaisonException | URISyntaxException
 				| IllegalAccessException | NoSuchFieldException e) {
-		    LOGGER.error(constructMessage("Error occured during http(s) download"), e);
+		    LOGGER.error(constructMessage("Error occurred during http(s) download"), e);
 			throw new RuntimeException(e);
 		}
 

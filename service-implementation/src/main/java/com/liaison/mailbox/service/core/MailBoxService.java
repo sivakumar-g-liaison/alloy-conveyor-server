@@ -255,9 +255,9 @@ public class MailBoxService {
 			}
 
 			MailBox mbx = processor.getMailbox();
-            LOG.info("The execution started for the prcsr named {} which is linked to profile {}  and it belongs to the mbx {} and mbx pguid is {}",
+            LOG.info("The execution started for the Processor named {} which is linked to profile {}  and it belongs to the mbx {} and mbx pguid is {}",
                     processor.getProcsrName(), dto.getProfileName(), mbx.getMbxName(), mbx.getPguid());
-			LOG.info("The Processer type is {}", processor.getProcessorType());
+			LOG.info("The Processor type is {}", processor.getProcessorType());
 			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
@@ -266,7 +266,7 @@ public class MailBoxService {
 			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
-			LOG.info("The execution completed for the prcsr named {} which is linked to profile {} and it belongs to the mbx {} and mbx pguid is {}",
+			LOG.info("The execution completed for the Processor named {} which is linked to profile {} and it belongs to the mbx {} and mbx pguid is {}",
                     processor.getProcsrName(), dto.getProfileName(), mbx.getMbxName(), mbx.getPguid());
 			LOG.info("#################################################################");
 

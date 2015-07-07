@@ -151,7 +151,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
-		    LOGGER.error(constructMessage("Error occured during sftp upload"), e);
+		    LOGGER.error(constructMessage("Error occurred during sftp upload"), e);
 			throw new RuntimeException(e);
 		}
 
