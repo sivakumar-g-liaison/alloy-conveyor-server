@@ -102,20 +102,20 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			long startTime = System.currentTimeMillis();
 			if (sftpRequest.openChannel()) {
 
-				String path = getPayloadURI();
-
-				if (MailBoxUtil.isEmpty(path)) {
+				String remotePath = getPayloadURI();
+				if (MailBoxUtil.isEmpty(remotePath)) {
 					LOGGER.info(constructMessage("The given payload URI is Empty."));
 					throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 				}
-				String remotePath = getWriteResponseURI();
-				if (MailBoxUtil.isEmpty(remotePath)) {
+
+				String localPath = getWriteResponseURI();
+				if (MailBoxUtil.isEmpty(localPath)) {
 					LOGGER.info(constructMessage("The given remote URI is Empty."));
 					throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 				}
 
-				LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, path);
-				downloadDirectory(sftpRequest, path, remotePath);
+				LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, localPath);
+				downloadDirectory(sftpRequest, remotePath, localPath);
 			}
 			// remove the private key once connection established successfully
 			removePrivateKeyFromTemp();
