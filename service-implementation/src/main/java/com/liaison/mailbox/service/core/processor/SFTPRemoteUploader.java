@@ -45,8 +45,6 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
@@ -105,18 +103,8 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 */
 	private void executeRequest(String executionId, MailboxFSM fsm) {
 		
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-		GlassMessage glassMessage = new GlassMessage();
-
 		try {
 			
-			//GLASS LOGGING BEGINS//
-            glassMessage.setCategory(ProcessorType.REMOTEUPLOADER);
-            glassMessage.setProtocol(Protocol.SFTP.getCode());
-            //Log running status
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to upload files");
-            //GLASS LOGGING ENDS//
-            
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.connect();
 
@@ -158,13 +146,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
 				
-				// Log Fourth corner
-				glassMessage.setStatus(ExecutionState.COMPLETED);
-				glassMessage.logFourthCornerTimestamp();
-				transactionVisibilityClient.logToGlass(glassMessage);
-				// Log running status
-				glassMessage.logProcessingStatus(StatusType.SUCCESS, "SFTP Uploader - Execution Compeleted Successfully");
-
 			}
 			// remove the private key once connection established successfully
 			removePrivateKeyFromTemp();
@@ -179,12 +160,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
             LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
-
-			glassMessage.setStatus(ExecutionState.FAILED);
-			glassMessage.logFourthCornerTimestamp();
-			transactionVisibilityClient.logToGlass(glassMessage);
-			// Log running status
-			glassMessage.logProcessingStatus(StatusType.ERROR, "SFTP Uploader - Execution Failed - " + e.getMessage());
 			throw new RuntimeException(e);
 		}
 
@@ -309,12 +284,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 													.append("File ")
 													.append(currentFileName)
 													.append(" uploaded successfully")
-													.append(" from local path ")
-													.append(localDir)
 													.append(" to remote path ")
 													.append(remoteParentDir);
 						// Glass Logging 
-						logGlassMessage(message.toString(), StatusType.SUCCESS);
+						logGlassMessage(message, item, ExecutionState.COMPLETED);
 					} else {
 						
 						archiveFiles(staticProp.getErrorFileLocation(), item);
@@ -326,7 +299,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 													.append(" to remote path ")
 													.append(remoteParentDir);
 						// Glass Logging 
-						logGlassMessage(message.toString(), StatusType.ERROR);
+						logGlassMessage(message, item, ExecutionState.FAILED);
 					}
 				}
 			}
@@ -444,19 +417,34 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @param message
 	 * @param status
 	 */
-	private void logGlassMessage(String message, StatusType status) {
+	private void logGlassMessage(StringBuilder message, File file, ExecutionState status) {
 		
 		StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
-		StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid());
+		StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid(), file.getName());
 		
-		GlassMessage glassMessage = new GlassMessage();
 		if (null != stagedFile) {
 
+		    TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+	        GlassMessage glassMessage = new GlassMessage();
+	        glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setCategory(configurationInstance.getProcessorType());
+            glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+
 			glassMessage.setGlobalPId(stagedFile.getPguid());
-			glassMessage.setStatus(ExecutionState.COMPLETED);
-			glassMessage.setInAgent(Protocol.SFTP.getCode());
+			glassMessage.setStatus(status);
+			glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
+			glassMessage.setOutSize((int) file.length());
+
 			// Log running status
-			glassMessage.logProcessingStatus(status, message);
+			if (ExecutionState.COMPLETED.equals(status)) {
+			    glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
+			    //Fourth corner timestamp
+			    glassMessage.logFourthCornerTimestamp();
+			} else {
+			    glassMessage.logProcessingStatus(StatusType.ERROR, message.toString());
+			}
+			//TVAPI
+			transactionVisibilityClient.logToGlass(glassMessage);
 			
 			// Inactivate the stagedFile
 			stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
