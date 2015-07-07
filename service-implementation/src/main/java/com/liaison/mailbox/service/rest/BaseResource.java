@@ -46,9 +46,9 @@ import com.liaison.spectrum.client.model.KeyValuePair;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
 /**
- * 
+ *
  * @author OFS
- * 
+ *
  */
 public class BaseResource {
 
@@ -81,7 +81,7 @@ public class BaseResource {
 
 	/**
 	 * Audits it based on the response status
-	 * 
+	 *
 	 * @param response
 	 * @param operationName
 	 */
@@ -96,7 +96,7 @@ public class BaseResource {
 
 	/**
 	 * Checks the response status
-	 * 
+	 *
 	 * @param serviceResponse
 	 * @return true if it is success, false otherwise
 	 */
@@ -111,9 +111,9 @@ public class BaseResource {
 
 	/**
 	 * Call this when entering a service, fish tags log for this thread.
-	 * 
+	 *
 	 * @param <T>
-	 * 
+	 *
 	 */
 	protected <T> void initLogContext(AbstractResourceDelegate<T> worker) {
 
@@ -133,6 +133,25 @@ public class BaseResource {
 	}
 
 	/**
+	 * Call this when entering a runtime service, fish tags log for this thread.
+	 *
+	 * @param path The rest resource path
+	 * @param className
+	 * @param methodName
+	 * @param globalProcessId
+	 * @param pipelineId
+	 */
+	protected void initLogContext(String path, String className, String methodName, String globalProcessId, String pipelineId) {
+
+		ThreadContext.put(LogTags.RELATIVE_PATH, path); // audit log context
+		ThreadContext.put(LogTags.SERVICE, className + ": " + methodName); // audit log context
+		ThreadContext.put(LogTags.GLOBAL_PROCESS_ID, globalProcessId); // audit log context
+		if (pipelineId != null && !pipelineId.isEmpty()) {
+			ThreadContext.put(LogTags.PIPELINE_ID, pipelineId); // audit log context
+		}
+	}
+
+	/**
 	 * success audit statement.
 	 */
 	protected AuditStatement successExitStatement = new DefaultAuditStatement(Status.SUCCEED, "Success (2xx)");
@@ -141,9 +160,9 @@ public class BaseResource {
 
 	/**
 	 * Call this when concluding a service, indicates successful exit (or fail) based on response status.
-	 * 
+	 *
 	 * Also cleans up thread context
-	 * 
+	 *
 	 * @param response
 	 */
 	protected void exitLog(Response response) {
@@ -158,7 +177,7 @@ public class BaseResource {
 
 	/**
 	 * Is the a query string param of xml? Otherwise it will be JSON serialization.
-	 * 
+	 *
 	 * @param request
 	 * @return a content-type string such as "application/json"
 	 */
@@ -181,7 +200,7 @@ public class BaseResource {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param httpCode
 	 * @param contentType
 	 * @param serviceResponse
@@ -258,7 +277,7 @@ public class BaseResource {
 
 	/**
 	 * Returns header map from http request.
-	 * 
+	 *
 	 * @param request The HTTPRequest
 	 * @return Headers
 	 */
@@ -284,7 +303,7 @@ public class BaseResource {
 
 	/**
 	 * Get workticket properties from the http request
-	 * 
+	 *
 	 * @param request HTTP request
 	 * @return Map contains workticket properties
 	 */

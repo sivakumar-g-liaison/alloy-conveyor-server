@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -131,7 +130,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		} catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
 				| SftpException | SymmetricAlgorithmException | NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException | JAXBException e) {
-		    LOGGER.error(constructMessage("Error occured during sftp download"), e);
+		    LOGGER.error(constructMessage("Error occurred during sftp download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}

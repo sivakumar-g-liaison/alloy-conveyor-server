@@ -32,7 +32,6 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
-import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.enums.Messages;
@@ -215,17 +214,12 @@ public class DropboxFileTransferService {
 				MailBoxConstants.VALUE_FOR_DEFAULT_TTL);
 		String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
 
-		for (MailBoxProperty mbp : processor.getMailbox().getMailboxProperties()) {
-			if (mbp.getMbxPropName().equals(MailBoxConstants.TTL)) {
-				ttl = (mbp.getMbxPropValue() == null) ? ttl : mbp.getMbxPropValue();
-				LOG.debug("TTL value in uploadContentAsyncToSpectrum() is %s", ttl);
-			}
-			if (mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT)) {
-				ttlUnit = (mbp.getMbxPropValue() == null) ? ttlUnit : mbp.getMbxPropValue();
-				LOG.debug("TTL Unit in uploadContentAsyncToSpectrum() is %s", ttlUnit);
-			}
+		Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
+		if(!ttlMap.isEmpty())
+		{
+			ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
+			ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
 		}
-
 		Integer ttlNumber = Integer.parseInt(ttl);
 		properties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlUnit, ttlNumber)));
 

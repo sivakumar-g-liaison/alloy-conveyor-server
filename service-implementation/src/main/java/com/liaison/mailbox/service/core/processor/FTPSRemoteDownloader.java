@@ -82,8 +82,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				// FTPSRequest executed through Java
 				run();
 			}
-	   } catch(JAXBException |IOException | IllegalAccessException | NoSuchFieldException e) {
-	       LOGGER.error(constructMessage("Error occured during ftp(s) download"), e);
+	   } catch(Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -162,7 +161,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				LOGGER.debug("The payload location({}) is empty", path);
 			}
 			// For testing purpose
-			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}", remotePath, path));
+			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, path);
 			downloadDirectory(ftpsRequest, path, remotePath);
 			ftpsRequest.disconnect();
 
@@ -174,6 +173,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		} catch (LiaisonException | JAXBException | IOException | MailBoxServicesException
 				| URISyntaxException |IllegalAccessException | NoSuchFieldException e) {
+		    LOGGER.error(constructMessage("Error occurred during ftp(s) download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}

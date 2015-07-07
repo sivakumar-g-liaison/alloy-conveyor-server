@@ -41,6 +41,7 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -127,11 +128,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					try {
 						sftpRequest.getNative().lstat(directory);
-						LOGGER.info(constructMessage("The remote directory{} already exists."), directory);
+						LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
 						sftpRequest.changeDirectory(directory);
 					} catch (Exception ex) {
 						sftpRequest.getNative().mkdir(directory);
-						LOGGER.info(constructMessage("The remote directory{} is not exist.So created that."), directory);
+						LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
 						sftpRequest.changeDirectory(directory);
 					}
 				}
@@ -151,7 +152,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				| SftpException | SymmetricAlgorithmException | NoSuchFieldException
 				| SecurityException | IllegalArgumentException | IllegalAccessException
 				| JAXBException | URISyntaxException e) {
-		    LOGGER.error(constructMessage("Error occured during sftp upload"), e);
+            LOGGER.error(constructMessage("Error occurred during sftp upload", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 
@@ -272,9 +273,26 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						deleteOrArchiveTheFiles(staticProp.getDeleteFiles(),
 						        staticProp.getProcessedFileLocation(), 
 						        item);
-
+						StringBuilder message = new StringBuilder()
+													.append("File ")
+													.append(currentFileName)
+													.append(" uploaded successfully")
+													.append(" to remote path ")
+													.append(remoteParentDir);
+						// Glass Logging 
+						logGlassMessage(message, item, ExecutionState.COMPLETED);
 					} else {
+						
 						archiveFiles(staticProp.getErrorFileLocation(), item);
+						StringBuilder message = new StringBuilder()
+													.append("Failed to upload file ")
+													.append(currentFileName)
+													.append(" from local path ")
+													.append(localDir)
+													.append(" to remote path ")
+													.append(remoteParentDir);
+						// Glass Logging 
+						logGlassMessage(message, item, ExecutionState.FAILED);
 					}
 				}
 			}
@@ -385,4 +403,5 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 	}
+	
 }
