@@ -575,7 +575,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating target(processed/error) folder");
-			Files.createDirectories(targetDirectory);
+			createFoldersAndAssingProperPermissions(targetDirectory);
+			//Files.createDirectories(targetDirectory);
 		}
 		Path target = targetDirectory.resolve(file.getName());
 		// moving to processed/error folder
