@@ -60,8 +60,8 @@ import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
+import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
@@ -613,7 +613,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		newPath = Paths.get(processedFileLcoation).resolve(file.getName());
 
 		if (!Files.exists(newPath.getParent())) {
-			Files.createDirectories(newPath.getParent());
+			createFoldersAndAssingProperPermissions(newPath.getParent());
+			//Files.createDirectories(newPath.getParent());
 		}
 
 		Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
@@ -862,7 +863,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
 		}
 
-		Files.createDirectories(filePathToCreate);
+		createFoldersAndAssingProperPermissions(filePathToCreate);
+		/*Files.createDirectories(filePathToCreate);
 		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
 		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
@@ -879,7 +881,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			filePathToCreate = filePathToCreate.getParent();
 		 }
 
-		LOGGER.debug("Done setting group");
+		LOGGER.debug("Done setting group");*/
 	}
 
 	private String getGroupFor(String protocol) {
@@ -919,9 +921,38 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	}
 
-	   /**
+	/**
+	 * Method to create the given path and assign proper group and permissions to the created folders
+	 *
+	 * @param filePathToCreate - file Path which is to be created
+	 * @throws IOException
+	 */
+	protected void createFoldersAndAssingProperPermissions(Path filePathToCreate) throws IOException {
+
+		FileSystem fileSystem = FileSystems.getDefault();
+		Files.createDirectories(filePathToCreate);
+		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
+		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
+		String group = getGroupFor(filePathToCreate.getName(1).toString());
+		LOGGER.debug("group  name - {}", group);
+		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+
+		//skip when reaching inbox/outbox
+		while(!(filePathToCreate.getFileName().toString().equals("inbox")
+		        || filePathToCreate.getFileName().toString().equals("outbox"))){
+
+			LOGGER.debug("setting the group of  {} to {}", filePathToCreate, group);
+			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
+			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
+			filePathToCreate = filePathToCreate.getParent();
+		 }
+
+		LOGGER.debug("Done setting group");
+	}
+
+	 /**
      * Method to log global process Id
-     * 
+     *
      * @param message
      * @param status
      */
