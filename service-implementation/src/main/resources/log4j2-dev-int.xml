@@ -237,7 +237,8 @@
 			ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
 			password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
 			sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="${env:GLASS_SPECTRUM_MESSAGE_TTL}"
-			dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}">
+			dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}"
+			ignoreExceptions="false">
 			<GlassMessageJSONLayout compact="true" />
 			<filters>
 				<MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
