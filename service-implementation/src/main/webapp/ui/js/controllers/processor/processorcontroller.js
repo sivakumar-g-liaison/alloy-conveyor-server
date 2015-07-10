@@ -30,6 +30,9 @@ var rest = myApp.controller(
             $scope.mailBoxId;
             $scope.processorUrlDisplayContent = ''; 
             $scope.urlType = '';
+			var isProcessorSearchFlag = false;
+			var procsrId = '';
+			var isSIdConstraint = true;
             		
 			function getIndexOfValue(objArray, value) {
 				var pos = -1;
@@ -146,10 +149,21 @@ var rest = myApp.controller(
                 $scope.selectedProfiles = [];
             };
             $scope.loadOrigin();
-            
+			
             $scope.initialLoad = function () {
-                $scope.readAllProcessors();
-                $scope.readAllProfiles();
+			
+			isProcessorSearchFlag = $location.search().isProcessorSearch;
+			procsrId = $location.search().processorId;
+			$rootScope.gridLoaded = false;
+				if(isProcessorSearchFlag){
+					isSIdConstraint = false;
+					$scope.readAllProcessors();
+					$scope.readAllProfiles();
+					$scope.editProcessor(procsrId,true);
+				} else {
+					$scope.readAllProcessors();
+					$scope.readAllProfiles();
+				}
             };
             //$scope.readOnlyProcessors = false;
             // Grid Setups
@@ -164,12 +178,14 @@ var rest = myApp.controller(
                 pageSize: 5,
                 currentPage: 1
             };
+			
             $scope.readAllProcessors = function () {
-                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?addServiceInstanceIdConstraint=' + true + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
+                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?addServiceInstanceIdConstraint=' + isSIdConstraint + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data) {
                         $scope.getPagedDataAsync(data,
                             $scope.pagingOptions.pageSize,
                             $scope.pagingOptions.currentPage);
+					$rootScope.gridLoaded = true;		
                     }
                 );
             };
@@ -422,11 +438,14 @@ var rest = myApp.controller(
 				if (blockuiFlag === true) {
 					$scope.block.blockUI();
 				}
-				
-				$scope.formAddPrcsr.$setPristine();
+				if(typeof $scope.formAddPrcsr != 'undefined'){
+					$scope.formAddPrcsr.$setPristine();
+				}
                 $scope.loadOrigin();
                 //To notify passwordDirective to clear the password and error message
-                $scope.doSend();
+                if(typeof $scope.formAddPrcsr != 'undefined'){
+					$scope.doSend();
+				}
                 $scope.isEdit = true;
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
@@ -518,9 +537,14 @@ var rest = myApp.controller(
             };			
 			
             $scope.doCancel = function () {			
-				$scope.closeModalView(); 
-				$location.$$search = {};
-				$location.path('/mailbox/getMailBox');
+				$scope.closeModalView(); 				
+				if($location.search().isProcessorSearch){
+					$location.$$search = {};
+					$location.path('/mailbox/getProcessor');
+				} else {
+					$location.$$search = {};
+					$location.path('/mailbox/getMailBox');
+				}
             };
 	        $scope.closeModalView = function () {
                  $('#cancelAction').modal('hide')

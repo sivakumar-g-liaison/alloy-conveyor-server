@@ -32,6 +32,7 @@ public class GetProcessorResponseDTO extends CommonResponseDTO {
 	private static final long serialVersionUID = 1L;
 	private ProcessorDTO processor;
 	private List<ProcessorDTO> processors;
+	private int totalItems;
 
 	public ProcessorDTO getProcessor() {
 		return processor;
@@ -44,5 +45,11 @@ public class GetProcessorResponseDTO extends CommonResponseDTO {
 	}
 	public void setProcessors(List<ProcessorDTO> processors) {
 		this.processors = processors;
+	}
+	public int getTotalItems() {
+		return totalItems;
+	}
+	public void setTotalItems(int totalItems) {
+		this.totalItems = totalItems;
 	}
 }

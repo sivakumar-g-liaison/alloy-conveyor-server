@@ -5,12 +5,12 @@
       Processors of Mailbox {{mailboxName}}
     </h2>
 
-        <div class="gridStyle" ng-grid="gridOptionsForProcessorList">
+        <div class="gridStyle" ng-grid="gridOptionsForProcessorList" ng-if="gridLoaded">
 
         </div>
         <br/>
 
-        <button id="mbx-procsr-addNew" class="btn btn-primary" data-toggle="modal" data-target="#addNewModal">
+        <button id="mbx-procsr-addNew" class="btn btn-primary" data-toggle="modal" data-target="#addNewModal" ng-show="gridLoaded">
             Add New
         </button>
         

@@ -2,8 +2,87 @@
 
 	<div class="form-row">
 		<h3 id="title" class="ng-binding">Search Processor</h3>
-		<hr />
-		<br />
+		<hr />		
+	</div>
+	<form name="formSearchMbx" novalidate="" >
+
+			<div class="row">
+				<div class="col-md-3">
+					<label for="name"> Mailbox Name  </label> 
+					 <input id="mbxNameInput" type="text" ng-model="processor.mbxname"
+                                       placeholder="Mailbox Name"
+                                       required typeahead="processors.mailboxName
+                                       for processors in processorList | filter:{mailboxName:$viewValue}"                                       
+                                       class="form-control"
+                                       name="mbxNameInput">									
+				</div>
+				<div class="col-md-3">
+					<label for="name"> Pipeline ID </label>
+					<input id="pipeLineIdInput" type="text" ng-model="processor.pipelineId"
+                                       placeholder="Pipeline ID"                                                                             
+                                       class="form-control"
+                                       name="pipelineIdInput">	
+				</div>
+				<div class="col-md-3">
+					<label for="name"> Folder Path </label> 
+					<input id="folderPathInput" type="text" ng-model="processor.folderPath"
+                                       placeholder="Folder Path"                                                                              
+                                       class="form-control"
+                                       name="folderPathInput">	
+				</div>				
+			</div>
+			<br />
+			<div class="row">
+				<div class="col-md-3">
+					<label for="name"> Profile </label>					
+				<input id="profileInput" type="text" ng-model="processor.profile"
+                                       placeholder="Profile"
+                                       required typeahead="prof.name for prof in profiles | filter:{name:$viewValue}"                                       
+                                       class="form-control"
+                                       name="profileInput">
+				</div>
+				<div class="col-md-3">
+					<label for="name"> Protocol </label>
+					<select id="protocolInput" ng-disabled="isEdit || isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-model="processor.protocol" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
+					<option value="">-- select--</option>
+					</select>
+				</div>
+				<div class="col-md-3">
+					<label for="name"> Processor Type </label>
+					<select id="processorTypeInput" ng-disabled="isEdit" ng-model="processor.type" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control">
+                    <option value="">-- select--</option>
+					</select>
+				</div>
+				<div class="col-md-3">		
+					<label for="name">  </label>
+					<br />					
+					<button id="mbx-procsr-search" class="btn btn-primary" data-toggle="modal">
+						Search
+					</button>															
+					<label for="name">  </label>
+					<button id="mbx-procsr-reset" class="btn btn-primary" data-toggle="modal">
+						Reset
+					</button>
+				</div>
+			</div>			
+	</form>
+	<br />
+	<div class="modal-custom" id="myModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button id="mbx-search-delete" type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						<i class="glyphicon glyphicon-remove-sign" ng-click="closeDelete()"> </i>
+					</button>
+					<h4 class="modal-title">Deactivate</h4>
+				</div>
+				<div class="modal-body">Do you really want to deactivate {{key.name}}?</div>
+				<div class="modal-footer">
+					<button id="deleteModalDeleteButton" class="btn btn-primary" ng-click="deactivateProcessor()">Deactivate</button>
+					<button id="deleteModalCancelButton" class="btn btn-primary cancel" ng-click="closeDelete()">Cancel</button>
+				</div>
+			</div>
+		</div>
 	</div>
 	<!-- Loading image will be shown until grid is loaded -->
 	<div  class="loadingSpinner"  id="loader" ng-cloak ng-hide="gridLoaded">

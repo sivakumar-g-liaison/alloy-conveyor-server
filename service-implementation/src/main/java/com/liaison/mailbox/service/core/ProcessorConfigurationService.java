@@ -72,6 +72,7 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
@@ -903,7 +904,7 @@ public class ProcessorConfigurationService {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public GetProcessorResponseDTO getAllProcessors()
+	public GetProcessorResponseDTO getAllProcessors(GenericSearchFilterDTO searchFilter)
 			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
 			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
 
@@ -914,8 +915,15 @@ public class ProcessorConfigurationService {
 			LOGGER.debug("Entering into get all processors.");			
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-			List<Processor> processors = config.getAllProcessors();
+			int totalCount = 0;			
+			Map<String, Integer> pageOffsetDetails = null;
 			
+			totalCount = config.getAllProcessorsCount();
+			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+					searchFilter.getPageSize(), totalCount);
+			
+			List<Processor> processors = config.getAllProcessors(searchFilter, pageOffsetDetails);
+
 			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
 			if (null == processors || processors.isEmpty()) {
 				throw new MailBoxConfigurationServicesException(Messages.NO_PROCESSORS_EXIST, Response.Status.NOT_FOUND);
@@ -928,6 +936,7 @@ public class ProcessorConfigurationService {
 			}
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setTotalItems(totalCount);
 			serviceResponse.setProcessors(prsDTO);
 			
 			LOGGER.debug("Exit from get all processors.");

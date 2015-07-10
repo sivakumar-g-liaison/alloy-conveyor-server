@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -38,12 +39,14 @@ import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.Monitors;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
@@ -74,7 +77,11 @@ public class ProcessorSearchResource extends AuditedResource {
 	@ApiOperation(value = "Get All Processors", notes = "get all the processors", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-	public Response getAllProcessors(@Context HttpServletRequest request) {
+	public Response getAllProcessors(@Context HttpServletRequest request,
+			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+			@QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
+			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
+			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -85,8 +92,13 @@ public class ProcessorSearchResource extends AuditedResource {
 
 				try {					
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
+					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+					searchFilter.setPage(page);
+					searchFilter.setPageSize(pageSize);
+					searchFilter.setSortField(sortField);
+					searchFilter.setSortDirection(sortDirection);
 					// Get all the processors
-					return processor.getAllProcessors();
+					return processor.getAllProcessors(searchFilter);
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());

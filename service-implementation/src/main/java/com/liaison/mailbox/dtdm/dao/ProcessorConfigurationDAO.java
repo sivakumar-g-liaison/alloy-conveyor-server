@@ -11,12 +11,14 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
  * @author OFS
@@ -141,9 +143,21 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	public Processor findProcessorByNameAndMbx(String mbxGuid, String ProcName); 
  	
  	/**
+	 * Retrieves count of all processors  
+	 * @return count of processors
+	 */
+	public int getAllProcessorsCount(); 
+	
+ 	/**
 	 * Retrieves list of all processors  
 	 * @return list of processors
 	 */
-	public List <Processor> getAllProcessors(); 
+	public List <Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
+	
+	/**
+	 * Retrieve the processors based on filter search  
+	 * @return list of processors
+	 */
+	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO); 
 
 }

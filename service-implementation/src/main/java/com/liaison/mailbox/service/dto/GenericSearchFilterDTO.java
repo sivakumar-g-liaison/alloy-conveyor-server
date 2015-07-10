@@ -11,6 +11,10 @@ public class GenericSearchFilterDTO {
 	private String sortDirection;
 	private String stagedFileName;
 	private String status;
+	private String pipelineId;
+	private String folderPath;
+	private String protocol;
+	private String processorType;
 
 	public String getMbxName() {
 		return mbxName;
@@ -83,5 +87,37 @@ public class GenericSearchFilterDTO {
     public void setStatus(String status) {
         this.status = status;
     }
+    
+    public String getPipelineId() {
+		return pipelineId;
+	}
+
+	public void setPipelineId(String pipelineId) {
+		this.pipelineId = pipelineId;
+	}
+
+	public String getFolderPath() {
+		return folderPath;
+	}
+
+	public void setFolderPath(String folderPath) {
+		this.folderPath = folderPath;
+	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	public String getProcessorType() {
+		return processorType;
+	}
+
+	public void setProcessorType(String processorType) {
+		this.processorType = processorType;
+	}
 
 }

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -23,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
@@ -31,6 +34,7 @@ import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -487,15 +491,42 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 
 	
-	public List<Processor> getAllProcessors() {
+	public List<Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails) {
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 		List<Processor> processors = new ArrayList<Processor>();
 
 		try {
 			
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor");
+			String sortDirection = searchFilter.getSortDirection();
+			String sortField=searchFilter.getSortField();
 
-			List <?> proc = entityManager.createQuery(query.toString()).getResultList();
+			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+				sortDirection=sortDirection.toUpperCase();
+				switch (sortField.toLowerCase()) {
+					case "mailboxname":
+						query.append(" order by processor.mailbox.mbxName " + sortDirection);
+					break;
+					case "name":
+						query.append(" order by processor.procsrName " + sortDirection);
+						break;
+					case "type":
+						query.append(" order by processor.type " + sortDirection);
+						break;
+					case "protocol":
+						query.append(" order by processor.procsrProtocol " + sortDirection);
+						break;
+					case "status":
+						query.append(" order by processor.procsrStatus " + sortDirection);
+						break;
+				}
+			}else {
+				query.append(" order by processor.procsrName");
+			}
+			List <?> proc = entityManager.createQuery(query.toString())
+										 .setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+										 .setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+										 .getResultList();
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
@@ -513,5 +544,99 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			}
 		}
 		return processors;		
+	}
+
+	@Override
+	public int getAllProcessorsCount() {
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		Long totalItems = null;
+		int count = 0;
+
+		try {
+			
+			StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor");
+
+			totalItems = (Long)entityManager.createQuery(query.toString()).getSingleResult();
+			count = totalItems.intValue();
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return count;	
+	}
+	
+	@Override
+	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO) {
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();
+
+		try {
+
+			LOG.info("Fetching the processor starts.");
+			boolean isWhereAdded = false;
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor");
+			
+			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
+				isWhereAdded = true;
+				query.append(" inner join processor.mailbox mbx");
+			}
+			if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != ""){
+				isWhereAdded = true;
+				query.append(" ");
+			}
+			if(null != searchDTO.getFolderPath() && searchDTO.getFolderPath() != ""){
+				isWhereAdded = true;
+				query.append(" inner join processor.folders folder ");
+			}
+			if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != ""){
+				isWhereAdded = true;
+				query.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
+						     .append(" inner join schd_prof_processor.scheduleProfilesRef profile");
+			}
+			if(isWhereAdded){
+				query.append(" where  ");
+			}
+			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
+				query.append(" processor.mailbox.name like: %" + searchDTO.getMbxName() + "%");				
+			}
+			if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != ""){
+				query.append(" ");
+			}
+			if(null != searchDTO.getFolderPath() && searchDTO.getFolderPath() != ""){
+				query.append(" folder.folderuri like: %" + searchDTO.getFolderPath() + "%");
+			}
+			if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != ""){
+				query.append(" profile.name like: %" + searchDTO.getProfileName() + "%");
+			}
+			if(null != searchDTO.getProtocol() && searchDTO.getProtocol() != ""){
+				query.append(" processor.protocol = :" + searchDTO.getProtocol());
+			}
+			if(null != searchDTO.getProcessorType() && searchDTO.getProcessorType() != ""){
+				query.append(" TYPE(processor) = :" + searchDTO.getProcessorType());
+			}
+
+			List<?> proc = entityManager.createQuery(query.toString())
+					.setParameter(STATUS, EntityStatus.ACTIVE.name())
+					.getResultList();
+
+			Iterator<?> iter = proc.iterator();
+			Processor processor;
+			while (iter.hasNext()) {
+
+				processor = (Processor) iter.next();
+				processors.add(processor);
+				LOG.info("Processor Configuration -Pguid : {}, JavaScriptUri : {}, Desc: {}, Properties : {}, Status : {}, Type : {}",
+						processor.getPrimaryKey(), processor.getJavaScriptUri(), processor.getProcsrDesc(),
+						processor.getProcsrProperties(), processor.getProcsrStatus(), processor.getProcessorType());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return processors;
 	}
 }

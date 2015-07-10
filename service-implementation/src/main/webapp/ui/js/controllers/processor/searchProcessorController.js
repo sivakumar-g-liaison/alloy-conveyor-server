@@ -6,11 +6,10 @@ var rest = myApp.controller(
             
             //Paging set up
             $scope.totalServerItems = 0;
-			$scope.mailBoxId = "";
-			$scope.mailBoxName = "";
+			
             $scope.pagingOptions = {
-                pageSizes: [5, 10, 50],
-                pageSize: 5,
+                pageSizes: [25, 100, 1000],
+                pageSize: 25,
                 currentPage: 1
             };
 			
@@ -18,6 +17,22 @@ var rest = myApp.controller(
 				fields: ['name'],
 				directions: ['asc']
 			};
+			
+			// Profiles loads initially
+        $scope.profiles = [];
+     
+        // Loading the profile details
+        $scope.loadProfiles = function () {
+            $scope.restService.get($scope.base_url + "/profile", function (data, status) {
+                if (status == 200) {
+                    $scope.profiles = data.getProfileResponse.profiles;
+                } else {
+                    showSaveMessage("failed to load Profiles", 'error');
+                }
+
+            })
+        };
+        $scope.loadProfiles(); // initial load for the profiles
 			
             $scope.readAllProcessors = function () {
 			
@@ -36,16 +51,49 @@ var rest = myApp.controller(
                             $scope.pagingOptions.currentPage);
 						$rootScope.gridLoaded = true;
 						 $scope.showprogressbar = false;
-                    }				
+                    },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection}				
                 );				
             };
 			$scope.readAllProcessors();
+			
+			// Enable the delete modal dialog
+        $scope.openDelete = function (row) {
+            $scope.key = row.entity;
+            // $scope.deleteKey = true;
+        };
+
+        // Enable the delete modal dialog
+        $scope.openMessage = function () {
+            $scope.customKey = true;
+        };
+
+        // Close the modal
+        $scope.closeMessage = function () {
+            $scope.customKey = false;
+        };
+
+        // calls the rest deactivate service
+        $scope.deactivateProcessor = function () {
+
+            $scope.restService.delete($scope.base_url + '/' + $scope.key.linkedMailboxId + '/processor/' + $scope.key.guid , function (data, status) {								  
+                $scope.readAllProcessors();
+            });
+            $scope.closeDelete();
+        };
+
+        // Close the modal
+        $scope.closeDelete = function () {
+        	$('#myModal').modal('hide')
+        };
 			// Navigate to mailbox screen for edit operation
 			$scope.edit = function (row) {
-				$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+				var processorSearchFlag = true;
+				$location.$$search = {};
+				$location.path('/mailbox/processor').search('mailBoxId', row.entity.linkedMailboxId).search('mbxname', row.entity.mailboxName).search('isProcessorSearch', processorSearchFlag).search('processorId', row.entity.guid);
 			};
             $scope.getPagedDataAsync = function (largeLoad, pageSize, page) {
                 setTimeout(function () {
+					$scope.totalServerItems = largeLoad.getProcessorResponse.totalItems;
                     $scope.setPagingData(largeLoad.getProcessorResponse.processors, page, pageSize);
                 }, 100);
             };
@@ -53,13 +101,9 @@ var rest = myApp.controller(
             $scope.setPagingData = function (data, page, pageSize) {
                 if (data === null || data.length <= 0) {
                     $scope.message = 'No results found.';
-                }
-                var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
-                $scope.processorList = pagedData;
-                $scope.totalServerItems = data.length;
-				$scope.mailBoxId = data.linkedMailboxId;
-				$scope.mailBoxName = data.mailboxName;
-				
+                }				
+                var pagedData = data;
+                $scope.processorList = pagedData;                				
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
@@ -114,21 +158,29 @@ var rest = myApp.controller(
 
             $scope.gridOptionsForGetProcessor = {
                 columnDefs: [{
+                    field: 'mailboxName',
+                    displayName: 'Mailbox Name',
+                    width: "25%"
+                },{
                     field: 'name',
-                    displayName: 'Name',
-                    width: "40%"
+                    displayName: 'Processor Name',
+                    width: "25%"
                 }, {
-                    field: 'description',
-                    displayName: 'Description',
-                    width: "20%"                    
+                    field: 'type',
+                    displayName: 'Type',
+                    width: "15%"                    
+                }, {
+                    field: 'protocol',
+                    displayName: 'Protocol',
+                    width: "15%"                    
                 }, {
                     field: 'status',
                     displayName: 'Status',
-                    width: "20%"                    
+                    width: "10%"                    
                 }, {
                     displayName: 'Action',
                     sortable: false,
-                    width: "20%",
+                    width: "10%",
 					cellTemplate: $scope.editableInPopup
                 }],
 				data: 'processorList',
