@@ -4,29 +4,34 @@
 		<h3 id="title" class="ng-binding">Search Processor</h3>
 		<hr />		
 	</div>
-	<form name="formSearchMbx" novalidate="" >
+	<form name="formSearchPrcsr" novalidate="" >
 
 			<div class="row">
 				<div class="col-md-3">
 					<label for="name"> Mailbox Name  </label> 
-					 <input id="mbxNameInput" type="text" ng-model="processor.mbxname"
-                                       placeholder="Mailbox Name"
-                                       required typeahead="processors.mailboxName
-                                       for processors in processorList | filter:{mailboxName:$viewValue}"                                       
+					<input id="mbxname" type="text" ng-model="mailBoxName"
+                                       placeholder="Mailbox Name"                                       
+									   typeahead="mbx.mbxName for mbx in getMailboxNames($viewValue) | filter:$viewValue"
+									   ng-minLength=5 ng-maxLength=80
                                        class="form-control"
-                                       name="mbxNameInput">									
+                                       name="mbxname">
+					<div ng-show="formSearchPrcsr.mbxname.$dirty && formSearchPrcsr.mbxname.$invalid">
+                	<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.mbxname.$error.pattern}" ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
+                	<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.minlength}" ng-show="formSearchPrcsr.mbxname.$error.minlength">
+                	<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
+		 			<span id="mbx-search-nameInvalid-maxlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.maxlength}" ng-show="formSearchPrcsr.mbxname.$error.maxlength">
+					<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+                </div>
 				</div>
 				<div class="col-md-3">
 					<label for="name"> Pipeline ID </label>
-					<input id="pipeLineIdInput" type="text" ng-model="processor.pipelineId"
-                                       placeholder="Pipeline ID"                                                                             
+					<input id="pipeLineIdInput" type="text" ng-model="processor.pipelineId"                                                                                                                    
                                        class="form-control"
                                        name="pipelineIdInput">	
 				</div>
 				<div class="col-md-3">
 					<label for="name"> Folder Path </label> 
-					<input id="folderPathInput" type="text" ng-model="processor.folderPath"
-                                       placeholder="Folder Path"                                                                              
+					<input id="folderPathInput" type="text" ng-model="processor.folderPath"                                       
                                        class="form-control"
                                        name="folderPathInput">	
 				</div>				
@@ -56,11 +61,11 @@
 				<div class="col-md-3">		
 					<label for="name">  </label>
 					<br />					
-					<button id="mbx-procsr-search" class="btn btn-primary" data-toggle="modal">
+					<button id="filterSearch" class="btn btn-primary" data-toggle="modal">
 						Search
 					</button>															
 					<label for="name">  </label>
-					<button id="mbx-procsr-reset" class="btn btn-primary" data-toggle="modal">
+					<button id="filterReset" class="btn btn-primary" data-toggle="modal">
 						Reset
 					</button>
 				</div>

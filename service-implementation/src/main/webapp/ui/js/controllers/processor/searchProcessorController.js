@@ -18,7 +18,12 @@ var rest = myApp.controller(
 				directions: ['asc']
 			};
 			
-			// Profiles loads initially
+		$scope.mailBoxName = null;
+		
+		// Modify the value to change the search criteria
+        $scope.searchMinCharacterCount = 5;
+			
+		// Profiles loads initially
         $scope.profiles = [];
      
         // Loading the profile details
@@ -55,6 +60,31 @@ var rest = myApp.controller(
                 );				
             };
 			$scope.readAllProcessors();
+			
+		// Enterprise selector
+    $scope.mailboxNames = [];
+    $scope.getMailboxNames = function(choice) {
+        var restUrl = $scope.base_url + '/processorsearch//getMailBoxNames';
+		var mailBoxName = choice;
+		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
+        if ((typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length >= $scope.searchMinCharacterCount)  || mailBoxName === null || mailBoxName === "" || (typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length === 0)) {
+            restUrl += '?mbxName=' + mailBoxName;
+        }
+        return $scope.restService.get(restUrl, function(data) {}).then(function(res){
+            var entities = [];
+            $scope.mailboxNames = [];
+            var data = res.data.SearchProcessorResponseDTO;
+            for (var i in data) {
+                if(choice) {
+                    if(data[i].name.toLowerCase().indexOf(choice.toLowerCase()) != -1) {
+                        entities.push({ 'name': data[i].mailBoxName });
+                        $scope.mailboxNames.push({ 'name': data[i].mailBoxName });
+                    }
+                }
+            }
+            return entities;
+        });        
+    }
 			
 			// Enable the delete modal dialog
         $scope.openDelete = function (row) {

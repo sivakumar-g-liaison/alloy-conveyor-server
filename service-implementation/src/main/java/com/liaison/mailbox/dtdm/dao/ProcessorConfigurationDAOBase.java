@@ -29,6 +29,7 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.FileWriter;
 import com.liaison.mailbox.dtdm.model.HTTPAsyncProcessor;
 import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
@@ -598,7 +599,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 				query.append(" where  ");
 			}
 			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
-				query.append(" processor.mailbox.name like: %" + searchDTO.getMbxName() + "%");				
+				query.append(" processor.mailbox.name like:" + MBX_NAME);				
 			}
 			if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != ""){
 				query.append(" ");
@@ -609,17 +610,20 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != ""){
 				query.append(" profile.name like: %" + searchDTO.getProfileName() + "%");
 			}
-			if(null != searchDTO.getProtocol() && searchDTO.getProtocol() != ""){
+			if(null != searchDTO.getProtocol() && searchDTO.getProtocol() != "") {
 				query.append(" processor.protocol = :" + searchDTO.getProtocol());
 			}
 			if(null != searchDTO.getProcessorType() && searchDTO.getProcessorType() != ""){
 				query.append(" TYPE(processor) = :" + searchDTO.getProcessorType());
 			}
 
-			List<?> proc = entityManager.createQuery(query.toString())
-					.setParameter(STATUS, EntityStatus.ACTIVE.name())
-					.getResultList();
-
+			Query processorQuery = entityManager.createQuery(query.toString());
+			
+			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
+				processorQuery.setParameter(MBX_NAME, "%" + searchDTO.getMbxName() + "%");
+			}
+					
+			List<?> proc = processorQuery.getResultList();
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
@@ -639,4 +643,34 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 		return processors;
 	}
+
+	@Override
+	public List<MailBox> getMailboxNames(GenericSearchFilterDTO searchDTO) {
+			 
+	        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+	        List<MailBox> mailboxNames = new ArrayList<MailBox>();
+	 
+	        try {
+	 
+	            StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
+	                    .append(" where LOWER(mbx.mbxName) like :" + MBX_NAME);
+	            List <?> proc = entityManager.createQuery(query.toString())
+	                    .setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%")
+	                    .getResultList();	
+	             
+	            Iterator<?> iter = proc.iterator();
+	            MailBox mailbox;
+	 			while (iter.hasNext()) {
+
+	 				mailbox = (MailBox) iter.next();
+	 				mailboxNames.add(mailbox);	 				
+	 			}
+	 
+	        } finally {
+	            if (entityManager != null) {
+	                entityManager.close();
+	            }
+	        }
+		return mailboxNames;
+	}	
 }

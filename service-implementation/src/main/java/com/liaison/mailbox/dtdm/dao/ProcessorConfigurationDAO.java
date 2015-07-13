@@ -17,6 +17,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
@@ -158,6 +159,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieve the processors based on filter search  
 	 * @return list of processors
 	 */
-	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO); 
-
+	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO);
+	
+	/**
+	 * Retrieve the mailbox names  
+	 * @return list of mailboxes
+	 */
+	public List<MailBox>getMailboxNames(GenericSearchFilterDTO searchDTO);
 }

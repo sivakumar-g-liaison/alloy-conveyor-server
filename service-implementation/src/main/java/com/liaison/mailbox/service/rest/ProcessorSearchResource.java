@@ -108,7 +108,7 @@ public class ProcessorSearchResource extends AuditedResource {
 				}
 			}
 		};
-		worker.actionLabel = "ProcessorAdminResource.getAllProcessors()";
+		worker.actionLabel = "ProcessorSearchResource.getAllProcessors()";
 		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);		
 
 		// hand the delegate to the framework for calling
@@ -120,6 +120,87 @@ public class ProcessorSearchResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
+	}
+	@GET
+	@Path("/getMailBoxNames")
+	@ApiOperation(value = "Get Mailbox Names", notes = "get mailbox names", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO.class)
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	public Response getMailBoxNames(@Context HttpServletRequest request,
+			@QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName) {
+		// create the worker delegate to perform the business logic
+				AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+					@Override
+					public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+						serviceCallCounter.addAndGet(1);
+
+						try {					
+							ProcessorConfigurationService processor = new ProcessorConfigurationService();
+							GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+							searchFilter.setMbxName(mbxName);
+							return processor.getMailBoxNames(searchFilter);
+						} catch (IOException | JAXBException e) {
+							LOG.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						} catch (SymmetricAlgorithmException e) {
+							LOG.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						}
+					}
+				};
+				worker.actionLabel = "ProcessorSearchResource.getMailBoxNames()";
+				worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);		
+
+				// hand the delegate to the framework for calling
+				try {
+					return handleAuditedServiceRequest(request, worker);
+				} catch (LiaisonAuditableRuntimeException e) {
+					if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+						return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+					}
+					return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+				}				
+	}
+	@GET
+	@Path("/getDetailsByTypeahead")
+	@ApiOperation(value = "Get Details for Typeahead", notes = "get details for typeahead", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	public Response getProcessorsByFilterSearch(@Context HttpServletRequest request,
+			@QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName) {
+		// create the worker delegate to perform the business logic
+				AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+					@Override
+					public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+						serviceCallCounter.addAndGet(1);
+
+						try {					
+							ProcessorConfigurationService processor = new ProcessorConfigurationService();
+							GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+							searchFilter.setMbxName(mbxName);							
+							// Get all the processors
+							return processor.getProcessorsByFilterSearch(searchFilter);
+						} catch (IOException | JAXBException e) {
+							LOG.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						} catch (SymmetricAlgorithmException e) {
+							LOG.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						}
+					}
+				};
+				worker.actionLabel = "ProcessorSearchResource.getMailBoxNames()";
+				worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);		
+
+				// hand the delegate to the framework for calling
+				try {
+					return handleAuditedServiceRequest(request, worker);
+				} catch (LiaisonAuditableRuntimeException e) {
+					if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+						return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+					}
+					return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+				}				
 	}
 
 	@Override

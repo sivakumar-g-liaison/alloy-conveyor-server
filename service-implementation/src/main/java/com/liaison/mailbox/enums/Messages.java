@@ -152,7 +152,8 @@ public enum Messages {
 	REQUEST_HEADER_PROPERTIES_MISSING("Request header properties are missing"),
 	
 	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details."),
-	NO_PROCESSORS_EXIST("No Processors available.");
+	NO_PROCESSORS_EXIST("No Processors available."),
+	NO_MBX_NAMES_EXIST("No Mailbox names available.");
 
 	private String value;
 

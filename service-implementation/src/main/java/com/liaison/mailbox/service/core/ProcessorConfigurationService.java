@@ -75,6 +75,7 @@ import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
@@ -88,6 +89,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreRespo
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -948,5 +950,111 @@ public class ProcessorConfigurationService {
 					e.getMessage()));
 			return serviceResponse;
 		} 
+	}
+	
+	/**
+	 * Get the Processor details of the mailbox using guid.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public SearchProcessorResponseDTO getMailBoxNames (GenericSearchFilterDTO searchFilter)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get mailbox names.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
+			
+			List<MailBox> mailboxList = config.getMailboxNames(searchFilter);
+
+			List<MailBoxDTO> mbxDTO = new ArrayList<MailBoxDTO>();
+			if (null == mailboxList || mailboxList.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_MBX_NAMES_EXIST, Response.Status.NOT_FOUND);
+			}
+			MailBoxDTO mailboxDTO = null;
+			for (MailBox mailbox : mailboxList) {
+				mailboxDTO = new MailBoxDTO();
+				mailboxDTO.copyFromEntity(mailbox);
+				mbxDTO.add(mailboxDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));			
+			serviceResponse.setMailbox(mbxDTO);
+			
+			LOGGER.debug("Exit from get processor details for typeahead.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+	}
+	
+	/**
+	 * Get the Processor details of the mailbox using guid.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public GetProcessorResponseDTO getProcessorsByFilterSearch (GenericSearchFilterDTO searchFilter)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get processor details for typeahead.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
+			
+			List<Processor> processors = config.filterProcessors(searchFilter);
+
+			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
+			if (null == processors || processors.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_PROCESSORS_EXIST, Response.Status.NOT_FOUND);
+			}
+			ProcessorDTO processorDTO = null;
+			for (Processor processor : processors) {
+				processorDTO = new ProcessorDTO();
+				processorDTO.copyFromEntity(processor, false);
+				prsDTO.add(processorDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));			
+			serviceResponse.setProcessors(prsDTO);
+			
+			LOGGER.debug("Exit from get processor details for typeahead.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
 	}
 }
