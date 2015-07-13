@@ -297,6 +297,9 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 			}
 		}
+		else {
+			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));
+		}
 	}
 
 	@Override

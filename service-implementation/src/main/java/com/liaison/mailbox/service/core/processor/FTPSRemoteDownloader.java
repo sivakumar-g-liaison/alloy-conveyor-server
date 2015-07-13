@@ -207,7 +207,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		FTPFile[] files = ftpClient.getNative().listFiles(dirToList);
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
-		if (files != null) {
+		if (files != null && files.length > 0) {
 
 			String statusIndicator = staticProp.getFileTransferStatusIndicator();
 			for (FTPFile file : files) {
@@ -287,6 +287,9 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					downloadDirectory(ftpClient, remotePath, localDir);
 				}
 			}
+		}
+		else {
+		LOGGER.info(constructMessage("The given payload URI '" + currentDir + "' is empty."));
 		}
 	}
 
