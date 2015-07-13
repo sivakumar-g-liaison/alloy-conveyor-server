@@ -142,6 +142,7 @@ public class TransactionVisibilityClient {
 		}
 
 		visibilityAPI.setId(message.getGlobalPId());
+		visibilityAPI.setGlobalId(message.getGlobalPId());
 	    visibilityAPI.setGlassMessageId(MailBoxUtil.getGUID());
 	    visibilityAPI.setVersion(String.valueOf(System.currentTimeMillis()));
 		visibilityAPI.setStatusDate(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));

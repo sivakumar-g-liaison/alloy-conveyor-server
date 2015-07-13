@@ -417,7 +417,7 @@ public class MailBoxUtil {
     public static String constructMessage(Processor processor, String transferProfile, String... messages) {
 
     	 StringBuffer logPrefix = null;
-    	 if (null == processor && null == transferProfile) {
+    	 if (null == processor) {
 
     		 logPrefix = new StringBuffer()
                  .append("DROPBOX")
@@ -427,7 +427,7 @@ public class MailBoxUtil {
         	 logPrefix = new StringBuffer()
             .append("DROPBOX")
             .append(seperator)
-            .append(transferProfile)
+            .append((transferProfile == null ? "NONE" : transferProfile))
             .append(seperator)
             .append(processor.getProcessorType())
             .append(seperator)
