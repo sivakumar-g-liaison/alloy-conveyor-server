@@ -378,7 +378,7 @@ public class MailBoxService {
             processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
 
             if (!MailBoxUtil.isEmpty(processorId)) {
-                processor = processorDAO.find(Processor.class, processorId);
+                processor = processorDAO.findActiveProcessorById(processorId);
             } else {
                 processor = new MailboxSLAWatchDogService().getSpecificProcessorofMailbox(mailboxId);
             }
