@@ -212,6 +212,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
 									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
+							.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, glassMessage.getGlobalPId())
 							.type(MediaType.APPLICATION_OCTET_STREAM).entity(payload).status(Response.Status.OK);
 					LOG.debug("Exit from download staged file service.");
 					return builder.build();
