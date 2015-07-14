@@ -77,6 +77,7 @@ import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
@@ -113,7 +114,7 @@ public class ProcessorConfigurationService {
 	private static final String PROCESSOR_STATUS = "Processor Status";
 	private static String INTERRUPT_SIGNAL = "Interrupt Signal";
 	private static String EXECUTING_PROCESSORS = "Executing Processors";
-
+	private static String PROFILE = "Profile";
 
 	/**
 	 * Creates processor for the mailbox.
@@ -953,7 +954,7 @@ public class ProcessorConfigurationService {
 	}
 	
 	/**
-	 * Get the Processor details of the mailbox using guid.
+	 * Get the Mailbox names.
 	 *
 	 * @return The responseDTO.
 	 * @throws IOException
@@ -987,14 +988,14 @@ public class ProcessorConfigurationService {
 			MailBoxDTO mailboxDTO = null;
 			for (MailBox mailbox : mailboxList) {
 				mailboxDTO = new MailBoxDTO();
-				mailboxDTO.copyFromEntity(mailbox);
+				mailboxDTO.setName(mailbox.getMbxName());
 				mbxDTO.add(mailboxDTO);
 			}
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));			
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));			
 			serviceResponse.setMailbox(mbxDTO);
 			
-			LOGGER.debug("Exit from get processor details for typeahead.");
+			LOGGER.debug("Exit from get mailbox names.");
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
 
@@ -1006,7 +1007,63 @@ public class ProcessorConfigurationService {
 	}
 	
 	/**
-	 * Get the Processor details of the mailbox using guid.
+	 * Get the Profile names.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public SearchProcessorResponseDTO getProfileNames (GenericSearchFilterDTO searchFilter)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get profile names.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
+			
+			List<ScheduleProfilesRef> profiles = config.getProfileNames(searchFilter);
+
+			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
+			if (profiles == null || profiles.isEmpty()) {
+				serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, PROFILE, Messages.SUCCESS));
+				serviceResponse.setProfiles(profilesDTO);
+				return serviceResponse;
+			}
+
+			ProfileDTO profileDTO = null;
+			for (ScheduleProfilesRef prof : profiles) {
+				profileDTO = new ProfileDTO();
+				profileDTO.setName(prof.getSchProfName());
+				profilesDTO.add(profileDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));			
+			serviceResponse.setProfiles(profilesDTO);
+			
+			LOGGER.debug("Exit from get profile names.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+	}
+	
+	/**
+	 * Get the Processor details by Filter Search.
 	 *
 	 * @return The responseDTO.
 	 * @throws IOException
@@ -1027,11 +1084,16 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.debug("Entering into get processor details for typeahead.");			
+			LOGGER.debug("Entering into get processor details.");			
 
-			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();	
+			int totalCount = 0;			
+			Map<String, Integer> pageOffsetDetails = null;
 			
-			List<Processor> processors = config.filterProcessors(searchFilter);
+			totalCount = config.getFilteredProcessorsCount(searchFilter);
+			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+					searchFilter.getPageSize(), totalCount);
+			List<Processor> processors = config.filterProcessors(searchFilter, pageOffsetDetails);
 
 			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
 			if (null == processors || processors.isEmpty()) {
@@ -1044,10 +1106,11 @@ public class ProcessorConfigurationService {
 				prsDTO.add(processorDTO);
 			}
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));			
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setTotalItems(totalCount);
 			serviceResponse.setProcessors(prsDTO);
 			
-			LOGGER.debug("Exit from get processor details for typeahead.");
+			LOGGER.debug("Exit from get processor details.");
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
 

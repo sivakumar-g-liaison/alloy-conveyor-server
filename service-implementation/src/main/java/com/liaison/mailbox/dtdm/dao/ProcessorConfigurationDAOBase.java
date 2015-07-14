@@ -32,6 +32,7 @@ import com.liaison.mailbox.dtdm.model.HTTPSyncProcessor;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.dtdm.model.Sweeper;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -568,62 +569,54 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	}
 	
 	@Override
-	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO) {
+	public int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO) {
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<Processor> processors = new ArrayList<Processor>();
+		Long totalItems = null;
+		int count = 0;
 
 		try {
 
-			LOG.info("Fetching the processor starts.");
-			boolean isWhereAdded = false;
+			LOG.info("Fetching the processors by filters starts.");
+			
+			StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor");
+			
+			query = genearteQueryBySearchFilters(searchDTO, query);
+			
+			Query processorSearchQuery = entityManager.createQuery(query.toString());
+			
+			processorSearchQuery = setParamsForProcessorSearchQuery(searchDTO, processorSearchQuery);
+					
+			totalItems = (Long)processorSearchQuery.getSingleResult();
+			
+			count = totalItems.intValue();
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+
+		return count;
+	}
+	
+	@Override
+	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO, Map <String, Integer> pageOffsetDetails) {
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List<Processor> processors = new ArrayList<Processor>();		
+
+		try {
+
+			LOG.info("Fetching the processors by filters starts.");
+			
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor");
 			
-			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
-				isWhereAdded = true;
-				query.append(" inner join processor.mailbox mbx");
-			}
-			if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != ""){
-				isWhereAdded = true;
-				query.append(" ");
-			}
-			if(null != searchDTO.getFolderPath() && searchDTO.getFolderPath() != ""){
-				isWhereAdded = true;
-				query.append(" inner join processor.folders folder ");
-			}
-			if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != ""){
-				isWhereAdded = true;
-				query.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
-						     .append(" inner join schd_prof_processor.scheduleProfilesRef profile");
-			}
-			if(isWhereAdded){
-				query.append(" where  ");
-			}
-			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
-				query.append(" processor.mailbox.name like:" + MBX_NAME);				
-			}
-			if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != ""){
-				query.append(" ");
-			}
-			if(null != searchDTO.getFolderPath() && searchDTO.getFolderPath() != ""){
-				query.append(" folder.folderuri like: %" + searchDTO.getFolderPath() + "%");
-			}
-			if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != ""){
-				query.append(" profile.name like: %" + searchDTO.getProfileName() + "%");
-			}
-			if(null != searchDTO.getProtocol() && searchDTO.getProtocol() != "") {
-				query.append(" processor.protocol = :" + searchDTO.getProtocol());
-			}
-			if(null != searchDTO.getProcessorType() && searchDTO.getProcessorType() != ""){
-				query.append(" TYPE(processor) = :" + searchDTO.getProcessorType());
-			}
-
-			Query processorQuery = entityManager.createQuery(query.toString());
+			query = genearteQueryBySearchFilters(searchDTO, query);
 			
-			if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != ""){
-				processorQuery.setParameter(MBX_NAME, "%" + searchDTO.getMbxName() + "%");
-			}
+			Query processorSearchQuery = entityManager.createQuery(query.toString());
+			
+			processorSearchQuery = setParamsForProcessorSearchQuery(searchDTO, processorSearchQuery);
 					
-			List<?> proc = processorQuery.getResultList();
+			List<?> proc = processorSearchQuery.getResultList();
+			
 			Iterator<?> iter = proc.iterator();
 			Processor processor;
 			while (iter.hasNext()) {
@@ -672,5 +665,101 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	            }
 	        }
 		return mailboxNames;
-	}	
+	}
+	
+	@Override
+	public List<ScheduleProfilesRef> getProfileNames(GenericSearchFilterDTO searchDTO) {
+			 
+	        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+	        List<ScheduleProfilesRef> profileNames = new ArrayList<ScheduleProfilesRef>();
+	 
+	        try {
+	 
+	            StringBuilder query = new StringBuilder().append("SELECT s FROM ScheduleProfilesRef s")
+	                    .append(" where LOWER(s.schProfName) like :" + PROF_NAME);
+	            List <?> proc = entityManager.createQuery(query.toString())
+	                    .setParameter(PROF_NAME, "%" + searchDTO.getProfileName().toLowerCase() + "%")
+	                    .getResultList();	
+	             
+	            Iterator<?> iter = proc.iterator();
+	            ScheduleProfilesRef profile;
+	 			while (iter.hasNext()) {
+
+	 				profile = (ScheduleProfilesRef) iter.next();
+	 				profileNames.add(profile);	 				
+	 			}
+	 
+	        } finally {
+	            if (entityManager != null) {
+	                entityManager.close();
+	            }
+	        }
+		return profileNames;
+	}
+	
+	public StringBuilder genearteQueryBySearchFilters(GenericSearchFilterDTO searchDTO, StringBuilder query) {
+		
+		List<String> predicateList = new ArrayList<String>();
+		
+		if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != "") {
+			query.append(" inner join processor.mailbox mbx ");
+			predicateList.add(" mbx.mbxName like :" + MBX_NAME);
+		}
+		if(null != searchDTO.getFolderPath() && searchDTO.getFolderPath() != "") {
+			
+			query.append(" inner join processor.folders folder ");
+			predicateList.add(" folder.folderuri like:" + FOLDER_URI);
+		}
+		if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != "") {
+			predicateList.add(" processor.properties like:" + PIPELINE_ID);
+		}
+		if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != "") {
+			
+			query.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
+					     .append(" inner join schd_prof_processor.scheduleProfilesRef profile");
+			predicateList.add("profile.name like:" + PROF_NAME);
+		}
+		if(null != searchDTO.getProtocol() && searchDTO.getProtocol() != "") {
+			predicateList.add(" processor.protocol = :" + PROTOCOL);
+		}
+		if(null != searchDTO.getProcessorType() && searchDTO.getProcessorType() != "") {
+			predicateList.add(" TYPE(processor) = :" + PROCESSOR_TYPE);
+		}
+		for (int i = 0; i < predicateList.size(); i++) {			
+			if(i == 0){
+				query.append(" WHERE ");				
+				query.append(predicateList.get(i));
+			} else {
+				query.append(" AND ");
+				query.append(predicateList.get(i));
+			}
+		}				
+		return query;
+	}
+	
+	public Query setParamsForProcessorSearchQuery(GenericSearchFilterDTO searchDTO, Query query) {
+		
+		if(null != searchDTO.getMbxName() && searchDTO.getMbxName() != "") {
+			
+			query.setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%");
+		}
+		if(null != searchDTO.getFolderPath() && searchDTO.getFolderPath() != "") {
+			
+			query.setParameter(FOLDER_URI, "%" + searchDTO.getFolderPath() + "%");
+		}
+		if(null != searchDTO.getPipelineId() && searchDTO.getPipelineId() != "") {
+			query.setParameter(PIPELINE_ID, "%" + searchDTO.getPipelineId() + "%");
+		}
+		if(null != searchDTO.getProfileName() && searchDTO.getProfileName() != "") {
+			
+			query.setParameter(PROF_NAME, "%" + searchDTO.getProfileName() + "%");
+		}
+		if(null != searchDTO.getProtocol() && searchDTO.getProtocol() != "") {
+			query.setParameter(PROTOCOL, "%" + searchDTO.getProtocol() + "%");
+		}
+		if(null != searchDTO.getProcessorType() && searchDTO.getProcessorType() != "") {
+			query.setParameter(PROCESSOR_TYPE, "%" + searchDTO.getProcessorType() + "%");
+		}
+		return query;		
+	}
 }

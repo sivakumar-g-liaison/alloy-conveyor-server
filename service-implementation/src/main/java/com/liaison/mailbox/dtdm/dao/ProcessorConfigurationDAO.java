@@ -19,6 +19,7 @@ import javax.persistence.NamedQuery;
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
@@ -67,6 +68,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String PRCSR_NAME = "prcsr_name";
 	public static final String PROFILE_ID = "profile_id";
 	public static final String TENANCY_KEY = "tenancy_key";
+	public static final String FOLDER_URI = "folder_uri";
+	public static final String PROTOCOL = "protocol";
+	public static final String PIPELINE_ID = "pipeline_id";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -159,11 +163,22 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * Retrieve the processors based on filter search  
 	 * @return list of processors
 	 */
-	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO);
+	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO, Map <String, Integer> pageOffsetDetails);
 	
 	/**
 	 * Retrieve the mailbox names  
 	 * @return list of mailboxes
 	 */
 	public List<MailBox>getMailboxNames(GenericSearchFilterDTO searchDTO);
+	
+	/**
+	 * Retrieve the profile names  
+	 * @return list of profiles
+	 */
+	public List<ScheduleProfilesRef>getProfileNames(GenericSearchFilterDTO searchDTO);
+	/**
+	 * Retrieves count of filtered processors  
+	 * @return count of filtered processors
+	 */
+	public int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO);
 }

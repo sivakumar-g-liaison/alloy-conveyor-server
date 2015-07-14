@@ -60,30 +60,54 @@ var rest = myApp.controller(
                 );				
             };
 			$scope.readAllProcessors();
+	// Get Processor details by filter criteria
+	$scope.getProcessorsByFilter = function(){
+	
+		var sortField = "";
+        	var sortDirection = "";
+            if($scope.sortInfo.fields && $scope.sortInfo.directions) {
+            	sortField = String($scope.sortInfo.fields);
+            	sortDirection = String($scope.sortInfo.directions);
+            }
+		$rootScope.gridLoaded = false;
+                $scope.restService.get($scope.base_url + '/processorsearch/getProcessorDetailsByFilter',
+                    function (data) {
+                        $scope.getPagedDataAsync(data,
+                            $scope.pagingOptions.pageSize,
+                            $scope.pagingOptions.currentPage);
+						$rootScope.gridLoaded = true;
+						 $scope.showprogressbar = false;
+                    },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
+					   mbxName:$scope.mailBoxName, pipelineId:$scope.pipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:$scope.protocolName, prcsrType:$scope.processorType}				
+                );
+	}	
 			
-		// Enterprise selector
-    $scope.mailboxNames = [];
-    $scope.getMailboxNames = function(choice) {
-        var restUrl = $scope.base_url + '/processorsearch//getMailBoxNames';
+	// Get Mailbox names for Typeahead display		
+	$scope.getMailboxNames = function(choice) {
+        var restUrl = $scope.base_url + '/processorsearch/getMailBoxNames';
 		var mailBoxName = choice;
 		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
         if ((typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length >= $scope.searchMinCharacterCount)  || mailBoxName === null || mailBoxName === "" || (typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length === 0)) {
             restUrl += '?mbxName=' + mailBoxName;
-        }
-        return $scope.restService.get(restUrl, function(data) {}).then(function(res){
-            var entities = [];
-            $scope.mailboxNames = [];
-            var data = res.data.SearchProcessorResponseDTO;
-            for (var i in data) {
-                if(choice) {
-                    if(data[i].name.toLowerCase().indexOf(choice.toLowerCase()) != -1) {
-                        entities.push({ 'name': data[i].mailBoxName });
-                        $scope.mailboxNames.push({ 'name': data[i].mailBoxName });
-                    }
-                }
-            }
-            return entities;
+        return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
+            var data = res.data.searchProcessorResponse;
+            return data.mailbox;
         });        
+	  }
+    }
+	
+	// Get Profile names for Typeahead display		
+	$scope.getProfileNames = function(choice) {
+        var restUrl = $scope.base_url + '/processorsearch/getProfileNames';
+		var profileName = choice;
+		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
+        if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $scope.searchMinCharacterCount)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
+            restUrl += '?prfName=' + profileName;
+        return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
+            var data = res.data.searchProcessorResponse;
+            return data.profiles;
+        });        
+	  }
     }
 			
 			// Enable the delete modal dialog

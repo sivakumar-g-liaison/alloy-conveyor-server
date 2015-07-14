@@ -18,6 +18,7 @@ import javax.xml.bind.JAXBException;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.mailbox.dtdm.model.Processor;
@@ -32,6 +33,7 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
  * 
  * @author OFS
  */
+@JsonRootName("searchProcessorResponse")
 public class SearchProcessorResponseDTO extends CommonResponseDTO {
 
 	/**

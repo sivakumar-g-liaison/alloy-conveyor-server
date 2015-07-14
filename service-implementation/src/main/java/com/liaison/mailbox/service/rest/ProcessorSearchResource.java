@@ -161,12 +161,13 @@ public class ProcessorSearchResource extends AuditedResource {
 					return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 				}				
 	}
+	
 	@GET
-	@Path("/getDetailsByTypeahead")
-	@ApiOperation(value = "Get Details for Typeahead", notes = "get details for typeahead", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
+	@Path("/getProfileNames")
+	@ApiOperation(value = "Get Profile Names", notes = "get profile names", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO.class)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-	public Response getProcessorsByFilterSearch(@Context HttpServletRequest request,
-			@QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName) {
+	public Response getProfileNames(@Context HttpServletRequest request,
+			@QueryParam(value = "prfName") @ApiParam(name = "prfName", required = false, value = "prfName") final String prfName) {
 		// create the worker delegate to perform the business logic
 				AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 					@Override
@@ -177,7 +178,58 @@ public class ProcessorSearchResource extends AuditedResource {
 						try {					
 							ProcessorConfigurationService processor = new ProcessorConfigurationService();
 							GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-							searchFilter.setMbxName(mbxName);							
+							searchFilter.setProfileName(prfName);
+							return processor.getProfileNames(searchFilter);
+						} catch (IOException | JAXBException e) {
+							LOG.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						} catch (SymmetricAlgorithmException e) {
+							LOG.error(e.getMessage(), e);
+							throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+						}
+					}
+				};
+				worker.actionLabel = "ProcessorSearchResource.getProfileNames()";
+				worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);		
+
+				// hand the delegate to the framework for calling
+				try {
+					return handleAuditedServiceRequest(request, worker);
+				} catch (LiaisonAuditableRuntimeException e) {
+					if (!StringUtils.isEmpty(e.getResponseStatus().getStatusCode() + "")) {
+						return marshalResponse(e.getResponseStatus().getStatusCode(), MediaType.TEXT_PLAIN, e.getMessage());
+					}
+					return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
+				}				
+	}
+	
+	@GET
+	@Path("/getProcessorDetailsByFilter")
+	@ApiOperation(value = "Get Processor Details By Filters", notes = "get processor details by filters", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
+	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
+	public Response getProcessorsByFilterSearch(@Context HttpServletRequest request,
+			@QueryParam(value = "mbxName") @ApiParam(name = "mbxName", required = false, value = "mbxName") final String mbxName,
+			@QueryParam(value = "pipelineId") @ApiParam(name = "pipelineId", required = false, value = "pipelineId") final String pipelineId,
+			@QueryParam(value = "folderPath") @ApiParam(name = "folderPath", required = false, value = "folderPath") final String folderPath,
+			@QueryParam(value = "profileName") @ApiParam(name = "profileName", required = false, value = "profileName") final String profileName,
+			@QueryParam(value = "protocol") @ApiParam(name = "protocol", required = false, value = "protocol") final String protocol,
+			@QueryParam(value = "prcsrType") @ApiParam(name = "prcsrType", required = false, value = "prcsrType") final String prcsrType){
+	// create the worker delegate to perform the business logic
+				AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+					@Override
+					public Object call() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+						serviceCallCounter.addAndGet(1);
+
+						try {					
+							ProcessorConfigurationService processor = new ProcessorConfigurationService();
+							GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+							searchFilter.setMbxName(mbxName);
+							searchFilter.setPipelineId(pipelineId);
+							searchFilter.setFolderPath(folderPath);
+							searchFilter.setProfileName(profileName);
+							searchFilter.setProtocol(protocol);
+							searchFilter.setProcessorType(prcsrType);
 							// Get all the processors
 							return processor.getProcessorsByFilterSearch(searchFilter);
 						} catch (IOException | JAXBException e) {
@@ -189,7 +241,7 @@ public class ProcessorSearchResource extends AuditedResource {
 						}
 					}
 				};
-				worker.actionLabel = "ProcessorSearchResource.getMailBoxNames()";
+				worker.actionLabel = "ProcessorSearchResource.getProcessorsByFilterSearch()";
 				worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);		
 
 				// hand the delegate to the framework for calling
