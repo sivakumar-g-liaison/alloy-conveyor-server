@@ -155,6 +155,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	 * @throws IOException
 	 */
 
+	@Deprecated
 	@Test
 	public void testUpdateTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
@@ -184,6 +185,7 @@ public class KeyManagerIntegrationServiceTest extends BaseServiceTest {
 	 * @throws IOException
 	 * @throws com.liaison.commons.exception.LiaisonException
 	 */
+	@Deprecated
 	@Test
 	public void testFetchTrustStore() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, com.liaison.commons.exception.LiaisonException {

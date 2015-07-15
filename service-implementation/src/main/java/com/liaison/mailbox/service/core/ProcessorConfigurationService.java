@@ -386,6 +386,7 @@ public class ProcessorConfigurationService {
 	 * @throws IOException
 	 * @throws JSONException
 	 */
+	@Deprecated
 	public GetTrustStoreResponseDTO uploadSelfSignedTrustStore()
 			throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
 
