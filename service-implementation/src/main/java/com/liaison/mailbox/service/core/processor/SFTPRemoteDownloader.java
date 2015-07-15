@@ -167,6 +167,14 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		List<String> files = sftpRequest.listFiles(currentDir);
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
+		if(files.size() == 2) {
+			
+			for (int i = 1; i >=0 ; i--) {
+				if (files.get(i).equals(".") || files.get(i).equals("..")) {
+				files.remove(i);
+				}
+			}
+		}
 		if (files != null && files.size() > 0) {
 
 			String statusIndicator = staticProp.getFileTransferStatusIndicator();
@@ -244,6 +252,9 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 				}
 			}
+		}
+		else {
+			LOGGER.info(constructMessage("The given payload URI '" + currentDir + "' is empty."));
 		}
 	}
 

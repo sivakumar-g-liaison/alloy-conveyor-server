@@ -331,8 +331,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				}
 			}
 		} else {
-			LOGGER.info("The given payload URI'" + localDir + "' does not exist.");
-			throw new MailBoxServicesException("The given payload URI '" + localDir + "' does not exist.", Response.Status.CONFLICT);
+			LOGGER.info(constructMessage("The given payload URI '" + localDir + "' is empty."));
 		}
 	}
 

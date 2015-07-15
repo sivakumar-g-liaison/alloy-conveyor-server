@@ -171,6 +171,9 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 						throw new MailBoxServicesException(Messages.HTTP_REQUEST_FAILED, Response.Status.BAD_REQUEST);
 					}
 				}
+				else {
+					LOGGER.info(constructMessage("The given HTTP downloader payload URI is Empty."));
+				}
 			} else {
 				response = request.execute();
 				writeResponseToMailBox(responseStream);

@@ -136,21 +136,6 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
    
-    // JSON which contains upload public key request
-    $rootScope.pkObj;
-    $rootScope.restService.get('data/publickeyrequest.json', function (data) {
-        $rootScope.pkObj = data;
-    });
-    // JSON which contains public key - Trust Store Association request
-    $rootScope.linkKeyTs;
-    $rootScope.restService.get('data/truststore_update_request.json', function (data) {
-        $rootScope.linkKeyTs = data;
-    });
-      // JSON which contains upload ssh key request
-    $rootScope.sshKeyObj;
-    $rootScope.restService.get('data/upload_keypair_request.json', function (data) {
-        $rootScope.sshKeyObj = data;
-    });
     // async load constants
     $rootScope.constants = [];
     $rootScope.restService.get('data/constants.json', function (data) {

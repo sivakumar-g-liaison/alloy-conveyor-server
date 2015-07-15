@@ -52,6 +52,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author OFS
  */
+@Deprecated
 @AppConfigurationResource
 @Path("config/mailbox/processor/uploadkey")
 @Api(value = "config/mailbox/processor/uploadkey", description = "Gateway for the mailbox upload self signed trust store services.")
@@ -79,6 +80,7 @@ public class MailboxKeyResource extends AuditedResource {
 	 * 
 	 * @return Response Object
 	 */
+	@Deprecated
 	@POST
 	@ApiOperation(value = "Upload TrustStore", notes = "upload Self Signed TrustStore", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -98,7 +100,7 @@ public class MailboxKeyResource extends AuditedResource {
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
 					GetTrustStoreResponseDTO serviceResponse = processor.uploadSelfSignedTrustStore(); 
 					//Added the guid
-					queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getTrustStore().getTrustStoreId());
+					//queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getTrustStore().getTrustStoreId());
 					return serviceResponse;
 
 				} catch (IOException | JSONException e) {

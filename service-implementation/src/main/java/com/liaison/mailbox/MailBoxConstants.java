@@ -140,8 +140,6 @@ public interface MailBoxConstants {
 	//DEFAULTVALUE_FOR_REQUIRED_PROPS
 
 	public static final String DEFAULT_SCRIPT_TEMPLATE_NAME = "mailbox.script.default.template";
-	public static final String DEFAULT_GLOBAL_TRUSTSTORE_ID = "mailbox.global.truststore.id";
-	public static final String DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID = "mailbox.global.trustgroup.id";
 	public static final String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	public static final String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";

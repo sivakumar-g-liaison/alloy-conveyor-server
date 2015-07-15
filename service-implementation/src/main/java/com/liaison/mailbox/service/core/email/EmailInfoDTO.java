@@ -22,7 +22,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
  *
  */
 public class EmailInfoDTO {
-    
+
     private static final Logger LOGGER = LogManager.getLogger(EmailInfoDTO.class);
 
     private String emailBody;
@@ -79,15 +79,14 @@ public class EmailInfoDTO {
 	public void copyToDTO(Processor processor, List<String> emailAddress, String emailSubject, String failureReason) {
 
 	    LOGGER.debug("Ready to construct Email Helper DTO for the mail to be sent for processor execution failure");
-        EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
-        emailInfoDTO.setMailboxId(null != processor ? processor.getMailbox().getPguid() : null);
-        emailInfoDTO.setMailboxName(null != processor ? processor.getMailbox().getMbxName() : null);
-        emailInfoDTO.setProcessorName(null !=  processor ? processor.getProcsrName() : null);
-        emailInfoDTO.setType("HTML");
-        emailInfoDTO.setEmailBody(failureReason);
-        emailInfoDTO.setToEmailAddrList(emailAddress);
-        emailInfoDTO.setSubject(emailSubject);
+        this.setMailboxId(null != processor ? processor.getMailbox().getPguid() : null);
+        this.setMailboxName(null != processor ? processor.getMailbox().getMbxName() : null);
+        this.setProcessorName(null !=  processor ? processor.getProcsrName() : null);
+        this.setType("HTML");
+        this.setEmailBody(failureReason);
+        this.setToEmailAddrList(emailAddress);
+        this.setSubject(emailSubject);
         LOGGER.debug("Email Helper DTO Constructed for the mail to be sent for processor execution failure");
 	}
-	
+
 }
