@@ -576,7 +576,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating target(processed/error) folder");
 			createFoldersAndAssingProperPermissions(targetDirectory);
-			//Files.createDirectories(targetDirectory);
 		}
 		Path target = targetDirectory.resolve(file.getName());
 		// moving to processed/error folder
@@ -614,8 +613,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		newPath = Paths.get(processedFileLcoation).resolve(file.getName());
 
 		if (!Files.exists(newPath.getParent())) {
-			createFoldersAndAssingProperPermissions(newPath.getParent());
-			//Files.createDirectories(newPath.getParent());
+			Files.createDirectories(newPath.getParent());
 		}
 
 		Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
@@ -928,7 +926,8 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	 * @param filePathToCreate - file Path which is to be created
 	 * @throws IOException
 	 */
-	protected void createFoldersAndAssingProperPermissions(Path filePathToCreate) throws IOException {
+	protected void createFoldersAndAssingProperPermissions(Path filePathToCreate)
+			throws IOException {
 
 		FileSystem fileSystem = FileSystems.getDefault();
 		Files.createDirectories(filePathToCreate);
@@ -938,15 +937,23 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		LOGGER.debug("group  name - {}", group);
 		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
 
-		//skip when reaching inbox/outbox
-		while(!(filePathToCreate.getFileName().toString().equals("inbox")
-		        || filePathToCreate.getFileName().toString().equals("outbox"))){
+		// skip when reaching inbox/outbox
+		while (!(filePathToCreate.getFileName().toString().equals("inbox") ||
+				filePathToCreate.getFileName().toString().equals("outbox"))) {
 
 			LOGGER.debug("setting the group of  {} to {}", filePathToCreate, group);
 			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
 			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
+
+			// if it is PROCESSED/ERROR Folder then skip assigning permissions to parent folders.
+			if ((filePathToCreate.getFileName().toString().equals(MailBoxConstants.PROCESSED_FOLDER) ||
+					filePathToCreate.getFileName().toString().equals(MailBoxConstants.ERROR_FOLDER))) {
+
+				LOGGER.debug("setting file permissions of PROCESSED/ERROR Folder is done. Skipping permission setting for parent folders as it is not needed.");
+				break;
+			}
 			filePathToCreate = filePathToCreate.getParent();
-		 }
+		}
 
 		LOGGER.debug("Done setting group");
 	}
