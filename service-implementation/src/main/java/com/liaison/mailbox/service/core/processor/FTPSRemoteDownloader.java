@@ -232,50 +232,49 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					ftpClient.changeDirectory(dirToList);
 					createResponseDirectory(localDir);
 
-						try {// GSB-1337,GSB-1336
+					try {// GSB-1337,GSB-1336
 
-							fos = new FileOutputStream(localDir);
-							bos = new BufferedOutputStream(fos);
-							LOGGER.info(constructMessage("downloading file {}  from remote path {} to local path {}"),
-									currentFileName, currentDir, localFileDir);
-							statusCode = ftpClient.getFile(currentFileName, bos);
+						fos = new FileOutputStream(localDir);
+						bos = new BufferedOutputStream(fos);
+						LOGGER.info(constructMessage("downloading file {}  from remote path {} to local path {}"),
+								currentFileName, currentDir, localFileDir);
+						statusCode = ftpClient.getFile(currentFileName, bos);
+					} finally {
+                        if (bos != null) {
+                            bos.close();
+                        }
+                        if (fos != null) {
+                            fos.close();
+                        }
+                    }
 
-						// Check whether the file downloaded successfully if so rename it.
-						if (statusCode == 226 || statusCode == 250) {
+					// Check whether the file downloaded successfully if so rename it.
+					if (statusCode == 226 || statusCode == 250) {
 
-							LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
-							totalNumberOfProcessedFiles++;
-							fos.close();
-							bos.close();
+						LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
+						totalNumberOfProcessedFiles++;
 
-							// Renames the downloaded file to original extension once the fileStatusIndicator is  given by User
-							if (!MailBoxUtil.isEmpty(statusIndicator)) {
+						// Renames the downloaded file to original extension once the fileStatusIndicator is  given by User
+						if (!MailBoxUtil.isEmpty(statusIndicator)) {
 
-								//Constructs the original file filename
-								File actualFileName = new File(localFileDir + File.separatorChar + currentFileName);
-								boolean renameStatus =  new File(localDir).renameTo(actualFileName);
-								if (renameStatus) {
-									LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
-								} else {
-									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
-								}
-							}
-							// Delete the remote files after successful download if user opt for it
-							if (staticProp.getDeleteFiles()) {
-
-								ftpClient.deleteFile(file.getName());
-								LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
-
+							//Constructs the original file filename
+							File actualFileName = new File(localFileDir + File.separatorChar + currentFileName);
+							boolean renameStatus =  new File(localDir).renameTo(actualFileName);
+							if (renameStatus) {
+								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
+							} else {
+								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 							}
 						}
-						} finally {
-							if (bos != null)
-								bos.close();
-							if (fos != null)
-								fos.close();
-						}
 
-					} else {
+						// Delete the remote files after successful download if user opt for it
+						if (staticProp.getDeleteFiles()) {
+							ftpClient.deleteFile(file.getName());
+							LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
+						}
+					}
+
+				} else {
 
 					String localDir = localFileDir + File.separatorChar + currentFileName;
 					String remotePath = dirToList + File.separatorChar + currentFileName;
@@ -287,9 +286,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					downloadDirectory(ftpClient, remotePath, localDir);
 				}
 			}
-		}
-		else {
-		LOGGER.info(constructMessage("The given payload URI '" + currentDir + "' is empty."));
+		} else {
+		    LOGGER.info(constructMessage("The given payload URI '" + currentDir + "' is empty."));
 		}
 	}
 
