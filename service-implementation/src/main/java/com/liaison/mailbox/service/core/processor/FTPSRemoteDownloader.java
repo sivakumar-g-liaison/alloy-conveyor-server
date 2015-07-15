@@ -270,7 +270,7 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 						// Delete the remote files after successful download if user opt for it
 						if (staticProp.getDeleteFiles()) {
 							ftpClient.deleteFile(file.getName());
-							LOGGER.info(constructMessage("File {} deleted successfully"), currentFileName);
+							LOGGER.info(constructMessage("File {} deleted successfully in the remote location"), currentFileName);
 						}
 					}
 
