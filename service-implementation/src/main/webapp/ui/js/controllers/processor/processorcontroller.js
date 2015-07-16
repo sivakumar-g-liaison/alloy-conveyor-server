@@ -1256,7 +1256,8 @@ var rest = myApp.controller(
 			};
 			$scope.sortProcessorProperties = function () {
 				 var reverse = ($scope.processorPropertiesSortInfo.directions[0] === 'asc') ? false : true; 
-				 $scope.propertiesAddedToProcessor = $filter('orderBy')($scope.propertiesAddedToProcessor, $scope.processorPropertiesSortInfo.fields[0], reverse);
+				 var fieldToBeSorted = ($scope.processorPropertiesSortInfo.fields[0] === 'name') ? 'displayName' : $scope.processorPropertiesSortInfo.fields[0];
+				 $scope.propertiesAddedToProcessor = $filter('orderBy')($scope.propertiesAddedToProcessor, fieldToBeSorted, reverse);
 			};
 			// Sort listener for Scripts grid
 			$scope.$watch('processorPropertiesSortInfo.directions + processorPropertiesSortInfo.fields', function (newVal, oldVal) {
