@@ -43,10 +43,19 @@ var rest = myApp.controller(
 			
 			var sortField = "";
         	var sortDirection = "";
+        	var prcsrTypeVal = "";
+			var prcsrProtocol = "";
+			
             if($scope.sortInfo.fields && $scope.sortInfo.directions) {
             	sortField = String($scope.sortInfo.fields);
             	sortDirection = String($scope.sortInfo.directions);
             }
+            if($scope.processorType) {
+            	prcsrTypeVal = String($scope.processorType.value);
+            }
+			if($scope.protocolName) {
+				prcsrProtocol = String($scope.protocolName.value);
+			}
 			
 			$rootScope.gridLoaded = false;
                 $scope.restService.get($scope.base_url + '/processorsearch',
@@ -56,31 +65,20 @@ var rest = myApp.controller(
                             $scope.pagingOptions.currentPage);
 						$rootScope.gridLoaded = true;
 						 $scope.showprogressbar = false;
-                    },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection}				
+                    },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
+					   mbxName:$scope.mailBoxName, pipelineId:$scope.PrcsrPipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:prcsrProtocol, prcsrType:prcsrTypeVal}				
                 );				
             };
 			$scope.readAllProcessors();
-	// Get Processor details by filter criteria
-	$scope.getProcessorsByFilter = function(){
-	
-		var sortField = "";
-        	var sortDirection = "";
-            if($scope.sortInfo.fields && $scope.sortInfo.directions) {
-            	sortField = String($scope.sortInfo.fields);
-            	sortDirection = String($scope.sortInfo.directions);
-            }
-		$rootScope.gridLoaded = false;
-                $scope.restService.get($scope.base_url + '/processorsearch/getProcessorDetailsByFilter',
-                    function (data) {
-                        $scope.getPagedDataAsync(data,
-                            $scope.pagingOptions.pageSize,
-                            $scope.pagingOptions.currentPage);
-						$rootScope.gridLoaded = true;
-						 $scope.showprogressbar = false;
-                    },{page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, 
-					   mbxName:$scope.mailBoxName, pipelineId:$scope.pipelineId, folderPath:$scope.folderPath, profileName:$scope.profileName, protocol:$scope.protocolName, prcsrType:$scope.processorType}				
-                );
-	}	
+			
+	$scope.clearAllFilters = function(){
+		$scope.mailBoxName = null;
+		$scope.PrcsrPipelineId = null;
+		$scope.folderPath = null;
+		$scope.profileName = null;
+		$scope.protocolName = null;
+		$scope.processorType = null;
+	}
 			
 	// Get Mailbox names for Typeahead display		
 	$scope.getMailboxNames = function(choice) {

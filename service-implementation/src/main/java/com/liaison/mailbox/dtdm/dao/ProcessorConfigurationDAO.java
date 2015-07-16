@@ -160,12 +160,6 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public List <Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
 	
 	/**
-	 * Retrieve the processors based on filter search  
-	 * @return list of processors
-	 */
-	public List<Processor> filterProcessors(GenericSearchFilterDTO searchDTO, Map <String, Integer> pageOffsetDetails);
-	
-	/**
 	 * Retrieve the mailbox names  
 	 * @return list of mailboxes
 	 */

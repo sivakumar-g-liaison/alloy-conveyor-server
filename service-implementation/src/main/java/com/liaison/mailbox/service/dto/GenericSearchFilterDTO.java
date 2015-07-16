@@ -1,5 +1,6 @@
 package com.liaison.mailbox.service.dto;
 
+
 public class GenericSearchFilterDTO {
 	
 	private String mbxName;

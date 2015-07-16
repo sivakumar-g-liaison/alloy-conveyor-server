@@ -921,7 +921,7 @@ public class ProcessorConfigurationService {
 			int totalCount = 0;			
 			Map<String, Integer> pageOffsetDetails = null;
 			
-			totalCount = config.getAllProcessorsCount();
+			totalCount = config.getFilteredProcessorsCount(searchFilter);
 			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 					searchFilter.getPageSize(), totalCount);
 			
@@ -1057,65 +1057,6 @@ public class ProcessorConfigurationService {
 
 			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
-					e.getMessage()));
-			return serviceResponse;
-		}
-	}
-	
-	/**
-	 * Get the Processor details by Filter Search.
-	 *
-	 * @return The responseDTO.
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 */
-	public GetProcessorResponseDTO getProcessorsByFilterSearch (GenericSearchFilterDTO searchFilter)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
-
-		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
-
-		try {
-
-			LOGGER.debug("Entering into get processor details.");			
-
-			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();	
-			int totalCount = 0;			
-			Map<String, Integer> pageOffsetDetails = null;
-			
-			totalCount = config.getFilteredProcessorsCount(searchFilter);
-			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
-					searchFilter.getPageSize(), totalCount);
-			List<Processor> processors = config.filterProcessors(searchFilter, pageOffsetDetails);
-
-			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
-			if (null == processors || processors.isEmpty()) {
-				throw new MailBoxConfigurationServicesException(Messages.NO_PROCESSORS_EXIST, Response.Status.NOT_FOUND);
-			}
-			ProcessorDTO processorDTO = null;
-			for (Processor processor : processors) {
-				processorDTO = new ProcessorDTO();
-				processorDTO.copyFromEntity(processor, false);
-				prsDTO.add(processorDTO);
-			}
-			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
-			serviceResponse.setTotalItems(totalCount);
-			serviceResponse.setProcessors(prsDTO);
-			
-			LOGGER.debug("Exit from get processor details.");
-			return serviceResponse;
-		} catch (MailBoxConfigurationServicesException e) {
-
-			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
 					e.getMessage()));
 			return serviceResponse;
 		}
