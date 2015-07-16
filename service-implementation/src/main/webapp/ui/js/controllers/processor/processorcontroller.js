@@ -1202,6 +1202,7 @@ var rest = myApp.controller(
                 showFooter: false,
                 rowHeight: 80,
 				enableColumnResize : true,
+				enableSorting : false,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "folderURI",
@@ -1240,6 +1241,7 @@ var rest = myApp.controller(
                 showFooter: false,
                 rowHeight: 80,
 				enableColumnResize : true,
+				enableSorting : false,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "name",
