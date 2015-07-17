@@ -46,7 +46,7 @@ public class TransactionVisibilityClient {
 		visibilityAPI.setHub(configuration.getString(PROPERTY_COM_LIAISON_LENS_HUB));
 	}
 
-	public void logToGlass(GlassMessage message) {
+	public TransactionVisibilityAPI logToGlass(GlassMessage message) {
 
 		visibilityAPI.getAdditionalInformation().clear();
 
@@ -150,6 +150,8 @@ public class TransactionVisibilityClient {
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
 		        message.getGlobalPId(), visibilityAPI.getId());
+		
+		return visibilityAPI;
 
 	}
 }

@@ -41,6 +41,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
 import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
@@ -216,7 +217,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
             				// Log FIRST corner
             				glassMessage.logFirstCornerTimestamp();
-            				transactionVisibilityClient.logToGlass(glassMessage);
+            				TransactionVisibilityAPI tvapi = transactionVisibilityClient.logToGlass(glassMessage);
             				// Log running status
             				glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
             				LOGGER.info(constructMessage("Global PID",
@@ -224,6 +225,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             				        wrkTicket.getGlobalProcessId(),
             				        " submitted for file ",
             				        wrkTicket.getFileName()));
+            				LOGGER.info(constructMessage(MailBoxUtil.marshalToJSON(tvapi)));
 
             			}
             		}
