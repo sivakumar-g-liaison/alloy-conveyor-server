@@ -13,10 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.commons.exception.LiaisonException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,6 +91,10 @@ public class StorageUtilities {
 	private static FlexibleStorageSystem FS2 = null;
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
+
+
+	public static final String PAYLOAD_DOWNLOAD_COUNT = "download_count";
+	public static final String GLOBAL_PROCESS_ID_HEADER = "fs2.headers.GLOBAL_PROCESS_ID";
 
 	/**
 	 * Initialize FS2
@@ -396,5 +402,60 @@ public class StorageUtilities {
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
 		return fs2Header;
+	}
+
+	/**
+	 * Adds header to Spectrum payload metadata
+	 *
+	 * @param spectrumUrl
+	 * @param headerKey
+	 * @param headerValue
+	 * @throws FS2Exception
+	 */
+	public static void addPayloadHeader(String spectrumUrl, String headerKey, String headerValue) throws FS2Exception {
+		FS2.addHeader(URI.create(spectrumUrl), headerKey, headerValue);
+	}
+
+	/**
+	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or file system.
+	 *
+	 * @param payloadURL Spectrum Payload URL
+	 * @return
+	 * @throws MailBoxServicesException
+	 */
+	public static FS2ObjectHeaders retrievePayloadHeaders(String payloadURL)
+			throws MailBoxServicesException {
+
+		try {
+			initializeFS2();
+			URI spectrumURI = new URI(payloadURL);
+			LOGGER.info("Retrieving payload headers from spectrum");
+			return FS2.getHeaders(spectrumURI);
+		} catch (URISyntaxException | FS2Exception e) {
+			LOGGER.error("Failed to retrieve payload headers from spectrum due to error", e);
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * Update download count metadata header
+	 *
+	 * @param spectrumUrl SpectrumURL
+	 * @throws FS2Exception
+	 * @throws LiaisonException
+	 */
+	public static void updateDownloadCountHeader(String spectrumUrl) throws FS2Exception, LiaisonException {
+		FS2ObjectHeaders fs2ObjectHeaders = FS2.getHeaders(URI.create(spectrumUrl));
+		if (String.valueOf(fs2ObjectHeaders.getHeaders().get(PAYLOAD_DOWNLOAD_COUNT)) != null) {
+			int payloadDownloadCount = Integer.parseInt(String.valueOf(fs2ObjectHeaders.getHeaders().get(PAYLOAD_DOWNLOAD_COUNT)));
+			payloadDownloadCount++;
+			ArrayList<String> downloadCounts = new ArrayList<>();
+			downloadCounts.add(Integer.toString(payloadDownloadCount));
+			fs2ObjectHeaders.getHeaders().put(PAYLOAD_DOWNLOAD_COUNT, downloadCounts);
+			FS2.updateHeaders(URI.create(spectrumUrl), fs2ObjectHeaders);
+		} else {
+			//Add download count header to Payload
+			addPayloadHeader(spectrumUrl, StorageUtilities.PAYLOAD_DOWNLOAD_COUNT, "1");
+		}
 	}
 }

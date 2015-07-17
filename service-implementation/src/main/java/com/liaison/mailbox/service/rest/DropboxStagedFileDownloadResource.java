@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.fs2.api.FS2ObjectHeaders;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -189,22 +190,33 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
                     glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
                     glassMessage.setGlobalPId(MailBoxUtil.getGUID());
-                    glassMessage.setStatus(ExecutionState.PROCESSING);
+                    glassMessage.setStatus(ExecutionState.COMPLETED);
                     glassMessage.setInAgent(GatewayType.REST);
                     glassMessage.setProcessId(processId);
+					glassMessage.setGlobalPId(getStagedFileGlobalProcessId(spectrumUrl));
 
                     // Log time stamp
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Download Request Recevied");
-
-                    // Log TVA status
-                    transactionVisibilityClient.logToGlass(glassMessage);
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Download Request Received");
 
 					// getting the file stream from spectrum for the given file
 					// id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
+
+					//Get headers of the Payload
+					FS2ObjectHeaders payloadHeaders = StorageUtilities.retrievePayloadHeaders(spectrumUrl);
+					if (!payloadHeaders.getHeaders().containsKey(StorageUtilities.PAYLOAD_DOWNLOAD_COUNT)) {
+						//Add download count header to Payload
+						StorageUtilities.addPayloadHeader(spectrumUrl, StorageUtilities.PAYLOAD_DOWNLOAD_COUNT, "1");
+						// Log TVA status DELIVERED only once
+						transactionVisibilityClient.logToGlass(glassMessage);
+					} else {
+						StorageUtilities.updateDownloadCountHeader(spectrumUrl);
+					}
+
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File Downloaded");
 
 					// response message construction
 					ResponseBuilder builder = Response
@@ -214,13 +226,17 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
 									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, glassMessage.getGlobalPId())
 							.type(MediaType.APPLICATION_OCTET_STREAM).entity(payload).status(Response.Status.OK);
 					LOG.debug("Exit from download staged file service.");
 					return builder.build();
 				} catch (MailBoxServicesException e) {
+					// Log Failed status
+					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Download Failed");
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
+				} finally {
+					// Log time stamp
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				}
 			}
 		};
@@ -370,5 +386,16 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 			throw new RuntimeException("Request has content length of " + contentLength
 					+ " which exceeds the configured maximum size of " + maxRequestSize);
 		}
+	}
+
+	/**
+	 * Reads the global process ID from the payload's FS2 headers
+	 *
+	 * @param spectrumUrl Spectrum URL
+	 * @return String globalProcessId
+	 */
+	private String getStagedFileGlobalProcessId(String spectrumUrl) {
+		FS2ObjectHeaders fs2ObjectHeaders = StorageUtilities.retrievePayloadHeaders(spectrumUrl);
+		return fs2ObjectHeaders.getHeaders().get(StorageUtilities.GLOBAL_PROCESS_ID_HEADER).toString();
 	}
 }
