@@ -80,6 +80,6 @@ public class DropboxService {
 		stageFileService.addStagedFile(dtoReq, glassMessage);
 
 	    // log TVA status
-	    //transactionVisibilityClient.logToGlass(glassMessage);
+	    transactionVisibilityClient.logToGlass(glassMessage);
 	}
 }

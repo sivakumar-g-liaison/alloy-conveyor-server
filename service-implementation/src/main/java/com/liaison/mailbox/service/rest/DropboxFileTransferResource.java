@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.mailbox.dtdm.model.MailBox;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -207,6 +208,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicketUtil workTicketUtil = new WorkTicketUtil();
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
+					workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 					//workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
 
 					String processId = IdentifierUtil.getUuid();
@@ -215,12 +217,17 @@ public class DropboxFileTransferResource extends AuditedResource {
 					glassMessage.setStatus(ExecutionState.PROCESSING);
 					glassMessage.setInAgent(GatewayType.REST);
 					glassMessage.setProcessId(processId);
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 					glassMessage.setSenderId(loginId);
+
 					// Log time stamp
 					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
 
 					// Log running status
 					glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Received");
+
+					// TVAPI Processing status
+					transactionVisibilityClient.logToGlass(glassMessage);
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -263,8 +270,6 @@ public class DropboxFileTransferResource extends AuditedResource {
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
 
-					// glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
@@ -272,7 +277,6 @@ public class DropboxFileTransferResource extends AuditedResource {
 					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
@@ -280,8 +284,9 @@ public class DropboxFileTransferResource extends AuditedResource {
 					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} finally {
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				}
 			}
 		};
