@@ -137,18 +137,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	private void run(String executionId) {
 
-		TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient();
-		GlassMessage glassMessage = new GlassMessage();
-
         try {
-
-            //GLASS LOGGING BEGINS//
-            glassMessage.setCategory(ProcessorType.SWEEPER);
-            glassMessage.setProtocol(Protocol.SWEEPER.getCode());
-            glassMessage.setPipelineId(getPipeLineID());
-            //Log running status
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
-            //GLASS LOGGING ENDS//
 
             // Get root from folders input_folder
             String inputLocation = getPayloadURI();
@@ -207,19 +196,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             			// For glass logging
             			for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
 
-            				glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
-            				glassMessage.setStatus(ExecutionState.PROCESSING);
-            				glassMessage.setInAgent(inputLocation);
-            				Long payloadSize = wrkTicket.getPayloadSize();
-            				if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-            					glassMessage.setInSize(payloadSize.intValue());
-            				}
-
-            				// Log FIRST corner
-            				glassMessage.logFirstCornerTimestamp();
-            				TransactionVisibilityAPI tvapi = transactionVisibilityClient.logToGlass(glassMessage);
-            				// Log running status
-            				glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
+            			    TransactionVisibilityAPI tvapi = logTransactionVisibilityAPI(inputLocation, wrkTicket);
             				LOGGER.info(constructMessage("Global PID",
             				        seperator,
             				        wrkTicket.getGlobalProcessId(),
@@ -247,6 +224,33 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         	throw new RuntimeException(e);
         }
 	}
+
+    private TransactionVisibilityAPI logTransactionVisibilityAPI(String inputLocation, WorkTicket wrkTicket) {
+
+        //GLASS LOGGING BEGINS//
+        TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient();
+        GlassMessage glassMessage = new GlassMessage();
+        glassMessage.setCategory(ProcessorType.SWEEPER);
+        glassMessage.setProtocol(Protocol.SWEEPER.getCode());
+        glassMessage.setPipelineId(wrkTicket.getPipelineId());
+
+        //Log running status
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
+        glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
+        glassMessage.setStatus(ExecutionState.PROCESSING);
+        glassMessage.setInAgent(inputLocation);
+        Long payloadSize = wrkTicket.getPayloadSize();
+        if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
+        	glassMessage.setInSize(payloadSize.intValue());
+        }
+
+        // Log FIRST corner
+        glassMessage.logFirstCornerTimestamp();
+        TransactionVisibilityAPI tvapi = transactionVisibilityClient.logToGlass(glassMessage);
+        // Log running status
+        glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
+        return tvapi;
+    }
 
 
 	/**
