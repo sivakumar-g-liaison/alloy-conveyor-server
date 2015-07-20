@@ -189,7 +189,6 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
                     glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
                     glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-                    glassMessage.setGlobalPId(MailBoxUtil.getGUID());
                     glassMessage.setStatus(ExecutionState.COMPLETED);
                     glassMessage.setInAgent(GatewayType.REST);
                     glassMessage.setProcessId(processId);

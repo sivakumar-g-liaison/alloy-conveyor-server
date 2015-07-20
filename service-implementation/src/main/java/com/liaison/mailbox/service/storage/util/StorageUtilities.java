@@ -93,7 +93,7 @@ public class StorageUtilities {
 	private static FS2Configuration[] filesystemConfigs;
 
 	public static final String PAYLOAD_DOWNLOAD_COUNT = "mft.headers.downloadCount";
-	public static final String GLOBAL_PROCESS_ID_HEADER = "fs2.headers.GLOBAL_PROCESS_ID";
+	public static final String GLOBAL_PROCESS_ID_HEADER = "GLOBAL_PROCESS_ID";
 
 	/**
 	 * Initialize FS2
