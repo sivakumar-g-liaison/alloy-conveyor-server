@@ -150,6 +150,6 @@ public class TransactionVisibilityClient {
 		logger.info(GlassMessageMarkers.GLASS_MESSAGE_MARKER, visibilityAPI);
 		logger.info("TransactionVisibilityAPI with status {} logged for GPID :{} and Glass Message Id is {}", message.getStatus().value(),
 		        message.getGlobalPId(), visibilityAPI.getId());
-
+		
 	}
 }
