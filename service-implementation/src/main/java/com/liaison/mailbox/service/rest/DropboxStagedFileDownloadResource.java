@@ -395,6 +395,6 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 	 */
 	private String getStagedFileGlobalProcessId(String spectrumUrl) {
 		FS2ObjectHeaders fs2ObjectHeaders = StorageUtilities.retrievePayloadHeaders(spectrumUrl);
-		return fs2ObjectHeaders.getHeaders().get(StorageUtilities.GLOBAL_PROCESS_ID_HEADER).toString();
+		return fs2ObjectHeaders.getHeaders().get(StorageUtilities.GLOBAL_PROCESS_ID_HEADER).get(0);
 	}
 }
