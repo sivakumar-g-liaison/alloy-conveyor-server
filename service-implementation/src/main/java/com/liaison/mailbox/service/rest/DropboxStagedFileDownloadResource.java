@@ -204,16 +204,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 					// id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
 
-					//Get headers of the Payload
-					FS2ObjectHeaders payloadHeaders = StorageUtilities.retrievePayloadHeaders(spectrumUrl);
-					if (!payloadHeaders.getHeaders().containsKey(StorageUtilities.PAYLOAD_DOWNLOAD_COUNT)) {
-						//Add download count header to Payload
-						StorageUtilities.addPayloadHeader(spectrumUrl, StorageUtilities.PAYLOAD_DOWNLOAD_COUNT, "1");
-						// Log TVA status DELIVERED only once
-						transactionVisibilityClient.logToGlass(glassMessage);
-					} else {
-						StorageUtilities.updateDownloadCountHeader(spectrumUrl);
-					}
+					transactionVisibilityClient.logToGlass(glassMessage);
 
 					glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File Downloaded");
 

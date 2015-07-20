@@ -92,7 +92,6 @@ public class StorageUtilities {
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
 
-	public static final String PAYLOAD_DOWNLOAD_COUNT = "DOWNLOAD_COUNT";
 	public static final String GLOBAL_PROCESS_ID_HEADER = "GLOBAL_PROCESS_ID";
 
 	/**
@@ -436,25 +435,4 @@ public class StorageUtilities {
 		}
 	}
 
-	/**
-	 * Update download count metadata header
-	 *
-	 * @param spectrumUrl SpectrumURL
-	 * @throws FS2Exception
-	 * @throws LiaisonException
-	 */
-	public static void updateDownloadCountHeader(String spectrumUrl) throws FS2Exception, LiaisonException {
-		FS2ObjectHeaders fs2ObjectHeaders = FS2.getHeaders(URI.create(spectrumUrl));
-		if (String.valueOf(fs2ObjectHeaders.getHeaders().get(PAYLOAD_DOWNLOAD_COUNT)) != null) {
-			int payloadDownloadCount = Integer.parseInt(String.valueOf(fs2ObjectHeaders.getHeaders().get(PAYLOAD_DOWNLOAD_COUNT)));
-			payloadDownloadCount++;
-			ArrayList<String> downloadCounts = new ArrayList<>();
-			downloadCounts.add(Integer.toString(payloadDownloadCount));
-			fs2ObjectHeaders.getHeaders().put(PAYLOAD_DOWNLOAD_COUNT, downloadCounts);
-			FS2.updateHeaders(URI.create(spectrumUrl), fs2ObjectHeaders);
-		} else {
-			//Add download count header to Payload
-			addPayloadHeader(spectrumUrl, StorageUtilities.PAYLOAD_DOWNLOAD_COUNT, "1");
-		}
-	}
 }
