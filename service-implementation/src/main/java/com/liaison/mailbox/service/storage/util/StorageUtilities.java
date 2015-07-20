@@ -92,8 +92,7 @@ public class StorageUtilities {
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
 
-
-	public static final String PAYLOAD_DOWNLOAD_COUNT = "download_count";
+	public static final String PAYLOAD_DOWNLOAD_COUNT = "mft.headers.downloadCount";
 	public static final String GLOBAL_PROCESS_ID_HEADER = "fs2.headers.GLOBAL_PROCESS_ID";
 
 	/**
