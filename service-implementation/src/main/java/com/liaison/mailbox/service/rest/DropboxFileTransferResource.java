@@ -209,13 +209,14 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
 					workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
+					workTicket.setPayloadSize(getContentLength(workTicket));
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
 					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
 					glassMessage.setStatus(ExecutionState.PROCESSING);
 					glassMessage.setInAgent(GatewayType.REST);
-					glassMessage.setInSize(serviceRequest.getContentLength());
+					glassMessage.setInSize(workTicket.getPayloadSize().intValue());
 					glassMessage.setProcessId(processId);
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 					glassMessage.setSenderId(loginId);
@@ -301,6 +302,25 @@ public class DropboxFileTransferResource extends AuditedResource {
 			}
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
+	}
+
+	/**
+	 * Get content length from the metadata headers
+	 *
+	 * @param workTicket workticket
+	 * @return int content length
+	 */
+	private long getContentLength(WorkTicket workTicket) {
+		String metadataHeaders = workTicket.getHeader(MailBoxConstants.UPLOAD_META);
+		String[] metadataHeaderArr = metadataHeaders.split(";");
+		for (String metadata : metadataHeaderArr) {
+			String[] metadataKeyPair = metadata.split("=");
+			if (metadataKeyPair[0].equals("size")) {
+				return Long.parseLong(metadataKeyPair[1]);
+			}
+		}
+
+		return -1L;
 	}
 
 	/**
