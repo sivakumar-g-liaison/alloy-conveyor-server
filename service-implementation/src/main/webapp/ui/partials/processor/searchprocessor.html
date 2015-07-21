@@ -46,15 +46,15 @@
 				<input id="profilename" type="text" ng-model="profileName"
                                        placeholder="Profile"
                                        required typeahead="prof.name for prof in getProfileNames($viewValue) | filter:$viewValue"
-									   ng-minLength=5 ng-maxLength=80									   
+									   ng-minLength="{{typeaheadMinLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
                                        name="profilename">
 					<div ng-show="formSearchPrcsr.profilename.$dirty && formSearchPrcsr.profilename.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.profilename.$error.pattern}" ng-show="formSearchPrcsr.profilename.$error.pattern">Invalid Profile Name.</span>
 						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.profilename.$error.minlength}" ng-show="formSearchPrcsr.profilename.$error.minlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
+						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{typeaheadMinLength}} characters to enable search.</span>
 						<span id="mbx-search-nameInvalid-maxlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.profilename.$error.maxlength}" ng-show="formSearchPrcsr.profilename.$error.maxlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
 					</div>
 				</div>
 				<div class="col-md-3">

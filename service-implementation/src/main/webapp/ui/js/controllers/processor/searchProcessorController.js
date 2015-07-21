@@ -99,7 +99,7 @@ var rest = myApp.controller(
         var restUrl = $scope.base_url + '/processorsearch/getProfileNames';
 		var profileName = choice;
 		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
-        if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $scope.searchMinCharacterCount)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
+        if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $rootScope.typeaheadMinLength)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
             restUrl += '?prfName=' + profileName;
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
@@ -252,8 +252,11 @@ var rest = myApp.controller(
 			
 		// Sort listener for search account grid
 		$scope.$watch('sortInfo.directions + sortInfo.fields', function (newVal, oldVal) {
+			var sortingField = String($scope.sortInfo.fields);
 			if (newVal !== oldVal) {
-				$scope.readAllProcessors();
+				if(sortingField !== 'type') {
+					$scope.readAllProcessors();
+				}
 			}
 
 		}, true);

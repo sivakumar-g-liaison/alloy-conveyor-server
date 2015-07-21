@@ -546,10 +546,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					break;
 					case "name":
 						query.append(" order by processor.procsrName " + sortDirection);
-						break;
-					case "type":
-						query.append(" order by processor.type " + sortDirection);
-						break;
+						break;					
 					case "protocol":
 						query.append(" order by processor.procsrProtocol " + sortDirection);
 						break;
@@ -720,7 +717,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			predicateList.add("LOWER(profile.schProfName) like :" + PROF_NAME);
 		}
 		if(!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
-			predicateList.add(" processor.procsrProtocol = :" + PROTOCOL);
+			predicateList.add(" LOWER(processor.procsrProtocol) = :" + PROTOCOL);
 		}
 		if(!MailBoxUtil.isEmpty(searchDTO.getProcessorType())) {
 			predicateList.add(" TYPE(processor) = :" + PROCESSOR_TYPE);
@@ -760,7 +757,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			query.setParameter(PROF_NAME, "%" + searchDTO.getProfileName().toLowerCase() + "%");
 		}
 		if(!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
-			query.setParameter(PROTOCOL, searchDTO.getProtocol());
+			query.setParameter(PROTOCOL, searchDTO.getProtocol().toLowerCase());
 		}		
 		return query;		
 	}
