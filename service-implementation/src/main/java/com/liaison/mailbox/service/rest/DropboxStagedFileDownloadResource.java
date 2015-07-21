@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
 import com.liaison.fs2.api.FS2ObjectHeaders;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -191,7 +192,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
                     glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
                     glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
                     glassMessage.setStatus(ExecutionState.COMPLETED);
-                    glassMessage.setInAgent(GatewayType.REST);
+                    glassMessage.setOutAgent(GatewayType.REST);
                     glassMessage.setProcessId(processId);
 					glassMessage.setGlobalPId(getStagedFileGlobalProcessId(spectrumUrl));
 
