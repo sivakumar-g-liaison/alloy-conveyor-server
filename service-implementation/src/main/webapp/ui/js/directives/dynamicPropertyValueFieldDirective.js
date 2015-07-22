@@ -32,10 +32,8 @@ angular.module(
                    scope.$watch("currentRowObject.name", function() {
                     var templateUrl = getTemplateUrl(scope.currentRowObject);                    
                         $rootScope.restService.get(templateUrl, function (data) {
-                              var modElem = elem.html(data);
-                              modElem.hide();
+                              elem.html(data);
                               $compile(elem.contents())(scope);
-                              modElem.show();
                         }); 
                    });
                    scope.infoIconImgUrl = 'img/alert-triangle-red.png'; 
