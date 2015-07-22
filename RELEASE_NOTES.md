@@ -1,6 +1,10 @@
 2.3.0-SNAPSHOT
 -------------------------------
 
+2.2.13
+-------------------------------
+update glass_log4j2_lib version to 2.X - GGT-111
+
 2.2.12
 -------------------------------
 GMB-483-TransactionVisibilityAPI logging is invalid
