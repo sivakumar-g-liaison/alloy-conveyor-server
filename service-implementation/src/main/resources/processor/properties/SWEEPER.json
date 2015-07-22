@@ -48,6 +48,18 @@
              
          },
          {
+            "name":"lensVisibility",
+            "displayName" : "Lens Visibility",
+            "value":"false",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]           
+ 		 },
+         {
             "name":"deleteFileAfterSweep",
             "displayName" : "Delete File After Sweep",
             "value":"true",

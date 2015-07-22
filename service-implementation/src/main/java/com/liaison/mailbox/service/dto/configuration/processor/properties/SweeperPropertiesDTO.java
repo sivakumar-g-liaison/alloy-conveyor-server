@@ -26,6 +26,8 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String numOfFilesThreshold;
 	private String payloadSizeThreshold;
 	private String sweepedFileLocation;
+	private boolean lensVisibility;
+
 
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -69,4 +71,11 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setSweepedFileLocation(String sweepedFileLocation) {
 		this.sweepedFileLocation = sweepedFileLocation;
 	}
+	public boolean isLensVisibility() {
+		return lensVisibility;
+	}
+	public void setLensVisibility(boolean lensVisibility) {
+		this.lensVisibility = lensVisibility;
+	}
+	
 }

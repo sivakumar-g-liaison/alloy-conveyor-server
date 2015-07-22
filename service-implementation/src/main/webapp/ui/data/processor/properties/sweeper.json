@@ -35,6 +35,18 @@
             }
          },
          {
+            "name":"lensVisibility",
+            "displayName" : "Lens Visibility",
+            "value":"false",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"false",
+            "validationRules": null,
+            "options":["false","true"]           
+ 		 },
+         {
             "name":"securedPayload",
             "displayName" : "Secured Payload",
             "value":"true",

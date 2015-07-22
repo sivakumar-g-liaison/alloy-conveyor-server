@@ -854,6 +854,7 @@ public class ProcessorConfigurationService {
 					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
 					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
 					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
+					boolean lensVisibility = httpListenerStaticProperties.isLensVisibility(); 
 
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID,
 							processor.getServiceInstance().getName());
@@ -864,6 +865,8 @@ public class ProcessorConfigurationService {
 							String.valueOf(securedPayload));
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
 							String.valueOf(authCheckRequired));
+					httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY,
+							String.valueOf(lensVisibility));
 
 					if (!MailBoxUtil.isEmpty(pipeLineId))
 						httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
