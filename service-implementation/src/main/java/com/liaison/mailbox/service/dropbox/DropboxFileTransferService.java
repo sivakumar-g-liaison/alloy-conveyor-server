@@ -252,7 +252,6 @@ public class DropboxFileTransferService {
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 		// set the glassmessage details once workTicket construction is complete with all details
-
 		glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));
 		glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
 		glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
@@ -260,7 +259,7 @@ public class DropboxFileTransferService {
 		glassMessage.setPipelineId(workTicket.getPipelineId());
 		glassMessage.setInSize(workTicket.getPayloadSize().intValue());
 		glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
-		glassMessage.setStatus(ExecutionState.QUEUED);
+		glassMessage.setStatus(ExecutionState.PROCESSING);
 
 		// Log TVA status
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
