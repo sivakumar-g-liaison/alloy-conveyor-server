@@ -211,7 +211,6 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();
-					// throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 					throw new LiaisonRuntimeException(Messages.COMMON_SYNC_ERROR_MESSAGE.value());
 				}
 			}
@@ -336,7 +335,7 @@ public class HTTPListenerResource extends AuditedResource {
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP ASync Request Failed: " + e.getMessage());
+					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage());
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
 					glassMessage.logFourthCornerTimestamp();
