@@ -210,6 +210,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
 					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+					glassMessage.setStatus(ExecutionState.PROCESSING);
 					glassMessage.setInAgent(GatewayType.REST);
 					glassMessage.setProcessId(processId);
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
