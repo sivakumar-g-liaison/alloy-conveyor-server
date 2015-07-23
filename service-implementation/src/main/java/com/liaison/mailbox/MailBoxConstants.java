@@ -113,6 +113,8 @@ public interface MailBoxConstants {
 	public final static String KEY_SERVICE_INSTANCE_ID = "SERVICE_INSTANCE_ID";
 	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
+	public final static String KEY_LENS_VISIBILITY = "LENS_VISIBILITY";
+	
 	public final static String PIPELINE_FULLY_QUALIFIED_PACKAGE = "com.liaison.service.core.edm.model.Pipeline";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
 
@@ -230,6 +232,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_HTTPLISTENER_PIPELINEID = "httpListenerPipeLineId";
 	public static final String PROPERTY_HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
 	public static final String PROPERTY_HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
+	public static final String PROPERTY_LENS_VISIBILITY = "lensVisibility";
 
 	// Properties for sweeper grouping boundary condition
 	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
