@@ -21,6 +21,7 @@ public class DropboxProcessorPropertiesDTO extends StaticProcessorPropertiesDTO 
 
 	private String httpListenerPipeLineId;
 	private boolean securedPayload;
+	private boolean lensVisibility;
 
 	public String getHttpListenerPipeLineId() {
 		return httpListenerPipeLineId;
@@ -33,6 +34,12 @@ public class DropboxProcessorPropertiesDTO extends StaticProcessorPropertiesDTO 
 	}
 	public void setSecuredPayload(boolean securedPayload) {
 		this.securedPayload = securedPayload;
+	}
+	public boolean isLensVisibility() {
+		return lensVisibility;
+	}
+	public void setLensVisibility(boolean lensVisibility) {
+		this.lensVisibility = lensVisibility;
 	}
 
 }

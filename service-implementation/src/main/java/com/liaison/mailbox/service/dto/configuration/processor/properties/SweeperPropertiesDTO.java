@@ -28,6 +28,9 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private String sweepedFileLocation;
 	private String includeFiles;
 	private String excludeFiles;
+	private boolean lensVisibility;
+
+
 
 	public String getPipeLineID() {
 		return pipeLineID;
@@ -71,6 +74,7 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setSweepedFileLocation(String sweepedFileLocation) {
 		this.sweepedFileLocation = sweepedFileLocation;
 	}
+
 	public String getIncludedFiles() {
 		return includeFiles;
 	}
@@ -82,5 +86,11 @@ public class SweeperPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setExcludedFiles(String excludedFiles) {
 		this.excludeFiles = excludedFiles;
+	}
+	public boolean isLensVisibility() {
+		return lensVisibility;
+	}
+	public void setLensVisibility(boolean lensVisibility) {
+		this.lensVisibility = lensVisibility;
 	}
 }
