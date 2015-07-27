@@ -403,18 +403,6 @@ public class StorageUtilities {
 	}
 
 	/**
-	 * Adds header to Spectrum payload metadata
-	 *
-	 * @param spectrumUrl
-	 * @param headerKey
-	 * @param headerValue
-	 * @throws FS2Exception
-	 */
-	public static void addPayloadHeader(String spectrumUrl, String headerKey, String headerValue) throws FS2Exception {
-		FS2.addHeader(URI.create(spectrumUrl), headerKey, headerValue);
-	}
-
-	/**
 	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or file system.
 	 *
 	 * @param payloadURL Spectrum Payload URL
