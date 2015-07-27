@@ -761,7 +761,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	/**
 	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
-	 * 
+	 *
      * @param inputLocation folderPath for logging
      * @param wrkTicket workticket for logging
      */
@@ -775,8 +775,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         glassMessage.setPipelineId(wrkTicket.getPipelineId());
 
         //Log running status
-        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
         glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
         glassMessage.setStatus(ExecutionState.PROCESSING);
         glassMessage.setInAgent(inputLocation);
         Long payloadSize = wrkTicket.getPayloadSize();
