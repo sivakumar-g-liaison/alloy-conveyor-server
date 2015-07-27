@@ -17,6 +17,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.mailbox.enums.ExecutionState;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -228,7 +229,6 @@ public class DropboxFileTransferService {
 		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
 		workTicket.setFileName(fileTransferDTO.getFileName());
 		workTicket.setProcessMode(ProcessMode.ASYNC);
-		workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 
 		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
 						"GLOBAL PID",
@@ -254,9 +254,7 @@ public class DropboxFileTransferService {
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
 		// set the glassmessage details once workTicket construction is complete with all details
-
 		glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));
-		glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 		glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
 		glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
 		glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));

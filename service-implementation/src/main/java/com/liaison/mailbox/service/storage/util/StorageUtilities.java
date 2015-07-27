@@ -13,10 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import com.liaison.commons.exception.LiaisonException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,6 +91,8 @@ public class StorageUtilities {
 	private static FlexibleStorageSystem FS2 = null;
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
+
+	public static final String GLOBAL_PROCESS_ID_HEADER = "GLOBAL_PROCESS_ID";
 
 	/**
 	 * Initialize FS2
@@ -397,4 +401,26 @@ public class StorageUtilities {
 
 		return fs2Header;
 	}
+
+	/**
+	 * A helper method to retrieve the payload headers.
+	 *
+	 * @param payloadURL Spectrum Payload URL
+	 * @return FS2ObjectHeaders
+	 * @throws MailBoxServicesException
+	 */
+	public static FS2ObjectHeaders retrievePayloadHeaders(String payloadURL)
+			throws MailBoxServicesException {
+
+		try {
+			initializeFS2();
+			URI spectrumURI = new URI(payloadURL);
+			LOGGER.info("Retrieving payload headers from spectrum");
+			return FS2.getHeaders(spectrumURI);
+		} catch (URISyntaxException | FS2Exception e) {
+			LOGGER.error("Failed to retrieve payload headers from spectrum due to error", e);
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.BAD_REQUEST);
+		}
+	}
+
 }
