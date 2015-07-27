@@ -403,10 +403,10 @@ public class StorageUtilities {
 	}
 
 	/**
-	 * A helper method to retrieve the payload from spectrum(secure/unsecure) or file system.
+	 * A helper method to retrieve the payload headers.
 	 *
 	 * @param payloadURL Spectrum Payload URL
-	 * @return
+	 * @return FS2ObjectHeaders
 	 * @throws MailBoxServicesException
 	 */
 	public static FS2ObjectHeaders retrievePayloadHeaders(String payloadURL)
