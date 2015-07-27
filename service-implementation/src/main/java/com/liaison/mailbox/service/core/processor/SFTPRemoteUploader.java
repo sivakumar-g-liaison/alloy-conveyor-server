@@ -280,7 +280,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 													.append(" to remote path ")
 													.append(remoteParentDir);
 						// Glass Logging 
-						logGlassMessage(message, item, ExecutionState.COMPLETED);
+						logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
 						
 						archiveFiles(staticProp.getErrorFileLocation(), item);
@@ -292,7 +292,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 													.append(" to remote path ")
 													.append(remoteParentDir);
 						// Glass Logging 
-						logGlassMessage(message, item, ExecutionState.FAILED);
+						logGlassMessage(message.toString(), item, ExecutionState.FAILED);
 					}
 				}
 			}
@@ -406,5 +406,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 	}
-	
+
+    @Override
+    public void logToLens(String msg, File file, ExecutionState status) {
+        logGlassMessage(msg, file, status);
+    }
+
 }

@@ -959,12 +959,13 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	}
 
 	 /**
-     * Method to log global process Id
+     * Logs TVAPI status and event message in LENS
      *
-     * @param message
-     * @param status
+     * @param message Message String to be logged in LENS event log
+     * @param file java.io.File
+     * @param status Status of the LENS logging
      */
-    protected void logGlassMessage(StringBuilder message, File file, ExecutionState status) {
+    protected void logGlassMessage(String message, File file, ExecutionState status) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid(), file.getName());
@@ -977,18 +978,17 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             glassMessage.setCategory(configurationInstance.getProcessorType());
             glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
 
-            glassMessage.setGlobalPId(stagedFile.getPguid());
             glassMessage.setStatus(status);
             glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
             glassMessage.setOutSize((int) file.length());
 
             // Log running status
             if (ExecutionState.COMPLETED.equals(status)) {
-                glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, message);
                 //Fourth corner timestamp
                 glassMessage.logFourthCornerTimestamp();
             } else {
-                glassMessage.logProcessingStatus(StatusType.ERROR, message.toString());
+                glassMessage.logProcessingStatus(StatusType.ERROR, message);
             }
             //TVAPI
             transactionVisibilityClient.logToGlass(glassMessage);
@@ -997,6 +997,11 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
             stagedFileDAO.merge(stagedFile);
         }
+    }
+
+    @Override
+    public void logToLens(String msg, File file, ExecutionState status) {
+        throw new RuntimeException("Not Implemented");
     }
 
 	/**
