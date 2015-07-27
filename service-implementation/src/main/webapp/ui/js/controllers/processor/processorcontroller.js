@@ -1190,6 +1190,23 @@ var rest = myApp.controller(
             }		   
             $scope.resetProcessorType($scope.procsrType);            
             
+			$scope.processorFoldersSortInfo = {
+				fields: ['folderURI'],
+				directions: ['asc']
+			};
+			
+			$scope.sortProcessorFolders = function () {
+				 var reverse = ($scope.processorFoldersSortInfo.directions[0] === 'asc') ? false : true; 
+				 $scope.folderAddedToProcessor = $filter('orderBy')($scope.folderAddedToProcessor, $scope.processorFoldersSortInfo.fields[0], reverse);
+			};
+			// Sort listener for Scripts grid
+			$scope.$watch('processorFoldersSortInfo.directions + processorFoldersSortInfo.fields', function (newVal, oldVal) {
+				if (newVal !== oldVal) {
+					$scope.sortProcessorFolders();
+				}
+
+			}, true);
+			
 			//New folder section
 			$scope.folderAvailableProperties = []; 
 			$scope.folderAddedToProcessor = [];
@@ -1202,6 +1219,8 @@ var rest = myApp.controller(
                 showFooter: false,
                 rowHeight: 80,
 				enableColumnResize : true,
+				sortInfo : $scope.processorFoldersSortInfo,
+				useExternalSorting : true,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "folderURI",
@@ -1231,6 +1250,22 @@ var rest = myApp.controller(
                 }]
             };
 			
+			$scope.processorPropertiesSortInfo = {
+				fields: ['value'],
+				directions: ['asc']
+			};
+			$scope.sortProcessorProperties = function () {
+				 var reverse = ($scope.processorPropertiesSortInfo.directions[0] === 'asc') ? false : true; 
+				 var fieldToBeSorted = ($scope.processorPropertiesSortInfo.fields[0] === 'name') ? 'displayName' : $scope.processorPropertiesSortInfo.fields[0];
+				 $scope.propertiesAddedToProcessor = $filter('orderBy')($scope.propertiesAddedToProcessor, fieldToBeSorted, reverse);
+			};
+			// Sort listener for Scripts grid
+			$scope.$watch('processorPropertiesSortInfo.directions + processorPropertiesSortInfo.fields', function (newVal, oldVal) {
+				if (newVal !== oldVal) {
+					$scope.sortProcessorProperties();
+				}
+
+			}, true);
             $scope.gridOptionsForProcessor = {
                 data: 'propertiesAddedToProcessor',
                 displaySelectionCheckbox: false,
@@ -1240,6 +1275,8 @@ var rest = myApp.controller(
                 showFooter: false,
                 rowHeight: 80,
 				enableColumnResize : true,
+				useExternalSorting : true,
+				sortInfo : $scope.processorPropertiesSortInfo,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "name",
@@ -1259,6 +1296,7 @@ var rest = myApp.controller(
                      width: "20%",
                      displayName: "Action*",
                      enableCellEdit: false,
+					 sortable: false,
                      cellTemplate: '<dynamic-action-field-directive available-properties = availableProperties added-properties = propertiesAddedToProcessor current-row-object = propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>',
                  }
                 ]

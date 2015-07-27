@@ -125,8 +125,8 @@ public class StorageUtilities {
 			LOGGER.info("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
 		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
-			LOGGER.error("Failed to retrieve payload from spectrum due to error", e);
-			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.BAD_REQUEST);
+			LOGGER.error(Messages.PAYLOAD_READ_ERROR.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
 
@@ -183,12 +183,11 @@ public class StorageUtilities {
 			return detail;
 
 		} catch (FS2ObjectAlreadyExistsException e) {
-			LOGGER.error("Failed to persist the payload in spectrum because it already exists.", e);
-			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.CONFLICT);
+			LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
 		} catch (FS2Exception | IOException e) {
-			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE,
-					Response.Status.INTERNAL_SERVER_ERROR);
+			LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -393,6 +392,7 @@ public class StorageUtilities {
 				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
+		fs2Header.addHeader(MailBoxConstants.KEY_LENS_VISIBILITY, httpListenerProperties.get(MailBoxConstants.PROPERTY_LENS_VISIBILITY));
 		String ttlValue= httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS);
 		if (!MailBoxUtil.isEmpty(ttlValue) && -1 != Integer.parseInt(ttlValue))  {
 		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue);

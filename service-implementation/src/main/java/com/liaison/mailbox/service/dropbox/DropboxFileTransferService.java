@@ -196,11 +196,13 @@ public class DropboxFileTransferService {
 		boolean securedPayload = dropboxProcessorStaticProperties.isSecuredPayload();
 		String mailboxPguid = processor.getMailbox().getPguid();
 		String serviceInstanceId = processor.getServiceInstance().getName();
+		boolean lensVisibility = dropboxProcessorStaticProperties.isLensVisibility();
 
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(MailBoxConstants.LOGIN_ID, fileTransferDTO.getLoginId());
 		properties.put(MailBoxConstants.KEY_TENANCY_KEY, fileTransferDTO.getTenancyKey());
 		properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(securedPayload));
+		properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(lensVisibility));
 
 		workTicket.setPipelineId(pipeLineId);
 		workTicket.setAdditionalContext(MailBoxConstants.MAILBOX_ID, mailboxPguid);

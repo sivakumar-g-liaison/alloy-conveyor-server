@@ -150,8 +150,12 @@ public enum Messages {
 	// processing of token for the retrieval of login id or authentication token failed.
 	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed."),
 	REQUEST_HEADER_PROPERTIES_MISSING("Request header properties are missing"),
-	
-	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details.");
+
+	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details."),
+
+	PAYLOAD_ALREADY_EXISTS("Failed to persist the payload in spectrum because it already exists."),
+	PAYLOAD_PERSIST_ERROR("Failed to persist the payload in spectrum due to error."),
+	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error");
 
 	private String value;
 

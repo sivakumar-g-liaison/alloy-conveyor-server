@@ -428,6 +428,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			}
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
+			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperStaticProperties.isLensVisibility()));
 			properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperStaticProperties.getPipeLineID());
 
 			LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
