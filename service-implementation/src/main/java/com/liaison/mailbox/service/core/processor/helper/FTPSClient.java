@@ -19,6 +19,7 @@ import java.security.cert.CertificateException;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
@@ -30,7 +31,6 @@ import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -82,6 +82,11 @@ public class FTPSClient {
 			// retrieve required properties
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
 			ftpsRequest.setURI(url);
+
+			// set log level
+			Level level = (ftpDownloaderStaticProperties.isDebugTranscript()) ? Level.INFO : Level.DEBUG;
+			MailBoxUtil.setLogLevelDuringRuntime(FTPSClient.class.getName(), level);
+
 			ftpsRequest.setDiagnosticLogger(LOGGER);
 			ftpsRequest.setCommandLogger(LOGGER);
 			ftpsRequest.setConnectionTimeout(connectionTimeout);

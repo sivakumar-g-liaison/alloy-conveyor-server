@@ -187,7 +187,19 @@
             "valueProvided":false,
             "defaultValue":"prg",
 			"validationRules": null
-	     }
+	     },
+		  {
+	        "name": "debugTranscript",
+	        "displayName": "Debug Transcript",
+	        "type": "select",
+	        "value": "false",
+		    "mandatory": false,
+		    "dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"false",
+			"validationRules": null,
+	        "options":["false","true"]
+	      }
       ],
       "folderProperties":[
 		  {

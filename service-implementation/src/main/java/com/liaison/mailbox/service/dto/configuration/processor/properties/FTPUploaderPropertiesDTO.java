@@ -35,8 +35,8 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean deleteFiles;
 	private String includeFiles;
 	private String excludeFiles;
+	private boolean debugTranscript;
 
-	
 	public String getUrl() {
 		return url;
 	}
@@ -133,4 +133,11 @@ public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	public void setExcludedFiles(String excludedFiles) {
 		this.excludeFiles = excludedFiles;
 	}
+	public boolean isDebugTranscript() {
+		return debugTranscript;
+	}
+	public void setDebugTranscript(boolean debugTranscript) {
+		this.debugTranscript = debugTranscript;
+	}
+
 }

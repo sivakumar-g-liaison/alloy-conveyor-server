@@ -19,6 +19,7 @@ import java.security.cert.CertificateEncodingException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
@@ -77,6 +78,11 @@ public class SFTPClient {
 			// retrieve required properties
 			G2SFTPClient sftpRequest = new G2SFTPClient();
 			sftpRequest.setURI(url);
+
+			// set Log Level
+			Level level = (sftpDownloaderStaticProperties.isDebugTranscript()) ? Level.INFO : Level.DEBUG;
+			MailBoxUtil.setLogLevelDuringRuntime(SFTPClient.class.getName(), level);
+
 			sftpRequest.setDiagnosticLogger(LOGGER);
 			sftpRequest.setCommandLogger(LOGGER);
 			sftpRequest.setTimeout(connectionTimeout);

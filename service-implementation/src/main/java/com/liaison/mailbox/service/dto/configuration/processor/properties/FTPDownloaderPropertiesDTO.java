@@ -33,6 +33,7 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	private boolean deleteFiles;
 	private String includeFiles;
 	private String excludeFiles;
+	private boolean debugTranscript;
 
 	public String getUrl() {
 		return url;
@@ -117,6 +118,12 @@ public class FTPDownloaderPropertiesDTO extends StaticProcessorPropertiesDTO {
 	}
 	public void setExcludedFiles(String excludeFiles) {
 		this.excludeFiles = excludeFiles;
+	}
+	public boolean isDebugTranscript() {
+		return debugTranscript;
+	}
+	public void setDebugTranscript(boolean debugTranscript) {
+		this.debugTranscript = debugTranscript;
 	}
 
 }
