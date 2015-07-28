@@ -747,8 +747,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         glassMessage.setStatus(ExecutionState.PROCESSING);
         glassMessage.setInAgent(inputLocation);
         Long payloadSize = wrkTicket.getPayloadSize();
-        if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-            glassMessage.setInSize(payloadSize.intValue());
+        if (payloadSize != null) {
+            glassMessage.setInSize(payloadSize);
         }
 
         // Log FIRST corner

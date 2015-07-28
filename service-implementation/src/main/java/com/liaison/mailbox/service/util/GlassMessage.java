@@ -59,8 +59,8 @@ public class GlassMessage {
 		this.setGlobalPId(wrkTicket.getGlobalProcessId());
 		this.setPipelineId(wrkTicket.getPipelineId());
 		Long payloadSize = wrkTicket.getPayloadSize();
-		if (payloadSize != null && payloadSize < Integer.MAX_VALUE && payloadSize != -1L) {
-			this.setOutSize(payloadSize.intValue());
+		if (payloadSize != null && payloadSize != -1L) {
+			this.setOutSize(payloadSize);
 		}
 		this.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 		this.setProcessorId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
@@ -87,8 +87,8 @@ public class GlassMessage {
 	private GatewayType inAgent;
 	private GatewayType outAgent;
 	private String message;
-	private int inSize;
-	private int outSize;
+	private Long inSize;
+	private Long outSize;
 	private String processId;
 	private String senderId;
 	private String transferProfileName;
@@ -252,11 +252,11 @@ public class GlassMessage {
 		return message;
 	}
 
-	public void setInSize(int inSize) {
+	public void setInSize(Long inSize) {
 		this.inSize = inSize;
 	}
 
-	public int getInSize() {
+	public Long getInSize() {
 		return inSize;
 	}
 
@@ -268,11 +268,11 @@ public class GlassMessage {
 		this.processId = processId;
 	}
 
-	public int getOutSize() {
+	public Long getOutSize() {
         return outSize;
     }
 
-    public void setOutSize(int outSize) {
+    public void setOutSize(Long outSize) {
         this.outSize = outSize;
     }
 

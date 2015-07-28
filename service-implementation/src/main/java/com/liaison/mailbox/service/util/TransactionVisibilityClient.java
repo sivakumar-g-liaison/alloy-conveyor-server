@@ -122,7 +122,9 @@ public class TransactionVisibilityClient {
 		
 		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.P);
-	        visibilityAPI.setInSize(message.getInSize());
+			if (null != message.getInSize()) {
+			    visibilityAPI.setInSize(message.getInSize());
+			}
 	        visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 	        visibilityAPI.setInAgent(message.getInAgent());
 		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
@@ -133,7 +135,9 @@ public class TransactionVisibilityClient {
 			visibilityAPI.setStatus(StatusCode.F);
 		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.S);
-			visibilityAPI.setOutSize(message.getOutSize());
+			if (null != message.getOutSize()) {
+			    visibilityAPI.setOutSize(message.getOutSize());
+            }
 			visibilityAPI.setOutAgent(message.getOutAgent());
 		} else if (ExecutionState.SKIPPED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.N);
