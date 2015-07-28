@@ -129,6 +129,12 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					for (File entry : files) {
 
+					    //File Modification Check
+	                    if (MailBoxUtil.validateLastModifiedTolerance(entry.toPath())) {
+	                        LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), entry.getName());
+	                        continue;
+	                    }
+
 						// interrupt signal check has to be done only if
 						// execution Id is present
 						if (!StringUtil.isNullOrEmptyAfterTrim(executionId)

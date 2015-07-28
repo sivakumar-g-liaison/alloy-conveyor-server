@@ -233,7 +233,14 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				} else {
 
-					String currentFileName = item.getName();
+				    String currentFileName = item.getName();
+
+				    //File Modification Check
+				    if (MailBoxUtil.validateLastModifiedTolerance(item.toPath())) {
+		                LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), currentFileName);
+		                continue;
+		            }
+
 					// Check if the file to be uploaded is included or not excluded
 					if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
 					        currentFileName,

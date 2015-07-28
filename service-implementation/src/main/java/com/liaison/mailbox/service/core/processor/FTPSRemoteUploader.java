@@ -246,6 +246,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				String currentFileName = item.getName();
 				if (item.isFile()) {
 
+				    //File Modification Check
+                    if (MailBoxUtil.validateLastModifiedTolerance(item.toPath())) {
+                        LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), currentFileName);
+                        continue;
+                    }
+
 				    // Check if the file to be uploaded is included or not excluded
                     //file must not be uploaded
                     if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
