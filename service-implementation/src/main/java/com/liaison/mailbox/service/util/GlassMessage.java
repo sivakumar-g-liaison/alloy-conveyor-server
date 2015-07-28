@@ -94,6 +94,8 @@ public class GlassMessage {
 	private String transferProfileName;
 	private String stagedFileId;
 	private String meta;
+	private String inboundFileName;
+	private String outboundFileName;
 
 
 	public String getTransferProfileName() {
@@ -274,6 +276,22 @@ public class GlassMessage {
 
     public void setOutSize(Long outSize) {
         this.outSize = outSize;
+    }
+
+    public String getInboundFileName() {
+        return inboundFileName;
+    }
+
+    public void setInboundFileName(String inboundFileName) {
+        this.inboundFileName = inboundFileName;
+    }
+
+    public String getOutboundFileName() {
+        return outboundFileName;
+    }
+
+    public void setOutboundFileName(String outboundFileName) {
+        this.outboundFileName = outboundFileName;
     }
 
     public static void logTimestamp(Logger logger, String message, Object... objects) {

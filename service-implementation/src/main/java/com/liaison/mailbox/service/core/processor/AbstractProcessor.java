@@ -981,6 +981,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             glassMessage.setStatus(status);
             glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
             glassMessage.setOutSize(file.length());
+            glassMessage.setOutboundFileName(file.getName());
 
             // Log running status
             if (ExecutionState.COMPLETED.equals(status)) {
