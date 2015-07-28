@@ -246,6 +246,12 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				String currentFileName = item.getName();
 				if (item.isFile()) {
 
+				    //File Modification Check
+                    if (MailBoxUtil.validateLastModifiedTolerance(item.toPath())) {
+                        LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), currentFileName);
+                        continue;
+                    }
+
 				    // Check if the file to be uploaded is included or not excluded
                     //file must not be uploaded
                     if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
@@ -293,7 +299,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                             .append(remoteParentDir);
 
                         // Glass Logging 
-                        logGlassMessage(message, item, ExecutionState.COMPLETED);
+                        logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
 					    archiveFiles(staticProp.getErrorFileLocation(), item);
 
@@ -306,7 +312,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
                             .append(remoteParentDir);
 
                             // Glass Logging 
-                            logGlassMessage(message, item, ExecutionState.FAILED);
+                            logGlassMessage(message.toString(), item, ExecutionState.FAILED);
 					}
 
 				} else {
@@ -445,4 +451,9 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 	}
+
+	@Override
+    public void logToLens(String msg, File file, ExecutionState status) {
+        logGlassMessage(msg, file, status);
+    }
 }

@@ -17,7 +17,6 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
-import com.liaison.mailbox.enums.ExecutionState;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -259,7 +258,7 @@ public class DropboxFileTransferService {
 		glassMessage.setTenancyKey((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_TENANCYKEY));
 		glassMessage.setServiceInstandId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		glassMessage.setPipelineId(workTicket.getPipelineId());
-		glassMessage.setInSize(workTicket.getPayloadSize().intValue());
+		glassMessage.setInSize(workTicket.getPayloadSize());
 		glassMessage.setTransferProfileName((String) workTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 
 		// Log TVA status

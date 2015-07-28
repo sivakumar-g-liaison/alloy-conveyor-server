@@ -249,7 +249,7 @@ dependencies {
 
 	workTicket 'com.liaison.dto:dto:3.+'
 	
-	compile ("com.liaison.commons.message.glass:glass-message-lib:5.+")
+	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
 
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
 
