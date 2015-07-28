@@ -334,6 +334,7 @@ public class GlassMessage {
 		timeStampAPI.setGlobalId(getGlobalPId());
 		timeStampAPI.setPipelineId(getPipelineId());
 		timeStampAPI.getTimeStamps().add(glassTimeStamp);
+		timeStampAPI.setGlassMessageId(IdentifierUtil.getUuid());
 
 		return timeStampAPI;
 	}

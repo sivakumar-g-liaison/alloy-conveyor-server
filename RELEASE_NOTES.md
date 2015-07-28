@@ -1,5 +1,6 @@
 2.3.0-SNAPSHOT
 -------------------------------
+GWUD-69: Fix Dropbox TVAPI & Glass Message logging
 
 2.2.13
 -------------------------------
