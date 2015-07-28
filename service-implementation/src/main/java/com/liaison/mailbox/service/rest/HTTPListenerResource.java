@@ -142,7 +142,7 @@ public class HTTPListenerResource extends AuditedResource {
 				glassMessage.setMailboxId(mailboxPguid);
 				glassMessage.setStatus(ExecutionState.PROCESSING);
 				glassMessage.setInAgent(GatewayType.REST);
-				glassMessage.setInSize(request.getContentLengthLong());
+				glassMessage.setInSize((long) request.getContentLength());
 
 				logger.info("HTTP(S)-SYNC : for the mailbox id {} - Start", mailboxPguid);
 				try {
@@ -306,7 +306,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setStatus(ExecutionState.PROCESSING);
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 					glassMessage.setInAgent(GatewayType.REST);
-					glassMessage.setInSize(request.getContentLengthLong());
+					glassMessage.setInSize((long) request.getContentLength());
 					glassMessage.setProcessId(processId);
 
 					// Log FIRST corner
