@@ -26,6 +26,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.bind.JAXBException;
 
+import com.liaison.fs2.api.FS2ObjectHeaders;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -122,6 +124,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
 				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
+				String loginId = "unknown";
 
 				try {
 
@@ -135,7 +138,7 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
 								Response.Status.BAD_REQUEST);
 					}
-					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
+					loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
 							MailBoxConstants.UM_AUTH_TOKEN);
 
@@ -188,23 +191,23 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 
                     glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
                     glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-                    glassMessage.setGlobalPId(MailBoxUtil.getGUID());
-                    glassMessage.setStatus(ExecutionState.PROCESSING);
-                    glassMessage.setInAgent(GatewayType.REST);
+                    glassMessage.setStatus(ExecutionState.COMPLETED);
+                    glassMessage.setOutAgent(GatewayType.REST);
                     glassMessage.setProcessId(processId);
+					glassMessage.setGlobalPId(getStagedFileGlobalProcessId(spectrumUrl));
 
                     // Log time stamp
                     glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
                     // Log running status
-                    glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Download Request Recevied");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
 
-                    // Log TVA status
-                    transactionVisibilityClient.logToGlass(glassMessage);
-
-					// getting the file stream from spectrum for the given file
-					// id
+					// getting the file stream from spectrum for the given file id
 					InputStream payload = StorageUtilities.retrievePayload(spectrumUrl);
+
+					transactionVisibilityClient.logToGlass(glassMessage);
+
+					glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
 
 					// response message construction
 					ResponseBuilder builder = Response
@@ -214,13 +217,17 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 							.header(GEMConstants.HEADER_KEY_ACL_SIGNATURE_PUBLIC_KEY_GUID,
 									manifestResponse.getPublicKeyGuid())
 							.header(MailBoxConstants.DROPBOX_AUTH_TOKEN, encryptedMbxToken)
-							.header(MailBoxConstants.GLOBAL_PROCESS_ID_HEADER, glassMessage.getGlobalPId())
 							.type(MediaType.APPLICATION_OCTET_STREAM).entity(payload).status(Response.Status.OK);
 					LOG.debug("Exit from download staged file service.");
 					return builder.build();
 				} catch (MailBoxServicesException e) {
+					// Log Failed status
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file download");
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					throw new LiaisonRuntimeException(e.getMessage());
+				} finally {
+					// Log time stamp
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				}
 			}
 		};
@@ -370,5 +377,16 @@ public class DropboxStagedFileDownloadResource extends AuditedResource {
 			throw new RuntimeException("Request has content length of " + contentLength
 					+ " which exceeds the configured maximum size of " + maxRequestSize);
 		}
+	}
+
+	/**
+	 * Reads the global process ID from the payload's FS2 headers
+	 *
+	 * @param spectrumUrl Spectrum URL
+	 * @return String globalProcessId
+	 */
+	private String getStagedFileGlobalProcessId(String spectrumUrl) {
+		FS2ObjectHeaders fs2ObjectHeaders = StorageUtilities.retrievePayloadHeaders(spectrumUrl);
+		return fs2ObjectHeaders.getHeaders().get(StorageUtilities.GLOBAL_PROCESS_ID_HEADER).get(0);
 	}
 }
