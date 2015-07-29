@@ -174,18 +174,26 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
     public void persistStagedFile(WorkTicket workticket, String processorId) {
 
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        StagedFile stagedFileEntity = null;
 
         try {
+
+            stagedFileEntity = find(StagedFile.class, workticket.getGlobalProcessId());
 
             StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
             stagedFileDto.setExpirationTime("0");
             stagedFileDto.setMeta(processorId);
 
-            StagedFile stagedFileEntity = new StagedFile();
-            stagedFileEntity.copyFromDto(stagedFileDto, true);
-            stagedFileEntity.setPguid(workticket.getGlobalProcessId());
+            if (stagedFileEntity != null) {
+                stagedFileEntity.copyFromDto(stagedFileDto, false);
+                merge(stagedFileEntity);
+            } else {
+                stagedFileEntity = new StagedFile();
+                stagedFileEntity.copyFromDto(stagedFileDto, true);
+                stagedFileEntity.setPguid(workticket.getGlobalProcessId());
+                persist(stagedFileEntity);
+            }
 
-            persist(stagedFileEntity);
         } finally {
 
             if (null != entityManager) {

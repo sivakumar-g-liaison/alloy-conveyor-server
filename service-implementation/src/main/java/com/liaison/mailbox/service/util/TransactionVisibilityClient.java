@@ -53,76 +53,92 @@ public class TransactionVisibilityClient {
 		// Log TransactionVisibilityAPI
 		MapItemType item;
 
-		if (message.getExecutionId() != null && !message.getExecutionId().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getExecutionId())) {
 			item = new MapItemType();
 			item.setKey("proc-exec-id");
 			item.setValue(message.getExecutionId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getMailboxId() != null && !message.getMailboxId().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getMailboxId())) {
 			item = new MapItemType();
 			item.setKey("mailbox-id");
 			item.setValue(message.getMailboxId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getProcessorId() != null && !message.getProcessorId().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getProcessorId())) {
 			item = new MapItemType();
 			item.setKey("processor-id");
 			item.setValue(message.getProcessorId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getTenancyKey() != null && !message.getTenancyKey().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getTenancyKey())) {
 			item = new MapItemType();
 			item.setKey("tenancy-key");
 			item.setValue(message.getTenancyKey());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getServiceInstandId() != null && !message.getServiceInstandId().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getServiceInstandId())) {
 			item = new MapItemType();
 			item.setKey("siid");
 			item.setValue(message.getServiceInstandId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getPipelineId() != null && !message.getPipelineId().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getPipelineId())) {
 			item = new MapItemType();
 			item.setKey("pipeline-id");
 			item.setValue(message.getPipelineId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getTransferProfileName() != null && !message.getTransferProfileName().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getTransferProfileName())) {
 			item = new MapItemType();
 			item.setKey("tranfer-profile-name");
 			item.setValue(message.getTransferProfileName());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getStagedFileId() != null && !message.getStagedFileId().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getStagedFileId())) {
 			item = new MapItemType();
 			item.setKey("staged-file-id");
 			item.setValue(message.getStagedFileId());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
 
-		if (message.getMeta() != null && !message.getMeta().equals("")) {
+		if (!MailBoxUtil.isEmpty(message.getMeta())) {
 			item = new MapItemType();
 			item.setKey("meta");
 			item.setValue(message.getMeta());
 			visibilityAPI.getAdditionalInformation().add(item);
 		}
-		
+
+		if (!MailBoxUtil.isEmpty(message.getInboundFileName())) {
+            item = new MapItemType();
+            item.setKey("inboundfilename");
+            item.setValue(message.getInboundFileName());
+            visibilityAPI.getAdditionalInformation().add(item);
+        }
+
+		if (!MailBoxUtil.isEmpty(message.getOutboundFileName())) {
+            item = new MapItemType();
+            item.setKey("outboundfilename");
+            item.setValue(message.getOutboundFileName());
+            visibilityAPI.getAdditionalInformation().add(item);
+        }
+
 		if (message.getCategory() != null && !message.getCategory().equals("")) {
 			visibilityAPI.setCategory(message.getProtocol() + ":" + message.getCategory().getCode());
 		}
 		
 		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.P);
-	        visibilityAPI.setInSize(message.getInSize());
+			if (null != message.getInSize()) {
+			    visibilityAPI.setInSize(message.getInSize());
+			}
 	        visibilityAPI.setArrivalTime(GlassMessageUtil.convertToXMLGregorianCalendar(new Date()));
 	        visibilityAPI.setInAgent(message.getInAgent());
 		} else if (ExecutionState.QUEUED.value().equals(message.getStatus().value())) {
@@ -133,7 +149,9 @@ public class TransactionVisibilityClient {
 			visibilityAPI.setStatus(StatusCode.F);
 		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.S);
-			visibilityAPI.setOutSize(message.getOutSize());
+			if (null != message.getOutSize()) {
+			    visibilityAPI.setOutSize(message.getOutSize());
+            }
 			visibilityAPI.setOutAgent(message.getOutAgent());
 		} else if (ExecutionState.SKIPPED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.N);

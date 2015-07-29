@@ -42,6 +42,7 @@ import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.rtdm.dao.FSMEventDAOBase;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
@@ -128,6 +129,12 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 					for (File entry : files) {
 
+					    //File Modification Check
+	                    if (MailBoxUtil.validateLastModifiedTolerance(entry.toPath())) {
+	                        LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), entry.getName());
+	                        continue;
+	                    }
+
 						// interrupt signal check has to be done only if
 						// execution Id is present
 						if (!StringUtil.isNullOrEmptyAfterTrim(executionId)
@@ -165,12 +172,20 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 								failedStatus = true;
 								delegateArchiveFile(entry, MailBoxConstants.PROPERTY_ERROR_FILE_LOCATION, true);
+
+								String msg = "Failed to upload a file " + entry.getName();
+								logToLens(msg, entry, ExecutionState.FAILED);
 								// continue;
 
 							} else {
 								totalNumberOfProcessedFiles++;
 								if (null != entry) {
 									delegateArchiveFile(entry, MailBoxConstants.PROPERTY_PROCESSED_FILE_LOCATION, false);
+									StringBuilder msg = new StringBuilder()
+									        .append("File ")
+									        .append(entry.getName())
+									        .append(" uploaded successfully");
+									logToLens(msg.toString(), entry, ExecutionState.COMPLETED);
 								}
 							}
 						}
@@ -295,4 +310,9 @@ public class HTTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 	}
+
+   @Override
+    public void logToLens(String msg, File file, ExecutionState status) {
+        logGlassMessage(msg, file, status);
+    }
 }

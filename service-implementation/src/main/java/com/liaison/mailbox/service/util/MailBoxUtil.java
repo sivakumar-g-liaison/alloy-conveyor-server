@@ -64,6 +64,7 @@ public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
+	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
 
 	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
 
@@ -152,7 +153,7 @@ public class MailBoxUtil {
 	}
 
 	public static DecryptableConfiguration getEnvironmentProperties() {
-		return LiaisonConfigurationFactory.getConfiguration();
+		return CONFIGURATION;
 	}
 
 	/**
@@ -451,7 +452,6 @@ public class MailBoxUtil {
         return msgBuf.toString();
     }
 
-
     /**
      * Method to set level in the logger config of the given logger Name during run time programmatically
      *
@@ -466,6 +466,31 @@ public class MailBoxUtil {
 		loggerConfig.setLevel(level);
 		context.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
 
+    }
+
+    /**
+     * Checks whether a file is modified with in the given time limit
+     *
+     * @param timelimit
+     *            to check the file is modified with in the given time limit
+     * @param file
+     *            File object
+     * @return true if it is updated with in the given time limit, false otherwise
+     */
+    public static boolean validateLastModifiedTolerance(Path file) {
+
+        long timelimit = CONFIGURATION.getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
+
+        long system = System.currentTimeMillis();
+        long lastmo = file.toFile().lastModified();
+
+        LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
+        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
+
+        if (((system - lastmo)/1000) < timelimit) {
+            return true;
+        }
+        return false;
     }
 
 }
