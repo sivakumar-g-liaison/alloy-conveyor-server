@@ -81,14 +81,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private String pipeLineID;
 	private List<Path> activeFiles = new ArrayList<>();
 	private String fileRenameFormat = null;
-	private long lastModifiedTolerance = 0L;
-
-    public long setLastModifiedTolerance() {
-        if (lastModifiedTolerance == 0L) {
-            lastModifiedTolerance = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
-        }
-        return lastModifiedTolerance;
-    }
 
     public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
@@ -142,7 +134,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             // retrieve required properties
             SweeperPropertiesDTO staticProp = (SweeperPropertiesDTO) getProperties();
             setFileRenameFormat(staticProp);
-            setLastModifiedTolerance();
 
             // Validation of the necessary properties
             if (MailBoxUtil.isEmpty(inputLocation)) {
@@ -265,7 +256,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 LOGGER.debug("Sweeping file {}", file.toString());
 				if (!fileName.endsWith(fileRenameFormat)) {
 
-					if (validateLastModifiedTolerance(lastModifiedTolerance, file)) {
+					if (MailBoxUtil.validateLastModifiedTolerance(file)) {
 						LOGGER.info(constructMessage("The file {} is in progress. So added in the in-progress list."), file.toString());
                         activeFiles.add(file);
 						continue;
@@ -581,30 +572,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	/**
-	 * Checks whether a file is modified with in the given time limit
-	 *
-	 * @param timelimit
-	 *            to check the file is modified with in the given time limit
-	 * @param file
-	 *            File object
-	 * @return true if it is updated with in the given time limit, false otherwise
-	 */
-	public boolean validateLastModifiedTolerance(long timelimit, Path file) {
-
-		long system = System.currentTimeMillis();
-		long lastmo = file.toFile().lastModified();
-
-        LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
-        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
-
-		if (((system - lastmo)/1000) < timelimit) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Checks recently in-progress files are completed or not
 	 *
 	 * @param activeFilesList
@@ -625,7 +592,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<Path> files = new ArrayList<>();
 		for (Path file : activeFilesList) {
 
-			if (!validateLastModifiedTolerance(lastModifiedTolerance, file)) {
+			if (!MailBoxUtil.validateLastModifiedTolerance(file)) {
 				LOGGER.info("There are no changes in the file {} recently. So it is added in the sweeper list.", file.getFileName());
 				files.add(file);
 				continue;
@@ -779,9 +746,10 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
         glassMessage.setStatus(ExecutionState.PROCESSING);
         glassMessage.setInAgent(inputLocation);
+        glassMessage.setInboundFileName(wrkTicket.getFileName());
         Long payloadSize = wrkTicket.getPayloadSize();
-        if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-            glassMessage.setInSize(payloadSize.intValue());
+        if (payloadSize != null) {
+            glassMessage.setInSize(payloadSize);
         }
 
         // Log FIRST corner

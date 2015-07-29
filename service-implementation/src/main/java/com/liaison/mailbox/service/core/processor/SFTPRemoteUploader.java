@@ -233,7 +233,14 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 				} else {
 
-					String currentFileName = item.getName();
+				    String currentFileName = item.getName();
+
+				    //File Modification Check
+				    if (MailBoxUtil.validateLastModifiedTolerance(item.toPath())) {
+		                LOGGER.info(constructMessage("The file {} is still in progress, so it is skipped."), currentFileName);
+		                continue;
+		            }
+
 					// Check if the file to be uploaded is included or not excluded
 					if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
 					        currentFileName,
@@ -280,7 +287,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 													.append(" to remote path ")
 													.append(remoteParentDir);
 						// Glass Logging 
-						logGlassMessage(message, item, ExecutionState.COMPLETED);
+						logGlassMessage(message.toString(), item, ExecutionState.COMPLETED);
 					} else {
 						
 						archiveFiles(staticProp.getErrorFileLocation(), item);
@@ -292,7 +299,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 													.append(" to remote path ")
 													.append(remoteParentDir);
 						// Glass Logging 
-						logGlassMessage(message, item, ExecutionState.FAILED);
+						logGlassMessage(message.toString(), item, ExecutionState.FAILED);
 					}
 				}
 			}
@@ -406,5 +413,10 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 
 	}
-	
+
+    @Override
+    public void logToLens(String msg, File file, ExecutionState status) {
+        logGlassMessage(msg, file, status);
+    }
+
 }

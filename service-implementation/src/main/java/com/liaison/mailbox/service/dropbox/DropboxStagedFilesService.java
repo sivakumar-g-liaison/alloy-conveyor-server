@@ -142,7 +142,7 @@ public class DropboxStagedFilesService {
 		}
 		glassMessage.setMeta(stagedFile.getFileMetaData());
 		glassMessage.setStagedFileId(fileId);
-		glassMessage.setOutSize(Integer.parseInt(stagedFile.getFileSize()));
+		glassMessage.setOutSize(Long.parseLong(stagedFile.getFileSize()));
 
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
 		MailBox mailbox = mailboxDao.find(MailBox.class, stagedFile.getMailboxId());
