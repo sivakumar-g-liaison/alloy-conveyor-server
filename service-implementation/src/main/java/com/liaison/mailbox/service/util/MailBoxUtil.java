@@ -27,12 +27,8 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -450,22 +446,6 @@ public class MailBoxUtil {
         }
 
         return msgBuf.toString();
-    }
-
-    /**
-     * Method to set level in the logger config of the given logger Name during run time programmatically
-     *
-     * @param loggerName - name of particular logger in which the level needs to be set
-     * @param level - logger level to set
-     */
-    public static void setLogLevelDuringRuntime(String loggerName, Level level) {
-
-		LoggerContext context = (LoggerContext) LogManager.getContext(false);
-		Configuration config = context.getConfiguration();
-		LoggerConfig loggerConfig = config.getLoggerConfig(loggerName);
-		loggerConfig.setLevel(level);
-		context.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
-
     }
 
     /**

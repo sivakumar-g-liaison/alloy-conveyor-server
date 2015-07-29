@@ -19,7 +19,6 @@ import java.security.cert.CertificateException;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
@@ -65,28 +64,28 @@ public class FTPSClient {
 			int connectionTimeout = 0;
 			int socketTimeout = 0;
 			int retryAttempts = 0;
-
+			//boolean debugTranscript = false;
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)processor.getProperties();
 				url = ftpUploaderStaticProperties.getUrl();
 				connectionTimeout = ftpUploaderStaticProperties.getConnectionTimeout();
 				socketTimeout = ftpUploaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpUploaderStaticProperties.getRetryAttempts();
+				//debugTranscript =  ftpUploaderStaticProperties.isDebugTranscript();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)processor.getProperties();
 				url = ftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = ftpDownloaderStaticProperties.getConnectionTimeout();
 				socketTimeout = ftpDownloaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpDownloaderStaticProperties.getRetryAttempts();
+				//debugTranscript = ftpDownloaderStaticProperties.isDebugTranscript();
 			}
 			// retrieve required properties
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
 			ftpsRequest.setURI(url);
 
-			// set log level
-			Level level = (ftpDownloaderStaticProperties.isDebugTranscript()) ? Level.INFO : Level.DEBUG;
-			MailBoxUtil.setLogLevelDuringRuntime(FTPSClient.class.getName(), level);
-
+			// set debug transcript property
+			//ftpsRequest.setDebugTranscript(debugTranscript);
 			ftpsRequest.setDiagnosticLogger(LOGGER);
 			ftpsRequest.setCommandLogger(LOGGER);
 			ftpsRequest.setConnectionTimeout(connectionTimeout);

@@ -19,7 +19,6 @@ import java.security.cert.CertificateEncodingException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
@@ -62,27 +61,28 @@ public class SFTPClient {
 			String url = null;
 			int connectionTimeout = 0;
 			int retryAttempts = 0;
+			//boolean debugTranscript = false;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO) processor.getProperties();
 				url = sftpUploaderStaticProperties.getUrl();
 				connectionTimeout = sftpUploaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpUploaderStaticProperties.getRetryAttempts();
+				//debugTranscript = sftpUploaderStaticProperties.isDebugTranscript();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO) processor.getProperties();
 				url = sftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = sftpDownloaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
+				//debugTranscript = sftpDownloaderStaticProperties.isDebugTranscript();
 			}
 
 			// retrieve required properties
 			G2SFTPClient sftpRequest = new G2SFTPClient();
 			sftpRequest.setURI(url);
 
-			// set Log Level
-			Level level = (sftpDownloaderStaticProperties.isDebugTranscript()) ? Level.INFO : Level.DEBUG;
-			MailBoxUtil.setLogLevelDuringRuntime(SFTPClient.class.getName(), level);
-
+			// set debug transcript property
+			//sftpRequest.setDebugTranscript(debugTranscript);
 			sftpRequest.setDiagnosticLogger(LOGGER);
 			sftpRequest.setCommandLogger(LOGGER);
 			sftpRequest.setTimeout(connectionTimeout);
