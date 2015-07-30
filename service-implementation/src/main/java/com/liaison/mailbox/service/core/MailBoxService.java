@@ -410,7 +410,7 @@ public class MailBoxService {
 
             processorService.runProcessor(workTicket, fsm);
             transactionVisibilityClient.logToGlass(glassMessage);
-            glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Stage is completed");
+            glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
 
             LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service exeuciton is completed",
                     processor.getProcessorType().name(),
