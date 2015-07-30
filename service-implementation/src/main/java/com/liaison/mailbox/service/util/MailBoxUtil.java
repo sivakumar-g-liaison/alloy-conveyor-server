@@ -261,9 +261,6 @@ public class MailBoxUtil {
 			Files.write(path, IOUtils.toByteArray(response));
 		}
 		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
-		if (response != null) {
-			response.close();
-		}
 	}
 
 	/**

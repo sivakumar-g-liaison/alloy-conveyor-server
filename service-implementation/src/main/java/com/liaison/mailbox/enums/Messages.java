@@ -155,7 +155,8 @@ public enum Messages {
 
 	PAYLOAD_ALREADY_EXISTS("Failed to persist the payload in spectrum because it already exists."),
 	PAYLOAD_PERSIST_ERROR("Failed to persist the payload in spectrum due to error."),
-	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error");
+	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error"),
+	PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from spectrum due to error");
 
 	private String value;
 

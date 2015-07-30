@@ -42,6 +42,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	    
 	    WorkTicket workTicket = (WorkTicket) dto;
         GlassMessage glassMessage = null;
+        String processorPayloadLocation = null;
 
         try {
 
@@ -67,48 +68,49 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             LOG.info(constructMessage("Found the processor to write the payload in the local payload location"));
 
             //get payload from spectrum
-            InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI());
+            try (InputStream payload = StorageUtilities.retrievePayload(workTicket.getPayloadURI())) {
 
-            if (null == payload) {
-                LOG.error(constructMessage("Global PID",
+                if (null == payload) {
+                    LOG.error(constructMessage("Global PID",
+                            seperator,
+                            workTicket.getGlobalProcessId(),
+                            seperator,
+                            "Failed to retrieve payload from spectrum"));
+                    throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
+                }
+
+                //get local payload location from uploader/filewriter
+                processorPayloadLocation = getFileWriteLocation();
+                if (null == processorPayloadLocation) {
+                    LOG.error(constructMessage("Global PID",
+                            seperator,
+                            workTicket.getGlobalProcessId(),
+                            seperator,
+                            "payload or filewrite location not configured for processor {}"), configurationInstance.getProcsrName());
+                    throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
+                }
+
+                boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE) ? true : false;
+                LOG.info(constructMessage("Global PID",
                         seperator,
                         workTicket.getGlobalProcessId(),
                         seperator,
-                        "Failed to retrieve payload from spectrum"));
-                throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
-            }
+                        "Started writing payload to ",
+                        processorPayloadLocation,
+                        seperator,
+                        fileName));
 
-            //get local payload location from uploader/filewriter
-            String processorPayloadLocation = getFileWriteLocation();
-            if (null == processorPayloadLocation) {
-                LOG.error(constructMessage("Global PID",
+                // write the payload retrieved from spectrum to the configured location of processor
+                MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
+                LOG.info(constructMessage("Global PID",
                         seperator,
                         workTicket.getGlobalProcessId(),
                         seperator,
-                        "payload or filewrite location not configured for processor {}"), configurationInstance.getProcsrName());
-                throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
+                        "Payload is successfully written to ",
+                        processorPayloadLocation,
+                        seperator,
+                        fileName));
             }
-
-            boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE) ? true : false;
-            LOG.info(constructMessage("Global PID",
-                    seperator,
-                    workTicket.getGlobalProcessId(),
-                    seperator,
-                    "Started writing payload to ",
-                    processorPayloadLocation,
-                    seperator,
-                    fileName));
-
-            // write the payload retrieved from spectrum to the configured location of processor
-            MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-            LOG.info(constructMessage("Global PID",
-                    seperator,
-                    workTicket.getGlobalProcessId(),
-                    seperator,
-                    "Payload is successfully written to ",
-                    processorPayloadLocation,
-                    seperator,
-                    fileName));
 
             //GLASS LOGGING BEGINS//
             glassMessage.setOutAgent(processorPayloadLocation);

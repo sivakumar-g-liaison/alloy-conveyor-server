@@ -331,9 +331,14 @@ public class Processor implements Identifiable {
 
 	}
 	
+	/**
+	 * Get the configured TTL unit and the value from Mailbox Properties
+	 * 
+	 * @return Map which contains TTL unit and value
+	 */
 	@Transient
-	public Map<String,String> getTTLUnitAndTTLNumber()
-	{
+	public Map<String,String> getTTLUnitAndTTLNumber() {
+
 		Map<String,String> map = new HashMap<String,String>();
 		List<MailBoxProperty> properties = getMailbox().getMailboxProperties();
 		for (MailBoxProperty mbp : properties) {
