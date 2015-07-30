@@ -342,8 +342,8 @@ public class ProcessorDTO {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public void copyFromEntity(Processor processor,boolean includeUITemplate) throws JsonParseException, JsonMappingException, JAXBException, IOException,
-			MailBoxConfigurationServicesException, SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void copyFromEntity(Processor processor, boolean includeUITemplate) throws NoSuchFieldException,
+            SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());

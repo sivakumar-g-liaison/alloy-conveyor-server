@@ -38,7 +38,6 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.netflix.servo.DefaultMonitorRegistry;
@@ -78,7 +77,7 @@ public class ProcessorSearchResource extends AuditedResource {
 	@ApiOperation(value = "Get All Processors", notes = "get all the processors", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-	public Response getAllProcessors(@Context HttpServletRequest request,
+	public Response searchProcessor(@Context HttpServletRequest request,
 			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
 			@QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
 			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
@@ -97,7 +96,8 @@ public class ProcessorSearchResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 
-				try {					
+				try {
+
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
 					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
 					searchFilter.setPage(page);
@@ -110,8 +110,9 @@ public class ProcessorSearchResource extends AuditedResource {
 					searchFilter.setProfileName(profileName);
 					searchFilter.setProtocol(protocol);
 					searchFilter.setProcessorType(prcsrType);
+
 					// Get all the processors
-					return processor.getAllProcessors(searchFilter);
+					return processor.searchProcessor(searchFilter);
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
@@ -134,6 +135,7 @@ public class ProcessorSearchResource extends AuditedResource {
 			return marshalResponse(500, MediaType.TEXT_PLAIN, e.getMessage());
 		}
 	}
+
 	@GET
 	@Path("/getMailBoxNames")
 	@ApiOperation(value = "Get Mailbox Names", notes = "get mailbox names", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO.class)
