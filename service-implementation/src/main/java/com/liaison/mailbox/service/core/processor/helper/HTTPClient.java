@@ -156,9 +156,7 @@ public class HTTPClient {
 
 					// If no certificate is configured then use default global
 					// trustoreid
-					String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri())) ? (MailBoxUtil
-							.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID))
-							: trustStoreCredential.getCredsIdpUri();
+					String trustStoreID = trustStoreCredential.getCredsIdpUri();
 
 					try (InputStream instream = KMSUtil.fetchTrustStore(trustStoreID)) {
 

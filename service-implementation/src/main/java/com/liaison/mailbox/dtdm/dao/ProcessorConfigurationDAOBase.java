@@ -597,11 +597,30 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			totalItems = (Long)entityManager.createQuery(query.toString()).getSingleResult();
 			count = totalItems.intValue();
 		} finally {
+            if (entityManager != null) {
+                entityManager.close();
+            }
+        }
+		return count;	
+	}
+		
+	@SuppressWarnings("unchecked")
+	@Override
+	public Processor findActiveProcessorById(String id) {
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+			List <Processor> proc = entityManager.createNamedQuery(FIND_ACTIVE_PROCESSOR_BY_ID)
+								.setParameter(STATUS, EntityStatus.ACTIVE.value())
+								.setParameter(PGUID, id)
+								.getResultList();
+			return (proc.isEmpty()) ? null : proc.get(0);
+			
+		} finally {
 			if (entityManager != null) {
 				entityManager.close();
 			}
 		}
-		return count;	
 	}
 	
 	@Override

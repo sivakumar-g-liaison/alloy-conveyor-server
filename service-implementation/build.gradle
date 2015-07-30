@@ -177,7 +177,7 @@ dependencies {
 	//    compile "jboss:jnp-client:4.0.2"
 
 	// for G2Javascript engine
-	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '2.0.+'
+	compile group: 'com.liaison.commons', name: 'commons-scripting', version: '3.2.0'
 
 	//Dependencies for MCC - DO NOT COMMENT THIS OUT IN BRANCH for-review. THE DEPLOYMENT WILL FAIL IF YOU DEPLOY THE CODE WITH THIS IN TOMCAT 7.X
 	//compile group: "com.liaison.google", name: "google-api-util", version: "1.0.0-SNAPSHOT", changing: true
@@ -208,7 +208,7 @@ dependencies {
 
 	compile 'com.liaison.commons.log4j2.gsa:pairwise-log4j2-lib:1.+'
 	compile 'net.logstash.log4j2:log4j2-logstash-jsonevent-layout:3.+'
-	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.2.+'
+	compile 'com.liaison.commons.log4j2.glass:glass_log4j2_lib:2.+'
 
 
 	//TODO change to 2.+ after logging updATE
@@ -249,7 +249,7 @@ dependencies {
 
 	workTicket 'com.liaison.dto:dto:3.+'
 	
-	compile ("com.liaison.commons.message.glass:glass-message-lib:5.+")
+	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
 
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
 

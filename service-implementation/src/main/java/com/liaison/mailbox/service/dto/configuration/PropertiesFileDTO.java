@@ -56,18 +56,6 @@ public class PropertiesFileDTO {
 			String fsmEventCheckIntervalInSeconds) {
 		this.fsmEventCheckIntervalInSeconds = fsmEventCheckIntervalInSeconds;
 	}
-	public String getTrustStoreId() {
-		return trustStoreId;
-	}
-	public void setTrustStoreId(String trustStoreId) {
-		this.trustStoreId = trustStoreId;
-	}
-	public String getTrustStoreGroupId() {
-		return trustStoreGroupId;
-	}
-	public void setTrustStoreGroupId(String trustStoreGroupId) {
-		this.trustStoreGroupId = trustStoreGroupId;
-	}
 	public String getListJobsIntervalInHours() {
 		return listJobsIntervalInHours;
 	}

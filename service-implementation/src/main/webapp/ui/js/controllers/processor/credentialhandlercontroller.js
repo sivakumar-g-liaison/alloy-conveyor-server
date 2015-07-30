@@ -115,6 +115,7 @@ myApp.controller(
                 showFooter: false,
                 rowHeight: 100,
 				enableColumnResize : true,
+				enableSorting : false,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "idpURI",

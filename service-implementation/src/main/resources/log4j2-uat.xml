@@ -233,7 +233,8 @@
                               ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
                               password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
                               sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="${env:GLASS_SPECTRUM_MESSAGE_TTL}"
-                              dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}">
+                              dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}"
+                              ignoreExceptions="false">
             <GlassMessageJSONLayout compact="true"/>
             <filters>
                 <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
@@ -271,6 +272,13 @@
         <Failover name="AsyncGlassMessageSpectrumRESTWithFailoverFailover" primary="AsyncGlassMessageSpectrumRESTWithFailover">
             <Failovers>
                 <AppenderRef ref="Console"/>
+            </Failovers>
+        </Failover>
+
+        <!-- Synchronous hotwire for glass -->
+        <Failover name="SyncGlassMessageSpectrumRESTWithFailover" primary="GlassMessageSpectrumREST">
+            <Failovers>
+                <AppenderRef ref="GlassMessageSpectrumFile"/>
             </Failovers>
         </Failover>
 
@@ -393,7 +401,8 @@
             <appender-ref ref="AsyncLogStashSocketWithFailoverFailover"/>
             <appender-ref ref="AsyncOrgGSALENSAppenderWithFailoverFailover" />
             <appender-ref ref="AsyncPairwiseGSALENSAppenderWithFailoverFailover" />
-            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
+<!--            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" /> -->
+            <appender-ref ref="SyncGlassMessageSpectrumRESTWithFailover" />
             <appender-ref ref="AsyncMetricsGMSpectrumAppenderWithFailoverFailover"/>
 			<appender-ref ref="AsyncFileSyslogWithFailoverFailover" />
 

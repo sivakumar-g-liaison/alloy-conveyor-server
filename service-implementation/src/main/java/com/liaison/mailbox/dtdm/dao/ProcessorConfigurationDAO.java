@@ -49,7 +49,11 @@ import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 								+ " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
 								+ ProcessorConfigurationDAO.PGUID 
 								+ " and processor.procsrName like :" 
-								+ ProcessorConfigurationDAO.PRCSR_NAME)
+								+ ProcessorConfigurationDAO.PRCSR_NAME),
+		@NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
+								query = "select processor from Processor processor"
+										+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
+										+ " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID)
 })
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
@@ -57,6 +61,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
 	public static final String FIND_ALL_ACTIVE_PROCESSORS = "findAllActiveProcessors";
 	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "findProcessorByNameAndMbx";
+	public static final String FIND_ACTIVE_PROCESSOR_BY_ID = "findActiveProcessorById";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -148,6 +153,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	public Processor findProcessorByNameAndMbx(String mbxGuid, String ProcName); 
  	
  	/**
+<<<<<<< HEAD
 	 * Retrieves count of all processors  
 	 * @return count of processors
 	 */
@@ -175,4 +181,11 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return count of filtered processors
 	 */
 	public int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO);
+
+	/**
+ 	* Retrieves active processor by processor id
+ 	* @return  processor
+ 	*/
+ 	public Processor findActiveProcessorById(String id);
+
 }

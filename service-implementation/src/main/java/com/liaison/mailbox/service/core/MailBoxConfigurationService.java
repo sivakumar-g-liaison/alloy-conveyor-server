@@ -579,8 +579,6 @@ public class MailBoxConfigurationService {
 		try {
 
 		    DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
-			dto.setTrustStoreId(config.getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
-			dto.setTrustStoreGroupId(config.getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
 			dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
 			dto.setFsmEventCheckIntervalInSeconds(config.getString(
 			        MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));

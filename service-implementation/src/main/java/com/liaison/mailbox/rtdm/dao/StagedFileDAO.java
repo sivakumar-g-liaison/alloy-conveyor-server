@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.liaison.commons.jpa.GenericDAO;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
@@ -32,6 +33,8 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	
 	public static final String STATUS = "status";
 	
+	public static final String PROCESSOR_ID = "processor_id";
+	
 	/**
 	 * Method to retrieve the list of all staged files of given mailbox ids
 	 * 
@@ -41,4 +44,7 @@ public interface StagedFileDAO extends GenericDAO<StagedFile> {
 	public List <StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails);
 	public List <StagedFile> findStagedFilesOfMailboxesBasedonGUID(List<String> mailboxIds, String guid);
 	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status);
+	public void persistStagedFile(WorkTicket workticket, String processorId);
+	public StagedFile findStagedFilesOfUploadersBasedOnMeta(String processorId, String fileName);
+
 }

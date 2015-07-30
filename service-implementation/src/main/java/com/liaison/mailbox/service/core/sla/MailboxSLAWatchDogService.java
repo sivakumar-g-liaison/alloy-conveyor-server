@@ -21,7 +21,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,6 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
@@ -38,19 +36,17 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
-import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.FileWriter;
@@ -73,7 +69,6 @@ import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMState;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.FTPSRemoteUploader;
@@ -85,6 +80,7 @@ import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponse
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
+import com.liaison.mailbox.service.util.EmailUtil;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -97,7 +93,7 @@ public class MailboxSLAWatchDogService {
 
 	private static final Logger LOG = LogManager.getLogger(MailboxSLAWatchDogService.class);
 
-	private static String SLA_VIOLATION_NOTIFICATION = "Mailbox %s does not adhere to SLA";
+	private static String SLA_VIOLATION_NOTIFICATION = "Mailbox %s(%s) does not adhere to SLA";
 	private static String SLA_VIOLATION_NOTIFICATION_MESSAGE = "Mailbox %s does not adhere to SLA Rule \"%s - %s\".";
 	private static String SLA_NOTIFICATION_FAILURE_INFO = "\n\n The last execution dated %s got failed.";
 	private static String MAILBOX_SLA_RULE = "Time to pick up file posted to mailbox";
@@ -105,6 +101,8 @@ public class MailboxSLAWatchDogService {
 	private static final String MAILBOX = "Mailbox";
 	private static final String MAILBOX_SLA = "mailbox_sla";
 	private static final String CUSTOMER_SLA = "customer_sla";
+	protected static final String seperator = ": ";
+	protected StringBuffer logPrefix;
 
 	/**
 	 * Check Mailbox satisfies the SLA Rules or not.
@@ -196,17 +194,17 @@ public class MailboxSLAWatchDogService {
 
 			String mailboxName = null;
 			String emailSubject = null;
-			StringBuilder emailBody = null;
+			String failureReason = null;
 			// If the list is empty then the processor is not executed at all during the specified sla time.
 			if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
 
 				LOG.debug("The processor was not executed with in the specified mailbox SLA configuration time");
 				mailboxName = procsr.getMailbox().getMbxName();
 				slaViolatedMailboxes.add(mailboxName);
-				emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
-				emailBody = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox));
+				emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
+				failureReason = String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox);
+				EmailUtil.sendEmail(procsr, emailSubject, failureReason);
 				LOG.info("The SLA violations are notified to the user by sending email");
-				sendEmail(procsr.getEmailAddress(), emailSubject, emailBody.toString(), "HTML");
 				continue;
 			}
 
@@ -215,14 +213,17 @@ public class MailboxSLAWatchDogService {
 				for (FSMStateValue fsmStateVal : listfsmStateVal) {
 
 					if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
+
 						LOG.debug("The processor was executed but got failed with in the specified mailbox SLA configuration time");
 						mailboxName = procsr.getMailbox().getMbxName();
 						slaViolatedMailboxes.add(mailboxName);
-						emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
+						emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
 						ISO8601Util dateUtil = new ISO8601Util();
-						emailBody = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox)).append(String.format(SLA_NOTIFICATION_FAILURE_INFO, dateUtil.fromTimestamp(fsmStateVal.getCreatedDate())));
+						failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox))
+						    .append(String.format(SLA_NOTIFICATION_FAILURE_INFO, dateUtil.fromTimestamp(fsmStateVal.getCreatedDate()))).toString();
+						EmailUtil.sendEmail(procsr, emailSubject, failureReason);
 						LOG.info("The SLA violations are notified to the user by sending email");
-						sendEmail(procsr.getEmailAddress(), emailSubject, emailBody.toString(), "HTML");
+
 					}
 				}
 
@@ -237,26 +238,6 @@ public class MailboxSLAWatchDogService {
 		LOG.debug("Exit from validateMailboxSLARules.");
 		return slaViolatedMailboxes.isEmpty();
 
-	}
-
-	/**
-	 * Sent notifications for SLA non adherence.
-	 *
-	 * @param toEmailAddrList
-	 *            The extra receivers. The default receiver will be available in
-	 *            the mailbox.
-	 * @param subject
-	 *            The notification subject
-	 * @param emailBody
-	 *            The body of the notification
-	 * @param type
-	 *            The notification type(TEXT/HTML).
-	 */
-
-	private void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
-
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
 	}
 
 	private Timestamp getSLAConfigurationAsTimeStamp(String slaConfiguration) throws IOException {
@@ -298,6 +279,7 @@ public class MailboxSLAWatchDogService {
 	 *
 	 * @param request
 	 */
+	@Deprecated
 	public void invokeWatchDog(String request) {
 
 		Processor processor = null;
@@ -309,7 +291,7 @@ public class MailboxSLAWatchDogService {
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(MailBoxUtil.getGUID());
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		GlassMessage glassMessage = null;
 
 		try {
@@ -319,7 +301,7 @@ public class MailboxSLAWatchDogService {
 			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
 			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 			glassMessage = new GlassMessage(workTicket);
-			glassMessage.setStatus(ExecutionState.STAGED);
+			glassMessage.setStatus(ExecutionState.COMPLETED);
 			glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
 			// validates mandatory value.
@@ -340,12 +322,22 @@ public class MailboxSLAWatchDogService {
 			processor = getSpecificProcessorofMailbox(mailboxId);
 
 			if (processor == null) {
-				LOG.error("Processor of type uploader is not available for mailbox {}", mailboxId);
+				LOG.error(constructMessage(processor, "Processor of type uploader/filewriter is not available for mailbox {}"), mailboxId);
 				throw new MailBoxServicesException(Messages.UPLOADER_OR_FILEWRITER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
 			}
+
+			LOG.info(constructMessage(processor, "Start Run"));
+			LOG.info(constructMessage(processor, "JSON received from SB {}"), new JSONObject(request).toString(2));
+			long startTime = System.currentTimeMillis();
+
+			// check if file Name is available in the payloadTicketRequest if so save the file with the
+			// provided file Name if not save with processor Name with Timestamp
+			String fileName = (workTicket.getFileName() == null)?(processor.getProcsrName() + System.nanoTime()):workTicket.getFileName();
+
+			LOG.info(constructMessage(processor, "Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
 			glassMessage.setCategory(processor.getProcessorType());
 			glassMessage.setProtocol(processor.getProcessorType().getCode());
-			LOG.debug("Processor {} of type uploader or filewriter is available for mailbox {}", processor.getProcsrName(), mailboxId);
+			LOG.info(constructMessage(processor, "Found the processor to write the payload in the local payload location"), mailboxId);
 
 			// retrieve the processor execution status of corresponding uploader from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
@@ -354,7 +346,12 @@ public class MailboxSLAWatchDogService {
 			InputStream payload = StorageUtilities.retrievePayload(payloadURI);
 
 			if (null == payload) {
-				LOG.error("Failed to retrieve payload from spectrum");
+				LOG.error(constructMessage(processor,
+				        "Global PID",
+				        seperator,
+				        workTicket.getGlobalProcessId(),
+				        seperator,
+				        "Failed to retrieve payload from spectrum"));
 				throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
 			}
 
@@ -362,19 +359,19 @@ public class MailboxSLAWatchDogService {
 			String processorPayloadLocation = getLocationToWritePayloadFromSpectrum(processor);
 
 			if (null == processorPayloadLocation) {
-				LOG.error("payload or filewrite location  not configured for processor {}", processor.getProcsrName());
+				LOG.error(constructMessage(processor,
+				        "Global PID",
+                        seperator,
+                        workTicket.getGlobalProcessId(),
+                        seperator,
+                        "payload or filewrite location not configured for processor {}"), processor.getProcsrName());
 				throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
 			}
-
-			// check if file Name is available in the payloadTicketRequest if so save the file with the
-			// provided file Name if not save with processor Name with Timestamp
-			String fileName = (workTicket.getFileName() == null)?(processor.getProcsrName() + System.nanoTime()):workTicket.getFileName();
-
 			// get the very first profile configured in the processor
 			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().get(0).getScheduleProfilesRef().getSchProfName():null;
 
 			if (null == profileName && processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
-				LOG.error("profile not configured for processor {}", processor.getProcsrName());
+				LOG.error(constructMessage(processor, "profile not configured for processor {}"), processor.getProcsrName());
 				throw new MailBoxServicesException(Messages.PROFILE_NOT_CONFIGURED, Response.Status.CONFLICT);
 			}
 
@@ -383,10 +380,27 @@ public class MailboxSLAWatchDogService {
 			}
 
 			boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE)?true:false;
-			LOG.debug("Started writing payload from spectrum to processor payload location");
+			LOG.info(constructMessage(processor,
+			        "Global PID",
+                    seperator,
+                    workTicket.getGlobalProcessId(),
+                    seperator,
+                    "Started writing payload to ",
+                    processorPayloadLocation,
+                    seperator,
+                    fileName));
+
 			// write the payload retrieved from spectrum to the configured location of processor
 			MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-			LOG.debug("Payload from spectrum is successfully written to given payload location");
+			LOG.info(constructMessage(processor,
+			        "Global PID",
+                    seperator,
+                    workTicket.getGlobalProcessId(),
+                    seperator,
+                    "Payload is successfully written to ",
+                    processorPayloadLocation,
+                    seperator,
+                    fileName));
 
 			//Initiate FSM
 			ProcessorStateDTO processorStaged = new ProcessorStateDTO();
@@ -397,27 +411,33 @@ public class MailboxSLAWatchDogService {
 	        processorExecutionStateDAO.merge(processorExecutionState);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
 
-	      //GLASS LOGGING BEGINS//
-
-			if(processorPayloadLocation.contains("ftps")){
-				glassMessage.setOutAgent(GatewayType.FTPS);
-			}if(processorPayloadLocation.contains("sftp")){
-				glassMessage.setOutAgent(GatewayType.SFTP);
-			}else if(processorPayloadLocation.contains("ftp")){
-				glassMessage.setOutAgent(GatewayType.FTP);
-			}
+	        //GLASS LOGGING BEGINS//
+	        glassMessage.setOutAgent(processorPayloadLocation);
 
 			//GLASS LOGGING CORNER 4 //
-			glassMessage.logProcessingStatus(StatusType.SUCCESS, "Payload delivered at target location");
+            StringBuffer message = new StringBuffer()
+                    .append("Payload delivered at target location : ")
+                    .append(processorPayloadLocation)
+                    .append(File.separatorChar)
+                    .append(fileName);
+
+            transactionVisibilityClient.logToGlass(glassMessage);
+			glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
             glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
 	        LOG.info("#################################################################");
+
+            long endTime = System.currentTimeMillis();
+            LOG.info(constructMessage(processor, "Number of files processed 1"));
+            LOG.info(constructMessage(processor, "Total time taken to process files {}"), endTime - startTime);
+            LOG.info(constructMessage(processor, "End run"));
+
 		} catch (JAXBException | JsonParseException | JsonMappingException e) {
 			//cannot send email since the request json cannot be parsed
 			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
 
 		} catch (Exception e) {
-			LOG.error("File Staging failed", e);
+			LOG.error(constructMessage(processor, "File Staging failed"), e);
 			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
 			processorStageFailed.setExecutionId(executionId);
 			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
@@ -435,61 +455,23 @@ public class MailboxSLAWatchDogService {
 
 			fsm.addState(processorStageFailed);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-			notifyUser(processor, mailboxId, e);
+
+			// send email in case of exception
+			String emailSubject = null;
+			if (null != processor) {
+				emailSubject = processor.getProcsrName() + ":" + e.getMessage();
+			} else {
+				emailSubject = e.getMessage();
+			}
+			// email will be sent only if emailAddress is available
+			EmailUtil.sendEmail(processor, emailSubject, e);
 			//GLASS LOGGING CORNER 4 //
 			glassMessage.setStatus(ExecutionState.FAILED);
 			transactionVisibilityClient.logToGlass(glassMessage);
 			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed :" + e.getMessage());
 			glassMessage.logFourthCornerTimestamp();
 			 //GLASS LOGGING ENDS//
-			
-
 		}
-
-	}
-
-	private List <String> getEmailAddress (Processor processor, String mailboxId) {
-
-		LOG.debug ("Retrieving Email Address from mailbox properties");
-		if (null != processor) {
-			return processor.getEmailAddress();
-		}
-		if (null != mailboxId) {
-			MailBoxConfigurationDAO mailboxDAO = new MailBoxConfigurationDAOBase();
-			MailBox mailBox = null;
-			try {
-				mailBox = mailboxDAO.find(MailBox.class, mailboxId) ;
-				List<MailBoxProperty> properties = mailBox.getMailboxProperties();
-
-				if (null != properties) {
-
-					for (MailBoxProperty property : properties) {
-
-						if (MailBoxConstants.MBX_RCVR_PROPERTY.equals(property.getMbxPropName())) {
-							String address = property.getMbxPropValue();
-							LOG.info("The retrieved emails are {}", address);
-							return Arrays.asList(address.split(","));
-						}
-					}
-				}
-			} catch (Exception e) {
-				LOG.error ("Failed to get Email Address", e);
-			}
-		}
-		return null;
-	}
-
-	private void notifyUser (Processor processor, String mailboxId, Exception e) {
-
-		String emailSubject = null;
-		List <String> emailAddress = getEmailAddress(processor, mailboxId);
-		if (null != processor) {
-			emailSubject = processor.getProcsrName() + ":" + e.getMessage();
-		} else {
-			emailSubject = e.getMessage();
-		}
-		// Email will be sent only if email address is available
-		if (null != emailAddress) sendEmail(emailAddress, emailSubject, ExceptionUtils.getStackTrace(e), "HTML");
 	}
 
 	/**
@@ -500,6 +482,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws IOException
 	 * @throws FS2Exception
 	 */
+	@Deprecated
 	public void writeSpectrumPayloadToProcessorLocation(InputStream response, String payloadLocation, String filename, Boolean isOverwrite) throws IOException {
 
 		LOG.info("Started writing payload from spectrum to processor payload location");
@@ -609,7 +592,7 @@ public class MailboxSLAWatchDogService {
 	 * @param mailboxId
 	 * @return
 	 */
-	private Processor getSpecificProcessorofMailbox(String mailboxId) {
+	public Processor getSpecificProcessorofMailbox(String mailboxId) {
 
 		LOG.info("Retrieving processors of type uploader for mailbox {}", mailboxId);
 		// get processor of type remote uploader of given mailbox id
@@ -721,9 +704,9 @@ public class MailboxSLAWatchDogService {
 
 				String mailboxName = procsr.getMailbox().getMbxName();
 				slaViolatedMailboxes.add(mailboxName);
-				String emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName);
-				StringBuilder emailBody = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, CUSTOMER_SLA_RULE, timeToPickUpFilePostedByMailbox));
-				sendEmail(procsr.getEmailAddress(), emailSubject, emailBody.toString(), "HTML");
+				String emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
+				StringBuilder failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, CUSTOMER_SLA_RULE, timeToPickUpFilePostedByMailbox));
+				EmailUtil.sendEmail(procsr, emailSubject, failureReason.toString());
 			}
 
 			// update the sla verfication of processor execution FSM state if sla verfication
@@ -838,7 +821,9 @@ public class MailboxSLAWatchDogService {
             LOG.error("Error occured during file existence check of processor {} , {}", processor.getProcsrName(), e.getMessage());
             // if any exception occurs during file existence check, a notification will be send to the user
             // and the mailbox corresponding to this processor will not be considered for sla validation
-            notifyUser(processor, processor.getMailbox().getPguid(), e);
+            String emailSubject = null;
+   			emailSubject = processor.getProcsrName() + ":" + e.getMessage();
+   			EmailUtil.sendEmail(processor, emailSubject, e);
             return isCustomerSLAViolated;
         }
 
@@ -872,5 +857,40 @@ public class MailboxSLAWatchDogService {
 		return isFileExists;
 
 	}
+
+    /**
+     * Method to construct log messages for easy visibility
+     *
+     * @param messages append to prefix, please make sure the order of the inputs
+     * @return constructed string
+     */
+    public String constructMessage(Processor processor, String... messages) {
+
+        if (null == logPrefix && null == processor) {
+
+            logPrefix = new StringBuffer()
+                .append("WatchDog")
+                .append(seperator);
+        } else {
+            logPrefix = new StringBuffer()
+                .append("WatchDog")
+                .append(seperator)
+                .append(processor.getProcessorType().name())
+                .append(seperator)
+                .append(processor.getProcsrName())
+                .append(seperator)
+                .append(processor.getMailbox().getMbxName())
+                .append(seperator)
+                .append(processor.getMailbox().getPguid())
+                .append(seperator);
+        }
+
+        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        for (String str : messages) {
+            msgBuf.append(str);
+        }
+
+        return msgBuf.toString();
+    }
 
 }

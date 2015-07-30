@@ -19,7 +19,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateEncodingException;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -43,6 +42,7 @@ import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.helper.ClientFactory;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SFTPDownloaderPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -93,32 +93,44 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 * @throws MailBoxConfigurationServicesException
 	 *
 	 */
-	private void executeSFTPRequest() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+	private void executeSFTPRequest() {
 
 		try {
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
 			sftpRequest.connect();
-
+			LOGGER.info(constructMessage("Start run"));
+			long startTime = System.currentTimeMillis();
 			if (sftpRequest.openChannel()) {
 
-				String path = getPayloadURI();
-				if (MailBoxUtil.isEmpty(path)) {
-					LOGGER.info("The given payload URI is Empty.");
+				String remotePath = getPayloadURI();
+				if (MailBoxUtil.isEmpty(remotePath)) {
+					LOGGER.info(constructMessage("The given payload URI is Empty."));
 					throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 				}
-				String remotePath = getWriteResponseURI();
-				if (MailBoxUtil.isEmpty(remotePath)) {
-					LOGGER.info("The given remote URI is Empty.");
+
+				String localPath = getWriteResponseURI();
+				if (MailBoxUtil.isEmpty(localPath)) {
+					LOGGER.info(constructMessage("The given remote URI is Empty."));
 					throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 				}
 
-				downloadDirectory(sftpRequest, path, remotePath);
+				LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, localPath);
+				downloadDirectory(sftpRequest, remotePath, localPath);
 			}
 			// remove the private key once connection established successfully
 			removePrivateKeyFromTemp();
 			sftpRequest.disconnect();
+
+			// to calculate the elapsed time for processing files
+			long endTime = System.currentTimeMillis();
+            LOGGER.info(constructMessage("Number of files processed {}"), totalNumberOfProcessedFiles);
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
+
 		} catch (LiaisonException | MailBoxServicesException | IOException | URISyntaxException
-				| SftpException | SymmetricAlgorithmException e) {
+				| SftpException | SymmetricAlgorithmException | NoSuchFieldException | SecurityException
+				| IllegalArgumentException | IllegalAccessException | JAXBException e) {
+		    LOGGER.error(constructMessage("Error occurred during sftp download", seperator, e.getMessage()), e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -143,8 +155,10 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	public void downloadDirectory(G2SFTPClient sftpRequest, String currentDir, String localFileDir) throws IOException,
 			LiaisonException, URISyntaxException, MailBoxServicesException, SftpException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
+		//variable to hold the status of file download request execution
+		int statusCode = 0;
 		String dirToList = "";
-		SFTPDownloaderPropertiesDTO sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO)getProperties();
+		SFTPDownloaderPropertiesDTO staticProp = (SFTPDownloaderPropertiesDTO) getProperties();
 
 		if (!currentDir.equals("")) {
 			dirToList += currentDir;
@@ -153,21 +167,25 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 		List<String> files = sftpRequest.listFiles(currentDir);
 		BufferedOutputStream bos = null;
 		FileOutputStream fos = null;
+		if(files.size() == 2) {
+			
+			for (int i = 1; i >=0 ; i--) {
+				if (files.get(i).equals(".") || files.get(i).equals("..")) {
+				files.remove(i);
+				}
+			}
+		}
 		if (files != null && files.size() > 0) {
-			String statusIndicator = sftpDownloaderStaticProperties.getFileTransferStatusIndicator();
-			String tempExtension = (!MailBoxUtil.isEmpty(statusIndicator) && statusIndicator.length() > 1) ? statusIndicator: "";
-			String excludedFiles = sftpDownloaderStaticProperties.getExcludedFiles();
-			String includedFiles = sftpDownloaderStaticProperties.getIncludedFiles();
-			List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
-			List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
+
+			String statusIndicator = staticProp.getFileTransferStatusIndicator();
+
 			for (String aFile : files) {
 				if (aFile.equals(".") || aFile.equals("..")) {
 					// skip parent directory and the directory itself
 					continue;
 				}
 
-             boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
-
+				boolean isDir = sftpRequest.getNative().stat(dirToList + File.separatorChar + aFile).isDir();
 				if (isDir) {
 
 					String localDir = localFileDir + File.separatorChar + aFile;
@@ -179,13 +197,18 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 					sftpRequest.changeDirectory(remotePath);
 					downloadDirectory(sftpRequest, remotePath, localDir);
 
-				}else{
+				} else {
 
-				String currentFileName = aFile;
-				// Check whether user preferred specific files to include or exclude during downloading process.
-				currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
-				if (currentFileName != null) {
-					String downloadingFileName = currentFileName + "." + tempExtension;
+					String currentFileName = aFile;
+					// Check if the file to be uploaded is included or not excluded
+                    if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                            currentFileName,
+                            staticProp.getExcludedFiles())) {
+                        continue;
+                    }
+
+					String downloadingFileName = (!MailBoxUtil.isEmpty(statusIndicator)) ? currentFileName + "."
+							+ statusIndicator : currentFileName;
 					String localDir = localFileDir + File.separatorChar + downloadingFileName;
 					sftpRequest.changeDirectory(dirToList);
 					createResponseDirectory(localDir);
@@ -194,52 +217,54 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 						fos = new FileOutputStream(localDir);
 						bos = new BufferedOutputStream(fos);
-						int statusCode = sftpRequest.getFile(currentFileName, bos);
+						LOGGER.info(constructMessage("downloading file {} from remote path {} to local path {}"),
+								currentFileName, currentDir, localFileDir);
+						statusCode = sftpRequest.getFile(currentFileName, bos);
 						// Check whether the file downloaded successfully if so rename it.
 						if (statusCode == 0) {
-							LOGGER.info("File downloaded successfully");
+
+							totalNumberOfProcessedFiles++;
+							LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
+							if (fos != null) fos.close();
+							if (bos != null) bos.close();
+
 							// Renames the downloaded file to original extension once the fileStatusIndicator is given by User
-							if (tempExtension.length() > 0) {
-								if (null != fos) {
-				                    fos.close();
-				                }
-				                if (null != bos) {
-				                    bos.close();
-				                }
+							if (!MailBoxUtil.isEmpty(statusIndicator)) {
 								File downloadedFile = new File(localDir);
-								String actualFile = localFileDir + currentFileName;
-								File actual = new File(actualFile);
-								boolean renameStatus = downloadedFile.renameTo(actual);
+								File currentFile = new File(localFileDir + File.separatorChar + currentFileName);
+								boolean renameStatus = downloadedFile.renameTo(currentFile);
 								if (renameStatus) {
-									LOGGER.info("File renamed successfully");
+									LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 								} else {
-									LOGGER.info("File renaming failed");
+									LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
 								}
 							}
 							// Delete the remote files after successful download if user optioned for it
-							if (sftpDownloaderStaticProperties.getDeleteFiles()) {
+							if (staticProp.getDeleteFiles()) {
 								sftpRequest.deleteFile(aFile);
+								LOGGER.info("File {} deleted successfully in the remote location", currentFileName);
 							}
-
 						}
 					} finally {
-						if (bos != null)
-							bos.close();
-						if (fos != null)
-							fos.close();
+						if (bos != null) bos.close();
+						if (fos != null) fos.close();
 					}
 
 				}
 			}
 		}
+		else {
+			LOGGER.info(constructMessage("The given payload URI '" + currentDir + "' is empty."));
+		}
 	}
-}
 
 	@Override
-	public void runProcessor(String executionId,MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		LOGGER.debug("Entering in invoke.");
 		try {
+
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			// G2SFTP executed through JavaScript
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 

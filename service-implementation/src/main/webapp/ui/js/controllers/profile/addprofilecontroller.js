@@ -101,14 +101,19 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 					{
 					 showSaveMessage("No Results Found ", 'error');
 					 }
+					if (!$scope.$$phase){
+					 $scope.$apply();
+					 }
 				}, {pageSize: pageSize, page: page, filterText: filterText, sortInfo: sortInfo}
 			);
         };
 
         // Loading the profile details
         $scope.loadProfiles = function () {
-        	$scope.getPagedDataAsync(url, $scope.pagingOptions.pageSize,
-        			$scope.pagingOptions.currentPage, $scope.filterOptions, $scope.sortInfo);
+			setTimeout(function () {
+				$scope.getPagedDataAsync(url, $scope.pagingOptions.pageSize,
+						$scope.pagingOptions.currentPage, $scope.filterOptions, $scope.sortInfo);
+			}, 100);
         };
         
         $scope.loadProfiles(); //loads the profile initially

@@ -21,10 +21,12 @@ import javax.persistence.EntityManager;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
+import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
+import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
@@ -59,7 +61,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
-					.append(" and sf.mailboxId in (?1)")
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
 					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
 					.append(" and sf.stagedFileStatus = :"+ STATUS);
 			
@@ -73,7 +75,6 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
-					.setParameter(1, QueryBuilderUtil.collectionToSqlString(mailboxIds))
 				    .setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
 				    .setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
 					.setFirstResult(pagingOffset)
@@ -109,12 +110,11 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where (sf.pguid) = :" + StagedFileDAO.GUID)
-					.append(" and sf.mailboxId in (?1)");
+					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
 			 
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
-					.setParameter(1, QueryBuilderUtil.collectionToSqlString(mailboxIds))
 					.getResultList();
 
 			Iterator<?> iterator = files.iterator();
@@ -169,4 +169,68 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			}
 		}
 	}
+
+    @Override
+    public void persistStagedFile(WorkTicket workticket, String processorId) {
+
+        EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+        StagedFile stagedFileEntity = null;
+
+        try {
+
+            stagedFileEntity = find(StagedFile.class, workticket.getGlobalProcessId());
+
+            StagedFileDTO stagedFileDto = new StagedFileDTO(workticket);
+            stagedFileDto.setExpirationTime("0");
+            stagedFileDto.setMeta(processorId);
+
+            if (stagedFileEntity != null) {
+                stagedFileEntity.copyFromDto(stagedFileDto, false);
+                merge(stagedFileEntity);
+            } else {
+                stagedFileEntity = new StagedFile();
+                stagedFileEntity.copyFromDto(stagedFileDto, true);
+                stagedFileEntity.setPguid(workticket.getGlobalProcessId());
+                persist(stagedFileEntity);
+            }
+
+        } finally {
+
+            if (null != entityManager) {
+                entityManager.close();
+            }
+        }
+    }
+    
+
+	@SuppressWarnings("unchecked")
+    @Override
+	public StagedFile findStagedFilesOfUploadersBasedOnMeta(String processorId, String fileName) {
+
+		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+
+			// query
+			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
+					.append(" where sf.fileMetaData =:" + PROCESSOR_ID)
+					.append(" and sf.stagedFileStatus =:" + STATUS)
+			        .append(" and sf.fileName =:" + FILE_NAME);
+
+			List<StagedFile> stagedFiles = em
+								.createQuery(query.toString())
+								.setParameter(PROCESSOR_ID, processorId)
+								.setParameter(STATUS, EntityStatus.ACTIVE.value())
+								.setParameter(FILE_NAME, fileName)
+								.getResultList();
+
+			return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
+		} finally {
+
+			if (null != em) {
+			    em.close();
+			}
+		}
+	}
+
 }

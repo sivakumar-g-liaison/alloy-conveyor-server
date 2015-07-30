@@ -60,6 +60,7 @@ import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifest
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.ExecutionTimestamp;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
@@ -108,8 +109,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
 			@Override
-			public Object call()
-					throws Exception {
+			public Object call() throws Exception {
 
 				serviceCallCounter.incrementAndGet();
 
@@ -123,12 +123,13 @@ public class DropboxFileTransferResource extends AuditedResource {
 				long startTime = 0;
 				long endTime = 0;
 
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = new GlassMessage();
+				String loginId = "unknown";
 
 				try {
 
+					LOG.info(MailBoxUtil.constructMessage(null, null, "file transfer for the transfer profile {} - Start"), transferProfileId);
 					// start time to calculate elapsed time for retrieving necessary details from headers
 					startTime = System.currentTimeMillis();
 					String fileName = null;
@@ -142,10 +143,12 @@ public class DropboxFileTransferResource extends AuditedResource {
 					String aclManifest = serviceRequest.getHeader(MailBoxConstants.ACL_MANIFEST_HEADER);
 					if (StringUtil.isNullOrEmptyAfterTrim(mailboxToken)
 							|| StringUtil.isNullOrEmptyAfterTrim(aclManifest)) {
+
+						LOG.error(MailBoxUtil.constructMessage(null, null, Messages.REQUEST_HEADER_PROPERTIES_MISSING.value()));
 						throw new MailBoxConfigurationServicesException(Messages.REQUEST_HEADER_PROPERTIES_MISSING,
 								Response.Status.BAD_REQUEST);
 					}
-					String loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
+					loginId = DropboxAuthenticatorUtil.getPartofToken(mailboxToken, MailBoxConstants.LOGIN_ID);
 					String authenticationToken = DropboxAuthenticatorUtil.getPartofToken(mailboxToken,
 							MailBoxConstants.UM_AUTH_TOKEN);
 
@@ -164,7 +167,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// authenticating
 					String encryptedMbxToken = authService.isAccountAuthenticatedSuccessfully(dropboxAuthAndGetManifestRequestDTO);
 					if (encryptedMbxToken == null) {
-						LOG.error("Dropbox - user authentication failed");
+						LOG.error(MailBoxUtil.constructMessage(null, null, "user authentication failed for login id - {}"), loginId);
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTHENTICATION_FAILURE,
 								Messages.FAILURE);
 						return Response.status(401).header("Content-Type", MediaType.APPLICATION_JSON).entity(
@@ -183,6 +186,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					// getting manifest
 					GEMManifestResponse manifestResponse = authService.getManifestAfterAuthentication(dropboxAuthAndGetManifestRequestDTO);
 					if (manifestResponse == null) {
+						LOG.error(MailBoxUtil.constructMessage(null, null, "user authenticated but manifest retrieval failed for login id - {}"), loginId);
 						responseEntity = new DropboxAuthAndGetManifestResponseDTO(Messages.AUTH_AND_GET_ACL_FAILURE,
 								Messages.FAILURE);
 						return Response.status(400).header("Content-Type", MediaType.APPLICATION_JSON).entity(
@@ -201,7 +205,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicketUtil workTicketUtil = new WorkTicketUtil();
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
-					//workTicketUtil.copyRequestHeadersToWorkTicket(serviceRequest, workTicket);
+					workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 
 					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
@@ -209,12 +213,13 @@ public class DropboxFileTransferResource extends AuditedResource {
 					glassMessage.setStatus(ExecutionState.PROCESSING);
 					glassMessage.setInAgent(GatewayType.REST);
 					glassMessage.setProcessId(processId);
+					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 					glassMessage.setSenderId(loginId);
 					// Log time stamp
 					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
 					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "MFT: File Transfer Request Recevived");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file upload");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -237,7 +242,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
-					LOG.debug("TIME SPENT IN SERVICE LAYER -  RETRIVE PROCESSOR PROPS + POST TO SPECTRUM + BUILD WORK TICKET + POST TO QUEUE");
+					LOG.debug("TIME SPENT IN SERVICE LAYER - RETRIEVE PROCESSOR PROPS + POST TO SPECTRUM + BUILD WORK TICKET + POST TO QUEUE");
 					MailBoxUtil.calculateElapsedTime(startTime, endTime);
 					String responseBody = MailBoxUtil.marshalToJSON(dropboxContentTransferDTO);
 
@@ -251,30 +256,29 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
-					LOG.debug("TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}", workTicket.getFileName(), endTime
+					LOG.info(MailBoxUtil.constructMessage(null, null, "TOTAL TIME TAKEN TO TRANSFER FILE {} IS {}"), workTicket.getFileName(), endTime
 							- actualStartTime);
+					LOG.info(MailBoxUtil.constructMessage(null, null, "file transfer for the transfer profile {} - End"), transferProfileId);
 					MailBoxUtil.calculateElapsedTime(actualStartTime, endTime);
 					LOG.debug("Exit from uploadContentAsyncToSpectrum service.");
 
-					// glassMessage.logProcessingStatus(StatusType.SUCCESS, "MFT: File queued for Transfer");
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					return builder.build();
 				} catch (MailBoxServicesException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file upload");
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
 					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "MFT: File Transfer Failed");
+					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file upload");
 					glassMessage.setStatus(ExecutionState.FAILED);
 					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
+				} finally {
+					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				}
 			}
 		};

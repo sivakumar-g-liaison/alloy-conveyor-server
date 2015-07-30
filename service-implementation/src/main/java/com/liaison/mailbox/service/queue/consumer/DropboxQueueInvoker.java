@@ -16,8 +16,10 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
 
 import com.liaison.mailbox.service.dropbox.DropboxService;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
 *
@@ -45,8 +47,8 @@ public class DropboxQueueInvoker implements Runnable {
 
 		try {
 			getService().invokeDropboxQueue(request);
-		} catch (JAXBException | IOException e) {
-			logger.error("Stage file failed", e);
+		} catch (JAXBException | IOException |JSONException e) {
+			logger.error(MailBoxUtil.constructMessage(null, null, "Stage file failed"), e);
 		}
 
 

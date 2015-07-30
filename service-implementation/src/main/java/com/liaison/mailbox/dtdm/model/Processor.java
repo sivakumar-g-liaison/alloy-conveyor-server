@@ -11,7 +11,9 @@
 package com.liaison.mailbox.dtdm.model;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,6 +33,7 @@ import javax.persistence.Transient;
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * The persistent class for the PROCESSORS database table.
@@ -327,6 +330,23 @@ public class Processor implements Identifiable {
 		return null;
 
 	}
+	
+	@Transient
+	public Map<String,String> getTTLUnitAndTTLNumber()
+	{
+		Map<String,String> map = new HashMap<String,String>();
+		List<MailBoxProperty> properties = getMailbox().getMailboxProperties();
+		for (MailBoxProperty mbp : properties) {
+			if (mbp.getMbxPropName().equals(MailBoxConstants.TTL) && !MailBoxUtil.isEmpty(mbp.getMbxPropValue())) {
+				map.put(MailBoxConstants.TTL_NUMBER, mbp.getMbxPropValue());
+			}
+			if (mbp.getMbxPropName().equals(MailBoxConstants.TTL_UNIT) && !MailBoxUtil.isEmpty(mbp.getMbxPropValue())) {
+				map.put(MailBoxConstants.CUSTOM_TTL_UNIT, mbp.getMbxPropValue());
+			}
+		}
+		return map;
+	}
+
 
 	@Override
 	public int hashCode() {

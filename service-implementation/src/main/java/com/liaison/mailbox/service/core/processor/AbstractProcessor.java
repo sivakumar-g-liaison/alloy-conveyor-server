@@ -34,12 +34,14 @@ import java.util.Properties;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import com.google.gson.JsonParseException;
 import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
@@ -49,19 +51,29 @@ import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.enums.CredentialType;
+import com.liaison.mailbox.enums.EntityStatus;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.FolderDTO;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * @author OFS
@@ -70,8 +82,16 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	private static final Logger LOGGER = LogManager.getLogger(AbstractProcessor.class);
+	protected static final String FILE_PERMISSION = "rw-rw----";
+	protected static final String FOLDER_PERMISSION = "rwxrwx---";
+
+	protected static final String seperator = ": ";
 
 	protected Processor configurationInstance;
+	protected int totalNumberOfProcessedFiles;
+	protected StringBuffer logPrefix;
+	protected TriggerProcessorRequestDTO reqDTO;
+
 	public Properties mailBoxProperties;
 	public ProcessorPropertyUITemplateDTO processorPropertiesTemplate;
 	public StaticProcessorPropertiesDTO staticProcessorProperties;
@@ -87,7 +107,56 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		return configurationInstance;
 	}
 
-	/**
+	public int getTotalNumberOfProcessedFiles() {
+		return totalNumberOfProcessedFiles;
+	}
+
+	public void setTotalNumberOfProcessedFiles(int totalNumberOfProcessedFiles) {
+		this.totalNumberOfProcessedFiles = totalNumberOfProcessedFiles;
+	}
+
+    public void setReqDTO(TriggerProcessorRequestDTO reqDTO) {
+        this.reqDTO = reqDTO;
+    }
+
+    public TriggerProcessorRequestDTO getReqDTO() {
+        return this.reqDTO;
+    }
+
+    /**
+     * Method to construct log messages for easy visibility
+     *
+     * @param messages append to prefix, please make sure the order of the inputs
+     * @return constructed string
+     */
+    public String constructMessage(String... messages) {
+
+        if (null == logPrefix) {
+
+            logPrefix = new StringBuffer()
+            .append("CronJob")
+            .append(seperator)
+            .append((reqDTO != null) ? reqDTO.getProfileName() : "NONE")
+            .append(seperator)
+            .append(configurationInstance.getProcessorType().name())
+            .append(seperator)
+            .append(configurationInstance.getProcsrName())
+            .append(seperator)
+            .append(configurationInstance.getMailbox().getMbxName())
+            .append(seperator)
+            .append(configurationInstance.getMailbox().getPguid())
+            .append(seperator);
+        }
+
+        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        for (String str : messages) {
+            msgBuf.append(str);
+        }
+
+        return msgBuf.toString();
+    }
+
+    /**
 	 * Construct DTO from Entity.
 	 *
 	 * @return the remoteProcessorProperties
@@ -304,7 +373,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
 				} else if (FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
 					return replaceTokensInFolderPath(folder.getFldrUri());
-				}
+				} else if (configurationInstance.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)
+				        && FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
+                    return replaceTokensInFolderPath(folder.getFldrUri());
+                }
 			}
 		}
 		return null;
@@ -459,10 +531,10 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 						if (!MailBoxConstants.META_FILE_NAME.equals(file.getName())) {
 							files.add(file);
 						}
-					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())) {
+					} else if (file.isDirectory() && !MailBoxConstants.PROCESSED_FOLDER.equals(file.getName())
+							&& !MailBoxConstants.ERROR_FOLDER.equals(file.getName())) {
 						// recursively get all files from sub directory.
 						fetchFiles(file.getAbsolutePath(), files);
-
 					}
 				}
 			}
@@ -503,7 +575,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		Path targetDirectory = file.toPath().getParent().resolve(targetFolder);
 		if (!Files.exists(targetDirectory)) {
 			LOGGER.info("Creating target(processed/error) folder");
-			Files.createDirectories(targetDirectory);
+			createFoldersAndAssingProperPermissions(targetDirectory);
 		}
 		Path target = targetDirectory.resolve(file.getName());
 		// moving to processed/error folder
@@ -562,6 +634,58 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 	}
 
 	/**
+	 * Method deletes or archives the files based on the configuration
+	 *
+	 * @param deleteFiles
+	 * @param processedFileLocation
+	 * @param item
+	 * @param curFileName
+	 * @throws IOException
+	 */
+	protected void deleteOrArchiveTheFiles(boolean deleteFiles, String processedFileLocation, File item) throws IOException {
+
+        // Delete the local files after successful upload if user opt for it
+        if (deleteFiles) {
+            item.delete();
+            LOGGER.info(constructMessage("File {} deleted successfully in the local payload location"), item.getName());
+        } else {
+            // File is not opted to be deleted. Hence moved to processed folder
+            processedFileLocation = replaceTokensInFolderPath(processedFileLocation);
+            if (MailBoxUtil.isEmpty(processedFileLocation)) {
+                LOGGER.info(constructMessage("Archive the file to the default processed file location - start"));
+                archiveFile(item.getAbsolutePath(), false);
+                LOGGER.info(constructMessage("Archive the file to the default processed file location - end"));
+            } else {
+                LOGGER.info(constructMessage("Archive the file to the processed file location {} - start"), processedFileLocation);
+                archiveFile(item, processedFileLocation);
+                LOGGER.info(constructMessage("Archive the file to the processed file location {} - end"), processedFileLocation);
+            }
+        }
+    }
+
+	/**
+	 * Method archives the files based on the configuration
+	 *
+	 * @param errorFileLocation
+	 * @param item
+	 * @throws IOException
+	 */
+	protected void archiveFiles(String errorFileLocation, File item) throws IOException {
+
+        // File Uploading failed so move the file to error folder
+        errorFileLocation = replaceTokensInFolderPath(errorFileLocation);
+        if (MailBoxUtil.isEmpty(errorFileLocation)) {
+            LOGGER.info(constructMessage("Archive the file to the default error file location - start"));
+            archiveFile(item.getAbsolutePath(), true);
+            LOGGER.info(constructMessage("Archive the file to the default error file location {} - end"));
+        } else {
+            LOGGER.info(constructMessage("Archive the file to the error file location {} - start"), errorFileLocation);
+            archiveFile(item, errorFileLocation);
+            LOGGER.info(constructMessage("Archive the file to the error file location {} - end"), errorFileLocation);
+        }
+    }
+
+	/**
 	 * Method is used to process the folder path given by user and replace the
 	 * mount location with proper value form properties file.
 	 *
@@ -611,8 +735,15 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			toEmailAddrList = configuredEmailAddress;
 		}
 
+		// construct the email helper dto which contains all details
+		EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
+		emailInfoDTO.setEmailBody(emailBody);
+		emailInfoDTO.setSubject(subject);
+		emailInfoDTO.setType(type);
+		emailInfoDTO.setToEmailAddrList(toEmailAddrList);
+
 		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
+		notifier.sendEmail(emailInfoDTO);
 	}
 
 	/**
@@ -731,35 +862,148 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 			throw new MailBoxConfigurationServicesException(Messages.HOME_FOLDER_DOESNT_EXIST_ALREADY,filePathToCreate.subpath(0, 3).toString(), Response.Status.BAD_REQUEST);
 		}
 
-
-		Files.createDirectories(filePathToCreate);
+		createFoldersAndAssingProperPermissions(filePathToCreate);
+		/*Files.createDirectories(filePathToCreate);
 		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
 		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
 		String group = getGroupFor(filePathToCreate.getName(1).toString());
 		LOGGER.debug("group  name - {}", group);
 		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+
 		//skip when reaching inbox/outbox
-		while(!(filePathToCreate.getFileName().toString().equals("inbox") || filePathToCreate.getFileName().toString().equals("outbox"))){
+		while(!(filePathToCreate.getFileName().toString().equals("inbox")
+		        || filePathToCreate.getFileName().toString().equals("outbox"))){
 
 			LOGGER.debug("setting the group of  {} to {}",filePathToCreate, group);
 			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
-			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString("rwxrwx---"));
+			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
 			filePathToCreate = filePathToCreate.getParent();
 		 }
 
-		LOGGER.debug("Done setting group");
-
+		LOGGER.debug("Done setting group");*/
 	}
 
 	private String getGroupFor(String protocol) {
 		return MailBoxUtil.getEnvironmentProperties().getString(protocol+".group.name");
  	}
 
+	/**
+	 * Returns false if file is excluded. Otherwise returns true. Include is higher priority then exclude.
+	 * @param includeList - List of extensions to be included
+	 * @param currentFileName - name of the file to be uploaded
+	 * @param excludedList - List of extensions to be excluded
+	 * @return boolean - uploading or downloading or directory sweeping process takes place only if it is true.
+	 */
+    public boolean checkFileIncludeorExclude(String includedFiles, String currentFileName, String excludedFiles) {
+
+        List<String> includeList = (!MailBoxUtil.isEmpty(includedFiles)) ? Arrays.asList(includedFiles.split(",")) : null;
+        List<String> excludedList = (!MailBoxUtil.isEmpty(excludedFiles)) ? Arrays.asList(excludedFiles.split(",")) : null;
+
+		//Add period to fileExtension since include/exclude list contains extension with period
+		String fileExtension = "." + FilenameUtils.getExtension(currentFileName);
+		//check if file is in include list
+		if(null != includeList && !includeList.isEmpty()) {
+			boolean fileIncluded = (includeList.contains(fileExtension))? true : false;
+			return fileIncluded;
+		}
+
+		//check if file is not in excluded list
+		if(null != excludedList && !excludedList.isEmpty() && excludedList.contains(fileExtension)) {
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public void updateState() {
 		// TODO Auto-generated method stub
 
 	}
+
+	/**
+	 * Method to create the given path and assign proper group and permissions to the created folders
+	 *
+	 * @param filePathToCreate - file Path which is to be created
+	 * @throws IOException
+	 */
+	protected void createFoldersAndAssingProperPermissions(Path filePathToCreate)
+			throws IOException {
+
+		FileSystem fileSystem = FileSystems.getDefault();
+		Files.createDirectories(filePathToCreate);
+		LOGGER.debug("Fodlers {} created.Starting with Group change.", filePathToCreate);
+		UserPrincipalLookupService lookupService = fileSystem.getUserPrincipalLookupService();
+		String group = getGroupFor(filePathToCreate.getName(1).toString());
+		LOGGER.debug("group  name - {}", group);
+		GroupPrincipal fileGroup = lookupService.lookupPrincipalByGroupName(group);
+
+		// skip when reaching inbox/outbox
+		while (!(filePathToCreate.getFileName().toString().equals("inbox") ||
+				filePathToCreate.getFileName().toString().equals("outbox"))) {
+
+			LOGGER.debug("setting the group of  {} to {}", filePathToCreate, group);
+			Files.getFileAttributeView(filePathToCreate, PosixFileAttributeView.class, LinkOption.NOFOLLOW_LINKS).setGroup(fileGroup);
+			Files.setPosixFilePermissions(filePathToCreate, PosixFilePermissions.fromString(FOLDER_PERMISSION));
+
+			// if it is PROCESSED/ERROR Folder then skip assigning permissions to parent folders.
+			if ((filePathToCreate.getFileName().toString().equals(MailBoxConstants.PROCESSED_FOLDER) ||
+					filePathToCreate.getFileName().toString().equals(MailBoxConstants.ERROR_FOLDER))) {
+
+				LOGGER.debug("setting file permissions of PROCESSED/ERROR Folder is done. Skipping permission setting for parent folders as it is not needed.");
+				break;
+			}
+			filePathToCreate = filePathToCreate.getParent();
+		}
+
+		LOGGER.debug("Done setting group");
+	}
+
+	 /**
+     * Logs TVAPI status and event message in LENS
+     *
+     * @param message Message String to be logged in LENS event log
+     * @param file java.io.File
+     * @param status Status of the LENS logging
+     */
+    protected void logGlassMessage(String message, File file, ExecutionState status) {
+
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        StagedFile stagedFile = stagedFileDAO.findStagedFilesOfUploadersBasedOnMeta(configurationInstance.getPguid(), file.getName());
+
+        if (null != stagedFile) {
+
+            TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+            GlassMessage glassMessage = new GlassMessage();
+            glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setCategory(configurationInstance.getProcessorType());
+            glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+
+            glassMessage.setStatus(status);
+            glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
+            glassMessage.setOutSize(file.length());
+            glassMessage.setOutboundFileName(file.getName());
+
+            // Log running status
+            if (ExecutionState.COMPLETED.equals(status)) {
+                glassMessage.logProcessingStatus(StatusType.SUCCESS, message);
+                //Fourth corner timestamp
+                glassMessage.logFourthCornerTimestamp();
+            } else {
+                glassMessage.logProcessingStatus(StatusType.ERROR, message);
+            }
+            //TVAPI
+            transactionVisibilityClient.logToGlass(glassMessage);
+
+            // Inactivate the stagedFile
+            stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+            stagedFileDAO.merge(stagedFile);
+        }
+    }
+
+    @Override
+    public void logToLens(String msg, File file, ExecutionState status) {
+        throw new RuntimeException("Not Implemented");
+    }
 
 	/**
 	 * Logging methods for javascript

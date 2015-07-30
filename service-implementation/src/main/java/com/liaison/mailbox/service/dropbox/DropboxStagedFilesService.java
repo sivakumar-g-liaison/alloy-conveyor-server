@@ -142,6 +142,7 @@ public class DropboxStagedFilesService {
 		}
 		glassMessage.setMeta(stagedFile.getFileMetaData());
 		glassMessage.setStagedFileId(fileId);
+		glassMessage.setOutSize(Long.parseLong(stagedFile.getFileSize()));
 
 		MailBoxConfigurationDAO mailboxDao = new MailBoxConfigurationDAOBase();
 		MailBox mailbox = mailboxDao.find(MailBox.class, stagedFile.getMailboxId());
@@ -172,7 +173,7 @@ public class DropboxStagedFilesService {
 
 			StagedFileDTO stagedFileDTO = request.getStagedFile();
 			if (stagedFileDTO == null) {
-				LOG.error("Invalid request json.");
+				LOG.error(MailBoxUtil.constructMessage(null, null, "Invalid request json."));
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 
@@ -195,20 +196,19 @@ public class DropboxStagedFilesService {
 				glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 
 			}
-
-
+			LOG.info(MailBoxUtil.constructMessage(null, null, "File {} staged successfully for mailbox {} with stagedFileId {}"),
+					stagedFileDTO.getName(), stagedFileDTO.getMailboxGuid(), stagedFile.getPrimaryKey());
 			LOG.debug("Exit from add staged file.");
 			return serviceResponse;
 
 		} catch (MailBoxConfigurationServicesException e) {
 
-			LOG.error(Messages.CREATE_OPERATION_FAILED.name(), e);
+			LOG.error(MailBoxUtil.constructMessage(null, null, Messages.CREATE_OPERATION_FAILED.name()), e);
 
 			if (null != glassMessage) {
 
 				// glass log in case of failure during file staging
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient(
-						MailBoxUtil.getGUID());
+				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
