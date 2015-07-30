@@ -416,8 +416,8 @@ public class StorageUtilities {
 			LOGGER.info("Retrieving payload headers from spectrum");
 			return FS2.getHeaders(spectrumURI);
 		} catch (URISyntaxException | FS2Exception e) {
-			LOGGER.error("Failed to retrieve payload headers from spectrum due to error", e);
-			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.BAD_REQUEST);
+			LOGGER.error(Messages.PAYLOAD_HEADERS_READ_ERROR, e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_HEADERS_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
 
