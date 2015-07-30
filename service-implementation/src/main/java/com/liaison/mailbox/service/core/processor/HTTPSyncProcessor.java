@@ -113,11 +113,10 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			// If payload URI avail, reads payload from spectrum. Mostly it
 			// would be an error message payload
 			if (!MailBoxUtil.isEmpty(result.getPayloadURI())) {
-                try (InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI())) {
-    				if (responseInputStream != null) {
-    					builder.entity(responseInputStream);
-    				}
-                }
+				InputStream responseInputStream = StorageUtilities.retrievePayload(result.getPayloadURI());
+				if (responseInputStream != null) {
+					builder.entity(responseInputStream);
+				}
 			} else {
 				if (!MailBoxUtil.isEmpty(result.getErrorMessage())) {
 					builder.entity(result.getErrorMessage());
