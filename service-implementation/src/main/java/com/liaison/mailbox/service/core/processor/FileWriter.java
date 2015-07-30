@@ -50,7 +50,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.COMPLETED);
-            glassMessage.logProcessingStatus(StatusType.RUNNING, "Started to write the payload in local location");
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "File Staging is started");
 
             LOG.info(constructMessage("Start Run"));
             LOG.info(constructMessage("JSON received from SB {}"), new JSONObject(JAXBUtility.marshalToJSON(workTicket)).toString(2));
