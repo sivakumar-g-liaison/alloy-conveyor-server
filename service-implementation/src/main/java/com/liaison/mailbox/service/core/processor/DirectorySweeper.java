@@ -412,11 +412,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 			Map <String, String> properties = new HashMap <String, String>();
 			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
-            if (!ttlMap.isEmpty()) {
-                Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-                workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
-                properties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
-            }
+			if(!ttlMap.isEmpty())
+			{
+			Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+			}
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
 			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperStaticProperties.isLensVisibility()));
@@ -719,7 +719,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	/**
 	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
-	 * 
+	 *
      * @param inputLocation folderPath for logging
      * @param wrkTicket workticket for logging
      */
@@ -733,8 +733,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         glassMessage.setPipelineId(wrkTicket.getPipelineId());
 
         //Log running status
-        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
         glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
         glassMessage.setStatus(ExecutionState.PROCESSING);
         glassMessage.setInAgent(inputLocation);
         glassMessage.setInboundFileName(wrkTicket.getFileName());

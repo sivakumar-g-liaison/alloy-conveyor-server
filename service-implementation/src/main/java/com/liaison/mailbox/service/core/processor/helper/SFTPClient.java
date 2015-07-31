@@ -47,7 +47,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
  */
 public class SFTPClient {
 
-	private static final Logger LOGGER = LogManager.getLogger(HTTPClient.class);
+	private static final Logger LOGGER = LogManager.getLogger(SFTPClient.class);
 
 	/**
 	 * @param processor
