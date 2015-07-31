@@ -99,6 +99,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+			sftpRequest.setLogPrefix(constructMessage());
 			sftpRequest.connect();
 
 			LOGGER.info(constructMessage("Start run"));

@@ -467,7 +467,6 @@ public class MailBoxUtil {
         if (((system - lastmo)/1000) < timelimit) {
             return true;
         }
-
         return false;
     }
 

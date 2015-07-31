@@ -218,8 +218,20 @@
             "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
             "minLength": "",
             "maxLength": ""
-        }
-		}
+        	}
+		},
+		  {
+	        "name": "debugTranscript",
+	        "displayName": "Debug Transcript",
+	        "type": "select",
+	        "value": "false",
+		    "mandatory": false,
+		    "dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"false",
+			"validationRules": null,
+	        "options":["false","true"]
+	      }
       ],
       "folderProperties":[
 		   {

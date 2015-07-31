@@ -64,6 +64,7 @@ public class FTPSClient {
 			int connectionTimeout = 0;
 			int socketTimeout = 0;
 			int retryAttempts = 0;
+			boolean debugTranscript = false;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)processor.getProperties();
@@ -71,16 +72,21 @@ public class FTPSClient {
 				connectionTimeout = ftpUploaderStaticProperties.getConnectionTimeout();
 				socketTimeout = ftpUploaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpUploaderStaticProperties.getRetryAttempts();
+				debugTranscript =  ftpUploaderStaticProperties.isDebugTranscript();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)processor.getProperties();
 				url = ftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = ftpDownloaderStaticProperties.getConnectionTimeout();
 				socketTimeout = ftpDownloaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpDownloaderStaticProperties.getRetryAttempts();
+				debugTranscript = ftpDownloaderStaticProperties.isDebugTranscript();
 			}
 			// retrieve required properties
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
 			ftpsRequest.setURI(url);
+
+			// set debug transcript property
+			ftpsRequest.setCanLogTranscript(debugTranscript);
 			ftpsRequest.setDiagnosticLogger(LOGGER);
 			ftpsRequest.setCommandLogger(LOGGER);
 			ftpsRequest.setConnectionTimeout(connectionTimeout);

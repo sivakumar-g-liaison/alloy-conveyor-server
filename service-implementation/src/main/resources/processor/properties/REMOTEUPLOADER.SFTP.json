@@ -181,20 +181,32 @@
             "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
             "minLength": "",
             "maxLength": ""
-        }
+        	}
 		},
-      {
-	     "name": "fileTransferStatusIndicator",
-	     "displayName": "File Transfer Status Indicator",
-	     "type": "textarea",
-		 "value": "",
-		 "readOnly": false,
-		 "mandatory": false,
-		 "dynamic": false,
-         "valueProvided":false,
-         "defaultValue":"prg",
-		 "validationRules": null
-	  }
+        {
+	        "name": "fileTransferStatusIndicator",
+	        "displayName": "File Transfer Status Indicator",
+	        "type": "textarea",
+		    "value": "",
+		    "readOnly": false,
+		    "mandatory": false,
+		    "dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"prg",
+		    "validationRules": null
+	      },
+	  	  {
+	     	"name": "debugTranscript",
+	     	"displayName": "Debug Transcript",
+	        "type": "select",
+	        "value": "false",
+		    "mandatory": false,
+		    "dynamic": false,
+            "valueProvided":false,
+            "defaultValue":"false",
+	        "validationRules": null,
+	        "options":["false","true"]
+	  	  }
     ],
       "folderProperties":[
 		  {

@@ -61,22 +61,28 @@ public class SFTPClient {
 			String url = null;
 			int connectionTimeout = 0;
 			int retryAttempts = 0;
+			boolean debugTranscript = false;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				sftpUploaderStaticProperties = (SFTPUploaderPropertiesDTO) processor.getProperties();
 				url = sftpUploaderStaticProperties.getUrl();
 				connectionTimeout = sftpUploaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpUploaderStaticProperties.getRetryAttempts();
+				debugTranscript = sftpUploaderStaticProperties.isDebugTranscript();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				sftpDownloaderStaticProperties = (SFTPDownloaderPropertiesDTO) processor.getProperties();
 				url = sftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = sftpDownloaderStaticProperties.getConnectionTimeout();
 				retryAttempts = sftpDownloaderStaticProperties.getRetryAttempts();
+				debugTranscript = sftpDownloaderStaticProperties.isDebugTranscript();
 			}
 
 			// retrieve required properties
 			G2SFTPClient sftpRequest = new G2SFTPClient();
 			sftpRequest.setURI(url);
+
+			// set debug transcript property
+			sftpRequest.setCanLogTranscript(debugTranscript);
 			sftpRequest.setDiagnosticLogger(LOGGER);
 			sftpRequest.setCommandLogger(LOGGER);
 			sftpRequest.setTimeout(connectionTimeout);
