@@ -426,7 +426,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
-				payloadToPersist.close();
 			}
 
             if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
@@ -437,7 +436,6 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 move(oldPath, newPath);
             }
 
-			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 
 		}
