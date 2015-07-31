@@ -97,6 +97,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 		try {
 			G2SFTPClient sftpRequest = (G2SFTPClient) getClient();
+			sftpRequest.setLogPrefix(constructMessage());
 			sftpRequest.connect();
 			LOGGER.info(constructMessage("Start run"));
 			long startTime = System.currentTimeMillis();

@@ -126,7 +126,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		try {
 
 			G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
-
+			ftpsRequest.setLogPrefix(constructMessage());
 			//ftpsRequest.enableSessionReuse(true);
 			ftpsRequest.connect();
 			ftpsRequest.login();
