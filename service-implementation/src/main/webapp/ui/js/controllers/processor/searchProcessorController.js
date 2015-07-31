@@ -58,7 +58,7 @@ var rest = myApp.controller(
 			}
 			
 			$rootScope.gridLoaded = false;
-                $scope.restService.get($scope.base_url + '/processorsearch',
+                $scope.restService.get($scope.base_url + '/searchprocessor',
                     function (data) {
                         $scope.getPagedDataAsync(data,
                             $scope.pagingOptions.pageSize,
@@ -82,11 +82,12 @@ var rest = myApp.controller(
 			
 	// Get Mailbox names for Typeahead display		
 	$scope.getMailboxNames = function(choice) {
-        var restUrl = $scope.base_url + '/processorsearch/getMailBoxNames';
+        var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
+        var type = "mailbox";
 		var mailBoxName = choice;
 		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
         if ((typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length >= $scope.searchMinCharacterCount)  || mailBoxName === null || mailBoxName === "" || (typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length === 0)) {
-            restUrl += '?mbxName=' + mailBoxName;
+            restUrl += '?name=' + mailBoxName + '&type=' + type;
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
             return data.mailbox;
@@ -96,11 +97,12 @@ var rest = myApp.controller(
 	
 	// Get Profile names for Typeahead display		
 	$scope.getProfileNames = function(choice) {
-        var restUrl = $scope.base_url + '/processorsearch/getProfileNames';
-		var profileName = choice;
+        var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
+        var type = "profile";
+        var profileName = choice;
 		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
         if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $rootScope.typeaheadMinLength)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
-            restUrl += '?prfName=' + profileName;
+            restUrl += '?name=' + profileName + '&type=' + type;
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
             return data.profiles;
