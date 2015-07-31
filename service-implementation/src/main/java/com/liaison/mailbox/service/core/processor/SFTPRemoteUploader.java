@@ -365,8 +365,6 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public void downloadDirectory(Object client, String localTargetLocation, String remotePayloadLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

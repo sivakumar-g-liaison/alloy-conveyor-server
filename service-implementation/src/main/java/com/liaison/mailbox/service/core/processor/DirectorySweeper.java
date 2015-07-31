@@ -680,26 +680,19 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	@Override
 	public Object getClient() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

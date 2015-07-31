@@ -162,28 +162,19 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	
 	@Override
     public Object getClient() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public void downloadDirectory(Object client, String remotePayloadLocation,
-            String localTargetLocation) {
-        // TODO Auto-generated method stub
-        
+    public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
     }
 
     @Override
-    public void uploadDirectory(Object client, String localPayloadLocation,
-            String remoteTargetLocation) {
-        // TODO Auto-generated method stub
-        
+    public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
     }
 
     @Override
     public void cleanup() {
-        // TODO Auto-generated method stub
-        
     }
 
 }

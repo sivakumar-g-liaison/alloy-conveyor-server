@@ -66,7 +66,7 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 
 
 	public void createEvent(ExecutionEvents eventType,String executionId) {
-		//TODO use this methods to create INTERRUPT SIGNAL REVICED EVENT AND INTERRUPTED EVENT FOR THE EXECUTION ID
+		//use this methods to create INTERRUPT SIGNAL REVICED EVENT AND INTERRUPTED EVENT FOR THE EXECUTION ID
 		FSMEventDAOBase configDao = new FSMEventDAOBase();
 		configDao.createEvent(eventType, executionId);
 	}
@@ -112,8 +112,6 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 
 		if (transition != null) {
 			for (Entry<String, ProcessorStateDTO> entry : transition.getUpdate().entrySet()) {
-				/** TODO (RKOH): separate function for setState? */
-
 				fsmDao.setState(entry.getKey(), entry.getValue());
 			}
 
@@ -234,8 +232,6 @@ public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 
 	@Override
 	public void setState(String arg0, ProcessorStateDTO arg1) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

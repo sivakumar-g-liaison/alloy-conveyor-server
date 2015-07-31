@@ -112,14 +112,13 @@ public interface ProcessorJavascriptI {
 	public Properties getCustomProperties();
 
 	/**
-	 * TODO
+	 * TODO GMB-537
 	 */
 	public void updateState();
 
 	/**
 	 * Returns array of credentials of the processor
 	 *
-	 * TODO How to returns the keys??
 	 * @return
 	 */
 	public CredentialDTO[] getCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException;
