@@ -720,24 +720,29 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	public void genearteQueryBySearchFilters(GenericSearchFilterDTO searchDTO, StringBuilder query) {
 		
 		List<String> predicateList = new ArrayList<String>();
+		boolean isFolderAvailable = false;
 		
-		if(!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {
-			query.append(" inner join processor.mailbox mbx ");
-			predicateList.add(" mbx.mbxName like :" + MBX_NAME);
+		if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {			
+			predicateList.add(" processor.mailbox.mbxName like :" + MBX_NAME);
 		}
-		if(!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
-			predicateList.add(" processor.folders.fldrUri like :" + FOLDER_URI);
+		if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
+			query.append(" inner join processor.folders folder ");
+			predicateList.add(" folder.fldrUri like :" + FOLDER_URI);
+			isFolderAvailable = true;
 		}
-		if(!MailBoxUtil.isEmpty(searchDTO.getPipelineId())) {
+		if (!MailBoxUtil.isEmpty(searchDTO.getPipelineId())) {
 			predicateList.add(" processor.procsrProperties like :" + PIPELINE_ID);
 		}
-		if(!MailBoxUtil.isEmpty(searchDTO.getProfileName())) {
-			predicateList.add("LOWER(processor.scheduleProfileProcessors.scheduleProfilesRef.schProfName) like :" + PROF_NAME);
+		if (!MailBoxUtil.isEmpty(searchDTO.getProfileName())) {
+            String profileAppender = isFolderAvailable ? " inner join folder.processor folderProcessor inner join folderProcessor.scheduleProfileProcessors schd_prof_processor"
+                    : " inner join processor.scheduleProfileProcessors schd_prof_processor";
+            query.append(profileAppender).append(" inner join schd_prof_processor.scheduleProfilesRef profile");
+            predicateList.add("LOWER(profile.schProfName) like :" + PROF_NAME);
 		}
-		if(!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
+		if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
 			predicateList.add(" LOWER(processor.procsrProtocol) = :" + PROTOCOL);
 		}
-		if(!MailBoxUtil.isEmpty(searchDTO.getProcessorType())) {
+		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorType())) {
 			predicateList.add(" TYPE(processor) = :" + PROCESSOR_TYPE);
 		}
 

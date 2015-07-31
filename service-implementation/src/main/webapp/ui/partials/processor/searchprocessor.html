@@ -12,33 +12,38 @@
 					<input id="mbxname" type="text" ng-model="mailBoxName"
                                        placeholder="Mailbox Name"                                       
 									   typeahead="mbx.name for mbx in getMailboxNames($viewValue) | filter:$viewValue"
-									   ng-minLength=5 ng-maxLength=80
+									   ng-minLength="{{minimumLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
-                                       name="mbxname">
+                                       name="mbxname"
+									   style="width:285px">
 					<div ng-show="formSearchPrcsr.mbxname.$dirty && formSearchPrcsr.mbxname.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.mbxname.$error.pattern}" ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
 						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.minlength}" ng-show="formSearchPrcsr.mbxname.$error.minlength">
 						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Requires a minimum of {{minimumLength}} characters to enable search.</span>
 						<span id="mbx-search-nameInvalid-maxlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.maxlength}" ng-show="formSearchPrcsr.mbxname.$error.maxlength">
-						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
+						<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{typeaheadMaxLength}} characters.</span>
 					</div>
 				</div>
 				<div class="col-md-3">
 					<label for="name"> Pipeline ID </label>
 					<input id="pipeLine" type="text" ng-model="PrcsrPipelineId"                                                                                                                    
                                        class="form-control"
-                                       name="pipeline">	
+                                       name="pipeline"
+									   style="width:285px">	
 				</div>
 				<div class="col-md-3">
 					<label for="name"> Folder Path </label> 
 					<input id="folderpath" type="text" ng-model="folderPath" ng-pattern="folderPathPattern"                                       
                                        class="form-control"
-                                       name="folderpath">
+                                       name="folderpath"
+									   style="width:285px">
 					<div ng-show="formSearchPrcsr.folderpath.$dirty && formSearchPrcsr.folderpath.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.folderpath.$error.pattern}" ng-show="formSearchPrcsr.folderpath.$error.pattern">Invalid folder path.</span>
 					</div>
-				</div>				
-			</div>
+				</div>
+				<div class="col-md-3">
+				</div>
+			</div>			
 			<br />
 			<div class="row">
 				<div class="col-md-3">
@@ -48,7 +53,8 @@
                                        required typeahead="prof.name for prof in getProfileNames($viewValue) | filter:$viewValue"
 									   ng-minLength="{{typeaheadMinLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
-                                       name="profilename">
+                                       name="profilename"
+									   style="width:285px">
 					<div ng-show="formSearchPrcsr.profilename.$dirty && formSearchPrcsr.profilename.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.profilename.$error.pattern}" ng-show="formSearchPrcsr.profilename.$error.pattern">Invalid Profile Name.</span>
 						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.profilename.$error.minlength}" ng-show="formSearchPrcsr.profilename.$error.minlength">
@@ -59,24 +65,24 @@
 				</div>
 				<div class="col-md-3">
 					<label for="name"> Protocol </label>
-					<select id="protocol" ng-model="protocolName" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control">
+					<select id="protocol" ng-model="protocolName" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control" style="width:285px">
 					<option value="">-- select--</option>
 					</select>
 				</div>
 				<div class="col-md-3">
 					<label for="name"> Processor Type </label>
-					<select id="processortype" ng-model="processorType" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control">
+					<select id="processortype" ng-model="processorType" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control" style="width:285px">
                     <option value="">-- select--</option>
 					</select>
 				</div>
 				<div class="col-md-3">		
-					<label for="name">  </label>
-					<br />					
-					<button id="filterSearch" class="btn btn-primary" data-toggle="modal" ng-click="readAllProcessors()">
+					<label for="name">&nbsp;</label>
+					<br />				
+					<button id="filterSearch" class="btn btn-primary" data-toggle="modal" ng-click="readAllProcessors()" style="width:127px">
 						Search
 					</button>															
-					<label for="name">  </label>
-					<button id="filterReset" class="btn btn-primary" data-toggle="modal" ng-click="clearAllFilters(); readAllProcessors()">
+					<label for="name"> </label>
+					<button id="filterReset" class="btn btn-primary" data-toggle="modal" ng-click="clearAllFilters(); readAllProcessors()" style="width:127px">
 						Reset
 					</button>
 				</div>

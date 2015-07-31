@@ -153,7 +153,6 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	public Processor findProcessorByNameAndMbx(String mbxGuid, String ProcName); 
  	
  	/**
-<<<<<<< HEAD
 	 * Retrieves count of all processors  
 	 * @return count of processors
 	 */
@@ -176,6 +175,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @return list of profiles
 	 */
 	public List<ScheduleProfilesRef>getProfileNames(GenericSearchFilterDTO searchDTO);
+	
 	/**
 	 * Retrieves count of filtered processors  
 	 * @return count of filtered processors
@@ -187,5 +187,4 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	* @return  processor
  	*/
  	public Processor findActiveProcessorById(String id);
-
 }

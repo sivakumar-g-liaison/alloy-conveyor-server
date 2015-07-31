@@ -201,14 +201,18 @@ var rest = myApp.controller(
         }		
 			// Customized column in the grid.
         $scope.editableInPopup = '<div ng-switch on="row.getProperty(\'status\')">\n\
-        <div ng-switch-when="INACTIVE" style="cursor: default;"><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
+        <div ng-switch-when="INACTIVE" style="cursor: default;"><button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
         <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
         <button class="btn btn-default btn-xs" ng-disabled="true">\n\
         <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div>\n\
-        <div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)">\n\
+        <div ng-switch-default><button class="btn btn-default btn-xs" ng-click="edit(row)" tooltip = "Edit" tooltip-placement="left" tooltip-append-to-body="true">\n\
         <i class="glyphicon glyphicon glyphicon-wrench glyphicon-white"></i></button>\n\
-        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal">\n\
+        <button class="btn btn-default btn-xs" ng-click="openDelete(row)" data-toggle="modal" data-target="#myModal" tooltip = "Deactivate" tooltip-placement="right" tooltip-append-to-body="true">\n\
         <i class="glyphicon glyphicon-trash glyphicon-white"></i></button></div></div>';
+		
+		$scope.cellToolTip = {
+			overflow: 'visible'
+		};
 
             $scope.gridOptionsForGetProcessor = {
                 columnDefs: [{
@@ -218,24 +222,25 @@ var rest = myApp.controller(
                 },{
                     field: 'name',
                     displayName: 'Processor Name',
-                    width: "25%"
+                    width: "26%"
                 }, {
                     field: 'type',
                     displayName: 'Type',
-                    width: "15%"                    
+                    width: "16%"                    
                 }, {
                     field: 'protocol',
                     displayName: 'Protocol',
-                    width: "15%"                    
+                    width: "17%"                    
                 }, {
                     field: 'status',
                     displayName: 'Status',
-                    width: "10%"                    
+                    width: "8%"                    
                 }, {
                     displayName: 'Action',
                     sortable: false,
-                    width: "10%",
-					cellTemplate: $scope.editableInPopup
+                    width: "8%",
+					cellTemplate: $scope.editableInPopup,
+					cellClass: $scope.cellToolTip
                 }],
 				data: 'processorList',
                 enablePaging: true,
