@@ -916,8 +916,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	@Override
 	public void updateState() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

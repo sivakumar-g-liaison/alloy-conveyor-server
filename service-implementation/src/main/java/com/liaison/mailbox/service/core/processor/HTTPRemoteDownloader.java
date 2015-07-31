@@ -227,20 +227,14 @@ public class HTTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.rest;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +46,6 @@ import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.HTTPAsyncProcessor;
@@ -61,7 +61,11 @@ import com.netflix.servo.MonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
 import com.netflix.servo.monitor.CompositeMonitor;
+import com.netflix.servo.monitor.MonitorConfig;
 import com.netflix.servo.monitor.Monitors;
+import com.netflix.servo.monitor.StatsTimer;
+import com.netflix.servo.monitor.Stopwatch;
+import com.netflix.servo.stats.StatsConfig;
 
 /**
  * G2 HTTP Gateway.
@@ -84,6 +88,15 @@ public class HTTPListenerResource extends AuditedResource {
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
+
+	private Stopwatch stopwatch;
+    private static final StatsTimer statsTimer = new StatsTimer(
+            MonitorConfig.builder("HTTPListenerResource_statsTimer").build(),
+            new StatsConfig.Builder().build());
+
+    static {
+        DefaultMonitorRegistry.getInstance().register(statsTimer);
+    }
 
 	protected static final String HTTP_METHOD_POST = "POST";
 
@@ -313,7 +326,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
 
 					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP ASync Request success");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success");
 
 					// Log TVA status
 					transactionVisibilityClient.logToGlass(glassMessage);
@@ -366,14 +379,31 @@ public class HTTPListenerResource extends AuditedResource {
 
 	@Override
 	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub
 
+	    stopwatch = statsTimer.start();
+        int globalCount = globalServiceCallCounter.addAndGet(1);
+        logKPIMetric(globalCount, "Global_serviceCallCounter");
+        int serviceCount = serviceCallCounter.addAndGet(1);
+        logKPIMetric(serviceCount, "HTTPListenerResource_serviceCallCounter");
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub
 
+	    stopwatch.stop();
+        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
+        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
+        statsTimer.record(duration, TimeUnit.MILLISECONDS);
+
+        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
+                "Global_timer");
+        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "HTTPListenerResource_timer");
+        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "HTTPListenerResource_timer");
+
+        if (!success) {
+            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
+            logKPIMetric(failureCounter.addAndGet(1), "HTTPListenerResource_failureCounter");
+        }
 	}
 
 	/**

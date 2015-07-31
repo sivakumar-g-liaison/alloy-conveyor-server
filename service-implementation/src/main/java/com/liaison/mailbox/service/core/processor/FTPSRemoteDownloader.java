@@ -15,11 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -27,17 +22,10 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jettison.json.JSONException;
 
-import com.google.gson.JsonParseException;
 import com.jcraft.jsch.SftpException;
-import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
-import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
@@ -89,26 +77,6 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	/**
 	 * Java method to execute the SFTPrequest to download the file or folder
-	 *
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws SftpException
-	 * @throws URISyntaxException
-	 * @throws FS2Exception
-	 * @throws MailBoxServicesException
-	 * @throws SymmetricAlgorithmException
-	 * @throws com.liaison.commons.exception.LiaisonException
-	 * @throws JsonParseException
-	 * @throws JSONException
-	 * @throws KeyStoreException
-	 * @throws CertificateException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CMSException
-	 * @throws OperatorCreationException
-	 * @throws UnrecoverableKeyException
-	 * @throws BootstrapingFailedException
-	 *
 	 */
 	protected void run() {
 
@@ -148,20 +116,9 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
+			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, path);
 			ftpsRequest.changeDirectory(path);
 
-			// For testing purpose
-			LOGGER.debug("The payload location is {}", path);
-			LOGGER.debug("The current working directory is {}", ftpsRequest.currentWorkingDirectory());
-			List<String> files = ftpsRequest.listFiles();
-			for (String file : files) {
-				LOGGER.debug("The payload is {}", file);
-			}
-			if (files.isEmpty()) {
-				LOGGER.debug("The payload location({}) is empty", path);
-			}
-			// For testing purpose
-			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, path);
 			downloadDirectory(ftpsRequest, path, remotePath);
 			ftpsRequest.disconnect();
 
@@ -193,7 +150,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 	 *
 	 */
 	public void downloadDirectory(G2FTPSClient ftpClient, String currentDir, String localFileDir) throws IOException,
-			LiaisonException, URISyntaxException, MailBoxServicesException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
+			LiaisonException, URISyntaxException, MailBoxServicesException, NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException {
 
 		//variable to hold the status of file download request execution
 		int statusCode = 0;
@@ -309,14 +267,10 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargeLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

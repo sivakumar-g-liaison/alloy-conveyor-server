@@ -160,6 +160,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
+			LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 			boolean dirExists = ftpsRequest.getNative().changeWorkingDirectory(remotePath);
 			if (!dirExists) {
 				// create directory on the server
@@ -168,7 +169,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 			}
 			ftpsRequest.changeDirectory(remotePath);
 
-			LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 			uploadDirectory(ftpsRequest, path, remotePath, executionId, fsm);
 			ftpsRequest.disconnect();
 
@@ -410,8 +410,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
     	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -427,8 +425,6 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

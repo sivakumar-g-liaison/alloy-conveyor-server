@@ -391,9 +391,9 @@ public class StorageUtilities {
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
 		fs2Header.addHeader(MailBoxConstants.KEY_LENS_VISIBILITY, httpListenerProperties.get(MailBoxConstants.PROPERTY_LENS_VISIBILITY));
-		String ttlValue= httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS);
-		if (!MailBoxUtil.isEmpty(ttlValue) && -1 != Integer.parseInt(ttlValue))  {
-		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue);
+		if(workTicket.getTtlDays() != -1) {
+		Integer ttlValue = MailBoxUtil.convertTTLIntoSeconds(MailBoxConstants.TTL_UNIT_DAYS, workTicket.getTtlDays());
+		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue.toString());
 		}
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
@@ -416,8 +416,8 @@ public class StorageUtilities {
 			LOGGER.info("Retrieving payload headers from spectrum");
 			return FS2.getHeaders(spectrumURI);
 		} catch (URISyntaxException | FS2Exception e) {
-			LOGGER.error("Failed to retrieve payload headers from spectrum due to error", e);
-			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.BAD_REQUEST);
+			LOGGER.error(Messages.PAYLOAD_HEADERS_READ_ERROR, e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_HEADERS_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
 

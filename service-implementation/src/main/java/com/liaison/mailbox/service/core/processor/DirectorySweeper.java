@@ -409,12 +409,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
+
 			Map <String, String> properties = new HashMap <String, String>();
 			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
 			if(!ttlMap.isEmpty())
 			{
 			Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-			properties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
 			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
 			}
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
@@ -426,18 +426,16 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
-				payloadToPersist.close();
 			}
+
             if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
                 LOGGER.debug("Deleting file after sweep");
                 delete(oldPath);
             } else {
                 LOGGER.debug("Moving file after sweep");
                 move(oldPath, newPath);
-
             }
 
-			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 
 		}
@@ -682,26 +680,19 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	@Override
 	public Object getClient() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**
