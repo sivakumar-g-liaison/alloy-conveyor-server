@@ -412,11 +412,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 			Map <String, String> properties = new HashMap <String, String>();
 			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
-            if (!ttlMap.isEmpty()) {
-                Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
-                workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
-                properties.put(MailBoxConstants.TTL_IN_SECONDS, String.valueOf(MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
-            }
+			if(!ttlMap.isEmpty())
+			{
+			Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+			}
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
 			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperStaticProperties.isLensVisibility()));
@@ -426,6 +426,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
+				payloadToPersist.close();
 			}
 
             if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
@@ -436,6 +437,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
                 move(oldPath, newPath);
             }
 
+			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 
 		}
