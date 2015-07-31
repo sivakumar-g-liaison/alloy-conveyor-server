@@ -25,7 +25,6 @@ public class ProcessorManagementFailedException extends Exception {
 	 * 
 	 */
 	public ProcessorManagementFailedException() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -33,7 +32,6 @@ public class ProcessorManagementFailedException extends Exception {
 	 */
 	public ProcessorManagementFailedException(Messages message, String key) {
 		super(String.format(message.value(), key));
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -41,7 +39,6 @@ public class ProcessorManagementFailedException extends Exception {
 	 */
 	public ProcessorManagementFailedException(Messages message) {
 		super(message.value());
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

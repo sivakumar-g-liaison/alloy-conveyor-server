@@ -71,7 +71,6 @@ public class GlassMessage {
 	}
 
 	public GlassMessage() {
-		// TODO Auto-generated constructor stub
 	}
 
 	private ProcessorType category;

@@ -25,7 +25,6 @@ public class MailBoxProcessorFactory {
 	 *
 	 */
 	private MailBoxProcessorFactory() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

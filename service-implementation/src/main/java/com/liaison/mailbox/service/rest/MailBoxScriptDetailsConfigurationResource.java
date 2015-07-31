@@ -141,7 +141,7 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 		int globalCount = globalServiceCallCounter.addAndGet(1);
 		logKPIMetric(globalCount, "Global_serviceCallCounter");
 		int serviceCount = serviceCallCounter.addAndGet(1);
-		logKPIMetric(serviceCount, "IdpProfileResource_serviceCallCounter");
+		logKPIMetric(serviceCount, "MailBoxScriptDetailsConfigurationResource_serviceCallCounter");
 	}
 
 	@Override
@@ -154,12 +154,12 @@ public class MailBoxScriptDetailsConfigurationResource extends AuditedResource {
 
 		logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
 				"Global_timer");
-		logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "IdpProfileResource_timer");
-		logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "IdpProfileResource_timer");
+		logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "MailBoxScriptDetailsConfigurationResource_timer");
+		logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "MailBoxScriptDetailsConfigurationResource_timer");
 
 		if (!success) {
 			logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
-			logKPIMetric(failureCounter.addAndGet(1), "IdpProfileResource_failureCounter");
+			logKPIMetric(failureCounter.addAndGet(1), "MailBoxScriptDetailsConfigurationResource_failureCounter");
 		}
 	}
 }
