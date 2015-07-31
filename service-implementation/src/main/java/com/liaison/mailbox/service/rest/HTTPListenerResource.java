@@ -313,7 +313,7 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
 
 					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP ASync Request success");
+					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success");
 
 					// Log TVA status
 					transactionVisibilityClient.logToGlass(glassMessage);
