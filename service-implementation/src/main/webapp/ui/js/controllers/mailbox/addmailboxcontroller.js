@@ -57,6 +57,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 
         var block = $rootScope.block;
         var fromAddProcsr = false;
+		var processorSearchFlag = false;
 
         $scope.status = $scope.enumstats[0];
         
@@ -223,14 +224,13 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 //$log.info($filter('json')(editReq));
 
                 $scope.restService.put($scope.base_url + "/" + $scope.mailBoxId + "?sid=" +$rootScope.serviceInstanceId, $filter('json')(editReq),
-                    function (data, status) {
-                        
+                    function (data, status) {                        
                 	    block.unblockUI();
                         if (status === 200 || status === 400) {
                              $scope.isMailBoxSaved = true;
                             if (fromAddProcsr) {
                                 $location.$$search = {};
-                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+                                $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
                             } else if (data.reviseMailBoxResponse.response.status === 'success') {
                                 showSaveMessage(data.reviseMailBoxResponse.response.message, 'success');
                             } else {
@@ -262,7 +262,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 								$scope.mailboxGuid = $scope.mailBoxId;
 								if (fromAddProcsr) {
 									$location.$$search = {};
-									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+									$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
 								} else {
 									showSaveMessage(data.addMailBoxResponse.response.message, 'success');
 									$scope.isMailBoxEdit = true;
@@ -297,7 +297,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $('#saveMailboxConfirmationModal').modal('show');
             } else {
                 $location.$$search = {};
-            	$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+            	$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
             }
         }
         
@@ -305,7 +305,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.closeMailboxConfirmationModal = function() {
        	 $('#saveMailboxConfirmationModal').modal('hide');
             $location.$$search = {};
-            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name);
+            $location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
            
        }
 

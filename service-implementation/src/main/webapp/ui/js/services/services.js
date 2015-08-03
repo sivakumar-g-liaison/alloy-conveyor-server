@@ -28,7 +28,6 @@ myApp.factory('RESTService',
             },
             post: function (url, body, callback, headers) {
 
-                //alert(body);
                 return $http({
                     method: 'POST',
                     url: url,
@@ -52,7 +51,6 @@ myApp.factory('RESTService',
             },
             put: function (url, body, callback, headers) {
 
-                //alert(body);
                 return $http({
                     method: 'PUT',
                     url: url,

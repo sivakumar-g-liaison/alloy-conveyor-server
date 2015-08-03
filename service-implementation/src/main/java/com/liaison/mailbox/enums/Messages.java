@@ -150,6 +150,9 @@ public enum Messages {
 	// processing of token for the retrieval of login id or authentication token failed.
 	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed."),
 	REQUEST_HEADER_PROPERTIES_MISSING("Request header properties are missing"),
+	
+	NO_PROCESSORS_EXIST("No Processors available."),
+	NO_MBX_NAMES_EXIST("No Mailbox names available."),
 
 	COMMON_SYNC_ERROR_MESSAGE("An error condition has been detected within the system. If this condition persists, please contact your administrator or customer support for more details."),
 

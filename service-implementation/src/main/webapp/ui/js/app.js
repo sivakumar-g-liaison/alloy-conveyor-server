@@ -63,6 +63,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/processor/processor.html',
             controller: 'ProcessorCntrlr'
         });
+        $routeProvider.when('/mailbox/getProcessor', {
+            templateUrl: 'partials/processor/searchprocessor.html',
+            controller: 'SearchProcessorCntrlr'
+        });
         $routeProvider.when('/profiles/addProfiles', {
             templateUrl: 'partials/profile/addprofile.html',
             controller: 'ProfileCntrlr'
@@ -121,6 +125,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.httpVersionPattern = /\b1.1\b/;
     $rootScope.multipleEmailPattern = /^(([a-zA-Z0-9_'+*$%\^&!\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9:]{2,7})([,]\W?(?!$))?)+$/;
 	$rootScope.inputPatternForPort = /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
+	$rootScope.folderPathPattern = /^\/data\/(sftp|ftp|ftps)\/(.*?)\/(inbox|outbox)(\/(.*?))?$/;
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
     // As of now used only for displaying the no of characters in error message.
     $rootScope.maximumLengthAllowedInTextBox = 80;
@@ -132,6 +137,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.maximumLengthAllowedInGridForFolderDetails = 250;
     $rootScope.maximumLengthAllowedInGridForCredentialDetails = 128;
     $rootScope.typeaheadMinLength = 3;
+	$rootScope.typeaheadMaxLength = 80;
     
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';

@@ -11,12 +11,16 @@
 package com.liaison.mailbox.dtdm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.liaison.commons.jpa.GenericDAO;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
  * @author OFS
@@ -69,6 +73,9 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	public static final String PRCSR_NAME = "prcsr_name";
 	public static final String PROFILE_ID = "profile_id";
 	public static final String TENANCY_KEY = "tenancy_key";
+	public static final String FOLDER_URI = "folder_uri";
+	public static final String PROTOCOL = "protocol";
+	public static final String PIPELINE_ID = "pipeline_id";
 
 	/**
 	 * Find by profileName and mailbox name pattern.
@@ -146,10 +153,38 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
  	public Processor findProcessorByNameAndMbx(String mbxGuid, String ProcName); 
  	
  	/**
+	 * Retrieves count of all processors  
+	 * @return count of processors
+	 */
+	public int getAllProcessorsCount(); 
+	
+ 	/**
+	 * Retrieves list of all processors  
+	 * @return list of processors
+	 */
+	public List <Processor> getAllProcessors(GenericSearchFilterDTO searchFilter, Map <String, Integer> pageOffsetDetails);
+	
+	/**
+	 * Retrieve the mailbox names  
+	 * @return list of mailboxes
+	 */
+	public List<MailBox>getMailboxNames(GenericSearchFilterDTO searchDTO);
+	
+	/**
+	 * Retrieve the profile names  
+	 * @return list of profiles
+	 */
+	public List<ScheduleProfilesRef>getProfileNames(GenericSearchFilterDTO searchDTO);
+	
+	/**
+	 * Retrieves count of filtered processors  
+	 * @return count of filtered processors
+	 */
+	public int getFilteredProcessorsCount(GenericSearchFilterDTO searchDTO);
+
+	/**
  	* Retrieves active processor by processor id
  	* @return  processor
  	*/
  	public Processor findActiveProcessorById(String id);
-
-
 }
