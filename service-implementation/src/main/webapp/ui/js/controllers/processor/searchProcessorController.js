@@ -91,8 +91,8 @@ var rest = myApp.controller(
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
             return data.mailbox;
-        });        
-	  }
+        });   
+		}
     }
 	
 	// Get Profile names for Typeahead display		
@@ -101,13 +101,13 @@ var rest = myApp.controller(
         var type = "profile";
         var profileName = choice;
 		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
-        if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $rootScope.typeaheadMinLength)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
+		if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $rootScope.typeaheadMinLength)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
             restUrl += '?name=' + profileName + '&type=' + type;
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
             return data.profiles;
         });        
-	  }
+		}
     }
 			
 			// Enable the delete modal dialog
@@ -154,7 +154,7 @@ var rest = myApp.controller(
             // Set the paging data to grid from server object
             $scope.setPagingData = function (data, page, pageSize) {
                 if (data === null || data.length <= 0) {
-                    $scope.message = 'No results found.';
+                     showSaveMessage("No results found", 'error');
                 }				
                 var pagedData = data;
                 $scope.processorList = pagedData;                				

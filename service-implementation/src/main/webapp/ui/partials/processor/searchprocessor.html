@@ -15,7 +15,7 @@
 									   ng-minLength="{{minimumLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
                                        name="mbxname"
-									   style="width:285px">
+									   style="width:285px" typeahead-min-length='5'>
 					<div ng-show="formSearchPrcsr.mbxname.$dirty && formSearchPrcsr.mbxname.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.mbxname.$error.pattern}" ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
 						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.minlength}" ng-show="formSearchPrcsr.mbxname.$error.minlength">
@@ -54,7 +54,7 @@
 									   ng-minLength="{{typeaheadMinLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
                                        name="profilename"
-									   style="width:285px">
+									   style="width:285px" typeahead-min-length='3'>
 					<div ng-show="formSearchPrcsr.profilename.$dirty && formSearchPrcsr.profilename.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.profilename.$error.pattern}" ng-show="formSearchPrcsr.profilename.$error.pattern">Invalid Profile Name.</span>
 						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.profilename.$error.minlength}" ng-show="formSearchPrcsr.profilename.$error.minlength">
