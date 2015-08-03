@@ -187,10 +187,11 @@ public class MailBoxService {
 	 */
 	public void executeProcessor(String triggerProfileRequest) {
 
+	    String processorId = null;
+	    String executionId = null;
 		Processor processor = null;
 		ProcessorExecutionState processorExecutionState = null;
-		String processorId = null;
-		String executionId = null;
+		TriggerProcessorRequestDTO dto = null;
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
@@ -198,9 +199,7 @@ public class MailBoxService {
 
 			LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
-
-			TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest,
-					TriggerProcessorRequestDTO.class);
+			dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest, TriggerProcessorRequestDTO.class);
 
 			// validates mandatory value.
 			processorId = dto.getProcessorId();
@@ -285,7 +284,8 @@ public class MailBoxService {
 		    if (processor == null) {
                 LOG.error("Processor execution failed", e);
             } else {
-                LOG.error("CronJob : NONE : {} : {} : {} : {} : Processor execution failed : {}",
+                LOG.error("CronJob : {} : {} : {} : {} : {} : Processor execution failed : {}",
+                        dto.getProfileName(),
                         processor.getProcessorType().name(),
                         processor.getProcsrName(),
                         processor.getMailbox().getMbxName(),
@@ -308,7 +308,8 @@ public class MailBoxService {
 		    if (processor == null) {
                 LOG.error("Processor execution failed", e);
             } else {
-                LOG.error("CronJob : NONE : {} : {} : {} : {} : Processor execution failed : {}",
+                LOG.error("CronJob : {} : {} : {} : {} : {} : Processor execution failed : {}",
+                        dto.getProfileName(),
                         processor.getProcessorType().name(),
                         processor.getProcsrName(),
                         processor.getMailbox().getMbxName(),

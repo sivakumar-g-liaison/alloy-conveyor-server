@@ -104,22 +104,22 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
 			LOGGER.info(constructMessage("Start run"));
 			startTime = System.currentTimeMillis();
 
-			String path = getPayloadURI();
-			if (MailBoxUtil.isEmpty(path)) {
+			String remotePath = getPayloadURI();
+			if (MailBoxUtil.isEmpty(remotePath)) {
 				LOGGER.info(constructMessage("The given payload URI is Empty."));
 				throw new MailBoxServicesException("The given payload URI is Empty.", Response.Status.CONFLICT);
 			}
 
-			String remotePath = getWriteResponseURI();
-			if (MailBoxUtil.isEmpty(remotePath)) {
+			String localPath = getWriteResponseURI();
+			if (MailBoxUtil.isEmpty(localPath)) {
 				LOGGER.info(constructMessage("The given remote URI is Empty."));
 				throw new MailBoxServicesException("The given remote URI is Empty.", Response.Status.CONFLICT);
 			}
 
-			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, path);
-			ftpsRequest.changeDirectory(path);
+			LOGGER.info(constructMessage("Ready to download files from remote path {} to local path {}"), remotePath, localPath);
+			ftpsRequest.changeDirectory(remotePath);
 
-			downloadDirectory(ftpsRequest, path, remotePath);
+			downloadDirectory(ftpsRequest, remotePath, localPath);
 			ftpsRequest.disconnect();
 
 			// to calculate the elapsed time for processing files
