@@ -101,7 +101,7 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 	public List <String> findExecutingProcessors() {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List <String> nonExecutionProcessors = new ArrayList<String>();
+		List <String> runningProcessors = new ArrayList<String>();
 
 		try {
 
@@ -110,7 +110,7 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 			Iterator<?> iter = nonExecutingsProcsrs.iterator();
 
 			while (iter.hasNext()) {
-				nonExecutionProcessors.add((String) iter.next());
+				runningProcessors.add((String) iter.next());
 			}
 
 		} finally {
@@ -118,7 +118,7 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 				entityManager.close();
 			}
 		}
-		return nonExecutionProcessors;
+		return runningProcessors;
 	}
 
 }

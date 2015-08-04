@@ -11,11 +11,12 @@
 package com.liaison.mailbox.service.rest;
 
 /**
- * This is the gateway updating and retrieving processor state.
+ * Service to update and retrieve the processor states
  *
  * @author OFS
  */
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +50,11 @@ import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecut
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
+import com.netflix.servo.monitor.MonitorConfig;
 import com.netflix.servo.monitor.Monitors;
+import com.netflix.servo.monitor.StatsTimer;
+import com.netflix.servo.monitor.Stopwatch;
+import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -58,10 +63,10 @@ import com.wordnik.swagger.annotations.ApiResponses;
 
 @AppConfigurationResource
 @Path("config/mailbox/processoradmin/processor/status")
-@Api(value = "config/mailbox/processoradmin/processor/changeStatus", description = "Change the processor status to failed")
+@Api(value = "config/mailbox/processoradmin/processor/status", description = "Change the processor status to failed")
 public class ProcessorAdminDetailsResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
+	private static final Logger LOG = LogManager.getLogger(ProcessorAdminDetailsResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -69,9 +74,18 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
+	private Stopwatch stopwatch;
+	private static final StatsTimer statsTimer = new StatsTimer(
+	        MonitorConfig.builder("ProcessorAdminDetailsResource_statsTimer").build(),
+	        new StatsConfig.Builder().build());
+
 	public ProcessorAdminDetailsResource() {
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
+
+    static {
+        DefaultMonitorRegistry.getInstance().register(statsTimer);
+    }
 
 	/**
 	 * REST service to get the list processors latest state
@@ -80,7 +94,8 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 	 * @return Response
 	 */
 	@PUT
-	@ApiOperation(value = "Update Processor Status to Failed", notes = "update existing processor status to failed", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
+	@ApiOperation(value = "Update Processor Status to Failed", notes = "update existing processor status to failed",
+	    position = 1, response = com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	public Response updateProcessorStatusToFailed(
@@ -89,18 +104,27 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
+
 			@Override
 			public Object call() {
 
 				serviceCallCounter.addAndGet(1);
-				ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
+                ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
 				GetProcessorExecutionStateResponseDTO serviceResponse = new GetProcessorExecutionStateResponseDTO();
 
 				ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(processorId);
-				if(null != processorExecutionState) {
-					processorDao.addProcessorExecutionState(processorId, ExecutionState.FAILED.value());
-					serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, "The processor execution status for processor with id : " + processorId + " is ", Messages.SUCCESS));
-				}
+				if (null == processorExecutionState) {
+				    serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED,
+                            "for processor with id : " + processorId,
+                            Messages.FAILURE));
+				} else {
+
+				    processorDao.addProcessorExecutionState(processorId, ExecutionState.FAILED.value());
+                    serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
+                            "The processor execution status for processor with id : " + processorId + " is ",
+                            Messages.SUCCESS));
+                    LOG.info("The processor execution status updated for processor id {}", processorId);
+                }
 				return serviceResponse;
 			}
 		};
@@ -126,9 +150,7 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21, response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-	public Response getExecutingProcessors(
-			@Context HttpServletRequest request) {
-
+	public Response getExecutingProcessors(@Context HttpServletRequest request) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -168,13 +190,30 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 
 	@Override
 	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub
 
+	    stopwatch = statsTimer.start();
+        int globalCount = globalServiceCallCounter.addAndGet(1);
+        logKPIMetric(globalCount, "Global_serviceCallCounter");
+        int serviceCount = serviceCallCounter.addAndGet(1);
+        logKPIMetric(serviceCount, "ProcessorAdminDetailsResource_serviceCallCounter");
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub
 
+	    stopwatch.stop();
+        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
+        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
+        statsTimer.record(duration, TimeUnit.MILLISECONDS);
+
+        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
+                "Global_timer");
+        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "ProcessorAdminDetailsResource_timer");
+        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "ProcessorAdminDetailsResource_timer");
+
+        if (!success) {
+            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
+            logKPIMetric(failureCounter.addAndGet(1), "ProcessorAdminDetailsResource_failureCounter");
+        }
 	}
 }
