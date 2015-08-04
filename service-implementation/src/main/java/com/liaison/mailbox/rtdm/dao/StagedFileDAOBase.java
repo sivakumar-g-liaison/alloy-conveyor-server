@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -32,7 +32,7 @@ import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
  * @author OFS
- * 
+ *
  */
 public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements StagedFileDAO, MailboxRTDMDAO {
 
@@ -41,8 +41,8 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 	}
 
 	/**
-	 *Method to get list of staged files based on search criteria 
-	 * 
+	 *Method to get list of staged files based on search criteria
+	 *
 	 */
 	@Override
 	public List<StagedFile> findStagedFilesOfMailboxes(List<String> mailboxIds, GenericSearchFilterDTO searchFilter, Map<String, Integer> pageOffsetDetails) {
@@ -51,7 +51,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
 		try {
-		    
+
 		   // get Search Filters
 		    String sortDirection = searchFilter.getSortDirection();
 		    String fileName = searchFilter.getStagedFileName();
@@ -64,14 +64,14 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
 					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
 					.append(" and sf.stagedFileStatus = :"+ STATUS);
-			
+
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
 				sortDirection=sortDirection.toUpperCase();
 				query.append(" order by sf.fileName " + sortDirection);
 			}else {
 				query.append(" order by sf.fileName");
 			}
-			
+
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
@@ -96,7 +96,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		}
 		return stagedFiles;
 	}
-	
+
 	/**
 	 * Returns the stagedfileList based on the search done by given GUID and MAILBOXIDS
 	 */
@@ -111,7 +111,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where (sf.pguid) = :" + StagedFileDAO.GUID)
 					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
-			 
+
 			List<?> files = entityManager
 					.createQuery(query.toString())
 					.setParameter(StagedFileDAO.GUID, (guid == null ? "" : guid))
@@ -124,18 +124,18 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 			}
 
 		} finally {
-			
+
 			if (null != entityManager) {
 				entityManager.close();
 			}
 		}
 		return stagedFiles;
 	}
-	
-	
+
+
 	/**
-	 *Method to number of staged files based on search criteria 
-	 * 
+	 *Method to number of staged files based on search criteria
+	 *
 	 */
 	@Override
 	public int getStagedFilesCountByName(List<String> mailboxIds, String fileName,String status) {
@@ -151,14 +151,14 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
 					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
 					.append(" and sf.stagedFileStatus = :"+ STATUS);
-			
+
 			totalItems = (Long)entityManager
 					.createQuery(query.toString())
 					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
 					.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
 					.setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
 					.getSingleResult();
-			
+
 			count = totalItems.intValue();
 			return count;
 
@@ -201,7 +201,7 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
             }
         }
     }
-    
+
 
 	@SuppressWarnings("unchecked")
     @Override
@@ -225,6 +225,34 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 								.getResultList();
 
 			return (stagedFiles.isEmpty()) ? null : stagedFiles.get(0);
+		} finally {
+
+			if (null != em) {
+			    em.close();
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List <StagedFile> findStagedFilesOfProcessorsBasedOnMeta(String processorId) {
+
+		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
+
+		try {
+
+			// query
+			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
+					.append(" where sf.fileMetaData =:" + PROCESSOR_ID)
+					.append(" and sf.stagedFileStatus =:" + STATUS);
+
+			List<StagedFile> stagedFiles = em
+								.createQuery(query.toString())
+								.setParameter(PROCESSOR_ID, processorId)
+								.setParameter(STATUS, EntityStatus.ACTIVE.value())
+								.getResultList();
+
+			return stagedFiles;
 		} finally {
 
 			if (null != em) {

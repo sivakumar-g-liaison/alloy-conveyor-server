@@ -27,6 +27,8 @@ public class EmailUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(EmailUtil.class);
 
+    private static String EMPTY_STR = "";
+
     /**
      * Method to send emails according to the details provided in the email helper dto.
      *
@@ -61,6 +63,17 @@ public class EmailUtil {
         LOGGER.info("Email sent successfully to {}", emailInfoDTO.getToEmailAddrList());
     }
 
+  
+    /**
+     * Method to send emails according to the processor details and email subject provided
+     * 
+     * @param processor - processor for which email notification needs to be sent
+     * @param emailSubject - subject of the email
+     */
+    public static void sendEmail(Processor processor, String emailSubject) {
+        sendEmail(processor, emailSubject, EMPTY_STR);
+    }
+
     /**
      * Sent notifications for trigger system failure.
      * Method to construct subject based on details of processor
@@ -68,7 +81,7 @@ public class EmailUtil {
      * @param processor - The processor for which execution fails
      * @return email Subject as String
      */
-    public static String constructSubject(Processor processor) {
+    public static String constructSubject(Processor processor, boolean isStagingSuccess) {
 
         LOGGER.debug("constructing subject for the mail to be sent for processor execution failure");
         StringBuilder subjectBuilder = null;
@@ -76,14 +89,26 @@ public class EmailUtil {
             subjectBuilder = new StringBuilder()
                 .append("Processor execution failed");
         } else {
-            subjectBuilder = new StringBuilder()
-                    .append("Processor:")
-                    .append(processor.getProcsrName())
-                    .append(" execution failed for the mailbox ")
-                    .append(processor.getMailbox().getMbxName())
-                    .append("(")
-                    .append(processor.getMailbox().getPguid())
-                    .append(")");
+            subjectBuilder = new StringBuilder();
+            if (!isStagingSuccess) {
+            	subjectBuilder.append("Processor:")
+                  	.append(processor.getProcsrName())
+                  	.append(" execution failed for the mailbox ")
+                  	.append(processor.getMailbox().getMbxName())
+                  	.append("(")
+                  	.append(processor.getMailbox().getPguid())
+                  	.append(")");
+            } else {
+            	subjectBuilder.append("Processor:")
+                	.append(processor.getProcsrName())
+                	.append("execution succeded for the mailbox ")
+                	.append(processor.getMailbox().getMbxName())
+                	.append("(")
+                	.append(processor.getMailbox().getPguid())
+                	.append(")")
+                	.append(" and file staged successfully");
+            }
+
         }
         return subjectBuilder.toString();
     }

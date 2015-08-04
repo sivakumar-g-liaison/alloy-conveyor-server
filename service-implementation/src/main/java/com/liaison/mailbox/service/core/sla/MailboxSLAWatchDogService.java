@@ -71,10 +71,8 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
-import com.liaison.mailbox.service.core.processor.FTPSRemoteUploader;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
-import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -514,6 +512,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws MailBoxServicesException
 	 * @throws IOException
 	 */
+	@Deprecated
 	private String getLocationToWritePayloadFromSpectrum (Processor processor) throws MailBoxServicesException, IOException {
 
 		LOG.info("Retrieving payload location from processor");
@@ -547,6 +546,7 @@ public class MailboxSLAWatchDogService {
 	 * @return processedFolderPath The folder path with mount location
 	 *
 	 */
+	@Deprecated
 	private String processMountLocation(String folderPath) throws IOException {
 
 		String processedFolderPath = null;
@@ -793,28 +793,29 @@ public class MailboxSLAWatchDogService {
         boolean isCustomerSLAViolated = false;
 
         try {
-            // check if the file exists in the configured file write location
-            // for processors  of type FileWriter if file exists then customer
-            // sla is violated
-            if (processor instanceof FileWriter) {
-                isCustomerSLAViolated = checkFileExistenceOfFileWriter(processor);
-            } else {
-                MailBoxProcessorI uploaderProcessor = MailBoxProcessorFactory.getInstance(processor);
+
+                MailBoxProcessorI processorInstance = MailBoxProcessorFactory.getInstance(processor);
 
                 // check if file exist in the configured payload location
-                // for processors of type uploader if file exists then
+                // for processors of type uploader or filewrite location
+                // for processors of type filewriter if file exists then
                 // customer sla is violated
-                if (uploaderProcessor instanceof FTPSRemoteUploader) {
 
-                    FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) uploaderProcessor;
+                if (processorInstance instanceof com.liaison.mailbox.service.core.processor.FileWriter) {
+
+                	com.liaison.mailbox.service.core.processor.FileWriter fileWriterProcessor = (com.liaison.mailbox.service.core.processor.FileWriter) processorInstance;
+                	isCustomerSLAViolated = fileWriterProcessor.checkFileExistence();
+                } /*else if (processor instanceof FTPSRemoteUploader) {
+
+                    FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) processorInstance;
                     isCustomerSLAViolated = ftpsRemoteUploader.checkFileExistence();
 
-                } else if (uploaderProcessor instanceof SFTPRemoteUploader) {
+                } else if (processor instanceof SFTPRemoteUploader) {
 
-                    SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)uploaderProcessor;
+                    SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)processorInstance;
                     isCustomerSLAViolated = sftpRemoteUploader.checkFileExistence();
-                }
-            }
+                }*/
+
             return isCustomerSLAViolated;
         } catch (Exception e) {
 
@@ -837,6 +838,7 @@ public class MailboxSLAWatchDogService {
 	 * @throws MailBoxServicesException
 	 * @throws IOException
 	 */
+	@Deprecated
 	private boolean checkFileExistenceOfFileWriter(Processor processor) throws MailBoxServicesException, IOException {
 
 		LOG.debug ("Entering file Existence check for File Writer processor");
