@@ -134,7 +134,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 					StagePayloadRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
 							StagePayloadRequestDTO.class);
 					//Added the quid from service Request
-					if(serviceRequest != null) {
+                    if (serviceRequest != null && serviceRequest.getStagedFile() != null) {
 						queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getStagedFile().getId());
 					}
 					// create the new staged file

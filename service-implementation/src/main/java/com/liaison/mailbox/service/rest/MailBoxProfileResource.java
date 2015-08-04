@@ -123,7 +123,9 @@ public class MailBoxProfileResource extends AuditedResource {
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					AddProfileResponseDTO serviceResponse = profile.createProfile(serviceRequest); 
 					//Added the guid
-					queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getProfile().getGuId());
+					if (null != serviceResponse.getProfile()) {
+					    queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getProfile().getGuId());
+					}
 					return serviceResponse;
 
 				} catch (IOException | JAXBException e) {
@@ -172,7 +174,9 @@ public class MailBoxProfileResource extends AuditedResource {
 					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
 							ReviseProfileRequestDTO.class);
 					//Added the guid
-					queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getProfile().getId());
+					if (null != serviceRequest.getProfile()) {
+					    queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getProfile().getId());
+					}
 					// update profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					return profile.updateProfile(serviceRequest);

@@ -129,7 +129,9 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 					AddMailBoxResponseDTO serviceResponse = mailbox.createMailBox(serviceRequest, serviceInstanceId, manifestJson);
 					//Added the guid
-					queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getMailBox().getGuid());
+					if (null != serviceResponse.getMailBox()) {
+					    queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getMailBox().getGuid());
+					}
 					return serviceResponse;
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);

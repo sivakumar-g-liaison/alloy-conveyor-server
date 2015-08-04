@@ -118,8 +118,7 @@ public class TypeaheadResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "TypeaheadResource.getEntitiesByName()";
-		worker.queryParams.put(AuditedResource.HEADER_GUID,
-				AuditedResource.MULTIPLE);
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 
 		// hand the delegate to the framework for calling
 		try {
