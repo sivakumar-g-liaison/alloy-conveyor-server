@@ -21,11 +21,13 @@ import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dto.enums.ProcessMode;
 import com.liaison.dto.queue.WorkTicket;
+import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -34,7 +36,10 @@ import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.DropBoxProcessor;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
+import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
@@ -69,8 +74,7 @@ public class DropboxFileTransferService {
 	 * @return DropboxTransferContentResponseDTO
 	 * @throws Exception
 	 */
-	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, FileTransferMetaDTO fileTransferDTO,
-			GlassMessage glassMessage, String aclManifestJson)
+	public DropboxTransferContentResponseDTO transferFile(WorkTicket workTicket, FileTransferMetaDTO fileTransferDTO, String aclManifestJson)
 			throws Exception {
 
 		try {
@@ -127,9 +131,9 @@ public class DropboxFileTransferService {
 							profileId, tenancyKey);
 					continue;
 				}
-				for (Processor processor : processors) {
 
-					transferPayloadAndPostWorkticket(processor, workTicket, fileTransferDTO, glassMessage);
+				for (Processor processor : processors) {
+					transferPayloadAndPostWorkticket(processor, workTicket, fileTransferDTO);
 				}
 			}
 			if (dropboxProcessors.isEmpty()) {
@@ -179,7 +183,7 @@ public class DropboxFileTransferService {
 	}
 
 	private void transferPayloadAndPostWorkticket(Processor processor, WorkTicket workTicket,
-			FileTransferMetaDTO fileTransferDTO, GlassMessage glassMessage)
+			FileTransferMetaDTO fileTransferDTO)
 			throws Exception {
 
 		long startTime = 0;
@@ -217,15 +221,16 @@ public class DropboxFileTransferService {
 		String ttlUnit = MailBoxConstants.TTL_UNIT_DAYS;
 
 		Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
-		if(!ttlMap.isEmpty())
-		{
+        if (!ttlMap.isEmpty()) {
 			ttl = ttlMap.get(MailBoxConstants.TTL_NUMBER);
 			ttlUnit = ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT);
 		}
+
 		Integer ttlNumber = Integer.parseInt(ttl);
 		workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlUnit, ttlNumber));
 		workTicket.setFileName(fileTransferDTO.getFileName());
 		workTicket.setProcessMode(ProcessMode.ASYNC);
+		workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 
 		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
 						"GLOBAL PID",
@@ -250,6 +255,43 @@ public class DropboxFileTransferService {
 		LOG.debug("TIME SPENT ON UPLOADING FILE TO SPECTRUM + OTHER MINOR FUNCTIONS");
 		MailBoxUtil.calculateElapsedTime(startTime, endTime);
 
+		logToLens(workTicket, fileTransferDTO);
+		WorkTicketUtil.postWrkTcktToQ(workTicket);
+
+		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
+						"GLOBAL PID",
+						MailBoxUtil.seperator,
+						workTicket.getGlobalProcessId(),
+						"Posted workticket to Service Broker for file",
+						MailBoxUtil.seperator),
+						fileTransferDTO.getFileName());
+	}
+
+    /**
+     * Helper method to log TVAPI and events to lens
+     * 
+     * @param workTicket
+     * @param fileTransferDTO
+     */
+    private void logToLens(WorkTicket workTicket, FileTransferMetaDTO fileTransferDTO) {
+
+        //LENS LOGGING
+		String processId = IdentifierUtil.getUuid();
+		GlassMessage glassMessage = new GlassMessage();
+		glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+        glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
+        glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
+        glassMessage.setStatus(ExecutionState.PROCESSING);
+        glassMessage.setInAgent(GatewayType.REST);
+        glassMessage.setProcessId(processId);
+        glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
+        glassMessage.setSenderId(fileTransferDTO.getLoginId());
+        // Log time stamp
+        glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+        // Log running status
+        glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload");
+
 		// set the glassmessage details once workTicket construction is complete with all details
 		glassMessage.setMailboxId((String) workTicket.getAdditionalContextItem(MailBoxConstants.MAILBOX_ID));
 		glassMessage.setProcessorId((String) workTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
@@ -267,17 +309,7 @@ public class DropboxFileTransferService {
 		glassMessage.logProcessingStatus(StatusType.QUEUED, MailBoxConstants.FILE_QUEUED_SUCCESSFULLY);
 		// log time stamp before posting to queue
 		glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-
-		WorkTicketUtil.postWrkTcktToQ(workTicket);
-
-		LOG.info(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(),
-						"GLOBAL PID",
-						MailBoxUtil.seperator,
-						workTicket.getGlobalProcessId(),
-						"Posted workticket to Service Broker for file",
-						MailBoxUtil.seperator),
-						fileTransferDTO.getFileName());
-	}
+    }
 
 	/**
 	 * @param request
