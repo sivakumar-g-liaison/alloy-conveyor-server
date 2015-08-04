@@ -97,5 +97,28 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 		}
 		return nonExecutionProcessors;
 	}
+	
+	public List <String> findExecutingProcessors() {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List <String> runningProcessors = new ArrayList<String>();
+
+		try {
+
+			List<?> nonExecutingsProcsrs = entityManager.createNamedQuery(FIND_EXECUTING_PROCESSORS)
+					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getResultList();
+			Iterator<?> iter = nonExecutingsProcsrs.iterator();
+
+			while (iter.hasNext()) {
+				runningProcessors.add((String) iter.next());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return runningProcessors;
+	}
 
 }
