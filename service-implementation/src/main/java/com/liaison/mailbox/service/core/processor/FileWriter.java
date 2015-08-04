@@ -206,7 +206,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
      * @param file java.io.File
      * @param status Status of the LENS logging
      */
-	protected void logGlassMessage(List <String> files) {
+	protected void logGlassMessage(List<String> files) {
 
         StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
         List <StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfProcessorsBasedOnMeta(configurationInstance.getPguid());
@@ -216,7 +216,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
         	// if the files contain the stagedFile Name, then the file is not picked up
         	// by the customer so continue to next staged file
         	if (files.contains(stagedFile.getFileName())) {
-        		LOG.debug("File {} is not picked up by the customer", stagedFile.getFileName());
+        		LOG.info("File {} is not picked up by the customer", stagedFile.getFileName());
         		continue;
         	}
             TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
@@ -235,7 +235,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             					.append(stagedFile.getFileName())
             					.append(" is picked up by the customer");
             glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
-           //Fourth corner timestamp
+
+            //Fourth corner timestamp
             glassMessage.logFourthCornerTimestamp();
 
             //TVAPI
