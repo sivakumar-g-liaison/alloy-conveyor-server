@@ -3,6 +3,8 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -15,19 +17,24 @@ import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
+import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
+import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
-    
+
     private static final Logger LOG = LogManager.getLogger(FileWriter.class);
-	
+
 	@SuppressWarnings("unused")
 	private FileWriter() {
 		// to force creation of instance only by passing the processor entity
@@ -39,7 +46,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
 	@Override
 	public void runProcessor(Object dto, MailboxFSM fsm) {
-	    
+
 	    WorkTicket workTicket = (WorkTicket) dto;
         GlassMessage glassMessage = null;
         String processorPayloadLocation = null;
@@ -137,14 +144,46 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
              //GLASS LOGGING ENDS//
             throw new RuntimeException(e);
         }
-		
+
 	}
-    
+
+	/**
+	 * This method will get the file write location of filewriter and check if any file exist in that specified location
+	 *
+	 * @param processor
+	 * @return boolean - if the file exists it will return value of true otherwise a value of false.
+	 * @throws MailBoxServicesException
+	 * @throws IOException
+	 */
+	public boolean checkFileExistence() throws MailBoxServicesException, IOException {
+
+		LOG.debug ("Entering file Existence check for File Writer processor");
+		boolean isFileExists = false;
+		String fileWriteLocation = getFileWriteLocation();
+		if (null == fileWriteLocation) {
+			LOG.error("filewrite location  not configured for processor {}", configurationInstance.getProcsrName());
+			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.FILEWRITE_LOCATION, Response.Status.CONFLICT);
+		}
+		File fileWriteLocationDirectory = new File(fileWriteLocation);
+		if (fileWriteLocationDirectory.isDirectory() && fileWriteLocationDirectory.exists()) {
+			String[] files =  fileWriteLocationDirectory.list();
+			isFileExists = (null != files && files.length > 0);
+			// Log Message to lens
+			logGlassMessage(Arrays.asList(files));
+		} else {
+			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
+		}
+		LOG.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
+		return isFileExists;
+
+	}
+
+
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {
@@ -159,7 +198,56 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 		}
 
 	}
-	
+
+	 /**
+     * Logs TVAPI status and event message in LENS
+     *
+     * @param message Message String to be logged in LENS event log
+     * @param file java.io.File
+     * @param status Status of the LENS logging
+     */
+	protected void logGlassMessage(List<String> files) {
+
+        StagedFileDAO stagedFileDAO = new StagedFileDAOBase();
+        List <StagedFile> stagedFiles = stagedFileDAO.findStagedFilesOfProcessorsBasedOnMeta(configurationInstance.getPguid());
+
+        for (StagedFile stagedFile : stagedFiles) {
+
+        	// if the files contain the stagedFile Name, then the file is not picked up
+        	// by the customer so continue to next staged file
+        	if (files.contains(stagedFile.getFileName())) {
+        		LOG.info("File {} is not picked up by the customer", stagedFile.getFileName());
+        		continue;
+        	}
+            TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+            GlassMessage glassMessage = new GlassMessage();
+            glassMessage.setGlobalPId(stagedFile.getPguid());
+            glassMessage.setCategory(configurationInstance.getProcessorType());
+            glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+
+            glassMessage.setStatus(ExecutionState.COMPLETED);
+            glassMessage.setOutAgent(configurationInstance.getProcsrProtocol());
+            glassMessage.setOutSize(null);
+            glassMessage.setOutboundFileName(stagedFile.getFileName());
+
+            StringBuilder message = new StringBuilder()
+            					.append("File ")
+            					.append(stagedFile.getFileName())
+            					.append(" is picked up by the customer");
+            glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
+
+            //Fourth corner timestamp
+            glassMessage.logFourthCornerTimestamp();
+
+            //TVAPI
+            transactionVisibilityClient.logToGlass(glassMessage);
+
+            // Inactivate the stagedFile
+            stagedFile.setStagedFileStatus(EntityStatus.INACTIVE.value());
+            stagedFileDAO.merge(stagedFile);
+        }
+    }
+
 	@Override
     public Object getClient() {
         return null;

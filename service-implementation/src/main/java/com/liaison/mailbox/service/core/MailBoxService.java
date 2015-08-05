@@ -300,7 +300,7 @@ public class MailBoxService {
 			}
 
 			// send email to the configured mail id in case of failure
-			String emailSubject = EmailUtil.constructSubject(processor);
+			String emailSubject = EmailUtil.constructSubject(processor, false);
 			EmailUtil.sendEmail(processor, emailSubject, e);
 
 		} catch (Exception e) {
@@ -324,14 +324,14 @@ public class MailBoxService {
 			}
 
 			// send email to the configured mail id in case of failure
-			EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor), e);
+			EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, false), e);
 		}
 	}
 
 	/**
 	 * The method writes the payload into local payload location using filewriter or uploaders
 	 * This servers watchdog functionality
-	 * 
+	 *
 	 * @param request
 	 */
 	public void executeFileWriter(String request) {
@@ -423,6 +423,9 @@ public class MailBoxService {
             //persist staged file to get the gpid during uploader
             StagedFileDAOBase dao = new StagedFileDAOBase();
             dao.persistStagedFile(workTicket, processor.getPguid());
+
+            // send notification for successful file staging
+            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, true));
             LOG.info("#################################################################");
 
         } catch (Exception e) {
@@ -455,10 +458,10 @@ public class MailBoxService {
             }
 
             // send email to the configured mail id in case of failure
-            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor), e);
+            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, false), e);
 
         }
-	    
+
 	}
 
 }
