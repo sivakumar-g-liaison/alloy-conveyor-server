@@ -413,7 +413,7 @@ public class MailBoxService {
             transactionVisibilityClient.logToGlass(glassMessage);
             glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
 
-            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service exeuciton is completed",
+            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
                     processor.getProcessorType().name(),
                     processor.getProcsrName(),
                     mbx.getMbxName(),
@@ -425,7 +425,9 @@ public class MailBoxService {
             dao.persistStagedFile(workTicket, processor.getPguid());
 
             // send notification for successful file staging
-            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, true));
+            String emailSubject = EmailUtil.constructSubject(processor, true);
+            String emailBody = "File Staged Successfully for delivery";
+            EmailUtil.sendEmail(processor, emailSubject, emailBody, true);
             LOG.info("#################################################################");
 
         } catch (Exception e) {
