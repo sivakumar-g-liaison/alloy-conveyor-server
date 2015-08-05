@@ -12,10 +12,9 @@
 					<input id="mbxname" type="text" ng-model="mailBoxName"
                                        placeholder="Mailbox Name"                                       
 									   typeahead="mbx.name for mbx in getMailboxNames($viewValue) | filter:$viewValue"
-									   ng-minLength="{{minimumLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
                                        name="mbxname"
-									   style="width:285px" typeahead-min-length="minimumLength">
+									   style="width:285px" typeahead-min-length="typeaheadMinLength">
 					<div ng-show="formSearchPrcsr.mbxname.$dirty && formSearchPrcsr.mbxname.$invalid">
 						<span id="mbx-search-nameInvalid-pattern" class="customHide" ng-class="{ 'help-block-custom' : formSearchPrcsr.mbxname.$error.pattern}" ng-show="formSearchPrcsr.mbxname.$error.pattern">Invalid MailBox Name.</span>
 						<span id="mbx-search-nameInvalid-minlength" class="customHide" ng-class="{ 'custom-info-block' : formSearchPrcsr.mbxname.$error.minlength}" ng-show="formSearchPrcsr.mbxname.$error.minlength">
@@ -51,7 +50,6 @@
 				<input id="profilename" type="text" ng-model="profileName"
                                        placeholder="Profile"
                                        required typeahead="prof.name for prof in getProfileNames($viewValue) | filter:$viewValue"
-									   ng-minLength="{{typeaheadMinLength}}" ng-maxLength="{{typeaheadMaxLength}}"
                                        class="form-control"
                                        name="profilename"
 									   style="width:285px" typeahead-min-length="typeaheadMinLength">

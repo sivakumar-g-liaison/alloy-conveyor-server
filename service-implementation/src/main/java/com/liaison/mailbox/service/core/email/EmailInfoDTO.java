@@ -32,6 +32,7 @@ public class EmailInfoDTO {
 	private String subject;
 	private String type;
 	private List<String> toEmailAddrList;
+	private boolean isSuccess;
 
 	public String getMailboxName() {
 		return mailboxName;
@@ -75,8 +76,13 @@ public class EmailInfoDTO {
 	public void setToEmailAddrList(List<String> toEmailAddrList) {
 		this.toEmailAddrList = toEmailAddrList;
 	}
-
-	public void copyToDTO(Processor processor, List<String> emailAddress, String emailSubject, String failureReason) {
+	public boolean isSuccess() {
+		return isSuccess;
+	}
+	public void setSuccess(boolean isSuccess) {
+		this.isSuccess = isSuccess;
+	}
+	public void copyToDTO(Processor processor, List<String> emailAddress, String emailSubject, String failureReason, boolean isSuccess) {
 
 	    LOGGER.debug("Ready to construct Email Helper DTO for the mail to be sent for processor execution failure");
         this.setMailboxId(null != processor ? processor.getMailbox().getPguid() : null);
@@ -86,6 +92,7 @@ public class EmailInfoDTO {
         this.setEmailBody(failureReason);
         this.setToEmailAddrList(emailAddress);
         this.setSubject(emailSubject);
+        this.setSuccess(isSuccess);
         LOGGER.debug("Email Helper DTO Constructed for the mail to be sent for processor execution failure");
 	}
 

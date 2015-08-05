@@ -593,3 +593,6 @@ input::-moz-focus-inner {
 .marginalign{
 	margin-left: 15px!important;
 }
+.proc_id_margin{
+	margin-top: -8px!important;
+}

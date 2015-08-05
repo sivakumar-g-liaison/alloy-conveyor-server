@@ -101,10 +101,10 @@ public class MailboxSLAWatchDogService {
 	private static final String CUSTOMER_SLA = "customer_sla";
 	protected static final String seperator = ": ";
 	protected StringBuilder logPrefix;
-	
+
 	/**
 	 * Internal logger for watch dog services
-	 * 
+	 *
 	 * @param message
 	 */
 	private void log(String message, Object... params) {
@@ -136,8 +136,9 @@ public class MailboxSLAWatchDogService {
 		List <String> slaViolatedMailboxesList  = new ArrayList<String>();
 
 		try {
-
-			if (validateMailboxSLARule(slaViolatedMailboxesList) && validateCustomerSLARule(slaViolatedMailboxesList)) {
+			boolean isMailboxSLAValidationSuccess = validateMailboxSLARule(slaViolatedMailboxesList);
+			boolean isCustomerSLAValidationSuccess = validateCustomerSLARule(slaViolatedMailboxesList);
+			if (isMailboxSLAValidationSuccess && isCustomerSLAValidationSuccess) {
 				serviceResponse.setResponse(new ResponseDTO(Messages.MAILBOX_ADHERES_SLA, Messages.SUCCESS, ""));
 			} else {
 
@@ -210,7 +211,7 @@ public class MailboxSLAWatchDogService {
 				slaViolatedMailboxes.add(mailboxName);
 				emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
 				failureReason = String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox);
-				EmailUtil.sendEmail(procsr, emailSubject, failureReason);
+				EmailUtil.sendEmail(procsr, emailSubject, failureReason, false);
 				log("The SLA violations are notified to the user by sending email for the prcocessor {}", procsr.getProcsrName());
 				continue;
 			}
@@ -228,7 +229,7 @@ public class MailboxSLAWatchDogService {
 						ISO8601Util dateUtil = new ISO8601Util();
 						failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, MAILBOX_SLA_RULE, timeToPickUpFilePostedToMailbox))
 						    .append(String.format(SLA_NOTIFICATION_FAILURE_INFO, dateUtil.fromTimestamp(fsmStateVal.getCreatedDate()))).toString();
-						EmailUtil.sendEmail(procsr, emailSubject, failureReason);
+						EmailUtil.sendEmail(procsr, emailSubject, failureReason, false);
 						log("The SLA violations are notified to the user by sending email or the prcocessor {}", procsr.getProcsrName());
 
 					}
@@ -715,7 +716,7 @@ public class MailboxSLAWatchDogService {
 				slaViolatedMailboxes.add(mailboxName);
 				String emailSubject = String.format(SLA_VIOLATION_NOTIFICATION, mailboxName, procsr.getMailbox().getPguid());
 				StringBuilder failureReason = new StringBuilder(String.format(SLA_VIOLATION_NOTIFICATION_MESSAGE, mailboxName, CUSTOMER_SLA_RULE, timeToPickUpFilePostedByMailbox));
-				EmailUtil.sendEmail(procsr, emailSubject, failureReason.toString());
+				EmailUtil.sendEmail(procsr, emailSubject, failureReason.toString(), false);
 			}
 
 			// update the sla verification of processor execution FSM state if sla verification

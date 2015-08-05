@@ -20,9 +20,6 @@ var rest = myApp.controller(
 			
 		$scope.mailBoxName = null;
 		
-		// Modify the value to change the search criteria
-        $scope.searchMinCharacterCount = 5;
-			
 		// Profiles loads initially
         $scope.profiles = [];
      
@@ -85,8 +82,8 @@ var rest = myApp.controller(
         var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
         var type = "mailbox";
 		var mailBoxName = choice;
-		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
-        if ((typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length >= $scope.searchMinCharacterCount)  || mailBoxName === null || mailBoxName === "" || (typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length === 0)) {
+		//check lists mailboxNames.
+        if ((typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length >= $rootScope.typeaheadMinLength)  || mailBoxName === null || mailBoxName === "" || (typeof mailBoxName !== 'undefined' && mailBoxName !== null && mailBoxName.length === 0)) {
             restUrl += '?name=' + mailBoxName + '&type=' + type;
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            
             var data = res.data.searchProcessorResponse;
@@ -100,7 +97,7 @@ var rest = myApp.controller(
         var restUrl = $scope.base_url + '/typeAhead/getEntityByNames';
         var type = "profile";
         var profileName = choice;
-		//check lists organization associated with specified enterprise. If enterprise is cleared,its name property becomes an empty string.
+		//check lists profile names.
 		if ((typeof profileName !== 'undefined' && profileName !== null && profileName.length >= $rootScope.typeaheadMinLength)  || profileName === null || profileName === "" || (typeof profileName !== 'undefined' && profileName !== null && profileName.length === 0)) {
             restUrl += '?name=' + profileName + '&type=' + type;
         return $scope.restService.get(restUrl, function(data) {}).then(function(res){            

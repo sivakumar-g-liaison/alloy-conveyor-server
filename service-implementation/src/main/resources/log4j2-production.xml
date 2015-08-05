@@ -184,7 +184,7 @@
         <!-- #########          Pairwise GSA APPENDER          ############ -->
         <!-- ############################################################## -->
 
-        <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData" clientId="LSG2PROD-PUBLISHER" proxy="amqproxy">
+        <GSAMessageLENS name="PairwiseGSALENSAppender" ip="${env:GSA_LENS_IP}" topic="PairwiseData" clientId="LSG2PROD-PUBLISHER" proxy="amqproxy" ignoreExceptions="false">
             <GSAMessageXMLLayout />
             <filters>
                 <MarkerFilter marker="PAIRWISE_GSA_MARKER" onMatch="ACCEPT" onMismatch="DENY" />
@@ -292,7 +292,8 @@
                               ip="${env:GLASS_METRIC_IP}" port="${env:GLASS_METRIC_PORT}"
                               password="${env:GLASS_METRIC_PASSWORD}" username="${env:GLASS_METRIC_USER}"
                               dataSpaceName="${env:GLASS_METRIC_DATASPACE}" sourceName="${env:GLASS_METRIC_SOURCE_NAME}"
-                              messageTTL="${env:GLASS_METRIC_TTL}" dataObjectName="${env:GLASS_METRIC_DATAOBJECTNAME}">
+                              messageTTL="${env:GLASS_METRIC_TTL}" dataObjectName="${env:GLASS_METRIC_DATAOBJECTNAME}"
+							  ignoreExceptions="false">
             <GlassMessageJSONLayout compact="true"/>
             <filters>
                 <MarkerFilter marker="METRICS_GM_MARKER" onMatch="ACCEPT" onMismatch="DENY"/>

@@ -27,15 +27,13 @@ public class EmailUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(EmailUtil.class);
 
-    private static String EMPTY_STR = "";
-
     /**
      * Method to send emails according to the details provided in the email helper dto.
      *
      * @param emailInfoDTO - EmailHelper DTO which contain all email details
      */
     public static void sendEmail(Processor processor, String emailSubject, Exception e) {
-        sendEmail(processor, emailSubject, ExceptionUtils.getStackTrace(e));
+        sendEmail(processor, emailSubject, ExceptionUtils.getStackTrace(e), false);
     }
 
     /**
@@ -43,7 +41,7 @@ public class EmailUtil {
      *
      * @param emailInfoDTO - EmailHelper DTO which contain all email details
      */
-    public static void sendEmail(Processor processor, String emailSubject, String failureReason) {
+    public static void sendEmail(Processor processor, String emailSubject, String emailBody, boolean isSuccess) {
 
         if (processor == null) {
             return;
@@ -56,23 +54,13 @@ public class EmailUtil {
         }
 
         EmailInfoDTO emailInfoDTO = new EmailInfoDTO();
-        emailInfoDTO.copyToDTO(processor, emailAddress, emailSubject, failureReason);
+        emailInfoDTO.copyToDTO(processor, emailAddress, emailSubject, emailBody, isSuccess);
         LOGGER.info("Ready to send email to {}", emailAddress);
         EmailNotifier emailNotifier = new EmailNotifier();
         emailNotifier.sendEmail(emailInfoDTO);
         LOGGER.info("Email sent successfully to {}", emailInfoDTO.getToEmailAddrList());
     }
 
-  
-    /**
-     * Method to send emails according to the processor details and email subject provided
-     * 
-     * @param processor - processor for which email notification needs to be sent
-     * @param emailSubject - subject of the email
-     */
-    public static void sendEmail(Processor processor, String emailSubject) {
-        sendEmail(processor, emailSubject, EMPTY_STR);
-    }
 
     /**
      * Sent notifications for trigger system failure.
@@ -101,7 +89,7 @@ public class EmailUtil {
             } else {
             	subjectBuilder.append("Processor:")
                 	.append(processor.getProcsrName())
-                	.append("execution succeded for the mailbox ")
+                	.append(" execution succeded for the mailbox ")
                 	.append(processor.getMailbox().getMbxName())
                 	.append("(")
                 	.append(processor.getMailbox().getPguid())

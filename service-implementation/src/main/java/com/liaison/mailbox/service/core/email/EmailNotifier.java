@@ -169,7 +169,9 @@ public class EmailNotifier {
 		}
 
 		// append the failure reason
-		builder.append(FAILURE_REASON).append(SEPARATOR).append(NEW_LINE);
+		if (!emailInfo.isSuccess()) {
+			builder.append(FAILURE_REASON).append(SEPARATOR).append(NEW_LINE);
+		}
 
 		return builder.toString();
 	}
