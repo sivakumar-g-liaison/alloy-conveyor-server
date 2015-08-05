@@ -66,20 +66,68 @@
 
                     </div>					
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label>
-                            Description
-                        </label>
-                        <textarea id="mbx-procsr-description" ng-model="processor.description" name="description" ng-pattern="userInputPattern" ng-maxlength=512 class="form-control processor_textArea_Editor"></textarea>
-                        <div ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
-                            <span id="mbx-procsr-descriptionInvalid-pattern" class = "customHide" ng-class = "{'help-block-custom':formAddPrcsr.description.$error.pattern}" ng-show="formAddPrcsr.description.$error.pattern">Invalid Description</span>
-                            <span id="mbx-procsr-descriptionInvalid-maxlength" class="customHide" ng-class = "{'custom-info-block':formAddPrcsr.description.$error.maxlength}" ng-show="formAddPrcsr.description.$error.maxlength">
-                             <span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Description cannot be longer than {{maximumLengthAllowedInProcessorDescription}} characters.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+				<div ng-show="isEdit">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label> Description </label>
+							<textarea id="mbx-procsr-description"
+								ng-model="processor.description" name="description"
+								ng-pattern="userInputPattern" ng-maxlength=512
+								class="form-control" rows="1"></textarea>
+							<div
+								ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+								<span id="mbx-procsr-descriptionInvalid-pattern"
+									class="customHide"
+									ng-class="{'help-block-custom':formAddPrcsr.description.$error.pattern}"
+									ng-show="formAddPrcsr.description.$error.pattern">Invalid
+									Description</span> 
+									<span id="mbx-procsr-descriptionInvalid-maxlength"
+									class="customHide"
+									ng-class="{'custom-info-block':formAddPrcsr.description.$error.maxlength}"
+									ng-show="formAddPrcsr.description.$error.maxlength"> <span
+									class="adjustPaddingRight"><img class="infoiconimg"
+										ng-src="{{infoIconImgUrl}}" /></span>Description cannot be longer
+									than {{maximumLengthAllowedInProcessorDescription}} characters.
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group proc_id_margin">
+							<label> ProcessorId </label>
+							<textarea class="form-control" readonly="readonly"
+								ng-model="processor.guid" ng-show="isEdit" id="processor_pguid"
+								rows="1" name="processorpguid"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6" ng-show="!isEdit">
+					<div class="form-group">
+						<label> Description </label>
+						<textarea id="mbx-procsr-description"
+							ng-model="processor.description" name="description"
+							ng-pattern="userInputPattern" ng-maxlength=512
+							class="form-control processor_textArea_Editor"></textarea>
+						<div
+							ng-show="formAddPrcsr.description.$dirty && formAddPrcsr.description.$invalid">
+							<span id="mbx-procsr-descriptionInvalid-pattern"
+								class="customHide"
+								ng-class="{'help-block-custom':formAddPrcsr.description.$error.pattern}"
+								ng-show="formAddPrcsr.description.$error.pattern">Invalid
+								Description</span> <span id="mbx-procsr-descriptionInvalid-maxlength"
+								class="customHide"
+								ng-class="{'custom-info-block':formAddPrcsr.description.$error.maxlength}"
+								ng-show="formAddPrcsr.description.$error.maxlength"> <span
+								class="adjustPaddingRight"><img class="infoiconimg"
+									ng-src="{{infoIconImgUrl}}" /></span>Description cannot be longer than
+								{{maximumLengthAllowedInProcessorDescription}} characters.
+							</span>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			</div>
 			<div class="row">
                 <div class="col-sm-6 col-md-6 processor_adjustMarginBottom">
                     <div class="form-group">
@@ -136,17 +184,17 @@
 					  </div>					      							     				
 				  </div>
 					 <div class="col-sm-1 col-md-1 processor_adjustPaddingRightForScript">
-					 <div ng-controller="ScriptCreateFileController">						
-						<div ng-switch on="scriptIsEdit">
-						    <div ng-switch-when="true">
+							<div ng-controller="ScriptCreateFileController">
+								<div ng-switch on="scriptIsEdit">
+									<div ng-switch-when="true">
 						     <button id="createNewScriptFileToEdit"  class="btn btn-primary" ng-click="onScriptTypeSelected()">EditScript</button>
-						    </div>
-						    <div ng-switch-when="false">
+									</div>
+									<div ng-switch-when="false">
 						     <button id="createNewScriptFileToAdd" class="btn btn-primary" ng-disabled="formAddPrcsr.scriptName.$invalid  || !scriptUrlIsValid" ng-click="onScriptTypeSelected()">AddScript</button>
-						    </div>
+									</div>
+								</div>
+							</div>
 						</div>
-                       </div>							
-					</div>
 					</div>
 			  </div>
 							

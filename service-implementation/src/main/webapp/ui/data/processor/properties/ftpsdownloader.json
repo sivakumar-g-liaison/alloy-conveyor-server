@@ -193,7 +193,7 @@
 	        "displayName": "Debug Transcript",
 	        "type": "select",
 	        "value": "false",
-		    "mandatory": false,
+		    "mandatory": true,
 		    "dynamic": false,
             "valueProvided":false,
             "defaultValue":"false",
