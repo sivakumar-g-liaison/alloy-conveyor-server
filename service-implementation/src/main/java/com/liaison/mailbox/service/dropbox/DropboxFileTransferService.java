@@ -288,9 +288,9 @@ public class DropboxFileTransferService {
     						"GLOBAL PID",
     						MailBoxUtil.seperator,
     						workTicket.getGlobalProcessId(),
-    						"Posted workticket to Service Broker for file",
-    						MailBoxUtil.seperator),
-    						fileTransferDTO.getFileName());
+    						"Posted workticket to Service Broker for file ",
+    						MailBoxUtil.seperator,
+    						fileTransferDTO.getFileName()));
     		// Log TVA status
             transactionVisibilityClient = new TransactionVisibilityClient();
             transactionVisibilityClient.logToGlass(glassMessage);

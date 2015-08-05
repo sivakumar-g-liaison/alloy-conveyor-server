@@ -36,12 +36,11 @@ public class StagedFileDTO {
 
 	public StagedFileDTO(WorkTicket workTicket) {
 		this.setName(workTicket.getFileName());
-		this.setPath(null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH) ? workTicket.getAdditionalContext().get(
-				MailBoxConstants.KEY_FILE_PATH).toString() : null);
-		this.setFileSize(workTicket.getPayloadSize()
-				.toString());
-		this.setMailboxGuid((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID)) ? workTicket.getAdditionalContext().get(
-				MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
+		this.setPath(null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH)
+		        ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_FILE_PATH).toString() : null);
+		this.setFileSize(workTicket.getPayloadSize().toString());
+		this.setMailboxGuid((null != workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID))
+		        ? workTicket.getAdditionalContext().get(MailBoxConstants.KEY_MAILBOX_ID).toString() : null);
 		this.setSpectrumUri(workTicket.getPayloadURI());
 		this.setMeta(workTicket.getHeader(MailBoxConstants.UPLOAD_META));
 		this.setStatus(EntityStatus.ACTIVE.value());

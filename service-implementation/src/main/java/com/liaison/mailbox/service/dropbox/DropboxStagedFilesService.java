@@ -162,11 +162,11 @@ public class DropboxStagedFilesService {
 		return null;
 	}
 
-	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request, GlassMessage glassMessage)
-			throws IOException, JAXBException {
+	public StagePayloadResponseDTO addStagedFile(StagePayloadRequestDTO request, GlassMessage glassMessage) {
 
 		LOG.debug("Entering into add staged file.");
 
+		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		StagePayloadResponseDTO serviceResponse = new StagePayloadResponseDTO();
 
 		try {
@@ -177,9 +177,24 @@ public class DropboxStagedFilesService {
 				throw new MailBoxConfigurationServicesException(Messages.INVALID_REQUEST, Response.Status.BAD_REQUEST);
 			}
 
-			// validation
-			GenericValidator validator = new GenericValidator();
-			validator.validate(stagedFileDTO);
+			// validation starts
+            if (MailBoxUtil.isEmpty(stagedFileDTO.getMailboxGuid())) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id", Response.Status.CONFLICT);
+            }
+
+            MailBoxConfigurationDAO mailboxDAO = new MailBoxConfigurationDAOBase();
+            MailBox mailbox = mailboxDAO.find(MailBox.class, stagedFileDTO.getMailboxGuid());
+            if (mailbox == null || EntityStatus.INACTIVE.name().equals(mailbox.getMbxStatus())) {
+                StringBuilder msg = new StringBuilder().append("Either given mailbox(")
+                        .append(stagedFileDTO.getMailboxGuid())
+                        .append(") is not avaialble in the system or inactive");
+                throw new MailBoxServicesException(msg.toString(), Response.Status.NOT_FOUND);
+            }
+
+            if (MailBoxUtil.isEmpty(stagedFileDTO.getSpectrumUri())) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Payload URI", Response.Status.CONFLICT);
+            }
+            // validation ends
 
 			StagedFileDAO dropboxDao = new StagedFileDAOBase();
 			StagedFile stagedFile = new StagedFile();
@@ -191,28 +206,26 @@ public class DropboxStagedFilesService {
 
 			// successfully staged
 			if (null != glassMessage) {
-
 				glassMessage.logProcessingStatus(StatusType.SUCCESS, MailBoxConstants.FILE_STAGED_SUCCESSFULLY);
 				glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-
+				transactionVisibilityClient.logToGlass(glassMessage);
 			}
 			LOG.info(MailBoxUtil.constructMessage(null, null, "File {} staged successfully for mailbox {} with stagedFileId {}"),
 					stagedFileDTO.getName(), stagedFileDTO.getMailboxGuid(), stagedFile.getPrimaryKey());
 			LOG.debug("Exit from add staged file.");
+
+		     // log TVA status
 			return serviceResponse;
 
-		} catch (MailBoxConfigurationServicesException e) {
+		} catch (Exception e) {
 
-			LOG.error(MailBoxUtil.constructMessage(null, null, Messages.CREATE_OPERATION_FAILED.name()), e);
+			LOG.error(MailBoxUtil.constructMessage(null, null, "Stage file failed"), e);
 
+			// glass log in case of failure during file staging
 			if (null != glassMessage) {
-
-				// glass log in case of failure during file staging
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
-
 			}
 
 			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, STAGED_FILE,

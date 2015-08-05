@@ -31,7 +31,6 @@ import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 import com.liaison.mailbox.service.dto.dropbox.request.StagePayloadRequestDTO;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
  * Class which has Dropbox related operations.
@@ -52,8 +51,7 @@ public class DropboxService {
 	 * @throws JsonParseException
 	 * @throws JSONException
 	 */
-	public void invokeDropboxQueue(String request)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, JSONException {
+	public void invokeDropboxQueue(String request) throws JAXBException, IOException, JSONException {
 
 		LOG.info("#####################----DROPBOX INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
@@ -61,7 +59,6 @@ public class DropboxService {
 
 		WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
 
-        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 	    GlassMessage glassMessage = new GlassMessage(workTicket);
 	    glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
 	    glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
@@ -79,7 +76,5 @@ public class DropboxService {
 		dtoReq.setStagedFile(stageFileReqDTO);
 		stageFileService.addStagedFile(dtoReq, glassMessage);
 
-	    // log TVA status
-	    transactionVisibilityClient.logToGlass(glassMessage);
 	}
 }
