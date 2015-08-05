@@ -442,7 +442,7 @@ public class MailBoxService {
 
             // send notification for successful file staging
             String emailSubject = EmailUtil.constructSubject(processor, true);
-            String emailBody = "File Staged Successfully for delivery";
+            String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
             EmailUtil.sendEmail(processor, emailSubject, emailBody, true);
             LOG.info("#################################################################");
 

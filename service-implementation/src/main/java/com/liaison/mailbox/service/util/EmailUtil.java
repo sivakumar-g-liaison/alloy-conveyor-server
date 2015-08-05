@@ -87,14 +87,8 @@ public class EmailUtil {
                   	.append(processor.getMailbox().getPguid())
                   	.append(")");
             } else {
-            	subjectBuilder.append("Processor:")
-                	.append(processor.getProcsrName())
-                	.append(" execution succeded for the mailbox ")
-                	.append(processor.getMailbox().getMbxName())
-                	.append("(")
-                	.append(processor.getMailbox().getPguid())
-                	.append(")")
-                	.append(" and file staged successfully");
+            	subjectBuilder.append("File is available for pick up for the processor :")
+                	.append(processor.getProcsrName());
             }
 
         }
