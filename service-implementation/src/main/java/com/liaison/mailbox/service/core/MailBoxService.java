@@ -392,7 +392,7 @@ public class MailBoxService {
                     processor,
                     workTicket.getFileName(),
                     ExecutionState.STAGED,
-                    SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode());
+                    SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
             fsm.addState(processorStaged);
 
             processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
