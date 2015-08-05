@@ -135,7 +135,7 @@ ssh.private.key.temp.location =/app/mailbox/tempprivatekey/
 
 # MAIL SERVER CONFIGURATIONS
 mail.host=smtpout.liaison.com
-mail.from=g2mailbox-errornotifier@liaison.com
+mail.from=mailboxservice-notifier@liaison.com
 
 # FOR JOB MONITORING ADMIN USE CASES - FOR GRACEFULLY INTTERUPTING THE JOB PROCESSING.
 default.job.search.period.in.hours=24
