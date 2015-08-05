@@ -37,22 +37,16 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.commons.message.glass.dom.GatewayType;
-import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.dropbox.authenticator.util.DropboxAuthenticatorUtil;
 import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.gem.service.client.GEMManifestResponse;
 import com.liaison.gem.util.GEMConstants;
 import com.liaison.mailbox.MailBoxConstants;
-import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dropbox.DropboxAuthenticationService;
 import com.liaison.mailbox.service.dropbox.DropboxFileTransferService;
 import com.liaison.mailbox.service.dto.configuration.response.DropboxTransferContentResponseDTO;
@@ -61,9 +55,7 @@ import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifest
 import com.liaison.mailbox.service.dto.dropbox.response.DropboxAuthAndGetManifestResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
@@ -136,8 +128,6 @@ public class DropboxFileTransferResource extends AuditedResource {
 				long startTime = 0;
 				long endTime = 0;
 
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-				GlassMessage glassMessage = new GlassMessage();
 				String loginId = "unknown";
 
 				try {
@@ -218,21 +208,6 @@ public class DropboxFileTransferResource extends AuditedResource {
 					WorkTicketUtil workTicketUtil = new WorkTicketUtil();
 					WorkTicket workTicket = workTicketUtil.createWorkTicket(getRequestProperties(serviceRequest),
 							getRequestHeaders(serviceRequest), "", null);
-					workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
-
-					String processId = IdentifierUtil.getUuid();
-					glassMessage.setCategory(ProcessorType.DROPBOXPROCESSOR);
-					glassMessage.setProtocol(Protocol.DROPBOXPROCESSOR.getCode());
-					glassMessage.setStatus(ExecutionState.PROCESSING);
-					glassMessage.setInAgent(GatewayType.REST);
-					glassMessage.setProcessId(processId);
-					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
-					glassMessage.setSenderId(loginId);
-					// Log time stamp
-					glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-
-					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file upload");
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -251,7 +226,7 @@ public class DropboxFileTransferResource extends AuditedResource {
 
 					// calling service to upload content to spectrum
 					DropboxTransferContentResponseDTO dropboxContentTransferDTO = fileTransferService.transferFile(
-							workTicket, fileTransferDTO, glassMessage, manifestResponse.getManifest());
+							workTicket, fileTransferDTO, manifestResponse.getManifest());
 
 					// to calculate elapsed time for getting manifest
 					endTime = System.currentTimeMillis();
@@ -278,20 +253,10 @@ public class DropboxFileTransferResource extends AuditedResource {
 					return builder.build();
 				} catch (MailBoxServicesException e) {
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
-					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file upload");
-					glassMessage.setStatus(ExecutionState.FAILED);
-					transactionVisibilityClient.logToGlass(glassMessage);
 					throw new LiaisonRuntimeException(e.getMessage());
 				} catch (IOException | JAXBException e) {
 					LOG.error(MailBoxUtil.constructMessage(null, null, e.getMessage()), e);
-					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + loginId + " file upload");
-					glassMessage.setStatus(ExecutionState.FAILED);
-					transactionVisibilityClient.logToGlass(glassMessage);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} finally {
-					glassMessage.logEndTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
 				}
 			}
 		};
