@@ -90,7 +90,6 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 	 */
 	@POST
 	@ApiOperation(value = "Check Mailbox satifies the expectations", notes = "Check Mailbox satifies the expectations", position = 23, response = com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
