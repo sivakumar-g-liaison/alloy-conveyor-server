@@ -89,7 +89,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
 	protected Processor configurationInstance;
 	protected int totalNumberOfProcessedFiles;
-	protected StringBuffer logPrefix;
+	protected StringBuilder logPrefix;
 	protected TriggerProcessorRequestDTO reqDTO;
 
 	public Properties mailBoxProperties;
@@ -133,7 +133,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 
         if (null == logPrefix) {
 
-            logPrefix = new StringBuffer()
+            logPrefix = new StringBuilder()
             .append("CronJob")
             .append(seperator)
             .append((reqDTO != null) ? reqDTO.getProfileName() : "NONE")
@@ -148,7 +148,7 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
             .append(seperator);
         }
 
-        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        StringBuilder msgBuf = new StringBuilder().append(logPrefix);
         for (String str : messages) {
             msgBuf.append(str);
         }

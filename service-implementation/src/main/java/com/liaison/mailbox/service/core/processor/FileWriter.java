@@ -123,7 +123,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
             glassMessage.setOutAgent(processorPayloadLocation);
 
             //GLASS LOGGING CORNER 4 //
-            StringBuffer message = new StringBuffer()
+            StringBuilder message = new StringBuilder()
                     .append("Payload written at target location : ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
