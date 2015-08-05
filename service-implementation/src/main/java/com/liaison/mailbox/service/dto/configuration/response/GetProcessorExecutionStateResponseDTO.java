@@ -30,6 +30,15 @@ public class GetProcessorExecutionStateResponseDTO extends CommonResponseDTO {
 	 */
 	private static final long serialVersionUID = 1L;
 	private List<String> executingProcessorIds = new ArrayList<String>();
+	private int totalItems;
+
+	public int getTotalItems() {
+		return totalItems;
+	}
+
+	public void setTotalItems(int totalItems) {
+		this.totalItems = totalItems;
+	}
 	
 	public List<String> getExecutingProcessorIds() {
 		return executingProcessorIds;

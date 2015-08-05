@@ -159,8 +159,14 @@ public enum Messages {
 	PAYLOAD_ALREADY_EXISTS("Failed to persist the payload in spectrum because it already exists."),
 	PAYLOAD_PERSIST_ERROR("Failed to persist the payload in spectrum due to error."),
 	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error"),
-	PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from spectrum due to error");
-
+	PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from spectrum due to error"),
+	
+	//referred in ProcessorAdminDetailsResource
+	PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),
+	PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
+	PROCESSOR_EXECUTION_STATE_NOT_PROCESSING(
+		"The status for the given processor id %s is not updated since the execution is not in 'Processing' state.");
+	
 	private String value;
 
 	// some caching to provide a better search algorithm
