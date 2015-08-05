@@ -384,6 +384,22 @@ public class MailBoxService {
                 processor = new MailboxSLAWatchDogService().getSpecificProcessorofMailbox(mailboxId);
             }
 
+            //Check the processor is null or not
+            if (null == processor) {
+
+                StringBuilder errorMessage = new StringBuilder();
+                if (!MailBoxUtil.isEmpty(processorId)) {
+                    errorMessage.append("Unable to find a processor type of uploader/filewriter")
+                        .append(" for the given processor guid ")
+                        .append(processorId);
+                } else {
+                    errorMessage.append("Unable to find a processor type of uploader/filewriter")
+                        .append(" for the given mailbox guid ")
+                        .append(processorId);
+                }
+                throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
+            }
+
             // Initiate FSM Starts
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());

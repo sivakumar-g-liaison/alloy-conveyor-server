@@ -100,7 +100,7 @@ public class MailboxSLAWatchDogService {
 	private static final String MAILBOX_SLA = "mailbox_sla";
 	private static final String CUSTOMER_SLA = "customer_sla";
 	protected static final String seperator = ": ";
-	protected StringBuffer logPrefix;
+	protected StringBuilder logPrefix;
 
 	/**
 	 * Internal logger for watch dog services
@@ -423,7 +423,7 @@ public class MailboxSLAWatchDogService {
 	        glassMessage.setOutAgent(processorPayloadLocation);
 
 			//GLASS LOGGING CORNER 4 //
-            StringBuffer message = new StringBuffer()
+	        StringBuilder message = new StringBuilder()
                     .append("Payload delivered at target location : ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
@@ -880,11 +880,11 @@ public class MailboxSLAWatchDogService {
 
         if (null == logPrefix && null == processor) {
 
-            logPrefix = new StringBuffer()
+            logPrefix = new StringBuilder()
                 .append("WatchDog")
                 .append(seperator);
         } else {
-            logPrefix = new StringBuffer()
+            logPrefix = new StringBuilder()
                 .append("WatchDog")
                 .append(seperator)
                 .append(processor.getProcessorType().name())
@@ -897,7 +897,7 @@ public class MailboxSLAWatchDogService {
                 .append(seperator);
         }
 
-        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+        StringBuilder msgBuf = new StringBuilder().append(logPrefix);
         for (String str : messages) {
             msgBuf.append(str);
         }

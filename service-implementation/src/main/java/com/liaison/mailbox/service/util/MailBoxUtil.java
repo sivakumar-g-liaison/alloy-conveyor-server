@@ -414,15 +414,15 @@ public class MailBoxUtil {
      */
     public static String constructMessage(Processor processor, String transferProfile, String... messages) {
 
-    	 StringBuffer logPrefix = null;
+        StringBuilder logPrefix = null;
     	 if (null == processor) {
 
-    		 logPrefix = new StringBuffer()
+    		 logPrefix = new StringBuilder()
                  .append("DROPBOX")
                  .append(seperator);
          } else {
 
-        	 logPrefix = new StringBuffer()
+        	 logPrefix = new StringBuilder()
             .append("DROPBOX")
             .append(seperator)
             .append((transferProfile == null ? "NONE" : transferProfile))
@@ -437,7 +437,7 @@ public class MailBoxUtil {
             .append(seperator);
         }
 
-        StringBuffer msgBuf = new StringBuffer().append(logPrefix);
+    	 StringBuilder msgBuf = new StringBuilder().append(logPrefix);
         for (String str : messages) {
             msgBuf.append(str);
         }
