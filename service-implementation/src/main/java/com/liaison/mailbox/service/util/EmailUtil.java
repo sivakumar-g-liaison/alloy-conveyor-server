@@ -29,8 +29,6 @@ public class EmailUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(EmailUtil.class);
 
-    private static final String SEPARATOR = ",";
-
     /**
      * Method to send emails according to the details provided in the email helper dto.
      *
@@ -50,13 +48,13 @@ public class EmailUtil {
         if (processor == null) {
             return;
         }
-        List<String> emailAddress = null;
-        if (!isSuccess) {
 
-           String internalEmail = (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ERROR_RECEIVER));
-           emailAddress = (!MailBoxUtil.isEmpty(internalEmail)) ? Arrays.asList(internalEmail.split(SEPARATOR)) : null;
+        List<String> emailAddress = null;
+        if (isSuccess) {
+           emailAddress = processor.getEmailAddress();
         } else {
-        	emailAddress = processor.getEmailAddress();
+            String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
+            emailAddress = Arrays.asList(internalEmail);
         }
 
         if (null == emailAddress || emailAddress.isEmpty()) {
