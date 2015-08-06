@@ -92,7 +92,7 @@ public class MailboxSLAWatchDogService {
 	private static final Logger LOG = LogManager.getLogger(MailboxSLAWatchDogService.class);
 
 	private static String SLA_VIOLATION_SUBJECT = "Files are not picked up by the customer within configured SLA of %s minutes";
-	private static String SLA_UPLADER_VIOLATION_SUBJECT = "Files are not uploaded to the customer within configured SLA of %s minutes";
+	private static String SLA_UPLOADER_VIOLATION_SUBJECT = "Files are not uploaded to the customer within configured SLA of %s minutes";
 	private static String SLA_MBX_VIOLATION_SUBJECT = "Files are not picked up by the Alloy Mailbox within configured SLA of %s minutes";
 	private static final String MAILBOX = "Mailbox";
 	private static final String MAILBOX_SLA = "mailbox_sla";
@@ -665,7 +665,9 @@ public class MailboxSLAWatchDogService {
 
 		    log("The processor {} was not executed with in the specified SLA configuration time", processor.getProcsrName());
 			slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
-			emailSubject = (isCustomerSLA) ? String.format(SLA_VIOLATION_SUBJECT, slaConfigurationTime) : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
+			emailSubject = (isCustomerSLA)
+					? String.format(SLA_UPLOADER_VIOLATION_SUBJECT, slaConfigurationTime)
+					: String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
             EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
 			log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
 			return;
@@ -680,7 +682,7 @@ public class MailboxSLAWatchDogService {
 				    log("The processor {} was executed but got failed with in the specified SLA configuration time", processor.getProcsrName());
 					slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
 					emailSubject = (isCustomerSLA)
-					        ? String.format(SLA_UPLADER_VIOLATION_SUBJECT, slaConfigurationTime)
+					        ? String.format(SLA_UPLOADER_VIOLATION_SUBJECT, slaConfigurationTime)
 					        : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
 	                EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
 					log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
