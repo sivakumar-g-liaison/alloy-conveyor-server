@@ -3,6 +3,7 @@ package com.liaison.mailbox.service.core.processor;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -155,26 +156,26 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	 * @throws MailBoxServicesException
 	 * @throws IOException
 	 */
-	public boolean checkFileExistence() throws MailBoxServicesException, IOException {
+	public List<String> checkFileExistence() throws MailBoxServicesException, IOException {
 
 		LOG.debug ("Entering file Existence check for File Writer processor");
-		boolean isFileExists = false;
 		String fileWriteLocation = getFileWriteLocation();
+		List<String> fileList = new ArrayList<>();
 		if (null == fileWriteLocation) {
-			LOG.error("filewrite location  not configured for processor {}", configurationInstance.getProcsrName());
+			LOG.error("filewrite location not configured for processor {}", configurationInstance.getProcsrName());
 			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.FILEWRITE_LOCATION, Response.Status.CONFLICT);
 		}
 		File fileWriteLocationDirectory = new File(fileWriteLocation);
 		if (fileWriteLocationDirectory.isDirectory() && fileWriteLocationDirectory.exists()) {
 			String[] files =  fileWriteLocationDirectory.list();
-			isFileExists = (null != files && files.length > 0);
 			// Log Message to lens
+			fileList = Arrays.asList(files);
 			logGlassMessage(Arrays.asList(files));
 		} else {
 			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
 		}
-		LOG.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
-		return isFileExists;
+		LOG.debug("File Eixstence check completed for File writer. File exists - {}", fileList.isEmpty());
+		return fileList;
 
 	}
 

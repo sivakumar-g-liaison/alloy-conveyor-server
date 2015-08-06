@@ -150,12 +150,12 @@ public class EmailNotifier {
 		}
 
 		// set mailbox id in email body if mailbox id is available
-		if (!MailBoxUtil.isEmpty(emailInfo.getMailboxId())) {
+		if (!MailBoxUtil.isEmpty(emailInfo.getMailboxId()) && !emailInfo.isSuccess()) {
 			builder.append(MAILBOX_ID).append(SEPARATOR).append(emailInfo.getMailboxId()).append(NEW_LINE);
 		}
 
 		// set processor name in email body if processor name is available
-		if (!MailBoxUtil.isEmpty(emailInfo.getProcessorName())) {
+		if (!MailBoxUtil.isEmpty(emailInfo.getProcessorName()) && !emailInfo.isSuccess()) {
 			builder.append(PROCESSOR_NAME).append(SEPARATOR).append(emailInfo.getProcessorName()).append(NEW_LINE);
 		}
 
@@ -164,7 +164,7 @@ public class EmailNotifier {
 				ConfigurationManager.getDeploymentContext().getDeploymentEnvironment()).append(NEW_LINE);
 
 		// set host name in email body if host name is available
-		if (!MailBoxUtil.isEmpty(hostName)) {
+		if (!MailBoxUtil.isEmpty(hostName) && !emailInfo.isSuccess()) {
 			builder.append(HOST_NAME).append(SEPARATOR).append(hostName).append(NEW_LINE);
 		}
 
