@@ -727,9 +727,11 @@ public class MailboxSLAWatchDogService {
 			if (isSLACheckRequired(processorLastExecutionTime, slaConfiguredTime)) {
 				LOG.debug("customer sla verification is required");
 				files = doCustomerSLAVerification(processor);
-				// update the sla verification status as sla verified
-				fileStagedEvent.setSlaVerificationStatus(SLAVerificationStatus.SLA_VERIFIED.getCode());
-				procDAO.merge(fileStagedEvent);
+				// update the sla verification status as sla verified if files contain file name
+				if (files != null && !files.contains(fileStagedEvent.getProfileName())) {
+				    fileStagedEvent.setSlaVerificationStatus(SLAVerificationStatus.SLA_VERIFIED.getCode());
+				    procDAO.merge(fileStagedEvent);
+				}
 			} else {
 				LOG.debug("customer sla verification is not required");
 			}
