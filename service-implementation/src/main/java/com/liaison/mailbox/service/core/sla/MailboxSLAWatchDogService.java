@@ -743,7 +743,7 @@ public class MailboxSLAWatchDogService {
 			StringBuilder body = new StringBuilder(emailSubject)
 				.append("\n\n")
 				.append("Files : ")
-				.append(StringUtils.join(files.toArray()));
+				.append(StringUtils.join(files.toArray(), ","));
 			EmailUtil.sendEmail(processor, emailSubject, body.toString(), true);
 		}
 
