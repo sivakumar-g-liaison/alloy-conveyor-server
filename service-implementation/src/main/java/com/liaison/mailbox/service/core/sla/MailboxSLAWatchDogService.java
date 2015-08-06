@@ -683,7 +683,7 @@ public class MailboxSLAWatchDogService {
 					        ? String.format(SLA_UPLADER_VIOLATION_SUBJECT, slaConfigurationTime)
 					        : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
 	                EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
-					log("The SLA violations are notified to the user by sending email or the prcocessor {}", processor.getProcsrName());
+					log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
 				}
 			}
 
