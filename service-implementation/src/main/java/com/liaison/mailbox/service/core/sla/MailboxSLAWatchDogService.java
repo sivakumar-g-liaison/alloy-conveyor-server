@@ -190,42 +190,8 @@ public class MailboxSLAWatchDogService {
 				continue;
 			}
 
-			FSMStateDAO procDAO = new FSMStateDAOBase();
-
-			List<FSMStateValue> listfsmStateVal = null;
-
-			log("checking whether the processor {} is executed with in the specified mailbox SLA configuration time", procsr.getProcsrName());
-			listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(procsr.getPguid(), getSLAConfigurationAsTimeStamp(timeToPickUpFilePostedToMailbox));
-
-			String emailSubject = null;
-			// If the list is empty then the processor is not executed at all during the specified sla time.
-			if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
-
-			    log("The processor {} was not executed with in the specified mailbox SLA configuration time", procsr.getProcsrName());
-				slaViolatedMailboxes.add(procsr.getMailbox().getMbxName());
-				emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, timeToPickUpFilePostedToMailbox);
-                EmailUtil.sendEmail(procsr, emailSubject, emailSubject, true);
-				log("The SLA violations are notified to the user by sending email for the prcocessor {}", procsr.getProcsrName());
-				continue;
-			}
-
-			// If the processor is executed during the speicified sla time but got failed.
-			if(null != listfsmStateVal && !listfsmStateVal.isEmpty()) {
-				for (FSMStateValue fsmStateVal : listfsmStateVal) {
-
-					if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
-
-					    log("The processor {} was executed but got failed with in the specified mailbox SLA configuration time", procsr.getProcsrName());
-						slaViolatedMailboxes.add(procsr.getMailbox().getMbxName());
-						emailSubject = String.format(SLA_MBX_VIOLATION_SUBJECT, timeToPickUpFilePostedToMailbox);
-		                EmailUtil.sendEmail(procsr, emailSubject, emailSubject, true);
-						log("The SLA violations are notified to the user by sending email or the prcocessor {}", procsr.getProcsrName());
-
-					}
-				}
-
-			}
-
+			// check whether sweeper got executed with in the configured sla time
+			checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, timeToPickUpFilePostedToMailbox, slaViolatedMailboxes, false);
 		}
 		if (null != slaViolatedMailboxes && slaViolatedMailboxes.size() > 0) {
 		    log("SLA Validation completed and the identified violations are notified to the user");
@@ -604,7 +570,6 @@ public class MailboxSLAWatchDogService {
 
 	}
 
-
 	/**
 	 * Iterate all Mailboxes and check whether Customer satisfies the SLA Rules
 	 * configured to a mailbox
@@ -630,9 +595,8 @@ public class MailboxSLAWatchDogService {
 	public boolean validateCustomerSLARule(List<String> slaViolatedMailboxesList) throws Exception {
 
 		LOG.debug("Entering into validateCustomerSLARule.");
-		List <String> slaViolatedMailboxes = new ArrayList<String>();
+		List<String> slaViolatedMailboxes = new ArrayList<String>();
 		String timeToPickUpFilePostedByMailbox = null;
-		List<String> files = null;
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		LOG.debug("Retrieving processor of type file writer and uploaders");
 		List <Processor> processors = processorDAO.findProcessorsByType(getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));
@@ -657,73 +621,17 @@ public class MailboxSLAWatchDogService {
 				continue;
 			}
 
-			FSMStateDAO procDAO = new FSMStateDAOBase();
-
-			log("Finding the most recent successful execution of processor {}", procsr.getProcsrName());
-			List<FSMStateValue> jobsExecuted = procDAO.findMostRecentSuccessfulExecutionOfProcessor(procsr.getPguid(), procsr.getProcessorType());
-
-			// if no jobs were successfully executed for this processor continue to next one
-			if (null == jobsExecuted || jobsExecuted.isEmpty()) {
-				log("There are no succesful executions for this processor {} in recent time", procsr.getProcsrName());
-				continue;
+			// validate customer sla of file writer
+			if (procsr.getProcessorType().getCode().equals(ProcessorType.FILEWRITER.getCode())) {
+				validateCustomerSLAOfFileWriter(procsr, timeToPickUpFilePostedByMailbox, slaViolatedMailboxes);
 			}
 
-			FSMStateValue mostRecentExecution = jobsExecuted.get(0) ;
-			Timestamp processorLastExecutionTime = mostRecentExecution.getCreatedDate();
-			log("The most recent successful execution of processor {} is on {}", procsr.getProcsrName(), processorLastExecutionTime);
-
-			log("Finding non sla verified file staged events");
-			List<FSMState> nonSLAVerifiedFileStagedEvents = procDAO.findNonSLAVerifiedFileStagedEvents(procsr.getPguid(), processorLastExecutionTime, procsr.getProcessorType());
-
-			// There are no non sla verified file staged events.
-			if (null != nonSLAVerifiedFileStagedEvents && nonSLAVerifiedFileStagedEvents.isEmpty()) {
-			    log("There are no non sla verified file staged events for the processor {}", procsr.getProcsrName());
+			// validate customer sla of remote uploaders by checking if the uploader is executed with in the configured sla time
+			if (procsr.getProcessorType().getCode().equals(ProcessorType.REMOTEUPLOADER.getCode())) {
+				checkIfProcessorExecutedInSpecifiedSLAConfiguration(procsr, timeToPickUpFilePostedByMailbox, slaViolatedMailboxes, true);
 			}
-			boolean slaVerificationDone = false;
-			for (FSMState fileStagedEvent : nonSLAVerifiedFileStagedEvents ) {
-
-				Timestamp slaConfiguredTime = getCustomerSLAConfigurationAsTimeStamp(timeToPickUpFilePostedByMailbox, processorLastExecutionTime);
-
-				// check whether the sla verification required based on the
-				// last execution of processor and sla configuration in the mailbox
-				if (isSLACheckRequired(processorLastExecutionTime, slaConfiguredTime)) {
-					LOG.debug("customer sla verification is required");
-					files = doCustomerSLAVerification(procsr);
-					// update the sla verification status as sla verified
-					fileStagedEvent.setSlaVerificationStatus(SLAVerificationStatus.SLA_VERIFIED.getCode());
-					procDAO.merge(fileStagedEvent);
-					slaVerificationDone = true;
-				} else {
-					LOG.debug("customer sla verification is not required");
-				}
-			}
-
-			// send an email if there is a sla violation for the current iterating processor
-			if (files != null && !files.isEmpty()) {
-
-				slaViolatedMailboxes.add(procsr.getMailbox().getMbxName());
-				String emailSubject = String.format(SLA_VIOLATION_SUBJECT, timeToPickUpFilePostedByMailbox);
-				StringBuilder body = new StringBuilder(emailSubject)
-    				.append("\n\n")
-    				.append("Files : ")
-    				.append(StringUtils.join(files.toArray()));
-				EmailUtil.sendEmail(procsr, emailSubject, body.toString(), true);
-			}
-
-			// update the sla verification of processor execution FSM state if sla verification
-			// of file staged event of corresponding processor is done
-			if (slaVerificationDone) {
-
-				List<FSMState> nonSLAVerifiedProcessorExecutions = procDAO.findNonSLAVerifiedFSMEventsByValue(procsr.getPguid(), processorLastExecutionTime, ExecutionState.COMPLETED.value());
-
-				for (FSMState fsmEvent : nonSLAVerifiedProcessorExecutions ) {
-					// update the status as sla verified true
-					fsmEvent.setSlaVerificationStatus(SLAVerificationStatus.SLA_VERIFIED.getCode());
-					procDAO.merge(fsmEvent);
-				}
-			}
-
 		}
+
 		if (!slaViolatedMailboxes.isEmpty()) {
 			slaViolatedMailboxesList.addAll(slaViolatedMailboxes);
 		}
@@ -732,6 +640,109 @@ public class MailboxSLAWatchDogService {
 		return slaViolatedMailboxes.isEmpty();
 	}
 
+	/**
+	 * Method which checks if the given processor is executed with in the given slaconfiguration time.
+	 *
+	 * @param processor - processor for which sla has to be validated
+	 * @param slaConfigurationTime - sla configured in mailbox
+	 * @param slaViolatedMailboxes - list to hold any sla violated mailboxes
+	 * @param isCustomerSLA - boolean stating if it is for customer sla or mailbox sla
+	 * @throws IOException
+	 */
+	private void checkIfProcessorExecutedInSpecifiedSLAConfiguration (Processor processor, String slaConfigurationTime, List<String> slaViolatedMailboxes, boolean isCustomerSLA) throws IOException {
+
+		FSMStateDAO procDAO = new FSMStateDAOBase();
+
+		List<FSMStateValue> listfsmStateVal = null;
+
+		log("checking whether the processor {} is executed with in the specified SLA configuration time", processor.getProcsrName());
+		listfsmStateVal = procDAO.findExecutingProcessorsByProcessorId(processor.getPguid(), getSLAConfigurationAsTimeStamp(slaConfigurationTime));
+
+		String emailSubject = null;
+		// If the list is empty then the processor is not executed at all during the specified sla time.
+		if (null == listfsmStateVal || listfsmStateVal.isEmpty()) {
+
+		    log("The processor {} was not executed with in the specified SLA configuration time", processor.getProcsrName());
+			slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
+			emailSubject = (isCustomerSLA) ? String.format(SLA_VIOLATION_SUBJECT, slaConfigurationTime) : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
+            EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
+			log("The SLA violations are notified to the user by sending email for the prcocessor {}", processor.getProcsrName());
+			return;
+		}
+
+		// If the processor is executed during the speicified sla time but got failed.
+		if(null != listfsmStateVal && !listfsmStateVal.isEmpty()) {
+			for (FSMStateValue fsmStateVal : listfsmStateVal) {
+
+				if (fsmStateVal.getValue().equals(ExecutionState.FAILED.value())) {
+
+				    log("The processor {} was executed but got failed with in the specified SLA configuration time", processor.getProcsrName());
+					slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
+					emailSubject = (isCustomerSLA) ? String.format(SLA_VIOLATION_SUBJECT, slaConfigurationTime) : String.format(SLA_MBX_VIOLATION_SUBJECT, slaConfigurationTime);
+	                EmailUtil.sendEmail(processor, emailSubject, emailSubject, true);
+					log("The SLA violations are notified to the user by sending email or the prcocessor {}", processor.getProcsrName());
+				}
+			}
+
+		}
+
+	}
+
+	private void validateCustomerSLAOfFileWriter(Processor processor, String timeToPickUpFilePostedByMailbox, List<String> slaViolatedMailboxes) throws Exception {
+
+		FSMStateDAO procDAO = new FSMStateDAOBase();
+		List<String> files = null;
+
+		log("Finding the most recent successful execution of processor {}", processor.getProcsrName());
+		List<FSMStateValue> jobsExecuted = procDAO.findMostRecentSuccessfulExecutionOfProcessor(processor.getPguid(), processor.getProcessorType());
+
+		// if no jobs were successfully executed for this processor continue to next one
+		if (null == jobsExecuted || jobsExecuted.isEmpty()) {
+			log("There are no succesful executions for this processor {} in recent time", processor.getProcsrName());
+			return;
+		}
+
+		FSMStateValue mostRecentExecution = jobsExecuted.get(0) ;
+		Timestamp processorLastExecutionTime = mostRecentExecution.getCreatedDate();
+		log("The most recent successful execution of processor {} is on {}", processor.getProcsrName(), processorLastExecutionTime);
+
+		log("Finding non sla verified file staged events");
+		List<FSMState> nonSLAVerifiedFileStagedEvents = procDAO.findNonSLAVerifiedFileStagedEvents(processor.getPguid(), processorLastExecutionTime, processor.getProcessorType());
+
+		// There are no non sla verified file staged events.
+		if (null != nonSLAVerifiedFileStagedEvents && nonSLAVerifiedFileStagedEvents.isEmpty()) {
+		    log("There are no non sla verified file staged events for the processor {}", processor.getProcsrName());
+		}
+		for (FSMState fileStagedEvent : nonSLAVerifiedFileStagedEvents) {
+
+			Timestamp slaConfiguredTime = getCustomerSLAConfigurationAsTimeStamp(timeToPickUpFilePostedByMailbox, processorLastExecutionTime);
+
+			// check whether the sla verification required based on the
+			// last execution of processor and sla configuration in the mailbox
+			if (isSLACheckRequired(processorLastExecutionTime, slaConfiguredTime)) {
+				LOG.debug("customer sla verification is required");
+				files = doCustomerSLAVerification(processor);
+				// update the sla verification status as sla verified
+				fileStagedEvent.setSlaVerificationStatus(SLAVerificationStatus.SLA_VERIFIED.getCode());
+				procDAO.merge(fileStagedEvent);
+			} else {
+				LOG.debug("customer sla verification is not required");
+			}
+		}
+
+		// send an email if there is a sla violation for the current iterating processor
+		if (files != null && !files.isEmpty()) {
+
+			slaViolatedMailboxes.add(processor.getMailbox().getMbxName());
+			String emailSubject = String.format(SLA_VIOLATION_SUBJECT, timeToPickUpFilePostedByMailbox);
+			StringBuilder body = new StringBuilder(emailSubject)
+				.append("\n\n")
+				.append("Files : ")
+				.append(StringUtils.join(files.toArray()));
+			EmailUtil.sendEmail(processor, emailSubject, body.toString(), true);
+		}
+
+	}
 	/**
 	 * Method to convert sla configuration property from mailbox into TimeStamp value
 	 *

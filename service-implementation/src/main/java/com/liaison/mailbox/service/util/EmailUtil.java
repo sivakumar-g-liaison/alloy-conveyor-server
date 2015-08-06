@@ -9,12 +9,14 @@
  */
 package com.liaison.mailbox.service.util;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -26,6 +28,8 @@ import com.liaison.mailbox.service.core.email.EmailNotifier;
 public class EmailUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(EmailUtil.class);
+
+    private static final String SEPARATOR = ",";
 
     /**
      * Method to send emails according to the details provided in the email helper dto.
@@ -46,8 +50,15 @@ public class EmailUtil {
         if (processor == null) {
             return;
         }
+        List<String> emailAddress = null;
+        if (!isSuccess) {
 
-        List<String> emailAddress = processor.getEmailAddress();
+           String internalEmail = (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.ERROR_RECEIVER));
+           emailAddress = (!MailBoxUtil.isEmpty(internalEmail)) ? Arrays.asList(internalEmail.split(SEPARATOR)) : null;
+        } else {
+        	emailAddress = processor.getEmailAddress();
+        }
+
         if (null == emailAddress || emailAddress.isEmpty()) {
             LOGGER.info("Email Address is not configured.");
             return;
