@@ -262,3 +262,6 @@ com.liaison.jms.send.attempts.dropboxQueue=-1
 sftp.group.name=ext_sftp_users
 ftp.group.name=ext_ftp_users
 ftps.group.name=ext_ftps_users
+
+#internal engineering DL to notify any failure cases 
+com.liaison.mailbox.error.receiver = vnagarajan@liaison.com,gnattarshah@liaison.com

@@ -9,12 +9,14 @@
  */
 package com.liaison.mailbox.service.util;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
@@ -47,7 +49,14 @@ public class EmailUtil {
             return;
         }
 
-        List<String> emailAddress = processor.getEmailAddress();
+        List<String> emailAddress = null;
+        if (isSuccess) {
+           emailAddress = processor.getEmailAddress();
+        } else {
+            String[] internalEmail = (MailBoxUtil.getEnvironmentProperties().getStringArray(MailBoxConstants.ERROR_RECEIVER));
+            emailAddress = Arrays.asList(internalEmail);
+        }
+
         if (null == emailAddress || emailAddress.isEmpty()) {
             LOGGER.info("Email Address is not configured.");
             return;

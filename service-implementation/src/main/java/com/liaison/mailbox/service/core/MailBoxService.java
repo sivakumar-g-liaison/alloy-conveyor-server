@@ -218,14 +218,10 @@ public class MailBoxService {
 			LOG.info("The triggered profile name is {}", dto.getProfileName());
 			LOG.info("The execution id is {}", executionId);
 
-			// determine SLA status
-			String slaVerificationStatus = (processor instanceof RemoteUploader)
-					   ? SLAVerificationStatus.SLA_NOT_VERIFIED.getCode()
-					   : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
 			// Initiate FSM
 			processor = processorDAO.find(Processor.class, processorId);
 			ProcessorStateDTO processorQueued = new ProcessorStateDTO();
-			processorQueued.setValues(executionId, processor,	dto.getProfileName(), ExecutionState.QUEUED, slaVerificationStatus);
+			processorQueued.setValues(executionId, processor,	dto.getProfileName(), ExecutionState.QUEUED, SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode());
 			fsm.addDefaultStateTransitionRules(processorQueued);
 
 			// retrieve the processor execution status from run-time DB
@@ -400,6 +396,11 @@ public class MailBoxService {
                 throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
             }
 
+			// determine SLA status
+			String slaVerificationStatus = (processor instanceof RemoteUploader)
+					   ? SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode()
+					   : SLAVerificationStatus.SLA_NOT_VERIFIED.getCode();
+
             // Initiate FSM Starts
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
@@ -408,7 +409,7 @@ public class MailBoxService {
                     processor,
                     workTicket.getFileName(),
                     ExecutionState.STAGED,
-                    SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
+                    slaVerificationStatus);
             fsm.addState(processorStaged);
 
             processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
@@ -441,7 +442,7 @@ public class MailBoxService {
             dao.persistStagedFile(workTicket, processor.getPguid());
 
             // send notification for successful file staging
-            String emailSubject = EmailUtil.constructSubject(processor, true);
+            String emailSubject = workTicket.getFileName() + "' is available for pick up";
             String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
             EmailUtil.sendEmail(processor, emailSubject, emailBody, true);
             LOG.info("#################################################################");

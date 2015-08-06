@@ -401,7 +401,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		ftpsRequest.disconnect();
 		LOGGER.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
 		return isFileExists;
-		}
+
+	}
 
 	@Override
 	public Object getClient() {

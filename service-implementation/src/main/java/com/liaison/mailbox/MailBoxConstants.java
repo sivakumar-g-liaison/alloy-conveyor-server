@@ -114,7 +114,7 @@ public interface MailBoxConstants {
 	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
 	public final static String KEY_LENS_VISIBILITY = "LENS_VISIBILITY";
-	
+
 	public final static String PIPELINE_FULLY_QUALIFIED_PACKAGE = "com.liaison.service.core.edm.model.Pipeline";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
 
@@ -294,4 +294,7 @@ public interface MailBoxConstants {
     public static final String FILE_QUEUEING_FAILED = "File content queued for transfer got failed";
     public static final String FILE_STAGING_FAILED = "File staging got failed after consuming from queue";
     public static final String FILE_DOWNLOADING_FAILED = "File downloading got failed";
+
+    // internal dl for error notification
+    public static final String ERROR_RECEIVER = "com.liaison.mailbox.error.receiver";
 }

@@ -335,7 +335,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 	 }
 
-	public boolean checkFileExistence() throws MailBoxServicesException, CertificateEncodingException, UnrecoverableKeyException, JsonParseException, OperatorCreationException, KeyStoreException, NoSuchAlgorithmException, LiaisonException, IOException, JAXBException, URISyntaxException, SymmetricAlgorithmException, JSONException, CMSException, BootstrapingFailedException {
+	public boolean checkFileExistence() throws Exception {
 
 		LOGGER.debug ("Entering file Existence check for SFTP Uploader processor");
 		boolean isFileExists = false;
