@@ -185,9 +185,9 @@ public class DropboxStagedFilesService {
             MailBoxConfigurationDAO mailboxDAO = new MailBoxConfigurationDAOBase();
             MailBox mailbox = mailboxDAO.find(MailBox.class, stagedFileDTO.getMailboxGuid());
             if (mailbox == null || EntityStatus.INACTIVE.name().equals(mailbox.getMbxStatus())) {
-                StringBuilder msg = new StringBuilder().append("Either given mailbox(")
+                StringBuilder msg = new StringBuilder().append("The given mailbox(")
                         .append(stagedFileDTO.getMailboxGuid())
-                        .append(") is not avaialble in the system or inactive");
+                        .append(") is inactive or not avaialble in the system");
                 throw new MailBoxServicesException(msg.toString(), Response.Status.NOT_FOUND);
             }
 
@@ -223,7 +223,7 @@ public class DropboxStagedFilesService {
 
 			// glass log in case of failure during file staging
 			if (null != glassMessage) {
-				glassMessage.logProcessingStatus(StatusType.ERROR, e.getMessage());
+				glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage());
 				glassMessage.setStatus(ExecutionState.FAILED);
 				transactionVisibilityClient.logToGlass(glassMessage);
 			}

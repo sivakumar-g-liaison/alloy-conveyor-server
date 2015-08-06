@@ -302,11 +302,12 @@ public class DropboxFileTransferService {
 	    } catch (Exception e) {
 	        LOG.error(MailBoxUtil.constructMessage(processor, fileTransferDTO.getTransferProfileName(), e.getMessage()), e);
 	        // Log error status
-	        if (null != glassMessage) {
+	        // DO NOT THROW ERROR TVAPI FROM GATEWAY BCS IT ISN"T USEFUL
+	        /*if (null != glassMessage) {
     	        glassMessage.logProcessingStatus(StatusType.ERROR, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload failed due to error : " + e.getMessage());
     	        glassMessage.setStatus(ExecutionState.FAILED);
     	        new TransactionVisibilityClient().logToGlass(glassMessage);
-	        }
+	        }*/
 	        throw e;
 	    }
 	}
