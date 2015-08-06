@@ -18,8 +18,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -363,9 +361,9 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 	 * @throws CMSException
 	 * @throws BootstrapingFailedException
 	 */
-	public List<String> checkFileExistence() throws Exception {
+	public boolean checkFileExistence() throws Exception {
 
-		/*LOGGER.debug ("Entering file Existence check for FTP Uploader processor");
+		LOGGER.debug ("Entering file Existence check for FTP Uploader processor");
 		G2FTPSClient ftpsRequest = (G2FTPSClient) getClient();
 
 		boolean isFileExists = false;
@@ -402,23 +400,8 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 		}
 		ftpsRequest.disconnect();
 		LOGGER.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
-		return isFileExists;*/
+		return isFileExists;
 
-	    LOGGER.debug ("Entering file existence check for ftp(s) uploader processor");
-        String fileWriteLocation = getFileWriteLocation();
-        List<String> fileList = new ArrayList<>();
-        if (null == fileWriteLocation) {
-            LOGGER.error("filewrite location not configured for processor {}", configurationInstance.getProcsrName());
-            throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.FILEWRITE_LOCATION, Response.Status.CONFLICT);
-        }
-        File fileWriteLocationDirectory = new File(fileWriteLocation);
-        if (fileWriteLocationDirectory.isDirectory() && fileWriteLocationDirectory.exists()) {
-            fileList = Arrays.asList(fileWriteLocationDirectory.list());
-        } else {
-            throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
-        }
-        LOGGER.debug("File existence check completed for FTP(S) Uploader. File exists - {}", fileList.isEmpty());
-        return fileList;
 	}
 
 	@Override

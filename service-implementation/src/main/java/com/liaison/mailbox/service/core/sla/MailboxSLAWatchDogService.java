@@ -71,10 +71,8 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
-import com.liaison.mailbox.service.core.processor.FTPSRemoteUploader;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
-import com.liaison.mailbox.service.core.processor.SFTPRemoteUploader;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -806,13 +804,13 @@ public class MailboxSLAWatchDogService {
             if (processorInstance instanceof com.liaison.mailbox.service.core.processor.FileWriter) {
             	com.liaison.mailbox.service.core.processor.FileWriter fileWriterProcessor = (com.liaison.mailbox.service.core.processor.FileWriter) processorInstance;
             	return fileWriterProcessor.checkFileExistence();
-            } else if (processorInstance instanceof FTPSRemoteUploader) {
+            } /*else if (processorInstance instanceof FTPSRemoteUploader) {
                 FTPSRemoteUploader ftpsRemoteUploader = (FTPSRemoteUploader) processorInstance;
                 return ftpsRemoteUploader.checkFileExistence();
             } else if (processorInstance instanceof SFTPRemoteUploader) {
                 SFTPRemoteUploader sftpRemoteUploader = (SFTPRemoteUploader)processorInstance;
                 return sftpRemoteUploader.checkFileExistence();
-            }
+            }*/
 
         } catch (Exception e) {
 
