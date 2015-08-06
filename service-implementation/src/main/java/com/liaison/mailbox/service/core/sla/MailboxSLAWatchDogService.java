@@ -597,7 +597,6 @@ public class MailboxSLAWatchDogService {
 
 		LOG.debug("Entering into validateCustomerSLARule.");
 		List<String> slaViolatedMailboxes = new ArrayList<String>();
-		String timeToPickUpFilePostedByMailbox = null;
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		LOG.debug("Retrieving processor of type file writer and uploaders");
 		List <Processor> processors = processorDAO.findProcessorsByType(getCannonicalNamesofSpecificProcessors(CUSTOMER_SLA));
@@ -606,6 +605,7 @@ public class MailboxSLAWatchDogService {
 
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
+			String timeToPickUpFilePostedByMailbox = null;
 			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving the customer SLA configuration from Mailbox");
 			for (MailBoxProperty property : mailboxProps) {
