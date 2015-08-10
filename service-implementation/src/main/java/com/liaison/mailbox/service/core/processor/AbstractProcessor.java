@@ -914,10 +914,6 @@ public abstract class AbstractProcessor implements ProcessorJavascriptI {
 		return true;
 	}
 
-	@Override
-	public void updateState() {
-	}
-
 	/**
 	 * Method to create the given path and assign proper group and permissions to the created folders
 	 *
