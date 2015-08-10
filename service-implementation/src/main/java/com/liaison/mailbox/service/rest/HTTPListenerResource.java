@@ -46,6 +46,7 @@ import com.liaison.framework.RuntimeProcessResource;
 import com.liaison.framework.util.IdentifierUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.processor.HTTPAsyncProcessor;
@@ -218,12 +219,19 @@ public class HTTPListenerResource extends AuditedResource {
                     logger.info("HTTP(S)-SYNC : for the mailbox id {} - End", mailboxPguid);
 					return syncResponse;
 				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
-					glassMessage.setStatus(ExecutionState.FAILED);
-					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logFourthCornerTimestamp();
+
+				    String errorMessage = e.getMessage();
+					logger.error(errorMessage, e);
+
+					//MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
+					if (!Messages.PAYLOAD_ALREADY_EXISTS.value().equals(errorMessage)
+                            && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)) {
+                        // Log error status
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
+                        glassMessage.setStatus(ExecutionState.FAILED);
+                        transactionVisibilityClient.logToGlass(glassMessage);
+                        glassMessage.logFourthCornerTimestamp();
+                    }
 					throw new LiaisonRuntimeException(e.getMessage());
 				}
 			}
@@ -345,13 +353,19 @@ public class HTTPListenerResource extends AuditedResource {
 							String.format("Payload accepted as process ID '%s'", workTicket.getGlobalProcessId())).build();
 
 				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-					// Log error status
-					glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage());
-					glassMessage.setStatus(ExecutionState.FAILED);
-					transactionVisibilityClient.logToGlass(glassMessage);
-					glassMessage.logFourthCornerTimestamp();
-					throw new LiaisonRuntimeException(e.getMessage());
+				    String errorMessage = e.getMessage();
+                    logger.error(errorMessage, e);
+
+                    //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
+                    if (!Messages.PAYLOAD_ALREADY_EXISTS.value().equals(errorMessage)
+                            && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)) {
+                        // Log error status
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Async Request Failed: " + e.getMessage());
+                        glassMessage.setStatus(ExecutionState.FAILED);
+                        transactionVisibilityClient.logToGlass(glassMessage);
+                        glassMessage.logFourthCornerTimestamp();
+                    }
+                    throw new LiaisonRuntimeException(e.getMessage());
 				}
 			}
 		};
