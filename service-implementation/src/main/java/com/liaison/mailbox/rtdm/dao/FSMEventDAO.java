@@ -19,12 +19,11 @@ import com.liaison.mailbox.rtdm.model.FSMEvent;
  * @author OFS
  * 
  */
-@NamedQuery(name = FSMEventDAO.FIND_INTERRUPT_EVENT,
-		query = "SELECT eventVal FROM FSMEvent eventVal WHERE eventVal.data =:" + FSMEventDAO.EXECUTION_ID)
+
 
 public interface FSMEventDAO extends GenericDAO<FSMEvent> {
 
-	public static final String FIND_INTERRUPT_EVENT = "findInterruptEvent";
+	public static final String FIND_INTERRUPT_EVENT = "FSMEvent.findInterruptEvent";
 	public static final String EXECUTION_ID = "execution_id";
 	
 	/**

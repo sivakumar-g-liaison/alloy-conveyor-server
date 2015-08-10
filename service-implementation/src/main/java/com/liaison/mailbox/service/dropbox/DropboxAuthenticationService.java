@@ -33,9 +33,9 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.datanucleus.util.Base64;
 
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
@@ -258,7 +258,7 @@ public class DropboxAuthenticationService {
 		if (UMClient.isSuccessful()) {
 			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::")
 					.append(serviceRequest.getLoginId()).toString();
-			String encryptedEncodedToken = new String(Base64.encode(EncryptionUtil.encrypt(mailboxTokenWithLoginId,
+			String encryptedEncodedToken = new String(Base64.encodeBase64String(EncryptionUtil.encrypt(mailboxTokenWithLoginId,
 					true)));
 			return encryptedEncodedToken;
 		}

@@ -12,6 +12,7 @@ package com.liaison.mailbox.dtdm.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 /**
  * 
@@ -25,6 +26,7 @@ public class RemoteDownloader extends Processor {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
+	@Transient
 	public Class getEntityClass() {
 		return this.getClass();
 	}

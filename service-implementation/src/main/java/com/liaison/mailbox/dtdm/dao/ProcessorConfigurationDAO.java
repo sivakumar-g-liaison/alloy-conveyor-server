@@ -22,37 +22,12 @@ import com.liaison.mailbox.dtdm.model.Processor;
  * @author OFS
  * 
  */
-@NamedQueries({
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,
-				query = "select processor from Processor processor"
-						+ " inner join processor.scheduleProfileProcessors schd_prof_processor"
-						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
-						+ " where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME
-						+ " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
-						+ " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
-						+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
-						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-						+ " order by " + ProcessorConfigurationDAO.PROF_NAME), 
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_COUNT,
-						query = "select count(processor) from Processor processor"
-								+ " inner join processor.mailbox mbx"
-								+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
-						query = "select processor from Processor processor"
-								+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX, 
-						query = "SELECT processor from Processor processor"
-								+ " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
-								+ ProcessorConfigurationDAO.PGUID 
-								+ " and processor.procsrName like :" 
-								+ ProcessorConfigurationDAO.PRCSR_NAME)
-})
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
-	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
-	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
-	public static final String FIND_ALL_ACTIVE_PROCESSORS = "findAllActiveProcessors";
-	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "findProcessorByNameAndMbx";
+	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "Processor.findProcessorByProfileAndMbxNamePattern";
+	public static final String FIND_PROCESSOR_COUNT = "Processor.findProcessorCountByMailboxId";
+	public static final String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
+	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";

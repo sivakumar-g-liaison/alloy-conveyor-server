@@ -22,16 +22,12 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
  * @author OFS
  * 
  */
-@NamedQueries({
-		@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"
-				+ ProfileConfigurationDAO.PROF_NAME),
-		@NamedQuery(name = ProfileConfigurationDAO.GET_ALL, query = "select schdprof from ScheduleProfilesRef schdprof order by schdprof.schProfName")})
 public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef> {
 
 	public static final String PGUID = "pguid";
-	public static final String GET_ALL = "getAll";
+	public static final String GET_ALL = "ScheduleProfilesRef.getAll";
 	public static final String PROF_NAME = "sch_prof_name";
-	public static final String GET_PROFILE_BY_NAME = "getProfileByName";
+	public static final String GET_PROFILE_BY_NAME = "ScheduleProfilesRef.getProfileByName";
 	public static final String STATUS = "status";
 	public static final String TENANCY_KEY = "tenancy_key";
 	

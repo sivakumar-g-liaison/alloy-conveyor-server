@@ -19,11 +19,17 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.rtdm.dao.FSMStateValueDAO;
 
 /**
  * The persistent class for the FSM_STATE_VALUE database table.
@@ -32,6 +38,10 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name = "FSM_STATE_VALUE")
+@NamedQueries({
+    @NamedQuery(name=FSMStateValueDAO.FIND_FSM_STATE_VALUE_BY_NAME,
+            query="SELECT val FROM FSMStateValue val WHERE val.value = :" + FSMStateValueDAO.NAME)
+})
 public class FSMStateValue implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
@@ -76,6 +86,7 @@ public class FSMStateValue implements Identifiable {
 	}
 	
 	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.EAGER)
+	@Fetch(value = FetchMode.SELECT)
 	public List<FSMTransitionState> getNewTransitionStates() {
 		return newTransitionStates;
 	}
@@ -85,6 +96,7 @@ public class FSMStateValue implements Identifiable {
 	}
 
 	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.EAGER)
+	@Fetch(value = FetchMode.SELECT)
 	public List<FSMTransitionState> getOldTransitionStates() {
 		return oldTransitionStates;
 	}

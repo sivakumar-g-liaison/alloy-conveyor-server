@@ -23,13 +23,18 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.enums.ProcessorType;
 
 /**
@@ -39,7 +44,32 @@ import com.liaison.mailbox.enums.ProcessorType;
  */
 @Entity
 @Table(name = "PROCESSOR")
-@NamedQuery(name = "Processor.findAll", query = "SELECT p FROM Processor p")
+@NamedQueries({
+	@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,
+			query = "select processor from Processor processor"
+					+ " inner join processor.scheduleProfileProcessors schd_prof_processor"
+					+ " inner join schd_prof_processor.scheduleProfilesRef profile"
+					+ " where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME
+					+ " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
+					+ " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
+					+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
+					+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
+					+ " order by " + ProcessorConfigurationDAO.PROF_NAME), 
+	@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_COUNT,
+					query = "select count(processor) from Processor processor"
+							+ " inner join processor.mailbox mbx"
+							+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
+	@NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
+					query = "select processor from Processor processor"
+							+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS),
+	@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX, 
+					query = "SELECT processor from Processor processor"
+							+ " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
+							+ ProcessorConfigurationDAO.PGUID 
+							+ " and processor.procsrName like :" 
+							+ ProcessorConfigurationDAO.PRCSR_NAME),
+	@NamedQuery(name = "Processor.findAll", query = "SELECT p FROM Processor p")
+})
 @DiscriminatorColumn(name = "TYPE", discriminatorType = DiscriminatorType.STRING, length = 128)
 public class Processor implements Identifiable {
 
@@ -74,6 +104,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ProcessorProperty
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	@Fetch(value = FetchMode.SELECT)
 	public List<ProcessorProperty> getDynamicProperties() {
 		return dynamicProperties;
 	}
@@ -150,6 +181,7 @@ public class Processor implements Identifiable {
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
+	@Fetch(value = FetchMode.SELECT)
 	public List<Credential> getCredentials() {
 		return this.credentials;
 	}
@@ -176,6 +208,7 @@ public class Processor implements Identifiable {
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
+	@Fetch(value = FetchMode.SELECT)
 	public List<Folder> getFolders() {
 		return this.folders;
 	}
@@ -199,8 +232,9 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBox
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
+	@Fetch(value = FetchMode.SELECT)
 	public MailBox getMailbox() {
 		return this.mailbox;
 	}
@@ -210,8 +244,9 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Service instance id
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
+	@Fetch(value = FetchMode.SELECT)
 	public ServiceInstance getServiceInstance() {
 		return serviceInstance;
 	}
@@ -223,6 +258,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ScheduleProfileProcessor
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	@Fetch(value = FetchMode.SELECT)
 	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
 		return this.scheduleProfileProcessors;
 	}
