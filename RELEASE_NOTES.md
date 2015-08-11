@@ -1,3 +1,6 @@
+2.4.0-SNAPSHOT
+-------------------------------
+
 2.3.0
 -------------------------------
 GWUD-69: Fix Dropbox TVAPI & Glass Message logging
