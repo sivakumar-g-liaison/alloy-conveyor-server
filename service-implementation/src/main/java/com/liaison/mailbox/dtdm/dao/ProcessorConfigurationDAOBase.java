@@ -400,30 +400,6 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		return processors;
 	}
 
-	private Class<?> getProcessorClass(ProcessorType processorType) {
-
-		Class <?> processorClass = null;
-		switch(processorType.getCode().toLowerCase()) {
-
-		case "httpsyncprocessor":
-			processorClass = HTTPSyncProcessor.class;
-			break;
-		case "httpasyncprocessor":
-			processorClass = HTTPAsyncProcessor.class;
-			break;
-		case  "sweeper":
-			processorClass = Sweeper.class;
-			break;
-		case "remoteuploader":
-			processorClass = RemoteUploader.class;
-			break;
-		case "filewriter":
-			processorClass = FileWriter.class;
-			break;
-		}
-		return processorClass;
-	}
-
 	public List<Processor> findProcessorByType(ProcessorType type) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
@@ -438,7 +414,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
 					.append(" and processor.procsrStatus = :" + STATUS)
 					.append(" and mbx.mbxStatus = :" + STATUS);
-			Class <?> processorType = getProcessorClass(type);
+			Class <?> processorType = getProcessorClass(type.getCode());
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PROCESSOR_TYPE, processorType)
@@ -743,7 +719,9 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			predicateList.add(" LOWER(processor.procsrProtocol) = :" + PROTOCOL);
 		}
 		if (!MailBoxUtil.isEmpty(searchDTO.getProcessorType())) {
-			predicateList.add(" TYPE(processor) = :" + PROCESSOR_TYPE);
+		    List<String> list = new ArrayList<String> ();
+		    list.add(getProcessorClass(searchDTO.getProcessorType()).getCanonicalName());
+			predicateList.add(QueryBuilderUtil.constructSqlStringForTypeOperator(list));
 		}
 
 		for (int i = 0; i < predicateList.size(); i++) {			
@@ -759,22 +737,16 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 	public Query setParamsForProcessorSearchQuery(GenericSearchFilterDTO searchDTO, Query query) {
 		
-        if (!MailBoxUtil.isEmpty(searchDTO.getProcessorType())) {
-            query.setParameter(PROCESSOR_TYPE, getProcessorClass(searchDTO.getProcessorType()));
-        }
         if (!MailBoxUtil.isEmpty(searchDTO.getMbxName())) {
-
             query.setParameter(MBX_NAME, "%" + searchDTO.getMbxName() + "%");
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getFolderPath())) {
-
             query.setParameter(FOLDER_URI, "%" + searchDTO.getFolderPath() + "%");
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getPipelineId())) {
             query.setParameter(PIPELINE_ID, "%" + searchDTO.getPipelineId() + "%");
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProfileName())) {
-
             query.setParameter(PROF_NAME, "%" + searchDTO.getProfileName().toLowerCase() + "%");
         }
         if (!MailBoxUtil.isEmpty(searchDTO.getProtocol())) {
