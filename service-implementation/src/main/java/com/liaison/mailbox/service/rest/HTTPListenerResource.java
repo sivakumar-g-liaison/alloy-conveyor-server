@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.service.rest;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -182,25 +183,30 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
-					//Fix for GMB-502
-					logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
-
-					String processId = IdentifierUtil.getUuid();
-					glassMessage.setProcessId(processId);
+					glassMessage.setProcessId(IdentifierUtil.getUuid());
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 
-					// Log First corner
-					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
-					// Log status running
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");
-					transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
-
-					logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
                     if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
 					    Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
 					    workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
 					}
+
+                    // persist payload in spectrum
+                    try (InputStream inputStream = request.getInputStream()) {
+                        StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
+                        logger.info("HTTP(S)-SYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+                    }
+
+                    //Fix for GMB-502
+                    logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+
+                    //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
+                    // Log First corner
+                    glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
+                    // Log status running
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");
+                    transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
 							httpListenerProperties, request.getContentType(), mailboxPguid);
@@ -316,10 +322,6 @@ public class HTTPListenerResource extends AuditedResource {
 					WorkTicket workTicket = new WorkTicketUtil().createWorkTicket(getRequestProperties(request),
 							getRequestHeaders(request), mailboxPguid, httpListenerProperties);
 
-					//Fix for GMB-502
-					logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
-
-					String processId = IdentifierUtil.getUuid();
 					glassMessage.setCategory(ProcessorType.HTTPASYNCPROCESSOR);
 					glassMessage.setProtocol(Protocol.HTTPASYNCPROCESSOR.getCode());
 					glassMessage.setGlobalPId(workTicket.getGlobalProcessId());
@@ -328,23 +330,30 @@ public class HTTPListenerResource extends AuditedResource {
 					glassMessage.setPipelineId(workTicket.getPipelineId());
 					glassMessage.setInAgent(GatewayType.REST);
 					glassMessage.setInSize((long) request.getContentLength());
-					glassMessage.setProcessId(processId);
+					glassMessage.setProcessId(IdentifierUtil.getUuid());
 
-					// Log FIRST corner
-					glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
-
-					// Log running status
-					glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success");
-
-					// Log TVA status
-					transactionVisibilityClient.logToGlass(glassMessage);
                     if (httpListenerProperties.containsKey(MailBoxConstants.TTL_IN_SECONDS)) {
                         Integer ttlNumber = Integer.parseInt(httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS));
                         workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(MailBoxConstants.TTL_UNIT_SECONDS, ttlNumber));
                     }
-					StorageUtilities.storePayload(request.getInputStream(), workTicket, httpListenerProperties, false);
+
+                    // persist payload in spectrum
+                    try (InputStream inputStream = request.getInputStream()) {
+                        StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
+                        logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
+                    }
+
+                    //Fix for GMB-502
+                    logGlobalProcessId(this.getClass(), workTicket.getGlobalProcessId(), workTicket.getPipelineId());
+                    //MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
+                    // Log FIRST corner
+                    glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
+                    // Log running status
+                    glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Async request success");
+                    // Log TVA status
+                    transactionVisibilityClient.logToGlass(glassMessage);
+
 					workTicket.setProcessMode(ProcessMode.ASYNC);
-					logger.info("HTTP(S)-ASYNC : GlobalPID {}", workTicket.getGlobalProcessId());
 					asyncProcessor.processWorkTicket(workTicket, mailboxPguid, glassMessage);
 					logger.info("HTTP(S)-ASYNC : GlobalPID {}, Posted workticket to Service Broker", workTicket.getGlobalProcessId());
 
