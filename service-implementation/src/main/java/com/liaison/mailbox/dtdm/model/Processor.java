@@ -110,7 +110,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ProcessorProperty
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@Fetch(FetchMode.SELECT)
+	@Fetch(FetchMode.JOIN)
 	public List<ProcessorProperty> getDynamicProperties() {
 		return dynamicProperties;
 	}
@@ -187,7 +187,7 @@ public class Processor implements Identifiable {
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
-	@Fetch(FetchMode.SELECT)
+	@Fetch(FetchMode.JOIN)
 	public List<Credential> getCredentials() {
 		return this.credentials;
 	}
@@ -214,7 +214,7 @@ public class Processor implements Identifiable {
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
-	@Fetch(FetchMode.SELECT)
+	@Fetch(FetchMode.JOIN)
 	public List<Folder> getFolders() {
 		return this.folders;
 	}
@@ -240,7 +240,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to MailBox
 	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
-	@Fetch(FetchMode.SELECT)
+	@Fetch(FetchMode.JOIN)
 	public MailBox getMailbox() {
 		return this.mailbox;
 	}
@@ -252,7 +252,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to Service instance id
 	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
-	@Fetch(FetchMode.SELECT)
+	@Fetch(FetchMode.JOIN)
 	public ServiceInstance getServiceInstance() {
 		return serviceInstance;
 	}
@@ -264,7 +264,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ScheduleProfileProcessor
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@Fetch(FetchMode.SELECT)
+	@Fetch(FetchMode.JOIN)
 	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
 		return this.scheduleProfileProcessors;
 	}
