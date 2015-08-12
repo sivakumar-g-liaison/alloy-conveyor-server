@@ -68,7 +68,6 @@ public class ScheduleProfileProcessor implements Identifiable {
 	// bi-directional many-to-one association to ScheduleProfilesRef
 	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SCHED_PROFILE_GUID", nullable = false)
-	@Fetch(value = FetchMode.SELECT)
 	public ScheduleProfilesRef getScheduleProfilesRef() {
 		return this.scheduleProfilesRef;
 	}

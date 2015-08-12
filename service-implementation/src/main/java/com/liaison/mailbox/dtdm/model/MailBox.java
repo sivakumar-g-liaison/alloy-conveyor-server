@@ -117,7 +117,6 @@ public class MailBox implements Identifiable {
 	// bi-directional many-to-one association to MailBoxProperty
 	@OneToMany(mappedBy = "mailbox", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@Fetch(value = FetchMode.SELECT)
 	public List<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
 	}
@@ -152,7 +151,6 @@ public class MailBox implements Identifiable {
 	}
 	
 	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	@Fetch(value = FetchMode.SELECT)
 	public List<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
 	}

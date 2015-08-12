@@ -86,7 +86,6 @@ public class FSMStateValue implements Identifiable {
 	}
 	
 	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.EAGER)
-	@Fetch(value = FetchMode.SELECT)
 	public List<FSMTransitionState> getNewTransitionStates() {
 		return newTransitionStates;
 	}
@@ -96,7 +95,6 @@ public class FSMStateValue implements Identifiable {
 	}
 
 	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.EAGER)
-	@Fetch(value = FetchMode.SELECT)
 	public List<FSMTransitionState> getOldTransitionStates() {
 		return oldTransitionStates;
 	}
