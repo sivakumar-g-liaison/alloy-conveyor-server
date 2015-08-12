@@ -33,6 +33,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.IndexColumn;
 
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.MailBoxConstants;
@@ -111,6 +112,7 @@ public class Processor implements Identifiable {
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
+	@IndexColumn(name = "PGUID")
 	public List<ProcessorProperty> getDynamicProperties() {
 		return dynamicProperties;
 	}
@@ -188,6 +190,7 @@ public class Processor implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
+	@IndexColumn(name = "PGUID")
 	public List<Credential> getCredentials() {
 		return this.credentials;
 	}
@@ -215,6 +218,7 @@ public class Processor implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
+	@IndexColumn(name = "PGUID")
 	public List<Folder> getFolders() {
 		return this.folders;
 	}
@@ -241,6 +245,7 @@ public class Processor implements Identifiable {
 	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
 	@Fetch(FetchMode.JOIN)
+	@IndexColumn(name = "PGUID")
 	public MailBox getMailbox() {
 		return this.mailbox;
 	}
@@ -253,6 +258,7 @@ public class Processor implements Identifiable {
 	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
 	@Fetch(FetchMode.JOIN)
+	@IndexColumn(name = "PGUID")
 	public ServiceInstance getServiceInstance() {
 		return serviceInstance;
 	}
@@ -265,6 +271,7 @@ public class Processor implements Identifiable {
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
+	@IndexColumn(name = "PGUID")
 	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
 		return this.scheduleProfileProcessors;
 	}
