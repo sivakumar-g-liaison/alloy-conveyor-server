@@ -13,8 +13,10 @@ package com.liaison.mailbox.service.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -177,7 +179,7 @@ public class MailBoxConfigurationService {
 			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(),
 					serviceInstance.getPguid());
 
-			List<MailboxServiceInstance> mbxServiceInstances = new ArrayList<MailboxServiceInstance>();
+			Set<MailboxServiceInstance> mbxServiceInstances = new HashSet<MailboxServiceInstance>();
 			if (mailboxServiceInstance == null) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
@@ -239,11 +241,11 @@ public class MailBoxConfigurationService {
 
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
 			if (addConstraint) {
-				List<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(
+				Set<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(
 						mailBox.getPguid(), serviceInstanceId);
 				mailBox.setMailboxProcessors(filteredProcessor);
 			} else {
-				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
+				Set<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
 				mailBox.setMailboxProcessors(processors);
 			}
 

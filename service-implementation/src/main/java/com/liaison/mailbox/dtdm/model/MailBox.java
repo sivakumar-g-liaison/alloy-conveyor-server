@@ -10,7 +10,7 @@
 
 package com.liaison.mailbox.dtdm.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -59,9 +59,9 @@ public class MailBox implements Identifiable {
 	private String mbxName;
 	private String mbxStatus;
 	private String shardKey;
-	private List<MailBoxProperty> mailboxProperties;
-	private List<Processor> mailboxProcessors;
-	private List<MailboxServiceInstance> mailboxServiceInstances;
+	private Set<MailBoxProperty> mailboxProperties;
+	private Set<Processor> mailboxProcessors;
+	private Set<MailboxServiceInstance> mailboxServiceInstances;
 	private String tenancyKey;
 	
 
@@ -118,11 +118,11 @@ public class MailBox implements Identifiable {
 	@OneToMany(mappedBy = "mailbox", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@Fetch(FetchMode.SELECT)
-	public List<MailBoxProperty> getMailboxProperties() {
+	public Set<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
 	}
 
-	public void setMailboxProperties(List<MailBoxProperty> mailboxProperties) {
+	public void setMailboxProperties(Set<MailBoxProperty> mailboxProperties) {
 		this.mailboxProperties = mailboxProperties;
 	}
 
@@ -143,21 +143,21 @@ public class MailBox implements Identifiable {
 	// bi-directional many-to-one association to MailBoxProcessor
 	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<Processor> getMailboxProcessors() {
+	public Set<Processor> getMailboxProcessors() {
 		return this.mailboxProcessors;
 	}
 
-	public void setMailboxProcessors(List<Processor> mailboxProcessors) {
+	public void setMailboxProcessors(Set<Processor> mailboxProcessors) {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 	
 	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@Fetch(FetchMode.SELECT)
-	public List<MailboxServiceInstance> getMailboxServiceInstances() {
+	public Set<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
 	}
 
-	public void setMailboxServiceInstances(List<MailboxServiceInstance> mailboxServiceInstances) {
+	public void setMailboxServiceInstances(Set<MailboxServiceInstance> mailboxServiceInstances) {
 		this.mailboxServiceInstances = mailboxServiceInstances;
 	}
 	

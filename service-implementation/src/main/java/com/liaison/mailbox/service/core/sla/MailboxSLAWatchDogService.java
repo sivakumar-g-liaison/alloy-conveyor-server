@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -175,7 +176,7 @@ public class MailboxSLAWatchDogService {
 			String timeToPickUpFilePostedToMailbox = null;
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
-			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
+			Set <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving Mailbox SLA Configuration property");
 			for (MailBoxProperty property : mailboxProps) {
 				if (property.getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX)) {
@@ -606,7 +607,7 @@ public class MailboxSLAWatchDogService {
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
 			String timeToPickUpFilePostedByMailbox = null;
-			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
+			Set <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving the customer SLA configuration from Mailbox");
 			for (MailBoxProperty property : mailboxProps) {
 				if (property .getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX)) {

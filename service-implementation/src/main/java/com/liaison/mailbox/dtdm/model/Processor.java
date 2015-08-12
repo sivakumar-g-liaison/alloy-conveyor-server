@@ -356,7 +356,7 @@ public class Processor implements Identifiable {
 	public List<String> getEmailAddress() {
 
 		MailBox mailBox = getMailbox();
-		List<MailBoxProperty> properties = mailBox.getMailboxProperties();
+		Set<MailBoxProperty> properties = mailBox.getMailboxProperties();
 
 		if (null != properties) {
 
@@ -382,7 +382,7 @@ public class Processor implements Identifiable {
 	public Map<String,String> getTTLUnitAndTTLNumber() {
 
 		Map<String,String> map = new HashMap<String,String>();
-		List<MailBoxProperty> properties = getMailbox().getMailboxProperties();
+		Set<MailBoxProperty> properties = getMailbox().getMailboxProperties();
 		for (MailBoxProperty mbp : properties) {
 			if (mbp.getMbxPropName().equals(MailBoxConstants.TTL) && !MailBoxUtil.isEmpty(mbp.getMbxPropValue())) {
 				map.put(MailBoxConstants.TTL_NUMBER, mbp.getMbxPropValue());

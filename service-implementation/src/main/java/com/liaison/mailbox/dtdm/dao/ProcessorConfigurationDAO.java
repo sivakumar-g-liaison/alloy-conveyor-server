@@ -12,6 +12,7 @@ package com.liaison.mailbox.dtdm.dao;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailBox;
@@ -71,7 +72,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param siGuid service instance id(name)
 	 * @return list of processor
 	 */
-	public List<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
+	public Set<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
 
 	/**
 	 * Retrieves list of processor from the given mailbox guid
@@ -79,7 +80,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param mbxGuid the mailbox guid
 	 * @return list of processor
 	 */
-	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
+	public Set<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
 
 	/**
 	 * Retrieves all active processors of specific types of given mailbox 

@@ -12,9 +12,11 @@ package com.liaison.mailbox.dtdm.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -151,10 +153,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * @return list of processor
 	 */
 	@Override
-	public List<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid) {
+	public Set<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<Processor> processors = new ArrayList<Processor>();
+		Set<Processor> processors = new HashSet<Processor>();
 
 		try {
 
@@ -198,10 +200,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * @return list of processor
 	 */
 	@Override
-	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired) {
+	public Set<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<Processor> processors = new ArrayList<Processor>();
+		Set<Processor> processors = new HashSet<Processor>();
 
 		try {
 
