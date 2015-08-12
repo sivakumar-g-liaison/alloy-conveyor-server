@@ -207,12 +207,6 @@ public class DropboxFileTransferService {
 	        glassMessage.setProcessId(MailBoxUtil.getGUID());
 	        glassMessage.setSenderId(fileTransferDTO.getLoginId());
 
-	        // Log time stamp
-	        glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
-
-	        // Log running status
-	        glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload");
-
     		long startTime = 0;
     		long endTime = 0;
 
@@ -267,6 +261,12 @@ public class DropboxFileTransferService {
 
     		// store payload to spectrum
     		StorageUtilities.storePayload(clsInputStream, workTicket, properties, true);
+
+    		// Log time stamp
+            glassMessage.logBeginTimestamp(MailBoxConstants.DROPBOX_FILE_TRANSFER);
+
+            // Log running status
+            glassMessage.logProcessingStatus(StatusType.RUNNING, MailBoxConstants.DROPBOX_SERVICE_NAME + ": User " + fileTransferDTO.getLoginId() + " file upload");
 
     		// end time to calculate elapsed time for storing payload in spectrum
     		endTime = System.currentTimeMillis();

@@ -46,8 +46,6 @@ public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 			Map<String, String> httpListenerProperties, String contentType, String mailboxPguid) throws Exception {
 		logger.info("Starting to forward request...");
 
-		// persist payload in spectrum
-		StorageUtilities.storePayload(inputStream, workTicket, httpListenerProperties, false);
 		workTicket.setProcessMode(ProcessMode.SYNC);
 
 		String serviceBrokerSyncUri = MailBoxUtil.getEnvironmentProperties().getString(CONFIGURATION_SERVICE_BROKER_URI);
