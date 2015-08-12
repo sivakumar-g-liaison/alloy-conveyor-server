@@ -82,7 +82,7 @@ public class FSMStateValue implements Identifiable {
 		this.createdDate = createdDate;
 	}
 	
-	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.LAZY)
 	public List<FSMTransitionState> getNewTransitionStates() {
 		return newTransitionStates;
 	}
@@ -91,7 +91,7 @@ public class FSMStateValue implements Identifiable {
 		this.newTransitionStates = newTransitionStates;
 	}
 
-	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.LAZY)
 	public List<FSMTransitionState> getOldTransitionStates() {
 		return oldTransitionStates;
 	}

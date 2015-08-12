@@ -105,7 +105,7 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to ProcessorProperty
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "processor", fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<ProcessorProperty> getDynamicProperties() {
 		return dynamicProperties;
@@ -180,7 +180,7 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Credential
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "processor", fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	public List<Credential> getCredentials() {
@@ -206,7 +206,7 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Folder
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "processor", fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	public List<Folder> getFolders() {
@@ -254,7 +254,7 @@ public class Processor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to ScheduleProfileProcessor
-	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "processor", fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
 		return this.scheduleProfileProcessors;
