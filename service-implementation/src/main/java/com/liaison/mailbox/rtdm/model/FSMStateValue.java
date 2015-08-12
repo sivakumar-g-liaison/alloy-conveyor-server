@@ -25,6 +25,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.rtdm.dao.FSMStateValueDAO;
 
@@ -82,7 +85,8 @@ public class FSMStateValue implements Identifiable {
 		this.createdDate = createdDate;
 	}
 	
-	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "newStateValue", fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	public List<FSMTransitionState> getNewTransitionStates() {
 		return newTransitionStates;
 	}
@@ -91,7 +95,8 @@ public class FSMStateValue implements Identifiable {
 		this.newTransitionStates = newTransitionStates;
 	}
 
-	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "oldStateValue", fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	public List<FSMTransitionState> getOldTransitionStates() {
 		return oldTransitionStates;
 	}

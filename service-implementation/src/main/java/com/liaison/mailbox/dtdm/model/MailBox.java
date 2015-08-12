@@ -23,6 +23,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 
@@ -112,8 +115,9 @@ public class MailBox implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to MailBoxProperty
-	@OneToMany(mappedBy = "mailbox", fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.PERSIST,
+	@OneToMany(mappedBy = "mailbox", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
+	@Fetch(FetchMode.JOIN)
 	public List<MailBoxProperty> getMailboxProperties() {
 		return this.mailboxProperties;
 	}
@@ -147,7 +151,8 @@ public class MailBox implements Identifiable {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 	
-	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
 	public List<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
 	}
