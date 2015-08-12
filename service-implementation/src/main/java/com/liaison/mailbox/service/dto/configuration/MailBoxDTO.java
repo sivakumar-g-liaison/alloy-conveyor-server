@@ -162,9 +162,7 @@ public class MailBoxDTO implements Serializable {
 		List<MailBoxProperty> properties = new ArrayList<>();
 		for (PropertyDTO propertyDTO : this.getProperties()) {
 			property = new MailBoxProperty();
-			// property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO
-			// REMOVE OWNER
-			// INCONSISTENT ERROR.STRANGE THOUGH.
+			property.setMailbox(mailBox); 
 			propertyDTO.copyToEntity(property, true);
 			properties.add(property);
 
