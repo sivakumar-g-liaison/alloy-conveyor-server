@@ -25,7 +25,6 @@ public class MailBoxFSMSetupException extends Exception {
 	 * 
 	 */
 	public MailBoxFSMSetupException() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -33,7 +32,6 @@ public class MailBoxFSMSetupException extends Exception {
 	 */
 	public MailBoxFSMSetupException(Messages message, String key) {
 		super(String.format(message.value(), key));
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -41,7 +39,6 @@ public class MailBoxFSMSetupException extends Exception {
 	 */
 	public MailBoxFSMSetupException(Messages message) {
 		super(message.value());
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

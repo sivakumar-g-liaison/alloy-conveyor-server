@@ -101,14 +101,19 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
 					{
 					 showSaveMessage("No Results Found ", 'error');
 					 }
+					if (!$scope.$$phase){
+					 $scope.$apply();
+					 }
 				}, {pageSize: pageSize, page: page, filterText: filterText, sortInfo: sortInfo}
 			);
         };
 
         // Loading the profile details
         $scope.loadProfiles = function () {
-        	$scope.getPagedDataAsync(url, $scope.pagingOptions.pageSize,
-        			$scope.pagingOptions.currentPage, $scope.filterOptions, $scope.sortInfo);
+			setTimeout(function () {
+				$scope.getPagedDataAsync(url, $scope.pagingOptions.pageSize,
+						$scope.pagingOptions.currentPage, $scope.filterOptions, $scope.sortInfo);
+			}, 100);
         };
         
         $scope.loadProfiles(); //loads the profile initially
@@ -125,21 +130,17 @@ var rest = myApp.controller('ProfileCntrlr', ['$rootScope','$scope', '$filter', 
             if (newVal !== oldVal  && $scope.validatePageNumberValue(newVal, oldVal)) {
             	$scope.loadProfiles();
             }
-
-            if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-            	$scope.loadProfiles();
-				newVal.currentPage = 1;
-            }
         }, true);
         
 		$scope.$watch('pagingOptions.pageSize', function (newVal, oldVal) {
             if (newVal !== oldVal) {
-            	$scope.loadProfiles();
-            }
-
-            if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-            	$scope.loadProfiles();
-				newVal.currentPage = 1;
+               //Get data when in first page
+               if ( $scope.pagingOptions.currentPage === 1) {
+                    $scope.loadProfiles();
+               } else {
+                    //If on other page than 1 go back
+                    $scope.pagingOptions.currentPage = 1;
+               }               
             }
         }, true);
 

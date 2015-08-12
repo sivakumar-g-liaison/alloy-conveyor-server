@@ -21,6 +21,7 @@ import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
  * @author OFS
  */
 @JsonRootName("getTrustStoreResponse")
+@Deprecated
 public class GetTrustStoreResponseDTO extends CommonResponseDTO {
 
 	/**

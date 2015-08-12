@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +40,11 @@ import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
+import com.netflix.servo.monitor.MonitorConfig;
 import com.netflix.servo.monitor.Monitors;
+import com.netflix.servo.monitor.StatsTimer;
+import com.netflix.servo.monitor.Stopwatch;
+import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -63,7 +68,15 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-
+	private Stopwatch stopwatch;
+	private static final StatsTimer statsTimer = new StatsTimer(
+            MonitorConfig.builder("TriggerSLAEvaluvationResource_statsTimer").build(),
+            new StatsConfig.Builder().build());
+	
+	static {
+        DefaultMonitorRegistry.getInstance().register(statsTimer);
+    }
+	
 	public TriggerSLAEvaluvationResource() {
 
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
@@ -77,7 +90,6 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 	 */
 	@POST
 	@ApiOperation(value = "Check Mailbox satifies the expectations", notes = "Check Mailbox satifies the expectations", position = 23, response = com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO.class)
-	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
 	@AccessDescriptor(skipFilter = true)
@@ -131,14 +143,31 @@ public class TriggerSLAEvaluvationResource extends AuditedResource {
 
 	@Override
 	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub
-
+		
+		stopwatch = statsTimer.start();
+        int globalCount = globalServiceCallCounter.addAndGet(1);
+        logKPIMetric(globalCount, "Global_serviceCallCounter");
+        int serviceCount = serviceCallCounter.addAndGet(1);
+        logKPIMetric(serviceCount, "TriggerSLAEvaluvationResource_serviceCallCounter");
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub
+		
+		stopwatch.stop();
+        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
+        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
+        statsTimer.record(duration, TimeUnit.MILLISECONDS);
 
+        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
+                "Global_timer");
+        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "TriggerSLAEvaluvationResource_timer");
+        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "TriggerSLAEvaluvationResource_timer");
+
+        if (!success) {
+            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
+            logKPIMetric(failureCounter.addAndGet(1), "TriggerSLAEvaluvationResource_failureCounter");
+        }
 	}
 
 }

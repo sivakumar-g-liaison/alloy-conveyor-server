@@ -470,6 +470,7 @@ public class MailBoxConfigurationService {
 
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
+			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			List<MailBox> mailboxes = new ArrayList<MailBox>();
 			// retrieve the actual tenancykey guids from DTO
@@ -504,23 +505,23 @@ public class MailBoxConfigurationService {
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();
-			SearchMailBoxDTO searchMailBoxDTO = null;
-			boolean hasProcessor;
+			SearchMailBoxDTO serachMailBoxDTO = null;
+			
+			long lStartTime = System.currentTimeMillis();
+						
 			for (MailBox mbx : mailboxes) {
 
-				hasProcessor = false;
-				for (MailboxServiceInstance serviceInstance : mbx.getMailboxServiceInstances()) {
-
-					if (serviceInstance.getServiceInstance().getName().equals(searchFilter.getServiceInstanceId())) {
-						hasProcessor = true;
-						break;
-					}
-				}
-				searchMailBoxDTO = new SearchMailBoxDTO();
-				searchMailBoxDTO.copyFromEntity(mbx, hasProcessor);
-				searchMailBoxDTOList.add(searchMailBoxDTO);
-			}
-
+                serachMailBoxDTO = new SearchMailBoxDTO();
+                serachMailBoxDTO.copyFromEntity(mbx,
+                        dao.isMailboxHasProcessor(mbx.getPguid(), searchFilter.getServiceInstanceId()));
+                searchMailBoxDTOList.add(serachMailBoxDTO);
+            }
+			
+			long lEndTime = System.currentTimeMillis();
+			 
+			long difference = lEndTime - lStartTime;
+		 
+			LOG.info("Elapsed time in milliseconds: " + difference);
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
 			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
@@ -578,8 +579,6 @@ public class MailBoxConfigurationService {
 		try {
 
 		    DecryptableConfiguration config = MailBoxUtil.getEnvironmentProperties();
-			dto.setTrustStoreId(config.getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_ID));
-			dto.setTrustStoreGroupId(config.getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID));
 			dto.setListJobsIntervalInHours(config.getString(MailBoxConstants.DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS));
 			dto.setFsmEventCheckIntervalInSeconds(config.getString(
 			        MailBoxConstants.DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC));

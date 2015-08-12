@@ -11,7 +11,8 @@ export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_NA
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.configurationSource.additionalUrls=file:///secure/tomcat/secure.properties"
 
 # Make all loggers ASYNC
-export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+#TODO renable once glass async processing is fixed
+#export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
  
 # Include Log Location (line number and file of origin)
 # This might be too slow for production, but is really great while in beta.
@@ -39,11 +40,11 @@ export SYSLOG_LOG_DIR="/var/log/tomcat/syslog_failover"
 export SYSLOG_RING_BUFFER_SIZE=128
  
 export GLASS_SPECTRUM_PORT=443
-export GLASS_SPECTRUM_IP=at4p-vpspectrum.liaison.prod
-export GLASS_SPECTRUM_USER=g2glass
-export GLASS_SPECTRUM_PASSWORD=FR9haL44zQR7SYBAse7VT6jaTi
+export GLASS_SPECTRUM_IP=at4p-spectrum-lens.liaison.prod
+export GLASS_SPECTRUM_USER=g2-aa-prod
+export GLASS_SPECTRUM_PASSWORD=L3nsAdm2
 export GLASS_SPECTRUM_DATASPACE=g2-glass
-export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
+export GLASS_SPECTRUM_SOURCE_NAME=$APP_NAME
 export GLASS_SPECTRUM_MESSAGE_TTL=630720000
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export GLASS_ROLLING_SIZE="250 MB"
@@ -61,7 +62,7 @@ export METRICS_LOG_DIR="/var/log/tomcat/metrics_failover"
 export METRICS_ROLLING_SIZE="250 MB"
 export METRICS_RING_BUFFER_SIZE=128
 
-export GSA_LENS_IP=10.152.2.31
+export GSA_LENS_IP=at4p-vpLENSIndex.liaison.prod
 
 export LENS_LOG_DIR="/var/log/tomcat/lens_failover"
 export ORGANIZATION_GSA_ROLLING_SIZE="250 MB"

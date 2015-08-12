@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,25 +46,30 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
  * Utilities for MailBox.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxUtil {
 
 	private static final UUIDGen UUID = new UUIDGen();
 	private static final Logger LOGGER = LogManager.getLogger(MailBoxUtil.class);
+	private static final DecryptableConfiguration CONFIGURATION = LiaisonConfigurationFactory.getConfiguration();
 
 	private static String propDataRetentionTTL = "fs2.storage.spectrum.%sdataRetentionTTL";
 
+	// for logging dropbox related details.
+	public static final String seperator = ": ";
+
 	/**
 	 * Utility is used to un-marshal from JSON String to Object.
-	 * 
+	 *
 	 * @param serializedJson The serialized JSON String.
 	 * @param clazz The corresponding class of the serialized JSON.
 	 * @return Object The instance of the give Class.
@@ -97,7 +102,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Utility is used to marshal the Object to JSON.
-	 * 
+	 *
 	 * @param object
 	 * @return
 	 * @throws JAXBException
@@ -126,7 +131,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Method is used to get the unique id from UUIDGen Utility.
-	 * 
+	 *
 	 * @return UUID The 32bit string.
 	 */
 	public static String getGUID() {
@@ -135,7 +140,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Checks the given string is empty or not.
-	 * 
+	 *
 	 * @param str The input String
 	 * @return boolean
 	 */
@@ -144,12 +149,12 @@ public class MailBoxUtil {
 	}
 
 	public static DecryptableConfiguration getEnvironmentProperties() {
-		return LiaisonConfigurationFactory.getConfiguration();
+		return CONFIGURATION;
 	}
 
 	/**
 	 * Method to get the current timestmp to insert into database.
-	 * 
+	 *
 	 * @return
 	 */
 	public static Timestamp getTimestamp() {
@@ -160,7 +165,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Method to get all tenancy keys from acl manifest Json
-	 * 
+	 *
 	 * @param String - aclManifestJson
 	 * @return list of tenancy keys
 	 * @throws IOException
@@ -207,7 +212,7 @@ public class MailBoxUtil {
 
 	/**
 	 * This Method will retrieve the TenancyKey Name from the given guid
-	 * 
+	 *
 	 * @param tenancyKeyGuid
 	 * @param tenancyKeys
 	 * @return
@@ -233,7 +238,7 @@ public class MailBoxUtil {
 
 	/**
 	 * method to write the given inputstream to given location
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	public static void writeDataToGivenLocation(InputStream response, String targetLocation, String filename,
@@ -243,7 +248,8 @@ public class MailBoxUtil {
 		LOGGER.info("Started writing given inputstream to given location {}", targetLocation);
 		File directory = new File(targetLocation);
 		if (!directory.exists()) {
-			Files.createDirectories(directory.toPath());
+		    Path dirPath = directory.toPath();
+			Files.createDirectories(dirPath);
 		}
 
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
@@ -251,17 +257,15 @@ public class MailBoxUtil {
 		if (file.exists() && !isOverwrite) {
 			LOGGER.info("File {} already exists and should not be overwritten", file.getName());
 		} else {
-			Files.write(file.toPath(), IOUtils.toByteArray(response));
+		    Path path = file.toPath();
+			Files.write(path, IOUtils.toByteArray(response));
 		}
 		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
-		if (response != null) {
-			response.close();
-		}
 	}
 
 	/**
 	 * Method to calculate the elapsed time between two given time limits
-	 * 
+	 *
 	 * @param startTime
 	 * @param endTime
 	 * @param taskToCalulateElapsedTime
@@ -277,7 +281,7 @@ public class MailBoxUtil {
 
 	/**
 	 * Method to get pagingOffsetDetails
-	 * 
+	 *
 	 * @param page
 	 * @param pageSize
 	 * @param totalCount
@@ -319,10 +323,10 @@ public class MailBoxUtil {
 
 		return pageParameters;
 	}
-	
+
 	/**
 	 * Method to get the data retention value from the properties
-	 * 
+	 *
 	 * @param identifier
 	 * @return
 	 */
@@ -330,11 +334,11 @@ public class MailBoxUtil {
 	    String ttl = String.format(propDataRetentionTTL, identifier != null ? identifier + "." : "");
 	    return getEnvironmentProperties().getInteger(ttl, 2592000);
 	}
-	
-	
+
+
 	/**
 	 * Method to convertTTLIntoSeconds
-	 * 
+	 *
 	 * @param ttlUnit
 	 * @param ttlNumber
 	 * @return Integer
@@ -360,17 +364,17 @@ public class MailBoxUtil {
 
 
 	/**
-	* Converts the given work ticket lifetime (TTL) in days - Round up to next integer. 
+	* Converts the given work ticket lifetime (TTL) in days - Round up to next integer.
 	* Example: 0.1 rounded off to 1
-	* 
+	*
 	* @param ttlUnit specifies the type of TTL value  which can be Year,Month,Week,Day,Hours,Minutes.
 	* @param ttlNumber specifies the TTL value in days.
-	* @return Integer 
+	* @return Integer
 	*/
 	public static Integer convertTTLIntoDays(String ttlUnit, Integer ttlNumber) {
 		// decimal value is used with operators in order to round up to next no
 		if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_YEARS)) {
-			return (int) Math.ceil(ttlNumber * 365.0); 
+			return (int) Math.ceil(ttlNumber * 365.0);
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_MONTHS)) {
 			return (int) Math.ceil(ttlNumber * 30.0);
 		} else if (ttlUnit.equals(MailBoxConstants.TTL_UNIT_WEEKS)) {
@@ -388,9 +392,9 @@ public class MailBoxUtil {
 
 	/**
 	 * Method to add given TimeToLive value in seconds to the CurrentTime
-	 * 
+	 *
 	 * @param seconds
-	 * 
+	 *
 	 * @return Timestamp
 	 */
 	public static Timestamp addTTLToCurrentTime(int seconds) {
@@ -401,43 +405,69 @@ public class MailBoxUtil {
 		cal.add(Calendar.SECOND, seconds);
 		return new Timestamp(cal.getTime().getTime());
 	}
-	
-	/**
-	 * Method to check whether the user has opt for including/excluding specific files during uploading,downloading and directory sweeping process.
-	 * When both include and exclude  are specified take include option as priority.
-	 * 
-	 * @param includeList
-	 * @param currentFileName
-	 * @param excludedList
-	 * @return
-	 */
-	
-	public static String checkIncludeorExclude(List<String> includeList,String currentFileName,List<String> excludedList ){
-		boolean includeEnabled = false;
-		boolean excludeEnabled = false;
-		if (null!=includeList && includeList.size()>0) {
-			 for(String includefile : includeList){
-                   if ((currentFileName.substring(currentFileName.lastIndexOf("."), currentFileName.length())
-                           .equals(includefile))) {
-                   	includeEnabled=true;
-                   }
-             }
-			if(!includeEnabled){
-				currentFileName = null;
-			}
-		}
-		else if(null!=excludedList && excludedList.size()>0) {
-			 for(String excludefile : excludedList){
-                   if ((currentFileName.substring(currentFileName.lastIndexOf("."), currentFileName.length())
-                           .equals(excludefile))) {
-                   	excludeEnabled=true;
-                   }
-             }
-			if(excludeEnabled){
-				currentFileName = null;
-			}
-		}
-		return currentFileName;
-	}
+
+    /**
+     * Method to construct log messages for easy visibility
+     *
+     * @param messages append to prefix, please make sure the order of the inputs
+     * @return constructed string
+     */
+    public static String constructMessage(Processor processor, String transferProfile, String... messages) {
+
+        StringBuilder logPrefix = null;
+    	 if (null == processor) {
+
+    		 logPrefix = new StringBuilder()
+                 .append("DROPBOX")
+                 .append(seperator);
+         } else {
+
+        	 logPrefix = new StringBuilder()
+            .append("DROPBOX")
+            .append(seperator)
+            .append((transferProfile == null ? "NONE" : transferProfile))
+            .append(seperator)
+            .append(processor.getProcessorType())
+            .append(seperator)
+            .append(processor.getProcsrName())
+            .append(seperator)
+            .append(processor.getMailbox().getMbxName())
+            .append(seperator)
+            .append(processor.getMailbox().getPguid())
+            .append(seperator);
+        }
+
+    	 StringBuilder msgBuf = new StringBuilder().append(logPrefix);
+        for (String str : messages) {
+            msgBuf.append(str);
+        }
+
+        return msgBuf.toString();
+    }
+
+    /**
+     * Checks whether a file is modified with in the given time limit
+     *
+     * @param timelimit
+     *            to check the file is modified with in the given time limit
+     * @param file
+     *            File object
+     * @return true if it is updated with in the given time limit, false otherwise
+     */
+    public static boolean validateLastModifiedTolerance(Path file) {
+
+        long timelimit = CONFIGURATION.getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
+
+        long system = System.currentTimeMillis();
+        long lastmo = file.toFile().lastModified();
+
+        LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
+        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
+
+        if (((system - lastmo)/1000) < timelimit) {
+            return true;
+        }
+        return false;
+    }
 
 }

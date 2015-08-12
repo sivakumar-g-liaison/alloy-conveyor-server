@@ -130,7 +130,11 @@
 		 "mandatory": false,
 		 "dynamic": false,
 	     "valueProvided":false,
-		 "validationRules": null
+		   "validationRules": {  
+            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "minLength": "",
+            "maxLength": ""
+        }
 	  },
 	  {
 		  "name": "excludeFiles",
@@ -141,7 +145,11 @@
 		  "mandatory": false,
 		  "dynamic": false,
 	      "valueProvided":false,
-		  "validationRules": null
+		  "validationRules": {  
+            "pattern":"\/^(([.]+[a-zA-Z]+)?([,]+[.]+[a-zA-Z]+)?)*$\/",
+            "minLength": "",
+            "maxLength": ""
+        }
 	  },
       {
 	     "name": "fileTransferStatusIndicator",
@@ -154,6 +162,18 @@
          "valueProvided":false,
          "defaultValue":"prg",
 		 "validationRules": null
+	  },
+	  {
+	      "name": "debugTranscript",
+	      "displayName": "Debug Transcript",
+	      "type": "select",
+	      "value": "false",
+		  "mandatory": true,
+		  "dynamic": false,
+          "valueProvided":false,
+          "defaultValue":"false",
+	      "validationRules": null,
+	      "options":["false","true"]
 	  }
     ],
       "folderProperties":[

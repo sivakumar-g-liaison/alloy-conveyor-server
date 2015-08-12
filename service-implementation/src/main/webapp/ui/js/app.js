@@ -32,6 +32,15 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     function ($routeProvider, $locationProvider, $httpProvider) {
         // TODO use html5 *no hash) where possible
         //$locationProvider.html5Mode(true);
+		
+		//GMB-472 Fix - Disable $http request cache
+		$httpProvider.defaults.cache = false;
+		if (!$httpProvider.defaults.headers.common) {
+	        $httpProvider.defaults.headers.common = {};
+	    }
+	    $httpProvider.defaults.headers.common["Cache-Control"] = "no-cache";
+	    $httpProvider.defaults.headers.common.Pragma = "no-cache";
+    
         $routeProvider.when('/', {
             templateUrl: 'partials/home.html'
         });
@@ -53,6 +62,10 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
         $routeProvider.when('/mailbox/processor', {
             templateUrl: 'partials/processor/processor.html',
             controller: 'ProcessorCntrlr'
+        });
+        $routeProvider.when('/mailbox/getProcessor', {
+            templateUrl: 'partials/processor/searchprocessor.html',
+            controller: 'SearchProcessorCntrlr'
         });
         $routeProvider.when('/profiles/addProfiles', {
             templateUrl: 'partials/profile/addprofile.html',
@@ -112,6 +125,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.httpVersionPattern = /\b1.1\b/;
     $rootScope.multipleEmailPattern = /^(([a-zA-Z0-9_'+*$%\^&!\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9:]{2,7})([,]\W?(?!$))?)+$/;
 	$rootScope.inputPatternForPort = /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
+	$rootScope.folderPathPattern = /^\/data\/(sftp|ftp|ftps)\/(.*?)\/(inbox|outbox)(\/(.*?))?$/;
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
     // As of now used only for displaying the no of characters in error message.
     $rootScope.maximumLengthAllowedInTextBox = 80;
@@ -123,25 +137,11 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.maximumLengthAllowedInGridForFolderDetails = 250;
     $rootScope.maximumLengthAllowedInGridForCredentialDetails = 128;
     $rootScope.typeaheadMinLength = 3;
+	$rootScope.typeaheadMaxLength = 80;
     
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
    
-    // JSON which contains upload public key request
-    $rootScope.pkObj;
-    $rootScope.restService.get('data/publickeyrequest.json', function (data) {
-        $rootScope.pkObj = data;
-    });
-    // JSON which contains public key - Trust Store Association request
-    $rootScope.linkKeyTs;
-    $rootScope.restService.get('data/truststore_update_request.json', function (data) {
-        $rootScope.linkKeyTs = data;
-    });
-      // JSON which contains upload ssh key request
-    $rootScope.sshKeyObj;
-    $rootScope.restService.get('data/upload_keypair_request.json', function (data) {
-        $rootScope.sshKeyObj = data;
-    });
     // async load constants
     $rootScope.constants = [];
     $rootScope.restService.get('data/constants.json', function (data) {

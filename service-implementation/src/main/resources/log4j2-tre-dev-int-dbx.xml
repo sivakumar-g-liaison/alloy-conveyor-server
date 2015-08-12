@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 Liaison Technologies, Inc.
+    This software is the confidential and proprietary information of
+    Liaison Technologies, Inc. ("Confidential Information").  You shall
+    not disclose such Confidential Information and shall use it only in
+    accordance with the terms of the license agreement you entered into
+    with Liaison Technologies.
+
+-->
+<configuration status="INFO"
+               packages="com.liaison.common.log4j2.plugins,com.liaison.commons.log4j2,net.logstash.logging.log4j2.core.layout,com.liaison.commons.audit.log4j2"
+               verbose="false"
+               monitorInterval="${sys:com.liaison.log4j2.configuration.refresh.interval.sec}">
+
+    <appenders>
+
+        <!-- ############################################################## -->
+        <!-- ######### Glass Message General ############ -->
+        <!-- ############################################################## -->
+
+        <!-- Logs ONLY Glass Messages to Spectrum -->
+        <GlassMessageSpectrum name="GlassMessageSpectrumREST"
+                              ip="${env:GLASS_SPECTRUM_IP}" port="${env:GLASS_SPECTRUM_PORT}"
+                              password="${env:GLASS_SPECTRUM_PASSWORD}" username="${env:GLASS_SPECTRUM_USER}"
+                              sourceName="${env:GLASS_SPECTRUM_SOURCE_NAME}" messageTTL="${env:GLASS_SPECTRUM_MESSAGE_TTL}"
+                              dataSpaceName="${env:GLASS_SPECTRUM_DATASPACE}"
+                              ignoreExceptions="false">
+            <GlassMessageJSONLayout compact="true" />
+            <filters>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
+                              onMismatch="DENY" />
+            </filters>
+        </GlassMessageSpectrum>
+
+        <!-- failover destination -->
+        <RollingFile name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
+                     filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}.log.gz"
+                     ignoreExceptions="false">
+            <GlassMessageJSONLayout compact="true" />
+            <filters>
+                <MarkerFilter marker="GLASS_MESSAGE_MARKER" onMatch="ACCEPT"
+                              onMismatch="DENY" />
+            </filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="${env:GLASS_ROLLING_SIZE}" />
+            </Policies>
+        </RollingFile>
+
+        <!-- Failover when either GlassMessageSpectrumREST appender fails or we run out of slots in buffer (overrun) -->
+        <Async name="AsyncGlassMessageSpectrumRESTWithFailover"
+               blocking="false"
+               bufferSize="${env:GLASS_RING_BUFFER_SIZE}"
+               errorRef="GlassMessageSpectrumFile"
+               ignoreExceptions="false"
+                >
+            <AppenderRef ref="GlassMessageSpectrumREST" />
+        </Async>
+
+        <!-- If the Async appender itself dies (ring buffer thread dies), finally fail to console -->
+        <Failover name="AsyncGlassMessageSpectrumRESTWithFailoverFailover" primary="AsyncGlassMessageSpectrumRESTWithFailover">
+            <Failovers>
+                <AppenderRef ref="Console" />
+            </Failovers>
+        </Failover>
+
+
+        <!-- ############################################################## -->
+        <!-- ######### Console ############ -->
+        <!-- ############################################################## -->
+
+        <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="true">
+            <PatternLayout pattern="%highlight{%d %c{1.} [%t] %-5level: %msg | %X%x%n%throwable}" />
+            <filters>
+                <!-- remove some noise -->
+                <MarkerFilter marker="MARKER_HQ_CLIENT_POOL" onMatch="DENY" onMismatch="ACCEPT" />
+                <MarkerFilter marker="SPECTRUM_CLIENT" onMatch="DENY" onMismatch="ACCEPT"/>
+            </filters>
+        </Console>
+
+    </appenders>
+
+    <loggers>
+        <root level="DEBUG">
+            <appender-ref ref="AsyncGlassMessageSpectrumRESTWithFailoverFailover" />
+
+            <!-- not for production -->
+            <appender-ref ref="Console" />
+
+        </root>
+    </loggers>
+</configuration>

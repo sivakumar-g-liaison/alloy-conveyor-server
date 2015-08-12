@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,11 +37,16 @@ import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
+import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
+import com.netflix.servo.monitor.MonitorConfig;
 import com.netflix.servo.monitor.Monitors;
+import com.netflix.servo.monitor.StatsTimer;
+import com.netflix.servo.monitor.Stopwatch;
+import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -51,6 +57,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * 
  * @author OFS
  */
+@Deprecated
 @AppConfigurationResource
 @Path("config/mailbox/processor/uploadkey")
 @Api(value = "config/mailbox/processor/uploadkey", description = "Gateway for the mailbox upload self signed trust store services.")
@@ -65,7 +72,15 @@ public class MailboxKeyResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-
+	private Stopwatch stopwatch;
+	private static final StatsTimer statsTimer = new StatsTimer(
+            MonitorConfig.builder("MailboxKeyResource_statsTimer").build(),
+            new StatsConfig.Builder().build());
+	
+	static {
+        DefaultMonitorRegistry.getInstance().register(statsTimer);
+    }
+	
 	public MailboxKeyResource()
 			throws IOException {
 
@@ -78,6 +93,7 @@ public class MailboxKeyResource extends AuditedResource {
 	 * 
 	 * @return Response Object
 	 */
+	@Deprecated
 	@POST
 	@ApiOperation(value = "Upload TrustStore", notes = "upload Self Signed TrustStore", position = 1, response = com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO.class)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -95,7 +111,10 @@ public class MailboxKeyResource extends AuditedResource {
 				try {
 					// add the new profile details
 					ProcessorConfigurationService processor = new ProcessorConfigurationService();
-					return processor.uploadSelfSignedTrustStore();
+					GetTrustStoreResponseDTO serviceResponse = processor.uploadSelfSignedTrustStore(); 
+					//Added the guid
+					//queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getTrustStore().getTrustStoreId());
+					return serviceResponse;
 
 				} catch (IOException | JSONException e) {
 					LOG.error(e.getMessage(), e);
@@ -127,13 +146,30 @@ public class MailboxKeyResource extends AuditedResource {
 
 	@Override
 	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub
-
+		
+		stopwatch = statsTimer.start();
+        int globalCount = globalServiceCallCounter.addAndGet(1);
+        logKPIMetric(globalCount, "Global_serviceCallCounter");
+        int serviceCount = serviceCallCounter.addAndGet(1);
+        logKPIMetric(serviceCount, "MailboxKeyResource_serviceCallCounter");
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub
+		
+		stopwatch.stop();
+        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
+        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
+        statsTimer.record(duration, TimeUnit.MILLISECONDS);
 
+        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
+                "Global_timer");
+        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "MailboxKeyResource_timer");
+        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "MailboxKeyResource_timer");
+
+        if (!success) {
+            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
+            logKPIMetric(failureCounter.addAndGet(1), "MailboxKeyResource_failureCounter");
+        }
 	}
 }

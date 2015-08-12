@@ -1,5 +1,62 @@
-2.3.0-SNAPSHOT
+2.4.0-SNAPSHOT
 -------------------------------
+
+2.3.0
+-------------------------------
+GWUD-69: Fix Dropbox TVAPI & Glass Message logging
+
+2.2.13
+-------------------------------
+update glass_log4j2_lib version to 2.X - GGT-111
+
+2.2.12
+-------------------------------
+GMB-483-TransactionVisibilityAPI logging is invalid
+GMB-483-TransactionVisibilityAPI logging in the async receving end
+GMB-483-TransactionVisibilityAPI changes
+GMB-483-TransactionVisibilityAPI set status to success
+GMB-483: http async common error msg and removed unused imports
+GMB-483 : set outsize in the lens logging
+GMB-483 : set out agent
+
+2.2.11
+-------------------------------
+turn off async logger
+made logj2 production xml files the same for dbx and vanilla
+removed async appender for glass and root async logger for uat and uatdbx
+
+2.2.10
+-------------------------------
+added remote debug for uat, qa, dev
+
+2.2.9
+-------------------------------
+making glass message appender sync
+
+2.2.8
+-------------------------------
+* bumped up commons script
+* TTL updates
+
+2.2.7
+-------------------------------
+prod properties updates
+
+2.2.6
+-------------------------------
+lens property changes
+
+2.2.5
+-------------------------------
+properties updates
+
+2.2.4
+-------------------------------
+fix for GMB-473
+
+2.2.3
+-------------------------------
+Patch/2.1.X/Lib Glass Message
 
 2.2.2
 -------------------------------
@@ -11,6 +68,15 @@ Updated the web.xml to apply the tomcat harden changes.
 
 2.2.0
 -------------------------------
+
+2.1.9
+-------------------------------
+* GMB-485 : upgrade commons scripting library
+
+2.1.8
+-------------------------------
+* Updated the glass_log4j2_lib version to 2.2.+
+* Updated UserMgmt Client to release version
 
 2.1.7
 -------------------------------
@@ -29,9 +95,9 @@ Updated the web.xml to apply the tomcat harden changes.
 * GMB-439 - reverted back as clearing of password on failure from KMS is the expected behavior
 * GMB-436 - Processor execution through JS is not working
 * GMB-440 - NPE occurs during file staging if the given mailbox corresponding to given mailbox Id in workTicket from serviceBroker is inactive
-
 * HTTP SYNC STATUS LOGGIN DURING SB ERROR CASE - LOG FAILURE STATUS INSTEAD OF SUCCESS RAW PASSWORD GETTING STORED IN CREDENTIALS TABLE
 * Fixed the console error when try search mail Box
+* Patch/Syslog Production
 
 2.1.6
 -------------------------------
@@ -131,4 +197,3 @@ RELEASE VERSION
 Initial version
 
 Add to the top of this file. Don't edit existing notes.
-

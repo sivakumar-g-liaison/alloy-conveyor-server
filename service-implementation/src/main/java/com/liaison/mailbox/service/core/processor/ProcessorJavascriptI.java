@@ -22,6 +22,7 @@ import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.service.dto.configuration.CredentialDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -111,14 +112,13 @@ public interface ProcessorJavascriptI {
 	public Properties getCustomProperties();
 
 	/**
-	 * TODO
+	 * TODO GMB-537
 	 */
 	public void updateState();
 
 	/**
 	 * Returns array of credentials of the processor
 	 *
-	 * TODO How to returns the keys??
 	 * @return
 	 */
 	public CredentialDTO[] getCredentials() throws MailBoxConfigurationServicesException, SymmetricAlgorithmException;
@@ -194,6 +194,7 @@ public interface ProcessorJavascriptI {
 	 * 
 	 */
 	public void cleanup();
+
 	/**
 	 * Info level logging
 	 *
@@ -228,6 +229,15 @@ public interface ProcessorJavascriptI {
 	 * @param msg
 	 */
 	public void logDebug(String msg);
+
+	/**
+     * Method to logs the TVAPI status and activity messages to LENS
+     *
+     * @param msg Message String to be logged in LENS event log
+     * @param file File corresponding to the log
+     * @param status Status of the LENS logging
+     */
+    public void logToLens(String msg, File file, ExecutionState status);
 
 
 }

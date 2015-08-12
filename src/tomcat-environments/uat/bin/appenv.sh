@@ -7,7 +7,8 @@ export APP_NAME="g2mailboxservice"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.environment=$APP_ENV"
 export CATALINA_OPTS="$CATALINA_OPTS -Darchaius.deployment.applicationId=$APP_NAME"
 # Make all loggers ASYNC
-export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
+#TODO renable once glass async processing is fixed
+#export CATALINA_OPTS="$CATALINA_OPTS -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector"
  
 # Include Log Location (line number and file of origin)
 # This might be too slow for production, but is really great while in beta.
@@ -39,7 +40,7 @@ export GLASS_SPECTRUM_IP=at4u-vpspectrum.liaison.prod
 export GLASS_SPECTRUM_USER=g2
 export GLASS_SPECTRUM_PASSWORD=QkUn7VcnNLLb_2Kzt4gGpP6yV
 export GLASS_SPECTRUM_DATASPACE=g2-glass
-export GLASS_SPECTRUM_SOURCE_NAME=$APP_ENV
+export GLASS_SPECTRUM_SOURCE_NAME=$APP_NAME
 export GLASS_SPECTRUM_MESSAGE_TTL=630720000
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export GLASS_ROLLING_SIZE="250 MB"
@@ -80,6 +81,10 @@ export LOGSTASH_RING_BUFFER_SIZE=262144
 # ==================================================================
 
 export JAVA_OPTS="$JAVA_OPTS -XX:-UseSplitVerifier"
+
+# NOT FOR PRODUCTION:
+# enable remote debugging
+export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 
 # Dump heap when out of memory to /var/log/tomcat
 export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/tomcat"

@@ -113,6 +113,8 @@ public interface MailBoxConstants {
 	public final static String KEY_SERVICE_INSTANCE_ID = "SERVICE_INSTANCE_ID";
 	public final static String KEY_PAYLOAD_DESCRIPTION = "PAYLOAD_DESCRIPTION";
 	public final static String KEY_TENANCY_KEY = "TENANCY_KEY";
+	public final static String KEY_LENS_VISIBILITY = "LENS_VISIBILITY";
+
 	public final static String PIPELINE_FULLY_QUALIFIED_PACKAGE = "com.liaison.service.core.edm.model.Pipeline";
 	public final static String PAYLOAD_DESCRIPTION_VALUE = "Sweeped Payload from payload location %s";
 
@@ -122,6 +124,7 @@ public interface MailBoxConstants {
 	public final static String KEY_FILE_CREATED_NAME = "createdTime";
 	public final static String KEY_FILE_MODIFIED_NAME = "modifiedTime";
 	public final static String KEY_MAILBOX_ID = "mailboxId";
+	public final static String KEY_PROCESSOR_ID = "processorId";
 	public final static String KEY_OVERWRITE = "overwrite";
 	public final static String KEY_FILE_PATH = "path";
 	public final static String KEY_WORKTICKET_PROCESSOR_ID = "processorId";
@@ -139,8 +142,6 @@ public interface MailBoxConstants {
 	//DEFAULTVALUE_FOR_REQUIRED_PROPS
 
 	public static final String DEFAULT_SCRIPT_TEMPLATE_NAME = "mailbox.script.default.template";
-	public static final String DEFAULT_GLOBAL_TRUSTSTORE_ID = "mailbox.global.truststore.id";
-	public static final String DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID = "mailbox.global.trustgroup.id";
 	public static final String DEFAULT_JOB_SEARCH_PERIOD_IN_HOURS = "default.job.search.period.in.hours";
 	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	public static final String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
@@ -175,6 +176,8 @@ public interface MailBoxConstants {
 	public static final String VALUE_FOR_DEFAULT_TTL = "30";
 	public static final String TTL_UNIT_SECONDS = "Seconds";
 	public static final String TTL_UNIT_MINUTES = "Minutes";
+	public static final String CUSTOM_TTL_UNIT = "CustomTTL";
+	public static final String TTL_NUMBER = "TTLnumber";
 	public static final String TTL_UNIT_HOURS = "Hours";
 	public static final String TTL_UNIT_DAYS = "Days";
 	public static final String TTL_UNIT_WEEKS = "Weeks";
@@ -229,6 +232,7 @@ public interface MailBoxConstants {
 	public static final String PROPERTY_HTTPLISTENER_PIPELINEID = "httpListenerPipeLineId";
 	public static final String PROPERTY_HTTPLISTENER_PAYLOAD_LOCATION = "httpListenerPayload";
 	public static final String PROPERTY_HTTPLISTENER_SECUREDPAYLOAD = "securedPayload";
+	public static final String PROPERTY_LENS_VISIBILITY = "lensVisibility";
 
 	// Properties for sweeper grouping boundary condition
 	public final static String PAYLOAD_SIZE_THRESHOLD = "payloadsizethreshold";
@@ -282,10 +286,15 @@ public interface MailBoxConstants {
 
     // glass log messages
     public static final String DROPBOX_FILE_TRANSFER = "dropbox_file_transfer";
-    public static final String FILE_QUEUED_SUCCESSFULLY = "MFT:File queued for transfer successfully";
-    public static final String FILE_STAGED_SUCCESSFULLY = "MFT:File staged for delivery";
+	public static final String DROPBOX_SERVICE_NAME = "On-Demand MFT";
+	public static final String DROPBOX_WORKTICKET_CONSUMED = "Workticket consumed from queue";
+	public static final String FILE_QUEUED_SUCCESSFULLY = DROPBOX_SERVICE_NAME + ": File queued for transfer successfully";
+    public static final String FILE_STAGED_SUCCESSFULLY = DROPBOX_SERVICE_NAME + ": File staged for delivery";
     public static final String FILE_DOWNLOADED_SUCCESSFULLY = "File downloaded successfully";
     public static final String FILE_QUEUEING_FAILED = "File content queued for transfer got failed";
     public static final String FILE_STAGING_FAILED = "File staging got failed after consuming from queue";
     public static final String FILE_DOWNLOADING_FAILED = "File downloading got failed";
+
+    // internal dl for error notification
+    public static final String ERROR_RECEIVER = "com.liaison.mailbox.error.receiver";
 }

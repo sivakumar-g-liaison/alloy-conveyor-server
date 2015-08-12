@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.rest;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,11 +42,16 @@ import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
+import com.netflix.servo.monitor.MonitorConfig;
 import com.netflix.servo.monitor.Monitors;
+import com.netflix.servo.monitor.StatsTimer;
+import com.netflix.servo.monitor.Stopwatch;
+import com.netflix.servo.stats.StatsConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -72,7 +78,15 @@ public class MailBoxProfileResource extends AuditedResource {
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
 
-
+	private Stopwatch stopwatch;
+	private static final StatsTimer statsTimer = new StatsTimer(
+            MonitorConfig.builder("MailBoxProfileResource_statsTimer").build(),
+            new StatsConfig.Builder().build());
+	
+	static {
+        DefaultMonitorRegistry.getInstance().register(statsTimer);
+    }
+	
 	public MailBoxProfileResource()
 			throws IOException {
 
@@ -107,7 +121,12 @@ public class MailBoxProfileResource extends AuditedResource {
 							AddProfileRequestDTO.class);
 					// creates new profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
-					return profile.createProfile(serviceRequest);
+					AddProfileResponseDTO serviceResponse = profile.createProfile(serviceRequest); 
+					//Added the guid
+					if (null != serviceResponse.getProfile()) {
+					    queryParams.put(AuditedResource.HEADER_GUID, serviceResponse.getProfile().getGuId());
+					}
+					return serviceResponse;
 
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
@@ -154,15 +173,17 @@ public class MailBoxProfileResource extends AuditedResource {
 					requestString = getRequestBody(request);
 					ReviseProfileRequestDTO serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
 							ReviseProfileRequestDTO.class);
+					//Added the guid
+					if (null != serviceRequest.getProfile()) {
+					    queryParams.put(AuditedResource.HEADER_GUID, serviceRequest.getProfile().getId());
+					}
 					// update profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					return profile.updateProfile(serviceRequest);
-
 				} catch (IOException | JAXBException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
-
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.updateProfile()";
@@ -207,6 +228,7 @@ public class MailBoxProfileResource extends AuditedResource {
 			}
 		};
 		worker.actionLabel = "MailBoxProfileResource.readProfiles()";
+		worker.queryParams.put(AuditedResource.HEADER_GUID, AuditedResource.MULTIPLE);
 		worker.queryParams.put("filterText", filterText);
 
 		// hand the delegate to the framework for calling
@@ -231,15 +253,30 @@ public class MailBoxProfileResource extends AuditedResource {
 
 	@Override
 	protected void beginMetricsCollection() {
-		// TODO Auto-generated method stub
-
+		
+		stopwatch = statsTimer.start();
+        int globalCount = globalServiceCallCounter.addAndGet(1);
+        logKPIMetric(globalCount, "Global_serviceCallCounter");
+        int serviceCount = serviceCallCounter.addAndGet(1);
+        logKPIMetric(serviceCount, "MailBoxProfileResource_serviceCallCounter");
 	}
 
 	@Override
 	protected void endMetricsCollection(boolean success) {
-		// TODO Auto-generated method stub
+		
+		stopwatch.stop();
+        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
+        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
+        statsTimer.record(duration, TimeUnit.MILLISECONDS);
 
+        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
+                "Global_timer");
+        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "MailBoxProfileResource_timer");
+        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "MailBoxProfileResource_timer");
+
+        if (!success) {
+            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
+            logKPIMetric(failureCounter.addAndGet(1), "MailBoxProfileResource_failureCounter");
+        }
 	}
-
-
 }

@@ -40,6 +40,7 @@ import com.liaison.fs2.storage.file.FS2DefaultFileConfig;
 import com.liaison.fs2.storage.spectrum.FS2DefaultSpectrumStorageConfig;
 import com.liaison.fs2.storage.spectrum.SpectrumConfigBuilder;
 import com.liaison.mailbox.MailBoxConstants;
+import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
@@ -89,6 +90,8 @@ public class StorageUtilities {
 	private static FS2Configuration[] spectrumConfigs;
 	private static FS2Configuration[] filesystemConfigs;
 
+	public static final String GLOBAL_PROCESS_ID_HEADER = "GLOBAL_PROCESS_ID";
+
 	/**
 	 * Initialize FS2
 	 */
@@ -120,10 +123,8 @@ public class StorageUtilities {
 			LOGGER.info("Retrieving payload from spectrum");
 			return FS2.getFS2PayloadInputStream(spectrumURI);
 		} catch (FS2PayloadNotFoundException | URISyntaxException e) {
-			LOGGER.error("Failed to retrieve payload from spectrum due to error", e);
-			throw new MailBoxServicesException(
-					"Failed to retrieve payload from spectrum due to error" + e.getMessage(),
-					Response.Status.BAD_REQUEST);
+			LOGGER.error(Messages.PAYLOAD_READ_ERROR.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_READ_ERROR, Response.Status.BAD_REQUEST);
 		}
 	}
 
@@ -180,13 +181,11 @@ public class StorageUtilities {
 			return detail;
 
 		} catch (FS2ObjectAlreadyExistsException e) {
-			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write the payload in spectrum : " + e.getMessage()
-					+ ". Becuase it already exists in the system.", Response.Status.CONFLICT);
+			LOGGER.error(Messages.PAYLOAD_ALREADY_EXISTS.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_ALREADY_EXISTS, Response.Status.CONFLICT);
 		} catch (FS2Exception | IOException e) {
-			LOGGER.error("Failed to persist the payload in spectrum due to error", e);
-			throw new MailBoxServicesException("Failed to write payload in spectrum : " + e.getMessage(),
-					Response.Status.INTERNAL_SERVER_ERROR);
+			LOGGER.error(Messages.PAYLOAD_PERSIST_ERROR.value(), e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_PERSIST_ERROR, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -256,7 +255,8 @@ public class StorageUtilities {
 		try {
 			uri = new URI("fs2", authority, path, null, null);
 		} catch (URISyntaxException e) {
-			throw new MailBoxServicesException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+			LOGGER.error("Unable to create a URI", e);
+			throw new MailBoxServicesException(Messages.COMMON_SYNC_ERROR_MESSAGE, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		return uri;
 	}
@@ -390,12 +390,35 @@ public class StorageUtilities {
 				httpListenerProperties.get(MailBoxConstants.KEY_SERVICE_INSTANCE_ID));
 		fs2Header.addHeader(MailBoxConstants.KEY_TENANCY_KEY,
 				(MailBoxConstants.PIPELINE_FULLY_QUALIFIED_PACKAGE + ":" + workTicket.getPipelineId()));
-		String ttlValue= httpListenerProperties.get(MailBoxConstants.TTL_IN_SECONDS);
-		if (!MailBoxUtil.isEmpty(ttlValue) && -1 != Integer.parseInt(ttlValue))  {
-		    fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue);
+		fs2Header.addHeader(MailBoxConstants.KEY_LENS_VISIBILITY, httpListenerProperties.get(MailBoxConstants.PROPERTY_LENS_VISIBILITY));
+		if(workTicket.getTtlDays() != -1) {
+		Integer ttlValue = MailBoxUtil.convertTTLIntoSeconds(MailBoxConstants.TTL_UNIT_DAYS, workTicket.getTtlDays());
+		fs2Header.addHeader(FlexibleStorageSystem.OPTION_TTL,ttlValue.toString());
 		}
 		LOGGER.debug("FS2 Headers set are {}", fs2Header.getHeaders());
 
 		return fs2Header;
 	}
+
+	/**
+	 * A helper method to retrieve the payload headers.
+	 *
+	 * @param payloadURL Spectrum Payload URL
+	 * @return FS2ObjectHeaders
+	 * @throws MailBoxServicesException
+	 */
+	public static FS2ObjectHeaders retrievePayloadHeaders(String payloadURL)
+			throws MailBoxServicesException {
+
+		try {
+			initializeFS2();
+			URI spectrumURI = new URI(payloadURL);
+			LOGGER.info("Retrieving payload headers from spectrum");
+			return FS2.getHeaders(spectrumURI);
+		} catch (URISyntaxException | FS2Exception e) {
+			LOGGER.error(Messages.PAYLOAD_HEADERS_READ_ERROR, e);
+			throw new MailBoxServicesException(Messages.PAYLOAD_HEADERS_READ_ERROR, Response.Status.BAD_REQUEST);
+		}
+	}
+
 }

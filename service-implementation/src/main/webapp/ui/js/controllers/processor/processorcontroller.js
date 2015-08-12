@@ -30,6 +30,9 @@ var rest = myApp.controller(
             $scope.mailBoxId;
             $scope.processorUrlDisplayContent = ''; 
             $scope.urlType = '';
+			var isProcessorSearchFlag = false;
+			var procsrId = '';
+			var isSIdConstraint = true;
             		
 			function getIndexOfValue(objArray, value) {
 				var pos = -1;
@@ -146,10 +149,21 @@ var rest = myApp.controller(
                 $scope.selectedProfiles = [];
             };
             $scope.loadOrigin();
-            
+			
             $scope.initialLoad = function () {
-                $scope.readAllProcessors();
-                $scope.readAllProfiles();
+			
+			isProcessorSearchFlag = $location.search().isProcessorSearch;
+			procsrId = $location.search().processorId;
+			$rootScope.gridLoaded = false;
+				if(isProcessorSearchFlag){
+					isSIdConstraint = false;
+					$scope.readAllProcessors();
+					$scope.readAllProfiles();
+					$scope.editProcessor(procsrId,true);
+				} else {
+					$scope.readAllProcessors();
+					$scope.readAllProfiles();
+				}
             };
             //$scope.readOnlyProcessors = false;
             // Grid Setups
@@ -164,12 +178,14 @@ var rest = myApp.controller(
                 pageSize: 5,
                 currentPage: 1
             };
+			
             $scope.readAllProcessors = function () {
-                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?addServiceInstanceIdConstraint=' + true + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
+                $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '?addServiceInstanceIdConstraint=' + isSIdConstraint + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data) {
                         $scope.getPagedDataAsync(data,
                             $scope.pagingOptions.pageSize,
                             $scope.pagingOptions.currentPage);
+					$rootScope.gridLoaded = true;		
                     }
                 );
             };
@@ -190,20 +206,43 @@ var rest = myApp.controller(
                     $scope.$apply();
                 }
             };
-            $scope.$watch('pagingOptions', function (newVal, oldVal) {
-                if (newVal !== oldVal && newVal.currentPage !== oldVal.currentPage) {
+		$scope.$watch('pagingOptions.currentPage', function (newVal, oldVal) {
+            if (newVal !== oldVal  && $scope.validatePageNumberValue(newVal, oldVal)) {
+            	$scope.readAllProcessors();
+            }
+        }, true);
+
+        $scope.$watch('pagingOptions.pageSize', function (newVal, oldVal) {
+            if (newVal !== oldVal) {
+               //Get data when in first page
+               if ( $scope.pagingOptions.currentPage === 1) {
                     $scope.readAllProcessors();
-                }
-                if (newVal !== oldVal && newVal.pageSize !== oldVal.pageSize) {
-                    $scope.readAllProcessors();
-                    newVal.currentPage = 1;
-                }
-            }, true);
-            $scope.$watch('filterOptions', function (newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    $scope.readAllProcessors();
-                }
-            }, true);
+               } else {
+                    //If on other page than 1 go back
+                    $scope.pagingOptions.currentPage = 1;
+               }               
+            }
+        }, true);
+
+		// Check that value in page number field is valid. Shows error if not valid value and set current page to 1
+        $scope.validatePageNumberValue = function(newVal, oldVal) {
+            // Value cannot be empty, non number or zero
+            var valid = true;
+            if(newVal === '' || !/^\d+$/.test(newVal) || newVal*1 == 0) {
+                valid = false;
+            }
+            // Value cannot be bigger than calculated max page count
+            else if($scope.totalServerItems !== undefined && $scope.totalServerItems !== 0 && newVal*1 > Math.ceil($scope.totalServerItems / $scope.pagingOptions.pageSize)) {
+                valid = false;
+            }
+
+            if(!valid)
+            {
+                $scope.pagingOptions.currentPage = oldVal;
+                showSaveMessage("Invalid input value. Page "+$scope.pagingOptions.currentPage+" is shown.", 'error');
+            }
+            return valid;
+        }			
 
             $scope.gridOptionsForProcessorList = {
                 columnDefs: [{
@@ -305,10 +344,10 @@ var rest = myApp.controller(
                 }
 				//GMB 221
 				if($scope.processor.protocol.value === "FTPS" || $scope.processor.protocol.value === "HTTPS") {
-					$scope.showTrusstoreSection = true;	
+					$scope.showTruststoreSection = true;	
 									
 				} else {
-					$scope.showTrusstoreSection = false;
+					$scope.showTruststoreSection = false;
 				}
 				$scope.showSSHKeysSection = ($scope.processor.protocol.value === "SFTP") ? true : false;
 				
@@ -399,11 +438,14 @@ var rest = myApp.controller(
 				if (blockuiFlag === true) {
 					$scope.block.blockUI();
 				}
-				
-				$scope.formAddPrcsr.$setPristine();
+				if(typeof $scope.formAddPrcsr != 'undefined'){
+					$scope.formAddPrcsr.$setPristine();
+				}
                 $scope.loadOrigin();
                 //To notify passwordDirective to clear the password and error message
-                $scope.doSend();
+                if(typeof $scope.formAddPrcsr != 'undefined'){
+					$scope.doSend();
+				}
                 $scope.isEdit = true;
                 var procsrId = processorId;
                 $scope.restService.get($scope.base_url + '/' + $location.search().mailBoxId + '/processor/' + procsrId, //Get mail box Data
@@ -495,9 +537,14 @@ var rest = myApp.controller(
             };			
 			
             $scope.doCancel = function () {			
-				$scope.closeModalView(); 
-				$location.$$search = {};
-				$location.path('/mailbox/getMailBox');
+				$scope.closeModalView(); 				
+				if($location.search().isProcessorSearch){
+					$location.$$search = {};
+					$location.path('/mailbox/getProcessor');
+				} else {
+					$location.$$search = {};
+					$location.path('/mailbox/getMailBox');
+				}
             };
 	        $scope.closeModalView = function () {
                  $('#cancelAction').modal('hide')
@@ -755,6 +802,7 @@ var rest = myApp.controller(
 							$scope.readAllProcessors();
 							//$scope.readAllProfiles();
 						} else {
+							$scope.editProcessor($scope.processor.guid, false);
 							$scope.setTypeDuringProtocolEdit($scope.processor.protocol);
                             $scope.creationFailed = true;
 							showSaveMessage("Error while saving processor", 'error');
@@ -1166,6 +1214,23 @@ var rest = myApp.controller(
             }		   
             $scope.resetProcessorType($scope.procsrType);            
             
+			$scope.processorFoldersSortInfo = {
+				fields: ['folderURI'],
+				directions: ['asc']
+			};
+			
+			$scope.sortProcessorFolders = function () {
+				 var reverse = ($scope.processorFoldersSortInfo.directions[0] === 'asc') ? false : true; 
+				 $scope.folderAddedToProcessor = $filter('orderBy')($scope.folderAddedToProcessor, $scope.processorFoldersSortInfo.fields[0], reverse);
+			};
+			// Sort listener for Scripts grid
+			$scope.$watch('processorFoldersSortInfo.directions + processorFoldersSortInfo.fields', function (newVal, oldVal) {
+				if (newVal !== oldVal) {
+					$scope.sortProcessorFolders();
+				}
+
+			}, true);
+			
 			//New folder section
 			$scope.folderAvailableProperties = []; 
 			$scope.folderAddedToProcessor = [];
@@ -1178,6 +1243,8 @@ var rest = myApp.controller(
                 showFooter: false,
                 rowHeight: 80,
 				enableColumnResize : true,
+				sortInfo : $scope.processorFoldersSortInfo,
+				useExternalSorting : true,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "folderURI",
@@ -1207,6 +1274,22 @@ var rest = myApp.controller(
                 }]
             };
 			
+			$scope.processorPropertiesSortInfo = {
+				fields: ['value'],
+				directions: ['asc']
+			};
+			$scope.sortProcessorProperties = function () {
+				 var reverse = ($scope.processorPropertiesSortInfo.directions[0] === 'asc') ? false : true; 
+				 var fieldToBeSorted = ($scope.processorPropertiesSortInfo.fields[0] === 'name') ? 'displayName' : $scope.processorPropertiesSortInfo.fields[0];
+				 $scope.propertiesAddedToProcessor = $filter('orderBy')($scope.propertiesAddedToProcessor, fieldToBeSorted, reverse);
+			};
+			// Sort listener for Scripts grid
+			$scope.$watch('processorPropertiesSortInfo.directions + processorPropertiesSortInfo.fields', function (newVal, oldVal) {
+				if (newVal !== oldVal) {
+					$scope.sortProcessorProperties();
+				}
+
+			}, true);
             $scope.gridOptionsForProcessor = {
                 data: 'propertiesAddedToProcessor',
                 displaySelectionCheckbox: false,
@@ -1216,6 +1299,8 @@ var rest = myApp.controller(
                 showFooter: false,
                 rowHeight: 80,
 				enableColumnResize : true,
+				useExternalSorting : true,
+				sortInfo : $scope.processorPropertiesSortInfo,
 				plugins: [new ngGridFlexibleHeightPlugin()],
                 columnDefs: [{
                     field: "name",
@@ -1235,6 +1320,7 @@ var rest = myApp.controller(
                      width: "20%",
                      displayName: "Action*",
                      enableCellEdit: false,
+					 sortable: false,
                      cellTemplate: '<dynamic-action-field-directive available-properties = availableProperties added-properties = propertiesAddedToProcessor current-row-object = propertiesAddedToProcessor[row.rowIndex] initial-state-object={{row.entity}}/>',
                  }
                 ]

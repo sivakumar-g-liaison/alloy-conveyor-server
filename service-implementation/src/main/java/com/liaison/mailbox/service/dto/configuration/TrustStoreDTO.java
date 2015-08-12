@@ -16,6 +16,7 @@ package com.liaison.mailbox.service.dto.configuration;
  * 
  * @author ofs
  */
+@Deprecated
 public class TrustStoreDTO {
 
 	private String trustStoreId;

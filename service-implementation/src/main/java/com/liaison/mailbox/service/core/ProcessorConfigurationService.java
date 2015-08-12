@@ -71,9 +71,12 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.DynamicPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
@@ -86,6 +89,7 @@ import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreRespo
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.SearchProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorDTO;
 import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
@@ -109,7 +113,7 @@ public class ProcessorConfigurationService {
 	private static final String PROCESSOR_STATUS = "Processor Status";
 	private static String INTERRUPT_SIGNAL = "Interrupt Signal";
 	private static String EXECUTING_PROCESSORS = "Executing Processors";
-
+	private static String PROFILE = "Profile";
 
 	/**
 	 * Creates processor for the mailbox.
@@ -386,6 +390,7 @@ public class ProcessorConfigurationService {
 	 * @throws IOException
 	 * @throws JSONException
 	 */
+	@Deprecated
 	public GetTrustStoreResponseDTO uploadSelfSignedTrustStore()
 			throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
 
@@ -854,6 +859,7 @@ public class ProcessorConfigurationService {
 					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
 					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
 					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
+					boolean lensVisibility = httpListenerStaticProperties.isLensVisibility(); 
 
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID,
 							processor.getServiceInstance().getName());
@@ -864,7 +870,14 @@ public class ProcessorConfigurationService {
 							String.valueOf(securedPayload));
 					httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK,
 							String.valueOf(authCheckRequired));
-
+					Map<String,String> ttlMap = processor.getTTLUnitAndTTLNumber();
+					if(!ttlMap.isEmpty())
+					{
+					Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+					httpListenerProperties.put(MailBoxConstants.TTL_IN_SECONDS,String.valueOf( MailBoxUtil.convertTTLIntoSeconds(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber)));
+					}
+					httpListenerProperties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY,
+							String.valueOf(lensVisibility));
 					if (!MailBoxUtil.isEmpty(pipeLineId))
 						httpListenerProperties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_PIPELINEID, pipeLineId);
 					break;
@@ -877,7 +890,7 @@ public class ProcessorConfigurationService {
 						Response.Status.NOT_FOUND);
 			}
 
-		} catch (JAXBException | IOException | SymmetricAlgorithmException e) {
+		} catch (JAXBException | IOException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
 			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
@@ -886,5 +899,175 @@ public class ProcessorConfigurationService {
 
 		return httpListenerProperties;
 
+	}
+	
+	/**
+	 * Get the Processor details of the mailbox using guid.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public GetProcessorResponseDTO searchProcessor(GenericSearchFilterDTO searchFilter)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get all processors.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+			int totalCount = 0;			
+			Map<String, Integer> pageOffsetDetails = null;
+			
+			totalCount = config.getFilteredProcessorsCount(searchFilter);
+			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
+					searchFilter.getPageSize(), totalCount);
+			
+			List<Processor> processors = config.getAllProcessors(searchFilter, pageOffsetDetails);
+
+			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
+			if (null == processors || processors.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_PROCESSORS_EXIST, Response.Status.NOT_FOUND);
+			}
+
+			ProcessorDTO processorDTO = null;
+			for (Processor processor : processors) {
+				processorDTO = new ProcessorDTO();
+				processorDTO.copyFromEntity(processor, false);
+				prsDTO.add(processorDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
+			serviceResponse.setTotalItems(totalCount);
+			serviceResponse.setProcessors(prsDTO);
+			
+			LOGGER.debug("Exit from get all processors.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROCESSOR, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		} 
+	}
+	
+	/**
+	 * Get the Mailbox names.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public SearchProcessorResponseDTO getMailBoxNames (GenericSearchFilterDTO searchFilter)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get mailbox names.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
+			
+			List<MailBox> mailboxList = config.getMailboxNames(searchFilter);
+
+			List<MailBoxDTO> mbxDTO = new ArrayList<MailBoxDTO>();
+			if (null == mailboxList || mailboxList.isEmpty()) {
+				throw new MailBoxConfigurationServicesException(Messages.NO_MBX_NAMES_EXIST, Response.Status.NOT_FOUND);
+			}
+			MailBoxDTO mailboxDTO = null;
+			for (MailBox mailbox : mailboxList) {
+				mailboxDTO = new MailBoxDTO();
+				mailboxDTO.setName(mailbox.getMbxName());
+				mbxDTO.add(mailboxDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));			
+			serviceResponse.setMailbox(mbxDTO);
+			
+			LOGGER.debug("Exit from get mailbox names.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+	}
+	
+	/**
+	 * Get the Profile names.
+	 *
+	 * @return The responseDTO.
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws JsonMappingException
+	 * @throws JsonParseException
+	 * @throws SymmetricAlgorithmException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 */
+	public SearchProcessorResponseDTO getProfileNames (GenericSearchFilterDTO searchFilter)
+			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
+			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+
+		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get profile names.");			
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
+			
+			List<ScheduleProfilesRef> profiles = config.getProfileNames(searchFilter);
+
+			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
+			if (profiles == null || profiles.isEmpty()) {
+				serviceResponse.setResponse(new ResponseDTO(Messages.NO_COMPONENT_EXISTS, PROFILE, Messages.SUCCESS));
+				serviceResponse.setProfiles(profilesDTO);
+				return serviceResponse;
+			}
+
+			ProfileDTO profileDTO = null;
+			for (ScheduleProfilesRef prof : profiles) {
+				profileDTO = new ProfileDTO();
+				profileDTO.setName(prof.getSchProfName());
+				profilesDTO.add(profileDTO);
+			}
+			// response message construction
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));			
+			serviceResponse.setProfiles(profilesDTO);
+			
+			LOGGER.debug("Exit from get profile names.");
+			return serviceResponse;
+		} catch (MailBoxConfigurationServicesException e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
 	}
 }

@@ -30,7 +30,6 @@ import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
-import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Credential;
 import com.liaison.mailbox.enums.CredentialType;
 import com.liaison.mailbox.enums.ProcessorType;
@@ -65,6 +64,7 @@ public class FTPSClient {
 			int connectionTimeout = 0;
 			int socketTimeout = 0;
 			int retryAttempts = 0;
+			boolean debugTranscript = false;
 
 			if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				ftpUploaderStaticProperties = (FTPUploaderPropertiesDTO)processor.getProperties();
@@ -72,16 +72,21 @@ public class FTPSClient {
 				connectionTimeout = ftpUploaderStaticProperties.getConnectionTimeout();
 				socketTimeout = ftpUploaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpUploaderStaticProperties.getRetryAttempts();
+				debugTranscript =  ftpUploaderStaticProperties.isDebugTranscript();
 			} else if (processor.getConfigurationInstance().getProcessorType().equals(ProcessorType.REMOTEDOWNLOADER)) {
 				ftpDownloaderStaticProperties = (FTPDownloaderPropertiesDTO)processor.getProperties();
 				url = ftpDownloaderStaticProperties.getUrl();
 				connectionTimeout = ftpDownloaderStaticProperties.getConnectionTimeout();
 				socketTimeout = ftpDownloaderStaticProperties.getSocketTimeout();
 				retryAttempts = ftpDownloaderStaticProperties.getRetryAttempts();
+				debugTranscript = ftpDownloaderStaticProperties.isDebugTranscript();
 			}
 			// retrieve required properties
 			G2FTPSClient ftpsRequest = new G2FTPSClient();
 			ftpsRequest.setURI(url);
+
+			// set debug transcript property
+			ftpsRequest.setCanLogTranscript(debugTranscript);
 			ftpsRequest.setDiagnosticLogger(LOGGER);
 			ftpsRequest.setCommandLogger(LOGGER);
 			ftpsRequest.setConnectionTimeout(connectionTimeout);
@@ -114,9 +119,7 @@ public class FTPSClient {
 				if (trustStoreCredential != null) {
 
 					// If no certificate is configured then use default global trustoreid
-					String trustStoreID = (MailBoxUtil.isEmpty(trustStoreCredential.getCredsIdpUri()))
-							? (MailBoxUtil.getEnvironmentProperties().getString(MailBoxConstants.DEFAULT_GLOBAL_TRUSTSTORE_GROUP_ID))
-							: trustStoreCredential.getCredsIdpUri();
+					String trustStoreID = trustStoreCredential.getCredsIdpUri();
 
 					try (InputStream instream = KMSUtil.fetchTrustStore(trustStoreID)) {
 						trustStore.load(instream, null);

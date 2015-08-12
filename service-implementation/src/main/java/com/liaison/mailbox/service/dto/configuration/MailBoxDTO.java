@@ -52,7 +52,7 @@ public class MailBoxDTO implements Serializable {
 	private String status;
 	private String shardKey;
 	private String tenancyKey;
-	private String tenancyKeyDisplayName;
+	private String tenancyKeyDisplayName;	
 
 	private List<PropertyDTO> properties;
 	private List<MailBoxProcessorResponseDTO> processors;
@@ -133,8 +133,6 @@ public class MailBoxDTO implements Serializable {
 	public void setProcessors(List<MailBoxProcessorResponseDTO> processors) {
 		this.processors = processors;
 	}
-	
-	
 
 	public String getTenancyKeyDisplayName() {
 		return tenancyKeyDisplayName;
@@ -215,5 +213,5 @@ public class MailBoxDTO implements Serializable {
 			this.getProcessors().add(prcsrDTO);
 		}
 
-	}
+	}	
 }

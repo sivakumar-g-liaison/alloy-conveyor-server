@@ -54,8 +54,19 @@ allprojects {
     
     configurations {
         all {
+
+        	//force governator to 1.3.x
+             resolutionStrategy {
+                force 'com.netflix.governator:governator:1.3.+'
+             }
+
               // Most of the time this is a bad idea with little upside:   // check for updates every build
               //resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+
+             //force eureka-client to use 1.1.159
+             resolutionStrategy {
+                force 'com.netflix.eureka:eureka-client:1.1.159'
+            }
         }
     }    
 }

@@ -59,8 +59,8 @@ public class GlassMessage {
 		this.setGlobalPId(wrkTicket.getGlobalProcessId());
 		this.setPipelineId(wrkTicket.getPipelineId());
 		Long payloadSize = wrkTicket.getPayloadSize();
-		if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-			this.setInSize((int) (long) payloadSize);
+		if (payloadSize != null && payloadSize != -1L) {
+			this.setOutSize(payloadSize);
 		}
 		this.setTransferProfileName((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.DBX_WORK_TICKET_PROFILE_NAME));
 		this.setProcessorId((String) wrkTicket.getAdditionalContextItem(MailBoxConstants.KEY_WORKTICKET_PROCESSOR_ID));
@@ -71,7 +71,6 @@ public class GlassMessage {
 	}
 
 	public GlassMessage() {
-		// TODO Auto-generated constructor stub
 	}
 
 	private ProcessorType category;
@@ -87,12 +86,16 @@ public class GlassMessage {
 	private GatewayType inAgent;
 	private GatewayType outAgent;
 	private String message;
-	private int inSize;
+	private Long inSize;
+	private Long outSize;
 	private String processId;
 	private String senderId;
 	private String transferProfileName;
 	private String stagedFileId;
 	private String meta;
+	private String inboundFileName;
+	private String outboundFileName;
+
 
 	public String getTransferProfileName() {
 		return transferProfileName;
@@ -134,6 +137,16 @@ public class GlassMessage {
 		this.outAgent = outAgent;
 	}
 
+	public void setOutAgent(String outAgent) {
+        if (outAgent.contains("ftps")) {
+            this.outAgent = GatewayType.FTPS;
+        } else if (outAgent.contains("sftp")) {
+            this.outAgent = GatewayType.SFTP;
+        } else if (outAgent.contains("ftp")) {
+            this.outAgent = GatewayType.FTP;
+        }
+    }
+
 	public GatewayType getInAgent() {
 		return inAgent;
 	}
@@ -141,6 +154,16 @@ public class GlassMessage {
 	public void setInAgent(GatewayType inAgent) {
 		this.inAgent = inAgent;
 	}
+
+	public void setInAgent(String inAgent) {
+	    if (inAgent.contains("ftps")) {
+	        this.inAgent = GatewayType.FTPS;
+        } else if (inAgent.contains("sftp")) {
+            this.inAgent = GatewayType.SFTP;
+        } else if (inAgent.contains("ftp")) {
+            this.inAgent = GatewayType.FTP;
+        }
+    }
 
 	public String getPipelineId() {
 		return pipelineId;
@@ -230,11 +253,11 @@ public class GlassMessage {
 		return message;
 	}
 
-	public void setInSize(int inSize) {
+	public void setInSize(Long inSize) {
 		this.inSize = inSize;
 	}
 
-	public int getInSize() {
+	public Long getInSize() {
 		return inSize;
 	}
 
@@ -246,7 +269,31 @@ public class GlassMessage {
 		this.processId = processId;
 	}
 
-	public static void logTimestamp(Logger logger, String message, Object... objects) {
+	public Long getOutSize() {
+        return outSize;
+    }
+
+    public void setOutSize(Long outSize) {
+        this.outSize = outSize;
+    }
+
+    public String getInboundFileName() {
+        return inboundFileName;
+    }
+
+    public void setInboundFileName(String inboundFileName) {
+        this.inboundFileName = inboundFileName;
+    }
+
+    public String getOutboundFileName() {
+        return outboundFileName;
+    }
+
+    public void setOutboundFileName(String outboundFileName) {
+        this.outboundFileName = outboundFileName;
+    }
+
+    public static void logTimestamp(Logger logger, String message, Object... objects) {
 		if (logger != null) {
 			logger.info(String.format("[TIME] %s | %s", new Date(System.currentTimeMillis()),
 					String.format(message, objects)));
@@ -256,6 +303,10 @@ public class GlassMessage {
 	public void logFirstCornerTimestamp() {
 		firstCornerTimestamp = logBeginTimestamp(config.getString(PROPERTY_FIRST_CORNER_NAME, DEFAULT_FIRST_CORNER_NAME));
 	}
+
+	public void logFirstCornerTimestamp(ExecutionTimestamp timeStamp) {
+        logTimeStamp(timeStamp);
+    }
 
 	public void logSecondCornerTimestamp() {
 		logEndTimestamp(config.getString(DEFAULT_SECOND_CORNER_NAME, PROPERTY_SECOND_CORNER_NAME));
@@ -274,7 +325,7 @@ public class GlassMessage {
 		logTimeStamp(timeStamp);
 		return timeStamp;
 	}
-
+	
 	public void logEndTimestamp(String name, String sessionId) {
 		ExecutionTimestamp timeStamp = ExecutionTimestamp.endTimestamp(name, sessionId);
 		logTimeStamp(timeStamp);
@@ -300,6 +351,7 @@ public class GlassMessage {
 		timeStampAPI.setGlobalId(getGlobalPId());
 		timeStampAPI.setPipelineId(getPipelineId());
 		timeStampAPI.getTimeStamps().add(glassTimeStamp);
+		timeStampAPI.setGlassMessageId(IdentifierUtil.getUuid());
 
 		return timeStampAPI;
 	}

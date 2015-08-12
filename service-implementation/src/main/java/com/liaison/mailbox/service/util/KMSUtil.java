@@ -235,6 +235,7 @@ public class KMSUtil {
 		return baseUrl + path;
 	}
 
+	@Deprecated
 	public static HttpResponse uploadSelfSignedTrustStoreCertificate () throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
 		String request = ServiceUtils.readFileFromClassPath("requests/keymanager/truststorerequest.json");
 

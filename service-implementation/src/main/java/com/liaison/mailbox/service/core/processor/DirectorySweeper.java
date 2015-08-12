@@ -22,7 +22,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +40,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.GatewayType;
 import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.util.ISO8601Util;
 import com.liaison.dto.enums.ProcessMode;
@@ -53,9 +51,8 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.enums.ProcessorType;
-import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
+import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.SweeperPropertiesDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
@@ -82,12 +79,22 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private static final Logger LOGGER = LogManager.getLogger(DirectorySweeper.class);
 
 	private String pipeLineID;
-	private  List<Path> activeFiles = new ArrayList<>();
-	
+	private List<Path> activeFiles = new ArrayList<>();
+	private String fileRenameFormat = null;
 
-	public void setPipeLineID(String pipeLineID) {
+    public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
 	}
+
+    public String setFileRenameFormat(SweeperPropertiesDTO staticProp) {
+        if (MailBoxUtil.isEmpty(fileRenameFormat)) {
+            fileRenameFormat = (MailBoxUtil.isEmpty(staticProp.getFileRenameFormat()))
+                    ? MailBoxConstants.SWEEPED_FILE_EXTN
+                    : "." + fileRenameFormat;
+        }
+        return fileRenameFormat;
+    }
+
 
 	@SuppressWarnings("unused")
 	private DirectorySweeper() {
@@ -100,16 +107,17 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 
 	@Override
-	public void runProcessor(String executionId,MailboxFSM fsm) {
+	public void runProcessor(Object dto, MailboxFSM fsm) {
 
 		try {
 
+		    setReqDTO((TriggerProcessorRequestDTO) dto);
 			if (getProperties().isHandOverExecutionToJavaScript()) {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_HANDED_OVER_TO_JS));
 				// Use custom G2JavascriptEngine
 				JavaScriptExecutorUtil.executeJavaScript(configurationInstance.getJavaScriptUri(), this);
 			 } else {
-				run(executionId);
+				run(getReqDTO().getExecutionId());
 			}
 		} catch(JAXBException |IOException |IllegalAccessException | NoSuchFieldException e) {
 			throw new RuntimeException(e);
@@ -117,147 +125,93 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	}
 
 	private void run(String executionId) {
-		
-		
-		TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient(executionId);
-		GlassMessage glassMessage = new GlassMessage();
-		
 
-	try {
-		
-		//GLASS LOGGING BEGINS//
-		glassMessage.setCategory(ProcessorType.SWEEPER);
-		glassMessage.setProtocol(Protocol.SWEEPER.getCode());
-		glassMessage.setPipelineId(getPipeLineID());
-		//Log running status
-		glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
-		//GLASS LOGGING ENDS//
-		// Get root from folders input_folder
-		String inputLocation = getPayloadURI();
-		// retrieve required properties
-		SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO)getProperties();
-		String fileRenameFormat = sweeperStaticProperties.getFileRenameFormat();
-		String includedFiles = sweeperStaticProperties.getIncludedFiles();
-		String excludedFiles = sweeperStaticProperties.getExcludedFiles();
-		List<String> includeList = (includedFiles != null && !includedFiles.isEmpty())? Arrays.asList(includedFiles.split(",")) : null;
-		List<String> excludedList = (excludedFiles != null && !excludedFiles.isEmpty()) ? Arrays.asList(excludedFiles.split(",")) : null;
-		String sweepedLocation = sweeperStaticProperties.getSweepedFileLocation();
-		File dirToList = new File(inputLocation);
-		File[] files = dirToList.listFiles();
-		for (File file : files) {
+        try {
 
-			if (file.getName().equals(".") || file.getName().equals("..")) {
-				// skip parent directory and the directory itself
-				continue;
-			}
-			String currentFileName = file.getName();
-			if (file.isFile()) {
-				// Check whether user preferred specific files to include or exclude during downloading process.
-				currentFileName= MailBoxUtil.checkIncludeorExclude(includeList, currentFileName, excludedList);
+            // Get root from folders input_folder
+            String inputLocation = getPayloadURI();
 
-				if(currentFileName != null){
-					Path oldPath =file.toPath();
-					if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
-		                LOGGER.debug("Deleting file after sweep");
-		                delete(oldPath);
-		            } else {
-		            	String sweepPath = sweepedLocation+ file.separator + currentFileName;
-						Path newPath=Paths.get(sweepPath);
-		                LOGGER.debug("Moving file after sweep");
-		                move(oldPath, newPath);
+            // retrieve required properties
+            SweeperPropertiesDTO staticProp = (SweeperPropertiesDTO) getProperties();
+            setFileRenameFormat(staticProp);
 
-		            }
-				}
-			}
-		}
-		fileRenameFormat = (MailBoxUtil.isEmpty(fileRenameFormat)) ? MailBoxConstants.SWEEPED_FILE_EXTN : "."+fileRenameFormat;
+            // Validation of the necessary properties
+            if (MailBoxUtil.isEmpty(inputLocation)) {
+            	throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
+            }
 
-		long timeLimit = MailBoxUtil.getEnvironmentProperties().getLong(MailBoxConstants.LAST_MODIFIED_TOLERANCE);
-		// Validation of the necessary properties
-		if (MailBoxUtil.isEmpty(inputLocation)) {
-			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.PAYLOAD_LOCATION, Response.Status.CONFLICT);
-		}
+            long startTime = System.currentTimeMillis();
+            LOGGER.info(constructMessage("Start run"));
+            LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
+            List<WorkTicket> workTickets = (activeFiles.isEmpty())
+            								? sweepDirectory(inputLocation , false, staticProp)
+            								: retryGenWrkTktForActiveFiles(activeFiles);
 
-        LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
-        List<WorkTicket> workTickets = (activeFiles.isEmpty())	
-        								? sweepDirectory(inputLocation , false, fileRenameFormat, timeLimit)
-        								: retryGenWrkTktForActiveFiles(activeFiles, timeLimit);
+            if (workTickets.isEmpty()) {
+            	LOGGER.info("There are no files to process.");
+            } else {
+                LOGGER.debug("There are {} files to process", workTickets.size());
+            	// Read from mailbox property - grouping js location
+            	List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
 
-		if (workTickets.isEmpty()) {
-			LOGGER.info("There are no files to process.");
-		} else {
-            LOGGER.debug("There are {} files to process", workTickets.size());
-			// Read from mailbox property - grouping js location
-			List<WorkTicketGroup> workTicketGroups = groupingWorkTickets(workTickets);
+            	String sweepedFileLocation = replaceTokensInFolderPath(staticProp.getSweepedFileLocation());
+            	if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
+                    LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
 
-			String sweepedFileLocation = replaceTokensInFolderPath(sweeperStaticProperties.getSweepedFileLocation());
-			if (!MailBoxUtil.isEmpty(sweepedFileLocation)) {
-                LOGGER.info("Sweeped File Location ({}) is not available, so system is creating.", sweepedFileLocation);
+            		// If the given sweeped file location is not available then system will create that.
+            		Path path = Paths.get(sweepedFileLocation);
+            		if (!Files.isDirectory(path)) {
+                        LOGGER.info("Creating Directories {}", path);
+                        Files.createDirectories(path);
+            		} else {
+                        LOGGER.info("Not creating, {} Is Directory", path);
+                    }
+            	}
 
-				// If the given sweeped file location is not available then system will create that.
-				Path path = Paths.get(sweepedFileLocation);
-				if (!Files.isDirectory(path)) {
-                    LOGGER.info("Creating Directories {}", path);
+            	// Renaming the file
+                LOGGER.debug("ABOUT TO MARK AS SWEEPED");
+            	markAsSweeped(workTickets, fileRenameFormat, sweepedFileLocation);
 
-                    Files.createDirectories(path);
-				} else {
-                    LOGGER.info("Not creating, {} Is Directory", path);
-                }
-			}
+            	if (workTicketGroups.isEmpty()) {
+            		LOGGER.info("The file group is empty, so NOP");
+            	} else {
+            		for (WorkTicketGroup workTicketGroup : workTicketGroups) {
 
-			// Renaming the file
-            LOGGER.debug("ABOUT TO MARK AS SWEEPED");
-			markAsSweeped(workTickets, fileRenameFormat, sweepedFileLocation);
+            			String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
+            			LOGGER.info(constructMessage("JSON POSTED TO SB.{}"), new JSONObject(wrkTcktToSbr).toString(2));
+            			postToSweeperQueue(wrkTcktToSbr);
 
-			if (workTicketGroups.isEmpty()) {
-				LOGGER.info("The file group is empty, so NOP");
-			} else {
-				for (WorkTicketGroup workTicketGroup : workTicketGroups) {
+            			// For glass logging
+            			for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
 
-					String wrkTcktToSbr = constructMetaDataJson(workTicketGroup);
-					LOGGER.info("JSON POSTED TO SB.{}", new JSONObject(wrkTcktToSbr).toString(2));
-					postToSweeperQueue(wrkTcktToSbr);
+            			    logToLens(inputLocation, wrkTicket);
+            				LOGGER.info(constructMessage("Global PID",
+            				        seperator,
+            				        wrkTicket.getGlobalProcessId(),
+            				        " submitted for file ",
+            				        wrkTicket.getFileName()));
 
-					// For glass logging
-					for (WorkTicket wrkTicket : workTicketGroup.getWorkTicketGroup()) {
+            			}
+            		}
+            	}
+            }
 
-						glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
-						glassMessage.setStatus(ExecutionState.PROCESSING);
-						Long payloadSize = wrkTicket.getPayloadSize();
-						if (payloadSize != null && payloadSize < Integer.MAX_VALUE) {
-							glassMessage.setInSize((int) (long) payloadSize);
-						}
+            // retry when in-progress file list is not empty
+            if (!activeFiles.isEmpty()) {
+            	run(executionId);
+            }
+            long endTime = System.currentTimeMillis();
 
-						if (inputLocation.contains("ftps")) {
-							glassMessage.setInAgent(GatewayType.FTPS);
-						} else if (inputLocation.contains("sftp")) {
-							glassMessage.setInAgent(GatewayType.SFTP);
-						} else if (inputLocation.contains("ftp")) {
-							glassMessage.setInAgent(GatewayType.FTP);
-						}
-
-						// Log FIRST corner
-						glassMessage.logFirstCornerTimestamp();
-						transactionVisibilityClient.logToGlass(glassMessage);
-						// Log running status
-						glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued");
-					}
-				}
-			}
-		}
-
-		// retry when in-progress file list is not empty
-		if (!activeFiles.isEmpty()) {
-			run(executionId);
-		}
-
-		} catch (MailBoxServicesException | IOException | URISyntaxException
-				| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
-				| JSONException | IllegalAccessException | NoSuchFieldException e) {
-			throw new RuntimeException(e);
-		}
+            LOGGER.info(constructMessage("Number of files processed {}"), workTickets.size());
+            LOGGER.info(constructMessage("Total time taken to process files {}"), endTime - startTime);
+            LOGGER.info(constructMessage("End run"));
+        } catch (MailBoxServicesException | IOException | URISyntaxException
+        		| FS2Exception | JAXBException | NoSuchMethodException | ScriptException
+        		| JSONException | IllegalAccessException | NoSuchFieldException e) {
+            LOGGER.error(constructMessage("Error occurred while scanning the mailbox", seperator, e.getMessage()), e);
+        	throw new RuntimeException(e);
+        }
 	}
-
 
 	/**
 	 * Method is used to retrieve all the WorkTickets from the given mailbox.
@@ -277,11 +231,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	
-	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly,String fileRenameFormat, long lastModifiedLmt) throws IOException, URISyntaxException,
+
+	public List<WorkTicket> sweepDirectory(String root, boolean listDirectoryOnly, SweeperPropertiesDTO staticProp) throws IOException, URISyntaxException,
 			MailBoxServicesException, FS2Exception, JAXBException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-        LOGGER.debug("SweepingDirectory: {}", root);
+        LOGGER.info(constructMessage("Scanning Directory: {}"), root);
 		Path rootPath = Paths.get(root);
 		if (!Files.isDirectory(rootPath)) {
 			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
@@ -290,11 +244,20 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		List<Path> result = new ArrayList<>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(listDirectoryOnly))) {
 			for (Path file : stream) {
-                LOGGER.debug("Sweeping file {}", file.toString());
-				if (!file.getFileName().toString().endsWith(fileRenameFormat)) {
 
-					if (validateLastModifiedTolerance(lastModifiedLmt, file)) {
-						LOGGER.info("The file {} is in progress. So added in the in-progress list.", file.toString());
+				String fileName = file.getFileName().toString();
+				// Check if the file to be uploaded is included or not excluded
+                if(!checkFileIncludeorExclude(staticProp.getIncludedFiles(),
+                        fileName,
+                        staticProp.getExcludedFiles())) {
+                    continue;
+                }
+
+                LOGGER.debug("Sweeping file {}", file.toString());
+				if (!fileName.endsWith(fileRenameFormat)) {
+
+					if (MailBoxUtil.validateLastModifiedTolerance(file)) {
+						LOGGER.info(constructMessage("The file {} is in progress. So added in the in-progress list."), file.toString());
                         activeFiles.add(file);
 						continue;
 					}
@@ -302,9 +265,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 				}
 			}
 		} catch (IOException e) {
-			throw e; //TODO Code review- what's this catch throw for?
+			throw e;
 		}
-
 
         LOGGER.debug("Result size: {}, results {}", result.size(), result.toArray());
 		return generateWorkTickets(result);
@@ -359,14 +321,11 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 		if (!MailBoxUtil.isEmpty(groupingJsPath)) {
 
-			// Use custom G2JavascriptEngine
-			//TODO
 			JavaScriptExecutorUtil.executeJavaScript(groupingJsPath, "init", workTickets, LOGGER);
-
 		} else {
 
 			if (workTickets.isEmpty()) {
-				LOGGER.info("There are no files available in the directory.");
+				LOGGER.info(constructMessage("There are no files available in the directory."));
 			}
 
 			WorkTicketGroup workTicketGroup = new WorkTicketGroup();
@@ -450,18 +409,23 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 			oldPath = payloadFile.toPath();
 			newPath = (target == null) ? oldPath.getParent().resolve(oldPath.toFile().getName() + fileRenameFormat)
 						: target.resolve(oldPath.toFile().getName() + fileRenameFormat);
-			String globalProcessId  = MailBoxUtil.getGUID();
-			workTicket.setGlobalProcessId(globalProcessId);
 
 			Map <String, String> properties = new HashMap <String, String>();
+			Map<String,String> ttlMap = configurationInstance.getTTLUnitAndTTLNumber();
+			if(!ttlMap.isEmpty())
+			{
+			Integer ttlNumber = Integer.parseInt(ttlMap.get(MailBoxConstants.TTL_NUMBER));
+			workTicket.setTtlDays(MailBoxUtil.convertTTLIntoDays(ttlMap.get(MailBoxConstants.CUSTOM_TTL_UNIT), ttlNumber));
+			}
             SweeperPropertiesDTO sweeperStaticProperties = (SweeperPropertiesDTO) this.getProperties();
 			properties.put(MailBoxConstants.PROPERTY_HTTPLISTENER_SECUREDPAYLOAD, String.valueOf(sweeperStaticProperties.isSecuredPayload()));
+			properties.put(MailBoxConstants.PROPERTY_LENS_VISIBILITY, String.valueOf(sweeperStaticProperties.isLensVisibility()));
 			properties.put(MailBoxConstants.KEY_PIPELINE_ID, sweeperStaticProperties.getPipeLineID());
 
+			LOGGER.info("Sweeping file {}", workTicket.getPayloadURI());
 			// persist payload in spectrum
 			try (InputStream payloadToPersist = new FileInputStream(payloadFile)) {
 				payloadDetail = StorageUtilities.persistPayload(payloadToPersist, workTicket, properties, false);
-				payloadToPersist.close();
 			}
 
             if (sweeperStaticProperties.isDeleteFileAfterSweep()) {
@@ -470,10 +434,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
             } else {
                 LOGGER.debug("Moving file after sweep");
                 move(oldPath, newPath);
-
             }
 
-			//GSB-1353- After discussion with Joshua and Sean
 			workTicket.setPayloadURI(payloadDetail.getMetaSnapshot().getURI().toString());
 
 		}
@@ -599,35 +561,12 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		    workTicket.setAdditionalContext(additionalContext);
 		    workTicket.setProcessMode(ProcessMode.ASYNC);
 			workTickets.add(workTicket);
+			workTicket.setGlobalProcessId(MailBoxUtil.getGUID());
 		}
 
         LOGGER.debug("WorkTickets size:{}, {}", workTickets.size(), workTickets.toArray());
 
         return workTickets;
-	}
-
-	/**
-	 * Checks whether a file is modified with in the given time limit
-	 *
-	 * @param timelimit
-	 *            to check the file is modified with in the given time limit
-	 * @param file
-	 *            File object
-	 * @return true if it is updated with in the given time limit, false otherwise
-	 */
-	public boolean validateLastModifiedTolerance(long timelimit, Path file) {
-
-		long system = System.currentTimeMillis();
-		long lastmo = file.toFile().lastModified();
-
-        LOGGER.debug("System time millis: {}, Last Modified {}, timelimit: {}", system, lastmo, timelimit);
-        LOGGER.debug("(system - lastmo)/1000) = {}", ((system - lastmo)/1000));
-
-		if (((system - lastmo)/1000) < timelimit) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -645,13 +584,13 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList, long timelimit)
+	private List<WorkTicket> retryGenWrkTktForActiveFiles(List<Path> activeFilesList)
 			throws JAXBException, IOException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		List<Path> files = new ArrayList<>();
 		for (Path file : activeFilesList) {
 
-			if (!validateLastModifiedTolerance(timelimit, file)) {
+			if (!MailBoxUtil.validateLastModifiedTolerance(file)) {
 				LOGGER.info("There are no changes in the file {} recently. So it is added in the sweeper list.", file.getFileName());
 				files.add(file);
 				continue;
@@ -663,7 +602,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		return generateWorkTickets(files);
 	}
 
-	
+
 	/**
 	 * Use to validate the given file can be added in the given group.
 	 *
@@ -741,33 +680,26 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
 	@Override
 	public Object getClient() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void cleanup() {
-		// TODO Auto-generated method stub
-
 	}
-	
+
 	/**
 	 * This Method create local folders if not available.
-	 * 
+	 *
 	 * * @param processorDTO it have details of processor
-	 * 
+	 *
 	 */
 	@Override
 	public void createLocalPath() {
@@ -784,4 +716,38 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 		}
 
 	}
+
+	/**
+	 * Logs the TVAPI and ActivityStatus messages to LENS. This will be invoked for each file.
+	 *
+     * @param inputLocation folderPath for logging
+     * @param wrkTicket workticket for logging
+     */
+    protected void logToLens(String inputLocation, WorkTicket wrkTicket) {
+
+        //GLASS LOGGING BEGINS//
+        TransactionVisibilityClient transactionVisibilityClient  = new TransactionVisibilityClient();
+        GlassMessage glassMessage = new GlassMessage();
+        glassMessage.setCategory(configurationInstance.getProcessorType());
+        glassMessage.setProtocol(configurationInstance.getProcsrProtocol());
+        glassMessage.setPipelineId(wrkTicket.getPipelineId());
+
+        //Log running status
+        glassMessage.setGlobalPId(wrkTicket.getGlobalProcessId());
+        glassMessage.logProcessingStatus(StatusType.RUNNING, "Starting to sweep input folders for new files");
+        glassMessage.setStatus(ExecutionState.PROCESSING);
+        glassMessage.setInAgent(inputLocation);
+        glassMessage.setInboundFileName(wrkTicket.getFileName());
+        Long payloadSize = wrkTicket.getPayloadSize();
+        if (payloadSize != null) {
+            glassMessage.setInSize(payloadSize);
+        }
+
+        // Log FIRST corner
+        glassMessage.logFirstCornerTimestamp();
+        transactionVisibilityClient.logToGlass(glassMessage);
+        // Log running status
+        glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
+    }
+
 }

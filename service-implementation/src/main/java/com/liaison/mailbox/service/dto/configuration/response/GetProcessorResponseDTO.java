@@ -10,10 +10,13 @@
 
 package com.liaison.mailbox.service.dto.configuration.response;
 
+import java.util.List;
+
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
  *
@@ -28,11 +31,25 @@ public class GetProcessorResponseDTO extends CommonResponseDTO {
 	 */
 	private static final long serialVersionUID = 1L;
 	private ProcessorDTO processor;
+	private List<ProcessorDTO> processors;
+	private int totalItems;
 
 	public ProcessorDTO getProcessor() {
 		return processor;
 	}
 	public void setProcessor(ProcessorDTO processor) {
 		this.processor = processor;
+	}
+	public List<ProcessorDTO> getProcessors() {
+		return processors;
+	}
+	public void setProcessors(List<ProcessorDTO> processors) {
+		this.processors = processors;
+	}
+	public int getTotalItems() {
+		return totalItems;
+	}
+	public void setTotalItems(int totalItems) {
+		this.totalItems = totalItems;
 	}
 }

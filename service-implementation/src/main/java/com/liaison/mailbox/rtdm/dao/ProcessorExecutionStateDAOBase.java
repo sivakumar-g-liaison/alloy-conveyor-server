@@ -74,6 +74,18 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 		persist(prcsrExecution);
 		LOGGER.info("Processor Execution created with status READY initialy");
 	}
+	
+	/**
+	 * Update the processor execution state with the given status
+	 * 
+	 * @param processorExecutionState - ProcessorExecutionState entity that has to be updated
+	 */
+	public void updateProcessorExecutionState(ProcessorExecutionState processorExecutionState) {
+		merge(processorExecutionState);
+		LOGGER.info("Processor execution state with id " + processorExecutionState.getPguid()
+				+ " is updated with status " + processorExecutionState.getExecutionStatus() + " for processor id "
+				+ processorExecutionState.getProcessorId());
+	}
 
 	public List <String> findNonExecutingProcessors() {
 
@@ -96,6 +108,29 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 			}
 		}
 		return nonExecutionProcessors;
+	}
+	
+	public List <String> findExecutingProcessors() {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		List <String> runningProcessors = new ArrayList<String>();
+
+		try {
+
+			List<?> executingsProcsrs = entityManager.createNamedQuery(FIND_EXECUTING_PROCESSORS)
+					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getResultList();
+			Iterator<?> iter = executingsProcsrs.iterator();
+
+			while (iter.hasNext()) {
+				runningProcessors.add((String) iter.next());
+			}
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return runningProcessors;
 	}
 
 }

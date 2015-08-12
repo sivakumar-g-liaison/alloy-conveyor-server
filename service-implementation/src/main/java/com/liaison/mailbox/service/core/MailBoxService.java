@@ -17,16 +17,20 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.jaxb.JAXBUtility;
+import com.liaison.commons.message.glass.dom.StatusType;
+import com.liaison.dto.queue.WorkTicket;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
@@ -36,18 +40,23 @@ import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
+import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.core.email.EmailNotifier;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
+import com.liaison.mailbox.service.core.processor.FileWriter;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
+import com.liaison.mailbox.service.core.sla.MailboxSLAWatchDogService;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TriggerProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.TriggerProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.ProcessorQueue;
+import com.liaison.mailbox.service.util.EmailUtil;
+import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
+import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 
 /**
@@ -166,7 +175,7 @@ public class MailBoxService {
 	}
 
 	/**
-	 * The method gets the processor based on given processor id.
+	 * The method executes the processor based on given processor id.
 	 *
 	 * Unique id for processor
 	 *
@@ -178,10 +187,11 @@ public class MailBoxService {
 	 */
 	public void executeProcessor(String triggerProfileRequest) {
 
+	    String processorId = null;
+	    String executionId = null;
 		Processor processor = null;
 		ProcessorExecutionState processorExecutionState = null;
-		String processorId = null;
-		String executionId = null;
+		TriggerProcessorRequestDTO dto = null;
 		MailboxFSM fsm = new MailboxFSM();
 		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
@@ -189,9 +199,7 @@ public class MailBoxService {
 
 			LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
 
-
-			TriggerProcessorRequestDTO dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest,
-					TriggerProcessorRequestDTO.class);
+			dto = MailBoxUtil.unmarshalFromJSON(triggerProfileRequest, TriggerProcessorRequestDTO.class);
 
 			// validates mandatory value.
 			processorId = dto.getProcessorId();
@@ -210,14 +218,10 @@ public class MailBoxService {
 			LOG.info("The triggered profile name is {}", dto.getProfileName());
 			LOG.info("The execution id is {}", executionId);
 
-			// determine SLA status
-			String slaVerificationStatus = (processor instanceof RemoteUploader)
-					   ? SLAVerificationStatus.SLA_NOT_VERIFIED.getCode()
-					   : SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode();
 			// Initiate FSM
 			processor = processorDAO.find(Processor.class, processorId);
 			ProcessorStateDTO processorQueued = new ProcessorStateDTO();
-			processorQueued.setValues(executionId, processor,	dto.getProfileName(), ExecutionState.QUEUED, slaVerificationStatus);
+			processorQueued.setValues(executionId, processor,	dto.getProfileName(), ExecutionState.QUEUED, SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode());
 			fsm.addDefaultStateTransitionRules(processorQueued);
 
 			// retrieve the processor execution status from run-time DB
@@ -245,67 +249,238 @@ public class MailBoxService {
 				fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			}
 
-			LOG.info("The Processer type is {}", processor.getProcessorType());
+			MailBox mbx = processor.getMailbox();
+            LOG.info("CronJob : {} : {} : {} : {} : {} : Handover execution to the processor service",
+                    dto.getProfileName(),
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid());
+
+			LOG.debug("The Processor type is {}", processor.getProcessorType());
 			processorExecutionState.setExecutionStatus(ExecutionState.PROCESSING.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_STARTED));
 
-			processorService.runProcessor(executionId, fsm);
+			processorService.runProcessor(dto, fsm);
 			processorExecutionState.setExecutionStatus(ExecutionState.COMPLETED.value());
 			processorExecutionStateDAO.merge(processorExecutionState);
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_COMPLETED));
+
+			LOG.info("CronJob : {} : {} : {} : {} : {} : Processor service exectuion is completed",
+                    dto.getProfileName(),
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid());
 			LOG.info("#################################################################");
 
 		} catch (MailBoxServicesException e) {
 
+		    if (processor == null) {
+                LOG.error("Processor execution failed", e);
+            } else {
+                LOG.error("CronJob : {} : {} : {} : {} : {} : Processor execution failed : {}",
+                        dto.getProfileName(),
+                        processor.getProcessorType().name(),
+                        processor.getProcsrName(),
+                        processor.getMailbox().getMbxName(),
+                        processor.getMailbox().getPguid(),
+                        e.getMessage(), e);
+            }
+
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-			sendEmail(processor.getEmailAddress(), "Processor:" + processor.getProcsrName() + " execution failed", e,
-					"HTML");
-			LOG.error("Processor execution failed", e);
+
+			// send email to the configured mail id in case of failure
+			String emailSubject = EmailUtil.constructSubject(processor, false);
+			EmailUtil.sendEmail(processor, emailSubject, e);
 
 		} catch (Exception e) {
 
+		    if (processor == null) {
+                LOG.error("Processor execution failed", e);
+            } else {
+                LOG.error("CronJob : {} : {} : {} : {} : {} : Processor execution failed : {}",
+                        dto.getProfileName(),
+                        processor.getProcessorType().name(),
+                        processor.getProcsrName(),
+                        processor.getMailbox().getMbxName(),
+                        processor.getMailbox().getPguid(),
+                        e.getMessage(), e);
+            }
+
 			fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
 			if (processorExecutionState != null) {
 				processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
 				processorExecutionStateDAO.merge(processorExecutionState);
 			}
-			sendEmail(processor.getEmailAddress(), "Processor:" + processor.getProcsrName() + " execution failed", e,
-					"HTML");
-			LOG.error("Processor execution failed", e);
+
+			// send email to the configured mail id in case of failure
+			EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, false), e);
 		}
 	}
 
 	/**
-	 * Sent notifications for trigger system failure.
+	 * The method writes the payload into local payload location using filewriter or uploaders
+	 * This servers watchdog functionality
 	 *
-	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
-	 * @param subject The notification subject
-	 * @param emailBody The body of the notification
-	 * @param type The notification type(TEXT/HTML).
+	 * @param request
 	 */
+	public void executeFileWriter(String request) {
 
-	private void sendEmail(List<String> toEmailAddrList, String subject, String emailBody, String type) {
+	    String mailboxId = null;
+	    String processorId = null;
+	    String payloadURI = null;
 
-		EmailNotifier notifier = new EmailNotifier();
-		notifier.sendEmail(toEmailAddrList, subject, emailBody, type);
-	}
+	    WorkTicket workTicket = null;
+	    Processor processor = null;
+        ProcessorExecutionState processorExecutionState = null;
 
-	/**
-	 * Sent notifications for trigger system failure.
-	 *
-	 * @param toEmailAddrList The extra receivers. The default receiver will be available in the mailbox.
-	 * @param subject The notification subject
-	 * @param exc The exception as body content
-	 * @param type The notification type(TEXT/HTML).
-	 */
-	private void sendEmail(List<String> toEmailAddrList, String subject, Exception exc, String type) {
+        MailboxFSM fsm = new MailboxFSM();
+        ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
+        ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 
-		sendEmail(toEmailAddrList, subject, ExceptionUtils.getStackTrace(exc), type);
+        TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
+        GlassMessage glassMessage = null;
+
+        try {
+
+            LOG.info("#####################----PROCESSOR EXECUTION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
+
+            workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
+
+            //Glass message begins
+            glassMessage = new GlassMessage(workTicket);
+            glassMessage.setStatus(ExecutionState.READY);
+            glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
+
+            // validates mandatory value.
+            mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
+            if (MailBoxUtil.isEmpty(mailboxId)) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id", Response.Status.CONFLICT);
+            }
+
+            payloadURI = workTicket.getPayloadURI();
+            if (MailBoxUtil.isEmpty(payloadURI)) {
+                throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL", Response.Status.CONFLICT);
+            }
+
+            LOG.info("Received mailbox id - {}", mailboxId);
+            LOG.info("Received payloadURI is {}", payloadURI);
+
+            processorId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_PROCESSOR_ID);
+
+            if (!MailBoxUtil.isEmpty(processorId)) {
+                processor = processorDAO.findActiveProcessorById(processorId);
+            } else {
+                processor = new MailboxSLAWatchDogService().getSpecificProcessorofMailbox(mailboxId);
+            }
+
+            //Check the processor is null or not
+            if (null == processor) {
+
+                StringBuilder errorMessage = new StringBuilder();
+                if (!MailBoxUtil.isEmpty(processorId)) {
+                    errorMessage.append("Unable to find a processor type of uploader/filewriter")
+                        .append(" for the given processor guid ")
+                        .append(processorId);
+                } else {
+                    errorMessage.append("Unable to find a processor type of uploader/filewriter")
+                        .append(" for the given mailbox guid ")
+                        .append(processorId);
+                }
+                throw new MailBoxServicesException(errorMessage.toString(), Response.Status.NOT_FOUND);
+            }
+
+			// determine SLA status
+			String slaVerificationStatus = (processor instanceof RemoteUploader)
+					   ? SLAVerificationStatus.SLA_NOT_APPLICABLE.getCode()
+					   : SLAVerificationStatus.SLA_NOT_VERIFIED.getCode();
+
+            // Initiate FSM Starts
+            // retrieve the processor execution status of corresponding uploader from run-time DB
+            processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
+            ProcessorStateDTO processorStaged = new ProcessorStateDTO();
+            processorStaged.setValues(workTicket.getGlobalProcessId(),
+                    processor,
+                    workTicket.getFileName(),
+                    ExecutionState.STAGED,
+                    slaVerificationStatus);
+            fsm.addState(processorStaged);
+
+            processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
+            processorExecutionStateDAO.merge(processorExecutionState);
+            fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
+            //Initiate FSM Ends
+
+            MailBoxProcessorI processorService = new FileWriter(processor);
+            MailBox mbx = processor.getMailbox();
+            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Handover execution to the filewriter service",
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid(),
+                    workTicket.getGlobalProcessId());
+
+            processorService.runProcessor(workTicket, fsm);
+            transactionVisibilityClient.logToGlass(glassMessage);
+            glassMessage.logProcessingStatus(StatusType.SUCCESS, "File Staged successfully");
+
+            LOG.info("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : Filewriter service execution is completed",
+                    processor.getProcessorType().name(),
+                    processor.getProcsrName(),
+                    mbx.getMbxName(),
+                    mbx.getPguid(),
+                    workTicket.getGlobalProcessId());
+
+            //persist staged file to get the gpid during uploader
+            StagedFileDAOBase dao = new StagedFileDAOBase();
+            dao.persistStagedFile(workTicket, processor.getPguid());
+
+            // send notification for successful file staging
+            String emailSubject = workTicket.getFileName() + "' is available for pick up";
+            String emailBody = "File '" +  workTicket.getFileName() + "' is available for pick up";
+            EmailUtil.sendEmail(processor, emailSubject, emailBody, true);
+            LOG.info("#################################################################");
+
+        } catch (Exception e) {
+
+            if (processor == null) {
+                LOG.error("File Staging failed", e);
+            } else {
+                LOG.error("CronJob : NONE : {} : {} : {} : {} : Global PID : {} : File Staging failed : {}",
+                        processor.getProcessorType().name(),
+                        processor.getProcsrName(),
+                        processor.getMailbox().getMbxName(),
+                        processor.getMailbox().getPguid(),
+                        (workTicket == null ? "NONE" : workTicket.getGlobalProcessId()),
+                        e.getMessage(), e);
+            }
+
+            //GLASS LOGGING CORNER 4 //
+            if (null != glassMessage) {
+                glassMessage.setStatus(ExecutionState.FAILED);
+                transactionVisibilityClient.logToGlass(glassMessage);
+                glassMessage.logProcessingStatus(StatusType.ERROR, "File Stage Failed :" + e.getMessage());
+                glassMessage.logFourthCornerTimestamp();
+            }
+            //GLASS LOGGING ENDS//
+
+            fsm.handleEvent(fsm.createEvent(ExecutionEvents.PROCESSOR_EXECUTION_FAILED));
+            if (processorExecutionState != null) {
+                processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
+                processorExecutionStateDAO.merge(processorExecutionState);
+            }
+
+            // send email to the configured mail id in case of failure
+            EmailUtil.sendEmail(processor, EmailUtil.constructSubject(processor, false), e);
+
+        }
+
 	}
 
 }

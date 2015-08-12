@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.core.sla;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTicketConsumer;
 
 /**
@@ -28,8 +29,8 @@ public class WatchDogInvoker implements Runnable {
 		this.request=request;
 	}
 
-	public MailboxSLAWatchDogService getService(){
-	    return new MailboxSLAWatchDogService();
+	public MailBoxService getService(){
+	    return new MailBoxService();
 	}
 
 
@@ -38,7 +39,7 @@ public class WatchDogInvoker implements Runnable {
 
 		logger.info("watchdog request:"+request+"handed over to thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 
-		getService().invokeWatchDog(request);
+		getService().executeFileWriter(request);
 
 		logger.info("watchdog request:"+request+" is completed by thread name:"+Thread.currentThread().getName()+" id:"+Thread.currentThread().getId());
 		  try {
