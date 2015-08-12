@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -100,10 +101,10 @@ public class Processor implements Identifiable {
 	private MailBox mailbox;
 	private ServiceInstance serviceInstance;
 
-	private List<Credential> credentials;
-	private List<Folder> folders;
-	private List<ProcessorProperty> dynamicProperties;
-	private List<ScheduleProfileProcessor> scheduleProfileProcessors;
+	private Set<Credential> credentials;
+	private Set<Folder> folders;
+	private Set<ProcessorProperty> dynamicProperties;
+	private Set<ScheduleProfileProcessor> scheduleProfileProcessors;
 
 	public Processor() {
 	}
@@ -113,11 +114,11 @@ public class Processor implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
 	@IndexColumn(name = "PGUID")
-	public List<ProcessorProperty> getDynamicProperties() {
+	public Set<ProcessorProperty> getDynamicProperties() {
 		return dynamicProperties;
 	}
 
-	public void setDynamicProperties(List<ProcessorProperty> processorProperties) {
+	public void setDynamicProperties(Set<ProcessorProperty> processorProperties) {
 		this.dynamicProperties = processorProperties;
 	}
 
@@ -190,12 +191,11 @@ public class Processor implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
-	@IndexColumn(name = "PGUID")
-	public List<Credential> getCredentials() {
+	public Set<Credential> getCredentials() {
 		return this.credentials;
 	}
 
-	public void setCredentials(List<Credential> credentials) {
+	public void setCredentials(Set<Credential> credentials) {
 		this.credentials = credentials;
 	}
 
@@ -218,12 +218,11 @@ public class Processor implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE,
 			CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
-	@IndexColumn(name = "PGUID")
-	public List<Folder> getFolders() {
+	public Set<Folder> getFolders() {
 		return this.folders;
 	}
 
-	public void setFolders(List<Folder> folders) {
+	public void setFolders(Set<Folder> folders) {
 		this.folders = folders;
 	}
 
@@ -245,7 +244,6 @@ public class Processor implements Identifiable {
 	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "MAILBOX_GUID", nullable = false)
 	@Fetch(FetchMode.JOIN)
-	@IndexColumn(name = "PGUID")
 	public MailBox getMailbox() {
 		return this.mailbox;
 	}
@@ -258,7 +256,6 @@ public class Processor implements Identifiable {
 	@ManyToOne(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SERVICE_INSTANCE_GUID", nullable = false)
 	@Fetch(FetchMode.JOIN)
-	@IndexColumn(name = "PGUID")
 	public ServiceInstance getServiceInstance() {
 		return serviceInstance;
 	}
@@ -270,12 +267,12 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ScheduleProfileProcessor
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@Fetch(FetchMode.SELECT)
-	public List<ScheduleProfileProcessor> getScheduleProfileProcessors() {
+	@Fetch(FetchMode.JOIN)
+	public Set<ScheduleProfileProcessor> getScheduleProfileProcessors() {
 		return this.scheduleProfileProcessors;
 	}
 
-	public void setScheduleProfileProcessors(List<ScheduleProfileProcessor> scheduleProfileProcessors) {
+	public void setScheduleProfileProcessors(Set<ScheduleProfileProcessor> scheduleProfileProcessors) {
 		this.scheduleProfileProcessors = scheduleProfileProcessors;
 	}
 

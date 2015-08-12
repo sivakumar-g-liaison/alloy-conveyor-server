@@ -281,7 +281,7 @@ public class ProcessorConfigurationService {
 		// Creates relationship processor and schedprofile.
 		if (!scheduleProfilesRef.isEmpty()) {
 
-			List<ScheduleProfileProcessor> scheduleProfileProcessors = new ArrayList<>();
+			Set<ScheduleProfileProcessor> scheduleProfileProcessors = new HashSet<>();
 			ScheduleProfileProcessor profileProcessor = null;
 			for (ScheduleProfilesRef profile : scheduleProfilesRef) {
 
@@ -610,11 +610,11 @@ public class ProcessorConfigurationService {
 		ProcessorProperty processorProperty = null;
 
 		// update the property
-		List<ProcessorProperty> existingProperties = processor.getDynamicProperties();
+		Set<ProcessorProperty> existingProperties = processor.getDynamicProperties();
 		// new property from DTO
 		List<PropertyDTO> newProperties = propertyDTO.getDynamicProperties();
 		// new property to add entity
-		List<ProcessorProperty> processorPropertyList = new ArrayList<ProcessorProperty>();
+		Set<ProcessorProperty> processorPropertyList = new HashSet<ProcessorProperty>();
 
 		for (PropertyDTO properties : newProperties) {
 

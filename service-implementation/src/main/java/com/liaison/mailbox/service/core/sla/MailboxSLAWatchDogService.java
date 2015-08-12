@@ -332,7 +332,7 @@ public class MailboxSLAWatchDogService {
 				throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
 			}
 			// get the very first profile configured in the processor
-			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().get(0).getScheduleProfilesRef().getSchProfName():null;
+			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().iterator().next().getScheduleProfilesRef().getSchProfName():null;
 
 			if (null == profileName && processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				LOG.error(constructMessage(processor, "profile not configured for processor {}"), processor.getProcsrName());

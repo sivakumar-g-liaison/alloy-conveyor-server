@@ -17,7 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -85,7 +87,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);
@@ -126,7 +128,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);
@@ -171,7 +173,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);
@@ -215,7 +217,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);

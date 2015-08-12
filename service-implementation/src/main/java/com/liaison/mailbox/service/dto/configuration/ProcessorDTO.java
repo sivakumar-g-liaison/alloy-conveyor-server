@@ -12,7 +12,9 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -256,7 +258,7 @@ public class ProcessorDTO {
 
 		// Setting the folders.
 		Folder folder = null;
-		List<Folder> folders = new ArrayList<>();
+		Set<Folder> folders = new HashSet<Folder>();
 		for (FolderDTO folderDTO : folderDTOList) {
 
 			folder = new Folder();
@@ -279,7 +281,7 @@ public class ProcessorDTO {
 
 		// Setting the credentials
 		Credential credential = null;
-		List<Credential> credentialList = new ArrayList<>();
+		Set<Credential> credentialList = new HashSet<>();
 		for (CredentialDTO credentialDTO : credentialDTOList) {
 
 		    validator.validate(credentialDTO);
@@ -298,7 +300,7 @@ public class ProcessorDTO {
 			processor.getDynamicProperties().clear();
 		}
 		ProcessorProperty property = null;
-		List<ProcessorProperty> properties = new ArrayList<>();
+		Set<ProcessorProperty> properties = new HashSet<>();
 		for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
 
 			if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
