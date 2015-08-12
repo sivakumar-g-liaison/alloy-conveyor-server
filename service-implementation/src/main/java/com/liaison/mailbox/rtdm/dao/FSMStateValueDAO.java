@@ -10,9 +10,6 @@
 
 package com.liaison.mailbox.rtdm.dao;
 
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 

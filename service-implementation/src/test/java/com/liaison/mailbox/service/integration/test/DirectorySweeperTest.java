@@ -22,12 +22,10 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jettison.json.JSONException;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Folder;

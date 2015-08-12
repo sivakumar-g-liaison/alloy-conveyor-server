@@ -12,9 +12,6 @@ package com.liaison.mailbox.dtdm.dao;
 
 import java.util.List;
 
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 

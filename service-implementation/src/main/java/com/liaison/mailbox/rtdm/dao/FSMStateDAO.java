@@ -13,9 +13,6 @@ package com.liaison.mailbox.rtdm.dao;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.fsm.FSMDao;
 import com.liaison.mailbox.enums.ExecutionEvents;

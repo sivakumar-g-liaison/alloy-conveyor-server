@@ -9,9 +9,6 @@
  */
 package com.liaison.mailbox.dtdm.dao;
 
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 

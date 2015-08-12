@@ -24,9 +24,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-
 import com.liaison.commons.jpa.Identifiable;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 
@@ -120,7 +117,6 @@ public class FSMState implements Identifiable {
 	@OneToMany(mappedBy = "fsmState", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@OrderBy(value="createdDate DESC")
-	@Fetch(value = FetchMode.SELECT)
 	public List<FSMStateValue> getExecutionState() {
 		return executionState;
 	}

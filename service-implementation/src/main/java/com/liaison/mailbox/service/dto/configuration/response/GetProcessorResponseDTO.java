@@ -16,7 +16,6 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
-import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
  *
