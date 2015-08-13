@@ -152,7 +152,6 @@ public class HTTPListenerResource extends AuditedResource {
 		        ExecutionTimestamp firstCornerTimeStamp = ExecutionTimestamp.beginTimestamp(GlassMessage.DEFAULT_FIRST_CORNER_NAME);
 
 				serviceCallCounter.incrementAndGet();
-				TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 				GlassMessage glassMessage = null;
 				WorkTicket workTicket = null;
 
@@ -201,7 +200,7 @@ public class HTTPListenerResource extends AuditedResource {
                     glassMessage.logFirstCornerTimestamp(firstCornerTimeStamp);
                     // Log status running
                     glassMessage.logProcessingStatus(StatusType.RUNNING, "HTTP Sync Request received");
-                    transactionVisibilityClient.logToGlass(glassMessage); // CORNER 1 LOGGING
+                    new TransactionVisibilityClient().logToGlass(glassMessage); // CORNER 1 LOGGING
 
 					Response syncResponse = syncProcessor.processRequest(workTicket, request.getInputStream(),
 							httpListenerProperties, request.getContentType(), mailboxPguid);
@@ -221,7 +220,7 @@ public class HTTPListenerResource extends AuditedResource {
                         if (null != contenLength && !contenLength.isEmpty()) {
                             successMessage.setOutSize(Long.getLong(String.valueOf(syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0))));
                         }
-                        transactionVisibilityClient.logToGlass(successMessage);
+                        new TransactionVisibilityClient().logToGlass(successMessage);
                     }
 
                     glassMessage.logFourthCornerTimestamp();
@@ -241,7 +240,7 @@ public class HTTPListenerResource extends AuditedResource {
 					        GlassMessage failedMsg = constructGlassMessage(request, workTicket, mailboxPguid, ExecutionState.FAILED);
                             // Log error status
 					        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
-                            transactionVisibilityClient.logToGlass(failedMsg);
+					        new TransactionVisibilityClient().logToGlass(failedMsg);
                             glassMessage.logFourthCornerTimestamp();
 					    }
                     }
