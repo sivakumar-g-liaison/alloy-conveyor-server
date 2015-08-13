@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.rest;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,6 +85,7 @@ public class HTTPListenerResource extends AuditedResource {
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);
 
 	private static final String HTTP_HEADER_BASIC_AUTH = "Authorization";
+	private static final String HTTP_HEADER_CONTENT_LENGTH = "Content-Length";
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
@@ -216,9 +218,18 @@ public class HTTPListenerResource extends AuditedResource {
 
                     // GLASS LOGGING //
                     if (syncResponse.getStatus() > 299) {
-                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity());;
+                        glassMessage.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request failed: " + syncResponse.getEntity());
                     } else {
                         glassMessage.logProcessingStatus(StatusType.SUCCESS, "HTTP Sync Request success");
+                        glassMessage.setStatus(ExecutionState.COMPLETED);
+                        glassMessage.setOutAgent(GatewayType.REST);
+
+                        //Hack to set outbound size
+                        List<Object> contenLength = syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH);
+                        if (null != contenLength && !contenLength.isEmpty()) {
+                            glassMessage.setOutSize((Long) syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0));
+                        }
+                        transactionVisibilityClient.logToGlass(glassMessage);
                     }
 
                     glassMessage.logFourthCornerTimestamp();
