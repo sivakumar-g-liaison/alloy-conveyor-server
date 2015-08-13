@@ -90,7 +90,7 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         if (MailBoxUtil.isEmpty(fileRenameFormat)) {
             fileRenameFormat = (MailBoxUtil.isEmpty(staticProp.getFileRenameFormat()))
                     ? MailBoxConstants.SWEEPED_FILE_EXTN
-                    : "." + fileRenameFormat;
+                    : "." + staticProp.getFileRenameFormat();
         }
         return fileRenameFormat;
     }

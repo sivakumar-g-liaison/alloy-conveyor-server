@@ -356,6 +356,7 @@ public class MailBoxService {
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.READY);
+            glassMessage.setOutSize(workTicket.getPayloadSize());
             glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
             // validates mandatory value.
