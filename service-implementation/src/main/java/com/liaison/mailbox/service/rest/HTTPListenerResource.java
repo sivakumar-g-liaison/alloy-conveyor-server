@@ -227,7 +227,7 @@ public class HTTPListenerResource extends AuditedResource {
                         //Hack to set outbound size
                         List<Object> contenLength = syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH);
                         if (null != contenLength && !contenLength.isEmpty()) {
-                            glassMessage.setOutSize((Long) syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0));
+                            glassMessage.setOutSize(Long.getLong(String.valueOf(syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0))));
                         }
                         transactionVisibilityClient.logToGlass(glassMessage);
                     }
