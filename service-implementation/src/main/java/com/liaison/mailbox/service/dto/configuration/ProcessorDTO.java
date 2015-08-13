@@ -262,6 +262,7 @@ public class ProcessorDTO {
 		for (FolderDTO folderDTO : folderDTOList) {
 
 			folder = new Folder();
+			folder.setProcessor(processor);
 			validator.validate(folderDTO);
 			folderDTO.copyToEntity(folder);
 
@@ -286,6 +287,7 @@ public class ProcessorDTO {
 
 		    validator.validate(credentialDTO);
 			credential = new Credential();
+			credential.setProcessor(processor);
 			credentialDTO.copyToEntity(credential);
 			credential.setPguid(MailBoxUtil.getGUID());
 			credentialList.add(credential);
@@ -307,6 +309,7 @@ public class ProcessorDTO {
 				continue;
 			}
 			property = new ProcessorProperty();
+			property.setProcessor(processor);
 			propertyDTO.copyToEntity(property);
 			properties.add(property);
 		}
