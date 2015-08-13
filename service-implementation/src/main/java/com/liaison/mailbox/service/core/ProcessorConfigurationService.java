@@ -80,6 +80,7 @@ import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
@@ -561,6 +562,51 @@ public class ProcessorConfigurationService {
 
 			createMailBoxAndProcessorLink(null, request, processor);
 			createScheduleProfileAndProcessorLink(null, request, processor);
+			
+			//set Processor properties
+			Set<ProcessorProperty> props = processor.getDynamicProperties();
+			if (null != props && !props.isEmpty()) {
+
+				Set<ProcessorProperty> base = new HashSet<>();
+				List<ProcessorPropertyDTO> pro = processorDTO.getProcessorPropertiesInTemplateJson().getStaticProperties();
+				for (ProcessorProperty prop : props) {
+					for (ProcessorPropertyDTO processorPropertyDTO : processorDTO.getProcessorPropertiesInTemplateJson().getStaticProperties()) {
+						if (prop.getProcsrPropName().equals(processorPropertyDTO.getName())) {
+							prop.setProcsrPropValue(processorPropertyDTO.getValue());
+							pro.add(processorPropertyDTO);
+							break;
+						}
+					}
+					base.add(prop);
+				}
+
+				if (!pro.isEmpty()) {
+
+					processorDTO.getProcessorPropertiesInTemplateJson()
+							.getStaticProperties().removeAll(pro);
+					ProcessorProperty property = null;
+					for (ProcessorPropertyDTO processorPropertyDTO : processorDTO.getProcessorPropertiesInTemplateJson().getStaticProperties()) {
+						property = new ProcessorProperty();
+						property.setProcsrPropName(processorPropertyDTO.getName());
+						property.setProcsrPropValue(processorPropertyDTO.getValue());
+						processorPropertyDTO.copyToEntity(property);
+						props.add(property);
+					}
+					processor.getDynamicProperties().removeAll(base);
+				}
+			} else {
+
+				ProcessorProperty property = null;
+				Set<ProcessorProperty> properties = new HashSet<>();
+				for (ProcessorPropertyDTO processorPropertyDTO : processorDTO.getProcessorPropertiesInTemplateJson().getStaticProperties()) {
+					property = new ProcessorProperty();
+					property.setProcsrPropName(processorPropertyDTO.getName());
+					property.setProcsrPropValue(processorPropertyDTO.getValue());
+					processorPropertyDTO.copyToEntity(property);
+					props.add(property);
+				}
+				processor.setDynamicProperties(properties);
+			}
 
 			// Copying the new details of the processor and merging.
 			processorDTO.copyToEntity(processor, false);

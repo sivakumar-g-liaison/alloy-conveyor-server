@@ -39,6 +39,7 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
@@ -328,9 +329,63 @@ public class MailBoxConfigurationService {
 				}
 			}
 
-			// Removing the child items.
-			retrievedMailBox.getMailboxProperties().clear();
+			/*// Removing the child items.
+			retrievedMailBox.getMailboxProperties().clear();*/
 
+			Set<MailBoxProperty> props = retrievedMailBox.getMailboxProperties();
+
+			if (null != props && !props.isEmpty()) {
+
+				Set<MailBoxProperty> base = new HashSet<>();
+
+				List<PropertyDTO> pro = mailboxDTO.getProperties();
+
+				for (MailBoxProperty prop : props) {
+
+					for (PropertyDTO propertyDTO : mailboxDTO.getProperties()) {
+
+						if (prop.getMbxPropName().equals(propertyDTO.getName())) {
+
+							prop.setMbxPropValue(propertyDTO.getValue());
+
+							pro.add(propertyDTO);
+
+							break;
+
+						} 
+					}
+
+					base.add(prop);
+				}
+
+				if (!pro.isEmpty()) {
+
+					mailboxDTO.getProperties().removeAll(pro);
+					MailBoxProperty property = null;
+					for (PropertyDTO propertyDTO : mailboxDTO.getProperties()) {
+						property = new MailBoxProperty();
+						property.setMailbox(retrievedMailBox);
+						propertyDTO.copyToEntity(property, true);
+						props.add(property);
+					}
+					retrievedMailBox.getMailboxProperties().removeAll(base);
+				}
+			} else {
+
+				MailBoxProperty property = null;
+				Set<MailBoxProperty> properties = new HashSet<>();
+				for (PropertyDTO propertyDTO : mailboxDTO.getProperties()) {
+					property = new MailBoxProperty();
+					property.setMailbox(retrievedMailBox);
+					propertyDTO.copyToEntity(property, true);
+					props.add(property);
+
+				}
+
+				retrievedMailBox.setMailboxProperties(properties);
+
+			}
+			
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
 
