@@ -218,7 +218,10 @@ public class HTTPListenerResource extends AuditedResource {
                         //Hack to set outbound size
                         List<Object> contenLength = syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH);
                         if (null != contenLength && !contenLength.isEmpty()) {
-                            successMessage.setOutSize(Long.getLong(String.valueOf(syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0))));
+                            String outSize = String.valueOf(syncResponse.getMetadata().get(HTTP_HEADER_CONTENT_LENGTH).get(0));
+                            if (!MailBoxUtil.isEmpty(outSize) && !("null".equals(outSize))) {
+                                successMessage.setOutSize(Long.valueOf(outSize));
+                            }
                         }
                         new TransactionVisibilityClient().logToGlass(successMessage);
                     }
