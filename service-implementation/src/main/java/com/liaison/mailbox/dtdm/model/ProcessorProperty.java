@@ -14,6 +14,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -57,6 +59,7 @@ public class ProcessorProperty implements Identifiable {
 
 	@Id
 	@Column(unique = true, nullable = false, length = 32)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public String getPguid() {
 		return this.pguid;
 	}

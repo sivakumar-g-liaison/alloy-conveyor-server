@@ -157,18 +157,6 @@ public class MailBoxDTO implements Serializable {
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
 		mailBox.setTenancyKey(this.getTenancyKey());
-
-		MailBoxProperty property = null;
-		Set<MailBoxProperty> properties = new HashSet<>();
-		for (PropertyDTO propertyDTO : this.getProperties()) {
-			property = new MailBoxProperty();
-			property.setMailbox(mailBox); 
-			propertyDTO.copyToEntity(property, true);
-			properties.add(property);
-
-		}
-		mailBox.setMailboxProperties(properties);
-
 		EntityStatus status = EntityStatus.findByName(this.getStatus());
 		mailBox.setMbxStatus(status.value());
 	}
