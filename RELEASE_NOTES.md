@@ -1,6 +1,18 @@
 2.4.0-SNAPSHOT
 -------------------------------
 
+2.3.1
+-------------------------------
+* GMB-573 - Payload outbound size
+* GMB-572 - Processor-Sweeper: Files are not renamed to the format specified in 'File Rename Format' property.
+* GMB-574 - HTTP Sync transaction status always in 'DELIVERY IN PROGRESS'
+* GMB-574 - outbound size cast
+* seperate glass messages for ingress and egress
+* GMB-574 - new TVAPI for the specific case
+* GMB-574 - handle the empty payload response
+* acl_signer_public_key_guid updates
+* updated dbx acl_signer_public_key_guid
+
 2.3.0
 -------------------------------
 GWUD-69: Fix Dropbox TVAPI & Glass Message logging

@@ -270,6 +270,9 @@ public class GlassMessage {
 	}
 
 	public Long getOutSize() {
+	    if (outSize != null && (0L == outSize || -1L == outSize)) {
+	        return null;
+	    }
         return outSize;
     }
 
