@@ -1,3 +1,6 @@
+2.4.0-SNAPSHOT
+-------------------------------
+
 2.3.2
 -------------------------------
 * GMB-569 - Removed Dynamic Key usage from Encryption Util
