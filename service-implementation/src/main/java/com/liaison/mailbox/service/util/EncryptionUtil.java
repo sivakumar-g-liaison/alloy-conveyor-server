@@ -14,7 +14,6 @@ import java.nio.charset.Charset;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -28,11 +27,13 @@ import com.liaison.mailbox.MailBoxConstants;
 /**
  * @author kirithigad
  * 
+ * The sole purpose of this class is to make the token non-readable/non-changeable by any process other than UMGT.
+ * It is not intended to ‘encrypt’ sensitive data
+ * 
  */
 public class EncryptionUtil {
 
-	static byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes(Charset.forName(MailBoxConstants.CHARSETNAME));
-	static byte[] DYNAMIC_KEY;
+	private static byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes(Charset.forName(MailBoxConstants.CHARSETNAME));
 
 	/**
 	 * Method to retrieve encoded decrypted Token.
@@ -42,19 +43,11 @@ public class EncryptionUtil {
 	 * @return byte
 	 * @throws Exception
 	 */
-	public static byte[] encrypt(String encryptString, boolean isDefaultKey)
+	public static byte[] encrypt(String encryptString)
 			throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException,
 			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
 
-		if (!isDefaultKey && (DYNAMIC_KEY == null)) {
-
-			byte[] buf = new byte[16];
-			Random random = new Random();
-			random.nextBytes(buf);
-			DYNAMIC_KEY = buf;
-		}
-
-		byte[] key = isDefaultKey ? STATIC_KEY : DYNAMIC_KEY;
+		byte[] key = STATIC_KEY;
 		byte[] ivBytes = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		SecretKeySpec skey = new SecretKeySpec(key, "AES");
 		final IvParameterSpec iv = new IvParameterSpec(ivBytes);
@@ -72,11 +65,11 @@ public class EncryptionUtil {
 	 * @return String
 	 * @throws Exception
 	 */
-	public static String decrypt(byte[] encryptedBytes, boolean isDefaultKey)
+	public static String decrypt(byte[] encryptedBytes)
 			throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
 			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
 
-		byte[] key = isDefaultKey ? STATIC_KEY : DYNAMIC_KEY;
+		byte[] key = STATIC_KEY;
 		byte[] ivBytes = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		SecretKeySpec skey = new SecretKeySpec(key, "AES");
 		final IvParameterSpec iv = new IvParameterSpec(ivBytes);
