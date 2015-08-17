@@ -28,7 +28,7 @@ import com.liaison.mailbox.MailBoxConstants;
  * @author kirithigad
  * 
  * The sole purpose of this class is to make the token non-readable/non-changeable by any process other than UMGT.
- * It is not intended to ‘encrypt’ sensitive data
+ * It is not intended to 'encrypt' sensitive data
  * 
  */
 public class EncryptionUtil {
