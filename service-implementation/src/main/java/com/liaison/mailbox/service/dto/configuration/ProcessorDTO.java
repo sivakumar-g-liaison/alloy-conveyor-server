@@ -284,7 +284,6 @@ public class ProcessorDTO {
 					folderDTO.copyToEntity(property);
 					existingProperties.add(property);
 				}
-				//retrievedMailBox.getMailboxProperties().removeAll(base);
 				processor.setFolders(existingProperties);
 			}
 		} else {
@@ -333,7 +332,6 @@ public class ProcessorDTO {
 					credential = new Credential();
 					credential.setProcessor(processor);
 					folderDTO.copyToEntity(credential);
-					credential.setPguid(MailBoxUtil.getGUID());
 					existingCredProperties.add(credential);
 				}
 				processor.setCredentials(existingCredProperties);
@@ -346,14 +344,13 @@ public class ProcessorDTO {
 				credential = new Credential();
 				credential.setProcessor(processor);
 				credentialDTO.copyToEntity(credential);
-				credential.setPguid(MailBoxUtil.getGUID());
 				properties.add(credential);
 			}
 			processor.setCredentials(properties);
 		}
 		
 		Set<ProcessorProperty> existingProps = processor.getDynamicProperties();
-		if (null != existingProperties && !existingProperties.isEmpty()) {
+		if (null != existingProps && !existingProps.isEmpty()) {
 			Set<ProcessorProperty> base = new HashSet<>();
 			List<ProcessorPropertyDTO> existingPropertiesInDTO = new ArrayList<ProcessorPropertyDTO>();
 			for (ProcessorProperty exist : existingProps) {

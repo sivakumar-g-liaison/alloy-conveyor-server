@@ -59,7 +59,6 @@ public class ProcessorProperty implements Identifiable {
 
 	@Id
 	@Column(unique = true, nullable = false, length = 32)
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public String getPguid() {
 		return this.pguid;
 	}
