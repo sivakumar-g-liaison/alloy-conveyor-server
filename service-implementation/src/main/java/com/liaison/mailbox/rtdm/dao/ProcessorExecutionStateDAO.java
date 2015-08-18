@@ -11,6 +11,7 @@
 package com.liaison.mailbox.rtdm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -27,7 +28,9 @@ import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 @NamedQuery(name = ProcessorExecutionStateDAO.FIND_NON_EXECUTING_PROCESSORS,
 			query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus not like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
 @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS,
-			query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS)
+			query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
+@NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS_ALL,
+			query = "SELECT count(executionState) FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS)
 })
 
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
@@ -35,6 +38,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 	public static final String FIND_BY_PROCESSOR_ID = "findByProcessorId";
 	public static final String FIND_NON_EXECUTING_PROCESSORS = "findNonExecutingProcessors";
 	public static final String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
+	public static final String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
 	public static final String PROCESSOR_ID = "processorId";
 	public static final String EXEC_STATUS = "exec_status";
 
@@ -44,6 +48,8 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 
 	public List <String> findNonExecutingProcessors();
 	
-	public List <String> findExecutingProcessors();
+	public List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+	
+	public int findAllExecutingProcessors();
 
 }

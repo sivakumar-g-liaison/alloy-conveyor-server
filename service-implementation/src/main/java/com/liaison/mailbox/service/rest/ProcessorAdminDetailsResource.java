@@ -16,7 +16,6 @@ package com.liaison.mailbox.service.rest;
  * @author OFS
  */
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,17 +39,10 @@ import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.framework.AppConfigurationResource;
-import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.Messages;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
-import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.dto.ResponseDTO;
+import com.liaison.mailbox.service.core.ProcessorExecutionConfigurationService;
+import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorExecutionStateResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.UpdateProcessorExecutionStateResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.netflix.servo.DefaultMonitorRegistry;
 import com.netflix.servo.annotations.DataSourceType;
 import com.netflix.servo.annotations.Monitor;
@@ -113,31 +105,8 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 			public Object call() {
 
 				serviceCallCounter.addAndGet(1);
-				if(StringUtil.isNullOrEmptyAfterTrim(processorId)) {
-					throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_ID_NOT_AVAILABLE,
-							Response.Status.BAD_REQUEST);
-				}
-				ProcessorExecutionStateDAOBase processorDao = new ProcessorExecutionStateDAOBase();
-                UpdateProcessorExecutionStateResponseDTO serviceResponse = new UpdateProcessorExecutionStateResponseDTO();
-
-				ProcessorExecutionState processorExecutionState = processorDao.findByProcessorId(processorId);
-				if (null == processorExecutionState) {
-					throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_EXECUTION_STATE_NOT_EXIST, processorId,
-							Response.Status.BAD_REQUEST);
-				} 
-					
-				if(processorExecutionState.getExecutionStatus().equals(ExecutionState.PROCESSING.value())) {
-					processorExecutionState.setExecutionStatus(ExecutionState.FAILED.value());
-					processorDao.updateProcessorExecutionState(processorExecutionState);
-					serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY,
-							"The processor execution status for processor with id : " + processorId + " is ",
-							Messages.SUCCESS));
-					LOG.info("The processor execution status updated for processor id {}", processorId);
-				} else {
-					throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_EXECUTION_STATE_NOT_PROCESSING, processorId,
-							Response.Status.BAD_REQUEST);
-				}
-				return serviceResponse;
+				ProcessorExecutionConfigurationService configService = new ProcessorExecutionConfigurationService();
+				return configService.UpdateExecutingProcessor(processorId);
 			}
 		};
 		worker.actionLabel = "ProcessorAdminDetailsResource.updateProcessorStatusToFailed()";
@@ -162,7 +131,9 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 	@ApiOperation(value = "Get Executing Processors", notes = "get list of executing processors", position = 21, response = com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	@ApiResponses({ @ApiResponse(code = 500, message = "Unexpected Service failure.") })
-	public Response getExecutingProcessors(@Context HttpServletRequest request) {
+	public Response getExecutingProcessors(@Context HttpServletRequest request, 
+			@QueryParam(value = "page") @ApiParam(name = "page", required = false, value = "page") final String page,
+			@QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize) {
 
 		// create the worker delegate to perform the business logic
 		AbstractResourceDelegate<Object> worker = new AbstractResourceDelegate<Object>() {
@@ -170,13 +141,12 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 			public Object call() {
 
 				serviceCallCounter.addAndGet(1);
-				ProcessorExecutionStateDAO processorDao = new ProcessorExecutionStateDAOBase();
-				GetProcessorExecutionStateResponseDTO serviceResponse = new GetProcessorExecutionStateResponseDTO();
-				
-				List<String> executingProcessors = processorDao.findExecutingProcessors();
-				serviceResponse.setExecutingProcessorIds(executingProcessors);
-				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, "The list of executing processors are " , Messages.SUCCESS));
-				serviceResponse.setTotalItems(executingProcessors.size());
+				ProcessorExecutionConfigurationService configService = new ProcessorExecutionConfigurationService();
+				GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+			 	//setting the current page and page size
+				searchFilter.setPage(page);
+				searchFilter.setPageSize(pageSize);
+				GetProcessorExecutionStateResponseDTO serviceResponse = configService.findExecutingProcessors(searchFilter);
 				return serviceResponse;
 			}
 		};
