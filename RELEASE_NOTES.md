@@ -1,6 +1,11 @@
 2.4.0-SNAPSHOT
 -------------------------------
 
+2.3.2
+-------------------------------
+* GMB-569 - Removed Dynamic Key usage from Encryption Util
+* GMB-569 - Removed the special char from comment
+
 2.3.1
 -------------------------------
 * GMB-573 - Payload outbound size
