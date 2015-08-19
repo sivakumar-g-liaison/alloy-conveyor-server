@@ -10,16 +10,20 @@
 
 package com.liaison.mailbox.service.core;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -40,7 +44,8 @@ import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 
 public abstract class GridService<T> {
 
-	private static final Logger LOGGER = LogManager.getLogger(GridService.class);
+	private static final Logger LOGGER = LogManager
+			.getLogger(GridService.class);
 
 	public static final String FILTER_TEXT = "filterText";
 	public static final String SORT_FIELDS = "fields";
@@ -68,6 +73,36 @@ public abstract class GridService<T> {
 		}
 	}
 
+	@SuppressWarnings({ "serial", "hiding" })
+	private class CriteriaQueryExpressionHolder<T> implements Serializable {
+
+		private HashMap<ParameterExpression<String>, String> predicateStrings = new HashMap<ParameterExpression<String>, String>();
+		private HashMap<ParameterExpression<Date>, Date> predicateDates = new HashMap<ParameterExpression<Date>, Date>();
+		private Predicate predicate;
+
+		public Predicate getPredicate() {
+			return this.predicate;
+		}
+
+		public void setPredicate(Predicate predicate) {
+			this.predicate = predicate;
+		}
+
+		public void put(ParameterExpression<String> key, String value) {
+			predicateStrings.put(key, value);
+		}
+
+		public void setParametersCount(TypedQuery<Long> query) {
+			for (ParameterExpression<String> p : predicateStrings.keySet()) {
+				query.setParameter(p, predicateStrings.get(p));
+			}
+			for (ParameterExpression<Date> p : predicateDates.keySet()) {
+				query.setParameter(p, predicateDates.get(p));
+			}
+		}
+
+	}
+
 	/**
 	 * Method provides filter and sorting.
 	 *
@@ -78,12 +113,14 @@ public abstract class GridService<T> {
 	 * @param pageSize
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public GridResult<T> getGridItems(final Class clazz, final String filterText, final String sortInfo,
-			final String page, final String pageSize) {
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public GridResult<T> getGridItems(final Class<T> clazz,
+			final String filterText, final String sortInfo, final String page,
+			final String pageSize) {
 
 		LOGGER.debug("Entering into getGridItems.");
-		Map<String, List<com.liaison.mailbox.dtdm.dao.FilterObject>> searchTextObjectList = new HashMap<>();
+		Map<String, List<FilterObject>> searchTextObjectList = new HashMap<>();
 		Map<String, Object> sortInfoMap = new HashMap<>();
 
 		// Generate JSON string from the object list
@@ -94,50 +131,68 @@ public abstract class GridService<T> {
 		try {
 
 			if (filterText != null && !filterText.isEmpty()) {
-				searchTextObjectList = gson.fromJson(filterText, new TypeToken<Map<String, List<FilterObject>>>() {
-				}.getType());
+				searchTextObjectList = gson.fromJson(filterText,
+						new TypeToken<Map<String, List<FilterObject>>>() {
+						}.getType());
 			}
 
 			if (sortInfo != null && !sortInfo.isEmpty()) {
-				sortInfoMap = gson.fromJson(sortInfo, new TypeToken<Map<String, Object>>() {
-				}.getType());
+				sortInfoMap = gson.fromJson(sortInfo,
+						new TypeToken<Map<String, Object>>() {
+						}.getType());
 			}
 
 			entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaBuilder criteriaBuilder = entityManager
+					.getCriteriaBuilder();
 
 			CriteriaQuery<T> query = criteriaBuilder.createQuery(clazz);
 			Root<T> gemRequest = query.from(clazz);
 			query.select(gemRequest);
 
+			List<Predicate> predicateList = new ArrayList<>();
+
+			// Filtering params
+			CriteriaQueryExpressionHolder holderFilter = createSearchCriteria(
+					searchTextObjectList, clazz, criteriaBuilder, gemRequest,
+					predicateList);
+			Predicate filterPred = holderFilter.getPredicate();
 
 			if (sortInfoMap.get(SORT_FIELDS) != null) {
 				addSort(sortInfoMap, criteriaBuilder, query, gemRequest);
 			}
 
-			List<Predicate> predicateList = new ArrayList<>();
-
-			addPredicates(searchTextObjectList, criteriaBuilder, gemRequest, predicateList);
-
-
-			// Add created predicates to where criteria
-			Predicate[] predicates = new Predicate[predicateList.size()];
-			predicateList.toArray(predicates);
-			if (predicateList != null && !predicateList.isEmpty()) {
-				query.where(predicates);
+			// Create where condition
+			List<Predicate> wherePredicateList = new ArrayList<Predicate>();
+			if (filterPred != null) {
+				wherePredicateList.add(filterPred);
 			}
 
-			// Total count needed for pagination
-			CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-			countQuery.select(criteriaBuilder.count(countQuery.from(clazz)));
-			if (predicateList != null && !predicateList.isEmpty()) {
-				countQuery.where(predicates);
+			if (!predicateList.isEmpty()) {
+				wherePredicateList.addAll(predicateList);
 			}
-			Long count = entityManager.createQuery(countQuery).getSingleResult();
+
+			Predicate wherePredicate = criteriaBuilder
+					.and(criteriaBuilder.and(wherePredicateList
+							.toArray(new Predicate[wherePredicateList.size()])));
+			if (predicateList != null && !predicateList.isEmpty()) {
+
+				query.where(wherePredicate);
+			}
+
+			Long count = getCount(clazz, entityManager, criteriaBuilder,
+					predicateList, holderFilter, wherePredicate);
 
 			// Execute query
+
 			List<T> mailboxMgtEntities;
-			if ((page != null && !page.isEmpty()) && (pageSize != null && !pageSize.isEmpty())) {
+			TypedQuery<T> tQueryObject = entityManager.createQuery(query);
+			// Set object query parameters
+			if (holderFilter != null) {
+				holderFilter.setParametersCount(tQueryObject);
+			}
+			if ((page != null && !page.isEmpty())
+					&& (pageSize != null && !pageSize.isEmpty())) {
 
 				int pageNumber = Integer.valueOf(page);
 				// Sets default value if it is less than 0
@@ -150,13 +205,20 @@ public abstract class GridService<T> {
 				// calculates first record as per the page size.
 				int first = (pageNumber - 1) * currentPageSize;
 
-				mailboxMgtEntities = entityManager.createQuery(query).setFirstResult(first).setMaxResults(
-						currentPageSize).getResultList();
+				// Execute query with paging options
+				mailboxMgtEntities = tQueryObject.setFirstResult(first)
+						.setMaxResults(currentPageSize).getResultList();
 
 			} else {
-				mailboxMgtEntities = entityManager.createQuery(query).getResultList();
+
+				// Execute query without paging options
+				mailboxMgtEntities = tQueryObject.getResultList();
 			}
 
+			/*
+			 * for (T gemEntity : mailboxMgtEntities) {
+			 * GemModelDetacher.detachGem(entityManager, gemEntity, 1); }
+			 */
 
 			LOGGER.debug("Exit from getGridItemsWithEnterprise.");
 			return new GridResult<T>(mailboxMgtEntities, count);
@@ -170,6 +232,46 @@ public abstract class GridService<T> {
 	}
 
 	/**
+	 * @param clazz
+	 * @param entityManager
+	 * @param criteriaBuilder
+	 * @param predicateList
+	 * @param holderFilter
+	 * @param wherePredicate
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Long getCount(final Class<T> clazz, EntityManager entityManager,
+			CriteriaBuilder criteriaBuilder, List<Predicate> predicateList,
+			CriteriaQueryExpressionHolder holderFilter, Predicate wherePredicate) {
+
+		// Count query
+		CriteriaQuery<Long> countQuery = criteriaBuilder
+				.createQuery(Long.class);
+		Root<T> countRoot = countQuery.from(clazz);
+		countQuery.select(criteriaBuilder.count(countRoot));
+		// DO NOT COMMENT THE BELOW LINE
+		// java.lang.IllegalArgumentException:
+		// org.hibernate.hql.internal.ast.QuerySyntaxException: Invalid path:
+		// 'generatedAlias1.status'
+		entityManager.createQuery(countQuery);
+
+		if (predicateList != null && !predicateList.isEmpty()) {
+			countQuery.where(wherePredicate);
+		}
+
+		TypedQuery<Long> tQueryCount = entityManager.createQuery(countQuery);
+
+		// Set count query parameters
+		if (holderFilter != null) {
+			holderFilter.setParametersCount(tQueryCount);
+		}
+
+		Long count = tQueryCount.getSingleResult();
+		return count;
+	}
+
+	/**
 	 * Adds sort to the criteria
 	 *
 	 * @param sortInfoMap
@@ -178,23 +280,29 @@ public abstract class GridService<T> {
 	 * @param gemRequest
 	 */
 	@SuppressWarnings("unchecked")
-	private void addSort(final Map<String, Object> sortInfoMap, final CriteriaBuilder criteriaBuilder,
+	private void addSort(final Map<String, Object> sortInfoMap,
+			final CriteriaBuilder criteriaBuilder,
 			final CriteriaQuery<T> query, final Root<T> gemRequest) {
 
 		LOGGER.debug("Entering into addSort.");
 		// Get sort data
-		ArrayList<String> fieldsValue = (ArrayList<String>) sortInfoMap.get(SORT_FIELDS);
-		ArrayList<String> directionsValue = (ArrayList<String>) sortInfoMap.get(SORT_DIRECTIONS);
+		ArrayList<String> fieldsValue = (ArrayList<String>) sortInfoMap
+				.get(SORT_FIELDS);
+		ArrayList<String> directionsValue = (ArrayList<String>) sortInfoMap
+				.get(SORT_DIRECTIONS);
 
 		// Loop through sort data
 		for (int i = 0; i < fieldsValue.size(); i++) {
 
 			String fieldName = fieldsValue.get(i).toString();
 			String direction = directionsValue.get(i).toString();
-			if (fieldName.equals("name"))
-				fieldName = "schProfName";
+
 			Path<Object> field = null;
-			field = gemRequest.get(fieldName);
+			if ("name".equals(fieldName)) {
+				field = gemRequest.get("schProfName");
+			} else {
+				field = gemRequest.get(fieldName);
+			}
 
 			if (direction.equals(SORT_DIRECTION_ASC)) {
 				query.orderBy(criteriaBuilder.asc(field));
@@ -211,35 +319,51 @@ public abstract class GridService<T> {
 	 * @param searchTextObjectList
 	 * @param criteriaBuilder
 	 * @param gemRequest
-	 * @param metamodel
+	 * 
 	 * @return
 	 * @throws ParseException
 	 */
 
-	private List<Predicate> addPredicates(final Map<String, List<FilterObject>> searchTextObjectList,
-			final CriteriaBuilder criteriaBuilder, final Root<T> gemRequest, List<Predicate> predicateList)
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private CriteriaQueryExpressionHolder createSearchCriteria(
+			final Map<String, List<FilterObject>> searchTextObjectList,
+			Class<T> clazz, final CriteriaBuilder criteriaBuilder,
+			final Root<T> gemRequest, List<Predicate> andPredicatesList)
 			throws ParseException {
 
-		Predicate pred = null;
+		CriteriaQueryExpressionHolder holder = new CriteriaQueryExpressionHolder();
 
 		if (searchTextObjectList.get(FILTER_TEXT) != null) {
 
 			// Searching functionality
-			List<FilterObject> searchFilterObjects = searchTextObjectList.get(FILTER_TEXT);
+			List<FilterObject> searchFilterObjects = searchTextObjectList
+					.get(FILTER_TEXT);
 			for (FilterObject entry : searchFilterObjects) {
 
 				String field = entry.getField();
-				if (field.equals("name"))
-					field = "schProfName";
-				Expression<String> path = null;
 
-				entry.setText(entry.getText().trim().toUpperCase());
-				path = gemRequest.get(field);
-				pred = criteriaBuilder.like(criteriaBuilder.upper(path), "%" + entry.getText() + "%");
-				predicateList.add(pred);
+				Expression<String> pathString = null;
+
+				if ("name".equals(field)) {
+					pathString = gemRequest.get("schProfName");
+				} else {
+					pathString = gemRequest.get(field);
+				}
+
+				ParameterExpression<String> parameterExp = criteriaBuilder
+						.parameter(String.class);
+				andPredicatesList.add(criteriaBuilder.like(
+						criteriaBuilder.upper(pathString), parameterExp));
+				holder.put(parameterExp, "%" + entry.getText() + "%");
 			}
 		}
 
-		return predicateList;
+		if (andPredicatesList != null) {
+			holder.setPredicate(criteriaBuilder.and(andPredicatesList
+					.toArray(new Predicate[andPredicatesList.size()])));
+		}
+
+		return holder;
 	}
+
 }

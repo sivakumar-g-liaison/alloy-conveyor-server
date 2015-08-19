@@ -287,6 +287,7 @@ public class ProcessorConfigurationService {
 
 				profileProcessor = new ScheduleProfileProcessor();
 				profileProcessor.setPguid(MailBoxUtil.getGUID());
+				profileProcessor.setProcessor(processor);
 				profileProcessor.setScheduleProfilesRef(profile);
 				scheduleProfileProcessors.add(profileProcessor);
 			}
@@ -549,9 +550,9 @@ public class ProcessorConfigurationService {
 			// validates the given processor is belongs to given mailbox
 			validateProcessorBelongToMbx(mailBoxId, processor);
 
-			if (processor.getScheduleProfileProcessors() != null) {
+			/*if (processor.getScheduleProfileProcessors() != null) {
 				processor.getScheduleProfileProcessors().clear();
-			}
+			}*/
 
 			createMailBoxAndProcessorLink(null, request, processor);
 			createScheduleProfileAndProcessorLink(null, request, processor);

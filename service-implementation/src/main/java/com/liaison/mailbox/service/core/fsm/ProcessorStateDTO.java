@@ -156,6 +156,7 @@ public class ProcessorStateDTO {
 		FSMStateValue value = new FSMStateValue();
 		value.setPguid(MailBoxUtil.getGUID());
 		value.setValue(this.getExecutionState().value());
+		value.setFsmState(entity);
 		value.setCreatedDate(MailBoxUtil.getTimestamp());
 		List<FSMStateValue> values = new ArrayList<FSMStateValue>();
 		values.add(value);

@@ -59,7 +59,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
                     + " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
                     + " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
                     + " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-                    + " order by " + ProcessorConfigurationDAO.PROF_NAME), 
+                    + " order by profile.schProfName" ), 
     @NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_COUNT,
                     query = "select count(processor) from Processor processor"
                             + " inner join processor.mailbox mbx"
