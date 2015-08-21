@@ -1,3 +1,7 @@
+2.3.3
+-------------------------------
+* Modified script cache to 5 seconds in uat
+
 2.3.2
 -------------------------------
 * GMB-569 - Removed Dynamic Key usage from Encryption Util
