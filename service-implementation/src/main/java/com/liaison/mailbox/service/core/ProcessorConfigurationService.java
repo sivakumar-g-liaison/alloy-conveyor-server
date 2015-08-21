@@ -254,49 +254,65 @@ public class ProcessorConfigurationService {
 			throws MailBoxConfigurationServicesException {
 
 		List<String> linkedProfiles = null;
+		ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
 		if (null == reviseRequest) {
+			
 			linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
 		} else {
 			linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
 		}
-
-		Set<ScheduleProfilesRef> scheduleProfilesRef = new HashSet<>();
-		if (null != linkedProfiles && !linkedProfiles.isEmpty()) {
-
-			ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
+		
+		Set<ScheduleProfileProcessor> sch = processor.getScheduleProfileProcessors();
+		List<String> collection = new ArrayList<>();
+		Set<ScheduleProfileProcessor> base = new HashSet<>();
+		if (null != sch && !sch.isEmpty()) {
+			for(ScheduleProfileProcessor sc : sch) {
+				for (String s : linkedProfiles) {
+					if(sc.getScheduleProfilesRef().getSchProfName().equals(s)) {
+						sc.getScheduleProfilesRef().setSchProfName(s);
+						collection.add(s);
+						break;
+					}
+				}
+				base.add(sc);
+			}
+			if(!collection.isEmpty()) {
+				linkedProfiles.removeAll(collection);
+				ScheduleProfileProcessor schedule = null;
+				ScheduleProfilesRef scheduleProfile = null;
+					for(String profileName : linkedProfiles) {
+						scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
+						if (scheduleProfile == null) {
+							throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName,
+									Response.Status.BAD_REQUEST);
+						}
+						schedule = new ScheduleProfileProcessor();
+						schedule.setPguid(MailBoxUtil.getGUID());
+						schedule.setProcessor(processor);
+						schedule.setScheduleProfilesRef(scheduleProfile);
+						sch.add(schedule);
+					}
+				processor.setScheduleProfileProcessors(sch);
+			}
+		} else {
+			ScheduleProfileProcessor schedule = null;
 			ScheduleProfilesRef scheduleProfile = null;
-			for (String profileName : linkedProfiles) {
-
+			Set<ScheduleProfileProcessor> schdProc =  new HashSet<>();
+			for(String profileName : linkedProfiles) {
 				scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
 				if (scheduleProfile == null) {
 					throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName,
 							Response.Status.BAD_REQUEST);
 				}
-
-				scheduleProfilesRef.add(scheduleProfile);
+				schedule = new ScheduleProfileProcessor();
+				schedule.setPguid(MailBoxUtil.getGUID());
+				schedule.setProcessor(processor);
+				schedule.setScheduleProfilesRef(scheduleProfile);
+				schdProc.add(schedule);
 			}
-
+			processor.setScheduleProfileProcessors(schdProc);
 		}
 
-		// Creates relationship processor and schedprofile.
-		if (!scheduleProfilesRef.isEmpty()) {
-
-			Set<ScheduleProfileProcessor> scheduleProfileProcessors = new HashSet<>();
-			ScheduleProfileProcessor profileProcessor = null;
-			for (ScheduleProfilesRef profile : scheduleProfilesRef) {
-
-				profileProcessor = new ScheduleProfileProcessor();
-				profileProcessor.setPguid(MailBoxUtil.getGUID());
-				profileProcessor.setProcessor(processor);
-				profileProcessor.setScheduleProfilesRef(profile);
-				scheduleProfileProcessors.add(profileProcessor);
-			}
-
-			if (!scheduleProfileProcessors.isEmpty()) {
-				processor.setScheduleProfileProcessors(scheduleProfileProcessors);
-			}
-
-		}
 	}
 
 	/**
@@ -549,10 +565,6 @@ public class ProcessorConfigurationService {
 
 			// validates the given processor is belongs to given mailbox
 			validateProcessorBelongToMbx(mailBoxId, processor);
-
-			/*if (processor.getScheduleProfileProcessors() != null) {
-				processor.getScheduleProfileProcessors().clear();
-			}*/
 
 			createMailBoxAndProcessorLink(null, request, processor);
 			createScheduleProfileAndProcessorLink(null, request, processor);
