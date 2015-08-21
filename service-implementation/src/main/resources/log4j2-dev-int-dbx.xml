@@ -248,7 +248,7 @@
 
 		<!-- failover destination -->
         <RollingFile name="GlassMessageSpectrumFile" fileName="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover.log"
-			filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}.log.gz"
+			filePattern="${env:GLASS_LOG_DIR}/GlassMessageSpectrumREST.failover-%d{MM-dd-yyyy}-%i.log"
 			ignoreExceptions="false">
 			<GlassMessageJSONLayout compact="true" />
 			<filters>
