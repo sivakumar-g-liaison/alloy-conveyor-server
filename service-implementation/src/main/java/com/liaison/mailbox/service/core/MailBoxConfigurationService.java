@@ -333,8 +333,13 @@ public class MailBoxConfigurationService {
 			retrievedMailBox.getMailboxProperties().clear();*/
 
 			Set<MailBoxProperty> existingProperties = retrievedMailBox.getMailboxProperties();
+			List<String> propertyNamesInDTOList = new ArrayList<>();
+			List<MailBoxProperty> toBeDeletedProperties = new ArrayList<>();
+			for (PropertyDTO propertyNames : mailboxDTO.getProperties()) {
+				propertyNamesInDTOList.add(propertyNames.getName());
+			}
+			
 			if (null != existingProperties && !existingProperties.isEmpty()) {
-				Set<MailBoxProperty> base = new HashSet<>();
 				List<PropertyDTO> existingPropertiesInDTO = new ArrayList<PropertyDTO>();
 				for (MailBoxProperty exist : existingProperties) {
 					for (PropertyDTO newProp : mailboxDTO.getProperties()) {
@@ -342,10 +347,13 @@ public class MailBoxConfigurationService {
 							exist.setMbxPropValue(newProp.getValue());
 							existingPropertiesInDTO.add(newProp);
 							break;
-						} 
+						} else if (!propertyNamesInDTOList.contains(exist.getMbxPropName())) {
+								toBeDeletedProperties.add(exist);
+						}
 					}
-					base.add(exist);		
-					}
+				}
+				existingProperties.removeAll(toBeDeletedProperties);
+				
 				if (!existingPropertiesInDTO.isEmpty()) {
 					mailboxDTO.getProperties().removeAll(existingPropertiesInDTO);
 					MailBoxProperty property = null;

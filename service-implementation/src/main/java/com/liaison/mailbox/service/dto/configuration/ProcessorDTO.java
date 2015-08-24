@@ -257,8 +257,12 @@ public class ProcessorDTO {
         List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
         
         Set<Folder> existingProperties = processor.getFolders();
+        List<String> folderNamesInDTOList = new ArrayList<>();
+        List<Folder> toBeDeletedFolderProperties = new ArrayList<>();
+        for (FolderDTO propertyNames : folderDTOList) {
+        	folderNamesInDTOList.add(propertyNames.getFolderType());
+		}
 		if (null != existingProperties && !existingProperties.isEmpty()) {
-			Set<Folder> base = new HashSet<>();
 			List<FolderDTO> existingPropertiesInDTO = new ArrayList<FolderDTO>();
 			for (Folder exist : existingProperties) {
 				for (FolderDTO newProp : folderDTOList) {
@@ -268,10 +272,13 @@ public class ProcessorDTO {
 						exist.setFldrDesc(newProp.getFolderDesc());
 						existingPropertiesInDTO.add(newProp);
 						break;
-					} 
+					} else if (!folderNamesInDTOList.contains(exist.getFldrType())) {
+						toBeDeletedFolderProperties.add(exist);
+					}
 				}
-				base.add(exist);		
-				}
+			}
+			existingProperties.removeAll(toBeDeletedFolderProperties);
+			
 			if (!existingPropertiesInDTO.isEmpty()) {
 				
 				folderDTOList.removeAll(existingPropertiesInDTO);
@@ -307,8 +314,13 @@ public class ProcessorDTO {
 		List <CredentialDTO> credentialDTOList = ProcessorPropertyJsonMapper.getCredentialProperties(credentialTemplateDTOList);
 
     	Set<Credential> existingCredProperties = processor.getCredentials();
+    	List<String> credentialsInDTOList = new ArrayList<>();
+        List<Credential> toBeDeletedCredentialProperties = new ArrayList<>();
+        for (CredentialDTO propertyNames : credentialDTOList) {
+        	credentialsInDTOList.add(propertyNames.getIdpType());
+		}
+        
 		if (null != existingCredProperties && !existingCredProperties.isEmpty()) {
-			Set<Credential> base = new HashSet<>();
 			List<CredentialDTO> existingPropertiesInDTO = new ArrayList<CredentialDTO>();
 			for (Credential exist : existingCredProperties) {
 				for (CredentialDTO newProp : credentialDTOList) {
@@ -321,10 +333,13 @@ public class ProcessorDTO {
 						exist.setCredsUsername(newProp.getUserId());
 						existingPropertiesInDTO.add(newProp);
 						break;
-					} 
+					} else if (!credentialsInDTOList.contains(exist.getCredsIdpType())) {
+						toBeDeletedCredentialProperties.add(exist);
+					}
 				}
-				base.add(exist);		
-				}
+			}
+			existingCredProperties.removeAll(toBeDeletedCredentialProperties);
+			
 			if (!existingPropertiesInDTO.isEmpty()) {
 				credentialDTOList.removeAll(existingPropertiesInDTO);
 				Credential credential = null;
@@ -350,8 +365,13 @@ public class ProcessorDTO {
 		}
 		
 		Set<ProcessorProperty> existingProps = processor.getDynamicProperties();
+		List<String> processorPropertyNamesInDTOList = new ArrayList<>();
+		List<ProcessorProperty> toBeDeletedProcessorProperties = new ArrayList<>();
+		for (ProcessorPropertyDTO propertyNames : dynamicPropertiesDTO) {
+			processorPropertyNamesInDTOList.add(propertyNames.getName());
+		}
+		
 		if (null != existingProps && !existingProps.isEmpty()) {
-			Set<ProcessorProperty> base = new HashSet<>();
 			List<ProcessorPropertyDTO> existingPropertiesInDTO = new ArrayList<ProcessorPropertyDTO>();
 			for (ProcessorProperty exist : existingProps) {
 				for (ProcessorPropertyDTO newProp : dynamicPropertiesDTO) {
@@ -362,10 +382,13 @@ public class ProcessorDTO {
 						exist.setProcsrPropValue(newProp.getValue());
 						existingPropertiesInDTO.add(newProp);
 						break;
-					} 
+					} else if (!processorPropertyNamesInDTOList.contains(exist.getProcsrPropName())) {
+						toBeDeletedProcessorProperties.add(exist);
+					}
 				}
-				base.add(exist);		
 				}
+			existingProps.removeAll(toBeDeletedProcessorProperties);
+			
 			if (!existingPropertiesInDTO.isEmpty()) {
 				dynamicPropertiesDTO.removeAll(existingPropertiesInDTO);
 				ProcessorProperty property = null;

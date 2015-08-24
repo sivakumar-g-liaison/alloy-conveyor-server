@@ -262,20 +262,22 @@ public class ProcessorConfigurationService {
 			linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
 		}
 		
+		List<ScheduleProfileProcessor> toBeDeletedProperties = new ArrayList<>();
+		
 		Set<ScheduleProfileProcessor> sch = processor.getScheduleProfileProcessors();
 		List<String> collection = new ArrayList<>();
-		Set<ScheduleProfileProcessor> base = new HashSet<>();
 		if (null != sch && !sch.isEmpty()) {
 			for(ScheduleProfileProcessor sc : sch) {
 				for (String s : linkedProfiles) {
 					if(sc.getScheduleProfilesRef().getSchProfName().equals(s)) {
-						sc.getScheduleProfilesRef().setSchProfName(s);
 						collection.add(s);
-						break;
+					} else if (!linkedProfiles.contains(sc.getScheduleProfilesRef().getSchProfName())) {
+						toBeDeletedProperties.add(sc);
 					}
-				}
-				base.add(sc);
+				} 
 			}
+			sch.removeAll(toBeDeletedProperties);
+			
 			if(!collection.isEmpty()) {
 				linkedProfiles.removeAll(collection);
 				ScheduleProfileProcessor schedule = null;
