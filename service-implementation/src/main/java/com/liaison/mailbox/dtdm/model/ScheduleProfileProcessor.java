@@ -55,7 +55,7 @@ public class ScheduleProfileProcessor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to Processor
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+	@ManyToOne(cascade = {CascadeType.REFRESH})
 	@JoinColumn(name = "PROCESSOR_GUID", nullable = false)
 	public Processor getProcessor() {
 		return this.processor;
@@ -66,7 +66,7 @@ public class ScheduleProfileProcessor implements Identifiable {
 	}
 
 	// bi-directional many-to-one association to ScheduleProfilesRef
-	@ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = {CascadeType.REFRESH}, fetch = FetchType.EAGER)
 	@JoinColumn(name = "SCHED_PROFILE_GUID", nullable = false)
 	@Fetch(value = FetchMode.SELECT)
 	public ScheduleProfilesRef getScheduleProfilesRef() {

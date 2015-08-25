@@ -10,6 +10,7 @@
 
 package com.liaison.mailbox.dtdm.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -119,6 +120,9 @@ public class MailBox implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
 	public Set<MailBoxProperty> getMailboxProperties() {
+	    if (this.mailboxProperties == null) {
+            this.mailboxProperties = new HashSet<>();
+        }
 		return this.mailboxProperties;
 	}
 

@@ -12,6 +12,7 @@ package com.liaison.mailbox.dtdm.model;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,6 +116,9 @@ public class Processor implements Identifiable {
 	@Fetch(FetchMode.JOIN)
 	@IndexColumn(name = "PGUID")
 	public Set<ProcessorProperty> getDynamicProperties() {
+	    if (this.dynamicProperties == null) {
+            this.dynamicProperties = new HashSet<>();
+        }
 		return dynamicProperties;
 	}
 
@@ -192,6 +196,9 @@ public class Processor implements Identifiable {
 			CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
 	public Set<Credential> getCredentials() {
+	    if (this.credentials == null) {
+            this.credentials = new HashSet<>();
+        }
 		return this.credentials;
 	}
 
@@ -219,6 +226,9 @@ public class Processor implements Identifiable {
 			CascadeType.REFRESH })
 	@Fetch(FetchMode.JOIN)
 	public Set<Folder> getFolders() {
+	    if (this.folders == null) {
+	        this.folders = new HashSet<>();
+	    }
 		return this.folders;
 	}
 
@@ -269,6 +279,9 @@ public class Processor implements Identifiable {
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
 	@Fetch(FetchMode.SELECT)
 	public Set<ScheduleProfileProcessor> getScheduleProfileProcessors() {
+	    if (this.scheduleProfileProcessors == null) {
+            this.scheduleProfileProcessors = new HashSet<>();
+        }
 		return this.scheduleProfileProcessors;
 	}
 
