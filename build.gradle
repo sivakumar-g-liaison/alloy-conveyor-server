@@ -28,8 +28,14 @@ buildscript {
 
 allprojects {
     apply plugin: 'eclipse' //provides tasks for eclipse. If you don't use eclipse, simply don't use these tasks :)
-    apply plugin: 'idea' 
-	
+    apply plugin: 'idea'
+
+    if (JavaVersion.current().isJava8Compatible()) {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+
     group = 'com.liaison.commons.mailbox'
 		
 	    // Define the Semantic Version number as the first line of RELEASE_NOTES.md
