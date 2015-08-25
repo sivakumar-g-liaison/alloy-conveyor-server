@@ -17,6 +17,7 @@ import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.validation.DataValidation;
 import com.liaison.mailbox.service.validation.Mandatory;
 import com.wordnik.swagger.annotations.ApiModel;
@@ -91,7 +92,7 @@ public class FolderDTO {
 
 		folder.setFldrType(foundFolderType.getCode());
 		folder.setFldrUri(this.getFolderURI());
-		folder.setPguid(this.getGuId());
+		folder.setPguid(MailBoxUtil.getGUID());
 	}
 
 	/**

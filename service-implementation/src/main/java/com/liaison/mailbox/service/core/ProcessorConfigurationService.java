@@ -271,6 +271,7 @@ public class ProcessorConfigurationService {
 				for (String s : linkedProfiles) {
 					if(sc.getScheduleProfilesRef().getSchProfName().equals(s)) {
 						collection.add(s);
+						break;
 					} else if (!linkedProfiles.contains(sc.getScheduleProfilesRef().getSchProfName())) {
 						toBeDeletedProperties.add(sc);
 					}
