@@ -256,14 +256,12 @@ public class ProcessorConfigurationService {
 		List<String> linkedProfiles = null;
 		ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
 		if (null == reviseRequest) {
-			
 			linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
 		} else {
 			linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
 		}
-		
+
 		List<ScheduleProfileProcessor> toBeDeletedProperties = new ArrayList<>();
-		
 		Set<ScheduleProfileProcessor> sch = processor.getScheduleProfileProcessors();
 		List<String> collection = new ArrayList<>();
 		if (null != sch && !sch.isEmpty()) {
@@ -278,7 +276,7 @@ public class ProcessorConfigurationService {
 				} 
 			}
 			sch.removeAll(toBeDeletedProperties);
-			
+
 			if(!collection.isEmpty()) {
 				linkedProfiles.removeAll(collection);
 				ScheduleProfileProcessor schedule = null;

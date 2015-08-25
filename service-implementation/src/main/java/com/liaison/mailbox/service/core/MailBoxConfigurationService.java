@@ -338,7 +338,7 @@ public class MailBoxConfigurationService {
 			for (PropertyDTO propertyNames : mailboxDTO.getProperties()) {
 				propertyNamesInDTOList.add(propertyNames.getName());
 			}
-			
+
 			if (null != existingProperties && !existingProperties.isEmpty()) {
 				List<PropertyDTO> existingPropertiesInDTO = new ArrayList<PropertyDTO>();
 				for (MailBoxProperty exist : existingProperties) {
@@ -377,7 +377,7 @@ public class MailBoxConfigurationService {
 				}
 				retrievedMailBox.setMailboxProperties(properties);
 			}
-			
+
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
 
