@@ -267,7 +267,7 @@ public class Processor implements Identifiable {
 	// bi-directional many-to-one association to ScheduleProfileProcessor
 	@OneToMany(mappedBy = "processor", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	@Fetch(FetchMode.JOIN)
+	@Fetch(FetchMode.SELECT)
 	public Set<ScheduleProfileProcessor> getScheduleProfileProcessors() {
 		return this.scheduleProfileProcessors;
 	}

@@ -36,6 +36,7 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfileProcessor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Protocol;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.StaticProcessorPropertiesDTO;
@@ -240,7 +241,6 @@ public class ProcessorDTO {
 																												 Protocol.findByCode(processor.getProcsrProtocol()));
 		ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
 		processorPropsDTO.setHandOverExecutionToJavaScript(propertiesDTO.isHandOverExecutionToJavaScript());
-
 		// set static properties into properties json to be stored in DB
 		String propertiesJSON = JSONUtil.marshalToJSON(processorPropsDTO);
 		processor.setProcsrProperties(propertiesJSON);
@@ -250,11 +250,71 @@ public class ProcessorDTO {
 
 		GenericValidator validator = new GenericValidator();
 
-		processFolderProperties(processor, propertiesDTO, validator);
+		// handling of folder properties
+		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
 
-		processCredentials(processor, propertiesDTO);
+        //Construct FOLDER DTO LIST
+        List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
 
-		processProcessorProperty(processor, dynamicPropertiesDTO);
+		// Setting the folders.
+		Folder folder = null;
+		Set<Folder> folders = new HashSet<>();
+		for (FolderDTO folderDTO : folderDTOList) {
+
+			folder = new Folder();
+			validator.validate(folderDTO);
+			folderDTO.copyToEntity(folder);
+			folder.setProcessor(processor);
+			folder.setPguid(MailBoxUtil.getGUID());
+			folders.add(folder);
+		}
+
+		if (!folders.isEmpty()) {
+			processor.getFolders().addAll(folders);
+		}
+
+		// handling of credential properties
+		List<ProcessorCredentialPropertyDTO> credentialTemplateDTOList = propertiesDTO.getCredentialProperties();
+
+		// construct credentialDTO from credentialPropertyDTO in template json
+		List <CredentialDTO> credentialDTOList = ProcessorPropertyJsonMapper.getCredentialProperties(credentialTemplateDTOList);
+
+		// Setting the credentials
+		Credential credential = null;
+		Set<Credential> credentialList = new HashSet<>();
+		for (CredentialDTO credentialDTO : credentialDTOList) {
+
+		    validator.validate(credentialDTO);
+			credential = new Credential();
+			credentialDTO.copyToEntity(credential);
+			credential.setPguid(MailBoxUtil.getGUID());
+			credential.setProcessor(processor);
+			credentialList.add(credential);
+		}
+
+		if (!credentialList.isEmpty()) {
+			processor.getCredentials().addAll(credentialList);
+		}
+
+		// Setting the property
+		if (null != processor.getDynamicProperties()) {
+			processor.getDynamicProperties().clear();
+		}
+		ProcessorProperty property = null;
+		Set<ProcessorProperty> properties = new HashSet<>();
+		for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
+
+			if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
+				continue;
+			}
+			property = new ProcessorProperty();
+			propertyDTO.copyToEntity(property);
+			property.setProcessor(processor);
+			properties.add(property);
+		}
+		if (!properties.isEmpty()) {
+			processor.getDynamicProperties().addAll(properties);
+		}
 
 		// Set the status
 		EntityStatus foundStatusType = EntityStatus.findByName(this.getStatus());
@@ -266,200 +326,10 @@ public class ProcessorDTO {
 			throw new MailBoxConfigurationServicesException("Revise Operation failed:"+e.getMessage(),Response.Status.INTERNAL_SERVER_ERROR);
 
 		}
+
+
+
 	}
-
-    /**
-     * @param processor
-     * @param dynamicPropertiesDTO
-     */
-    private void processProcessorProperty(Processor processor, List<ProcessorPropertyDTO> dynamicPropertiesDTO) {
-
-        //Processor Property
-		Set<ProcessorProperty> existingProps = processor.getDynamicProperties();
-		List<String> processorPropertyNamesInDTOList = new ArrayList<>();
-		List<ProcessorProperty> toBeDeletedProcessorProperties = new ArrayList<>();
-		for (ProcessorPropertyDTO propertyNames : dynamicPropertiesDTO) {
-			processorPropertyNamesInDTOList.add(propertyNames.getName());
-		}
-		
-		if (null != existingProps && !existingProps.isEmpty()) {
-			List<ProcessorPropertyDTO> existingPropertiesInDTO = new ArrayList<ProcessorPropertyDTO>();
-			for (ProcessorProperty exist : existingProps) {
-				for (ProcessorPropertyDTO newProp : dynamicPropertiesDTO) {
-					if (newProp.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
-						continue;
-					}
-					if (exist.getProcsrPropName().equals(newProp.getName())) {
-						exist.setProcsrPropValue(newProp.getValue());
-						existingPropertiesInDTO.add(newProp);
-						break;
-					} else if (!processorPropertyNamesInDTOList.contains(exist.getProcsrPropName())) {
-						toBeDeletedProcessorProperties.add(exist);
-					}
-				}
-				}
-			existingProps.removeAll(toBeDeletedProcessorProperties);
-			
-			if (!existingPropertiesInDTO.isEmpty()) {
-				dynamicPropertiesDTO.removeAll(existingPropertiesInDTO);
-				ProcessorProperty property = null;
-				for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
-					if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
-						continue;
-					}
-					property = new ProcessorProperty();
-					property.setProcessor(processor);
-					propertyDTO.copyToEntity(property);
-					existingProps.add(property);
-				}
-				processor.setDynamicProperties(existingProps);
-			}
-		} else {
-
-			ProcessorProperty property = null;
-			Set<ProcessorProperty> properties = new HashSet<>();
-			for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
-				if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
-					continue;
-				}
-				property = new ProcessorProperty();
-				property.setProcessor(processor);
-				propertyDTO.copyToEntity(property);
-				properties.add(property);
-			}
-			processor.setDynamicProperties(properties);
-		}
-    }
-
-    /**
-     * @param processor
-     * @param propertiesDTO
-     * @throws SymmetricAlgorithmException
-     */
-    private void processCredentials(Processor processor, ProcessorPropertyUITemplateDTO propertiesDTO)
-            throws SymmetricAlgorithmException {
-
-        // handling of credential properties
-		List<ProcessorCredentialPropertyDTO> credentialTemplateDTOList = propertiesDTO.getCredentialProperties();
-
-		// construct credentialDTO from credentialPropertyDTO in template json
-		List <CredentialDTO> credentialDTOList = ProcessorPropertyJsonMapper.getCredentialProperties(credentialTemplateDTOList);
-
-    	Set<Credential> existingCredProperties = processor.getCredentials();
-    	List<String> credentialsInDTOList = new ArrayList<>();
-        List<Credential> toBeDeletedCredentialProperties = new ArrayList<>();
-        for (CredentialDTO propertyNames : credentialDTOList) {
-        	credentialsInDTOList.add(propertyNames.getIdpType());
-		}
-        
-		if (null != existingCredProperties && !existingCredProperties.isEmpty()) {
-			List<CredentialDTO> existingPropertiesInDTO = new ArrayList<CredentialDTO>();
-			for (Credential exist : existingCredProperties) {
-				for (CredentialDTO newProp : credentialDTOList) {
-					if (exist.getCredsIdpType().equals(newProp.getIdpType())) {
-						exist.setCredsIdpType(newProp.getIdpType());
-						exist.setCredsIdpUri(newProp.getIdpURI());
-						exist.setCredsPassword(newProp.getPassword());
-						exist.setCredsType(newProp.getCredentialType());
-						exist.setCredsUri(newProp.getCredentialURI());
-						exist.setCredsUsername(newProp.getUserId());
-						existingPropertiesInDTO.add(newProp);
-						break;
-					} else if (!credentialsInDTOList.contains(exist.getCredsIdpType())) {
-						toBeDeletedCredentialProperties.add(exist);
-					}
-				}
-			}
-			existingCredProperties.removeAll(toBeDeletedCredentialProperties);
-			
-			if (!existingPropertiesInDTO.isEmpty()) {
-				credentialDTOList.removeAll(existingPropertiesInDTO);
-				Credential credential = null;
-				for (CredentialDTO folderDTO : credentialDTOList) {
-					credential = new Credential();
-					credential.setProcessor(processor);
-					folderDTO.copyToEntity(credential);
-					existingCredProperties.add(credential);
-				}
-				processor.setCredentials(existingCredProperties);
-			}
-		} else {
-
-			Credential credential = null;
-			Set<Credential> properties = new HashSet<>();
-			for (CredentialDTO credentialDTO : credentialDTOList) {
-				credential = new Credential();
-				credential.setProcessor(processor);
-				credentialDTO.copyToEntity(credential);
-				properties.add(credential);
-			}
-			processor.setCredentials(properties);
-		}
-    }
-
-    /**
-     * @param processor
-     * @param propertiesDTO
-     * @param validator
-     */
-    private void processFolderProperties(Processor processor, ProcessorPropertyUITemplateDTO propertiesDTO,
-            GenericValidator validator) {
-
-        // handling of folder properties
-        // Construct FOLDER DTO LIST
-        List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties(propertiesDTO.getFolderProperties());
-        
-        Set<Folder> existingProperties = processor.getFolders();
-        List<String> folderNamesInDTOList = new ArrayList<>();
-        List<Folder> toBeDeletedFolderProperties = new ArrayList<>();
-        for (FolderDTO propertyNames : folderDTOList) {
-        	folderNamesInDTOList.add(propertyNames.getFolderType());
-		}
-		if (null != existingProperties && !existingProperties.isEmpty()) {
-			List<FolderDTO> existingPropertiesInDTO = new ArrayList<FolderDTO>();
-			for (Folder exist : existingProperties) {
-				for (FolderDTO newProp : folderDTOList) {
-					
-					if (exist.getFldrType().equals(newProp.getFolderType())) {
-						exist.setFldrUri(newProp.getFolderURI());
-						exist.setFldrDesc(newProp.getFolderDesc());
-						existingPropertiesInDTO.add(newProp);
-						break;
-					} else if (!folderNamesInDTOList.contains(exist.getFldrType())) {
-						toBeDeletedFolderProperties.add(exist);
-					}
-				}
-			}
-			existingProperties.removeAll(toBeDeletedFolderProperties);
-			
-			if (!existingPropertiesInDTO.isEmpty()) {
-				
-				folderDTOList.removeAll(existingPropertiesInDTO);
-				Folder property = null;
-				for (FolderDTO folderDTO : folderDTOList) {
-					
-					property = new Folder();
-					property.setProcessor(processor);
-					validator.validate(folderDTO);
-					folderDTO.copyToEntity(property);
-					existingProperties.add(property);
-				}
-				processor.setFolders(existingProperties);
-			}
-		} else {
-
-			Folder property = null;
-			Set<Folder> properties = new HashSet<>();
-			for (FolderDTO folderDTO : folderDTOList) {
-				property = new Folder();
-				property.setProcessor(processor);
-				validator.validate(folderDTO);
-				folderDTO.copyToEntity(property);
-				properties.add(property);
-			}
-			processor.setFolders(properties);
-		}
-    }
 
 	/**
 	 * Copies the values from Entity to DTO.

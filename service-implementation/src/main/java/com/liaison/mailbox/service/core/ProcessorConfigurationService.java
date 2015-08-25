@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
@@ -36,11 +38,13 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAO;
 import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
@@ -197,8 +201,7 @@ public class ProcessorConfigurationService {
 			processor.setServiceInstance(serviceInstance);
 
 			// persist the processor.
-
-			configDAO.merge(processor);
+			configDAO.persist(processor);
 
 			// persist the processor execution state with status READY
 			ProcessorExecutionStateDAO executionDAO = new ProcessorExecutionStateDAOBase();
@@ -253,66 +256,50 @@ public class ProcessorConfigurationService {
 			ReviseProcessorRequestDTO reviseRequest, Processor processor)
 			throws MailBoxConfigurationServicesException {
 
-		List<String> linkedProfiles = null;
-		ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
-		if (null == reviseRequest) {
-			linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
-		} else {
-			linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
-		}
+	    List<String> linkedProfiles = null;
+        if (null == reviseRequest) {
+            linkedProfiles = addRequest.getProcessor().getLinkedProfiles();
+        } else {
+            linkedProfiles = reviseRequest.getProcessor().getLinkedProfiles();
+        }
 
-		List<ScheduleProfileProcessor> toBeDeletedProperties = new ArrayList<>();
-		Set<ScheduleProfileProcessor> sch = processor.getScheduleProfileProcessors();
-		List<String> collection = new ArrayList<>();
-		if (null != sch && !sch.isEmpty()) {
-			for(ScheduleProfileProcessor sc : sch) {
-				for (String s : linkedProfiles) {
-					if(sc.getScheduleProfilesRef().getSchProfName().equals(s)) {
-						collection.add(s);
-						break;
-					} else if (!linkedProfiles.contains(sc.getScheduleProfilesRef().getSchProfName())) {
-						toBeDeletedProperties.add(sc);
-					}
-				} 
-			}
-			sch.removeAll(toBeDeletedProperties);
+        Set<ScheduleProfilesRef> scheduleProfilesRef = new HashSet<>();
+        if (null != linkedProfiles && !linkedProfiles.isEmpty()) {
 
-			if(!collection.isEmpty()) {
-				linkedProfiles.removeAll(collection);
-				ScheduleProfileProcessor schedule = null;
-				ScheduleProfilesRef scheduleProfile = null;
-					for(String profileName : linkedProfiles) {
-						scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
-						if (scheduleProfile == null) {
-							throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName,
-									Response.Status.BAD_REQUEST);
-						}
-						schedule = new ScheduleProfileProcessor();
-						schedule.setPguid(MailBoxUtil.getGUID());
-						schedule.setProcessor(processor);
-						schedule.setScheduleProfilesRef(scheduleProfile);
-						sch.add(schedule);
-					}
-				processor.setScheduleProfileProcessors(sch);
-			}
-		} else {
-			ScheduleProfileProcessor schedule = null;
-			ScheduleProfilesRef scheduleProfile = null;
-			Set<ScheduleProfileProcessor> schdProc =  new HashSet<>();
-			for(String profileName : linkedProfiles) {
-				scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
-				if (scheduleProfile == null) {
-					throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName,
-							Response.Status.BAD_REQUEST);
-				}
-				schedule = new ScheduleProfileProcessor();
-				schedule.setPguid(MailBoxUtil.getGUID());
-				schedule.setProcessor(processor);
-				schedule.setScheduleProfilesRef(scheduleProfile);
-				schdProc.add(schedule);
-			}
-			processor.setScheduleProfileProcessors(schdProc);
-		}
+            ProfileConfigurationDAO scheduleProfileDAO = new ProfileConfigurationDAOBase();
+            ScheduleProfilesRef scheduleProfile = null;
+            for (String profileName : linkedProfiles) {
+
+                scheduleProfile = scheduleProfileDAO.findProfileByName(profileName);
+                if (scheduleProfile == null) {
+                    throw new MailBoxConfigurationServicesException(Messages.PROFILE_NAME_DOES_NOT_EXIST, profileName,
+                            Response.Status.BAD_REQUEST);
+                }
+
+                scheduleProfilesRef.add(scheduleProfile);
+            }
+
+        }
+
+        // Creates relationship processor and schedprofile.
+        if (!scheduleProfilesRef.isEmpty()) {
+
+            Set<ScheduleProfileProcessor> scheduleProfileProcessors = new HashSet<>();
+            ScheduleProfileProcessor profileProcessor = null;
+            for (ScheduleProfilesRef profile : scheduleProfilesRef) {
+
+                profileProcessor = new ScheduleProfileProcessor();
+                profileProcessor.setPguid(MailBoxUtil.getGUID());
+                profileProcessor.setScheduleProfilesRef(profile);
+                profileProcessor.setProcessor(processor);
+                scheduleProfileProcessors.add(profileProcessor);
+            }
+
+            if (!scheduleProfileProcessors.isEmpty()) {
+                processor.getScheduleProfileProcessors().addAll(scheduleProfileProcessors);
+            }
+
+        }
 
 	}
 
@@ -514,11 +501,10 @@ public class ProcessorConfigurationService {
 	 * @throws NoSuchFieldException
 	 */
 	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId,
-			String processorId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException,
-			SymmetricAlgorithmException, NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+			String processorId) {
 
+	    EntityManager em = null;
+        EntityTransaction tx = null;
 		LOGGER.debug("Entering into revising processor.");
 		LOGGER.info("Request guid is {} ", request.getProcessor().getGuid());
 		ReviseProcessorResponseDTO serviceResponse = new ReviseProcessorResponseDTO();
@@ -557,8 +543,12 @@ public class ProcessorConfigurationService {
 						Response.Status.BAD_REQUEST);
 			}
 
-			ProcessorConfigurationDAO configDao = new ProcessorConfigurationDAOBase();
-			Processor processor = configDao.find(Processor.class, processorDTO.getGuid());
+			// Getting the mailbox.
+			em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
+            tx = em.getTransaction();
+            tx.begin();
+
+			Processor processor = em.find(Processor.class, processorDTO.getGuid());
 			if (processor == null) {
 				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST,
 						processorDTO.getGuid(), Response.Status.BAD_REQUEST);
@@ -566,6 +556,22 @@ public class ProcessorConfigurationService {
 
 			// validates the given processor is belongs to given mailbox
 			validateProcessorBelongToMbx(mailBoxId, processor);
+
+			if (processor.getFolders() != null) {
+                processor.getFolders().clear();
+            }
+            if (processor.getCredentials() != null) {
+                processor.getCredentials().clear();
+            }
+            if (processor.getScheduleProfileProcessors() != null) {
+                processor.getScheduleProfileProcessors().clear();
+            }
+            if (processor.getDynamicProperties() != null) {
+                processor.getDynamicProperties().clear();
+            }
+            //Flush required to avoid unique constraint violation exception
+            //This is because of hibernate query execution order
+            em.flush();
 
 			createMailBoxAndProcessorLink(null, request, processor);
 			createScheduleProfileAndProcessorLink(null, request, processor);
@@ -581,10 +587,11 @@ public class ProcessorConfigurationService {
 				}
 			}
 
-			configDao.merge(processor);
+			//Merge the changes and commit the transaction
+			em.merge(processor);
+		    tx.commit();
 
-			// Change the execution order if existing and incoming does not
-			// matche
+			// Change the execution order if existing and incoming does not match
 			// changeExecutionOrder(request, configDao, processor);
 
 			// response message construction
@@ -594,10 +601,25 @@ public class ProcessorConfigurationService {
 
 		} catch (MailBoxConfigurationServicesException e) {
 
+		    if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+
 			LOGGER.error(Messages.REVISE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, PROCESSOR, Messages.FAILURE,
 					e.getMessage()));
 			return serviceResponse;
+		} catch (Exception e) {
+
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+
+            throw e;
+        } finally {
+		    if (em != null) {
+                em.close();
+            }
 		}
 
 		LOGGER.debug("Exit from revise processor.");
