@@ -79,10 +79,15 @@ public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfiles
 				StringBuilder query = new StringBuilder().append("select distinct profile from Processor processor")
 							.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
 							.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-							.append(" where processor.mailbox.tenancyKey = :" + ProfileConfigurationDAO.TENANCY_KEY)
-							.append(" and processor.mailbox.mbxStatus = :" + ProfileConfigurationDAO.STATUS)
-							.append(" and processor.procsrStatus = :" + ProfileConfigurationDAO.STATUS)
-							.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+							.append(" where processor.mailbox.tenancyKey = :")
+							.append(ProfileConfigurationDAO.TENANCY_KEY)
+							.append(" and processor.mailbox.mbxStatus = :")
+							.append(ProfileConfigurationDAO.STATUS)
+							.append(" and processor.procsrStatus = :")
+							.append(ProfileConfigurationDAO.STATUS)
+							.append(" and ( ")
+							.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
+							.append(")");
 
 
 				List<?> proc = entityManager.createQuery(query.toString())

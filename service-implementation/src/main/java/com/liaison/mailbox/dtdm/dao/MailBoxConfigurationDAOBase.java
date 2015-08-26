@@ -58,9 +58,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join mbx.mailboxProcessors prcsr")
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")")
-					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
+					.append(" where LOWER(mbx.mbxName) like :")
+					.append(MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (")
+					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+					.append(")")
+					.append(" and profile.schProfName like :")
+					.append(SCHD_PROF_NAME);
 
 			totalItems = (Long)em
 					.createQuery(query.toString())
@@ -102,9 +106,13 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 					.append(" inner join mbx.mailboxProcessors prcsr")
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
 					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")")
-					.append(" and profile.schProfName like :" + SCHD_PROF_NAME);
+					.append(" where LOWER(mbx.mbxName) like :")
+					.append(MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (")
+					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+					.append(")")
+					.append(" and profile.schProfName like :")
+					.append(SCHD_PROF_NAME);
 			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 
 				sortDirection = sortDirection.toUpperCase();
@@ -154,8 +162,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
         try {
  
             StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
-                    .append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
+                    .append(" where LOWER(mbx.mbxName) like :")
+                    .append(MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (")
+					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+					.append(")");
             totalItems = (Long)entityManager.createQuery(query.toString())
                     .setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
                     .getSingleResult();
@@ -187,8 +198,11 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 
 			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
-					.append(" where LOWER(mbx.mbxName) like :" + MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase() + ")");
+					.append(" where LOWER(mbx.mbxName) like :")
+					.append(MBOX_NAME)
+					.append(" and LOWER(mbx.tenancyKey) IN (")
+					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+					.append(")");
 			String sortDirection = searchFilter.getSortDirection();
 			String sortField=searchFilter.getSortField();
 
@@ -269,7 +283,9 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		try {
 			
 			StringBuilder query = new StringBuilder().append("select mailbox.pguid from MailBox mailbox")
-							.append(" where mailbox.tenancyKey in (" + QueryBuilderUtil.collectionToSqlString(tenancyKeys) + ")");
+							.append(" where mailbox.tenancyKey in (")
+							.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys))
+							.append(")");
 			List<?> mailboxIds = entityManager.createQuery(query.toString()).getResultList();
 			
 			Iterator<?> iter = mailboxIds.iterator();

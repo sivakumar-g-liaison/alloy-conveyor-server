@@ -60,10 +60,15 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		    int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
-					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
-					.append(" and sf.stagedFileStatus = :"+ STATUS);
+					.append(" where LOWER(sf.fileName) like :")
+					.append(FILE_NAME)
+					.append(" and sf.mailboxId in (")
+					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
+					.append(")")
+					.append(" and sf.expirationTime > :")
+					.append(CURRENT_TIME)
+					.append(" and sf.stagedFileStatus = :")
+					.append(STATUS);
 
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
 				sortDirection=sortDirection.toUpperCase();
@@ -109,8 +114,11 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		try {
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where (sf.pguid) = :" + StagedFileDAO.GUID)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")");
+					.append(" where (sf.pguid) = :")
+					.append(StagedFileDAO.GUID)
+					.append(" and sf.mailboxId in (")
+					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
+					.append(")");
 
 			List<?> files = entityManager
 					.createQuery(query.toString())
@@ -147,10 +155,15 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		try {
 
 			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
-					.append(" where LOWER(sf.fileName) like :" + FILE_NAME)
-					.append(" and sf.mailboxId in (" + QueryBuilderUtil.collectionToSqlString(mailboxIds) + ")")
-					.append(" and sf.expirationTime > :"+ CURRENT_TIME)
-					.append(" and sf.stagedFileStatus = :"+ STATUS);
+					.append(" where LOWER(sf.fileName) like :")
+					.append(FILE_NAME)
+					.append(" and sf.mailboxId in (")
+					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
+					.append(")")
+					.append(" and sf.expirationTime > :")
+					.append(CURRENT_TIME)
+					.append(" and sf.stagedFileStatus = :")
+					.append(STATUS);
 
 			totalItems = (Long)entityManager
 					.createQuery(query.toString())
@@ -213,9 +226,12 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			// query
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.fileMetaData =:" + PROCESSOR_ID)
-					.append(" and sf.stagedFileStatus =:" + STATUS)
-			        .append(" and sf.fileName =:" + FILE_NAME);
+					.append(" where sf.fileMetaData =:")
+					.append(PROCESSOR_ID)
+					.append(" and sf.stagedFileStatus =:")
+					.append(STATUS)
+			        .append(" and sf.fileName =:")
+			        .append(FILE_NAME);
 
 			List<StagedFile> stagedFiles = em
 								.createQuery(query.toString())
@@ -243,8 +259,10 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 			// query
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where sf.fileMetaData =:" + PROCESSOR_ID)
-					.append(" and sf.stagedFileStatus =:" + STATUS);
+					.append(" where sf.fileMetaData =:")
+					.append(PROCESSOR_ID)
+					.append(" and sf.stagedFileStatus =:")
+					.append(STATUS);
 
 			List<StagedFile> stagedFiles = em
 								.createQuery(query.toString())
