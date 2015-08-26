@@ -170,8 +170,9 @@ public class JavascriptExecutor extends ScriptExecutorBase {
 
 		Map<String, String> scriptExecutionTimes = metricData;
 		String[] keys = scriptExecutionTimes.keySet().toArray(new String[1]);
-
-		for (int i = 0; i < scriptExecutionTimes.size(); i++) {
+		int count = scriptExecutionTimes.size();
+		
+		for (int i = 0; i < count; i++) {
 			metricTag = new MetricTag();
 			metricTag.setName(keys[i]);
 			metricTag.setValue(scriptExecutionTimes.get(keys[i]));
