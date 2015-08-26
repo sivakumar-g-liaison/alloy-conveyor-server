@@ -130,12 +130,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					try {
 						sftpRequest.getNative().lstat(directory);
 						LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
-						sftpRequest.changeDirectory(directory);
 					} catch (Exception ex) {
 						sftpRequest.getNative().mkdir(directory);
 						LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
-						sftpRequest.changeDirectory(directory);
 					}
+					sftpRequest.changeDirectory(directory);
 				}
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
