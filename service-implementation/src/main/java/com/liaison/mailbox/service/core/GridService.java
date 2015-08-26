@@ -195,12 +195,8 @@ public abstract class GridService<T> {
 				fieldName = "schProfName";
 			Path<Object> field = null;
 			field = gemRequest.get(fieldName);
-
-			if (direction.equals(SORT_DIRECTION_ASC)) {
-				query.orderBy(criteriaBuilder.asc(field));
-			} else if (direction.equals(SORT_DIRECTION_DESC)) {
-				query.orderBy(criteriaBuilder.desc(field));
-			}
+			query.orderBy((direction.equals(SORT_DIRECTION_ASC)) ? criteriaBuilder.asc(field) : criteriaBuilder
+					.desc(field));
 		}
 		LOGGER.debug("Exit from addSort.");
 	}
