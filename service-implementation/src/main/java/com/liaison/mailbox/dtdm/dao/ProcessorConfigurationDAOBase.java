@@ -725,13 +725,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 		for (int i = 0; i < predicateList.size(); i++) {			
-            if (i == 0) {
-				query.append(" WHERE ");				
-				query.append(predicateList.get(i));
-			} else {
-				query.append(" AND ");
-				query.append(predicateList.get(i));
-			}
+            query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
 		}				
 	}
 
