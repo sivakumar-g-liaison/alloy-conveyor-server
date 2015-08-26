@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import com.jcraft.jsch.SftpException;
 import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.util.client.ftps.G2FTPSClient;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
@@ -207,7 +208,8 @@ public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxPr
                     }
 
 					// Check whether the file downloaded successfully if so rename it.
-					if (statusCode == 226 || statusCode == 250) {
+					if (statusCode == MailBoxConstants.CLOSING_DATA_CONNECTION
+							|| statusCode == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK) {
 
 						LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
 						totalNumberOfProcessedFiles++;

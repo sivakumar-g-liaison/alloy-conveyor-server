@@ -168,6 +168,9 @@ public interface MailBoxConstants {
 	public static final int AUTH_SUCCESS_CODE = 200;
 	public static final int AUTH_FAILURE_CODE = 401;
 	public static final int ACL_RETRIVAL_FAILURE_CODE = 400;
+	public static final int CLOSING_DATA_CONNECTION = 226;
+	public static final int FTP_FILE_TRANSFER_ACTION_OK = 250;
+	public static final int SFTP_FILE_TRANSFER_ACTION_OK = 0;
 	public static final String TTL = "ttl";
 	public static final String TTL_UNIT = "ttlunit";
 	public static final String TTL_IN_SECONDS = "ttlinseconds";

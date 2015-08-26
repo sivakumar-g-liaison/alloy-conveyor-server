@@ -230,7 +230,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					sftpRequest.changeDirectory(remoteFilePath);
 					String localDr = localParentDir + File.separatorChar + item.getName();
 	                uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm);
-					replyCode = 0;
+					replyCode = MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK;
 
 				} else {
 
@@ -263,7 +263,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				    }
 
 				    // Check whether the file uploaded successfully
-					if (replyCode == 0) {
+					if (replyCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 
 						totalNumberOfProcessedFiles++;
 						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
@@ -271,7 +271,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
 						if (!MailBoxUtil.isEmpty(statusIndicator)) {
 							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
-							if (renameStatus == 0) {
+							if (renameStatus == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 							} else {
 								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
