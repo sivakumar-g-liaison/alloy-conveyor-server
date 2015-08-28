@@ -46,9 +46,9 @@ import com.liaison.spectrum.client.model.KeyValuePair;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
 /**
+ * Base class for all resources.
  *
  * @author OFS
- *
  */
 public class BaseResource {
 

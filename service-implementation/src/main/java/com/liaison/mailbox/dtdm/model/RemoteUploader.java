@@ -14,6 +14,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 /**
+ * The persistent class for the processor type remote uploader in processor database table.
  * 
  *  @author OFS
  */

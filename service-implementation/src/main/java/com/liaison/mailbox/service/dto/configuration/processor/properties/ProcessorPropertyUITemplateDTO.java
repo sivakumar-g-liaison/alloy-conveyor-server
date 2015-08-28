@@ -15,8 +15,9 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
+ * Data Transfer Object to set the processor properties in json template.
+ * 
  * @author OFS
- *
  */
 @JsonRootName("processorDefinition")
 public class ProcessorPropertyUITemplateDTO {

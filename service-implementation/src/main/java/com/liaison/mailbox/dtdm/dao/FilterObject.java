@@ -12,9 +12,9 @@ package com.liaison.mailbox.dtdm.dao;
 import java.io.Serializable;
 
 /**
+ * This class contains detail to perform search operations.
  * 
  * @author OFS
- * 
  */
 public class FilterObject implements Serializable {
 

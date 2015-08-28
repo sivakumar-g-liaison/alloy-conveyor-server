@@ -13,8 +13,9 @@ package com.liaison.mailbox.service.dto.configuration.processor.properties;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 /**
+ * Data Transfer Object for the properties of FTP uploader.
+ * 
  * @author OFS
- *
  */
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="staticProperties")
 public class FTPUploaderPropertiesDTO extends StaticProcessorPropertiesDTO {

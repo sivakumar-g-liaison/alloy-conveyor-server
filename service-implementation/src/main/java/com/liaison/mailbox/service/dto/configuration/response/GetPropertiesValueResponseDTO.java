@@ -22,9 +22,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertiesFileDTO;
 
 /**
+ * Data Transfer Object used for retrieving the mailbox properties.
  *
  * @author OFS
- *
  */
 @JsonRootName("getPropertiesValueResponseDTO")
 public class GetPropertiesValueResponseDTO extends CommonResponseDTO {

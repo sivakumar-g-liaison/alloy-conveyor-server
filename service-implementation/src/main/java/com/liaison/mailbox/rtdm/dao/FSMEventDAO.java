@@ -16,8 +16,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.FSMEvent;
 
 /**
- * @author OFS
+ * The dao class for the FSM_EVENT database table.
  * 
+ * @author OFS
  */
 @NamedQuery(name = FSMEventDAO.FIND_INTERRUPT_EVENT,
 		query = "SELECT eventVal FROM FSMEvent eventVal WHERE eventVal.data =:" + FSMEventDAO.EXECUTION_ID)

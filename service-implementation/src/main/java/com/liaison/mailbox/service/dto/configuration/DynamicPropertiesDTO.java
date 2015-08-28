@@ -15,8 +15,9 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
- * @author OFS
+ * Data Transfer Object for dynamic properties.
  * 
+ * @author OFS
  */
 @JsonRootName("dynamicProperties")
 public class DynamicPropertiesDTO {

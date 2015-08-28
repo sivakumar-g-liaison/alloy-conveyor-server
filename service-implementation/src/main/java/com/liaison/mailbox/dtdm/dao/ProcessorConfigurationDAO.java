@@ -23,8 +23,9 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
- * @author OFS
+ * The dao class for the PROCESSOR database table.
  * 
+ * @author OFS
  */
 @NamedQueries({
 		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,

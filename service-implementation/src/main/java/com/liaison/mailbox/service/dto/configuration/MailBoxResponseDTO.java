@@ -15,8 +15,9 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author OFS
+ * The response DTO for mailbox CRUD operations.
  * 
+ * @author OFS
  */
 public class MailBoxResponseDTO implements Serializable {
 

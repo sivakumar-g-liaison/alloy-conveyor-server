@@ -43,8 +43,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
+ * Contains the processor fetch informations and  We can retrieve the processor details here.
+ * 
  * @author OFS
- *
  */
 public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> implements ProcessorConfigurationDAO, MailboxDTDMDAO {
 

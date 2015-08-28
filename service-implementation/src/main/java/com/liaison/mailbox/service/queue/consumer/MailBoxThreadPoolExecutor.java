@@ -15,9 +15,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Class that provides pool of threads and execute them.
  *
  * @author OFS
- *
  */
 public class MailBoxThreadPoolExecutor extends ThreadPoolExecutor{
     

@@ -19,8 +19,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 
 /**
- * @author OFS
+ * The dao class for the SCHED_PROFILE database table.
  * 
+ * @author OFS
  */
 @NamedQueries({
 		@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"

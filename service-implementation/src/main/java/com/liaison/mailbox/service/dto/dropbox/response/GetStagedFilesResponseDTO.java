@@ -16,9 +16,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 
 /**
+ * Data Transfer Object used for retrieving the staged files.
  *
  * @author OFS
- *
  */
 public class GetStagedFilesResponseDTO extends CommonResponseDTO {
 

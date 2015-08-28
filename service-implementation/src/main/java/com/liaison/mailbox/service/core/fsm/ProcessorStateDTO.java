@@ -21,8 +21,9 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * Data Transfer Object for processorState informations.
+ * 
  * @author OFS
- *
  */
 public class ProcessorStateDTO {
 

@@ -21,9 +21,9 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.commons.scripting.javascript.JavascriptScriptContext;
 
 /**
- * @author VNagarajan on 11/14/2014
- *
- *
+ * Class that creates context for running java scripts.
+ * 
+ * @author OFS
  */
 public class ContextCreator implements Serializable {
 

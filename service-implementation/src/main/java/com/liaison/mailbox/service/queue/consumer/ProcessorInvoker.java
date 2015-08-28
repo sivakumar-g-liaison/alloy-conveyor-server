@@ -15,9 +15,9 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.mailbox.service.core.MailBoxService;
 
 /**
+ * Class that process the messages posted to processor queue.
  * 
  * @author OFS
- *
  */
 class ProcessorInvoker implements Runnable {
 	

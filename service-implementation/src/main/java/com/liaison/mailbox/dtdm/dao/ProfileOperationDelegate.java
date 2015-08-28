@@ -20,9 +20,9 @@ import com.liaison.commons.jpa.OperationDelegate;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 
 /**
+ * Performs the ScheduleProfiles retrieving operations.
  * 
- * 
- * @author veerasamyn
+ * @author OFS
  */
 public class ProfileOperationDelegate extends OperationDelegate {
     

@@ -19,7 +19,7 @@ import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
- *
+ * Data Transfer Object used for retrieving the processors.
  *
  * @author OFS
  */

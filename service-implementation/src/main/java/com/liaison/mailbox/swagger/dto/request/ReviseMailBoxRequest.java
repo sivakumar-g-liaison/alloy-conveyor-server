@@ -13,6 +13,7 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 
 /**
+ * Data Transfer Object for mailbox revision through swagger.
  * 
  * @author OFS
  */

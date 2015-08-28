@@ -15,9 +15,9 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
+ * Data Transfer Object for sending the mailbox SLA validation responses.
  *
  * @author OFS
- *
  */
 @JsonRootName("mailboxSLAResponse")
 public class MailboxSLAResponseDTO extends CommonResponseDTO {

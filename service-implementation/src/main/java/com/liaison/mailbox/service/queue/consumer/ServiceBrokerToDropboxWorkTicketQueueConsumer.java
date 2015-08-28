@@ -18,6 +18,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * Class that consumes the workticket from ServiceBrokerToDropboxWorkTicketQueue.
+ * 
+ * @author OFS
+ */
 public class ServiceBrokerToDropboxWorkTicketQueueConsumer {
 
 	private static int threadCount;

@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto.directorysweeper;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
+ * Data Transfer Object that contains the various attributes of the file.
  * 
  * @author OFS
- *
  */
 public class FileAttributesDTO {
 

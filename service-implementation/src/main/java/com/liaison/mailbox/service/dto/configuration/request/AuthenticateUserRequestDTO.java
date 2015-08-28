@@ -16,8 +16,9 @@ import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.usermanagement.validation.Mandatory;
 
 /**
+ * Data Transfer Object that contains the fields required for authentication.
+ * 
  * @author OFS
- *
  */
 @JsonRootName("authenticateRequest")
 public class AuthenticateUserRequestDTO {

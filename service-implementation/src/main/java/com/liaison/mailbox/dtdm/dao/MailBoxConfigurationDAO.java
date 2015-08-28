@@ -21,8 +21,9 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
+ * The dao class for the MAILBOX database table.
+ * 
  * @author OFS
- *
  */
 @NamedQueries({
 		@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,

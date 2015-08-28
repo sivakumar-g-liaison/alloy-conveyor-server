@@ -11,8 +11,9 @@
 package com.liaison.mailbox.rtdm.dao;
 
 /**
+ * Interface to hold the persistence unit name for runtime database.
+ * 
  * @author OFS
- *
  */
 public interface MailboxRTDMDAO {
 	public static final String PERSISTENCE_UNIT_NAME = "mailbox-rtdm";

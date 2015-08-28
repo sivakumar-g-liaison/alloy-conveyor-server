@@ -31,8 +31,9 @@ import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.ProcessorType;
 
 /**
+ * Class that contains the fields required for logging messages in LENS.
+ * 
  * @author OFS
- *
  */
 public class GlassMessage {
 

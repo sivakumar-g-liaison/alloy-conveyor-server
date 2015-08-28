@@ -14,8 +14,9 @@ import java.util.List;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
- * @author OFS
+ * Data Transfer Object that contains the properties of remote processors.
  * 
+ * @author OFS
  */
 @JsonRootName("remoteProcessorProperties")
 public class RemoteProcessorPropertiesDTO {

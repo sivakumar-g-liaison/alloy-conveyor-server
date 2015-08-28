@@ -16,8 +16,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 
 /**
- * @author OFS
+ * The dao class for the MAILBOX_SERVICE_INSTANCE database table.
  * 
+ * @author OFS
  */
 @NamedQueries({ @NamedQuery(name = MailboxServiceInstanceDAO.FIND_MBX_SI_GUID, query = "SELECT msi FROM MailboxServiceInstance msi where msi.mailbox.pguid = :"
 		+ MailboxServiceInstanceDAO.GUID_MBX + " AND msi.serviceInstance.pguid = :" + MailboxServiceInstanceDAO.SERVICE_INSTANCE_GUID) })

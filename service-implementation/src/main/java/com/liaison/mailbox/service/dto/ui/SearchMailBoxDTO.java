@@ -20,9 +20,9 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 
 /**
+ * Data Transfer Object that contains the fields required for mailbox search.
  * 
- * 
- * @author veerasamyn
+ * @author OFS
  */
 public class SearchMailBoxDTO {
 

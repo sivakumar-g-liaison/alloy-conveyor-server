@@ -20,8 +20,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 
 /**
+ * The dao class for the PROCESSOR_EXECUTION_STATE database table.
+ * 
  * @author OFS
- *
  */
 @NamedQueries({ @NamedQuery(name = ProcessorExecutionStateDAO.FIND_BY_PROCESSOR_ID,
 			query = "SELECT executionState FROM ProcessorExecutionState executionState WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID),

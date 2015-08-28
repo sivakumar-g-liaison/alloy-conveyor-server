@@ -84,8 +84,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
+ * Class that performs the SLA validations.
+ * 
  * @author OFS
- *
  */
 public class MailboxSLAWatchDogService {
 

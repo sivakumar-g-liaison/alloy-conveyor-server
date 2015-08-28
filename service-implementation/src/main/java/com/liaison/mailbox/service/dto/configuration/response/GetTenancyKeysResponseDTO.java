@@ -18,9 +18,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.TenancyKeyDTO;
 
 /**
- *
+ * Data Transfer Object used for retrieving the Tenancy keys.
+ * 
  * @author OFS
- *
  */
 @JsonRootName("getTenancyKeysResponse")
 public class GetTenancyKeysResponseDTO extends CommonResponseDTO {

@@ -30,8 +30,9 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.EncryptionUtil;
 
 /**
+ * Utilities for Dropbox authentication.
+ * 
  * @author OFS
- *
  */
 public class DropboxAuthenticatorUtil {
 

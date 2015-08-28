@@ -33,9 +33,9 @@ import com.netflix.servo.monitor.StatsTimer;
 import com.netflix.servo.stats.StatsConfig;
 
 /**
+ * Resource class to audit all the incoming requests and their corresponding responses.
  * 
  * @author OFS
- * 
  */
 public abstract class AuditedResource extends BaseResource {
 

@@ -48,9 +48,9 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
+ * This is the gateway to retrieve all tenancy keys of acl manifest in request.
  * 
  * @author OFS
- * 
  */
 @AppConfigurationResource
 @Path("config/mailbox/tenancyKeys/")

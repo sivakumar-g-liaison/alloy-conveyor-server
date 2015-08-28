@@ -49,7 +49,7 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- *
+ * Data Transfer Object for processor details.
  *
  * @author OFS
  */

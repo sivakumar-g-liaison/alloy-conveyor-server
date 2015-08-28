@@ -25,8 +25,9 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 
 /**
+ * The dao class for the FSM_STATE database table.
+ * 
  * @author OFS
- *
  */
 @NamedQueries({ @NamedQuery(name = FSMStateDAO.FIND_FSM_STATE_BY_NAME,
 		query = "SELECT state FROM FSMState state WHERE state.executionId = :" + FSMStateDAO.EXECUTION_ID),

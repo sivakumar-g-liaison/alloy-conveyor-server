@@ -27,8 +27,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
+ * Performs mailbox fetch operations. 
+ * 
  * @author OFS
- *
  */
 public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		implements MailBoxConfigurationDAO, MailboxDTDMDAO  {

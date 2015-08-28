@@ -19,8 +19,9 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
 
 /**
- * @author OFS
+ * Performs the Service Instance fetch operations.
  * 
+ * @author OFS
  */
 public class ServiceInstanceDAOBase extends GenericDAOBase<ServiceInstance> implements ServiceInstanceDAO, MailboxDTDMDAO {
 
