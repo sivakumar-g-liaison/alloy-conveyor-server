@@ -142,7 +142,6 @@ public abstract class AuditedResource extends BaseResource {
 				returnResponse = (Response) responseObject;
 			}
 
-			// TODO - better exception handling
 		} catch (RollbackException rbe) {
 			success = false;
 			// unwrap the real cause

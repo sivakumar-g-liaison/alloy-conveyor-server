@@ -130,7 +130,6 @@ public class SessionContext {
 		String pathInfo = request.getPathInfo();
 
 		if ((queryString == null) && (pathInfo == null)) {
-			// TODO - this should be an error.
 			return null;
 		}
 
