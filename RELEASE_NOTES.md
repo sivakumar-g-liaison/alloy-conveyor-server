@@ -1,6 +1,14 @@
 2.4.0-SNAPSHOT
 -------------------------------
 
+2.3.4
+-------------------------------
+* GMB-584 - Set unique guid instead of globalprocessor guid in FSM_STATE of the mailbox filewriter
+
+2.3.3
+-------------------------------
+* Modified script cache to 5 seconds in uat
+
 2.3.2
 -------------------------------
 * GMB-569 - Removed Dynamic Key usage from Encryption Util

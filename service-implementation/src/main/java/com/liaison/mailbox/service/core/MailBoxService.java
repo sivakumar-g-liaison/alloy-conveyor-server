@@ -406,7 +406,7 @@ public class MailBoxService {
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
             ProcessorStateDTO processorStaged = new ProcessorStateDTO();
-            processorStaged.setValues(workTicket.getGlobalProcessId(),
+            processorStaged.setValues(MailBoxUtil.getGUID(),
                     processor,
                     workTicket.getFileName(),
                     ExecutionState.STAGED,
