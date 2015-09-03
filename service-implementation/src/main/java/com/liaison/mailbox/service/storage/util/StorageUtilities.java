@@ -173,7 +173,7 @@ public class StorageUtilities {
 				detail = new PayloadDetail();
 				detail.setMetaSnapshot(metaSnapshot);
 				detail.setPayloadSize(metaSnapshot.getPayloadSize());
-				LOGGER.debug("TIME SPENT ON UPLOADING FILE {} OF SIZE {} TO SPECTRUM ONLY IS {} ms",
+				LOGGER.debug("Time spent on uploading file {} of size {} to spectrum only is {} ms",
 						workTicket.getFileName(), detail.getPayloadSize(), endTime - startTime);
 			}
 
@@ -364,9 +364,8 @@ public class StorageUtilities {
 
 			PayloadDetail detail = StorageUtilities.persistPayload(payloadToPersist, workTicket,
 					httpListenerProperties, isDropbox);
-			LOGGER.info("SPECTRUM URL FOR THE FILE {} IS {} ", workTicket.getFileName(),
-					detail.getMetaSnapshot().getURI().toString());
-			LOGGER.info("FILE SIZE IN BYTES {} ", detail.getPayloadSize());
+			LOGGER.info("Spectrum URL for the file {} is {}. File size in bytes {} ", workTicket.getFileName(),
+					detail.getMetaSnapshot().getURI().toString(), detail.getPayloadSize());
 
 			workTicket.setPayloadSize(detail.getPayloadSize());
 			workTicket.setPayloadURI(detail.getMetaSnapshot().getURI().toString());
