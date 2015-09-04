@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
@@ -58,18 +59,26 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		    String status = searchFilter.getStatus();
 		    int pagingOffset = pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET);
 		    int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
+		    String entityStatus = MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase();
 
 			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
-					.append(" where LOWER(sf.fileName) like :")
-					.append(FILE_NAME)
-					.append(" and sf.mailboxId in (")
+					.append(" where sf.mailboxId in (")
 					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
 					.append(")")
-					.append(" and sf.expirationTime > :")
-					.append(CURRENT_TIME)
 					.append(" and sf.stagedFileStatus = :")
 					.append(STATUS);
 
+			// Setting expirationTime based on the status - (Setting only for ACTIVE status). GMB-595
+			if(EntityStatus.ACTIVE.name().equals(entityStatus)){
+				query.append(" and sf.expirationTime > :");
+				query.append(CURRENT_TIME);
+			}
+			
+			if(!StringUtil.isNullOrEmptyAfterTrim(fileName)){
+				query.append(" and LOWER(sf.fileName) like :");
+				query.append(FILE_NAME);
+			}
+			
 			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
 				sortDirection=sortDirection.toUpperCase();
 				query.append(" order by sf.fileName " + sortDirection);
@@ -77,14 +86,20 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 				query.append(" order by sf.fileName");
 			}
 
-			List<?> files = entityManager
-					.createQuery(query.toString())
-					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
-				    .setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
-				    .setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
-					.setFirstResult(pagingOffset)
-					.setMaxResults(pagingCount)
-					.getResultList();
+			Query qry = entityManager.createQuery(query.toString());
+		    qry.setParameter(STATUS, entityStatus);
+			qry.setFirstResult(pagingOffset);
+			qry.setMaxResults(pagingCount);
+
+			if(!StringUtil.isNullOrEmptyAfterTrim(fileName)){
+				qry.setParameter(FILE_NAME, "%" + fileName.toLowerCase() + "%");
+			}
+			 
+			if(EntityStatus.ACTIVE.name().equals(entityStatus)){
+				qry.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+			}
+			
+			List<?> files = qry.getResultList();
 
 			Iterator<?> iterator = files.iterator();
 
