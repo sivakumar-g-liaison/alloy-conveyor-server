@@ -253,6 +253,9 @@ dependencies {
 	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
 
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
+	
+	//Required for integration test case
+	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
 
 }
 
