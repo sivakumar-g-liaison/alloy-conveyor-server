@@ -13,10 +13,13 @@ package com.liaison.mailbox.rtdm.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
 
 /**
  * The persistent class for the PROCESSOR_EXEC_STATE database table.
@@ -25,6 +28,16 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name = "PROCESSOR_EXEC_STATE")
+@NamedQueries({ 
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_BY_PROCESSOR_ID,
+                query = "SELECT executionState FROM ProcessorExecutionState executionState WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_NON_EXECUTING_PROCESSORS,
+                query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus not like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS,
+                query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
+        @NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS_ALL,
+        		query = "SELECT count(executionState) FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS)
+})
 public class ProcessorExecutionState implements Identifiable {
 
 	private static final long serialVersionUID = 1L;

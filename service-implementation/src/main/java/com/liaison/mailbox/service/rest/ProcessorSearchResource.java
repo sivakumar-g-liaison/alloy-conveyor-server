@@ -64,7 +64,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/mailbox/searchprocessor", description = "Administration of processor services")
 public class ProcessorSearchResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager.getLogger(MailBoxConfigurationResource.class);
+	private static final Logger LOG = LogManager.getLogger(ProcessorSearchResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -76,7 +76,7 @@ public class ProcessorSearchResource extends AuditedResource {
 	private static final StatsTimer statsTimer = new StatsTimer(
             MonitorConfig.builder("ProcessorSearchResource_statsTimer").build(),
             new StatsConfig.Builder().build());
-	
+
 	static {
         DefaultMonitorRegistry.getInstance().register(statsTimer);
     }
@@ -165,11 +165,11 @@ public class ProcessorSearchResource extends AuditedResource {
 	@Override
 	protected void beginMetricsCollection() {
 
-		stopwatch = statsTimer.start();
-		int globalCount = globalServiceCallCounter.addAndGet(1);
-		logKPIMetric(globalCount, "Global_serviceCallCounter");
-		int serviceCount = serviceCallCounter.addAndGet(1);
-		logKPIMetric(serviceCount, "ProcessorSearchResource_serviceCallCounter");
+	    stopwatch = statsTimer.start();
+        int globalCount = globalServiceCallCounter.addAndGet(1);
+        logKPIMetric(globalCount, "Global_serviceCallCounter");
+        int serviceCount = serviceCallCounter.addAndGet(1);
+        logKPIMetric(serviceCount, "ProcessorSearchResource_serviceCallCounter");
 	}
 
 	@Override

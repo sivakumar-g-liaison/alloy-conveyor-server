@@ -12,7 +12,9 @@ package com.liaison.mailbox.service.dto.configuration;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -255,19 +257,19 @@ public class ProcessorDTO {
 
 		// Setting the folders.
 		Folder folder = null;
-		List<Folder> folders = new ArrayList<>();
+		Set<Folder> folders = new HashSet<>();
 		for (FolderDTO folderDTO : folderDTOList) {
 
 			folder = new Folder();
 			validator.validate(folderDTO);
 			folderDTO.copyToEntity(folder);
-
+			folder.setProcessor(processor);
 			folder.setPguid(MailBoxUtil.getGUID());
 			folders.add(folder);
 		}
 
 		if (!folders.isEmpty()) {
-			processor.setFolders(folders);
+			processor.getFolders().addAll(folders);
 		}
 
 		// handling of credential properties
@@ -278,18 +280,19 @@ public class ProcessorDTO {
 
 		// Setting the credentials
 		Credential credential = null;
-		List<Credential> credentialList = new ArrayList<>();
+		Set<Credential> credentialList = new HashSet<>();
 		for (CredentialDTO credentialDTO : credentialDTOList) {
 
 		    validator.validate(credentialDTO);
 			credential = new Credential();
 			credentialDTO.copyToEntity(credential);
 			credential.setPguid(MailBoxUtil.getGUID());
+			credential.setProcessor(processor);
 			credentialList.add(credential);
 		}
 
 		if (!credentialList.isEmpty()) {
-			processor.setCredentials(credentialList);
+			processor.getCredentials().addAll(credentialList);
 		}
 
 		// Setting the property
@@ -297,7 +300,7 @@ public class ProcessorDTO {
 			processor.getDynamicProperties().clear();
 		}
 		ProcessorProperty property = null;
-		List<ProcessorProperty> properties = new ArrayList<>();
+		Set<ProcessorProperty> properties = new HashSet<>();
 		for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
 
 			if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
@@ -305,10 +308,11 @@ public class ProcessorDTO {
 			}
 			property = new ProcessorProperty();
 			propertyDTO.copyToEntity(property);
+			property.setProcessor(processor);
 			properties.add(property);
 		}
 		if (!properties.isEmpty()) {
-			processor.setDynamicProperties(properties);
+			processor.getDynamicProperties().addAll(properties);
 		}
 
 		// Set the status

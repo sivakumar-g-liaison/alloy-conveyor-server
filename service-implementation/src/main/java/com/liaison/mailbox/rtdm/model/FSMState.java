@@ -17,12 +17,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 
 /**
  * The persistent class for the FSM_STATE database table.
@@ -31,6 +34,60 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name = "FSM_STATE")
+@NamedQueries({ @NamedQuery(name = FSMStateDAO.FIND_FSM_STATE_BY_NAME,
+query = "SELECT state FROM FSMState state WHERE state.executionId = :" + FSMStateDAO.EXECUTION_ID),
+@NamedQuery(name = FSMStateDAO.FIND_ALL_EXECUTING_PROC,
+query = "select stateVal from FSMStateValue stateVal"
+		+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+		+ " inner join sta.executionState staVal"
+		+ " where staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " group by staVal.fsmState)"),
+@NamedQuery(name = FSMStateDAO.FIND_EXECUTING_PROC_BY_VALUE,
+query = "select stateVal from FSMStateValue stateVal"
+		+ " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+		+ " inner join sta.executionState staVal"
+		+ " where staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + " and stateVal.value = :" + FSMStateDAO.BY_VALUE
+		+ " group by staVal.fsmState)"),
+@NamedQuery(name = FSMStateDAO.FIND_EXECUTING_PROC_BY_DATE,
+query = "select stateVal from FSMStateValue stateVal"
+        + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+        + " inner join sta.executionState staVal"
+        + " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
+        + " group by staVal.fsmState)"),
+@NamedQuery(name = FSMStateDAO.FIND_EXECUTING_PROC_BY_VALUE_AND_DATE,
+query = "select stateVal from FSMStateValue stateVal"
+        + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+        + " inner join sta.executionState staVal"
+        + " where stateVal.createdDate >= :" + FSMStateDAO.FROM_DATE + " and stateVal.createdDate <= :" + FSMStateDAO.TO_DATE
+        + " and stateVal.value = :" + FSMStateDAO.BY_VALUE
+        + " group by staVal.fsmState)"),
+@NamedQuery(name = FSMStateDAO.FIND_ALL_EXECUTING_PROC_BY_PROCESSORID,
+query = "select stateVal from FSMStateValue stateVal"
+        + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+        + " inner join sta.executionState staVal"
+        + " where sta.processorId = :" + FSMStateDAO.PROCESSOR_ID
+        + " and staVal.createdDate >= :" + FSMStateDAO.INTERVAL_IN_HOURS + ")"),
+@NamedQuery(name = FSMStateDAO.FIND_MOST_RECENT_SUCCESSFUL_EXECUTION_OF_PROCESSOR,
+query = "select stateVal from FSMStateValue stateVal"
+        + " where stateVal.createdDate IN (select max(staVal.createdDate) from FSMState sta"
+        + " inner join sta.executionState staVal"
+        + " where sta.processorId = :" + FSMStateDAO.PROCESSOR_ID
+        + " and staVal.value = :" + FSMStateDAO.BY_VALUE + ")"),
+@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FSM_EVENTS_BY_VALUE,
+query = "select state from FSMState state"
+		+ " inner join state.executionState stateValue"
+		+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS
+		+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
+		+ " and stateValue.createdDate <= :" +FSMStateDAO.TO_DATE
+		+ " and stateValue.value = :" + FSMStateDAO.BY_VALUE),
+@NamedQuery(name = FSMStateDAO.FIND_NON_SLA_VERIFIED_FILE_STAGED_EVENTS,
+query = "select state from FSMState state"
+		+ " inner join state.executionState stateValue"
+		+ " where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS
+		+ " and state.processorId = :" + FSMStateDAO.PROCESSOR_ID
+		+ " and stateValue.createdDate < :" +FSMStateDAO.TO_DATE
+		+ " and stateValue.value = :" + FSMStateDAO.BY_VALUE)
+
+})
 public class FSMState implements Identifiable {
 
 	private static final long serialVersionUID = 1L;

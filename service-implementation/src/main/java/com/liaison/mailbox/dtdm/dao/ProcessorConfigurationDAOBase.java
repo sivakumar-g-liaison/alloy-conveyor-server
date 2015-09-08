@@ -12,9 +12,11 @@ package com.liaison.mailbox.dtdm.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -69,13 +71,35 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
 
 		try {
+			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
+					.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
+					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
+					.append(" where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME)
+					.append(" and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS)
+					.append(" and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS);
+				
+			if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
+				query.append(" and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME);
 
-			List<?> proc = entityManager.createNamedQuery(FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN)
+			}
+				
+			if (!MailBoxUtil.isEmpty(shardKey)) {
+				query.append(" and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY);
+			}
+				
+			Query processorQuery = entityManager.createQuery(query.toString())
 					.setParameter(PROF_NAME, profileName)
-					.setParameter(STATUS, EntityStatus.ACTIVE.value())
-					.setParameter(MBX_NAME, (MailBoxUtil.isEmpty(mbxNamePattern) ? "''" : mbxNamePattern + "%"))
-					.setParameter(SHARD_KEY, (MailBoxUtil.isEmpty(shardKey) ? "%%" : shardKey))
-					.getResultList();
+					.setParameter(STATUS, EntityStatus.ACTIVE.value());
+				
+			if (!MailBoxUtil.isEmpty(mbxNamePattern)) {
+				processorQuery.setParameter(MBX_NAME, mbxNamePattern);
+			}
+				
+			if (!MailBoxUtil.isEmpty(shardKey)) {
+				processorQuery.setParameter(SHARD_KEY, shardKey);
+			}
+
+			List<?> proc = processorQuery.getResultList();
 
 			List<Processor> processors = new ArrayList<Processor>();
 
@@ -98,7 +122,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 	}
-
+	
 	/**
      * Checks the mailbox has the processor or not.
      *
@@ -153,10 +177,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * @return list of processor
 	 */
 	@Override
-	public List<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid) {
+	public Set<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<Processor> processors = new ArrayList<Processor>();
+		Set<Processor> processors = new HashSet<Processor>();
 
 		try {
 
@@ -203,10 +227,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	 * @return list of processor
 	 */
 	@Override
-	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired) {
+	public Set<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List<Processor> processors = new ArrayList<Processor>();
+		Set<Processor> processors = new HashSet<Processor>();
 
 		try {
 

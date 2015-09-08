@@ -12,9 +12,7 @@ package com.liaison.mailbox.dtdm.dao;
 
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import java.util.Set;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailBox;
@@ -26,42 +24,13 @@ import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
  * @author OFS
  * 
  */
-@NamedQueries({
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN,
-				query = "select processor from Processor processor"
-						+ " inner join processor.scheduleProfileProcessors schd_prof_processor"
-						+ " inner join schd_prof_processor.scheduleProfilesRef profile"
-						+ " where profile.schProfName like :" + ProcessorConfigurationDAO.PROF_NAME
-						+ " and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS
-						+ " and processor.mailbox.mbxName not like :" + ProcessorConfigurationDAO.MBX_NAME
-						+ " and processor.mailbox.shardKey like :" + ProcessorConfigurationDAO.SHARD_KEY
-						+ " and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-						+ " order by " + ProcessorConfigurationDAO.PROF_NAME), 
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_COUNT,
-						query = "select count(processor) from Processor processor"
-								+ " inner join processor.mailbox mbx"
-								+ " where mbx.pguid = :" + ProcessorConfigurationDAO.PGUID),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_ALL_ACTIVE_PROCESSORS,
-						query = "select processor from Processor processor"
-								+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_PROCESSOR_BY_NAME_AND_MBX, 
-						query = "SELECT processor from Processor processor"
-								+ " inner join processor.mailbox mbx"+ " WHERE mbx.pguid = :" 
-								+ ProcessorConfigurationDAO.PGUID 
-								+ " and processor.procsrName like :" 
-								+ ProcessorConfigurationDAO.PRCSR_NAME),
-		@NamedQuery(name = ProcessorConfigurationDAO.FIND_ACTIVE_PROCESSOR_BY_ID,
-								query = "select processor from Processor processor"
-										+ " where processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS
-										+ " and processor.pguid = :" + ProcessorConfigurationDAO.PGUID)
-})
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 
-	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "findProcessorByProfileAndMbxNamePattern";
-	public static final String FIND_PROCESSOR_COUNT = "findProcessorCountByMailboxId";
-	public static final String FIND_ALL_ACTIVE_PROCESSORS = "findAllActiveProcessors";
-	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "findProcessorByNameAndMbx";
-	public static final String FIND_ACTIVE_PROCESSOR_BY_ID = "findActiveProcessorById";
+	public static final String FIND_PROCESSOR_BY_PROFILE_AND_MBX_NAME_PATTERN = "Processor.findProcessorByProfileAndMbxNamePattern";
+	public static final String FIND_PROCESSOR_COUNT = "Processor.findProcessorCountByMailboxId";
+	public static final String FIND_ALL_ACTIVE_PROCESSORS = "Processor.findAllActiveProcessors";
+	public static final String FIND_PROCESSOR_BY_NAME_AND_MBX = "Processor.findProcessorByNameAndMbx";
+	public static final String FIND_ACTIVE_PROCESSOR_BY_ID = "Processor.findActiveProcessorById";
 
 	public static final String PROF_NAME = "sch_prof_name";
 	public static final String MBX_NAME = "mbx_name";
@@ -103,7 +72,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param siGuid service instance id(name)
 	 * @return list of processor
 	 */
-	public List<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
+	public Set<Processor> findProcessorByMbxAndServiceInstance(String mbxGuid, String siGuid);
 
 	/**
 	 * Retrieves list of processor from the given mailbox guid
@@ -111,7 +80,7 @@ public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 	 * @param mbxGuid the mailbox guid
 	 * @return list of processor
 	 */
-	public List<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
+	public Set<Processor> findProcessorByMbx(String mbxGuid, boolean activeEntityRequired);
 
 	/**
 	 * Retrieves all active processors of specific types of given mailbox 

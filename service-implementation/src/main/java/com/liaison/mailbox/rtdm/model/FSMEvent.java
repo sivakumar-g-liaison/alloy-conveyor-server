@@ -15,10 +15,12 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.rtdm.dao.FSMEventDAO;
 
 /**
  * The persistent class for the FSM_EVENT database table.
@@ -27,6 +29,8 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name = "FSM_EVENT")
+@NamedQuery(name = FSMEventDAO.FIND_INTERRUPT_EVENT,
+query = "SELECT eventVal FROM FSMEvent eventVal WHERE eventVal.data =:" + FSMEventDAO.EXECUTION_ID)
 public class FSMEvent implements Identifiable {
 	
 	private static final long serialVersionUID = 1L;

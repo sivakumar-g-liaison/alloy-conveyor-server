@@ -12,6 +12,7 @@ package com.liaison.mailbox.dtdm.model;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
 /**
 * The persistent class for the processor type sweeper in processor database table.
@@ -26,6 +27,7 @@ public class Sweeper extends Processor {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
+	@Transient
 	public Class getEntityClass() {
 		return this.getClass();
 	}

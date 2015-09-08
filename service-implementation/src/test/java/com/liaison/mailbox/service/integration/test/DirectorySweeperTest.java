@@ -17,17 +17,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
 import org.codehaus.jettison.json.JSONException;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.liaison.dto.queue.WorkTicket;
 import com.liaison.framework.util.ServiceUtils;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.dtdm.model.Folder;
@@ -87,7 +87,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);
@@ -128,7 +128,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);
@@ -173,7 +173,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);
@@ -217,7 +217,7 @@ public class DirectorySweeperTest extends BaseServiceTest {
 		String remoteProperties = ServiceUtils.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("PAYLOAD_LOCATION");
 		folder.setFldrUri(inbox);

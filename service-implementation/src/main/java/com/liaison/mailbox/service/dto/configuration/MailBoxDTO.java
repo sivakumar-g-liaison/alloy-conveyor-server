@@ -13,7 +13,9 @@ package com.liaison.mailbox.service.dto.configuration;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -155,20 +157,6 @@ public class MailBoxDTO implements Serializable {
 		mailBox.setMbxDesc(this.getDescription());
 		mailBox.setShardKey(this.getShardKey());
 		mailBox.setTenancyKey(this.getTenancyKey());
-
-		MailBoxProperty property = null;
-		List<MailBoxProperty> properties = new ArrayList<>();
-		for (PropertyDTO propertyDTO : this.getProperties()) {
-			property = new MailBoxProperty();
-			// property.setMailbox(mailBox); -- GANESH COMMENTED THIS OUT TO
-			// REMOVE OWNER
-			// INCONSISTENT ERROR.STRANGE THOUGH.
-			propertyDTO.copyToEntity(property, true);
-			properties.add(property);
-
-		}
-		mailBox.setMailboxProperties(properties);
-
 		EntityStatus status = EntityStatus.findByName(this.getStatus());
 		mailBox.setMbxStatus(status.value());
 	}

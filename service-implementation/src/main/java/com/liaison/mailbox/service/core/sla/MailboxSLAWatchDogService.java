@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
@@ -175,7 +176,7 @@ public class MailboxSLAWatchDogService {
 			String timeToPickUpFilePostedToMailbox = null;
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
-			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
+			Set <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving Mailbox SLA Configuration property");
 			for (MailBoxProperty property : mailboxProps) {
 				if (property.getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX)) {
@@ -333,7 +334,7 @@ public class MailboxSLAWatchDogService {
 				throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
 			}
 			// get the very first profile configured in the processor
-			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().get(0).getScheduleProfilesRef().getSchProfName():null;
+			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().iterator().next().getScheduleProfilesRef().getSchProfName():null;
 
 			if (null == profileName && processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
 				LOG.error(constructMessage(processor, "profile not configured for processor {}"), processor.getProcsrName());
@@ -608,7 +609,7 @@ public class MailboxSLAWatchDogService {
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
 			String timeToPickUpFilePostedByMailbox = null;
-			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
+			Set <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving the customer SLA configuration from Mailbox");
 			for (MailBoxProperty property : mailboxProps) {
 				if (property .getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX)) {
