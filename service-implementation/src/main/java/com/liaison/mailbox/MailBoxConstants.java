@@ -300,4 +300,18 @@ public interface MailBoxConstants {
 
     // internal dl for error notification
     public static final String ERROR_RECEIVER = "com.liaison.mailbox.error.receiver";
+
+    /**
+     * STATIC KEY used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
+     */
+    public static byte[] STATIC_KEY = "A3$1E*8^%ER256%$".getBytes();
+
+    /**
+     * ivBytes used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
+     */
+    public static byte[] IV_BYTES = new byte[] { (byte) 0x8E, 0x12, 0x39, (byte) 0x9C, 0x07, 0x72, 0x6F, 0x5A,
+                         (byte) 0x8E, 0x12, 0x39, (byte) 0x9C, 0x07, 0x72, 0x6F, 0x5A };
+
+    public static int ENCRYPT_MODE = 1;
+    public static int DECRYPT_MODE = 2;
 }

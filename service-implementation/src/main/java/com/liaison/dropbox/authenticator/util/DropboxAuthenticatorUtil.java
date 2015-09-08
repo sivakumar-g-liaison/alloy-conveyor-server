@@ -10,14 +10,6 @@
 
 package com.liaison.dropbox.authenticator.util;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
@@ -56,21 +48,16 @@ public class DropboxAuthenticatorUtil {
 			default:
 				return null;
 			}
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException
-				| NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
-				| UnsupportedEncodingException e) {
-			throw new MailBoxServicesException("Token cannot be processed." + e.getMessage(),
-					Response.Status.BAD_REQUEST);
+		} catch (Exception e) {
+			throw new MailBoxServicesException("Token cannot be processed." + e.getMessage(), Response.Status.BAD_REQUEST);
 		}
 	}
 
-	public static String[] retrieveAuthTokenDetails(String token) throws InvalidKeyException,
-			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException,
-			IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+	public static String[] retrieveAuthTokenDetails(String token) {
 
 		LOGGER.debug("Retrieval of Token Details");
 		byte[] decodedToken = Base64.decodeBase64(token.getBytes());
-		String decryptedToken = EncryptionUtil.decrypt(decodedToken);
+		String decryptedToken = new String(EncryptionUtil.encrypt(decodedToken, MailBoxConstants.STATIC_KEY, MailBoxConstants.IV_BYTES, MailBoxConstants.DECRYPT_MODE));
 		LOGGER.debug("decryptedToken token {} ", decryptedToken);
 		// Retrieval of recent revision date from token
 		return decryptedToken.split(MailBoxConstants.TOKEN_SEPARATOR);

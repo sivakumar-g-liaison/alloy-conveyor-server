@@ -258,7 +258,7 @@ public class DropboxAuthenticationService {
 		if (UMClient.isSuccessful()) {
 			String mailboxTokenWithLoginId = new StringBuilder(UMClient.getAuthenticationToken()).append("::")
 					.append(serviceRequest.getLoginId()).toString();
-			String encryptedEncodedToken = new String(Base64.encodeBase64String(EncryptionUtil.encrypt(mailboxTokenWithLoginId)));
+			String encryptedEncodedToken = new String(Base64.encodeBase64String(EncryptionUtil.encrypt(mailboxTokenWithLoginId.getBytes(), MailBoxConstants.STATIC_KEY, MailBoxConstants.IV_BYTES, MailBoxConstants.ENCRYPT_MODE)));
 			return encryptedEncodedToken;
 		}
 

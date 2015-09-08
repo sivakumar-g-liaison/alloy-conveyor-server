@@ -13,10 +13,6 @@
         <listener-class>com.netflix.karyon.server.guice.KaryonGuiceContextListener</listener-class>
     </listener>
 
-    <!--  <listener>
-        <listener-class>com.netflix.adminresources.MyGuiceServletConfig</listener-class>
-    </listener> -->
-
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -26,11 +22,9 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-	<!--  Commented by senthilvel-->
-	<!--  This declaration part is deprecated by HelloworldComponent's initialize() -->
     <!-- Framework initialization servlet, please do not modify -->
     <servlet>
-    <servlet-name>InitializationServlet</servlet-name>
+    	<servlet-name>InitializationServlet</servlet-name>
         <servlet-class>com.liaison.framework.bootstrap.InitializationServlet</servlet-class>
 		<load-on-startup>0</load-on-startup>
     </servlet>
@@ -38,36 +32,6 @@
     <servlet-mapping>
         <servlet-name>InitializationServlet</servlet-name>
         <url-pattern>/init</url-pattern>
-    </servlet-mapping>
-
-	<!-- Added by senthilvel for AsyncServlet Injection -->
-	<servlet>
-        <servlet-name>AsyncServlet</servlet-name>
-        <servlet-class>com.liaison.framework.async.AsyncServlet</servlet-class>
-	<init-param>
-		<param-name>threadpoolsize</param-name>
-		<param-value>100</param-value>
-	</init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>AsyncServlet</servlet-name>
-        <url-pattern>/async</url-pattern>
-    </servlet-mapping>
-
-
-
-
-	<!-- Framework-defined dynamic services support, please do not modify -->
-
-    <servlet>
-        <servlet-name>DynamicRest</servlet-name>
-        <servlet-class>com.liaison.framework.dynamic.DynamicServicesServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>DynamicRest</servlet-name>
-        <url-pattern>/dyn/*</url-pattern>
     </servlet-mapping>
 
     <!-- Supports Jersey endpoints, please do not modify -->
@@ -155,21 +119,7 @@
         <load-on-startup>2</load-on-startup>
     </servlet>
 
-	<!--
-    ==============================================================================
-       Enable only for development when using python to make calls to tomcat  and
-       make sure containes (tomcat) provides the jar required for this
-    ==============================================================================
-
-    <filter>
-        <filter-name>CorsFilter</filter-name>
-        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>CorsFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping> -->
-
+	<!-- Error config -->
 	<error-page>
 	    <error-code>404</error-code>
 	    <location>/config/ui/error-404.html</location>
