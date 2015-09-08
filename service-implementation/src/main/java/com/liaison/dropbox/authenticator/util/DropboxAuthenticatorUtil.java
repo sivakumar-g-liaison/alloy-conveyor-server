@@ -16,10 +16,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.security.EncryptionUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.util.EncryptionUtil;
 
 /**
  * Utilities for Dropbox authentication.

@@ -31,7 +31,6 @@ public class StagedFileDTO {
 	private String expirationTime;
 
 	public StagedFileDTO() {
-
 	}
 
 	public StagedFileDTO(WorkTicket workTicket) {

@@ -37,6 +37,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.liaison.commons.security.EncryptionUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.gem.service.client.GEMACLClient;
@@ -49,7 +50,6 @@ import com.liaison.gem.util.GEMConstants;
 import com.liaison.gem.util.GEMUtil;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
-import com.liaison.mailbox.service.util.EncryptionUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 import com.liaison.usermanagement.service.dto.AuthenticationResponseDTO;
 import com.liaison.usermanagement.service.dto.response.AuthenticateUserAccountResponseDTO;

@@ -229,13 +229,13 @@ dependencies {
 
 	// Dependency for KeyManager
 	//compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.4', classifier: 'grammar', changing: true
-	compile('com.liaison.key.management:key-management:1.+:grammar'){
+	compile('com.liaison.key.management:key-management:1.+:grammar') {
 		exclude module:'karyon-admin'
 		exclude module:'karyon-admin-web'
 		exclude module:'datanucleus-api-jpa'
 		exclude module:'datanucleus-rdbms'
 		exclude module:'datanucleus-core'
-		}
+	}
 
 	//Dependency for GEM client Integration
 	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'2.5.0', changing: true
@@ -256,6 +256,9 @@ dependencies {
 	
 	//Required for integration test case
 	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
+
+	//Dependency for Encryption
+	compile "com.liaison.commons.lib:crypto:4.0.2"
 
 }
 
