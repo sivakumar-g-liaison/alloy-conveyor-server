@@ -129,7 +129,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockU
 
 	//  load initial Processor Data
     $rootScope.initialProcessorData;
-    $rootScope.restService.get('data/initialProcessorDetails_json.json', function (data) {
+    $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
         $rootScope.initialProcessorData = data;
     }); 
 
