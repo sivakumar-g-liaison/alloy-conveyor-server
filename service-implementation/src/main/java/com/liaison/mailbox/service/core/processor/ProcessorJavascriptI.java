@@ -102,19 +102,14 @@ public interface ProcessorJavascriptI {
 	 * Returns the list of custom properties of the processor known only to java script
 	 *
 	 * @return
-	 * @throws IOException 
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws IOException
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 */
 	public Properties getCustomProperties();
-
-	/**
-	 * TODO GMB-537
-	 */
-	public void updateState();
 
 	/**
 	 * Returns array of credentials of the processor
@@ -144,7 +139,7 @@ public interface ProcessorJavascriptI {
 	 */
 	public Properties getMailBoxProperties();
 
-	
+
 	/**
 	 * To Retrieve the Payload URI
 	 *
@@ -153,14 +148,14 @@ public interface ProcessorJavascriptI {
 	 * @throws MailBoxServicesException
 	 */
 	public String getPayloadURI() throws MailBoxServicesException, IOException;
-	
+
 	/**
 	 * Method to download the file or folder for FTP/SFTP processor
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -169,15 +164,15 @@ public interface ProcessorJavascriptI {
 	 *
 	 */
 	public void downloadDirectory(Object client, String remotePayloadLocation, String localTargetLocation) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException;
-	
-	
+
+
 	/**
 	 * Method to upload the file or folder for FTP/SFTP processor
-	 * @throws JAXBException 
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
+	 * @throws JAXBException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
 	 *
 	 * @throws IOException
 	 * @throws LiaisonException
@@ -185,13 +180,13 @@ public interface ProcessorJavascriptI {
 	 * @throws SftpException
 	 *
 	 */
-	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException, 
+	public void uploadDirectory(Object client, String localPayloadLocation, String remoteTargetLocation) throws NoSuchFieldException,
 						SecurityException, IllegalArgumentException, IllegalAccessException, JAXBException;
-	
-	
+
+
 	/**
 	 * Method to do clean up activities once JS completes the execution of a processor
-	 * 
+	 *
 	 */
 	public void cleanup();
 

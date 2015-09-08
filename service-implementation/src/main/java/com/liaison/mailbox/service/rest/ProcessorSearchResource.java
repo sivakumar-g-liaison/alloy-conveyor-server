@@ -71,13 +71,13 @@ public class ProcessorSearchResource extends AuditedResource {
 
 	@Monitor(name = "serviceCallCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger serviceCallCounter = new AtomicInteger(0);
-
+	
 	private Stopwatch stopwatch;
-    private static final StatsTimer statsTimer = new StatsTimer(
+	private static final StatsTimer statsTimer = new StatsTimer(
             MonitorConfig.builder("ProcessorSearchResource_statsTimer").build(),
             new StatsConfig.Builder().build());
 
-    static {
+	static {
         DefaultMonitorRegistry.getInstance().register(statsTimer);
     }
 
@@ -175,20 +175,20 @@ public class ProcessorSearchResource extends AuditedResource {
 	@Override
 	protected void endMetricsCollection(boolean success) {
 
-	    stopwatch.stop();
-        long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
-        globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
-        statsTimer.record(duration, TimeUnit.MILLISECONDS);
+		stopwatch.stop();
+		long duration = stopwatch.getDuration(TimeUnit.MILLISECONDS);
+		globalStatsTimer.record(duration, TimeUnit.MILLISECONDS);
+		statsTimer.record(duration, TimeUnit.MILLISECONDS);
 
-        logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
-                "Global_timer");
-        logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits", "ProcessorSearchResource_timer");
-        logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "ProcessorSearchResource_timer");
+		logKPIMetric(globalStatsTimer.getTotalTime() + " elapsed ms/" + globalStatsTimer.getCount() + " hits",
+				"Global_timer");
+		logKPIMetric(statsTimer.getTotalTime() + " ms/" + statsTimer.getCount() + " hits",
+				"ProcessorSearchResource_timer");
+		logKPIMetric(duration + " ms for hit " + statsTimer.getCount(), "ProcessorSearchResource_timer");
 
-        if (!success) {
-            logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
-            logKPIMetric(failureCounter.addAndGet(1), "ProcessorSearchResource_failureCounter");
-        }
-
+		if (!success) {
+			logKPIMetric(globalFailureCounter.addAndGet(1), "Global_failureCounter");
+			logKPIMetric(failureCounter.addAndGet(1), "ProcessorSearchResource_failureCounter");
+		}
 	}
 }

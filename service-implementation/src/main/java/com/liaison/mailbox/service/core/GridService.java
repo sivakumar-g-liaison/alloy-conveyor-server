@@ -298,17 +298,17 @@ public abstract class GridService<T> {
 			String direction = directionsValue.get(i).toString();
 
 			Path<Object> field = null;
+
 			if ("name".equals(fieldName)) {
 				field = gemRequest.get("schProfName");
 			} else {
 				field = gemRequest.get(fieldName);
 			}
 
-			if (direction.equals(SORT_DIRECTION_ASC)) {
-				query.orderBy(criteriaBuilder.asc(field));
-			} else if (direction.equals(SORT_DIRECTION_DESC)) {
-				query.orderBy(criteriaBuilder.desc(field));
-			}
+			field = gemRequest.get(fieldName);
+			query.orderBy((direction.equals(SORT_DIRECTION_ASC))
+					? criteriaBuilder.asc(field)
+					: criteriaBuilder.desc(field));
 		}
 		LOGGER.debug("Exit from addSort.");
 	}

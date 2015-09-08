@@ -11,6 +11,7 @@
 package com.liaison.mailbox.rtdm.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
@@ -24,7 +25,7 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 	public static final String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
 	public static final String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
 	public static final String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
-
+	public static final String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
 	public static final String PROCESSOR_ID = "processorId";
 	public static final String EXEC_STATUS = "exec_status";
 
@@ -34,6 +35,8 @@ public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutio
 
 	public List <String> findNonExecutingProcessors();
 	
-	public List <String> findExecutingProcessors();
+	public List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails);
+	
+	public int findAllExecutingProcessors();
 
 }

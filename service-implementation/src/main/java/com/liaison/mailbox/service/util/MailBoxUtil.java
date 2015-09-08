@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -257,8 +258,9 @@ public class MailBoxUtil {
 		if (file.exists() && !isOverwrite) {
 			LOGGER.info("File {} already exists and should not be overwritten", file.getName());
 		} else {
-		    Path path = file.toPath();
-			Files.write(path, IOUtils.toByteArray(response));
+			try (FileOutputStream outputStream = new FileOutputStream(file)) {
+				IOUtils.copy(response, outputStream);
+			}
 		}
 		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
 	}

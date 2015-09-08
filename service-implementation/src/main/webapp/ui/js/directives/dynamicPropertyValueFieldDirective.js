@@ -28,14 +28,27 @@ angular.module(
                     currentRowObject: '='
                 },        
                 link: function(scope, elem, attrs) {
+                	
+ 				   scope.loadTemplate = function() {
+                     var templateUrl = getTemplateUrl(scope.currentRowObject);                    
+ 	                        $rootScope.restService.get(templateUrl, function (data) {
+ 	                              elem.html(data);
+ 	                              $compile(elem.contents())(scope);
+ 	                        }); 
+ 	               }	
                 
                    scope.$watch("currentRowObject.name", function() {
-                    var templateUrl = getTemplateUrl(scope.currentRowObject);                    
-                        $rootScope.restService.get(templateUrl, function (data) {
-                              elem.html(data);
-                              $compile(elem.contents())(scope);
-                        }); 
+                	   scope.loadTemplate();
                    });
+                   
+                   // Tweak applied for GMB-583 watch the changes in value and reload the template
+                   // only for select component as the problem exists only for select component
+                   scope.$watch("currentRowObject.value", function() {
+						if (scope.currentRowObject.type === "select" && (scope.currentRowObject.valueProvided === true || scope.currentRowObject.mandatory === true)) {
+							scope.loadTemplate();
+						}
+				   })
+				   
                    scope.infoIconImgUrl = 'img/alert-triangle-red.png'; 
                    scope.sftpDefaultPort = '22';
 			       scope.ftpDefaultPort = '21';

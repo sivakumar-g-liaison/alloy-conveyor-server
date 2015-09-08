@@ -234,9 +234,6 @@ public class BaseResource {
 			response = response.header(header.getKey(), header.getValue());
 		}
 
-		// TODO remove this
-		response.header("Access-Control-Allow-Origin", "*");
-
 		return response.build();
 	}
 

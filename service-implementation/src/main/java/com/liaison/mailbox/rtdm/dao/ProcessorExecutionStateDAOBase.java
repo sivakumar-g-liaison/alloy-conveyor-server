@@ -13,6 +13,7 @@ package com.liaison.mailbox.rtdm.dao;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -110,15 +112,24 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 		return nonExecutionProcessors;
 	}
 	
-	public List <String> findExecutingProcessors() {
+	/**
+	 * Method to find the executing processors based on page offset
+	 * 
+	 * @param pageOffsetDetails
+	 */
+	@Override
+	public List<String> findExecutingProcessors(Map<String, Integer> pageOffsetDetails) {
 
 		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
-		List <String> runningProcessors = new ArrayList<String>();
+		List<String> runningProcessors = new ArrayList<String>();
 
 		try {
 
 			List<?> executingsProcsrs = entityManager.createNamedQuery(FIND_EXECUTING_PROCESSORS)
-					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getResultList();
+					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value())
+					.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+					.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT)).getResultList();
+
 			Iterator<?> iter = executingsProcsrs.iterator();
 
 			while (iter.hasNext()) {
@@ -131,6 +142,31 @@ public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExe
 			}
 		}
 		return runningProcessors;
+	}
+
+	/**
+	 * Method to find the count of all executing processors
+	 */
+	@Override
+	public int findAllExecutingProcessors() {
+
+		EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
+		Long processorsCount = null;
+		int count;
+
+		try {
+
+			processorsCount = (Long) entityManager.createNamedQuery(FIND_EXECUTING_PROCESSORS_ALL)
+					.setParameter(EXEC_STATUS, ExecutionState.PROCESSING.value()).getSingleResult();
+
+			count = processorsCount.intValue();
+
+		} finally {
+			if (entityManager != null) {
+				entityManager.close();
+			}
+		}
+		return count;
 	}
 
 }

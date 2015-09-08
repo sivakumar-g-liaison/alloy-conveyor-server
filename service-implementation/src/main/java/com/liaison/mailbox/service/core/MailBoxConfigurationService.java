@@ -535,8 +535,6 @@ public class MailBoxConfigurationService {
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 						searchFilter.getPageSize(), totalCount);
 				retrievedMailBoxes = configDao.find(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-				mailboxes.addAll(retrievedMailBoxes);
-				serviceResponse.setTotalItems(totalCount);
 
 			} else {
 
@@ -545,9 +543,10 @@ public class MailBoxConfigurationService {
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 						searchFilter.getPageSize(), totalCount);
 				retrievedMailBoxes = configDao.findByName(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-				mailboxes.addAll(retrievedMailBoxes);
-				serviceResponse.setTotalItems(totalCount);
 			}
+			
+			mailboxes.addAll(retrievedMailBoxes);
+			serviceResponse.setTotalItems(totalCount);
 
 			// Constructing the SearchMailBoxDTO from retrieved mailboxes
 			List<SearchMailBoxDTO> searchMailBoxDTOList = new ArrayList<SearchMailBoxDTO>();

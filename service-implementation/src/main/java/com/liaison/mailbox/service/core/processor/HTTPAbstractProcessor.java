@@ -111,7 +111,7 @@ public abstract class HTTPAbstractProcessor {
 		isAuthCheckRequired = Boolean
 				.parseBoolean(httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));
 		logger.info("Property httplistenerauthcheckrequired is configured in the mailbox and set to be {}",
-				httpListenerProperties.get(MailBoxConstants.PROPERTY_HTTPLISTENER_AUTH_CHECK));
+				isAuthCheckRequired);
 		return isAuthCheckRequired;
 	}
 

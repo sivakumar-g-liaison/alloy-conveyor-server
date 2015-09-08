@@ -1,6 +1,3 @@
-// TODO check web.xml - this should be deprecated.
-
-
 /*
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
@@ -40,8 +37,6 @@ import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTick
  * <P>
  * Bootstrapper
  * <p/>
- * TODO: Probably not the best place for this. Should likely move this (and all servlets) to TODO
- * within the guice framework.
  * 
  * @author Robert.Christian
  * @version 1.0
@@ -66,9 +61,7 @@ public class InitializationServlet extends HttpServlet {
         
     	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
-    	//OracleDataSource.initOracleDataSource(); // TODO
-        DAOUtil.init(); // TODO This does the work of loading all JAP entity files. We
-            // should change to allow the query string to be passed.
+        DAOUtil.init();
         UUIDGen.init();
         
       //Set ACL Filter Signature Verifier

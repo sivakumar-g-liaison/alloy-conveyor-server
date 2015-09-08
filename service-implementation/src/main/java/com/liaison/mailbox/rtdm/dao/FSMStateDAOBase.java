@@ -446,9 +446,12 @@ public class FSMStateDAOBase extends GenericDAOBase<FSMState> implements FSMStat
 
 			StringBuilder query = new StringBuilder().append("select state from FSMState state")
 							.append(" inner join state.executionState stateValue")
-							.append(" where state.slaVerificationStatus = :" + FSMStateDAO.SLA_VERIFICATION_STATUS)
-							.append(" and state.processorId = :" + FSMStateDAO.PROCESSOR_ID)
-							.append(" and stateValue.value = :" + FSMStateDAO.BY_VALUE);
+							.append(" where state.slaVerificationStatus = :")
+							.append(FSMStateDAO.SLA_VERIFICATION_STATUS)
+							.append(" and state.processorId = :")
+							.append(FSMStateDAO.PROCESSOR_ID)
+							.append(" and stateValue.value = :")
+							.append(FSMStateDAO.BY_VALUE);
 
 			switch(processorType.getCode().toLowerCase()) {
 

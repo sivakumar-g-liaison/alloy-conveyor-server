@@ -117,6 +117,7 @@ public class CustomDataSourceFactory
     {
 		DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();
 		String value = null;
+		boolean boolValue;
 		Integer intValue = null;
 
 		// Required configuration
@@ -141,22 +142,14 @@ public class CustomDataSourceFactory
 			poolDataSource.setInactiveConnectionTimeout(intValue);
 		}
 
-		// TODO - make a getBooleanPoolConfig method
-		value = getStringPoolConfig(configuration, DB_VALIDATECONNECTIONONBORROW_PROPERTY);
-		if (value != null)
-		{
-			if (value.equalsIgnoreCase(TRUE))
-			{
-				poolDataSource.setValidateConnectionOnBorrow(true);
-			}
-			else if (value.equalsIgnoreCase(FALSE))
-			{
-				poolDataSource.setValidateConnectionOnBorrow(false);
-			}
-			else
-			{
-				throw new Exception("Configuration value '" + DB_VALIDATECONNECTIONONBORROW_PROPERTY + "' has an invalid value, must be '" + TRUE + "' or '" + FALSE + "'");
-			}
+		boolValue = getBooleanPoolConfig(configuration, DB_VALIDATECONNECTIONONBORROW_PROPERTY);
+		if (boolValue) {
+			poolDataSource.setValidateConnectionOnBorrow(true);
+		} else if (boolValue == false) {
+			poolDataSource.setValidateConnectionOnBorrow(false);
+		} else {
+			throw new Exception("Configuration value '" + DB_VALIDATECONNECTIONONBORROW_PROPERTY
+					+ "' has an invalid value, must be '" + TRUE + "' or '" + FALSE + "'");
 		}
 
 		value = getStringPoolConfig(configuration, DB_DESCRIPTION_PROPERTY);
@@ -189,22 +182,14 @@ public class CustomDataSourceFactory
 			poolDataSource.setConnectionWaitTimeout(intValue);
 		}
 
-		// TODO - make a getBooleanPoolConfig method
-		value = getStringPoolConfig(configuration, DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY);
-		if (value != null)
-		{
-			if (value.equalsIgnoreCase(TRUE))
-			{
-				poolDataSource.setFastConnectionFailoverEnabled(true);
-			}
-			else if (value.equalsIgnoreCase(FALSE))
-			{
-				poolDataSource.setFastConnectionFailoverEnabled(false);
-			}
-			else
-			{
-				throw new Exception("Configuration value '" + DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY + "' has an invalid value, must be '" + TRUE + "' or '" + FALSE + "'");
-			}
+		boolValue = getBooleanPoolConfig(configuration, DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY);
+		if (boolValue) {
+			poolDataSource.setFastConnectionFailoverEnabled(true);
+		} else if (boolValue == false) {
+			poolDataSource.setFastConnectionFailoverEnabled(false);
+		} else {
+			throw new Exception("Configuration value '" + DB_FASTCONNECTIONFAILOVERENABLED_PROPERTY
+					+ "' has an invalid value, must be '" + TRUE + "' or '" + FALSE + "'");
 		}
 
 		intValue = getIntPoolConfig(configuration, DB_INITIALPOOLSIZE_PROPERTY);
@@ -311,6 +296,19 @@ public class CustomDataSourceFactory
 		}
 	}
 
+	protected boolean getBooleanPoolConfig(DecryptableConfiguration configuration, String configurationName)
+			throws Exception {
+
+		try {
+
+			boolean value = configuration.getBoolean(configurationName, false);
+			return value;
+		} catch (ConversionException e) {
+			throw new Exception("Required Configuration value '" + configurationName + "' has an invalid format", e);
+		}
+
+	}
+	
 	protected Integer getIntPoolConfig (DecryptableConfiguration configuration, String configurationName)
 		throws Exception
 	{

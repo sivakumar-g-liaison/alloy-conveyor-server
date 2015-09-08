@@ -661,28 +661,20 @@ public class ProcessorConfigurationService {
 
 			} else {
 
-				for (ProcessorProperty property : existingProperties) {
+				ProcessorProperty property = isPropertyAlreadyExists(existingProperties, properties.getName());
 
-					String existingName = property.getProcsrPropName();
-
-					// Update the property value if property name already exist
-					if (existingName != null && existingName.equals(properties.getName())) {
-						property.setProcsrPropValue(properties.getValue());
-					} else {
-						// add new property name and value
-						processorProperty = new ProcessorProperty();
-						processorProperty.setPguid(MailBoxUtil.getGUID());
-						processorProperty.setProcsrPropName(properties.getName());
-						processorProperty.setProcsrPropValue(properties.getValue());
-
-					}
-				}
-				if (null != processorProperty) {
+				// if property already exists just change the value to the new value
+				if (null != property) {
+					property.setProcsrPropValue(properties.getValue());
+				} else { // else create a new property and add it to the existing properties
+					processorProperty = new ProcessorProperty();
+					processorProperty.setPguid(MailBoxUtil.getGUID());
+					processorProperty.setProcsrPropName(properties.getName());
+					processorProperty.setProcsrPropValue(properties.getValue());
 					existingProperties.add(processorProperty);
 				}
 			}
 		}
-
 		configDao.merge(processor);
 	}
 
@@ -889,7 +881,7 @@ public class ProcessorConfigurationService {
 					String pipeLineId = httpListenerStaticProperties.getHttpListenerPipeLineId();
 					boolean securedPayload = httpListenerStaticProperties.isSecuredPayload();
 					boolean authCheckRequired = httpListenerStaticProperties.isHttpListenerAuthCheckRequired();
-					boolean lensVisibility = httpListenerStaticProperties.isLensVisibility(); 
+					boolean lensVisibility = httpListenerStaticProperties.isLensVisibility();
 
 					httpListenerProperties.put(MailBoxConstants.KEY_SERVICE_INSTANCE_ID,
 							processor.getServiceInstance().getName());
@@ -930,7 +922,7 @@ public class ProcessorConfigurationService {
 		return httpListenerProperties;
 
 	}
-	
+
 	/**
 	 * Get the Processor details of the mailbox using guid.
 	 *
@@ -953,16 +945,16 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.debug("Entering into get all processors.");			
+			LOGGER.debug("Entering into get all processors.");
 
 			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
-			int totalCount = 0;			
+			int totalCount = 0;
 			Map<String, Integer> pageOffsetDetails = null;
-			
+
 			totalCount = config.getFilteredProcessorsCount(searchFilter);
 			pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 					searchFilter.getPageSize(), totalCount);
-			
+
 			List<Processor> processors = config.getAllProcessors(searchFilter, pageOffsetDetails);
 
 			List<ProcessorDTO> prsDTO = new ArrayList<ProcessorDTO>();
@@ -980,7 +972,7 @@ public class ProcessorConfigurationService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROCESSOR, Messages.SUCCESS));
 			serviceResponse.setTotalItems(totalCount);
 			serviceResponse.setProcessors(prsDTO);
-			
+
 			LOGGER.debug("Exit from get all processors.");
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
@@ -989,9 +981,9 @@ public class ProcessorConfigurationService {
 			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROCESSOR, Messages.FAILURE,
 					e.getMessage()));
 			return serviceResponse;
-		} 
+		}
 	}
-	
+
 	/**
 	 * Get the Mailbox names.
 	 *
@@ -1014,10 +1006,10 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.debug("Entering into get mailbox names.");			
+			LOGGER.debug("Entering into get mailbox names.");
 
-			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
-			
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+
 			List<MailBox> mailboxList = config.getMailboxNames(searchFilter);
 
 			List<MailBoxDTO> mbxDTO = new ArrayList<MailBoxDTO>();
@@ -1031,9 +1023,9 @@ public class ProcessorConfigurationService {
 				mbxDTO.add(mailboxDTO);
 			}
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));			
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
 			serviceResponse.setMailbox(mbxDTO);
-			
+
 			LOGGER.debug("Exit from get mailbox names.");
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
@@ -1044,7 +1036,7 @@ public class ProcessorConfigurationService {
 			return serviceResponse;
 		}
 	}
-	
+
 	/**
 	 * Get the Profile names.
 	 *
@@ -1067,10 +1059,10 @@ public class ProcessorConfigurationService {
 
 		try {
 
-			LOGGER.debug("Entering into get profile names.");			
+			LOGGER.debug("Entering into get profile names.");
 
-			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();			
-			
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+
 			List<ScheduleProfilesRef> profiles = config.getProfileNames(searchFilter);
 
 			List<ProfileDTO> profilesDTO = new ArrayList<ProfileDTO>();
@@ -1087,9 +1079,9 @@ public class ProcessorConfigurationService {
 				profilesDTO.add(profileDTO);
 			}
 			// response message construction
-			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));			
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
 			serviceResponse.setProfiles(profilesDTO);
-			
+
 			LOGGER.debug("Exit from get profile names.");
 			return serviceResponse;
 		} catch (MailBoxConfigurationServicesException e) {
@@ -1099,5 +1091,23 @@ public class ProcessorConfigurationService {
 					e.getMessage()));
 			return serviceResponse;
 		}
+	}
+
+	/**
+	 * Method to check if a given custom property given through js already exists. if exists the existing property will
+	 * be returned otherwise null will be returned
+	 *
+	 * @param existingProperties - existing properties in which checking has to be done
+	 * @param propertyName - the property name that has to be searched
+	 * @return ProcessorProperty or null
+	 */
+	private ProcessorProperty isPropertyAlreadyExists(List<ProcessorProperty> existingProperties, String propertyName) {
+
+		for (ProcessorProperty processorProperty : existingProperties) {
+			if (processorProperty.getProcsrPropName().equals(propertyName)) {
+				return processorProperty;
+			}
+		}
+		return null;
 	}
 }

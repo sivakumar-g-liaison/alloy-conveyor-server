@@ -37,6 +37,7 @@ import com.liaison.commons.exception.LiaisonException;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.G2SFTPClient;
 import com.liaison.fs2.api.exceptions.FS2Exception;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.Messages;
@@ -222,7 +223,7 @@ public class SFTPRemoteDownloader extends AbstractProcessor implements MailBoxPr
 								currentFileName, currentDir, localFileDir);
 						statusCode = sftpRequest.getFile(currentFileName, bos);
 						// Check whether the file downloaded successfully if so rename it.
-						if (statusCode == 0) {
+						if (statusCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 
 							totalNumberOfProcessedFiles++;
 							LOGGER.info(constructMessage("File {} downloaded successfully"), currentFileName);
