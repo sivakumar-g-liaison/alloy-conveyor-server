@@ -1102,7 +1102,7 @@ public class ProcessorConfigurationService {
 	 * @param propertyName - the property name that has to be searched
 	 * @return ProcessorProperty or null
 	 */
-	private ProcessorProperty isPropertyAlreadyExists(List<ProcessorProperty> existingProperties, String propertyName) {
+	private ProcessorProperty isPropertyAlreadyExists(Set<ProcessorProperty> existingProperties, String propertyName) {
 
 		for (ProcessorProperty processorProperty : existingProperties) {
 			if (processorProperty.getProcsrPropName().equals(propertyName)) {
