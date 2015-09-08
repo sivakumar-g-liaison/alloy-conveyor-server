@@ -39,8 +39,8 @@ public class FSMStateValue implements Identifiable {
 	private String pguid;
 	private String value;
 	private Timestamp createdDate;
-	List<FSMTransitionState> oldTransitionStates;
-	List<FSMTransitionState> newTransitionStates;
+	private List<FSMTransitionState> oldTransitionStates;
+	private List<FSMTransitionState> newTransitionStates;
 	private FSMState fsmState;
 	
 	public FSMStateValue () {

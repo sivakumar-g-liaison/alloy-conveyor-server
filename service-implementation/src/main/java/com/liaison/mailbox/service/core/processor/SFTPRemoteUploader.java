@@ -130,12 +130,11 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					try {
 						sftpRequest.getNative().lstat(directory);
 						LOGGER.info(constructMessage("The remote directory {} already exists."), directory);
-						sftpRequest.changeDirectory(directory);
 					} catch (Exception ex) {
 						sftpRequest.getNative().mkdir(directory);
 						LOGGER.info(constructMessage("The remote directory {} is not exist.So created that."), directory);
-						sftpRequest.changeDirectory(directory);
 					}
+					sftpRequest.changeDirectory(directory);
 				}
 				LOGGER.info(constructMessage("Ready to upload files from local path {} to remote path {}"), path, remotePath);
 				uploadDirectory(sftpRequest, path, remotePath, executionId, fsm);
@@ -230,7 +229,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 					sftpRequest.changeDirectory(remoteFilePath);
 					String localDr = localParentDir + File.separatorChar + item.getName();
 	                uploadDirectory(sftpRequest, localDr, remoteFilePath, executionId, fsm);
-					replyCode = 0;
+					replyCode = MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK;
 
 				} else {
 
@@ -263,7 +262,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 				    }
 
 				    // Check whether the file uploaded successfully
-					if (replyCode == 0) {
+					if (replyCode == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 
 						totalNumberOfProcessedFiles++;
 						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
@@ -271,7 +270,7 @@ public class SFTPRemoteUploader extends AbstractProcessor implements MailBoxProc
 						// Renames the uploaded file to original extension if the fileStatusIndicator is given by User
 						if (!MailBoxUtil.isEmpty(statusIndicator)) {
 							int renameStatus = sftpRequest.renameFile(uploadingFileName, currentFileName);
-							if (renameStatus == 0) {
+							if (renameStatus == MailBoxConstants.SFTP_FILE_TRANSFER_ACTION_OK) {
 								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 							} else {
 								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);

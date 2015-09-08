@@ -120,8 +120,10 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
             LOG.info("Start Time of Query Execution : " + lStartTime);
             StringBuilder query = new StringBuilder().append("select count(processor) from Processor processor")
                     .append(" inner join processor.mailbox mbx")
-                    .append(" where mbx.pguid = :" + PGUID)
-                    .append(" and processor.serviceInstance.name like :" + SERV_INST_ID);
+                    .append(" where mbx.pguid = :")
+                    .append(PGUID)
+                    .append(" and processor.serviceInstance.name like :")
+                    .append(SERV_INST_ID);
 
             long count = (long) entityManager.createQuery(query.toString())
                     .setParameter(PGUID , mbxGuid)
@@ -162,10 +164,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
-					.append(" where mbx.pguid = :" + PGUID)
+					.append(" where mbx.pguid = :")
+					.append(PGUID)
 					.append(" and processor.pguid in (select prcsr.pguid from Processor prcsr")
 					.append(" inner join prcsr.serviceInstance si")
-					.append(" where si.name like :" + SERV_INST_ID + ")");
+					.append(" where si.name like :")
+					.append(SERV_INST_ID)
+					.append(")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PGUID, mbxGuid)
@@ -209,10 +214,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
-					.append(" where mbx.pguid = :" + PGUID);
+					.append(" where mbx.pguid = :")
+					.append(PGUID);
 			if(activeEntityRequired) {
-				query.append(" and mbx.mbxStatus = :" + STATUS)
-					 .append(" and processor.procsrStatus = :" + STATUS);
+				query.append(" and mbx.mbxStatus = :")
+				     .append(STATUS)
+					 .append(" and processor.procsrStatus = :")
+					 .append(STATUS);
 			}
 			
 			Query processorQuery = entityManager.createQuery(query.toString())
@@ -289,9 +297,13 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.info("Fetching the processor starts.");
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
-						.append(" where processor.procsrStatus = :" + STATUS)
-						.append(" and mbx.mbxStatus = :" + STATUS)
-						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+						.append(" where processor.procsrStatus = :")
+						.append(STATUS)
+						.append(" and mbx.mbxStatus = :")
+						.append(STATUS)
+						.append(" and ( ")
+						.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
+						.append(")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(STATUS, EntityStatus.ACTIVE.name())
@@ -328,10 +340,15 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			LOG.info("Fetching the processor starts.");
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.mailbox mbx")
-						.append(" where mbx.pguid = :" + PGUID)
-						.append(" and mbx.mbxStatus = :" + STATUS)
-						.append(" and processor.procsrStatus = :" + STATUS)
-						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+						.append(" where mbx.pguid = :")
+						.append(PGUID)
+						.append(" and mbx.mbxStatus = :")
+						.append(STATUS)
+						.append(" and processor.procsrStatus = :")
+						.append(STATUS)
+						.append(" and ( ")
+						.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
+						.append(")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(PGUID, mbxGuid)
@@ -369,11 +386,17 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 						.append(" inner join processor.scheduleProfileProcessors schd_prof_processor")
 						.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-						.append(" where profile.pguid = :" + ProcessorConfigurationDAO.PROFILE_ID)
-						.append(" and processor.mailbox.tenancyKey = :" + ProcessorConfigurationDAO.TENANCY_KEY)
-						.append(" and processor.mailbox.mbxStatus = :" + ProcessorConfigurationDAO.STATUS)
-						.append(" and processor.procsrStatus = :" + ProcessorConfigurationDAO.STATUS)
-						.append(" and ( " + QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes) + ")");
+						.append(" where profile.pguid = :")
+						.append(ProcessorConfigurationDAO.PROFILE_ID)
+						.append(" and processor.mailbox.tenancyKey = :")
+						.append(ProcessorConfigurationDAO.TENANCY_KEY)
+						.append(" and processor.mailbox.mbxStatus = :")
+						.append(ProcessorConfigurationDAO.STATUS)
+						.append(" and processor.procsrStatus = :")
+						.append(ProcessorConfigurationDAO.STATUS)
+						.append(" and ( ")
+						.append(QueryBuilderUtil.constructSqlStringForTypeOperator(specificProcessorTypes))
+						.append(")");
 
 			List<?> proc = entityManager.createQuery(query.toString())
 					.setParameter(ProcessorConfigurationDAO.PROFILE_ID, profileId)
@@ -411,9 +434,12 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 
 			StringBuilder query = new StringBuilder().append("select processor from Processor processor")
 					.append(" inner join processor.mailbox mbx")
-					.append(" where TYPE(processor) = :" + PROCESSOR_TYPE)
-					.append(" and processor.procsrStatus = :" + STATUS)
-					.append(" and mbx.mbxStatus = :" + STATUS);
+					.append(" where TYPE(processor) = :")
+					.append(PROCESSOR_TYPE)
+					.append(" and processor.procsrStatus = :")
+					.append(STATUS)
+					.append(" and mbx.mbxStatus = :")
+					.append(STATUS);
 			Class <?> processorType = getProcessorClass(type.getCode());
 
 			List<?> proc = entityManager.createQuery(query.toString())
@@ -548,16 +574,20 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
         	sortDirection=sortDirection.toUpperCase();
         	switch (sortField.toLowerCase()) {
         		case "mailboxname":
-        			query.append(" order by processor.mailbox.mbxName " + sortDirection);
+        			query.append(" order by processor.mailbox.mbxName ")
+        			.append(sortDirection);
         		break;
         		case "name":
-        			query.append(" order by processor.procsrName " + sortDirection);
+        			query.append(" order by processor.procsrName ")
+        			.append(sortDirection);
         			break;					
         		case "protocol":
-        			query.append(" order by processor.procsrProtocol " + sortDirection);
+        			query.append(" order by processor.procsrProtocol ")
+        			.append(sortDirection);
         			break;
         		case "status":
-        			query.append(" order by processor.procsrStatus " + sortDirection);
+        			query.append(" order by processor.procsrStatus ")
+        			.append(sortDirection);
         			break;
         	}
         } else {
@@ -642,7 +672,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	        try {
 
 	            StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
-	                    .append(" where LOWER(mbx.mbxName) like :" + MBX_NAME);
+	                    .append(" where LOWER(mbx.mbxName) like :")
+	                    .append(MBX_NAME);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(MBX_NAME, "%" + searchDTO.getMbxName().toLowerCase() + "%")
 	                    .getResultList();	
@@ -672,7 +703,8 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 	        try {
 	 
 	            StringBuilder query = new StringBuilder().append("SELECT s FROM ScheduleProfilesRef s")
-	                    .append(" where LOWER(s.schProfName) like :" + PROF_NAME);
+	                    .append(" where LOWER(s.schProfName) like :")
+	                    .append(PROF_NAME);
 	            List <?> proc = entityManager.createQuery(query.toString())
 	                    .setParameter(PROF_NAME, "%" + searchDTO.getProfileName().toLowerCase() + "%")
 	                    .getResultList();	
@@ -725,13 +757,7 @@ public class ProcessorConfigurationDAOBase extends GenericDAOBase<Processor> imp
 		}
 
 		for (int i = 0; i < predicateList.size(); i++) {			
-            if (i == 0) {
-				query.append(" WHERE ");				
-				query.append(predicateList.get(i));
-			} else {
-				query.append(" AND ");
-				query.append(predicateList.get(i));
-			}
+            query.append((i == 0) ? " WHERE " : " AND ").append(predicateList.get(i));
 		}				
 	}
 

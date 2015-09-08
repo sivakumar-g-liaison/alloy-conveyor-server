@@ -273,14 +273,15 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 				    }
 
                     // Check whether the file is uploaded successfully
-                    if (replyCode == 226 || replyCode == 250) {
+					if (replyCode == MailBoxConstants.CLOSING_DATA_CONNECTION
+							|| replyCode == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK) {
 
 						LOGGER.info(constructMessage("File {} uploaded successfully"), currentFileName);
 						totalNumberOfProcessedFiles++;
 						// Renames the uploaded file to original extension once the fileStatusIndicator is given by User
 						if (!MailBoxUtil.isEmpty(statusIndicator)) {
 							int renameStatus = ftpsRequest.renameFile(uploadingFileName, currentFileName);
-							if (renameStatus == 250) {
+							if (renameStatus == MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK) {
 								LOGGER.info(constructMessage("File {} renamed successfully"), currentFileName);
 							} else {
 								LOGGER.info(constructMessage("File {} renaming failed"), currentFileName);
@@ -333,7 +334,7 @@ public class FTPSRemoteUploader extends AbstractProcessor implements MailBoxProc
 					}
 					ftpsRequest.changeDirectory(remoteFilePath);
 					uploadDirectory(ftpsRequest, item.getAbsolutePath(), remoteFilePath, executionId, fsm);
-					replyCode = 250;
+					replyCode = MailBoxConstants.FTP_FILE_TRANSFER_ACTION_OK;
 				}
 			}
 		} else {

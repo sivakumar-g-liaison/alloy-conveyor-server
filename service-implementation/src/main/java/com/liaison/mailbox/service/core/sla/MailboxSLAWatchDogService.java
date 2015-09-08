@@ -257,6 +257,7 @@ public class MailboxSLAWatchDogService {
 		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
 		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
 		GlassMessage glassMessage = null;
+		String processorPayloadLocation = null;
 
 		try {
 
@@ -301,13 +302,13 @@ public class MailboxSLAWatchDogService {
 			LOG.info(constructMessage(processor, "Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
 			glassMessage.setCategory(processor.getProcessorType());
 			glassMessage.setProtocol(processor.getProcessorType().getCode());
-			LOG.info(constructMessage(processor, "Found the processor to write the payload in the local payload location"), mailboxId);
+			LOG.debug(constructMessage(processor, "Found the processor to write the payload in the local payload location"), mailboxId);
 
 			// retrieve the processor execution status of corresponding uploader from run-time DB
 			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
 
 			//get payload from spectrum
-			InputStream payload = StorageUtilities.retrievePayload(payloadURI);
+			try (InputStream payload = StorageUtilities.retrievePayload(payloadURI)) {
 
 			if (null == payload) {
 				LOG.error(constructMessage(processor,
@@ -320,7 +321,7 @@ public class MailboxSLAWatchDogService {
 			}
 
 			//get local payload location from uploader/filewriter
-			String processorPayloadLocation = getLocationToWritePayloadFromSpectrum(processor);
+			processorPayloadLocation = getLocationToWritePayloadFromSpectrum(processor);
 
 			if (null == processorPayloadLocation) {
 				LOG.error(constructMessage(processor,
@@ -374,6 +375,7 @@ public class MailboxSLAWatchDogService {
 	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
 	        processorExecutionStateDAO.merge(processorExecutionState);
 	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
+			}
 
 	        //GLASS LOGGING BEGINS//
 	        glassMessage.setOutAgent(processorPayloadLocation);

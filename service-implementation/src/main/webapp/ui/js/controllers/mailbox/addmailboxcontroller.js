@@ -386,28 +386,36 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                                    <div ng-switch-when="emailnotificationids">\n\
            								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="emailnotificationids" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.multipleEmailPattern + '" />\n\
           								  <div ng-show="formAddMbx.emailnotificationids.$dirty && formAddMbx.emailnotificationids.$invalid">\n\
+          								     <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.required}" ng-show=formAddMbx.emailnotificationids.$error.required><strong>Email is mandatory</strong></span>\n\
             								 <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.emailnotificationids.$error.pattern}" ng-show=formAddMbx.emailnotificationids.$error.pattern><strong>Invalid Email address</strong></span>\n\
            								 </div>\n\
            						   </div>\n\
                                    <div ng-switch-when="timetopickupfilepostedtomailbox">\n\
      								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedtomailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
     								 <div ng-show="formAddMbx.timetopickupfilepostedtomailbox.$dirty && formAddMbx.timetopickupfilepostedtomailbox.$invalid">\n\
+    								    <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedtomailbox.$error.required}" ng-show=formAddMbx.timetopickupfilepostedtomailbox.$error.required><strong>Time to Pickup File Posted to Mailbox is mandatory</strong></span>\n\
      								 	<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedtomailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedtomailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
      								 </div>\n\
      							   </div>\n\
                                    <div ng-switch-when="timetopickupfilepostedbymailbox">\n\
      								 <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" name="timetopickupfilepostedbymailbox" required ng-maxLength=512 style="width:94%;height: 45px" placeholder="required" ng-pattern="' + $scope.numberPattern + '" />\n\
      								 	<div ng-show="formAddMbx.timetopickupfilepostedbymailbox.$dirty && formAddMbx.timetopickupfilepostedbymailbox.$invalid">\n\
+     								 	    <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.required}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.required><strong>Time to Pickup File Posted By Mailbox is mandatory</strong></span>\n\
      								 		<span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.timetopickupfilepostedbymailbox.$error.pattern}" ng-show=formAddMbx.timetopickupfilepostedbymailbox.$error.pattern><strong>Enter Valid Number</strong></span>\n\
      								 	</div>\n\
 									</div>\n\
 									<div ng-switch-when="ttl">\n\
 										<div class="input-group col-md-5">\n\
-											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD"/>\n\
+											<input class="form-control" id="ttlField" name="ttl" ng-model="COL_FIELD" ng-input="COL_FIELD" required ng-pattern="' + $scope.numberPattern + '" />\n\
 											<div class="input-group-btn">\n\
 												<select ng-model="ttlUnit" id="ttlUnit" class="btn btn-default" ng-options="timeunit.name for timeunit in ttlDropdownValues" ng-change="onTTLUnitChanged(ttlUnit)"/>\n\
 											</div>\n\
 										</div>\n\
+										<div class = clearfix></div>\n\
+										<div class="col-md-5" ng-show="formAddMbx.ttl.$dirty && formAddMbx.ttl.$invalid">\n\
+										     <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.ttl.$error.required}" ng-show=formAddMbx.ttl.$error.required><strong>TTL is mandatory</strong></span>\n\
+							 		         <span class="customHide" ng-class="{\'help-block-custom\':formAddMbx.ttl.$error.pattern}" ng-show=formAddMbx.ttl.$error.pattern><strong>\Enter Valid Number</strong></span>\n\
+							 	        </div>\n\
 									</div>\n\
      							  <div ng-switch-default>\n\
                                         <textarea class="form-control" ng-model="COL_FIELD" ng-input="COL_FIELD" required style="width:94%;height:45px" ng-maxLength=512 placeholder="required"/>\n\

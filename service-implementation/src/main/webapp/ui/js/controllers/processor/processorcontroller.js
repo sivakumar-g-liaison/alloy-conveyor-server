@@ -155,7 +155,7 @@ var rest = myApp.controller(
 			isProcessorSearchFlag = $location.search().isProcessorSearch;
 			procsrId = $location.search().processorId;
 			$rootScope.gridLoaded = false;
-				if(isProcessorSearchFlag){
+				if(isProcessorSearchFlag === true || isProcessorSearchFlag === "true"){
 					isSIdConstraint = false;
 					$scope.readAllProcessors();
 					$scope.readAllProfiles();

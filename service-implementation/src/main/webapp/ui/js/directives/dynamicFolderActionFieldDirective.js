@@ -24,9 +24,13 @@ angular.module(
                      scope.addGridProperty = function() {
                      
                         if (!scope.currentRowObject.folderURI) {
-                             showAlert('It is mandatory to set the folderURI of the property being added.', 'error');
+                             showAlert('It is mandatory to set the folder URI of the property being added.', 'error');
                              return;
-                        }                        
+                        }
+                        if (!scope.currentRowObject.folderDisplayType) {
+                            showAlert('It is mandatory to set the folder Type of the property being added.', 'error');
+                            return;
+                        }
                          scope.currentRowObject.valueProvided = true;
 						 scope.currentRowObject.mandatory = true;
                         for (var i = 0; i < scope.folderAvailableProperties.length; i ++) {

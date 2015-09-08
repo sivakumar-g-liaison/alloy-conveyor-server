@@ -33,7 +33,6 @@ public class HealthCheck implements HealthCheckHandler {
 
     @Override
     public int getStatus() {
-        // TODO: Health check logic. - GMB-539
         logger.info("Health check invoked.");
         return 200;
     }
