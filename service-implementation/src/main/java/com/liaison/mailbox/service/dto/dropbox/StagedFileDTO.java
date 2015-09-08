@@ -14,9 +14,9 @@ import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.EntityStatus;
 
 /**
+ * Data Transfer Object that contains the staged file details.
  *
  * @author OFS
- *
  */
 public class StagedFileDTO {
 

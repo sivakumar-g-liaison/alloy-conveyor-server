@@ -13,8 +13,9 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author OFS
+ * Contains the status for entity.
  * 
+ * @author OFS
  */
 public enum EntityStatus {
 

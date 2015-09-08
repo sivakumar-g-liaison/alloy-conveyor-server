@@ -16,6 +16,7 @@ import java.util.List;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
+ * Data Transfer Object used for retrieving the executing processor responses.
  *
  * @author OFS
  */

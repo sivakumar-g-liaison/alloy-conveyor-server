@@ -12,8 +12,9 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.dropbox.request.DropboxAuthAndGetManifestRequestDTO;
 
 /**
+ * Data Transfer Object for authentication through swagger.
+ * 
  * @author OFS
- *
  */
 public class AuthenticateRequest {
 

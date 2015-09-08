@@ -21,8 +21,9 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 
 /**
- * @author OFS
+ * Performs the FSM state value fetch operations.
  * 
+ * @author OFS
  */
 public class FSMStateValueDAOBase extends GenericDAOBase<FSMStateValue> implements FSMStateValueDAO, MailboxRTDMDAO {
 

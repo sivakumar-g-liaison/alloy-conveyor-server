@@ -1,6 +1,11 @@
 package com.liaison.mailbox.service.dto;
 
 
+/**
+ * Helper DTO that contains various search filter details.
+ * 
+ * @author OFS
+ */
 public class GenericSearchFilterDTO {
 	
 	private String mbxName;

@@ -28,8 +28,9 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 
 /**
- * @author VNagarajan
- *
+ * Interface exposes API to run the processors via javascript.
+ * 
+ * @author OFS
  */
 public interface ProcessorJavascriptI {
 

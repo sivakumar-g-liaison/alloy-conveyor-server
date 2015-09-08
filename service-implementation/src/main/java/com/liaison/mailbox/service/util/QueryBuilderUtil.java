@@ -12,6 +12,7 @@ package com.liaison.mailbox.service.util;
 import java.util.List;
 
 /**
+ * Utilities for building the queries.
  * 
  * @author OFS
  */

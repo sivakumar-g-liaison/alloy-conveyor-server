@@ -15,8 +15,9 @@ import com.liaison.mailbox.rtdm.model.FSMStateValue;
 
 
 /**
- * @author OFS
+ * The dao class for the FSM_STATE_VALUE database table.
  * 
+ * @author OFS
  */
 public interface FSMStateValueDAO extends GenericDAO <FSMStateValue>{
 	

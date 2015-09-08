@@ -35,9 +35,9 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
+ * Data Transfer Object for mailbox details.
  * 
- * 
- * @author veerasamyn
+ * @author OFS
  */
 @ApiModel(value = "mailbox")
 public class MailBoxDTO implements Serializable {

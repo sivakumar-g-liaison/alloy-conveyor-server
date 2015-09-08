@@ -16,8 +16,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 
 /**
- * @author OFS
+ * The dao class for the SCHED_PROFILE database table.
  * 
+ * @author OFS
  */
 public interface ProfileConfigurationDAO extends GenericDAO<ScheduleProfilesRef> {
 

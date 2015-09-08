@@ -10,6 +10,11 @@ import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.WorkTicketUtil;
 
+/**
+ * Class that deals with processing of async request.
+ * 
+ * @author OFS
+ */
 public class HTTPAsyncProcessor extends HTTPAbstractProcessor {
 
     private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);

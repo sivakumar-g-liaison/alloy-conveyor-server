@@ -16,9 +16,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 
 /**
+ * Data Transfer Object used for sending revised mailbox responses.
  *
- *
- * @author veerasamyn
+ * @author OFS
  */
 @JsonRootName("reviseMailBoxResponse")
 public class ReviseMailBoxResponseDTO extends CommonResponseDTO {

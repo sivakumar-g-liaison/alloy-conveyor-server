@@ -31,9 +31,9 @@ import com.netflix.config.ConfigurationManager;
 import com.netflix.config.util.ConfigurationUtils;
 
 /**
- *
+ * This will handles the email notification operations.
+ * 
  * @author OFS
- *
  */
 public class EmailNotifier {
 

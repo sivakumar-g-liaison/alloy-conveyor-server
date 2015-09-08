@@ -17,8 +17,9 @@ import com.liaison.mailbox.service.dto.configuration.FSMEventDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 
 /**
+ * Data Transfer Object that contains the FSMevent details which can be used to interrupt the running processors.
+ * 
  * @author OFS
- *
  */
 @JsonRootName("interruptExecutionRequest")
 public class InterruptExecutionEventRequestDTO {

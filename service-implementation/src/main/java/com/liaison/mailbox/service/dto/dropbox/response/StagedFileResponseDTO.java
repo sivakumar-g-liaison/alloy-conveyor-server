@@ -12,8 +12,9 @@ package com.liaison.mailbox.service.dto.dropbox.response;
 import java.io.Serializable;
 
 /**
- * @author OFS
+ * Data Transfer Object used for sending staged file responses.
  * 
+ * @author OFS
  */
 public class StagedFileResponseDTO implements Serializable {
 

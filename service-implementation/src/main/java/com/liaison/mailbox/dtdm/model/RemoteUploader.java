@@ -15,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.Transient;
 
 /**
+ * The persistent class for the processor type remote uploader in processor database table.
  * 
  *  @author OFS
  */

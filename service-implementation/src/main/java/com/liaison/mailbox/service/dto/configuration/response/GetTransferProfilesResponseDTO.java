@@ -18,7 +18,7 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
-*
+* Data Transfer Object used for retrieving the transfer profiles.
 *
 * @author OFS
 */

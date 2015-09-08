@@ -32,6 +32,11 @@ import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
+/**
+ * This will place and manages the file with respect to the given location.
+ * 
+ * @author OFS
+ */
 public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
     private static final Logger LOG = LogManager.getLogger(FileWriter.class);

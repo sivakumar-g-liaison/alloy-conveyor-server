@@ -105,8 +105,9 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
 
 /**
+ * Class which has Processor configuration related operations.
+ * 
  * @author OFS
- *
  */
 public class ProcessorConfigurationService {
 

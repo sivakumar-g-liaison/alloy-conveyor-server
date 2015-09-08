@@ -11,9 +11,9 @@
 package com.liaison.mailbox;
 
 /**
+ * Contains the static variables which we can use globally. 
  *
- *
- * @author veerasamyn
+ * @author OFS
  */
 public interface MailBoxConstants {
 

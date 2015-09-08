@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.queue.consumer;
 import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreReceiveClient;
 
 /**
+* Class that enqueues the workticket from service broker to mailbox.
 *
 * @author OFS
-*
 */
 public class ServiceBrokerToMailboxWorkTicket extends HornetQRecoveringCoreReceiveClient {
 

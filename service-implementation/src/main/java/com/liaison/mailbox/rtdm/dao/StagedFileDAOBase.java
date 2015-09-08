@@ -32,8 +32,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
+ * This will fetch the Staged file details. 
+ * 
  * @author OFS
- *
  */
 public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements StagedFileDAO, MailboxRTDMDAO {
 

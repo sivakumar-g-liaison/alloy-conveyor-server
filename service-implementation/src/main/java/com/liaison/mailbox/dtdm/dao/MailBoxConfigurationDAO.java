@@ -18,8 +18,9 @@ import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
+ * The dao class for the MAILBOX database table.
+ * 
  * @author OFS
- *
  */
 public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 

@@ -14,8 +14,9 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 
 /**
- * @author OFS
+ * Data Transfer Object that contains the fields required for processor revision.
  * 
+ * @author OFS
  */
 
 @JsonRootName("reviseProcessorRequest")

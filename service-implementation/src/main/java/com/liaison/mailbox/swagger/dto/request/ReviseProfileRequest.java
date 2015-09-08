@@ -13,8 +13,9 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileRequestDTO;
 
 /**
+ * Data Transfer Object for profile revision through swagger.
+ * 
  * @author OFS
- *
  */
 
 public class ReviseProfileRequest {

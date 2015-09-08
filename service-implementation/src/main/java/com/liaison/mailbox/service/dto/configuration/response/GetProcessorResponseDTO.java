@@ -18,7 +18,7 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 
 /**
- *
+ * Data Transfer Object used for retrieving the processors.
  *
  * @author OFS
  */

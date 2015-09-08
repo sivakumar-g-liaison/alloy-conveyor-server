@@ -16,6 +16,11 @@ import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.usermanagement.service.client.UserManagementClient;
 
+/**
+ * Base class that provides implementation common to both sync and async processors.
+ * 
+ * @author OFS
+ */
 public abstract class HTTPAbstractProcessor {
 	
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);

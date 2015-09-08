@@ -22,8 +22,9 @@ import com.liaison.mailbox.service.core.email.EmailInfoDTO;
 import com.liaison.mailbox.service.core.email.EmailNotifier;
 
 /**
- * @author VNagarajan
- *
+ * Utilities for Email.
+ * 
+ * @author OFS
  */
 public class EmailUtil {
 

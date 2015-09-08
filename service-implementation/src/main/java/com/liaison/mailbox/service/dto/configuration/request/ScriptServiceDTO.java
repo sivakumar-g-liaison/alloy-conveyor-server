@@ -12,9 +12,9 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import com.liaison.usermanagement.validation.Mandatory;
 
 /**
+ * Data Transfer Object that contains the script file details.
  * 
  * @author OFS
- *
  */
 public class ScriptServiceDTO {
 	

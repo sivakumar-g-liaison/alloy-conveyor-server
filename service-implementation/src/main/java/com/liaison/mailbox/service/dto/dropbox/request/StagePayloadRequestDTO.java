@@ -15,6 +15,8 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.dropbox.StagedFileDTO;
 
 /**
+ * Data Transfer Object that contains the fields required for staged file request.
+ * 
  * @author OFS
  */
 @JsonRootName("addStagedFileRequest")

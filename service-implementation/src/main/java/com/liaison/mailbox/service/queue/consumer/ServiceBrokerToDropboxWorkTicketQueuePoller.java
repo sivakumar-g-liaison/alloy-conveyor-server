@@ -21,9 +21,9 @@ import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 
 /**
+* Polls ServiceBrokerToDropboxWorkTicketQueue and invokes ServiceBrokerToDropboxWorkTicketQueueConsumer.
 *
 * @author OFS
-*
 */
 public class ServiceBrokerToDropboxWorkTicketQueuePoller {
 

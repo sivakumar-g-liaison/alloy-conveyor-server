@@ -13,8 +13,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 
 /**
- * @author OFS
+ * The dao class for the MAILBOX_SERVICE_INSTANCE database table.
  * 
+ * @author OFS
  */
 public interface MailboxServiceInstanceDAO extends GenericDAO<MailboxServiceInstance> {
 

@@ -38,6 +38,7 @@ import com.liaison.mailbox.dtdm.dao.FilterObject;
 import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 
 /**
+ * This class contains the methods that are used to populate data in the grid.
  *
  * @author OFS
  */

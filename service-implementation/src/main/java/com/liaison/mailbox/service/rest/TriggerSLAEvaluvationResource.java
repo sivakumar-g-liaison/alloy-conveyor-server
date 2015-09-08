@@ -50,9 +50,9 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
+ * This is the gateway to checks whether Mailbox Configurations satisfies the expectations as per SLA.
  * 
  * @author OFS
- * 
  */
 @AppConfigurationResource
 @Path("config/mailbox/trigger/slacheck")

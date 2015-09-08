@@ -16,9 +16,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxResponseDTO;
 
 /**
+ * Data Transfer Object used for sending mailBox deactivation Responses.
  *
- *
- * @author veerasamyn
+ * @author OFS
  */
 @JsonRootName("deactivateMailBoxResponse")
 public class DeActivateMailBoxResponseDTO extends CommonResponseDTO {

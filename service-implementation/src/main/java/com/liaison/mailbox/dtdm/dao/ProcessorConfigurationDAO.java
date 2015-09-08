@@ -21,8 +21,9 @@ import com.liaison.mailbox.dtdm.model.ScheduleProfilesRef;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
- * @author OFS
+ * The dao class for the PROCESSOR database table.
  * 
+ * @author OFS
  */
 public interface ProcessorConfigurationDAO extends GenericDAO<Processor> {
 

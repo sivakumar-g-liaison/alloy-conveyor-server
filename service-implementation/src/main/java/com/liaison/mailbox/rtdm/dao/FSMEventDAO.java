@@ -14,8 +14,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.FSMEvent;
 
 /**
- * @author OFS
+ * The dao class for the FSM_EVENT database table.
  * 
+ * @author OFS
  */
 
 

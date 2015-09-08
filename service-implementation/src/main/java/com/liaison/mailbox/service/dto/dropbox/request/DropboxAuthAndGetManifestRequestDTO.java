@@ -11,9 +11,9 @@ package com.liaison.mailbox.service.dto.dropbox.request;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
+ * Data Transfer Object that contains the fields required for authenticating and retrieving manifest.
  *
  * @author OFS
- *
  */
 @JsonRootName("authAndGetACLRequest")
 public class DropboxAuthAndGetManifestRequestDTO {

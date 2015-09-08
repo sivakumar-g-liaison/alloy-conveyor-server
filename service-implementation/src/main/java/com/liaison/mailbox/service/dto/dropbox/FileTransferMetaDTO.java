@@ -2,6 +2,11 @@ package com.liaison.mailbox.service.dto.dropbox;
 
 import java.io.InputStream;
 
+/**
+ * Data Transfer Object that contains the meta data about the file.
+ * 
+ * @author OFS
+ */
 public class FileTransferMetaDTO {
     
     String fileName;

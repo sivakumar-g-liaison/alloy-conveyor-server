@@ -11,8 +11,9 @@
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 /**
+ * Data Transfer Object for validation rules of the folder.
+ * 
  * @author OFS
- *
  */
 public class FolderValidationRulesDTO {
 

@@ -13,8 +13,9 @@ package com.liaison.mailbox.service.dto.dropbox.response;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
+ * Data Transfer Object used for sending the staged file responses.
+ * 
  * @author OFS
- *
  */
 public class StagePayloadResponseDTO extends CommonResponseDTO {
 

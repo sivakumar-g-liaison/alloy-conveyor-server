@@ -17,8 +17,9 @@ import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 
 /**
+ * The dao class for the PROCESSOR_EXECUTION_STATE database table.
+ * 
  * @author OFS
- *
  */
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
 

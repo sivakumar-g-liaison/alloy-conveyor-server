@@ -1,6 +1,11 @@
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 
+/**
+ * Data Transfer Object for processor credential details.
+ * 
+ * @author OFS
+ */
 public class ProcessorCredentialPropertyDTO {
 
     private String credentialType;

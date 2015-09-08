@@ -16,8 +16,9 @@ import com.liaison.mailbox.service.core.MailBoxService;
 import com.liaison.mailbox.service.queue.consumer.ServiceBrokerToMailboxWorkTicketConsumer;
 
 /**
+ * Class that invokes the watchdog queue and executes the file writer. 
+ * 
  * @author OFS
- *
  */
 public class WatchDogInvoker implements Runnable {
 
