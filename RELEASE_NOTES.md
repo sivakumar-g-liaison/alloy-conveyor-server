@@ -1,6 +1,31 @@
 2.4.0-SNAPSHOT
 -------------------------------
 
+2.3.4
+-------------------------------
+* GMB-584 - Set unique guid instead of globalprocessor guid in FSM_STATE of the mailbox filewriter
+
+2.3.3
+-------------------------------
+* Modified script cache to 5 seconds in uat
+
+2.3.2
+-------------------------------
+* GMB-569 - Removed Dynamic Key usage from Encryption Util
+* GMB-569 - Removed the special char from comment
+
+2.3.1
+-------------------------------
+* GMB-573 - Payload outbound size
+* GMB-572 - Processor-Sweeper: Files are not renamed to the format specified in 'File Rename Format' property.
+* GMB-574 - HTTP Sync transaction status always in 'DELIVERY IN PROGRESS'
+* GMB-574 - outbound size cast
+* seperate glass messages for ingress and egress
+* GMB-574 - new TVAPI for the specific case
+* GMB-574 - handle the empty payload response
+* acl_signer_public_key_guid updates
+* updated dbx acl_signer_public_key_guid
+
 2.3.0
 -------------------------------
 GWUD-69: Fix Dropbox TVAPI & Glass Message logging

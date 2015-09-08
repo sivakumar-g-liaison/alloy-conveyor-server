@@ -356,6 +356,7 @@ public class MailBoxService {
             //Glass message begins
             glassMessage = new GlassMessage(workTicket);
             glassMessage.setStatus(ExecutionState.READY);
+            glassMessage.setOutSize(workTicket.getPayloadSize());
             glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
 
             // validates mandatory value.
@@ -405,7 +406,7 @@ public class MailBoxService {
             // retrieve the processor execution status of corresponding uploader from run-time DB
             processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
             ProcessorStateDTO processorStaged = new ProcessorStateDTO();
-            processorStaged.setValues(workTicket.getGlobalProcessId(),
+            processorStaged.setValues(MailBoxUtil.getGUID(),
                     processor,
                     workTicket.getFileName(),
                     ExecutionState.STAGED,

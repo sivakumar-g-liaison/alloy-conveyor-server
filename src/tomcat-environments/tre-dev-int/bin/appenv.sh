@@ -30,6 +30,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -Xdebug -Xrunjdwp:transport=dt_socket,addre
 # ==================================================================
 export CATALINA_OPTS="$CATALINA_OPTS -Dlog4j.configurationFile=log4j2-$APP_ENV.xml"
 # Shortcode for APP_NAME:
+
 export SYSLOG_APPNAME="g2mailboxservice"
 export SYSLOG_HOST="audit-syslog-server"
 export SYSLOG_PORT="514"
@@ -46,8 +47,8 @@ export GLASS_SPECTRUM_PORT=10010
 export GLASS_SPECTRUM_IP=192.168.0.67
 export GLASS_SPECTRUM_USER=g2tampere
 export GLASS_SPECTRUM_PASSWORD=g2tampere
-export GLASS_SPECTRUM_DATASPACE=g2-tampere
-export GLASS_SPECTRUM_SOURCE_NAME=$APP_NAME
+export GLASS_SPECTRUM_DATASPACE=g2-lens-spectrum
+export GLASS_SPECTRUM_SOURCE_NAME=$APP_NAME-$APP_ENV
 export GLASS_SPECTRUM_MESSAGE_TTL=630720000
 export GLASS_LOG_DIR="/var/log/tomcat/glass_failover"
 export GLASS_ROLLING_SIZE="250 MB"

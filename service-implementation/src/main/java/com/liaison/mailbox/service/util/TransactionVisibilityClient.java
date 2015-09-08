@@ -145,6 +145,9 @@ public class TransactionVisibilityClient {
 			visibilityAPI.setStatus(StatusCode.B);
 		} else if (ExecutionState.READY.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.R);
+			if (null != message.getOutSize()) {
+                visibilityAPI.setOutSize(message.getOutSize());
+            }
 		} else if (ExecutionState.FAILED.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.F);
 		} else if (ExecutionState.COMPLETED.value().equals(message.getStatus().value())) {

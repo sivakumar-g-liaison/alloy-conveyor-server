@@ -69,7 +69,7 @@ public class DropboxAuthenticatorUtil {
 
 		LOGGER.debug("Retrieval of Token Details");
 		byte[] decodedToken = Base64.decodeBase64(token.getBytes());
-		String decryptedToken = EncryptionUtil.decrypt(decodedToken, true);
+		String decryptedToken = EncryptionUtil.decrypt(decodedToken);
 		LOGGER.debug("decryptedToken token {} ", decryptedToken);
 		// Retrieval of recent revision date from token
 		return decryptedToken.split(MailBoxConstants.TOKEN_SEPARATOR);
