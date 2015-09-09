@@ -490,7 +490,13 @@ public class ProcessorPropertyJsonMapper {
 					isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
 				}
 			}
-			staticProperty.setValue(propertyValue);
+            if (staticProperty.getName().equals("lensVisibility")) {
+
+                String value = propertyValue.equals("true") ? "Visible" : "Invisible";
+                staticProperty.setValue(value);
+            } else {
+                staticProperty.setValue(propertyValue);
+            }
 			staticProperty.setValueProvided(isValueAvailable);
 		}
 	}

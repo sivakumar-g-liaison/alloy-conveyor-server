@@ -218,104 +218,113 @@ public class ProcessorDTO {
 	 */
 	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException{
 
-		try {
+        try {
 
-		if (isCreate) {
-			processor.setPguid(MailBoxUtil.getGUID());
-		}
-		// Set the protocol
-		Protocol protocol = Protocol.findByName(this.getProtocol());
-		processor.setProcsrProtocol(protocol.getCode());
+            if (isCreate) {
+                processor.setPguid(MailBoxUtil.getGUID());
+            }
+            // Set the protocol
+            Protocol protocol = Protocol.findByName(this.getProtocol());
+            processor.setProcsrProtocol(protocol.getCode());
 
-		ProcessorPropertyUITemplateDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
+            ProcessorPropertyUITemplateDTO propertiesDTO = this.getProcessorPropertiesInTemplateJson();
 
-		// separate static and dynamic and folder properties
-		List <ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
-		List <ProcessorPropertyDTO> procPropertiesFromTemplate = propertiesDTO.getStaticProperties();
-		ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(procPropertiesFromTemplate, dynamicPropertiesDTO);
+            // separate static and dynamic and folder properties
+            List<ProcessorPropertyDTO> dynamicPropertiesDTO = new ArrayList<ProcessorPropertyDTO>();
+            List<ProcessorPropertyDTO> procPropertiesFromTemplate = propertiesDTO.getStaticProperties();
+            for (ProcessorPropertyDTO property : procPropertiesFromTemplate) {
 
-		StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(),
+                if (property.getName().equals("lensVisibility")) {
+
+                    String value = property.getValue().equals("Visible") ? "true" : "false";
+                    property.setValue(value);
+                    break;
+                }
+            }
+            ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(procPropertiesFromTemplate, dynamicPropertiesDTO);
+
+            StaticProcessorPropertiesDTO processorPropsDTO = ProcessorPropertyJsonMapper.getProcessorPropInstanceFor(processor.getProcessorType(),
 																												 Protocol.findByCode(processor.getProcsrProtocol()));
-		ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
-		processorPropsDTO.setHandOverExecutionToJavaScript(propertiesDTO.isHandOverExecutionToJavaScript());
-		// set static properties into properties json to be stored in DB
-		String propertiesJSON = JSONUtil.marshalToJSON(processorPropsDTO);
-		processor.setProcsrProperties(propertiesJSON);
-	    processor.setProcsrDesc(this.getDescription());
-		processor.setProcsrName(this.getName());
-		processor.setJavaScriptUri(this.getJavaScriptURI());
+            ProcessorPropertyJsonMapper.transferProps(procPropertiesFromTemplate, processorPropsDTO);
+            processorPropsDTO.setHandOverExecutionToJavaScript(propertiesDTO.isHandOverExecutionToJavaScript());
+            // set static properties into properties json to be stored in DB
+            String propertiesJSON = JSONUtil.marshalToJSON(processorPropsDTO);
+            processor.setProcsrProperties(propertiesJSON);
+            processor.setProcsrDesc(this.getDescription());
+            processor.setProcsrName(this.getName());
+            processor.setJavaScriptUri(this.getJavaScriptURI());
 
-		GenericValidator validator = new GenericValidator();
+            GenericValidator validator = new GenericValidator();
 
-		// handling of folder properties
-		List <ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
+            // handling of folder properties
+            List<ProcessorFolderPropertyDTO> folderProperties = propertiesDTO.getFolderProperties();
 
-        //Construct FOLDER DTO LIST
-        List <FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties (folderProperties);
+            // Construct FOLDER DTO LIST
+            List<FolderDTO> folderDTOList = ProcessorPropertyJsonMapper.getFolderProperties(folderProperties);
 
-		// Setting the folders.
-		Folder folder = null;
-		List<Folder> folders = new ArrayList<>();
-		for (FolderDTO folderDTO : folderDTOList) {
+            // Setting the folders.
+            Folder folder = null;
+            List<Folder> folders = new ArrayList<>();
+            for (FolderDTO folderDTO : folderDTOList) {
 
-			folder = new Folder();
-			validator.validate(folderDTO);
-			folderDTO.copyToEntity(folder);
+                folder = new Folder();
+                validator.validate(folderDTO);
+                folderDTO.copyToEntity(folder);
 
-			folder.setPguid(MailBoxUtil.getGUID());
-			folders.add(folder);
-		}
+                folder.setPguid(MailBoxUtil.getGUID());
+                folders.add(folder);
+            }
 
-		if (!folders.isEmpty()) {
-			processor.setFolders(folders);
-		}
+            if (!folders.isEmpty()) {
+                processor.setFolders(folders);
+            }
 
-		// handling of credential properties
-		List<ProcessorCredentialPropertyDTO> credentialTemplateDTOList = propertiesDTO.getCredentialProperties();
+            // handling of credential properties
+            List<ProcessorCredentialPropertyDTO> credentialTemplateDTOList = propertiesDTO.getCredentialProperties();
 
-		// construct credentialDTO from credentialPropertyDTO in template json
-		List <CredentialDTO> credentialDTOList = ProcessorPropertyJsonMapper.getCredentialProperties(credentialTemplateDTOList);
+            // construct credentialDTO from credentialPropertyDTO in template json
+            List <CredentialDTO> credentialDTOList = ProcessorPropertyJsonMapper.getCredentialProperties(credentialTemplateDTOList);
 
-		// Setting the credentials
-		Credential credential = null;
-		List<Credential> credentialList = new ArrayList<>();
-		for (CredentialDTO credentialDTO : credentialDTOList) {
+            // Setting the credentials
+            Credential credential = null;
+            List<Credential> credentialList = new ArrayList<>();
+            for (CredentialDTO credentialDTO : credentialDTOList) {
 
-		    validator.validate(credentialDTO);
-			credential = new Credential();
-			credentialDTO.copyToEntity(credential);
-			credential.setPguid(MailBoxUtil.getGUID());
-			credentialList.add(credential);
-		}
+                validator.validate(credentialDTO);
+                credential = new Credential();
+                credentialDTO.copyToEntity(credential);
+                credential.setPguid(MailBoxUtil.getGUID());
+                credentialList.add(credential);
+            }
 
-		if (!credentialList.isEmpty()) {
-			processor.setCredentials(credentialList);
-		}
+            if (!credentialList.isEmpty()) {
+                processor.setCredentials(credentialList);
+            }
 
-		// Setting the property
-		if (null != processor.getDynamicProperties()) {
-			processor.getDynamicProperties().clear();
-		}
-		ProcessorProperty property = null;
-		List<ProcessorProperty> properties = new ArrayList<>();
-		for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
+            // Setting the property
+            if (null != processor.getDynamicProperties()) {
+                processor.getDynamicProperties().clear();
+            }
+            ProcessorProperty property = null;
+            List<ProcessorProperty> properties = new ArrayList<>();
+            for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
 
-			if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
-				continue;
-			}
-			property = new ProcessorProperty();
-			propertyDTO.copyToEntity(property);
-			properties.add(property);
-		}
-		if (!properties.isEmpty()) {
-			processor.setDynamicProperties(properties);
-		}
+                if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
+                    continue;
+                }
+                property = new ProcessorProperty();
+                propertyDTO.copyToEntity(property);
+                properties.add(property);
+            }
+            if (!properties.isEmpty()) {
+                processor.setDynamicProperties(properties);
+            }
 
-		// Set the status
-		EntityStatus foundStatusType = EntityStatus.findByName(this.getStatus());
-		processor.setProcsrStatus(foundStatusType.value());
+            // Set the status
+            EntityStatus foundStatusType = EntityStatus.findByName(this.getStatus());
+            processor.setProcsrStatus(foundStatusType.value());
 
-		} catch (NoSuchFieldException | SecurityException
+        } catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException | JAXBException | IOException | SymmetricAlgorithmException e) {
 			LOGGER.error(e);
 			throw new MailBoxConfigurationServicesException("Revise Operation failed:"+e.getMessage(),Response.Status.INTERNAL_SERVER_ERROR);
