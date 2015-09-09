@@ -10,13 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-/**
- * This is the gateway processors state monitoring and interrupt.
- *
- * @author OFS
- */
-
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,20 +20,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.liaison.commons.audit.AuditStatement;
-import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
+import com.liaison.commons.audit.DefaultAuditStatement;
 import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
-import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
@@ -63,8 +53,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 @Api(value = "config/mailbox/typeAhead", description = "Administration of processor services")
 public class TypeaheadResource extends AuditedResource {
 
-	private static final Logger LOG = LogManager
-			.getLogger(MailBoxConfigurationResource.class);
+	private static final Logger LOG = LogManager.getLogger(TypeaheadResource.class);
 
 	@Monitor(name = "failureCounter", type = DataSourceType.COUNTER)
 	private final static AtomicInteger failureCounter = new AtomicInteger(0);
@@ -104,30 +93,18 @@ public class TypeaheadResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 
-				try {
-					
-					ProcessorConfigurationService processor = new ProcessorConfigurationService();
-					GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
-					if (type.equals("mailbox")) {
-						
-						searchFilter.setMbxName(name);
-						return processor.getMailBoxNames(searchFilter);
-					} else {
-						
-						searchFilter.setProfileName(name);
-						return processor.getProfileNames(searchFilter);
-					}
+				ProcessorConfigurationService processor = new ProcessorConfigurationService();
+				GenericSearchFilterDTO searchFilter = new GenericSearchFilterDTO();
+				if (type.equals("mailbox")) {
 
-				} catch (IOException | JAXBException e) {
-					
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(
-							"Unable to Read Request. " + e.getMessage());
-				} catch (SymmetricAlgorithmException e) {
-					
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException(
-							"Unable to Read Request. " + e.getMessage());
+					LOG.debug("Get Mailbox Names");
+					searchFilter.setMbxName(name);
+					return processor.getMailBoxNames(searchFilter);
+				} else {
+
+					LOG.debug("Get profile Names");
+					searchFilter.setProfileName(name);
+					return processor.getProfileNames(searchFilter);
 				}
 			}
 		};

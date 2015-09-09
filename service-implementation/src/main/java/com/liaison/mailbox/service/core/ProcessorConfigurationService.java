@@ -26,18 +26,11 @@ import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -82,14 +75,12 @@ import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
-import com.liaison.mailbox.service.dto.configuration.TrustStoreDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.HTTPListenerPropertiesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddProcessorToMailboxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.DeActivateProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetProcessorResponseDTO;
-import com.liaison.mailbox.service.dto.configuration.response.GetTrustStoreResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.InterruptExecutionEventResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProcessorResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProcessorResponseDTO;
@@ -99,7 +90,6 @@ import com.liaison.mailbox.service.dto.ui.GetExecutingProcessorResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.exception.ProcessorManagementFailedException;
-import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.validation.GenericValidator;
@@ -113,7 +103,6 @@ public class ProcessorConfigurationService {
 
 	private static final Logger LOGGER = LogManager.getLogger(ProcessorConfigurationService.class);
 	private static String PROCESSOR = "Processor";
-	private static String TRUSTSTORE = "TrustStore";
 	private static String MAILBOX = "MailBox";
 	private static final String PROCESSOR_STATUS = "Processor Status";
 	private static String INTERRUPT_SIGNAL = "Interrupt Signal";
@@ -123,24 +112,13 @@ public class ProcessorConfigurationService {
 	/**
 	 * Creates processor for the mailbox.
 	 *
-	 * @param serviceRequest The AddProcessorToMailboxRequestDTO
-	 * @return The AddProcessorToMailboxResponseDTO
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonGenerationException
-	 * @throws SymmetricAlgorithmException
-	 * @throws JSONException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @param mailBoxGuid Mailbox GUID
+	 * @param serviceRequest Processor request
+	 * @param serviceInstanceId Service Instance Id
+	 * @return AddProcessorToMailboxResponseDTO
 	 */
 	public AddProcessorToMailboxResponseDTO createProcessor(String mailBoxGuid,
-			AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId)
-			throws JsonGenerationException, JsonMappingException, JAXBException, IOException,
-			SymmetricAlgorithmException, JSONException, NoSuchFieldException, SecurityException,
-			IllegalArgumentException, IllegalAccessException {
+			AddProcessorToMailboxRequestDTO serviceRequest, String serviceInstanceId) {
 
 		LOGGER.debug("call receive to insert the processor ::{}", serviceRequest.getProcessor());
 		AddProcessorToMailboxResponseDTO serviceResponse = new AddProcessorToMailboxResponseDTO();
@@ -251,11 +229,9 @@ public class ProcessorConfigurationService {
 	 * @param addRequest The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest The ReviseProcessorRequest DTO
 	 * @param processor The processor Entity
-	 * @throws MailBoxConfigurationServicesException
 	 */
 	private void createScheduleProfileAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
-			ReviseProcessorRequestDTO reviseRequest, Processor processor)
-			throws MailBoxConfigurationServicesException {
+			ReviseProcessorRequestDTO reviseRequest, Processor processor) {
 
 	    List<String> linkedProfiles = null;
         if (null == reviseRequest) {
@@ -310,11 +286,9 @@ public class ProcessorConfigurationService {
 	 * @param addRequest The AddProcessorToMailboxRequest DTO
 	 * @param reviseRequest The ReviseProcessorRequest DTO
 	 * @param processor The processor Entity
-	 * @throws MailBoxConfigurationServicesException
 	 */
 	private void createMailBoxAndProcessorLink(AddProcessorToMailboxRequestDTO addRequest,
-			ReviseProcessorRequestDTO reviseRequest, Processor processor)
-			throws MailBoxConfigurationServicesException {
+			ReviseProcessorRequestDTO reviseRequest, Processor processor) {
 
 		String mailBoxId = null;
 		if (null == reviseRequest) {
@@ -336,21 +310,17 @@ public class ProcessorConfigurationService {
 	/**
 	 * Get the Processor details of the mailbox using guid.
 	 *
-	 * @param processorGuid The guid of the Processor.
-	 * @return The responseDTO.
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
+	 * @param mailBoxGuid The pguid of the mailbox
+	 * @param processorGuid The pguid of the processor
+	 * @return serviceResponse GetProcessorResponseDTO
 	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws IOException
 	 */
 	public GetProcessorResponseDTO getProcessor(String mailBoxGuid, String processorGuid)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
 
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
@@ -385,58 +355,6 @@ public class ProcessorConfigurationService {
 					e.getMessage()));
 			return serviceResponse;
 		}
-	}
-
-	/**
-	 * Get the TrustStoreResponse.
-	 *
-	 * @return GetTrustStoreResponseDTO
-	 * @throws MailBoxConfigurationServicesException
-	 * @throws ClientProtocolException
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	@Deprecated
-	public GetTrustStoreResponseDTO uploadSelfSignedTrustStore()
-			throws MailBoxConfigurationServicesException, ClientProtocolException, IOException, JSONException {
-
-		GetTrustStoreResponseDTO serviceResponse = new GetTrustStoreResponseDTO();
-
-		try {
-
-			HttpResponse response = KMSUtil.uploadSelfSignedTrustStoreCertificate();
-
-			if ((response.getStatusLine().getStatusCode() >= 200) && (response.getStatusLine().getStatusCode() < 300)) {
-
-				JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
-
-				// Setting TrustStore ID
-				JSONArray arr = obj.getJSONObject("dataTransferObject").getJSONArray("trustStores");
-				String trustStoreId = (((JSONObject) arr.get(0)).getString("pguid"));
-				TrustStoreDTO dto = new TrustStoreDTO();
-				dto.setTrustStoreId(trustStoreId);
-
-				// Setting TrustStore Group ID
-				dto.setTrustStoreGroupId(obj.getJSONObject("dataTransferObject").getString("pguid"));
-
-				serviceResponse.setTrustStore(dto);
-				serviceResponse.setResponse(new ResponseDTO(Messages.CREATED_SUCCESSFULLY, TRUSTSTORE, Messages.SUCCESS));
-				LOGGER.debug("Exit from get mailbox.");
-				return serviceResponse;
-
-			} else {
-				throw new MailBoxConfigurationServicesException(Messages.SELFSIGNED_TRUSTSTORE_CREATION_FAILED,
-						Response.Status.BAD_REQUEST);
-			}
-
-		} catch (MailBoxConfigurationServicesException e) {
-
-			LOGGER.error(Messages.CREATE_OPERATION_FAILED.name(), e);
-			serviceResponse.setResponse(new ResponseDTO(Messages.CREATE_OPERATION_FAILED, TRUSTSTORE, Messages.FAILURE,
-					e.getMessage()));
-			return serviceResponse;
-		}
-
 	}
 
 	/**
@@ -491,18 +409,8 @@ public class ProcessorConfigurationService {
 	 * @param mailBoxId The guid of the mailbox.The given processor should belongs to the given mailbox.
 	 * @param processorId The processor guid which is to be revised.
 	 * @return The Revise Processor ResponseDTO
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonGenerationException
-	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
 	 */
-	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId,
-			String processorId) {
+	public ReviseProcessorResponseDTO reviseProcessor(ReviseProcessorRequestDTO request, String mailBoxId, String processorId) {
 
 	    EntityManager em = null;
         EntityTransaction tx = null;
@@ -679,16 +587,13 @@ public class ProcessorConfigurationService {
 		configDao.merge(processor);
 	}
 
-
 	/**
 	 * Validates the given processor is belongs to the given mailbox.
 	 *
 	 * @param mailBoxGuid The guid of the mailbox
 	 * @param processor The processor of the mailbox
-	 * @throws MailBoxConfigurationServicesException
 	 */
-	private void validateProcessorBelongToMbx(String mailBoxGuid, Processor processor)
-			throws MailBoxConfigurationServicesException {
+	private void validateProcessorBelongToMbx(String mailBoxGuid, Processor processor) {
 
 		MailBox mbx = processor.getMailbox();
 		if (!mailBoxGuid.equals(mbx.getPrimaryKey())) {
@@ -699,12 +604,8 @@ public class ProcessorConfigurationService {
 
 	/**
 	 * Get the executing processors
-	 *
-	 * @throws MailBoxConfigurationServicesException
-	 * @throws IOException
 	 */
-	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate)
-			throws IOException {
+	public GetExecutingProcessorResponseDTO getExecutingProcessors(String status, String frmDate, String toDate) {
 
 		GetExecutingProcessorResponseDTO serviceResponse = new GetExecutingProcessorResponseDTO();
 		LOGGER.debug("Entering into getExecutingProcessors.");
@@ -786,11 +687,8 @@ public class ProcessorConfigurationService {
 	 * Interrupt the execution of running processor
 	 *
 	 * @param executionID
-	 * @throws MailBoxConfigurationServicesException
-	 *
 	 */
-	public InterruptExecutionEventResponseDTO interruptRunningProcessor(String executionID)
-			throws MailBoxConfigurationServicesException {
+	public InterruptExecutionEventResponseDTO interruptRunningProcessor(String executionID) {
 
 		LOGGER.debug("Entering into interrupt processor.");
 		InterruptExecutionEventResponseDTO serviceResponse = new InterruptExecutionEventResponseDTO();
@@ -844,11 +742,9 @@ public class ProcessorConfigurationService {
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
-	 * @throws MailBoxConfigurationServicesException
 	 */
 	public Map<String, String> getHttpListenerProperties(String mailboxGuid, ProcessorType httpListenerType)
-			throws MailBoxConfigurationServicesException, NoSuchFieldException, SecurityException,
-			IllegalArgumentException, IllegalAccessException {
+			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		Map<String, String> httpListenerProperties = new HashMap<String, String>();
 
@@ -913,7 +809,7 @@ public class ProcessorConfigurationService {
 						Response.Status.NOT_FOUND);
 			}
 
-		} catch (JAXBException | IOException e) {
+		} catch (IOException e) {
 			LOGGER.error("unable to retrieve processor of type {} of mailbox {}", httpListenerType, mailboxGuid);
 			LOGGER.error("Retrieval of processor failed", e);
 			throw new RuntimeException(e);
@@ -938,9 +834,8 @@ public class ProcessorConfigurationService {
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-	public GetProcessorResponseDTO searchProcessor(GenericSearchFilterDTO searchFilter)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+	public GetProcessorResponseDTO searchProcessor(GenericSearchFilterDTO searchFilter) throws NoSuchFieldException,
+			SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
 
 		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
 
@@ -986,22 +881,12 @@ public class ProcessorConfigurationService {
 	}
 
 	/**
-	 * Get the Mailbox names.
+	 * Get the Mailbox names for the search processor typeahead
 	 *
-	 * @return The responseDTO.
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @param searchFilter
+	 * @return list of names
 	 */
-	public SearchProcessorResponseDTO getMailBoxNames (GenericSearchFilterDTO searchFilter)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+	public SearchProcessorResponseDTO getMailBoxNames(GenericSearchFilterDTO searchFilter) {
 
 		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
 
@@ -1041,20 +926,10 @@ public class ProcessorConfigurationService {
 	/**
 	 * Get the Profile names.
 	 *
-	 * @return The responseDTO.
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
+	 * @param searchFilter
+	 * @return list of profile names
 	 */
-	public SearchProcessorResponseDTO getProfileNames (GenericSearchFilterDTO searchFilter)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, SymmetricAlgorithmException,
-			NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException  {
+	public SearchProcessorResponseDTO getProfileNames (GenericSearchFilterDTO searchFilter) {
 
 		SearchProcessorResponseDTO serviceResponse = new SearchProcessorResponseDTO();
 

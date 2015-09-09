@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
 
 import org.apache.http.entity.ContentType;
 import org.apache.logging.log4j.LogManager;
@@ -224,7 +223,7 @@ public class BaseResource {
 			} else {
 				response = Response.status(httpCode).header("Content-Type", contentType);
 			}
-		} catch (IOException | JAXBException e) {
+		} catch (IOException e) {
 			response = Response.status(500).header("Content-Type", MediaType.TEXT_PLAIN).entity(
 					"Response serialization failure.");
 			logger.error(e.getMessage(), e);

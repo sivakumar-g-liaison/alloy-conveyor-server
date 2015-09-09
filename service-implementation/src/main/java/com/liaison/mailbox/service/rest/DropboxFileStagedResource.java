@@ -141,7 +141,7 @@ public class DropboxFileStagedResource extends AuditedResource {
 					DropboxStagedFilesService stagedFileService = new DropboxStagedFilesService();
 					return stagedFileService.addStagedFile(serviceRequest, null);
 
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

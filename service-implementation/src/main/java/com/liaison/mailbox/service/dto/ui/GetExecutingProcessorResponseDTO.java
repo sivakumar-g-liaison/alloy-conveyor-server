@@ -44,4 +44,17 @@ public class GetExecutingProcessorResponseDTO extends CommonResponseDTO {
 	public void setHitCounter(String hitCounter) {
 		this.hitCounter = hitCounter;
 	}
+
+	public List<GetExecutingProcessorDTO> getExecutingProcessors() {
+		return executingProcessors;
+	}
+
+	public void setExecutingProcessors(List<GetExecutingProcessorDTO> executingProcessors) {
+		this.executingProcessors = executingProcessors;
+	}
+
+	public String getHitCounter() {
+		return hitCounter;
+	}
+
 }

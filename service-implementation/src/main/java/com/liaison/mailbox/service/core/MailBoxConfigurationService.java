@@ -164,10 +164,8 @@ public class MailBoxConfigurationService {
 	 *
 	 * @param serviceInstanceID The serviceInstanceID of the mailbox
 	 * @param mailbox
-	 * @throws MailBoxConfigurationServicesException
 	 */
-	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox)
-			throws MailBoxConfigurationServicesException {
+	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox) {
 
 		try {
 
@@ -205,13 +203,10 @@ public class MailBoxConfigurationService {
 	 * @return The responseDTO.
 	 * @throws SymmetricAlgorithmException
 	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
+	 * @throws JAXBException 
 	 */
 	public GetMailBoxResponseDTO getMailBox(String guid, boolean addConstraint, String serviceInstanceId,
-			String aclManifestJson)
-			throws JAXBException, IOException, SymmetricAlgorithmException {
+			String aclManifestJson) throws IOException, JAXBException, SymmetricAlgorithmException {
 
 		LOG.debug("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);

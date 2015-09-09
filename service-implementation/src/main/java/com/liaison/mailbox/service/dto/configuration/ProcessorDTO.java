@@ -22,7 +22,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.JsonMappingException;
 
@@ -335,18 +334,13 @@ public class ProcessorDTO {
 	 *
 	 * @param processor
 	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
-	 * @throws MailBoxConfigurationServicesException
-	 * @throws SymmetricAlgorithmException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
-    public void copyFromEntity(Processor processor, boolean includeUITemplate) throws NoSuchFieldException,
-            SecurityException, IllegalArgumentException, IllegalAccessException, IOException, JAXBException {
+    public void copyFromEntity(Processor processor, boolean includeUITemplate)
+    		throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, IOException {
 
 		this.setGuid(processor.getPguid());
 		this.setDescription(processor.getProcsrDesc());

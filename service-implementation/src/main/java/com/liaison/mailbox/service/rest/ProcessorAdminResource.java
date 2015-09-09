@@ -10,13 +10,6 @@
 
 package com.liaison.mailbox.service.rest;
 
-/**
- * This is the gateway processors state monitoring and interrupt.
- *
- * @author OFS
- */
-
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -115,18 +108,13 @@ public class ProcessorAdminResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 
-				try {
-					GetExecutingProcessorResponseDTO serviceResponse = null;
-					ProcessorConfigurationService processor = new ProcessorConfigurationService();
-					// get the list processors latest state
-					serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
-					serviceResponse.setHitCounter(hitCounter);
+				GetExecutingProcessorResponseDTO serviceResponse = null;
+				ProcessorConfigurationService processor = new ProcessorConfigurationService();
+				// get the list processors latest state
+				serviceResponse = processor.getExecutingProcessors(status, frmDate, toDate);
+				serviceResponse.setHitCounter(hitCounter);
 
-					return serviceResponse;
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				}
+				return serviceResponse;
 			}
 		};
 		worker.actionLabel = "ProcessorAdminResource.getExecutingProcessors()";

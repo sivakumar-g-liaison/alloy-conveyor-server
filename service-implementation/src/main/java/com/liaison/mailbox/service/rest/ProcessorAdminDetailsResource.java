@@ -106,6 +106,7 @@ public class ProcessorAdminDetailsResource extends AuditedResource {
 
 				serviceCallCounter.addAndGet(1);
 				ProcessorExecutionConfigurationService configService = new ProcessorExecutionConfigurationService();
+				LOG.info("Updates the processors status to failed {}", processorId);
 				return configService.UpdateExecutingProcessor(processorId);
 			}
 		};
