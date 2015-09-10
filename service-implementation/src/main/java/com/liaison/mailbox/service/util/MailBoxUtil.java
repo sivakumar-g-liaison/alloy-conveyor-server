@@ -472,4 +472,19 @@ public class MailBoxUtil {
         return false;
     }
 
+	/**
+     * Method set expiration date to an object.
+     *
+     * @param date  from date to calculate expiration date
+     * @param value no of days
+     * @return Date expiration date
+     */
+     public static Date getExpirationDate(Date date, int value)  {
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, value);
+        return cal.getTime();
+     }
+
 }
