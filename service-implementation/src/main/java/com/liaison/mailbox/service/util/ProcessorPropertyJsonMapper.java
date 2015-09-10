@@ -466,7 +466,7 @@ public class ProcessorPropertyJsonMapper {
 
 		for (ProcessorPropertyDTO staticProperty : processorPropertiesDefinitionDto.getStaticProperties()) {
 
-			if (staticProperty.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
+			if (MailBoxConstants.ADD_NEW_PROPERTY.equals(staticProperty.getName())) {
 				continue;
 			}
 
@@ -475,14 +475,14 @@ public class ProcessorPropertyJsonMapper {
 			Object fieldValue = field.get(staticPropertiesDTO);
 			String propertyValue = (null == fieldValue) ? "" : fieldValue.toString();
 
-			if (staticProperty.getName().equals(MailBoxConstants.PORT_PROPERTY)
+			if (MailBoxConstants.PORT_PROPERTY.equals(staticProperty.getName())
 					&& !MailBoxUtil.isEmpty((Integer.parseInt(propertyValue) == 0) ? "" : propertyValue)) {
 				staticProperty.setReadOnly(true);
 			}
 			boolean isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
-			if (field.getType().equals(Boolean.TYPE)) {
+			if (Boolean.TYPE.equals(field.getType())) {
 				isValueAvailable = (Boolean.valueOf(propertyValue).equals(true) ? true : false);
-			} else if (field.getType().equals(Integer.TYPE)) {
+			} else if (Integer.TYPE.equals(field.getType())) {
 				if (Integer.parseInt(propertyValue) == 0) {
 					propertyValue = "";
 					isValueAvailable = false;
@@ -490,7 +490,12 @@ public class ProcessorPropertyJsonMapper {
 					isValueAvailable = !(MailBoxUtil.isEmpty(propertyValue));
 				}
 			}
-			staticProperty.setValue(propertyValue);
+            if (MailBoxConstants.PROPERTY_LENS_VISIBILITY.equals(staticProperty.getName())) {
+                String value = Boolean.toString(true).equals(propertyValue) ? MailBoxConstants.LENS_VISIBLE : MailBoxConstants.LENS_INVISIBLE;
+                staticProperty.setValue(value);
+            } else {
+                staticProperty.setValue(propertyValue);
+            }
 			staticProperty.setValueProvided(isValueAvailable);
 		}
 	}
