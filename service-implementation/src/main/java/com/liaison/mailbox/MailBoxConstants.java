@@ -300,4 +300,8 @@ public interface MailBoxConstants {
 
     // internal dl for error notification
     public static final String ERROR_RECEIVER = "com.liaison.mailbox.error.receiver";
+    
+    //added for lens visibility property
+    public static final String LENS_VISIBLE = "Visible";
+    public static final String LENS_INVISIBLE = "Invisible";
 }

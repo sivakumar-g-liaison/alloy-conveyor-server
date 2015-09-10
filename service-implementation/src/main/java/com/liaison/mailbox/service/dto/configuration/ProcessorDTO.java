@@ -19,7 +19,6 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -206,19 +205,10 @@ public class ProcessorDTO {
 	 * @param isCreate
 	 *            The boolean value use to differentiate create and revise processor operation.
 	 * @throws MailBoxConfigurationServicesException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonGenerationException
-	 * @throws SymmetricAlgorithmException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
 	 */
 	public void copyToEntity(Processor processor, boolean isCreate) throws MailBoxConfigurationServicesException{
 
-        try {
+		try {
 
             if (isCreate) {
                 processor.setPguid(MailBoxUtil.getGUID());
@@ -234,12 +224,12 @@ public class ProcessorDTO {
             List<ProcessorPropertyDTO> procPropertiesFromTemplate = propertiesDTO.getStaticProperties();
             for (ProcessorPropertyDTO property : procPropertiesFromTemplate) {
 
-                if (property.getName().equals("lensVisibility")) {
-
-                    String value = property.getValue().equals("Visible") ? "true" : "false";
-                    property.setValue(value);
-                    break;
-                }
+                if (MailBoxConstants.PROPERTY_LENS_VISIBILITY.equals(property.getName())) {
+                	
+                    String value = MailBoxConstants.LENS_VISIBLE.equals(property.getValue()) ? Boolean.toString(true) : Boolean.toString(false);
+					property.setValue(value);
+					break;
+				}
             }
             ProcessorPropertyJsonMapper.separateStaticAndDynamicProperties(procPropertiesFromTemplate, dynamicPropertiesDTO);
 
@@ -309,7 +299,7 @@ public class ProcessorDTO {
             List<ProcessorProperty> properties = new ArrayList<>();
             for (ProcessorPropertyDTO propertyDTO : dynamicPropertiesDTO) {
 
-                if (propertyDTO.getName().equals(MailBoxConstants.ADD_NEW_PROPERTY)) {
+                if (MailBoxConstants.ADD_NEW_PROPERTY.equals(propertyDTO.getName())) {
                     continue;
                 }
                 property = new ProcessorProperty();
@@ -324,10 +314,9 @@ public class ProcessorDTO {
             EntityStatus foundStatusType = EntityStatus.findByName(this.getStatus());
             processor.setProcsrStatus(foundStatusType.value());
 
-        } catch (NoSuchFieldException | SecurityException
-				| IllegalArgumentException | IllegalAccessException | JAXBException | IOException | SymmetricAlgorithmException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | JAXBException | IOException | SymmetricAlgorithmException e) {
 			LOGGER.error(e);
-			throw new MailBoxConfigurationServicesException("Revise Operation failed:"+e.getMessage(),Response.Status.INTERNAL_SERVER_ERROR);
+			throw new MailBoxConfigurationServicesException("Revise Operation failed:" + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 
 		}
 
