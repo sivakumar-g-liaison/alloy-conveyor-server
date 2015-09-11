@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.queue;
 import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendReceiveClient;
 
 /**
+ * Class that enqueues request for running a processor.
+ * 
  * Created by jeremyfranklin-ross on 7/17/14.
  */
 public class ProcessorQueue extends HornetQRecoveringCoreSendReceiveClient {

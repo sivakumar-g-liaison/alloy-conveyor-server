@@ -12,9 +12,9 @@ package com.liaison.mailbox.enums;
 
 
 /**
+ * Contains the list of event status for all executions.
  *
- *
- * @author veerasamyn
+ * @author OFS
  */
 public enum ExecutionEvents {
 

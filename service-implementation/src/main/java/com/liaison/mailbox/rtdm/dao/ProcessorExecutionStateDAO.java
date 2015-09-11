@@ -13,30 +13,18 @@ package com.liaison.mailbox.rtdm.dao;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-
 import com.liaison.commons.jpa.GenericDAO;
 import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 
 /**
+ * The dao class for the PROCESSOR_EXECUTION_STATE database table.
+ * 
  * @author OFS
- *
  */
-@NamedQueries({ @NamedQuery(name = ProcessorExecutionStateDAO.FIND_BY_PROCESSOR_ID,
-			query = "SELECT executionState FROM ProcessorExecutionState executionState WHERE executionState.processorId = :" + ProcessorExecutionStateDAO.PROCESSOR_ID),
-@NamedQuery(name = ProcessorExecutionStateDAO.FIND_NON_EXECUTING_PROCESSORS,
-			query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus not like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
-@NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS,
-			query = "SELECT executionState.processorId FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS),
-@NamedQuery(name = ProcessorExecutionStateDAO.FIND_EXECUTING_PROCESSORS_ALL,
-			query = "SELECT count(executionState) FROM ProcessorExecutionState executionState WHERE executionState.executionStatus like :" + ProcessorExecutionStateDAO.EXEC_STATUS)
-})
-
 public interface ProcessorExecutionStateDAO extends GenericDAO<ProcessorExecutionState> {
 
-	public static final String FIND_BY_PROCESSOR_ID = "findByProcessorId";
-	public static final String FIND_NON_EXECUTING_PROCESSORS = "findNonExecutingProcessors";
+	public static final String FIND_BY_PROCESSOR_ID = "ProcessorExecutionState.findByProcessorId";
+	public static final String FIND_NON_EXECUTING_PROCESSORS = "ProcessorExecutionState.findNonExecutingProcessors";
 	public static final String FIND_EXECUTING_PROCESSORS = "findExecutingProcessors";
 	public static final String FIND_EXECUTING_PROCESSORS_ALL = "findExecutingProcessorsAll";
 	public static final String PROCESSOR_ID = "processorId";

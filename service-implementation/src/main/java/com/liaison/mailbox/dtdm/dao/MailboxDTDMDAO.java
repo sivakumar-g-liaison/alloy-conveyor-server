@@ -11,8 +11,9 @@
 package com.liaison.mailbox.dtdm.dao;
 
 /**
+ * Interface to hold the persistence unit name for config time database.
+ * 
  * @author OFS
- *
  */
 public interface MailboxDTDMDAO {
 

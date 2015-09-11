@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto.configuration;
 import com.wordnik.swagger.annotations.ApiModel;
 
 /**
+ * Data Transfer Object for tenancy key details.
  * 
  * @author OFS
- *
  */
 @ApiModel(value = "tenancykey")
 public class TenancyKeyDTO {

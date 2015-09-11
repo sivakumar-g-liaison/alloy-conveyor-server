@@ -10,8 +10,9 @@
 package com.liaison.mailbox.service.dto.configuration.request;
 
 /**
- * @author OFS
+ * Data Transfer Object that holds the HTTP request headers as a key-value pairs.
  * 
+ * @author OFS
  */
 public class HTTPOtherRequestHeaderDTO {
 

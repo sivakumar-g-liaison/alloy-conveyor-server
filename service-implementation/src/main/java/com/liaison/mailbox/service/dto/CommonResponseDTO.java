@@ -13,7 +13,7 @@ package com.liaison.mailbox.service.dto;
 import java.io.Serializable;
 
 /**
-*
+* Class that contains the response.
 *
 * @author OFS
 */

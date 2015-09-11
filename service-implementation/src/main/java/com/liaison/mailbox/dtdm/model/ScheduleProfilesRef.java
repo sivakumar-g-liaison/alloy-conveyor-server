@@ -16,12 +16,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.dtdm.dao.ProfileConfigurationDAO;
 
 /**
  * The persistent class for the SCHEDULE_PROFILES_REF database table.
@@ -30,7 +32,12 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name = "SCHED_PROFILE")
+@NamedQueries({
+	@NamedQuery(name = ProfileConfigurationDAO.GET_PROFILE_BY_NAME, query = "select schdprof from ScheduleProfilesRef schdprof where schdprof.schProfName = :"
+			+ ProfileConfigurationDAO.PROF_NAME),
+	@NamedQuery(name = ProfileConfigurationDAO.GET_ALL, query = "select schdprof from ScheduleProfilesRef schdprof order by schdprof.schProfName"),
 @NamedQuery(name = "ScheduleProfilesRef.findAll", query = "SELECT s FROM ScheduleProfilesRef s")
+})
 public class ScheduleProfilesRef implements Identifiable {
 
 	private static final long serialVersionUID = 1L;

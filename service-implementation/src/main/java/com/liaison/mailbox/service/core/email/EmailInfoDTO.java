@@ -18,8 +18,9 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.mailbox.dtdm.model.Processor;
 
 /**
- * @author OFS
+ * Data Transfer Object for email informations.
  *
+ * @author OFS
  */
 public class EmailInfoDTO {
 

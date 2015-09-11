@@ -11,8 +11,9 @@
 package com.liaison.mailbox.service.dto.configuration.processor.properties;
 
 /**
+ * Data Transfer Object for the set of processor validation rules.
+ * 
  * @author OFS
- *
  */
 public class ValidationRulesDTO {
 

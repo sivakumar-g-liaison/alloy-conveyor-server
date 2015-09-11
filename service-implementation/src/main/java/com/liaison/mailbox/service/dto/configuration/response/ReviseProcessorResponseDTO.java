@@ -14,8 +14,9 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
+ * Data Transfer Object used for sending revised processor responses.
+ * 
  * @author OFS
- *
  */
 
 @JsonRootName("reviseProcessorResponse")

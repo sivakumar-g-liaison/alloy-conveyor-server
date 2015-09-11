@@ -28,9 +28,9 @@ import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
 import com.liaison.mailbox.service.exception.MailBoxFSMSetupException;
 
 /**
+ * This class manages the processor execution states and events.
  *
  * @author OFS
- *
  */
 public class MailboxFSM implements FSM<ProcessorStateDTO, ExecutionEvents> {
 

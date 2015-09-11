@@ -13,8 +13,9 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * Contains the status of SLA Verification.
+ * 
  * @author OFS
- *
  */
 public enum SLAVerificationStatus {
 

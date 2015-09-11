@@ -61,13 +61,9 @@ public class JSONUtil {
 	 * 
 	 * @return json
 	 * 
-	 * @throws JAXBException
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz)
-			throws JAXBException, JsonParseException, JsonMappingException, IOException {
+	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
 		AnnotationIntrospector secondary = new JacksonAnnotationIntrospector();

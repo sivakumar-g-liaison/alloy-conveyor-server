@@ -161,8 +161,8 @@ public class StagedFile implements Identifiable {
 	 * @throws IOException 
 	 * @throws JAXBException 
 	 */
-	public void copyToDto(StagedFileDTO stagedFileDto, boolean copyAll) throws IOException, JAXBException {
-		
+	public void copyToDto(StagedFileDTO stagedFileDto, boolean copyAll) {
+
 		// if copyAll is false, mailboxguid and spectrum uri will not be set in StagedFileDTO
 		if (copyAll) {
 			stagedFileDto.setMailboxGuid(this.getMailboxId());
@@ -174,9 +174,9 @@ public class StagedFile implements Identifiable {
 		stagedFileDto.setFileSize(this.getFileSize());
 		stagedFileDto.setMeta(this.getFileMetaData());
 		stagedFileDto.setStatus(this.getStagedFileStatus());
-		stagedFileDto.setExpirationTime(this.getExpirationTime()==null?"":this.getExpirationTime().toString());
+		stagedFileDto.setExpirationTime(this.getExpirationTime() == null ? "" : this.getExpirationTime().toString());
 	}
-	
+
 	/**
 	 * Copies required data from DTO to Entity
 	 * 
@@ -189,9 +189,9 @@ public class StagedFile implements Identifiable {
 	 * @throws JsonGenerationException 
 	 */
 	public void copyFromDto(StagedFileDTO stagedFileDto, boolean isCreate) {		
-		
-		if(isCreate){
-			this.setPguid(MailBoxUtil.getGUID()); 
+
+		if (isCreate) {
+			this.setPguid(MailBoxUtil.getGUID());
 		}
 		this.setFileName(stagedFileDto.getName());
 		this.setFilePath(stagedFileDto.getPath());

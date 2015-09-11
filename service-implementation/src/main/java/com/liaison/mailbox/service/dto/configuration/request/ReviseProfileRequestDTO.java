@@ -14,8 +14,9 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 
 /**
+ * Data Transfer Object that contains the fields required for Profile revision.
+ * 
  * @author OFS
- *
  */
 
 @JsonRootName("reviseProfileRequest")

@@ -25,9 +25,9 @@ import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
 import com.liaison.mailbox.enums.ExecutionState;
 
 /**
+ * Java wrapper client for logging messages in LENS.
  *
  * @author OFS
- *
  */
 public class TransactionVisibilityClient {
 

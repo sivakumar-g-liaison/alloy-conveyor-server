@@ -16,9 +16,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 
 /**
+ * Data Transfer Object used for sending mailBox Responses.
  *
- *
- * @author veerasamyn
+ * @author OFS
  */
 @JsonRootName("getMailBoxResponse")
 public class GetMailBoxResponseDTO extends CommonResponseDTO {

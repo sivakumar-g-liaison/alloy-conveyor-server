@@ -13,8 +13,9 @@ package com.liaison.mailbox.service.core.processor.helper;
 import com.liaison.mailbox.service.core.processor.AbstractProcessor;
 
 /**
- * @author VNagarajan
- *
+ * Factory class to fetch the client.
+ * 
+ * @author OFS
  */
 public class ClientFactory {
 

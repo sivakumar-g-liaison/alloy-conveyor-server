@@ -24,12 +24,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
 
 import com.liaison.commons.audit.AuditStatement;
 import com.liaison.commons.audit.AuditStatement.Status;
@@ -38,7 +36,6 @@ import com.liaison.commons.audit.exception.LiaisonAuditableRuntimeException;
 import com.liaison.commons.audit.hipaa.HIPAAAdminSimplification201303;
 import com.liaison.commons.audit.pci.PCIV20Requirement;
 import com.liaison.commons.exception.LiaisonRuntimeException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.framework.AppConfigurationResource;
 import com.liaison.mailbox.service.core.ProcessorConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
@@ -128,12 +125,9 @@ public class MailBoxProcessorResource extends AuditedResource {
 					ProcessorConfigurationService mailbox = new ProcessorConfigurationService();
 					return mailbox.createProcessor(guid, serviceRequest, serviceInstanceId);
 
-				} catch (IOException | JAXBException | JSONException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
-				} catch (SymmetricAlgorithmException e) {
-					LOG.error(e.getMessage(), e);
-					throw new LiaisonRuntimeException("Unable to read a mailbox. " + e.getMessage());
 				}
 			}
 		};

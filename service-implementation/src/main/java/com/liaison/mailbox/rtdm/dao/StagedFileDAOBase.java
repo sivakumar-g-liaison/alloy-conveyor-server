@@ -32,8 +32,9 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
+ * This will fetch the Staged file details. 
+ * 
  * @author OFS
- *
  */
 public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements StagedFileDAO, MailboxRTDMDAO {
 
@@ -61,45 +62,45 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 		    int pagingCount = pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT);
 		    String entityStatus = MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase();
 
-			StringBuilder query = new StringBuilder().append("select sf from StagedFile sf")
+			StringBuilder queryString = new StringBuilder().append("select sf from StagedFile sf")
 					.append(" where sf.mailboxId in (")
 					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
 					.append(")")
 					.append(" and sf.stagedFileStatus = :")
 					.append(STATUS);
 
-			// Setting expirationTime based on the status - (Setting only for ACTIVE status). GMB-595
-			if(EntityStatus.ACTIVE.name().equals(entityStatus)){
-				query.append(" and sf.expirationTime > :");
-				query.append(CURRENT_TIME);
+			// GMB-595 - Setting expirationTime based on the status - (Setting only for ACTIVE status). 
+			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
+				queryString.append(" and sf.expirationTime > :");
+				queryString.append(CURRENT_TIME);
 			}
-			
-			if(!StringUtil.isNullOrEmptyAfterTrim(fileName)){
-				query.append(" and LOWER(sf.fileName) like :");
-				query.append(FILE_NAME);
+
+			if (!StringUtil.isNullOrEmptyAfterTrim(fileName)) {
+				queryString.append(" and LOWER(sf.fileName) like :");
+				queryString.append(FILE_NAME);
 			}
-			
-			if(!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
+
+			if (!StringUtil.isNullOrEmptyAfterTrim(sortDirection)) {
 				sortDirection=sortDirection.toUpperCase();
-				query.append(" order by sf.fileName " + sortDirection);
-			}else {
-				query.append(" order by sf.fileName");
+				queryString.append(" order by sf.fileName " + sortDirection);
+			} else {
+				queryString.append(" order by sf.fileName");
 			}
 
-			Query qry = entityManager.createQuery(query.toString());
-		    qry.setParameter(STATUS, entityStatus);
-			qry.setFirstResult(pagingOffset);
-			qry.setMaxResults(pagingCount);
+			Query query = entityManager.createQuery(queryString.toString());
+		    query.setParameter(STATUS, entityStatus);
+			query.setFirstResult(pagingOffset);
+			query.setMaxResults(pagingCount);
 
-			if(!StringUtil.isNullOrEmptyAfterTrim(fileName)){
-				qry.setParameter(FILE_NAME, "%" + fileName.toLowerCase() + "%");
+			if (!StringUtil.isNullOrEmptyAfterTrim(fileName)) {
+				query.setParameter(FILE_NAME, "%" + fileName.toLowerCase() + "%");
 			}
-			 
-			if(EntityStatus.ACTIVE.name().equals(entityStatus)){
-				qry.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+
+			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
+				query.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
 			}
-			
-			List<?> files = qry.getResultList();
+
+			List<?> files = query.getResultList();
 
 			Iterator<?> iterator = files.iterator();
 

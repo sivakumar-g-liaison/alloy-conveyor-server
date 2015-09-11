@@ -185,11 +185,8 @@ dependencies {
 	//exclude group: "commons-net",  module: "commons-net"
 	//}
 
-	// DataNucleus
-	def datanucleusVersion = '3.2.4'    // 3.2.4 core breaks "enhance" but 3.2.5 is not yet in MavenCentral for the other components
-	compile "org.datanucleus:datanucleus-core:3.2.5"
-	compile "org.datanucleus:datanucleus-api-jpa:${datanucleusVersion}"
-	compile "org.datanucleus:datanucleus-rdbms:${datanucleusVersion}"
+	// hibernate orm dependency
+	compile 'org.hibernate:hibernate-entitymanager:4.2.8.Final'
 
 	// geronimo jpa spec
 	compile 'org.apache.geronimo.specs:geronimo-jpa_2.0_spec:1.1'
@@ -232,9 +229,13 @@ dependencies {
 
 	// Dependency for KeyManager
 	//compile group: 'com.liaison.key.management', name: 'key-management', version: '1.0.4', classifier: 'grammar', changing: true
-	compile('com.liaison.key.management:key-management:1.+:grammar'){
+	compile('com.liaison.key.management:key-management:1.+:grammar') {
 		exclude module:'karyon-admin'
-		exclude module:'karyon-admin-web'}
+		exclude module:'karyon-admin-web'
+		exclude module:'datanucleus-api-jpa'
+		exclude module:'datanucleus-rdbms'
+		exclude module:'datanucleus-core'
+	}
 
 	//Dependency for GEM client Integration
 	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'2.5.0', changing: true
@@ -252,6 +253,12 @@ dependencies {
 	compile ("com.liaison.commons.message.glass:glass-message-lib:6.+")
 
 	//enhance group: "com.liaison.commons.message.glass", name: "glass-message-lib", version: "4.1.0", changing: true
+	
+	//Required for integration test case
+	testCompile 'org.apache.tomcat:tomcat-catalina:7.0.42'
+
+	//Dependency for Encryption
+	compile "com.liaison.commons.lib:crypto:4.0.2"
 
 }
 
@@ -481,7 +488,7 @@ task jettyRunSetProperties {
 
 
 
-// JPA (datanucleus) bytecode enhancement
+/*// JPA (datanucleus) bytecode enhancement
 task enhance()  << {
 	logger.info("... Enhancing ...");
 
@@ -505,7 +512,7 @@ task enhance()  << {
 			persistenceUnit : "mailbox-rtdm",
 			failonerror : true)
 
-	/*ant.taskdef(
+	ant.taskdef(
 	 name      : 'datanucleusenhancer',
 	 classpath : (files("$projectDir/enhancerLib/enhancerDependency.jar")).asPath,
 	 classname : 'org.datanucleus.enhancer.EnhancerTask'
@@ -521,13 +528,13 @@ task enhance()  << {
 	 verbose     : true,
 	 api : "JPA",
 	 persistenceUnit : "mailbox-rtdm",
-	 failonerror : true)*/
+	 failonerror : true)
 
 
 }
 
 
-classes.dependsOn('enhance')
+classes.dependsOn('enhance')*/
 
 
 def dtoArchiveSourceRoot = "${projectDir}/build/tmp/jar-dto/"

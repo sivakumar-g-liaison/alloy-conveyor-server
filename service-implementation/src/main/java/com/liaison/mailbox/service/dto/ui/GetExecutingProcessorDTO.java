@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto.ui;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
 
 /**
+ * Data Transfer Object that contains the fields required for retrieving the executing processors.
  * 
  * @author OFS
- *
  */
 public class GetExecutingProcessorDTO {
 	

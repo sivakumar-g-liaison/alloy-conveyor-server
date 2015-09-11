@@ -26,8 +26,9 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.service.util.QueryBuilderUtil;
 
 /**
+ * Contains the profile fetch informations and  We can retrieve the profile details here.
+ * 
  * @author OFS
- *
  */
 public class ProfileConfigurationDAOBase extends GenericDAOBase<ScheduleProfilesRef> implements ProfileConfigurationDAO,
 		MailboxDTDMDAO {

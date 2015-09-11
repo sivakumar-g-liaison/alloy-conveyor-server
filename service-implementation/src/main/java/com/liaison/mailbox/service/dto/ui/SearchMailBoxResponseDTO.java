@@ -18,9 +18,9 @@ import org.codehaus.jackson.map.annotate.JsonRootName;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
+ * Data Transfer Object used for retrieving the mailbox responses.
  *
- *
- * @author veerasamyn
+ * @author OFS
  */
 @JsonRootName("searchMailBoxResponse")
 public class SearchMailBoxResponseDTO extends CommonResponseDTO {

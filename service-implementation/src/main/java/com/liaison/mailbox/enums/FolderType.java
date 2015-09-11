@@ -12,8 +12,9 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author OFS
+ * Contains the list of Folder Location types.
  * 
+ * @author OFS
  */
 public enum FolderType {
 

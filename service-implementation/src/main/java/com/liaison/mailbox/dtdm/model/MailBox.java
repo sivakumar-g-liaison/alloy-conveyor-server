@@ -10,19 +10,25 @@
 
 package com.liaison.mailbox.dtdm.model;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 
 /**
  * The persistent class for the MAILBOXES database table.
@@ -31,7 +37,20 @@ import com.liaison.commons.jpa.Identifiable;
  */
 @Entity
 @Table(name = "MAILBOX")
-@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m")
+@NamedQueries({
+	@NamedQuery(name = MailBoxConfigurationDAO.GET_MBX,
+			query = "SELECT mbx FROM MailBox mbx"
+					+ " inner join mbx.mailboxProcessors prcsr"
+					+ " inner join prcsr.scheduleProfileProcessors schd_prof_processor"
+					+ " inner join schd_prof_processor.scheduleProfilesRef profile"
+					+ " where LOWER(mbx.mbxName) like :" + MailBoxConfigurationDAO.MBOX_NAME
+					+ " and profile.schProfName like :" + MailBoxConfigurationDAO.SCHD_PROF_NAME
+					+ " order by mbx.mbxName"),
+  @NamedQuery(name = MailBoxConfigurationDAO.FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME, query = "SELECT mbx from MailBox mbx "
+			        + "WHERE mbx.mbxName =:" + MailBoxConfigurationDAO.MBOX_NAME + " and mbx.tenancyKey =:" + MailBoxConfigurationDAO.TENANCY_KEYS),
+	@NamedQuery(name = "MailBox.findAll", query = "SELECT m FROM MailBox m")
+})
+
 public class MailBox implements Identifiable {
 
 	private static final long serialVersionUID = 1L;
@@ -41,9 +60,9 @@ public class MailBox implements Identifiable {
 	private String mbxName;
 	private String mbxStatus;
 	private String shardKey;
-	private List<MailBoxProperty> mailboxProperties;
-	private List<Processor> mailboxProcessors;
-	private List<MailboxServiceInstance> mailboxServiceInstances;
+	private Set<MailBoxProperty> mailboxProperties;
+	private Set<Processor> mailboxProcessors;
+	private Set<MailboxServiceInstance> mailboxServiceInstances;
 	private String tenancyKey;
 	
 
@@ -99,11 +118,15 @@ public class MailBox implements Identifiable {
 	// bi-directional many-to-one association to MailBoxProperty
 	@OneToMany(mappedBy = "mailbox", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST,
 			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<MailBoxProperty> getMailboxProperties() {
+	@Fetch(FetchMode.JOIN)
+	public Set<MailBoxProperty> getMailboxProperties() {
+	    if (this.mailboxProperties == null) {
+            this.mailboxProperties = new HashSet<>();
+        }
 		return this.mailboxProperties;
 	}
 
-	public void setMailboxProperties(List<MailBoxProperty> mailboxProperties) {
+	public void setMailboxProperties(Set<MailBoxProperty> mailboxProperties) {
 		this.mailboxProperties = mailboxProperties;
 	}
 
@@ -124,21 +147,21 @@ public class MailBox implements Identifiable {
 	// bi-directional many-to-one association to MailBoxProcessor
 	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.REMOVE, CascadeType.REFRESH })
-	public List<Processor> getMailboxProcessors() {
+	public Set<Processor> getMailboxProcessors() {
 		return this.mailboxProcessors;
 	}
 
-	public void setMailboxProcessors(List<Processor> mailboxProcessors) {
+	public void setMailboxProcessors(Set<Processor> mailboxProcessors) {
 		this.mailboxProcessors = mailboxProcessors;
 	}
 	
-	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.PERSIST,
-			CascadeType.MERGE, CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
-	public List<MailboxServiceInstance> getMailboxServiceInstances() {
+	@OneToMany(mappedBy = "mailbox", orphanRemoval = true, cascade = { CascadeType.REMOVE, CascadeType.REFRESH }, fetch = FetchType.EAGER)
+	@Fetch(FetchMode.JOIN)
+	public Set<MailboxServiceInstance> getMailboxServiceInstances() {
 		return mailboxServiceInstances;
 	}
 
-	public void setMailboxServiceInstances(List<MailboxServiceInstance> mailboxServiceInstances) {
+	public void setMailboxServiceInstances(Set<MailboxServiceInstance> mailboxServiceInstances) {
 		this.mailboxServiceInstances = mailboxServiceInstances;
 	}
 	

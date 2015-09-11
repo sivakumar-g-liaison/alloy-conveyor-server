@@ -20,8 +20,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
@@ -106,7 +106,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");
 		folder.setFldrUri(responseLocation);
@@ -201,7 +201,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");// Entity
 		folder.setFldrUri(responseLocation);
@@ -243,7 +243,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");// Entity
 		folder.setFldrUri(responseLocation);
@@ -285,7 +285,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");// Entity
 		folder.setFldrUri(responseLocation);
@@ -329,7 +329,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");// Entity
 		folder.setFldrUri(responseLocation + File.separator + System.nanoTime());
@@ -365,7 +365,7 @@ public class RemoteProcessorTest extends BaseServiceTest {
 				.readFileFromClassPath("requests/processor/remoteprocessor.json");
 		processor.setProcsrProperties(remoteProperties);
 
-		List<Folder> folders = new ArrayList<Folder>();
+		Set<Folder> folders = new HashSet<Folder>();
 		Folder folder = new Folder();
 		folder.setFldrType("RESPONSE_LOCATION");// Entity
 		folder.setFldrUri(responseLocation);

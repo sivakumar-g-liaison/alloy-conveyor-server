@@ -19,8 +19,9 @@ import com.liaison.mailbox.rtdm.model.StagedFile;
 import com.liaison.mailbox.service.dto.GenericSearchFilterDTO;
 
 /**
+ * The dao class for the STAGED_FILE database table.
+ * 
  * @author OFS
- *
  */
 
 public interface StagedFileDAO extends GenericDAO<StagedFile> {

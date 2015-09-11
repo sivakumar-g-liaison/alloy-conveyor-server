@@ -12,9 +12,9 @@ package com.liaison.mailbox.service.dto.configuration.request;
 import org.codehaus.jackson.map.annotate.JsonRootName;
 
 /**
+ * Data Transfer Object that contains the fields required for script creation or revision in gitlab.
  * 
  * @author OFS
- *
  */
 @JsonRootName("scriptserviceRequest")
 public class ScriptServiceRequestDTO {

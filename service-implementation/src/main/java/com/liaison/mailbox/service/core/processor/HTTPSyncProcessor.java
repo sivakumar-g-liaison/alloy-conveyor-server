@@ -28,6 +28,11 @@ import com.liaison.mailbox.service.rest.HTTPListenerResource;
 import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
+/**
+ * Class that deals with processing of sync request.
+ * 
+ * @author OFS
+ */
 public class HTTPSyncProcessor extends HTTPAbstractProcessor {
 
 	private static final Logger logger = LogManager.getLogger(HTTPListenerResource.class);

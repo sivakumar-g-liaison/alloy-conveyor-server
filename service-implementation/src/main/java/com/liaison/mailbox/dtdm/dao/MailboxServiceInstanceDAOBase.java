@@ -20,8 +20,9 @@ import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 
 /**
- * @author OFS
+ * Service instance guid's are fetch through MailboxServiceInstanceDAOBase.
  * 
+ * @author OFS
  */
 public class MailboxServiceInstanceDAOBase extends GenericDAOBase<MailboxServiceInstance> implements MailboxServiceInstanceDAO, MailboxDTDMDAO {
 

@@ -13,8 +13,9 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author OFS
+ * Contains the list of processors.
  * 
+ * @author OFS
  */
 public enum ProcessorType {
 

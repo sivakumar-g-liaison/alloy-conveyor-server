@@ -135,11 +135,9 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-	 * @throws JAXBException
 	 */
 	public static ProcessorPropertyUITemplateDTO getHydratedUIPropertyTemplate(String propertyJson, Processor processor)
-			throws IOException, NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException, JAXBException {
+			throws IOException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		ProcessorPropertyUITemplateDTO uiPropTemplate = getTemplate(processor.getProcessorType(), protocol);
@@ -174,22 +172,18 @@ public class ProcessorPropertyJsonMapper {
 	 * @param processor
 	 * @return
 	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFromJson(String propertyJson,
-			Processor processor) throws IOException, JAXBException, NoSuchFieldException, SecurityException,
-			IllegalArgumentException, IllegalAccessException {
+	public static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFromJson(String propertyJson, Processor processor)
+			throws IOException, IllegalArgumentException, IllegalAccessException {
 
 		StaticProcessorPropertiesDTO staticProcessorProperties = null;
 		Protocol protocol = Protocol.findByCode(processor.getProcsrProtocol());
 		try {
 			staticProcessorProperties = getProcessorBasedStaticProps(propertyJson);
 
-		} catch (JAXBException | JsonMappingException | JsonParseException e) {
+		} catch (JsonMappingException | JsonParseException e) {
 
 			RemoteProcessorPropertiesDTO leagcyProps = MailBoxUtil.unmarshalFromJSON(propertyJson,
 					RemoteProcessorPropertiesDTO.class);
@@ -213,8 +207,7 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IOException
 	 */
 
-	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException {
+	private static StaticProcessorPropertiesDTO getProcessorBasedStaticProps(String propertyJson) throws IOException {
 		return JSONUtil.unmarshalFromJSON(propertyJson, StaticProcessorPropertiesDTO.class);
 	}
 
@@ -225,18 +218,9 @@ public class ProcessorPropertyJsonMapper {
 	 * @param processorType The processorType of the Processor
 	 * @param protocol The protocol of the Processor
 	 * @return ProcessorPropertyUITemplateDTO
-	 * @throws JsonParseException
-	 * @throws JsonMappingException
-	 * @throws JAXBException
 	 * @throws IOException
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
 	 */
-	public static ProcessorPropertyUITemplateDTO getTemplate(ProcessorType processorType, Protocol protocol)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException, NoSuchFieldException,
-			SecurityException, IllegalArgumentException, IllegalAccessException {
+	public static ProcessorPropertyUITemplateDTO getTemplate(ProcessorType processorType, Protocol protocol) throws IOException {
 
 		ProcessorPropertyUITemplateDTO processorProperties = null;
 		String propertiesJson = null;
@@ -452,17 +436,11 @@ public class ProcessorPropertyJsonMapper {
 	 * @return list of static properties
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-	 * @throws IOException
-	 * @throws JAXBException
 	 * @throws SecurityException
 	 * @throws NoSuchFieldException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
 	 */
 	private static void hydrateTemplate(StaticProcessorPropertiesDTO staticPropertiesDTO,
-			ProcessorPropertyUITemplateDTO processorPropertiesDefinitionDto)
-			throws IllegalArgumentException, IllegalAccessException, JsonParseException, JsonMappingException,
-			NoSuchFieldException, SecurityException, JAXBException, IOException {
+			ProcessorPropertyUITemplateDTO processorPropertiesDefinitionDto) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		for (ProcessorPropertyDTO staticProperty : processorPropertiesDefinitionDto.getStaticProperties()) {
 
@@ -512,9 +490,7 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFrmLegacyProps(ProcessorType processorType,
-			Protocol protocol) throws NoSuchFieldException, SecurityException, IllegalArgumentException,
-			IllegalAccessException {
+	private static StaticProcessorPropertiesDTO getProcessorBasedStaticPropsFrmLegacyProps(ProcessorType processorType, Protocol protocol) {
 
 		switch (processorType) {
 
@@ -576,13 +552,12 @@ public class ProcessorPropertyJsonMapper {
 	 * @param source The RemoteProcessorPropertiesDTO
 	 * @param target The StaticProcessorPropertiesDTO
 	 *
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
+	@SuppressWarnings("unchecked")
 	private static void mapLegacyProps(RemoteProcessorPropertiesDTO source, StaticProcessorPropertiesDTO target)
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			throws IllegalArgumentException, IllegalAccessException {
 
 		for (Field field : target.getClass().getDeclaredFields()) {
 
@@ -633,14 +608,11 @@ public class ProcessorPropertyJsonMapper {
 	 *
 	 * @param staticProcessorPropertiesDTO The staticProcessorPropertiesDTO of the processor
 	 * @param processor
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static void handleDynamicProperties(StaticProcessorPropertiesDTO staticProcessorPropertiesDTO,
-			Processor processor)
-			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private static void handleDynamicProperties(StaticProcessorPropertiesDTO staticProcessorPropertiesDTO, Processor processor)
+			throws IllegalArgumentException, IllegalAccessException {
 
 		if (null != processor.getDynamicProperties()) {
 
@@ -703,9 +675,7 @@ public class ProcessorPropertyJsonMapper {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	public static void constructFolderTemplate(Processor processor,
-			ProcessorPropertyUITemplateDTO processorPropertiesDefinitionDto)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException {
+	public static void constructFolderTemplate(Processor processor, ProcessorPropertyUITemplateDTO processorPropertiesDefinitionDto) {
 
 		if (null != processor.getFolders() && !processor.getFolders().isEmpty()) {
 

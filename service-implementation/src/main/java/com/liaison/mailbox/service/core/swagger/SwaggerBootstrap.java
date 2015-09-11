@@ -21,8 +21,9 @@ import com.wordnik.swagger.config.ConfigFactory;
 import com.wordnik.swagger.config.SwaggerConfig;
 
 /**
- * @author OFS
+ * Class that is responsible for bootstrapping swagger.
  * 
+ * @author OFS
  */
 public class SwaggerBootstrap extends HttpServlet {
 

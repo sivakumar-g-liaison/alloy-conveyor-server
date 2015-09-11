@@ -28,8 +28,9 @@ import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author OFS
+ * This will fetch the executing processors details.
  *
+ * @author OFS
  */
 public class ProcessorExecutionStateDAOBase extends  GenericDAOBase<ProcessorExecutionState> implements ProcessorExecutionStateDAO, MailboxRTDMDAO {
 

@@ -12,6 +12,11 @@ package com.liaison.mailbox.service.dto.configuration.response;
 
 import com.liaison.mailbox.enums.ExecutionState;
 
+/**
+ * Data Transfer Object that contains the executing processors details.
+ * 
+ * @author OFS
+ */
 public class ExecutingProcessorsDTO {
 
 	private String processorId;

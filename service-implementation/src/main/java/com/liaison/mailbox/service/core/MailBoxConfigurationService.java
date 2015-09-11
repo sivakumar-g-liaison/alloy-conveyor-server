@@ -13,9 +13,13 @@ package com.liaison.mailbox.service.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
@@ -24,12 +28,14 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
+import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
 import com.liaison.commons.util.client.sftp.StringUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.MailBoxConfigurationDAOBase;
+import com.liaison.mailbox.dtdm.dao.MailboxDTDMDAO;
 import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAO;
 import com.liaison.mailbox.dtdm.dao.MailboxServiceInstanceDAOBase;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
@@ -37,6 +43,7 @@ import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAO;
 import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAOBase;
 import com.liaison.mailbox.dtdm.model.MailBox;
+import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.MailboxServiceInstance;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.ServiceInstance;
@@ -157,10 +164,8 @@ public class MailBoxConfigurationService {
 	 *
 	 * @param serviceInstanceID The serviceInstanceID of the mailbox
 	 * @param mailbox
-	 * @throws MailBoxConfigurationServicesException
 	 */
-	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox)
-			throws MailBoxConfigurationServicesException {
+	public void createMailboxServiceInstanceIdLink(String serviceInstanceID, MailBox mailbox) {
 
 		try {
 
@@ -177,7 +182,7 @@ public class MailBoxConfigurationService {
 			MailboxServiceInstance mailboxServiceInstance = msiDao.findByGuids(mailbox.getPguid(),
 					serviceInstance.getPguid());
 
-			List<MailboxServiceInstance> mbxServiceInstances = new ArrayList<MailboxServiceInstance>();
+			Set<MailboxServiceInstance> mbxServiceInstances = new HashSet<MailboxServiceInstance>();
 			if (mailboxServiceInstance == null) {
 				// Creates relationship mailbox and service instance id
 				MailboxServiceInstance msi = new MailboxServiceInstance();
@@ -198,13 +203,10 @@ public class MailBoxConfigurationService {
 	 * @return The responseDTO.
 	 * @throws SymmetricAlgorithmException
 	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws JsonMappingException
-	 * @throws JsonParseException
+	 * @throws JAXBException 
 	 */
 	public GetMailBoxResponseDTO getMailBox(String guid, boolean addConstraint, String serviceInstanceId,
-			String aclManifestJson)
-			throws JAXBException, IOException, SymmetricAlgorithmException {
+			String aclManifestJson) throws IOException, JAXBException, SymmetricAlgorithmException {
 
 		LOG.debug("Entering into get mailbox.");
 		LOG.info("The retrieve guid is {} ", guid);
@@ -239,11 +241,11 @@ public class MailBoxConfigurationService {
 
 			ProcessorConfigurationDAO processorDao = new ProcessorConfigurationDAOBase();
 			if (addConstraint) {
-				List<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(
+				Set<Processor> filteredProcessor = processorDao.findProcessorByMbxAndServiceInstance(
 						mailBox.getPguid(), serviceInstanceId);
 				mailBox.setMailboxProcessors(filteredProcessor);
 			} else {
-				List<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
+				Set<Processor> processors = processorDao.findProcessorByMbx(mailBox.getPguid(), false);
 				mailBox.setMailboxProcessors(processors);
 			}
 
@@ -276,14 +278,17 @@ public class MailBoxConfigurationService {
 	 * @throws JsonParseException
 	 */
 	public ReviseMailBoxResponseDTO reviseMailBox(ReviseMailBoxRequestDTO request, String guid,
-			String serviceInstanceId, String aclManifestJson)
-			throws JsonParseException, JsonMappingException, JAXBException, IOException {
+			String serviceInstanceId, String aclManifestJson) throws IOException {
 
+	    EntityManager em = null;
+        EntityTransaction tx = null;
 		LOG.debug("Entering into revise mailbox.The revise request is for {} ", guid);
 
 		ReviseMailBoxResponseDTO serviceResponse = new ReviseMailBoxResponseDTO();
 
 		try {
+
+		    em = DAOUtil.getEntityManager(MailboxDTDMDAO.PERSISTENCE_UNIT_NAME);
 
 			// check if service instance id is available in query param if not throw an exception
 			if (MailBoxUtil.isEmpty(serviceInstanceId)) {
@@ -309,14 +314,16 @@ public class MailBoxConfigurationService {
 			}
 
 			// Getting the mailbox.
-			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
-			MailBox retrievedMailBox = configDao.find(MailBox.class, guid);
+			tx = em.getTransaction();
+			tx.begin();
+			MailBox retrievedMailBox = em.find(MailBox.class, guid);
 			if (retrievedMailBox == null) {
 				throw new MailBoxConfigurationServicesException(Messages.GUID_NOT_AVAIL, Response.Status.BAD_REQUEST);
 			}
 
 			if (!mailboxDTO.getName().equals(retrievedMailBox.getMbxName())) {
 				// Getting the mailbox.
+			    MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 				MailBox retrievedEntity = configDao.findByMailBoxNameAndTenancyKeyName(mailboxDTO.getName(),
 						mailboxDTO.getTenancyKey());
 
@@ -328,6 +335,24 @@ public class MailBoxConfigurationService {
 
 			// Removing the child items.
 			retrievedMailBox.getMailboxProperties().clear();
+			//Flush required to avoid unique constraint violation exception
+            //This is because of hibernate query execution order
+			em.flush();
+
+			// updates the mail box data
+            mailboxDTO.copyToEntity(retrievedMailBox);
+
+            //Mailbox properties
+            MailBoxProperty property = null;
+            Set<MailBoxProperty> properties = new HashSet<>();
+            for (PropertyDTO propertyDTO : mailboxDTO.getProperties()) {
+                property = new MailBoxProperty();
+                property.setMailbox(retrievedMailBox);
+                propertyDTO.copyToEntity(property, true);
+                properties.add(property);
+
+            }
+            retrievedMailBox.getMailboxProperties().addAll(properties);
 
 			// updates the mail box data
 			mailboxDTO.copyToEntity(retrievedMailBox);
@@ -344,7 +369,8 @@ public class MailBoxConfigurationService {
 				LOG.error("Tenancy Key present in Manifest does not match the Tenancy Key of mailbox.");
 			}
 
-			configDao.merge(retrievedMailBox);
+			//Merge the changes and commit the transaction
+			em.merge(retrievedMailBox);
 
 			ServiceInstanceDAO serviceInstanceDAO = new ServiceInstanceDAOBase();
 			ServiceInstance serviceInstance = serviceInstanceDAO.findById(serviceInstanceId);
@@ -352,7 +378,7 @@ public class MailBoxConfigurationService {
 				serviceInstance = new ServiceInstance();
 				serviceInstance.setName(serviceInstanceId);
 				serviceInstance.setPguid(MailBoxUtil.getGUID());
-				serviceInstanceDAO.persist(serviceInstance);
+				em.persist(serviceInstance);
 			}
 
 			MailboxServiceInstanceDAO msiDao = new MailboxServiceInstanceDAOBase();
@@ -364,8 +390,11 @@ public class MailBoxConfigurationService {
 				msi.setPguid(MailBoxUtil.getGUID());
 				msi.setServiceInstance(serviceInstance);
 				msi.setMailbox(retrievedMailBox);
-				msiDao.persist(msi);
+				em.persist(msi);
 			}
+
+			//commit the transaction
+			tx.commit();
 
 			// response message construction
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISED_SUCCESSFULLY, MAILBOX, Messages.SUCCESS));
@@ -375,11 +404,23 @@ public class MailBoxConfigurationService {
 
 		} catch (MailBoxConfigurationServicesException e) {
 
+		    if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
 			LOG.error(Messages.REVISE_OPERATION_FAILED.name(), e);
 			serviceResponse.setResponse(new ResponseDTO(Messages.REVISE_OPERATION_FAILED, MAILBOX, Messages.FAILURE,
 					e.getMessage()));
 			return serviceResponse;
-		}
+		} catch (IOException e) {
+		    if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
 
 	}
 

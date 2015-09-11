@@ -11,6 +11,7 @@
 package com.liaison.mailbox.service.dto.configuration.response;
 
 /**
+ * Data Transfer Object used for sending profile responses.
  * 
  * @author OFS
  */

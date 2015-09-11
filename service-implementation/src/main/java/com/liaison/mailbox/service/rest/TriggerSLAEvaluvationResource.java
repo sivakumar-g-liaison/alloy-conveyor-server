@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -51,9 +50,9 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
+ * This is the gateway to checks whether Mailbox Configurations satisfies the expectations as per SLA.
  * 
  * @author OFS
- * 
  */
 @AppConfigurationResource
 @Path("config/mailbox/trigger/slacheck")

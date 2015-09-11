@@ -48,29 +48,29 @@ public class InitializationServlet extends HttpServlet {
 	DecryptableConfiguration configuration = LiaisonConfigurationFactory.getConfiguration();  
 	public static final String START_DROPBOX_QUEUE = "com.liaison.deployAsDropbox";
 
-    public void init(ServletConfig config) throws ServletException {
-    	
-    	if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
-    	    logger.debug("dropbox queue starts to poll");
-    		ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();       
-        } else {
-            logger.debug("processor and sweeper queues starts to poll");
-        	ProcessorQueuePoller.startPolling();
-        	ServiceBrokerToMailboxWorkTicketPoller.startPolling();
-        }
-        
-    	logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+	public void init(ServletConfig config) throws ServletException {
 
-        DAOUtil.init();
-        UUIDGen.init();
-        
-      //Set ACL Filter Signature Verifier
-      SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
+		if (configuration.getBoolean(START_DROPBOX_QUEUE, false)) {
+			logger.debug("dropbox queue starts to poll");
+			ServiceBrokerToDropboxWorkTicketQueuePoller.startPolling();
+		} else {
+			logger.debug("processor and sweeper queues starts to poll");
+			ProcessorQueuePoller.startPolling();
+			ServiceBrokerToMailboxWorkTicketPoller.startPolling();
+		}
 
-      ACLUtil.setSignatureVerifier(aclSignatureVerifier);
-      logger.info(new DefaultAuditStatement(Status.SUCCEED, "ACL Filter Signature Verifier Set: " + aclSignatureVerifier.getClass().getName(), com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
-      logger.info(new DefaultAuditStatement(Status.SUCCEED,"initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+		logger.info(new DefaultAuditStatement(Status.SUCCEED, "initialize", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
 
-    }
+		DAOUtil.init();
+		UUIDGen.init();
+
+		// Set ACL Filter Signature Verifier
+		SignatureVerifier aclSignatureVerifier = new RemoteURLPublicKeyVerifier();
+
+		ACLUtil.setSignatureVerifier(aclSignatureVerifier);
+		logger.info(new DefaultAuditStatement(Status.SUCCEED, "ACL Filter Signature Verifier Set: " + aclSignatureVerifier.getClass().getName(), com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+		logger.info(new DefaultAuditStatement(Status.SUCCEED, "initialize via InitializationServlet", com.liaison.commons.audit.pci.PCIV20Requirement.PCI10_2_6));
+
+	}
 
 }

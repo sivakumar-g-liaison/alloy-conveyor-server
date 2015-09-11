@@ -15,11 +15,14 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.liaison.commons.jpa.Identifiable;
+import com.liaison.mailbox.dtdm.dao.ServiceInstanceDAO;
 
 /**
 * The persistent class for the MAILBOX_SERICEINSTANCE database table.
@@ -28,6 +31,8 @@ import com.liaison.commons.jpa.Identifiable;
 */
 @Entity
 @Table(name = "SERVICE_INSTANCE")
+@NamedQueries({ @NamedQuery(name = ServiceInstanceDAO.FIND_BY_SERVICE_INSTANCEID, query = "SELECT sii FROM ServiceInstance sii WHERE sii.name = :"
+		+ ServiceInstanceDAO.INTANXE_ID) })
 public class ServiceInstance implements Identifiable {
 
 	private static final long serialVersionUID = 1L;

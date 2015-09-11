@@ -17,14 +17,12 @@
 package com.liaison.mailbox.service.dto.configuration;
 
 /**
+ * Data Transfer Object to hold the properties.
  * 
  * @author OFS
- *
  */
 public class PropertiesFileDTO {
 	
-	private String trustStoreId;
-	private String trustStoreGroupId;
 	private String listJobsIntervalInHours;
 	private String fsmEventCheckIntervalInSeconds;
 	private String processorSyncUrlDisplayPrefix;

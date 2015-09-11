@@ -22,9 +22,9 @@ import com.liaison.mailbox.service.dropbox.DropboxService;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
-*
+* Class that invokes the dropbox queue.
+* 
 * @author OFS
-*
 */
 public class DropboxQueueInvoker implements Runnable {
 

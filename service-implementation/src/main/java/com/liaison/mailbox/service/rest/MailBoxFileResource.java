@@ -24,7 +24,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -118,7 +117,7 @@ public class MailBoxFileResource extends AuditedResource {
 					String response = MailBoxUtil.marshalToJSON(infos);
 					return Response.ok(response).header("Content-Type", MediaType.APPLICATION_JSON).build();
 
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

@@ -13,9 +13,9 @@ package com.liaison.mailbox.enums;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * Contains the list of state for all executions.
  * 
- * 
- * @author veerasamyn
+ * @author OFS
  */
 public enum ExecutionState {
 

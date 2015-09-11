@@ -12,8 +12,9 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.configuration.request.AddProfileRequestDTO;
 
 /**
+ * Data Transfer Object for profile creation through swagger.
+ * 
  * @author OFS
- *
  */
 public class AddProfileRequest {
 	

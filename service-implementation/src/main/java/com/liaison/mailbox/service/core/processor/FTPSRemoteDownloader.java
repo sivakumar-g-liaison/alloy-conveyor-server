@@ -40,8 +40,10 @@ import com.liaison.mailbox.service.executor.javascript.JavaScriptExecutorUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * FTPS remote downloader to perform pull operation, also it has support methods
+ * for javascript.
+ * 
  * @author OFS
- *
  */
 public class FTPSRemoteDownloader extends AbstractProcessor implements MailBoxProcessorI {
 

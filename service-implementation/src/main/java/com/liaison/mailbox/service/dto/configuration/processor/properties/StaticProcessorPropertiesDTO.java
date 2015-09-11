@@ -13,8 +13,9 @@ import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
 /**
+ * Data Transfer Object for the static properties of processor.
+ * 
  * @author OFS
- *
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "staticProperties")
 @JsonSubTypes({ @JsonSubTypes.Type(value = FTPUploaderPropertiesDTO.class),

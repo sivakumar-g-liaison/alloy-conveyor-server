@@ -27,9 +27,9 @@ import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.queue.sender.SweeperQueue;
 
 /**
+ * Utilities for WorkTicket.
  * 
  * @author OFS
- * 
  */
 public class WorkTicketUtil {
 
