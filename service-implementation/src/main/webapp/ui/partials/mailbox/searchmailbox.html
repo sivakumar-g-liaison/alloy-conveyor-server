@@ -65,5 +65,6 @@
 
 	<div>
 		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')" ng-if="gridLoaded">Add New</button>
+		<button id="disableFilters" class="btn btn-primary" ng-click="disableFilter()" ng-if="gridLoaded">{{filterBtnValue}}</button>
 	</div>
 </div>
