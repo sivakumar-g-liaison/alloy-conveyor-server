@@ -31,6 +31,7 @@ import javax.script.ScriptException;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -81,6 +82,8 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 	private String pipeLineID;
 	private List<Path> activeFiles = new ArrayList<>();
 	private String fileRenameFormat = null;
+    private static final String AS2_TTL_DAYS = "com.liaison.mailbox.as2.mount.ttl.days";
+    protected int totalNumberOfDeletedFiles;
 
     public void setPipeLineID(String pipeLineID) {
 		this.pipeLineID = pipeLineID;
@@ -142,6 +145,22 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
 
             long startTime = System.currentTimeMillis();
             LOGGER.info(constructMessage("Start run"));
+
+            // GAC-135- AS2 Mount Cleanup
+            if (staticProp.isAs2MountCleanup()) {
+
+            	LOGGER.info(constructMessage("AS2 Mount clean up starts"));
+				int ttlValue = (MailBoxUtil.isEmpty(staticProp.getAs2TtlDays()))
+							   ? MailBoxUtil.getEnvironmentProperties().getInt(AS2_TTL_DAYS)
+							   : Integer.parseInt(staticProp.getAs2TtlDays());
+            	deleteExpiredFilesInAS2MFTMount(inputLocation, ttlValue);
+            	long endTime = System.currentTimeMillis();
+                LOGGER.info(constructMessage("Number of files deleted {}"), totalNumberOfDeletedFiles);
+                LOGGER.info(constructMessage("Total time taken to delete files {}"), endTime - startTime);
+            	LOGGER.info(constructMessage("AS2 Mount clean up ends"));
+            	return;
+            }
+
             LOGGER.debug("Is progress list is empty: {}", activeFiles.isEmpty());
             List<WorkTicket> workTickets = (activeFiles.isEmpty())
             								? sweepDirectory(inputLocation , false, staticProp)
@@ -749,5 +768,49 @@ public class DirectorySweeper extends AbstractProcessor implements MailBoxProces
         // Log running status
         glassMessage.logProcessingStatus(StatusType.QUEUED, "Sweeper - Workticket queued for file " +  wrkTicket.getFileName());
     }
+
+	/**
+	 * Method to delete expired files on AS2 Mount
+	 *
+	 * @param payloadLocation location to check and delete expired files
+	 * @param ttlValue time to live for each file since created time
+	 * @throws IOException
+	 */
+	private void deleteExpiredFilesInAS2MFTMount(String payloadLocation, int ttlValue) throws IOException {
+
+		LOGGER.debug("going to delete files in AS2 Mount location {} based on the ttl value {}", payloadLocation, ttlValue);
+		Path rootPath = Paths.get(payloadLocation);
+		try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, defineFilter(true))) {
+
+			for (Path path : stream) {
+
+				if (isFileExpired(path, ttlValue)) {
+					File directory = path.toFile();
+					LOGGER.debug("The file {} has expired, so deleting it in As2 Mount location", path.getFileName());
+					FileUtils.deleteDirectory(directory);
+					LOGGER.debug("The expired file {} was deleted successfully", path.getFileName());
+					totalNumberOfDeletedFiles++;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Method to check is the file exists in given path has expired or not
+	 * based on the ttl value and the created time of the file
+	 *
+	 * @param path path of the file for which expiration needs to be checked
+	 * @param ttlValue time to live for each file since created time
+	 * @return true if file has expired otherwise false
+	 * @throws IOException
+	 */
+	private boolean isFileExpired(Path path, int ttlValue) throws IOException {
+
+		LOGGER.debug("checking if the file {} has expired", path.getFileName());
+		BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
+		Date fileCreatedDate = new Date(attributes.creationTime().toMillis());
+		Date fileExpiredDate = MailBoxUtil.getExpirationDate(fileCreatedDate, ttlValue);
+		return fileExpiredDate.before(new Date());
+	}
 
 }
