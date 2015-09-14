@@ -20,9 +20,9 @@ import com.liaison.mailbox.service.core.sla.WatchDogInvoker;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+* Class that consumes the workticket from ServiceBrokerToMailboxWorkTicket.
 *
 * @author OFS
-*
 */
 public class ServiceBrokerToMailboxWorkTicketConsumer {
 

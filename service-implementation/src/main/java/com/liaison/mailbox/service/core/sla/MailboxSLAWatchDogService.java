@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
-import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
@@ -35,57 +35,42 @@ import org.apache.logging.log4j.Logger;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import com.liaison.commons.exception.BootstrapingFailedException;
 import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.jaxb.JAXBUtility;
-import com.liaison.commons.message.glass.dom.StatusType;
 import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.dto.queue.WorkTicket;
 import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
 import com.liaison.mailbox.dtdm.model.FileWriter;
-import com.liaison.mailbox.dtdm.model.Folder;
 import com.liaison.mailbox.dtdm.model.MailBox;
 import com.liaison.mailbox.dtdm.model.MailBoxProperty;
 import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.dtdm.model.RemoteUploader;
 import com.liaison.mailbox.dtdm.model.Sweeper;
-import com.liaison.mailbox.enums.ExecutionEvents;
 import com.liaison.mailbox.enums.ExecutionState;
-import com.liaison.mailbox.enums.FolderType;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.enums.SLAVerificationStatus;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAO;
 import com.liaison.mailbox.rtdm.dao.FSMStateDAOBase;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAO;
-import com.liaison.mailbox.rtdm.dao.ProcessorExecutionStateDAOBase;
 import com.liaison.mailbox.rtdm.model.FSMState;
 import com.liaison.mailbox.rtdm.model.FSMStateValue;
-import com.liaison.mailbox.rtdm.model.ProcessorExecutionState;
-import com.liaison.mailbox.service.core.fsm.MailboxFSM;
-import com.liaison.mailbox.service.core.fsm.ProcessorStateDTO;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
-import com.liaison.mailbox.service.storage.util.StorageUtilities;
 import com.liaison.mailbox.service.util.EmailUtil;
-import com.liaison.mailbox.service.util.GlassMessage;
 import com.liaison.mailbox.service.util.MailBoxUtil;
-import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
+ * Class that performs the SLA validations.
+ * 
  * @author OFS
- *
  */
 public class MailboxSLAWatchDogService {
 
@@ -175,7 +160,7 @@ public class MailboxSLAWatchDogService {
 			String timeToPickUpFilePostedToMailbox = null;
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
-			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
+			Set <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving Mailbox SLA Configuration property");
 			for (MailBoxProperty property : mailboxProps) {
 				if (property.getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_TO_MAILBOX)) {
@@ -237,208 +222,6 @@ public class MailboxSLAWatchDogService {
 		return timeConfigurationUnit;
 	}
 
-	/**
-	 * Method which will consume request from queue and write the payload into the
-	 * configured payload location in processor of type uploader
-	 *
-	 * @param request
-	 */
-	@Deprecated
-	public void invokeWatchDog(String request) {
-
-		Processor processor = null;
-		ProcessorExecutionState processorExecutionState = null;
-		String mailboxId = null;
-		String payloadURI = null;
-		String profileName = null;
-		String executionId = MailBoxUtil.getGUID();
-		MailboxFSM fsm = new MailboxFSM();
-		ProcessorConfigurationDAO processorDAO = new ProcessorConfigurationDAOBase();
-		ProcessorExecutionStateDAO processorExecutionStateDAO = new ProcessorExecutionStateDAOBase();
-		TransactionVisibilityClient transactionVisibilityClient = new TransactionVisibilityClient();
-		GlassMessage glassMessage = null;
-		String processorPayloadLocation = null;
-
-		try {
-
-			LOG.info("#####################----WATCHDOG INVOCATION BLOCK-AFTER CONSUMING FROM QUEUE---############################################");
-
-			//PayloadTicketRequestDTO dto = MailBoxUtil.unmarshalFromJSON(request, PayloadTicketRequestDTO.class);
-			WorkTicket workTicket = JAXBUtility.unmarshalFromJSON(request, WorkTicket.class);
-			glassMessage = new GlassMessage(workTicket);
-			glassMessage.setStatus(ExecutionState.COMPLETED);
-			glassMessage.logProcessingStatus(StatusType.RUNNING, "Consumed workticket from queue");
-
-			// validates mandatory value.
-			mailboxId = workTicket.getAdditionalContextItem(MailBoxConstants.KEY_MAILBOX_ID);
-			if (MailBoxUtil.isEmpty(mailboxId)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Mailbox Id", Response.Status.CONFLICT);
-			}
-
-			payloadURI = workTicket.getPayloadURI();
-			if (MailBoxUtil.isEmpty(payloadURI)) {
-				throw new MailBoxServicesException(Messages.MANDATORY_FIELD_MISSING, "Spectrum URL", Response.Status.CONFLICT);
-			}
-
-			LOG.info("The given mailbox id is {}", mailboxId);
-			LOG.info("The payloadURI is {}", payloadURI);
-
-			//get processor of type uploader/filewriter configured with mailbox present in PayloadTicketRequest
-			processor = getSpecificProcessorofMailbox(mailboxId);
-
-			if (processor == null) {
-				LOG.error(constructMessage(processor, "Processor of type uploader/filewriter is not available for mailbox {}"), mailboxId);
-				throw new MailBoxServicesException(Messages.UPLOADER_OR_FILEWRITER_NOT_AVAILABLE, mailboxId, Response.Status.CONFLICT);
-			}
-
-			LOG.info(constructMessage(processor, "Start Run"));
-			LOG.info(constructMessage(processor, "JSON received from SB {}"), new JSONObject(request).toString(2));
-			long startTime = System.currentTimeMillis();
-
-			// check if file Name is available in the payloadTicketRequest if so save the file with the
-			// provided file Name if not save with processor Name with Timestamp
-			String fileName = (workTicket.getFileName() == null)?(processor.getProcsrName() + System.nanoTime()):workTicket.getFileName();
-
-			LOG.info(constructMessage(processor, "Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
-			glassMessage.setCategory(processor.getProcessorType());
-			glassMessage.setProtocol(processor.getProcessorType().getCode());
-			LOG.debug(constructMessage(processor, "Found the processor to write the payload in the local payload location"), mailboxId);
-
-			// retrieve the processor execution status of corresponding uploader from run-time DB
-			processorExecutionState = processorExecutionStateDAO.findByProcessorId(processor.getPguid());
-
-			//get payload from spectrum
-			try (InputStream payload = StorageUtilities.retrievePayload(payloadURI)) {
-
-			if (null == payload) {
-				LOG.error(constructMessage(processor,
-				        "Global PID",
-				        seperator,
-				        workTicket.getGlobalProcessId(),
-				        seperator,
-				        "Failed to retrieve payload from spectrum"));
-				throw new MailBoxServicesException("Failed to retrieve payload from spectrum", Response.Status.BAD_REQUEST);
-			}
-
-			//get local payload location from uploader/filewriter
-			processorPayloadLocation = getLocationToWritePayloadFromSpectrum(processor);
-
-			if (null == processorPayloadLocation) {
-				LOG.error(constructMessage(processor,
-				        "Global PID",
-                        seperator,
-                        workTicket.getGlobalProcessId(),
-                        seperator,
-                        "payload or filewrite location not configured for processor {}"), processor.getProcsrName());
-				throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.COMMON_LOCATION, Response.Status.CONFLICT);
-			}
-			// get the very first profile configured in the processor
-			profileName = (processor.getScheduleProfileProcessors() != null && processor.getScheduleProfileProcessors().size() > 0)? processor.getScheduleProfileProcessors().get(0).getScheduleProfilesRef().getSchProfName():null;
-
-			if (null == profileName && processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER)) {
-				LOG.error(constructMessage(processor, "profile not configured for processor {}"), processor.getProcsrName());
-				throw new MailBoxServicesException(Messages.PROFILE_NOT_CONFIGURED, Response.Status.CONFLICT);
-			}
-
-			if (null == profileName && processor.getProcessorType().equals(ProcessorType.FILEWRITER)) {
-				profileName = MailBoxConstants.PROFILE_NOT_AVAILABLE;
-			}
-
-			boolean isOverwrite = (workTicket.getAdditionalContextItem(MailBoxConstants.KEY_OVERWRITE) == Boolean.TRUE)?true:false;
-			LOG.info(constructMessage(processor,
-			        "Global PID",
-                    seperator,
-                    workTicket.getGlobalProcessId(),
-                    seperator,
-                    "Started writing payload to ",
-                    processorPayloadLocation,
-                    seperator,
-                    fileName));
-
-			// write the payload retrieved from spectrum to the configured location of processor
-			MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-			LOG.info(constructMessage(processor,
-			        "Global PID",
-                    seperator,
-                    workTicket.getGlobalProcessId(),
-                    seperator,
-                    "Payload is successfully written to ",
-                    processorPayloadLocation,
-                    seperator,
-                    fileName));
-
-			//Initiate FSM
-			ProcessorStateDTO processorStaged = new ProcessorStateDTO();
-			processorStaged.setValues(executionId, processor, profileName, ExecutionState.STAGED,SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
-			fsm.addState(processorStaged);
-
-	        processorExecutionState.setExecutionStatus(ExecutionState.STAGED.value());
-	        processorExecutionStateDAO.merge(processorExecutionState);
-	        fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGED));
-			}
-
-	        //GLASS LOGGING BEGINS//
-	        glassMessage.setOutAgent(processorPayloadLocation);
-
-			//GLASS LOGGING CORNER 4 //
-	        StringBuilder message = new StringBuilder()
-                    .append("Payload delivered at target location : ")
-                    .append(processorPayloadLocation)
-                    .append(File.separatorChar)
-                    .append(fileName);
-
-            transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.SUCCESS, message.toString());
-            glassMessage.logFourthCornerTimestamp();
-			 //GLASS LOGGING ENDS//
-	        LOG.info("#################################################################");
-
-            long endTime = System.currentTimeMillis();
-            LOG.info(constructMessage(processor, "Number of files processed 1"));
-            LOG.info(constructMessage(processor, "Total time taken to process files {}"), endTime - startTime);
-            LOG.info(constructMessage(processor, "End run"));
-
-		} catch (JAXBException | JsonParseException | JsonMappingException e) {
-			//cannot send email since the request json cannot be parsed
-			LOG.error("Unable to Parse Payload Work Ticket from ServiceBroker", e);
-
-		} catch (Exception e) {
-			LOG.error(constructMessage(processor, "File Staging failed"), e);
-			ProcessorStateDTO processorStageFailed = new ProcessorStateDTO();
-			processorStageFailed.setExecutionId(executionId);
-			processorStageFailed.setExecutionState(ExecutionState.STAGING_FAILED);
-			processorStageFailed.setMailboxId(mailboxId != null ? mailboxId : MailBoxConstants.DUMMY_MAILBOX_ID_FOR_FSM_STATE);
-			processorStageFailed.setProfileName(profileName != null ? profileName : MailBoxConstants.PROFILE_NOT_AVAILABLE);
-			processorStageFailed.setSlaVerficationStatus(SLAVerificationStatus.SLA_NOT_VERIFIED.getCode());
-			processorStageFailed.setProcessorId((processor == null) ? MailBoxConstants.DUMMY_PROCESSOR_ID_FOR_FSM_STATE : processor.getPguid());
-			processorStageFailed.setProcessorName((processor == null) ? MailBoxConstants.PROCESSOR_NOT_AVAILABLE : processor.getProcsrName());
-			processorStageFailed.setProcessorType((processor == null) ? ProcessorType.REMOTEUPLOADER : processor.getProcessorType());
-			// processorExecutionState table will be updated only if processorExecution is available
-			if (null != processorExecutionState) {
-				processorExecutionState.setExecutionStatus(ExecutionState.STAGING_FAILED.value());
-				processorDAO.merge(processor);
-			}
-
-			fsm.addState(processorStageFailed);
-			fsm.handleEvent(fsm.createEvent(ExecutionEvents.FILE_STAGING_FAILED));
-
-			// send email in case of exception
-			String emailSubject = null;
-			if (null != processor) {
-				emailSubject = processor.getProcsrName() + ":" + e.getMessage();
-			} else {
-				emailSubject = e.getMessage();
-			}
-			// email will be sent only if emailAddress is available
-			EmailUtil.sendEmail(processor, emailSubject, e);
-			//GLASS LOGGING CORNER 4 //
-			glassMessage.setStatus(ExecutionState.FAILED);
-			transactionVisibilityClient.logToGlass(glassMessage);
-			glassMessage.logProcessingStatus(StatusType.ERROR, "Delivery Failed :" + e.getMessage());
-			glassMessage.logFourthCornerTimestamp();
-			 //GLASS LOGGING ENDS//
-		}
-	}
 
 	/**
 	 * method to write the payload from spectrum to configured payload location of processor
@@ -468,65 +251,6 @@ public class MailboxSLAWatchDogService {
 		if (response != null) {
 		    response.close();
 		}
-	}
-
-
-	/**
-	 * Method to get the local payload location of Remote Uploader
-	 * associated with given mailbox
-	 *
-	 * @param mailboxId
-	 * @return
-	 * @throws MailBoxServicesException
-	 * @throws IOException
-	 */
-	@Deprecated
-	private String getLocationToWritePayloadFromSpectrum (Processor processor) throws MailBoxServicesException, IOException {
-
-		LOG.info("Retrieving payload location from processor");
-		if (processor.getFolders() != null) {
-
-			for (Folder folder : processor.getFolders()) {
-
-				FolderType foundFolderType = FolderType.findByCode(folder.getFldrType());
-				if (null == foundFolderType) {
-					throw new MailBoxServicesException(Messages.FOLDERS_CONFIGURATION_INVALID, Response.Status.CONFLICT);
-				} else if (processor.getProcessorType().equals(ProcessorType.REMOTEUPLOADER) && FolderType.PAYLOAD_LOCATION.equals(foundFolderType)) {
-					LOG.info("The payload location retrieved from processor is {}", folder.getFldrUri());
-					return processMountLocation(folder.getFldrUri());
-				}  else if (processor.getProcessorType().equals(ProcessorType.FILEWRITER) && FolderType.FILE_WRITE_LOCATION.equals(foundFolderType)) {
-					LOG.info("The file write location retrieved from processor is {}", folder.getFldrUri());
-					return processMountLocation(folder.getFldrUri());
-				}
-			}
-		}
-		return null;
-
-	}
-
-	/**
-	 * Method is used to process the folder path given by user and replace the
-	 * mount location with proper value form properties file.
-	 *
-	 * @param folderPath
-	 *            The folder path given by user
-	 *
-	 * @return processedFolderPath The folder path with mount location
-	 *
-	 */
-	@Deprecated
-	private String processMountLocation(String folderPath) throws IOException {
-
-		String processedFolderPath = null;
-
-		if (folderPath != null && folderPath.toUpperCase().contains(MailBoxConstants.MOUNT_LOCATION)) {
-			String mountLocationValue = MailBoxUtil.getEnvironmentProperties().getString("MOUNT_POINT");
-			processedFolderPath = folderPath.replaceAll(MailBoxConstants.MOUNT_LOCATION_PATTERN, mountLocationValue);
-		} else {
-			return folderPath;
-		}
-		LOG.info("The Processed Folder Path is" + processedFolderPath);
-		return processedFolderPath;
 	}
 
 	/**
@@ -608,7 +332,7 @@ public class MailboxSLAWatchDogService {
 			// get the mailbox of this processor to retrieve sla properties
 			MailBox mailbox = procsr.getMailbox();
 			String timeToPickUpFilePostedByMailbox = null;
-			List <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
+			Set <MailBoxProperty> mailboxProps = mailbox.getMailboxProperties();
 			LOG.debug("Retrieving the customer SLA configuration from Mailbox");
 			for (MailBoxProperty property : mailboxProps) {
 				if (property .getMbxPropName().equals(MailBoxConstants.TIME_TO_PICK_UP_FILE_POSTED_BY_MAILBOX)) {
@@ -842,36 +566,6 @@ public class MailboxSLAWatchDogService {
    			EmailUtil.sendEmail(processor, emailSubject, e);
         }
         return null;
-
-	}
-
-	/**
-	 * This method will get the file write location of filewriter and check if any file exist in that specified location
-	 *
-	 * @param processor
-	 * @return boolean - if the file exists it will return value of true otherwise a value of false.
-	 * @throws MailBoxServicesException
-	 * @throws IOException
-	 */
-	@Deprecated
-	private boolean checkFileExistenceOfFileWriter(Processor processor) throws MailBoxServicesException, IOException {
-
-		LOG.debug ("Entering file Existence check for File Writer processor");
-		boolean isFileExists = false;
-		String fileWriteLocation = getLocationToWritePayloadFromSpectrum(processor);
-		if (null == fileWriteLocation) {
-			LOG.error("filewrite location  not configured for processor {}", processor.getProcsrName());
-			throw new MailBoxServicesException(Messages.LOCATION_NOT_CONFIGURED, MailBoxConstants.FILEWRITE_LOCATION, Response.Status.CONFLICT);
-		}
-		File fileWriteLocationDirectory = new File(fileWriteLocation);
-		if (fileWriteLocationDirectory.isDirectory() && fileWriteLocationDirectory.exists()) {
-			String[] files =  fileWriteLocationDirectory.list();
-			isFileExists = (null != files && files.length > 0);
-		} else {
-			throw new MailBoxServicesException(Messages.INVALID_DIRECTORY, Response.Status.BAD_REQUEST);
-		}
-		LOG.debug("File Eixstence check completed for FTP Uploader. File exists - {}", isFileExists);
-		return isFileExists;
 
 	}
 

@@ -50,17 +50,17 @@
          },
          {
             "name":"lensVisibility",
-            "displayName":"Lens Visibility",
-            "value":"false",
+            "displayName":"LENS Visibility",
+            "value":"Invisible",
             "type":"select",
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
-            "defaultValue":"false",
+            "defaultValue":"Invisible",
             "validationRules":null,
             "options":[
-               "false",
-               "true"
+               "Invisible",
+               "Visible"
             ]
          },
          {

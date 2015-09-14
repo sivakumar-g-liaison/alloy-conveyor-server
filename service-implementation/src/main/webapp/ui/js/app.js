@@ -79,23 +79,6 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
             templateUrl: 'partials/profile/triggerprofile.html',
             controller: 'TriggerProfileCntrlr'
         });
-        /* $routeProvider.when('/contact', {
-        templateUrl:'partials/contact.html'
-    });
-    $routeProvider.when('/about', {
-        templateUrl:'partials/about.html'
-    });
-    $routeProvider.when('/faq', {
-        templateUrl:'partials/faq.html'
-    });
-
-    // note that to minimize playground impact on app.js, we
-    // are including just this simple route with a parameterized 
-    // partial value (see playground.js and playground.html)
-    $routeProvider.when('/playground/:widgetName', {
-        templateUrl:'playground/playground.html',
-        controller:'PlaygroundCtrl'
-    }); */
         // by default, redirect to site root
         $routeProvider.otherwise({
             redirectTo: '/'
@@ -103,20 +86,17 @@ myApp.config(['$routeProvider', '$locationProvider', '$httpProvider',
     }
 ]);
 // this is run after angular is instantiated and bootstrapped
-myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTService, $blockUI) {
+myApp.run(function ($rootScope, $location, $http, $timeout, RESTService, $blockUI) {
+
     // *****
     // Eager load some data using simple REST client
     // *****
-    //FOR USE WITH PYTHON
-    //$rootScope.base_url = 'http://localhost:8080/g2mailboxservice/rest/v1/mailbox';
     $rootScope.base_url = '../mailbox';
     $rootScope.kms_base_url='/kms/key-management';
-    //$rootScope.kms_base_url='http://10.0.24.129:8989/key-management';
 	$rootScope.url_secret_service = $rootScope.kms_base_url+'/secret/';
-    //$rootScope.url_secret_service = 'http://10.0.24.129:8989/key-management/secret/';
-    
+
 	$rootScope.block = $blockUI.createBlockUI();
-	
+
     $rootScope.restService = RESTService;
     // validation of user input pattern
     $rootScope.userInputPattern = /^[a-zA-Z0-9\-:_.,\s]+$/;
@@ -130,6 +110,7 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.multipleEmailPattern = /^(([a-zA-Z0-9_'+*$%\^&!\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9:]{2,7})([,]\W?(?!$))?)+$/;
 	$rootScope.inputPatternForPort = /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
 	$rootScope.folderPathPattern = /^\/data\/(sftp|ftp|ftps)\/(.*?)\/(inbox|outbox)(\/(.*?))?$/;
+
     // These variables can be used as attributes when the ng-maxlength issue is fixed in angular js.
     // As of now used only for displaying the no of characters in error message.
     $rootScope.maximumLengthAllowedInTextBox = 80;
@@ -142,35 +123,21 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
     $rootScope.maximumLengthAllowedInGridForCredentialDetails = 128;
     $rootScope.typeaheadMinLength = 3;
 	$rootScope.typeaheadMaxLength = 80;
-    
+
     // These variables used for displaying info icon  where the ng-maxlength  and ng-minlength validation.
 	$rootScope.infoIconImgUrl = 'img/alert-triangle-red.png';
-   
-    // async load constants
-    $rootScope.constants = [];
-    $rootScope.restService.get('data/constants.json', function (data) {
-        $rootScope.constants = data[0];
-    });
-    // async load data do be used in table (playgound grid widget)
-    $rootScope.listData = [];
-    $rootScope.restService.get('data/generic-list.json', function (data) {
-        $rootScope.listData = data;
-    });	
+
 	//  load initial Processor Data
     $rootScope.initialProcessorData;
-    $rootScope.restService.get('data/initialProcessorDetails_json.json', function (data) {
+    $rootScope.restService.get('data/initialProcessorDetails.json', function (data) {
         $rootScope.initialProcessorData = data;
     }); 
-	
-    // *****
-    // Initialize authentication
-    // *****
-    $rootScope.authService = AuthService;
+
 	// pipeline id
     $rootScope.pipelineId = getParameterByName($location.absUrl(), "pipeLineId");
 	// service instance id
 	$rootScope.serviceInstanceId = getParameterByName($location.absUrl(), "sid");
-	
+
 	//getting values from java properties file
 	$rootScope.javaProperties = {
 		globalTrustStoreId: "",
@@ -193,70 +160,18 @@ myApp.run(function ($rootScope, $location, $http, $timeout, AuthService, RESTSer
 			}
 		}
 	);
-	
-	
-	/*$rootScope.serviceInstancePrimaryId = prompt("NOTE: This is a temporary arrangement till the INTEGRATION with ACL. " +
-													"Actual impelentation is to retrive this from ACL manifest." +
-													"Make sure you always use a same ID everytime you lauch the UI inorder to search/revise the mailbox and/or processors you added " +
-													"Enter PRIMARY Service Instance Id : ", "");
-	$rootScope.serviceInstanceSecondaryId = prompt("NOTE: This is a temporary arrangement till the INTEGRATION with ACL. " +
-													"Actual impelentation is to retrive this from ACL manifest." +
-													"Make sure you always use a same ID everytime you lauch the UI inorder to search/revise the mailbox and/or processors you added " +
-													"Enter SECONDARY Service Instance Id : ", "");*/
-    // text input for login/password (only)
-    $rootScope.loginInput = 'rob@gmail.com';
-    $rootScope.passwordInput = 'complexpassword';
-    $rootScope.$watch('authService.authorized()', function () {
-        // if never logged in, do nothing (otherwise bookmarks fail)
-        if ($rootScope.authService.initialState()) {
-            // we are public browsing
-            return;
-        }
-        // instantiate and initialize an auth notification manager
-        $rootScope.authNotifier = new NotificationManager($rootScope);
-        // when user logs in, redirect to home
-        if ($rootScope.authService.authorized()) {
-            $location.path("/");
-            $rootScope.authNotifier.notify('information', 'Welcome ' + $rootScope.authService.currentUser() + "!");
-        }
-        // when user logs out, redirect to home
-        if (!$rootScope.authService.authorized()) {
-            $location.path("/");
-            $rootScope.authNotifier.notify('information', 'Thanks for visiting.  You have been signed out.');
-        }
-    }, true);
-    // TODO move this out to a more appropriate place
-    $rootScope.faq = [{
-        key: "What is the service-nucleus?",
-        value: "The service nucleus is a starting point for a full-blown Java webservice and accompanying UI."
-    }, {
-        key: "What are the pre-requisites for running the service nucleus?",
-        value: "You need JDK 7 and Gradle>=1.6."
-    }, {
-        key: "How do I change styling (css)?",
-        value: "See service-implementation/bootstrap.  First change the less modules, then compile using build.sh.  The resulting artifacts will be copied to the appropriate location."
-    }, {
-        key: "How do I implement a REST service?",
-        value: "Simply add a new Jersey Resource.  See service-implementation/src/main/java/com/liaison/service/resources/examples for examples."
-    }, {
-        key: "How do I brand my project (rename from Hello-World)?",
-        value: "This is currently a manual process with about a half-dozen steps.  See README.md for details."
-    }, {
-        key: "How do I expose JMX metrics?",
-        value: "Checkout the MetricsResource example."
-    }];
-	
+
 	/*
 	* Pipeline Id code
 	*/
 	$rootScope.appendQueryParamAddMBox = function() {
 		return "#/mailbox/addMailBox";
 	};
-	
+
 	$rootScope.appendQueryParamManage = function() {
 		return "#/profiles/addProfiles";
 	};
-	
+
 	$rootScope.appendQueryParamTrigger = function() {
 		return "#/profiles/trigger";
 	};

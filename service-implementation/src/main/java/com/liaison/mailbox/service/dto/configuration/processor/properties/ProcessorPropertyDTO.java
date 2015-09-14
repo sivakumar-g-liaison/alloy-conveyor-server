@@ -16,8 +16,9 @@ import com.liaison.mailbox.dtdm.model.ProcessorProperty;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * Data Transfer Object for properties of the processor.
+ * 
  * @author OFS
- *
  */
 public class ProcessorPropertyDTO {
 

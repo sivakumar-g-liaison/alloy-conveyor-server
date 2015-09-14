@@ -13,6 +13,8 @@ package com.liaison.mailbox.service.queue.sender;
 import com.liaison.commons.messagebus.hornetq.HornetQRecoveringCoreSendClient;
 
 /**
+ * Queue where the swept file details are enqueued as worktickets. 
+ * 
  * Created by jeremyfranklin-ross on 7/17/14.
  */
 public class SweeperQueue extends HornetQRecoveringCoreSendClient {

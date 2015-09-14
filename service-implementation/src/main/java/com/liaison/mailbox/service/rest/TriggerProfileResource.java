@@ -50,9 +50,9 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
+ * This is the gateway for trigger profile services.
  * 
  * @author OFS
- * 
  */
 @AppConfigurationResource
 @Path("config/mailbox/trigger/profile")

@@ -42,8 +42,9 @@ import com.liaison.mailbox.service.util.KMSUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
- * @author VNagarajan
- *
+ * Helper class to construct FTPS request.
+ * 
+ * @author OFS
  */
 public class FTPSClient {
 

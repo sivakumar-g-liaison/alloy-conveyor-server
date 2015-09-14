@@ -25,7 +25,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -128,7 +127,7 @@ public class MailBoxProfileResource extends AuditedResource {
 					}
 					return serviceResponse;
 
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
@@ -180,7 +179,7 @@ public class MailBoxProfileResource extends AuditedResource {
 					// update profile
 					ProfileConfigurationService profile = new ProfileConfigurationService();
 					return profile.updateProfile(serviceRequest);
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

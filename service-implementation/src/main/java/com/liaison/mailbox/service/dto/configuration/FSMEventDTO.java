@@ -16,7 +16,7 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * 
+ * Data Transfer Object for FSM event executionID and its name.
  * 
  * @author OFS
  */

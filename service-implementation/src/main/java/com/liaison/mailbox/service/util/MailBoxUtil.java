@@ -79,8 +79,8 @@ public class MailBoxUtil {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz)
-			throws JAXBException, JsonParseException, JsonMappingException, IOException {
+	public static <T> T unmarshalFromJSON(String serializedJson, Class<T> clazz) throws IOException {
+
 		LOGGER.debug("Input JSON is {}", serializedJson);
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();
@@ -111,8 +111,7 @@ public class MailBoxUtil {
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
-	public static String marshalToJSON(Object object)
-			throws JAXBException, JsonGenerationException, JsonMappingException, IOException {
+	public static String marshalToJSON(Object object) throws IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
 		AnnotationIntrospector primary = new JaxbAnnotationIntrospector();

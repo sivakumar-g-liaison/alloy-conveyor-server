@@ -12,6 +12,7 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
 
 /**
+ * Data Transfer Object for mailbox creation through swagger.
  * 
  * @author OFS
  */

@@ -23,7 +23,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -116,7 +115,7 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ScriptServiceRequestDTO.class);
 					return scriptService.createScript(serviceRequest.getScript());
 
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}
@@ -171,7 +170,7 @@ public class MailBoxScriptConfigurationResource extends AuditedResource {
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString, ScriptServiceRequestDTO.class);
 					return scriptService.updateScript(serviceRequest.getScript());
 
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

@@ -13,8 +13,9 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
 
 /**
+ * Data Transfer Object for processor creation through swagger.
+ * 
  * @author OFS
- *
  */
 public class AddProcessorToMailBoxRequest {
 	

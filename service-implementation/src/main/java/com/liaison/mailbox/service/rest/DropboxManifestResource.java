@@ -137,7 +137,7 @@ public class DropboxManifestResource extends AuditedResource {
 					String requestString = getRequestBody(request);
 					serviceRequest = MailBoxUtil.unmarshalFromJSON(requestString,
 							DropboxAuthAndGetManifestRequestDTO.class);					
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

@@ -22,8 +22,9 @@ import com.liaison.mailbox.rtdm.model.FSMEvent;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * This will creates and manages the FSM events.
+ *
  * @author OFS
- * 
  */
 public class FSMEventDAOBase extends  GenericDAOBase<FSMEvent> implements FSMEventDAO, MailboxRTDMDAO {
 

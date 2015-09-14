@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -35,9 +35,9 @@ import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 
 /**
  * Base Test class for initial setup and cleanup.
- * 
+ *
  * @author OFS
- * 
+ *
  */
 public abstract class BaseServiceTest {
 
@@ -48,13 +48,16 @@ public abstract class BaseServiceTest {
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
-	
+	public static final String STATUS = Messages.STATUS.value();
+    public static final String MESSAGE = Messages.MESSAGE.value();
+
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";
 	public String tenancyKey = "D277AEB40A92296314146AFC3A87839E";
 	public String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 	public String spectrumUri = "fs2://secure@dev-int/mailbox/payload/1.0/21F9B154FB54495A855EAC63E1CDC69B";
-	
+	public String response = "response";
+
 	@BeforeMethod
 	public void initialSetUp() throws FileNotFoundException, IOException {
 
@@ -72,7 +75,7 @@ public abstract class BaseServiceTest {
             System.setProperty("archaius.deployment.environment", prop.getProperty("ENVIRONMENT"));
 			// close the stream
 			is.close();
-		} 		
+		}
 
 	}
 
@@ -83,7 +86,7 @@ public abstract class BaseServiceTest {
 	public void setOutput(ByteArrayOutputStream output) {
 		this.output = output;
 	}
-	
+
 	public String getBASE_URL() {
 		return BASE_URL;
 	}
@@ -99,7 +102,7 @@ public abstract class BaseServiceTest {
 	public static void setKMS_BASE_URL(String kMS_BASE_URL) {
 		KMS_BASE_URL = kMS_BASE_URL;
 	}
-	
+
 	public static String getBASE_URL_DROPBOX() {
 		return BASE_URL_DROPBOX;
 	}
@@ -115,7 +118,7 @@ public abstract class BaseServiceTest {
 
 	/**
 	 * Constructs HTTPRequest for integration tests.
-	 * 
+	 *
 	 * @param URL
 	 *            The service URL
 	 * @param method
@@ -126,7 +129,7 @@ public abstract class BaseServiceTest {
 	 *            The logger
 	 * @return HTTPRequest The HTTPRequest instance for the given URL and method
 	 * @throws LiaisonException
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public HTTPRequest constructHTTPRequest(String URL, HTTP_METHOD method, String input, Logger logger)
 			throws LiaisonException, IOException {
@@ -145,27 +148,27 @@ public abstract class BaseServiceTest {
 		return request;
 	}
 
-	/**
-	 * Common method to get the response status from the response JSON String.
-	 * 
-	 * @param responseString
-	 *            The JSON response String
-	 * @param serivceName
-	 *            The service object name
-	 * @return String The status String
-	 * @throws JSONException
-	 */
-	public String getResponseStatus(String responseString, String serivceName) throws JSONException {
+    /**
+     * Common method to get the response status and message from the response JSON String.
+     *
+     * @param responseString The JSON response String
+     * @param serivceName The service object name
+     * @param type response message type
+     * @return String The status String
+     * @throws JSONException
+     */
+    public String getResponse(String responseString, String serivceName, String type)
+            throws JSONException {
 
-		JSONObject rootJson = new JSONObject(responseString);
-		JSONObject serviceJson = rootJson.getJSONObject(serivceName);
-		JSONObject responseJson = serviceJson.getJSONObject("response");
-		return responseJson.getString("status");
-	}
+        JSONObject rootJson = new JSONObject(responseString);
+        JSONObject serviceJson = rootJson.getJSONObject(serivceName);
+        JSONObject responseJson = serviceJson.getJSONObject(response);
+        return responseJson.getString(type);
+    }
 
 	/**
 	 * Method constructs the request JSON String into JSONObject.
-	 * 
+	 *
 	 * @param requestString
 	 *            The requestJSON String.
 	 * @param serivceName
@@ -182,7 +185,7 @@ public abstract class BaseServiceTest {
 
 	/**
 	 * Construct dummy mailbox DTO for testing.
-	 * 
+	 *
 	 * @param uniqueValue
 	 * @return
 	 */
@@ -209,7 +212,7 @@ public abstract class BaseServiceTest {
 			mailBoxDTO.setShardKey("MBX_REV_SHARD_KEY" + uniqueValue);
 			mailBoxDTO.setStatus(EntityStatus.ACTIVE.name());
 			mailBoxDTO.setTenancyKey("MBX_TENANCY_KEY" + uniqueValue);
-			
+
 			property.setName("MBX_REV_SIZE");
 			property.setValue("1024");
 

@@ -13,8 +13,9 @@ package com.liaison.mailbox.swagger.dto.request;
 import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 
 /**
+ * Data Transfer Object for processor revision through swagger.
+ * 
  * @author OFS
- *
  */
 public class ReviseProcessorRequest {
 

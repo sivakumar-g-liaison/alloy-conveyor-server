@@ -16,6 +16,7 @@ import java.util.List;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
+ * Data Transfer Object used for retrieving the executing processor responses.
  *
  * @author OFS
  */
@@ -43,4 +44,17 @@ public class GetExecutingProcessorResponseDTO extends CommonResponseDTO {
 	public void setHitCounter(String hitCounter) {
 		this.hitCounter = hitCounter;
 	}
+
+	public List<GetExecutingProcessorDTO> getExecutingProcessors() {
+		return executingProcessors;
+	}
+
+	public void setExecutingProcessors(List<GetExecutingProcessorDTO> executingProcessors) {
+		this.executingProcessors = executingProcessors;
+	}
+
+	public String getHitCounter() {
+		return hitCounter;
+	}
+
 }

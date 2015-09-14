@@ -2,7 +2,7 @@
  * Copyright Liaison Technologies, Inc. All rights reserved.
  *
  * This software is the confidential and proprietary information of
- * Liaison Technologies, Inc. ("Confidential Information").  You shall 
+ * Liaison Technologies, Inc. ("Confidential Information").  You shall
  * not disclose such Confidential Information and shall use it only in
  * accordance with the terms of the license agreement you entered into
  * with Liaison Technologies.
@@ -38,7 +38,7 @@ import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Test class which tests the mailbox functional services.
- * 
+ *
  * @author OFS
  */
 public class MailBoxServiceTest extends BaseServiceTest {
@@ -47,17 +47,17 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 	private HTTPRequest request;
 	private String jsonRequest;
-	
+
 	private String jsonResponse;
 
 	@BeforeMethod
 	public void setUp() throws Exception {
 		logger = LogManager.getLogger(MailBoxServiceTest.class);
 	}
-    
+
 	/**
 	 * Method to test triggerprofile.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -68,8 +68,8 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	@Test
 	public void testTriggerProfile() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException {
-        
-		// Add the Mailbox		
+
+		// Add the Mailbox
 		String serviceInstanceId = "9032A4910A0A52980A0EC676DB33A102";
 		jsonRequest = ServiceUtils.readFileFromClassPath("requests/mailbox/addmailboxrequest.json");
 		AddMailboxRequestDTO requestDTO = MailBoxUtil.unmarshalFromJSON(jsonRequest, AddMailboxRequestDTO.class);
@@ -78,11 +78,11 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		requestDTO.setMailBox(mbxDTO);
 
 		jsonRequest = MailBoxUtil.marshalToJSON(requestDTO);
-		
+
 		String url = getBASE_URL() + "?sid=" +serviceInstanceId;
 		request = constructHTTPRequest(url, HTTP_METHOD.POST, jsonRequest, logger);
 		request.execute();
-		Assert.assertEquals(SUCCESS, getResponseStatus(getOutput().toString(), "addMailBoxResponse"));
+        Assert.assertEquals(SUCCESS, getResponse(getOutput().toString(), "addMailBoxResponse", STATUS));
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
@@ -112,7 +112,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 
 		addProcessorDTO.getProcessor().setLinkedMailboxId(responseDTO.getMailBox().getGuid());
 		addProcessorDTO.getProcessor().getLinkedProfiles().add(profileName);
-		
+
 		jsonRequest = MailBoxUtil.marshalToJSON(addProcessorDTO);
 
 		String addProcessor = "/" + responseDTO.getMailBox().getGuid() + "/processor" + "?sid=" +serviceInstanceId;
@@ -122,7 +122,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "addProcessorToMailBoxResponse").equals(SUCCESS));
+        Assert.assertEquals(true, getResponse(jsonResponse, "addProcessorToMailBoxResponse", STATUS).equals(SUCCESS));
 
 		// Trigger the profile
 		String triggerProfile = "/trigger/profile" + "?name=" + profileName;
@@ -132,12 +132,12 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(SUCCESS));
+		Assert.assertEquals(true, getResponse(jsonResponse, "triggerProfileResponse", STATUS).equals(SUCCESS));
 	}
-	
+
 	/**
 	 * Method to test trigger profile with profile as null.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -148,20 +148,20 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	@Test
 	public void testTriggerProfile_ProfileIsNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 	         JAXBException, IOException {
-		
+
 		String triggerProfile = "/trigger/profile" + "?name=" +null;
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
 
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
-		
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(FAILURE));		
+
+        Assert.assertEquals(true, getResponse(jsonResponse, "triggerProfileResponse", STATUS).equals(FAILURE));
 	}
-	
+
 	/**
 	 * Method to test trigger profile with profile as invalid.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -172,7 +172,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	@Test
 	public void testTriggerProfile_ProfileIsInvalid() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
             JAXBException, IOException {
-		
+
 		String triggerProfile = "/trigger/profile" + "?name=" + System.currentTimeMillis()+"INVALID_PROFILE";
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
@@ -180,12 +180,12 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(FAILURE));		
+        Assert.assertEquals(true, getResponse(jsonResponse, "triggerProfileResponse", STATUS).equals(FAILURE));
 	}
-	
+
 	/**
 	 * Method to test trigger profile with profile as empty.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
@@ -196,7 +196,7 @@ public class MailBoxServiceTest extends BaseServiceTest {
 	@Test
 	public void testTriggerProfile_ProfileIsEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
             JAXBException, IOException {
-		
+
 		String triggerProfile = "/trigger/profile" + "?name=";
 		request = constructHTTPRequest(getBASE_URL() + triggerProfile, HTTP_METHOD.POST, null, logger);
 		request.execute();
@@ -204,6 +204,6 @@ public class MailBoxServiceTest extends BaseServiceTest {
 		jsonResponse = getOutput().toString();
 		logger.info(jsonResponse);
 
-		Assert.assertEquals(true, getResponseStatus(jsonResponse, "triggerProfileResponse").equals(FAILURE));		
-	}	
+        Assert.assertEquals(true, getResponse(jsonResponse, "triggerProfileResponse", STATUS).equals(FAILURE));
+	}
 }

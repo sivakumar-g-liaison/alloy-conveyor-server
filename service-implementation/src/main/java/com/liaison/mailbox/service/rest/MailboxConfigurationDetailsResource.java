@@ -129,7 +129,7 @@ public class MailboxConfigurationDetailsResource extends AuditedResource {
 					// updates existing mailbox
 					MailBoxConfigurationService mailbox = new MailBoxConfigurationService();
 					return mailbox.reviseMailBox(serviceRequest, guid, serviceInstanceId, manifestJson);
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

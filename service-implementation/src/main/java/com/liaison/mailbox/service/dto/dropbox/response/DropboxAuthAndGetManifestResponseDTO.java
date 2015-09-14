@@ -17,9 +17,9 @@ import com.liaison.mailbox.service.dto.CommonResponseDTO;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 
 /**
+ * Data Transfer Object used for sending ACL manifest responses.
  *
  * @author OFS
- *
  */
 @JsonRootName("authAndGetACLResponse")
 public class DropboxAuthAndGetManifestResponseDTO extends CommonResponseDTO {

@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto.configuration.response;
 import com.liaison.mailbox.service.dto.CommonResponseDTO;
 
 /**
- *
+ * Data Transfer Object for sending the processor interruption responses.
+ * 
  * @author OFS
- *
  */
 public class InterruptExecutionEventResponseDTO extends CommonResponseDTO {
 

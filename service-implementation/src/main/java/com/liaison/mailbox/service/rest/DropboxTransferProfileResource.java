@@ -21,7 +21,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -167,7 +166,7 @@ public class DropboxTransferProfileResource extends AuditedResource {
 				} catch (MailBoxServicesException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException(e.getMessage());
-				} catch (IOException | JAXBException e) {
+				} catch (IOException e) {
 					LOG.error(e.getMessage(), e);
 					throw new LiaisonRuntimeException("Unable to Read Request. " + e.getMessage());
 				}

@@ -12,8 +12,9 @@ package com.liaison.mailbox.service.core.processor;
 import com.liaison.mailbox.service.core.fsm.MailboxFSM;
 
 /**
- * @author Ganesh
- *
+ * Interface exposes API required for running the processors.
+ * 
+ * @author OFS
  */
 public interface MailBoxProcessorI {
 

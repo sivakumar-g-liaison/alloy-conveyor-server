@@ -76,8 +76,9 @@ import com.liaison.mailbox.service.util.ProcessorPropertyJsonMapper;
 import com.liaison.mailbox.service.util.TransactionVisibilityClient;
 
 /**
+ * Base processor type for all type of processors.
+ * 
  * @author OFS
- *
  */
 public abstract class AbstractProcessor implements ProcessorJavascriptI {
 

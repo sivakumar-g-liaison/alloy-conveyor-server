@@ -18,9 +18,9 @@ import org.apache.logging.log4j.Logger;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
+ * Class that consumes the messages from processor queue.
  *
  * @author OFS
- *
  */
 public class MailboxProcessorQueueConsumer {
 

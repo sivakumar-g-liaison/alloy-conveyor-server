@@ -13,9 +13,9 @@ package com.liaison.mailbox.service.dto;
 import javax.ws.rs.core.Response;
 
 /**
- * 
+ * Class that constructs the response.
  *
- * @author veerasamyn
+ * @author OFS
  */
 public interface ResponseBuilder {
 

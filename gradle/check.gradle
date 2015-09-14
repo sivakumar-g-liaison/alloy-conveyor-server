@@ -29,6 +29,7 @@ allprojects {
             ignoreFailures = true
             reports.html.enabled false 
             reports.xml.enabled true
+            findbugs.toolVersion = '3.0.1'
         }
 
         // PMD
