@@ -109,14 +109,6 @@ subprojects {
         compile 'com.liaison.commons.acl:acl-commons-lib:5.+'
      }
 
-    test {
-        // workaround for Java7 and Cobutura/Emma instrumentation problem
-        jvmArgs '-XX:-UseSplitVerifier'    
-	ignoreFailures = false
-        jvmArgs "-XX:-UseSplitVerifier"
-		useTestNG()
-        //ignoreFailures = false
-    }
 }
 
 /*
