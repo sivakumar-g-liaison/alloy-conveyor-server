@@ -23,6 +23,7 @@ subprojects { project ->
     version = rootProject.version
 
     sourceCompatibility = 1.7
+    targetCompatibility = 1.7
 
     // GRADLE-2087 workaround, perform after java plugin
     // Restore status after Java plugin
@@ -120,5 +121,5 @@ githubPages {
 
 // Generate wrapper, which is distributed as part of source to alleviate the need of installing gradle
 task createWrapper(type: Wrapper, description:'Generates gradle wrapper', group:'Build Setup') {
-    gradleVersion = '1.7'
+    gradleVersion = '1.12'
 }
