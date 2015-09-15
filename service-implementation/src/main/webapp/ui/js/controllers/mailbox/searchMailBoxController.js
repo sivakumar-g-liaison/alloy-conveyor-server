@@ -20,7 +20,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
         // Profiles loads initially
         $scope.profiles = [];
-     
+		
         // Loading the profile details
         $scope.loadProfiles = function () {
             $scope.restService.get($scope.base_url + "/profile", function (data, status) {
@@ -74,6 +74,11 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 			fields: ['name'],
 			directions: ['asc']
 		};
+		
+		// Filter properties
+		$scope.disableFiltr = false;
+		$scope.filterBtnValue = "Disable Filters";
+		
         // Set the paging data to grid from server object
         $scope.setPagingData = function (data) {
 
@@ -83,14 +88,19 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
             $scope.mailboxes = data.mailBox;
             $scope.totalServerItems = data.totalItems;
+			$scope.disableFiltr = data.disableFilter;
             if ( $scope.mailboxes.length === 0)
 			{
             	showSaveMessage("No Results Found", 'error');
 			}
             if (!$scope.$$phase) {
                 $scope.$apply();
-            }
-
+            }			
+			if ($scope.disableFiltr === true || $scope.disableFiltr === "true") {
+				$scope.filterBtnValue = "Enable Filters";
+			} else if ($scope.disableFiltr === false || $scope.disableFiltr === "false") {
+				$scope.filterBtnValue = "Disable Filters";
+			}
         };
 
         // Enable the delete modal dialog
@@ -127,8 +137,21 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 
         // Navigate to mailbox screen for edit operation
         $scope.edit = function (row) {
-            $location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid);
+			if($scope.disableFiltr === true || $scope.disableFiltr === "true"){
+				$location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid).search('disableFilters', true);
+			} else {
+				$location.path('/mailbox/addMailBox').search('mailBoxId', row.entity.guid).search('disableFilters', false)
+			}
         };
+		
+		// Disable/Enable tenancy key and sid filter when search the mailboxes
+        $scope.disableFilter = function () {
+			if ($scope.filterBtnValue === "Disable Filters") {			
+				$location.path('/mailbox/getMailBox').search('disableFilters', true);
+			} else if ($scope.filterBtnValue === "Enable Filters") {
+				$location.path('/mailbox/getMailBox').search('disableFilters', false);
+			}
+		};
 
         $scope.getPagedDataAsync = function (largeLoad) {
             setTimeout(function () {
@@ -151,7 +174,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             }
             
             var sortField = "";
-        	var sortDirection = "";
+        	var sortDirection = "";			
             if($scope.sortInfo.fields && $scope.sortInfo.directions) {
             	sortField = String($scope.sortInfo.fields);
             	sortDirection = String($scope.sortInfo.directions);
@@ -159,6 +182,12 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
             
             $scope.hitCounter = $scope.hitCounter + 1;
             $rootScope.gridLoaded = false;
+			
+			var disableFiltr = false;
+            if (null !== $location.search().disableFilters && ($location.search().disableFilters === true || $location.search().disableFilters === "true")) {
+                disableFiltr = true;
+            }
+			
             $scope.restService.get($scope.base_url +'?siid=' + $rootScope.serviceInstanceId ,/*, $filter('json')($scope.serviceInstanceIdsForSearch)*/
                 function (data, status) {
             	if (status === 200 || status === 400) {
@@ -183,7 +212,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                     }
                     $rootScope.gridLoaded = true;
                     $scope.showprogressbar = false;
-                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection}
+                }, {name:mbxName, profile:profName, hitCounter:$scope.hitCounter, page:$scope.pagingOptions.currentPage, pagesize:$scope.pagingOptions.pageSize, sortField:sortField, sortDirection:sortDirection, disableFilters:disableFiltr}
             );
         };
 
@@ -260,7 +289,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
         $scope.gridOptions = {
         		columnDefs: [{
                     field: 'guid',
-                    width: '20%',
+                    width: '22%',
                     displayName: 'MailboxId'
                 }, {
                     field: 'name',
@@ -269,16 +298,16 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
                     cellTemplate: '<div class="customCell" status="{{row.getProperty(\'status\')}}" name="{{row.getProperty(col.field)}}"></div>'
                 }, {
                     field: 'description',
-                    width: '20%',
+                    width: '22%',
                     displayName: 'Description'
                 }, {
                 	field: 'configStatus' ,
-                	width: '20%' ,
+                	width: '19%' ,
                 	displayName: 'Config Status' , 
                 	cellTemplate: $scope.manageConfigStatus
                 }, {
                     field: 'status',
-                    width: '10%',
+                    width: '9%',
                     displayName: 'Status',
                     cellTemplate: $scope.manageStatus
                 },
@@ -287,7 +316,7 @@ myApp.controller('SearchMailBoxCntrlr', ['$rootScope', '$scope', '$location',  '
 				 */
                 { // Customized column
                     displayName: 'Action',
-                    width: '10%',
+                    width: '8%',
                     sortable: false,
                     cellTemplate: $scope.editableInPopup
                 }

@@ -173,7 +173,8 @@ public class MailBoxConfigurationResource extends AuditedResource {
 			@QueryParam(value = "pagesize") @ApiParam(name = "pagesize", required = false, value = "pagesize") final String pageSize,
 			@QueryParam(value = "sortField") @ApiParam(name = "sortField", required = false, value = "sortField") final String sortField,
 			@QueryParam(value = "sortDirection") @ApiParam(name = "sortDirection", required = false, value = "sortDirection") final String sortDirection,
-			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId) {
+			@QueryParam(value = "siid") @ApiParam(name = "siid", required = true, value = "service instance id") final String serviceInstanceId,
+			@QueryParam(value = "disableFilters") @ApiParam(name = "disableFilters", required = true, value = "disable Filters") final boolean disableFilters) {
 
 
 		// create the worker delegate to perform the business logic
@@ -198,6 +199,7 @@ public class MailBoxConfigurationResource extends AuditedResource {
 					searchFilter.setPageSize(pageSize);
 					searchFilter.setSortField(sortField);
 					searchFilter.setSortDirection(sortDirection);
+					searchFilter.setDisableFilters(disableFilters);
 					// search the mailbox based on the given query parameters
 					SearchMailBoxResponseDTO serviceResponse = mailbox.searchMailBox(searchFilter, manifestJson);
 					serviceResponse.setHitCounter(hitCounter);

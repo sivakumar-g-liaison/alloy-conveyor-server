@@ -25,6 +25,8 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
 		 $scope.enumTenancyKey = [];
 	     $scope.tenancyKey = {guid:'', name:''};
 	     $scope.tenancyKeys = [];
+		 
+		 $scope.isDisableFilterVal = false;
 		
         //Model for Add MB
         addRequest = $scope.addRequest = {
@@ -120,6 +122,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $scope.isMailBoxEdit = true;
                 $scope.isEnable = true;	
                 $scope.mailBoxId = $location.search().mailBoxId;
+				$scope.isDisableFilters = $location.search().disableFilters;
                 block.blockUI();
                 $scope.restService.get($scope.base_url + "/" + $scope.mailBoxId+ '?addServiceInstanceIdConstraint=' + true + '&sid=' + $rootScope.serviceInstanceId, //Get mail box Data
                     function (data, status) {
@@ -135,9 +138,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         							
         							$scope.addProcessorBtnValue = 'List Processors';
         							$scope.isProcessorsAvailable = true;
+									$scope.isDisableFilterVal = $scope.isDisableFilters;
         						}	else {
         							$scope.addProcessorBtnValue = 'Add Processors';
         							$scope.isProcessorsAvailable = false;
+									$scope.isDisableFilterVal = $scope.isDisableFilters;
         						}
                                 (data.getMailBoxResponse.mailBox.status === 'ACTIVE' ||
                                     data.getMailBoxResponse.mailBox.status === 'INCOMPLETE') ? $scope.status = $scope.enumstats[0] : $scope.status = $scope.enumstats[1];
@@ -284,7 +289,11 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
         $scope.doCancel = function () {        	
     	    $scope.closeModalView(); 
             $location.$$search = {};
-            $location.path('/mailbox/getMailBox');
+			if($scope.isDisableFilterVal === true || $scope.isDisableFilterVal === "true"){
+				$location.path('/mailbox/getMailBox').search('disableFilters', true);
+			} else {
+				$location.path('/mailbox/getMailBox');
+			}            
         };
         
         $scope.closeModalView = function () {
@@ -297,7 +306,7 @@ var rest = myApp.controller('AddMailBoxCntrlr', ['$rootScope', '$scope', '$filte
                 $('#saveMailboxConfirmationModal').modal('show');
             } else {
                 $location.$$search = {};
-            	$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag);
+            	$location.path('/mailbox/processor').search('mailBoxId', $scope.mailBoxId).search('mbxname', $scope.mailBox.name).search('isProcessorSearch', processorSearchFlag).search('disableFilters', $scope.isDisableFilterVal);
             }
         }
         

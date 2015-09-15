@@ -33,6 +33,7 @@ var rest = myApp.controller(
 			var isProcessorSearchFlag = false;
 			var procsrId = '';
 			var isSIdConstraint = true;
+			var isDisableFilterValue = false;
             		
 			function getIndexOfValue(objArray, value) {
 				var pos = -1;
@@ -155,11 +156,16 @@ var rest = myApp.controller(
 			isProcessorSearchFlag = $location.search().isProcessorSearch;
 			procsrId = $location.search().processorId;
 			$rootScope.gridLoaded = false;
+			isDisableFilterValue = $location.search().disableFilters;
 				if(isProcessorSearchFlag === true || isProcessorSearchFlag === "true"){
 					isSIdConstraint = false;
 					$scope.readAllProcessors();
 					$scope.readAllProfiles();
 					$scope.editProcessor(procsrId,true);
+				} else if (isDisableFilterValue === true || isDisableFilterValue === "true"){
+					isSIdConstraint = false;
+					$scope.readAllProcessors();
+					$scope.readAllProfiles();
 				} else {
 					$scope.readAllProcessors();
 					$scope.readAllProfiles();
@@ -1475,3 +1481,4 @@ var ScriptCreateFileController = function($rootScope, $scope, $filter, $http, $b
         $scope.$dismiss();
      }; 
 };
+

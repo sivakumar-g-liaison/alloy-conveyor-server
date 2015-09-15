@@ -11,7 +11,7 @@
 package com.liaison.mailbox;
 
 /**
- * Contains the static variables which we can use globally. 
+ * Contains the static variables which we can use globally.
  *
  * @author OFS
  */
@@ -301,6 +301,10 @@ public interface MailBoxConstants {
     // internal dl for error notification
     public static final String ERROR_RECEIVER = "com.liaison.mailbox.error.receiver";
 
+    //added for lens visibility property
+    public static final String LENS_VISIBLE = "Visible";
+    public static final String LENS_INVISIBLE = "Invisible";
+
     /**
      * STATIC KEY used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
      */
@@ -314,4 +318,5 @@ public interface MailBoxConstants {
 
     public static int ENCRYPT_MODE = 1;
     public static int DECRYPT_MODE = 2;
+
 }

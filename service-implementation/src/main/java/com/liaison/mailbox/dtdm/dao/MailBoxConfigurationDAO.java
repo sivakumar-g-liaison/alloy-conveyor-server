@@ -32,10 +32,10 @@ public interface MailBoxConfigurationDAO extends GenericDAO<MailBox> {
 	public static final String TENANCY_KEYS = "tenancy_keys";
 	public static final String FIND_BY_MBX_NAME_AND_TENANCYKEY_NAME = "MailBox.findByMboxNameAndTenancyKeyName";
 
-	public int getMailboxCountByProfile(String mbxName, String profName, List <String> tenancyKeys);
+	public int getMailboxCountByProfile(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys);
 	public List<MailBox> find(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
 
-	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys);
+	public int getMailboxCountByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys);
 	public List<MailBox> findByName(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys, Map <String, Integer> pageOffsetDetails);
 	public MailBox findByMailBoxNameAndTenancyKeyName(String mbxName, String tenancyKeyName);
 	

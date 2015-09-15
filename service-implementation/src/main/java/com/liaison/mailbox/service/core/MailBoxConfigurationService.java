@@ -503,42 +503,46 @@ public class MailBoxConfigurationService {
 		SearchMailBoxResponseDTO serviceResponse = new SearchMailBoxResponseDTO();
 
 		try {
-
-			// check if service instance id is available in query param if not throw an exception
-			if (MailBoxUtil.isEmpty(searchFilter.getServiceInstanceId())) {
-				LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
-			}
-
+			
 			// Getting mailbox
 			MailBoxConfigurationDAO configDao = new MailBoxConfigurationDAOBase();
 			ProcessorConfigurationDAO dao = new ProcessorConfigurationDAOBase();
 
 			List<MailBox> mailboxes = new ArrayList<MailBox>();
-			// retrieve the actual tenancykey guids from DTO
-			List<String> tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+			List<String> tenancyKeyGuids = new ArrayList<String>();
+			
+			if (!searchFilter.isDisableFilters()) {
 
-			if (tenancyKeyGuids.isEmpty()) {
-				LOG.error("retrieval of tenancy key from acl manifest failed");
-				throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
-						Response.Status.BAD_REQUEST);
+				// check if service instance id is available in query param if not throw an exception
+				if (MailBoxUtil.isEmpty(searchFilter.getServiceInstanceId())) {
+					LOG.error(Messages.SERVICE_INSTANCE_ID_NOT_AVAILABLE);
+				}	
+				
+				// retrieve the actual tenancykey guids from DTO
+				tenancyKeyGuids = MailBoxUtil.getTenancyKeyGuids(aclManifestJson);
+	
+				if (tenancyKeyGuids.isEmpty()) {
+					LOG.error("retrieval of tenancy key from acl manifest failed");
+					throw new MailBoxConfigurationServicesException(Messages.TENANCY_KEY_RETRIEVAL_FAILED,
+							Response.Status.BAD_REQUEST);
+				}
 			}
-
+	
 			if (!MailBoxUtil.isEmpty(searchFilter.getProfileName())) {
-
-				totalCount = configDao.getMailboxCountByProfile(searchFilter.getMbxName(),
-						searchFilter.getProfileName(), tenancyKeyGuids);
+	
+				totalCount = configDao.getMailboxCountByProfile(searchFilter, tenancyKeyGuids);
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 						searchFilter.getPageSize(), totalCount);
 				retrievedMailBoxes = configDao.find(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-
+	
 			} else {
-
+	
 				// If the profile name is empty it will use findByName
-				totalCount = configDao.getMailboxCountByName(searchFilter.getMbxName(), tenancyKeyGuids);
+				totalCount = configDao.getMailboxCountByName(searchFilter, tenancyKeyGuids);
 				pageOffsetDetails = MailBoxUtil.getPagingOffsetDetails(searchFilter.getPage(),
 						searchFilter.getPageSize(), totalCount);
 				retrievedMailBoxes = configDao.findByName(searchFilter, tenancyKeyGuids, pageOffsetDetails);
-			}
+			}			
 			
 			mailboxes.addAll(retrievedMailBoxes);
 			serviceResponse.setTotalItems(totalCount);
@@ -564,8 +568,9 @@ public class MailBoxConfigurationService {
 			LOG.info("Elapsed time in milliseconds: " + difference);
 			// Constructing the responses.
 			serviceResponse.setMailBox(searchMailBoxDTOList);
+			serviceResponse.setDisableFilter(searchFilter.isDisableFilters());
 			serviceResponse.setResponse(new ResponseDTO(Messages.SEARCH_SUCCESSFUL, MAILBOX, Messages.SUCCESS));
-
+			
 			LOG.debug("Exit from search mailbox.");
 			return serviceResponse;
 
