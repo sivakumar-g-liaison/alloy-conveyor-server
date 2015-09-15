@@ -32,6 +32,7 @@ public class SearchMailBoxResponseDTO extends CommonResponseDTO {
 	private List<SearchMailBoxDTO> mailBox;
 	private String hitCounter;
 	private int totalItems;
+	private boolean isDisableFilter;
 
 	public int getTotalItems() {
 		return totalItems;
@@ -59,5 +60,13 @@ public class SearchMailBoxResponseDTO extends CommonResponseDTO {
 
 	public void setHitCounter(String hitCounter) {
 		this.hitCounter = hitCounter;
+	}
+
+	public boolean isDisableFilter() {
+		return isDisableFilter;
+	}
+
+	public void setDisableFilter(boolean isDisableFilter) {
+		this.isDisableFilter = isDisableFilter;
 	}
 }

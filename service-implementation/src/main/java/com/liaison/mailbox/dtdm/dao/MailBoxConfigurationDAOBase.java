@@ -17,6 +17,8 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
+import org.hamcrest.core.IsNull;
+
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;
@@ -30,6 +32,7 @@ import com.liaison.mailbox.service.util.QueryBuilderUtil;
  * Performs mailbox fetch operations. 
  * 
  * @author OFS
+
  */
 public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		implements MailBoxConfigurationDAO, MailboxDTDMDAO  {
@@ -47,25 +50,35 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return count of mailbox retrieved
 	 */
 	@Override
-	public int getMailboxCountByProfile(String mbxName, String profName, List <String> tenancyKeys) {
+	public int getMailboxCountByProfile(GenericSearchFilterDTO searchFilter, List <String> tenancyKeys) {
 
 		Long totalItems = null;
 		int count = 0;
 
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
-
+			
+			String mbxName = searchFilter.getMbxName();
+			String profName = searchFilter.getProfileName();			
 			StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
 					.append(" inner join mbx.mailboxProcessors prcsr")
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
-					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-					.append(" where LOWER(mbx.mbxName) like :")
-					.append(MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (")
-					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-					.append(")")
-					.append(" and profile.schProfName like :")
-					.append(SCHD_PROF_NAME);
+					.append(" inner join schd_prof_processor.scheduleProfilesRef profile");
+					
+			if (searchFilter.isDisableFilters()) {
+				query.append(" where LOWER(mbx.mbxName) like :")
+				 .append(MBOX_NAME)				 
+				 .append(" and profile.schProfName like :")
+				 .append(SCHD_PROF_NAME);
+            } else {
+            	query.append(" where LOWER(mbx.mbxName) like :")
+					 .append(MBOX_NAME)
+					 .append(" and LOWER(mbx.tenancyKey) IN (")
+					 .append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+					 .append(")")
+					 .append(" and profile.schProfName like :")
+					 .append(SCHD_PROF_NAME);
+            }
 
 			totalItems = (Long)em
 					.createQuery(query.toString())
@@ -97,7 +110,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 		List<MailBox> mailBoxes = null;
 		EntityManager em = DAOUtil.getEntityManager(persistenceUnitName);
 		try {
-
 			
 			String sortDirection = searchFilter.getSortDirection();
 			String sortField=searchFilter.getSortField();
@@ -106,15 +118,23 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			StringBuilder query = new StringBuilder().append("SELECT distinct mbx FROM MailBox mbx")
 					.append(" inner join mbx.mailboxProcessors prcsr")
 					.append(" inner join prcsr.scheduleProfileProcessors schd_prof_processor")
-					.append(" inner join schd_prof_processor.scheduleProfilesRef profile")
-					.append(" where LOWER(mbx.mbxName) like :")
-					.append(MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (")
-					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-					.append(")")
-					.append(" and profile.schProfName like :")
-					.append(SCHD_PROF_NAME);
-			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+					.append(" inner join schd_prof_processor.scheduleProfilesRef profile");
+			
+			if (searchFilter.isDisableFilters()) {
+				query.append(" where LOWER(mbx.mbxName) like :")
+				     .append(MBOX_NAME)					 
+					 .append(" and profile.schProfName like :")
+					 .append(SCHD_PROF_NAME);
+			} else {
+				query.append(" where LOWER(mbx.mbxName) like :")
+				 	 .append(MBOX_NAME)
+				 	 .append(" and LOWER(mbx.tenancyKey) IN (")
+				 	 .append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+				 	 .append(")")
+				 	 .append(" and profile.schProfName like :")
+				 	 .append(SCHD_PROF_NAME);
+			}
+			if (!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 
 				sortDirection = sortDirection.toUpperCase();
 				switch (sortField.toLowerCase()) {
@@ -128,7 +148,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 						query.append(" order by mbx.mbxStatus " + sortDirection);
 						break;
 				}
-			}else {
+			} else {
 				query.append(" order by mbx.mbxName");
 			}
 			mailBoxes = em
@@ -154,7 +174,7 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 	 * @return count of mailboxes retrieved
 	 */
 	@Override
-	public int getMailboxCountByName(String mbxName, List<String> tenancyKeys) {
+	public int getMailboxCountByName(GenericSearchFilterDTO searchFilter, List<String> tenancyKeys) {
 		 
         EntityManager entityManager = DAOUtil.getEntityManager(persistenceUnitName);
         Long totalItems = null;
@@ -162,15 +182,27 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
  
         try {
  
-            StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx")
-                    .append(" where LOWER(mbx.mbxName) like :")
-                    .append(MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (")
-					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
-					.append(")");
-            totalItems = (Long)entityManager.createQuery(query.toString())
-                    .setParameter(MBOX_NAME, "%" + mbxName.toLowerCase() + "%")
-                    .getSingleResult();
+            StringBuilder query = new StringBuilder().append("SELECT count(mbx) FROM MailBox mbx");
+            
+            if (searchFilter.isDisableFilters()) {
+            	if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+            		query.append(" where LOWER(mbx.mbxName) like :")
+            			 .append(MBOX_NAME);
+            	}
+            } else {
+            	query.append(" where LOWER(mbx.mbxName) like :")
+                .append(MBOX_NAME)
+            	.append(" and LOWER(mbx.tenancyKey) IN (")
+				.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
+				.append(")");
+            }					
+            if (searchFilter.isDisableFilters() && MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+	            totalItems = (Long)entityManager.createQuery(query.toString()).getSingleResult();
+            } else {
+            	totalItems = (Long)entityManager.createQuery(query.toString())
+	                    .setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+	                    .getSingleResult();
+            }
  
             count = totalItems.intValue();
  
@@ -198,16 +230,25 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 
 		try {
 
-			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx")
-					.append(" where LOWER(mbx.mbxName) like :")
-					.append(MBOX_NAME)
-					.append(" and LOWER(mbx.tenancyKey) IN (")
+			StringBuilder query = new StringBuilder().append("SELECT mbx FROM MailBox mbx");
+			
+			 if (searchFilter.isDisableFilters()){
+				 if(!MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+					 query.append(" where LOWER(mbx.mbxName) like :")
+					 	  .append(MBOX_NAME);
+				 }
+			 } else {
+				 query.append(" where LOWER(mbx.mbxName) like :")
+				 	.append(MBOX_NAME)
+				 	.append(" and LOWER(mbx.tenancyKey) IN (")
 					.append(QueryBuilderUtil.collectionToSqlString(tenancyKeys).toLowerCase())
 					.append(")");
+			 }
+					
 			String sortDirection = searchFilter.getSortDirection();
 			String sortField=searchFilter.getSortField();
 
-			if(!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
+			if (!(StringUtil.isNullOrEmptyAfterTrim(sortField) && StringUtil.isNullOrEmptyAfterTrim(sortDirection))) {
 				sortDirection=sortDirection.toUpperCase();
 				switch (sortField.toLowerCase()) {
 					case "name":
@@ -220,14 +261,22 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 						query.append(" order by mbx.mbxStatus " + sortDirection);
 						break;
 				}
-			}else {
+			} else {
 				query.append(" order by mbx.mbxName");
 			}
-			mailboxList = entityManager.createQuery(query.toString())
-					.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
-					.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
-					.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
-					.getResultList();
+			
+			if (searchFilter.isDisableFilters() && MailBoxUtil.isEmpty(searchFilter.getMbxName())) {
+				mailboxList = entityManager.createQuery(query.toString())					
+						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+						.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+						.getResultList();
+			} else {			
+				mailboxList = entityManager.createQuery(query.toString())
+						.setParameter(MBOX_NAME, "%" + searchFilter.getMbxName().toLowerCase() + "%")
+						.setFirstResult(pageOffsetDetails.get(MailBoxConstants.PAGING_OFFSET))
+						.setMaxResults(pageOffsetDetails.get(MailBoxConstants.PAGING_COUNT))
+						.getResultList();
+			}
 
 		} finally {
 			if (entityManager != null) {
@@ -303,8 +352,6 @@ public class MailBoxConfigurationDAOBase extends GenericDAOBase<MailBox>
 			}
 		}
 		
-		return linkedMailboxIds;
-		
+		return linkedMailboxIds;		
 	}
-
 }
