@@ -29,13 +29,16 @@ import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.MailBoxConfigurationService;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseMailBoxRequestDTO;
 import com.liaison.mailbox.service.dto.configuration.response.AddMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.DeActivateMailBoxResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.GetMailBoxResponseDTO;
+import com.liaison.mailbox.service.dto.configuration.response.ReviseMailBoxResponseDTO;
 import com.liaison.mailbox.service.util.MailBoxUtil;
 
 /**
  * Test class to test mailbox configuration service.
- * 
+ *
  * @author veerasamyn
  */
 public class MailBoxConfigurationServiceIT extends BaseServiceTest {
@@ -52,17 +55,17 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		System.setProperty("archaius.deployment.environment", "test");
 		InitInitialDualDBContext.init();
 	}
-    
+
 	/**
 	 * Method constructs MailBox with valid data.
-	 * 
+	 *
 	 * @throws LiaisonException
 	 * @throws JSONException
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 * @throws JAXBException
 	 * @throws IOException
-	 * @throws SymmetricAlgorithmException 
+	 * @throws SymmetricAlgorithmException
 	 */
 	@Test
 	public void testCreateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
@@ -72,7 +75,7 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
-		
+
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
 		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
 
@@ -89,7 +92,71 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
 
 	}
-	
+
+	/**
+     * Method to check to fail creation of MailBox with Null Value Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testCreateMailBoxWithNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        requestDTO.setMailBox(null);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method to check to fail creation of MailBox with Empty ServiceInstanceId Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testCreateMailBoxWithServiceInstanceIdEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, "", aclManifest);
+
+        Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method to check to fail creation of MailBox with null ServiceInstanceId Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
 	@Test
 	public void testCreateMailBoxWithoutServiceInstanceId() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, SymmetricAlgorithmException {
@@ -98,14 +165,25 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
-		
+
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
 		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, null, aclManifest);
 
 		Assert.assertEquals(FAILURE, response.getResponse().getStatus());
 
 	}
-	
+
+    /**
+     * Method to check to pass creation of MailBox with new ServiceInstanceId.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
 	@Test
 	public void testCreateMailBoxWithNewServiceInstanceId() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, SymmetricAlgorithmException {
@@ -114,46 +192,172 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
 		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
 		requestDTO.setMailBox(mbxDTO);
-		
+
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
 		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, MailBoxUtil.getGUID(), aclManifest);
 
 		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
 
 	}
-	
+
+    /**
+     * Method to check to fail creation of MailBox without mailbox name Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testCreateMailBoxWithoutName() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setStatus("ACTIVE");
+        mailBox.setTenancyKey("test Tenancy Key");
+        requestDTO.setMailBox(mailBox);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method to check to fail creation of MailBox without mailbox status Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+	@Test
+    public void testCreateMailBoxWithoutStatus() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setName("TestMailBox" + System.currentTimeMillis());
+        mailBox.setTenancyKey("test Tenancy Key");
+        requestDTO.setMailBox(mailBox);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method to check to fail creation of MailBox without tenancy key Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
 	@Test
 	public void testCreateMailBoxWithoutTenancyKey() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, SymmetricAlgorithmException {
 
 		// Adding the mailbox
 		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
-		MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
-		mbxDTO.setTenancyKey("Dummy");
-		requestDTO.setMailBox(mbxDTO);
-		
+		MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setName("TestMailBox" + System.currentTimeMillis());
+        mailBox.setStatus("ACTIVE");
+		requestDTO.setMailBox(mailBox);
+
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
 		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
 
 		Assert.assertEquals(FAILURE, response.getResponse().getStatus());
 
 	}
-	
+
+    /**
+     * Method to check to fail creation of MailBox with empty tenancy key Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
 	@Test
-	public void testCreateMailBoxWithoutMailboxDTO() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
-			JAXBException, IOException, SymmetricAlgorithmException {
+    public void testCreateMailBoxWithTenancyKeyEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
 
-		// Adding the mailbox
-		AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
-		requestDTO.setMailBox(null);
-		
-		MailBoxConfigurationService service = new MailBoxConfigurationService();
-		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setName("TestMailBox" + System.currentTimeMillis());
+        mailBox.setStatus("ACTIVE");
+        mailBox.setTenancyKey("");
+        requestDTO.setMailBox(mailBox);
 
-		Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
 
-	}
-	
+        Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method to check to fail creation of MailBox with null tenancy key Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testCreateMailBoxWithTenancyKeyNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setName("TestMailBox" + System.currentTimeMillis());
+        mailBox.setStatus("ACTIVE");
+        mailBox.setTenancyKey(null);
+        requestDTO.setMailBox(mailBox);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, response.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method to check to fail creation of MailBox with Existing Mailbox Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
 	@Test
 	public void testCreateMailBoxWithExistingMailbox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
 			JAXBException, IOException, SymmetricAlgorithmException {
@@ -164,12 +368,514 @@ public class MailBoxConfigurationServiceIT extends BaseServiceTest {
 		mbxDTO.setName("MBX_TEST1441230467303");
 		mbxDTO.setTenancyKey("G2_DEV_INT_MONIKER");
 		requestDTO.setMailBox(mbxDTO);
-		
+
 		MailBoxConfigurationService service = new MailBoxConfigurationService();
 		AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, null);
 
 		Assert.assertEquals(FAILURE, response.getResponse().getStatus());
 
 	}
-    
+
+    /**
+     * Method Get MailBox with valid data.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testGetMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+    }
+
+    /**
+     * Method Get MailBox with Empty ServiceInstanceId Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testGetMailBoxWithServiceInstanceIdEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, "", aclManifest);
+
+        // Assertion
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Get MailBox with null MailBox value Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testGetMailBoxWithMailBoxNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox("dummy", false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(FAILURE, getResponseDTO.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with valid data.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName("RevisedMailBox" + System.currentTimeMillis());
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertNotEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertNotEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertNotEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertNotEquals(requestDTO.getMailBox().getStatus(), getResponseDTO.getMailBox().getStatus());
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with Empty ServiceInstanceId Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBoxWithServiceInstanceIdEmpty() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+     // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName("RevisedMailBox");
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "", aclManifest);
+
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with dummy ServiceInstanceId Should pass.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBoxWithDummyServiceInstanceId() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+     // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName(mbxDTO.getName());
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), "dummy" + System.currentTimeMillis(), aclManifest);
+
+        Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with Wrong Guid Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBoxWithWrongGuid() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+     // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName("RevisedMailBox");
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid()+"X", serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with Existing MailBox Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBoxWithExistingMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName("MBX_TEST1441230467303");
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setTenancyKey("G2_DEV_INT_MONIKER");
+        mbxDTO.setGuid(getResponseDTO.getMailBox().getGuid());
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertNotEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertNotEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertNotEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertNotEquals(requestDTO.getMailBox().getStatus(), getResponseDTO.getMailBox().getStatus());
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with valid data Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBoxWithNullMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        mbxDTO.setGuid("dummy");
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        mbxDTO.setName("RevisedMailBox" + System.currentTimeMillis());
+        mbxDTO.setDescription("RevisedMailBox Desc");
+        mbxDTO.setStatus("INACTIVE");
+        mbxDTO.setShardKey("RevisedShard");
+        mbxDTO.setGuid("dummy");
+        reviseRequestDTO.setMailBox(mbxDTO);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertNotEquals(requestDTO.getMailBox().getName(), getResponseDTO.getMailBox().getName());
+        Assert.assertNotEquals(requestDTO.getMailBox().getDescription(), getResponseDTO.getMailBox().getDescription());
+        Assert.assertNotEquals(requestDTO.getMailBox().getShardKey(), getResponseDTO.getMailBox().getShardKey());
+        Assert.assertNotEquals(requestDTO.getMailBox().getStatus(), getResponseDTO.getMailBox().getStatus());
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Revise MailBox with null value Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testReviseMailBoxWithNull() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mbxDTO = constructDummyMailBoxDTO(System.currentTimeMillis(), true);
+        requestDTO.setMailBox(mbxDTO);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+     // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+        ReviseMailBoxRequestDTO reviseRequestDTO = new ReviseMailBoxRequestDTO();
+        reviseRequestDTO.setMailBox(null);
+
+        ReviseMailBoxResponseDTO reviseResponse = service.reviseMailBox(reviseRequestDTO, mbxDTO.getGuid(), serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+
+    }
+
+    /**
+     * Method Deactivate MailBox with valid data.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testDeactivateMailBox() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setName("TestMailBox" + System.currentTimeMillis());
+        mailBox.setStatus("ACTIVE");
+        mailBox.setTenancyKey("test Tenancy Key");
+        requestDTO.setMailBox(mailBox);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+        DeActivateMailBoxResponseDTO reviseResponse = service.deactivateMailBox(getResponseDTO.getMailBox().getGuid(), aclManifest);
+
+        Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
+        Assert.assertEquals(reviseResponse.getResponse().getMessage().contains("deactivated successfully."), true);
+
+    }
+
+    /**
+     * Method Deactivate MailBox with dummy guid Should fail.
+     *
+     * @throws LiaisonException
+     * @throws JSONException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws JAXBException
+     * @throws IOException
+     * @throws SymmetricAlgorithmException
+     */
+    @Test
+    public void testDeactivateMailBoxwithDummyGuid() throws LiaisonException, JSONException, JsonParseException, JsonMappingException,
+            JAXBException, IOException, SymmetricAlgorithmException {
+
+        // Adding the mailbox
+        AddMailboxRequestDTO requestDTO = new AddMailboxRequestDTO();
+        MailBoxDTO mailBox = new MailBoxDTO();
+        mailBox.setName("TestMailBox" + System.currentTimeMillis());
+        mailBox.setStatus("ACTIVE");
+        mailBox.setTenancyKey("test Tenancy Key");
+        requestDTO.setMailBox(mailBox);
+
+        MailBoxConfigurationService service = new MailBoxConfigurationService();
+        AddMailBoxResponseDTO response = service.createMailBox(requestDTO, serviceInstanceId, aclManifest);
+
+        Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+        // Get the mailbox
+        GetMailBoxResponseDTO getResponseDTO = service.getMailBox(response.getMailBox().getGuid(), false, serviceInstanceId, aclManifest);
+
+        // Assertion
+        Assert.assertEquals(SUCCESS, getResponseDTO.getResponse().getStatus());
+        Assert.assertEquals(EntityStatus.ACTIVE.name(), getResponseDTO.getMailBox().getStatus());
+
+        DeActivateMailBoxResponseDTO reviseResponse = service.deactivateMailBox("dummy", aclManifest);
+
+        Assert.assertEquals(FAILURE, reviseResponse.getResponse().getStatus());
+
+    }
 }
