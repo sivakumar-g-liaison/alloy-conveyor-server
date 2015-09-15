@@ -17,8 +17,6 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 
-import org.hamcrest.core.IsNull;
-
 import com.liaison.commons.jpa.DAOUtil;
 import com.liaison.commons.jpa.GenericDAOBase;
 import com.liaison.commons.util.client.sftp.StringUtil;

@@ -48,8 +48,8 @@ public abstract class BaseServiceTest {
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
-	public static final String STATUS = Messages.STATUS.value();
-    public static final String MESSAGE = Messages.MESSAGE.value();
+	public static final String STATUS = "status";
+    public static final String MESSAGE = "message";
 
 	public static String USER_ID = "demouserjan22@liaison.dev";
 	public static String PASSWORD = "TG9yZDAyZ2FuZXNoIQ==";

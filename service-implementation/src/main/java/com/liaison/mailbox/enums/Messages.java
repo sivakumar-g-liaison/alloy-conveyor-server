@@ -51,8 +51,6 @@ public enum Messages {
 	NO_SUCH_COMPONENT_EXISTS("No such %s available in the system."),
 	SUCCESS("success"),
 	FAILURE("failure"),
-    STATUS("status"),
-    MESSAGE("message"),
 	MANDATORY_FIELD_MISSING("%s is mandatory"),
 	INVALID_REQUEST("The input request is invalid."),
 	GUID_NOT_AVAIL("Input id is not available in the system."),
