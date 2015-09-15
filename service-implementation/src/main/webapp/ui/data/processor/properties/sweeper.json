@@ -5,22 +5,21 @@
       "protocol":"",
       "handOverExecutionToJavaScript":false,
       "staticProperties":[
-          {
+         {
             "name":"add new -->",
-            "displayName" : "add new -->",
+            "displayName":"add new -->",
             "value":"",
             "type":"textarea",
             "readOnly":false,
             "mandatory":false,
-            "dynamic": true,
+            "dynamic":true,
             "valueProvided":false,
             "defaultValue":"",
-            "validationRules": null        
-            
+            "validationRules":null
          },
          {
             "name":"pipeLineID",
-            "displayName" : "Pipeline Id",
+            "displayName":"Pipeline Id",
             "value":"",
             "type":"textarea",
             "readOnly":true,
@@ -30,50 +29,58 @@
             "defaultValue":"",
             "validationRules":{
                "pattern":"",
-               "minLength": "",
-			  "maxLength": "2048"
+               "minLength":"",
+               "maxLength":"2048"
             }
          },
          {
+            "name":"securedPayload",
+            "displayName":"Secured Payload",
+            "value":"true",
+            "type":"select",
+            "mandatory":true,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
+         },
+         {
             "name":"lensVisibility",
-            "displayName" : "LENS Visibility",
+            "displayName":"LENS Visibility",
             "value":"Invisible",
             "type":"select",
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
             "defaultValue":"Invisible",
-            "validationRules": null,
-            "options":["Invisible","Visible"]           
- 		 },
-         {
-            "name":"securedPayload",
-            "displayName" : "Secured Payload",
-            "value":"true",
-            "type":"select",
-            "mandatory":true,
-            "dynamic":false,
-            "valueProvided":false,
-            "defaultValue":"",
-            "validationRules": null,
-            "options":["false","true"]
-             
+            "validationRules":null,
+            "options":[
+               "Invisible",
+               "Visible"
+            ]
          },
          {
             "name":"deleteFileAfterSweep",
-            "displayName" : "Delete File After Sweep",
+            "displayName":"Delete File After Sweep",
             "value":"true",
             "type":"select",
             "mandatory":true,
             "dynamic":false,
             "valueProvided":false,
             "defaultValue":"",
-            "validationRules": null,
-            "options":["false","true"]
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
          },
          {
             "name":"fileRenameFormat",
-            "displayName" : "File Rename Format",
+            "displayName":"File Rename Format",
             "value":"",
             "type":"textarea",
             "mandatory":false,
@@ -82,13 +89,13 @@
             "defaultValue":"",
             "validationRules":{
                "pattern":"",
-               "minLength": "",
-			   "maxLength": ""
+               "minLength":"",
+               "maxLength":""
             }
          },
          {
             "name":"numOfFilesThreshold",
-            "displayName" : "File Group Threshold:# of files",
+            "displayName":"File Group Threshold:# of files",
             "value":"",
             "type":"textarea",
             "mandatory":false,
@@ -97,13 +104,13 @@
             "defaultValue":"10",
             "validationRules":{
                "pattern":"\/^\\d+$\/",
-               "minLength": "",
+               "minLength":"",
                "maxLength":"512"
             }
          },
          {
             "name":"payloadSizeThreshold",
-            "displayName" : "File Group Threshold:group size",
+            "displayName":"File Group Threshold:group size",
             "value":"",
             "type":"textarea",
             "mandatory":false,
@@ -112,13 +119,13 @@
             "defaultValue":"131072",
             "validationRules":{
                "pattern":"\/^\\d+$\/",
-               "minLength": "",
-               "maxLength":"512"               
+               "minLength":"",
+               "maxLength":"512"
             }
          },
          {
             "name":"sweepedFileLocation",
-            "displayName" : "Sweeped File Location",
+            "displayName":"Sweeped File Location",
             "value":"",
             "type":"textarea",
             "mandatory":false,
@@ -127,50 +134,78 @@
             "defaultValue":"",
             "validationRules":{
                "pattern":"",
-               "minLength": "",
-               "maxLength":""               
+               "minLength":"",
+               "maxLength":""
             }
          },
          {
-		 "name": "includeFiles",
-		  "displayName": "IncludeFiles",
-		  "type": "textarea",
-		  "value": "",
-		  "readOnly": false,
-		  "mandatory": false,
-		  "dynamic": false,
-	      "valueProvided":false,
-		  "validationRules": null
-	  },
-	  {
-		  "name": "excludeFiles",
-		  "displayName": "ExcludeFiles",
-		  "type": "textarea",
-		  "value": "",
-		  "readOnly": false,
-		  "mandatory": false,
-		  "dynamic": false,
-	      "valueProvided":false,
-		  "validationRules": null
-	  }
+            "name":"includeFiles",
+            "displayName":"IncludeFiles",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "validationRules":null
+         },
+         {
+            "name":"excludeFiles",
+            "displayName":"ExcludeFiles",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "validationRules":null
+         },
+         {
+            "name":"as2MountCleanup",
+            "displayName":"AS2 MFT Mount Cleanup",
+            "value":"false",
+            "type":"select",
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "defaultValue":"",
+            "validationRules":null,
+            "options":[
+               "false",
+               "true"
+            ]
+         },
+         {
+            "name":"as2TtlDays",
+            "displayName":"AS2 TTL Days",
+            "type":"textarea",
+            "value":"",
+            "readOnly":false,
+            "mandatory":false,
+            "dynamic":false,
+            "valueProvided":false,
+            "validationRules":null
+         }
       ],
       "folderProperties":[
-		  {
-			  "folderURI": "",
-			  "folderDisplayType": "Payload Location",
-			  "folderType": "PAYLOAD_LOCATION",
-			  "folderDesc": "",			  
-			  "mandatory": true,
-			  "readOnly":true,
-			  "valueProvided":true,
-			  "validationRules":{
-				   "folderURIPattern":"",
-				   "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
-				   "minLength": "",
-				   "maxLength": "250"
-			  }
-		  }
-	   ],
-	   "credentialProperties":[]
+         {
+            "folderURI":"",
+            "folderDisplayType":"Payload Location",
+            "folderType":"PAYLOAD_LOCATION",
+            "folderDesc":"",
+            "mandatory":true,
+            "readOnly":true,
+            "valueProvided":true,
+            "validationRules":{
+               "folderURIPattern":"",
+               "folderDescPattern":"\/^[a-zA-Z0-9\\-:_.,\\s]+$\/",
+               "minLength":"",
+               "maxLength":"250"
+            }
+         }
+      ],
+      "credentialProperties":[
+
+      ]
    }
 }

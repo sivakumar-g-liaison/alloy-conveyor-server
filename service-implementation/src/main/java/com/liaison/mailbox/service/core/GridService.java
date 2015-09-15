@@ -305,8 +305,6 @@ public abstract class GridService<T> {
 			} else {
 				field = gemRequest.get(fieldName);
 			}
-
-			field = gemRequest.get(fieldName);
 			query.orderBy((direction.equals(SORT_DIRECTION_ASC))
 					? criteriaBuilder.asc(field)
 					: criteriaBuilder.desc(field));
