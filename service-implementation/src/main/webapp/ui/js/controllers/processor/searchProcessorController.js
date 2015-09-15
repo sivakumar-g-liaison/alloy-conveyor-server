@@ -22,6 +22,11 @@ var rest = myApp.controller(
 		
 		// Profiles loads initially
         $scope.profiles = [];
+        
+        $scope.isProcessorTypeSweeper = false;
+		$scope.isProcessorTypeHTTPListener = false;
+		$scope.isProcessorTypeDropbox = false;
+		$scope.isProcessorTypeFileWriter = false;
      
         // Loading the profile details
         $scope.loadProfiles = function () {
@@ -223,11 +228,13 @@ var rest = myApp.controller(
                 }, {
                     field: 'type',
                     displayName: 'Type',
-                    width: "16%"                    
+                    width: "18%",
+                    cellTemplate: 'partials/processor/processor_section_templates/processor_type_field_template.html'                    
                 }, {
                     field: 'protocol',
                     displayName: 'Protocol',
-                    width: "17%"                    
+                    width: "15%",
+                    cellTemplate: 'partials/processor/processor_section_templates/processor_protocol_field_template.html'                    
                 }, {
                     field: 'status',
                     displayName: 'Status',
@@ -264,5 +271,47 @@ var rest = myApp.controller(
 			}
 
 		}, true);
+		
+	$scope.resetProcessorType = function(proceesorType) {
+			    $scope.selectedProcessorType = proceesorType.value;			    
+                switch ($scope.selectedProcessorType) {
+                  case "SWEEPER":
+					$scope.isProcessorTypeSweeper = true;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.protocolName = null;					
+					break;
+                  case "HTTPSYNCPROCESSOR": 
+				  case "HTTPASYNCPROCESSOR": 				 
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = true;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.protocolName = null;					
+					break;
+				  case "FILEWRITER": 				
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.isProcessorTypeFileWriter = true;
+					$scope.protocolName = null;
+                    break;
+                  case "DROPBOXPROCESSOR":			
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeFileWriter = false;
+					$scope.isProcessorTypeDropbox = true;
+					$scope.protocolName = null;
+                    break;
+				  case "REMOTEDOWNLOADER":
+				  case "REMOTEUPLOADER":				  
+					$scope.isProcessorTypeSweeper = false;
+					$scope.isProcessorTypeHTTPListener = false;
+					$scope.isProcessorTypeDropbox = false;
+					$scope.isProcessorTypeFileWriter = false;
+                    break;                  
+			    }
+		}	
 	}
 ]);

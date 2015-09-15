@@ -1,0 +1,5 @@
+<div ng-switch on="row.getProperty('type')">
+    <div ng-switch-when="REMOTEDOWNLOADER">{{row.getProperty('protocol')}}</div>
+    <div ng-switch-when="REMOTEUPLOADER">{{row.getProperty('protocol')}}</div>
+    <div ng-switch-default>--NA--</div>
+</div>
