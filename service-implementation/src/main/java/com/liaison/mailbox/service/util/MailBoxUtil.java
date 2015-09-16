@@ -183,11 +183,11 @@ public class MailBoxUtil {
 			tenancyKey = new TenancyKeyDTO();
 			tenancyKey.setName(rbac.getDomainName());
 			// if domainInternalName is not available then exception will be thrown.
-			if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainMoniker())) {
+			if (StringUtil.isNullOrEmptyAfterTrim(rbac.getDomainInternalName())) {
 				throw new MailBoxServicesException(Messages.DOMAIN_INTERNAL_NAME_MISSING_IN_MANIFEST,
 						Response.Status.CONFLICT);
 			} else {
-				tenancyKey.setGuid(rbac.getDomainMoniker());
+				tenancyKey.setGuid(rbac.getDomainInternalName());
 			}
 			tenancyKeys.add(tenancyKey);
 		}
@@ -204,7 +204,7 @@ public class MailBoxUtil {
 		List<RoleBasedAccessControl> roleBasedAccessControls = gemClient.getDomainsFromACLManifest(aclManifestJson);
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
-			tenancyKeyGuids.add(rbac.getDomainMoniker());
+			tenancyKeyGuids.add(rbac.getDomainInternalName());
 		}
 		return tenancyKeyGuids;
 
@@ -227,7 +227,7 @@ public class MailBoxUtil {
 
 		for (RoleBasedAccessControl rbac : roleBasedAccessControls) {
 
-			if (rbac.getDomainMoniker().equals(tenancyKeyGuid)) {
+			if (rbac.getDomainInternalName().equals(tenancyKeyGuid)) {
 				tenancyKeyDisplayName = rbac.getDomainName();
 				break;
 			}
