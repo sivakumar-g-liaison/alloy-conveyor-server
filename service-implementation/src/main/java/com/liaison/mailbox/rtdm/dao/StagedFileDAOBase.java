@@ -170,24 +170,31 @@ public class StagedFileDAOBase extends GenericDAOBase<StagedFile> implements Sta
 
 		try {
 
+			String entityStatus = MailBoxUtil.isEmpty(status) ? EntityStatus.ACTIVE.name() : status.toUpperCase();
+			
 			StringBuilder query = new StringBuilder().append("select count(sf) from StagedFile sf")
 					.append(" where LOWER(sf.fileName) like :")
 					.append(FILE_NAME)
 					.append(" and sf.mailboxId in (")
 					.append(QueryBuilderUtil.collectionToSqlString(mailboxIds))
-					.append(")")
-					.append(" and sf.expirationTime > :")
-					.append(CURRENT_TIME)
-					.append(" and sf.stagedFileStatus = :")
-					.append(STATUS);
+					.append(")");
+			
+			if (EntityStatus.ACTIVE.name().equals(entityStatus)) {
+				query.append(" and sf.expirationTime > :")
+				     .append(CURRENT_TIME);
+			}
+			query.append(" and sf.stagedFileStatus = :")
+				 .append(STATUS);
+			
+			Query queryResult = entityManager.createQuery(query.toString());
+			if(EntityStatus.ACTIVE.name().equals(entityStatus)) {
+				queryResult.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()));
+			}
+			
+			queryResult.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
+			           .setParameter(STATUS, entityStatus);
 
-			totalItems = (Long)entityManager
-					.createQuery(query.toString())
-					.setParameter(FILE_NAME, "%" + (fileName == null ? "" : fileName.toLowerCase()) + "%")
-					.setParameter(CURRENT_TIME, new Timestamp(System.currentTimeMillis()))
-					.setParameter(STATUS,(MailBoxUtil.isEmpty(status)?EntityStatus.ACTIVE.name():status.toUpperCase()))
-					.getSingleResult();
-
+			totalItems = (Long) queryResult.getSingleResult();
 			count = totalItems.intValue();
 			return count;
 
