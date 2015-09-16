@@ -29,6 +29,7 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileReques
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
+import com.liaison.mailbox.service.dto.ui.GetProfileByNameResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -206,6 +207,46 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 			return serviceResponse;
 		}
 
+	}
+	
+	/**
+	 * Retrieve the profile based on the name.
+	 * 
+	 * @param name
+	 * @return The GetProfileResponseDTO.
+	 */
+	public GetProfileByNameResponseDTO getProfileByName(String name) {
+		
+		LOG.debug("Entering into get profile by name.");
+		GetProfileByNameResponseDTO serviceResponse = new GetProfileByNameResponseDTO();
+		ProfileConfigurationDAO configDao = new ProfileConfigurationDAOBase();
+		
+		try {
+			
+			ScheduleProfilesRef profileName = configDao.findProfileByName(name);
+			if(profileName != null) {
+					
+				ProfileDTO profile = new ProfileDTO();
+				profile.copyFromEntity(profileName);
+				serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, PROFILE, Messages.SUCCESS));
+				serviceResponse.setProfile(profile);
+			} else {
+				throw new MailBoxConfigurationServicesException(Messages.NO_SUCH_COMPONENT_EXISTS, PROFILE,
+						Response.Status.BAD_REQUEST);
+			}
+			
+			LOG.debug("Exiting from get profile by name operation.");
+
+			return serviceResponse;
+			
+		} catch (MailBoxConfigurationServicesException e) {
+			
+			LOG.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, PROFILE, Messages.FAILURE,
+					e.getMessage()));
+
+			return serviceResponse;
+		}
 	}
 
 }
