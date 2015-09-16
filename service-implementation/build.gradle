@@ -238,7 +238,7 @@ dependencies {
 	}
 
 	//Dependency for GEM client Integration
-	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'2.5.0', changing: true
+	compile group: 'com.liaison.commons.globalenterprisemanager', name: 'globalenterprisemanager-client', version:'3.0.0', changing: true
 
 	//dependency for testng
 	testCompile group: 'org.testng', name: 'testng', version: '6.8.8'
