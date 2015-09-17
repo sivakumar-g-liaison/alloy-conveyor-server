@@ -106,9 +106,14 @@ subprojects {
         testCompile 'org.testng:testng:6.8'
 
         //Dependency for ACL integration 
-        compile 'com.liaison.commons.acl:acl-commons-lib:5.+'
+        compile 'com.liaison.commons.acl:acl-commons-lib:6.+'
      }
 
+}
+
+test {
+	ignoreFailures = false
+	useTestNG()
 }
 
 /*
@@ -174,9 +179,6 @@ project(':service-framework') {
     }
 }
 
-
-
-
 allprojects {
     //repositories { mavenCentral() }
     configurations.all {
@@ -205,5 +207,12 @@ allprojects {
 	   }
 	   
 
+    }
+}
+
+allprojects {
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = '1.7'
+        targetCompatibility = '1.7'
     }
 }
