@@ -62,15 +62,15 @@
 					</div>
 				</div>
 				<div class="col-md-3">
-					<label for="name"> Protocol </label>
-					<select id="protocol" ng-model="protocolName" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control" style="width:285px">
-					<option value="">-- select--</option>
+					<label for="name"> Processor Type </label>
+					<select id="processortype" ng-model="processorType" ng-change="resetProcessorType(processorType)" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control" style="width:285px">
+                    <option value="">-- select--</option>
 					</select>
 				</div>
 				<div class="col-md-3">
-					<label for="name"> Processor Type </label>
-					<select id="processortype" ng-model="processorType" ng-options="type.key group by type.type for type in initialProcessorData.supportedProcessors.options | orderBy:'key'" class="form-control" style="width:285px">
-                    <option value="">-- select--</option>
+					<label for="name"> Protocol </label>
+					<select id="protocol" ng-model="protocolName" ng-disabled="isProcessorTypeSweeper || isProcessorTypeHTTPListener || isProcessorTypeFileWriter || isProcessorTypeDropbox" ng-options="protocol.key for protocol in initialProcessorData.supportedProtocols.options" class="form-control" style="width:285px">
+					<option value="">-- select--</option>
 					</select>
 				</div>
 				<div class="col-md-3">		

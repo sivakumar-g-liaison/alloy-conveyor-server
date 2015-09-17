@@ -12,7 +12,7 @@
 		<form name="formSearchMbx" novalidate="" >
 
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-5">
 				<label for="name"> Name </label> <input type="text" id="name" ng-model="mailBoxName" ng-trim="true"
 					name="name" ng-pattern="userInputPattern" ng-minLength=5 ng-maxLength=80 class="form-control"/>
 				<div ng-show="formSearchMbx.name.$dirty && formSearchMbx.name.$invalid">
@@ -23,18 +23,20 @@
 					<span class="adjustPaddingRight"><img class="infoiconimg" ng-src="{{infoIconImgUrl}}"/></span>Mailbox Name cannot be longer than {{maximumLengthAllowedInTextBox}} characters.</span>
                 </div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-5">
 				<label for="prof"> Profiles </label> <select id="mbx-search-prof" ng-model="profile"
 					ng-options="prof.name for prof in profiles" ng-change="selectSearch()" class="form-control">
 					<option value="">-- select--</option>
 				</select>
 				<progress ng-show=showprogressbar> </progress>
-
+			</div>
+			<div class="col-md-2">
+				<label for="name">&nbsp;</label><br/>
+				<button id="disableFilters" class="btn btn-primary pull-left" ng-click="disableFilter()" ng-if="gridLoaded" style="width:164px">{{filterBtnValue}}</button>
 			</div>
 		</form>
 	</div>
 	<br />
-
 
 	<div class="modal-custom" id="myModal" tabindex="-1" role="dialog">
 		<div class="modal-dialog">
@@ -64,6 +66,6 @@
 	</div>
 
 	<div>
-		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')" ng-if="gridLoaded">Add New</button>
+		<button id="addNew" class="btn btn-primary" ng-click="goto('/mailbox/addMailBox')" ng-if="gridLoaded">Add New</button>		
 	</div>
 </div>

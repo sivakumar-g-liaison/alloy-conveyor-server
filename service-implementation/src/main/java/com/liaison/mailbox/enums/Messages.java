@@ -76,7 +76,7 @@ public enum Messages {
 
 	PROCESSOR_EXECUTION_SUCCESSFULLY("Processor %s execution successfully."),
 	PROCESSOR_EXECUTION_FAILED("Error execution in the processor %s."),
-    
+
 	// CREATE CONFIGURED LOCATION
 	LOCAL_FOLDERS_CREATION_FAILED("Local folder %s creation failed."),
 	HOME_FOLDER_DOESNT_EXIST_ALREADY("The local folder %s must exist before creating custom folders."),
@@ -148,11 +148,11 @@ public enum Messages {
 	DELETE_ONDEMAND_SUCCESSFUL("File unstaged successfully"),
 	USER_AUTHENTICATED_AND_GET_MANIFEST_SUCCESSFUL("User authenticated and manifest retrieved successfully"),
 	STAGE_FILEID_NOT_BELONG_TO_ORGANISATION("Given staged file id does not belong to any user organisation."),
-	
+
 	// processing of token for the retrieval of login id or authentication token failed.
 	PROCESSING_OF_TOKEN_FAILED("Token cannot be processed."),
 	REQUEST_HEADER_PROPERTIES_MISSING("Request header properties are missing"),
-	
+
 	NO_PROCESSORS_EXIST("No Processors available."),
 	NO_MBX_NAMES_EXIST("No Mailbox names available."),
 
@@ -162,13 +162,13 @@ public enum Messages {
 	PAYLOAD_PERSIST_ERROR("Failed to persist the payload in spectrum due to error."),
 	PAYLOAD_READ_ERROR("Failed to retrieve payload from spectrum due to error"),
 	PAYLOAD_HEADERS_READ_ERROR("Failed to retrieve payload headers from spectrum due to error"),
-	
+
 	//referred in ProcessorAdminDetailsResource
 	PROCESSOR_ID_NOT_AVAILABLE("Processor ID is not available as query parameter."),
 	PROCESSOR_EXECUTION_STATE_NOT_EXIST("Processor execution state does not exist for the given id %s ."),
 	PROCESSOR_EXECUTION_STATE_NOT_PROCESSING(
 		"The status for the given processor id %s is not updated since the execution is not in 'Processing' state.");
-	
+
 	private String value;
 
 	// some caching to provide a better search algorithm
