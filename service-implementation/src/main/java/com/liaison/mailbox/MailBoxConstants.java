@@ -306,6 +306,9 @@ public interface MailBoxConstants {
     public static final String LENS_VISIBLE = "Visible";
     public static final String LENS_INVISIBLE = "Invisible";
 
+    //constants for staged file entry
+    public static final String FILE_EXISTS = "fileExists";
+
     /**
      * STATIC KEY used to encrypt/decrypt the token. The token contains username:: tokenCreatedDate::mostRecentRevisionDate and it doesn't contain any sensitive data
      */
