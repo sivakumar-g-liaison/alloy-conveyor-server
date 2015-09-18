@@ -21,6 +21,7 @@ import com.liaison.mailbox.dtdm.model.Processor;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.ExecutionState;
 import com.liaison.mailbox.enums.Messages;
+import com.liaison.mailbox.enums.ProcessorType;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAO;
 import com.liaison.mailbox.rtdm.dao.StagedFileDAOBase;
 import com.liaison.mailbox.rtdm.model.StagedFile;
@@ -56,6 +57,8 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 	    WorkTicket workTicket = (WorkTicket) dto;
         GlassMessage glassMessage = null;
         String processorPayloadLocation = null;
+        ProcessorType processorType = null;
+        boolean writeStatus = false;
 
         try {
 
@@ -76,8 +79,9 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                     : workTicket.getFileName();
 
             LOG.info(constructMessage("Global PID", seperator, workTicket.getGlobalProcessId(), "retrieved from workticket for file", fileName));
-            glassMessage.setCategory(configurationInstance.getProcessorType());
-            glassMessage.setProtocol(configurationInstance.getProcessorType().getCode());
+            processorType = configurationInstance.getProcessorType();
+            glassMessage.setCategory(processorType);
+            glassMessage.setProtocol(processorType.getCode());
             LOG.info(constructMessage("Found the processor to write the payload in the local payload location"));
 
             //get payload from spectrum
@@ -114,15 +118,34 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
                         fileName));
 
                 // write the payload retrieved from spectrum to the configured location of processor
-                MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
-                LOG.info(constructMessage("Global PID",
-                        seperator,
-                        workTicket.getGlobalProcessId(),
-                        seperator,
-                        "Payload is successfully written to ",
-                        processorPayloadLocation,
-                        seperator,
-                        fileName));
+                writeStatus = MailBoxUtil.writeDataToGivenLocation(payload, processorPayloadLocation, fileName, isOverwrite);
+                if (!writeStatus) {
+
+                	LOG.info(constructMessage("Global PID",
+                            seperator,
+                            workTicket.getGlobalProcessId(),
+                            seperator,
+                            "File {} already exists at {} and should not be overwritten "),
+                			fileName,
+                            processorPayloadLocation);
+
+                	//To aviod staged file entry
+                	workTicket.setAdditionalContext(MailBoxConstants.FILE_EXISTS, Boolean.TRUE.toString());
+                } else {
+	                LOG.info(constructMessage("Global PID",
+	                        seperator,
+	                        workTicket.getGlobalProcessId(),
+	                        seperator,
+	                        "Payload is successfully written to ",
+	                        processorPayloadLocation,
+	                        seperator,
+	                        fileName));
+
+	                //To add more details in staged file for filewriter
+	                if (ProcessorType.FILEWRITER.equals(processorType)) {
+	                	workTicket.setAdditionalContext(MailBoxConstants.KEY_FILE_PATH, processorPayloadLocation);
+	                }
+                }
             }
 
             //GLASS LOGGING BEGINS//
@@ -130,7 +153,7 @@ public class FileWriter extends AbstractProcessor implements MailBoxProcessorI {
 
             //GLASS LOGGING CORNER 4 //
             StringBuilder message = new StringBuilder()
-                    .append("Payload written at target location : ")
+                    .append(writeStatus ? "Payload written at target location : " : "File already exists at ")
                     .append(processorPayloadLocation)
                     .append(File.separatorChar)
                     .append(fileName);

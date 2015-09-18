@@ -239,13 +239,16 @@ public class MailBoxUtil {
 	/**
 	 * method to write the given inputstream to given location
 	 *
+	 * @param response payload
+	 * @param targetLocation location to write the payload
+	 * @param filename file name 
+	 * @param isOverwrite whether to overwrite or not
+	 * @return true if it is successfully written the file to the location, otherwise false
 	 * @throws IOException
 	 */
-	public static void writeDataToGivenLocation(InputStream response, String targetLocation, String filename,
-			Boolean isOverwrite)
-			throws IOException {
+	public static boolean writeDataToGivenLocation(InputStream response, String targetLocation, String filename, Boolean isOverwrite) throws IOException {
 
-		LOGGER.info("Started writing given inputstream to given location {}", targetLocation);
+		LOGGER.debug("Started writing given inputstream to given location {}", targetLocation);
 		File directory = new File(targetLocation);
 		if (!directory.exists()) {
 		    Path dirPath = directory.toPath();
@@ -255,13 +258,15 @@ public class MailBoxUtil {
 		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
 		// if the file already exists create a file and write the contents.
 		if (file.exists() && !isOverwrite) {
-			LOGGER.info("File {} already exists and should not be overwritten", file.getName());
+			LOGGER.debug("File {} already exists and should not be overwritten", file.getName());
+			return false;
 		} else {
 			try (FileOutputStream outputStream = new FileOutputStream(file)) {
 				IOUtils.copy(response, outputStream);
 			}
+			LOGGER.debug("The given inputstream is successfully written to location {}", file.getAbsolutePath());
+			return true;
 		}
-		LOGGER.info("The given inputstream is successfully written to location {}", file.getAbsolutePath());
 	}
 
 	/**

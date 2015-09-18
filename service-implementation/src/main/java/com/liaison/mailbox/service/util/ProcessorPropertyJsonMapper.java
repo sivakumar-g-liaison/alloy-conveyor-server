@@ -842,9 +842,11 @@ public class ProcessorPropertyJsonMapper {
 				// handle credential property to provide backward compatibility with already uploaded ssh keypairs
 				// after upload provision removal only one entry will be available under type ssh_keypair
 				// the legacy processor will have two entries one for private and other for public this has to converted to one entry
-				if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR)) {
+				if (credential.getCredsType().equalsIgnoreCase(MailBoxConstants.SSH_KEYPAIR)
+						&& !MailBoxUtil.isEmpty(credential.getCredsIdpType())
+						&& credential.getCredsIdpType().equals("PRIVATE")) {
 					// if private just skip that
-					if (!MailBoxUtil.isEmpty(credential.getCredsIdpType()) && credential.getCredsIdpType().equals("PRIVATE")) continue;
+					continue;
 				}
 				credentialPropertyTemplate = new ProcessorCredentialPropertyDTO();
 				handleCredentialProperties(credentialPropertyTemplate, credential);

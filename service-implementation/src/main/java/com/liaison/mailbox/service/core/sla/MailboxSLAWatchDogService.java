@@ -10,15 +10,7 @@
 
 package com.liaison.mailbox.service.core.sla;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,21 +18,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jettison.json.JSONException;
 
-import com.liaison.commons.exception.BootstrapingFailedException;
-import com.liaison.commons.exception.LiaisonException;
-import com.liaison.commons.security.pkcs7.SymmetricAlgorithmException;
-import com.liaison.fs2.api.exceptions.FS2Exception;
 import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAO;
 import com.liaison.mailbox.dtdm.dao.ProcessorConfigurationDAOBase;
@@ -62,7 +43,6 @@ import com.liaison.mailbox.service.core.processor.MailBoxProcessorFactory;
 import com.liaison.mailbox.service.core.processor.MailBoxProcessorI;
 import com.liaison.mailbox.service.dto.ResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.MailboxSLAResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
 import com.liaison.mailbox.service.exception.MailBoxServicesException;
 import com.liaison.mailbox.service.util.EmailUtil;
 import com.liaison.mailbox.service.util.MailBoxUtil;
@@ -97,20 +77,8 @@ public class MailboxSLAWatchDogService {
 	/**
 	 * Check Mailbox satisfies the SLA Rules or not.
 	 *
-	 * @return MailboxSLAResponseDTO.
-	 * @throws IOException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws JSONException
-	 * @throws SymmetricAlgorithmException
-	 * @throws URISyntaxException
-	 * @throws JAXBException
-	 * @throws LiaisonException
-	 * @throws OperatorCreationException
-	 * @throws KeyStoreException
-	 * @throws CertificateException
-	 * @throws NoSuchAlgorithmException
-	 * @throws UnrecoverableKeyException
+	 * @return MailboxSLAResponseDTO
+	 * @throws Exception
 	 */
 	public MailboxSLAResponseDTO validateSLARules() throws Exception {
 
@@ -222,43 +190,11 @@ public class MailboxSLAWatchDogService {
 		return timeConfigurationUnit;
 	}
 
-
-	/**
-	 * method to write the payload from spectrum to configured payload location of processor
-	 *
-	 * @throws MailBoxServicesException
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 * @throws FS2Exception
-	 */
-	@Deprecated
-	public void writeSpectrumPayloadToProcessorLocation(InputStream response, String payloadLocation, String filename, Boolean isOverwrite) throws IOException {
-
-		LOG.info("Started writing payload from spectrum to processor payload location");
-		File directory = new File(payloadLocation);
-		if (!directory.exists()) {
-			Files.createDirectories(directory.toPath());
-		}
-
-		File file = new File(directory.getAbsolutePath() + File.separatorChar + filename);
-		// if the file already exists create a file and write the contents.
-		if (file.exists() && !isOverwrite)  {
-			LOG.info("File {} already exists and should not be overwritten", file.getName());
-		} else {
-			Files.write(file.toPath(), IOUtils.toByteArray(response));
-		}
-		LOG.info("Payload from spectrum is successfully written to location {}", file.getAbsolutePath());
-		if (response != null) {
-		    response.close();
-		}
-	}
-
 	/**
 	 * Method to return a list of canonical names of specific processors
 	 *
-	 *
+	 * @param type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
 	 * @return list of canonical names of processors of based on the type provided
-	 * type Mailbox_SLA - (sweeper), type Customer_SLA - (remoteuploader, filewriter)
 	 */
 	private List<String> getCannonicalNamesofSpecificProcessors(String type) {
 
@@ -282,7 +218,7 @@ public class MailboxSLAWatchDogService {
 	 * associated with given mailbox
 	 *
 	 * @param mailboxId
-	 * @return
+	 * @return Processor
 	 */
 	public Processor getSpecificProcessorofMailbox(String mailboxId) {
 
@@ -301,23 +237,9 @@ public class MailboxSLAWatchDogService {
 	 * Iterate all Mailboxes and check whether Customer satisfies the SLA Rules
 	 * configured to a mailbox
 	 *
-	 * @throws IOException
-	 * @throws BootstrapingFailedException
-	 * @throws CMSException
-	 * @throws JSONException
-	 * @throws SymmetricAlgorithmException
-	 * @throws MailBoxServicesException
-	 * @throws URISyntaxException
-	 * @throws JAXBException
-	 * @throws LiaisonException
-	 * @throws OperatorCreationException
-	 * @throws KeyStoreException
-	 * @throws CertificateException
-	 * @throws NoSuchAlgorithmException
-	 * @throws JsonParseException
-	 * @throws UnrecoverableKeyException
-	 *
-	 * @throws MailBoxConfigurationServicesException
+	 * @param slaViolatedMailboxesList
+	 * @return true if customer sla is violated otherwise false
+	 * @throws Exception
 	 */
 	public boolean validateCustomerSLARule(List<String> slaViolatedMailboxesList) throws Exception {
 
@@ -476,6 +398,7 @@ public class MailboxSLAWatchDogService {
 		}
 
 	}
+
 	/**
 	 * Method to convert sla configuration property from mailbox into TimeStamp value
 	 *
@@ -512,25 +435,11 @@ public class MailboxSLAWatchDogService {
 	}
 
 	/**
-	 *
+	 * Customer SLA Verification
 	 *
 	 * @param processor
-	 * @param timeToPickUpFilePostedByMailbox
-	 * @throws UnrecoverableKeyException
-	 * @throws JsonParseException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateException
-	 * @throws KeyStoreException
-	 * @throws OperatorCreationException
-	 * @throws IOException
-	 * @throws LiaisonException
-	 * @throws JAXBException
-	 * @throws URISyntaxException
-	 * @throws MailBoxServicesException
-	 * @throws SymmetricAlgorithmException
-	 * @throws JSONException
-	 * @throws CMSException
-	 * @throws BootstrapingFailedException
+	 * @return List of available files in the given processor location
+	 * @throws Exception
 	 */
 	private List<String> doCustomerSLAVerification(Processor processor) throws Exception {
 

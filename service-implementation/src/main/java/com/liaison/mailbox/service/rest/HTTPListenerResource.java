@@ -236,16 +236,15 @@ public class HTTPListenerResource extends AuditedResource {
 
 					//MailBox TVAPI updates should be sent only after the payload has been persisted to Spectrum
 					if (!Messages.PAYLOAD_ALREADY_EXISTS.value().equals(errorMessage)
-                            && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)) {
+                            && !Messages.PAYLOAD_PERSIST_ERROR.value().equals(errorMessage)
+                            && null != glassMessage) {
 
-					    if (null != glassMessage) {
+				        GlassMessage failedMsg = constructGlassMessage(request, workTicket, mailboxPguid, ExecutionState.FAILED);
+	                    // Log error status
+				        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
+				        new TransactionVisibilityClient().logToGlass(failedMsg);
+	                    glassMessage.logFourthCornerTimestamp();
 
-					        GlassMessage failedMsg = constructGlassMessage(request, workTicket, mailboxPguid, ExecutionState.FAILED);
-                            // Log error status
-					        failedMsg.logProcessingStatus(StatusType.ERROR, "HTTP Sync Request Failed: " + e.getMessage());
-					        new TransactionVisibilityClient().logToGlass(failedMsg);
-                            glassMessage.logFourthCornerTimestamp();
-					    }
                     }
 					throw new LiaisonRuntimeException(e.getMessage());
 				}
