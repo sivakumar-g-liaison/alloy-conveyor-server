@@ -224,7 +224,7 @@ public class ProfileConfigurationService extends GridService<ScheduleProfilesRef
 		try {
 			
 			ScheduleProfilesRef profileName = configDao.findProfileByName(name);
-			if(profileName != null) {
+			if(null != profileName) {
 					
 				ProfileDTO profile = new ProfileDTO();
 				profile.copyFromEntity(profileName);

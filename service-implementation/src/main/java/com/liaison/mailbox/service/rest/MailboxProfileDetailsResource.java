@@ -65,9 +65,7 @@ public class MailboxProfileDetailsResource extends AuditedResource {
         DefaultMonitorRegistry.getInstance().register(statsTimer);
     }
 	
-	public MailboxProfileDetailsResource()
-			throws IOException {
-
+	public MailboxProfileDetailsResource() throws IOException {
 		DefaultMonitorRegistry.getInstance().register(Monitors.newObjectMonitor(this));
 	}
 	

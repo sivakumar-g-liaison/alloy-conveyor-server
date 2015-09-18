@@ -34,6 +34,7 @@ import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
 import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.FolderValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
@@ -333,6 +334,19 @@ public abstract class BaseServiceTest {
         validationRules.setMaxLength("");
         validationRules.setMinLength("");
         return validationRules;
+    }
+    
+    /**
+     * Construct dummy profile DTO for testing.
+     * 
+     * @param uniqueValue
+     * @return profileDTO
+     */
+    public ProfileDTO constructDummyProfileDTO(Long uniqueValue) {
+    	
+    	ProfileDTO profileDTO = new ProfileDTO();
+        profileDTO.setName("PROFILE_TEST" + uniqueValue);
+		return profileDTO;
     }
 
 }
