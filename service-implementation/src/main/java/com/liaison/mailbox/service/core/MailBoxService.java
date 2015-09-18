@@ -438,9 +438,12 @@ public class MailBoxService {
                     mbx.getPguid(),
                     workTicket.getGlobalProcessId());
 
-            //persist staged file to get the gpid during uploader
-            StagedFileDAOBase dao = new StagedFileDAOBase();
-            dao.persistStagedFile(workTicket, processor.getPguid());
+            //check if the file already exists and not overwritten
+            if (workTicket.getAdditionalContextItem(MailBoxConstants.FILE_EXISTS) == null) {
+            	//persist staged file to get the gpid during uploader
+            	StagedFileDAOBase dao = new StagedFileDAOBase();
+            	dao.persistStagedFile(workTicket, processor.getPguid());
+            }
 
             // send notification for successful file staging
             String emailSubject = workTicket.getFileName() + "' is available for pick up";

@@ -22,6 +22,7 @@ import com.liaison.commons.message.glass.dom.TransactionVisibilityAPI;
 import com.liaison.commons.message.glass.util.GlassMessageUtil;
 import com.liaison.commons.util.settings.DecryptableConfiguration;
 import com.liaison.commons.util.settings.LiaisonConfigurationFactory;
+import com.liaison.mailbox.MailBoxConstants;
 import com.liaison.mailbox.enums.ExecutionState;
 
 /**
@@ -131,9 +132,13 @@ public class TransactionVisibilityClient {
         }
 
 		if (message.getCategory() != null && !message.getCategory().equals("")) {
-			visibilityAPI.setCategory(message.getProtocol() + ":" + message.getCategory().getCode());
+			if (MailBoxConstants.DROPBOX_PROCESSOR.equalsIgnoreCase(message.getProtocol())) {
+				visibilityAPI.setCategory("MFT" + ":" + MailBoxConstants.DROPBOX_SERVICE_NAME);
+			} else {
+				visibilityAPI.setCategory(message.getProtocol() + ":" + message.getCategory().getCode());
+			}
 		}
-		
+
 		if (ExecutionState.PROCESSING.value().equals(message.getStatus().value())) {
 			visibilityAPI.setStatus(StatusCode.P);
 			if (null != message.getInSize()) {
