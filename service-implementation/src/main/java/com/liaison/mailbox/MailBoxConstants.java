@@ -66,6 +66,7 @@ public interface MailBoxConstants {
 	// processor name.
 	public final static String PROCESSOR = "PROCESSOR";
 
+	public final static String MAILBOX_PROCESSOR = "Processor";
 
 	// Added for processing Mount Location from Folder Path given by User
 	public final static String MOUNT_LOCATION = "MOUNT_POINT";
@@ -146,6 +147,12 @@ public interface MailBoxConstants {
 	public static final String DEFAULT_INTERRUPT_SIGNAL_FREQUENCY_IN_SEC = "check.for.interrupt.signal.frequency.in.sec";
 	public static final String PROCESSOR_SYNC_URL_DISPLAY_PREFIX = "processor.sync.url.display.prefix";
 	public static final String PROCESSOR_ASYNC_URL_DISPLAY_PREFIX = "processor.async.url.display.prefix";
+
+	public static String MAILBOX = "MailBox";
+	public static final String PROCESSOR_STATUS = "Processor Status";
+	public static String INTERRUPT_SIGNAL = "Interrupt Signal";
+	public static String EXECUTING_PROCESSORS = "Executing Processors";
+	public static String PROFILE = "Profile";
 
 	//added for generic error message if any location is missing
 	public static final String PAYLOAD_LOCATION = "payload";
