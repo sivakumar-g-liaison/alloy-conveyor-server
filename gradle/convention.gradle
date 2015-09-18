@@ -22,9 +22,6 @@ subprojects { project ->
 
     version = rootProject.version
 
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
-
     // GRADLE-2087 workaround, perform after java plugin
     // Restore status after Java plugin
     status = rootProject.status

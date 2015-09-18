@@ -32,7 +32,7 @@
 :: ==================================================================
 
 :: set JRE_HOME=%CATALINA_BASE%/../jre/
-set JAVA_OPTS=%JAVA_OPTS% -XX:-UseSplitVerifier
+rem set JAVA_OPTS=%JAVA_OPTS% -XX:-UseSplitVerifier
 
 :: discourage address map swapping by setting Xms and Xmx to the same value
 :: http://confluence.atlassian.com/display/DOC/Garbage+Collector+Performance+Issues
