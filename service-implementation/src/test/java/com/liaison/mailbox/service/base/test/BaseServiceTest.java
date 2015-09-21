@@ -43,6 +43,7 @@ import com.liaison.mailbox.service.dto.configuration.processor.properties.Proces
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
 import com.liaison.mailbox.service.dto.configuration.processor.properties.ValidationRulesDTO;
 import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 
 /**
  * Base Test class for initial setup and cleanup.
@@ -233,6 +234,15 @@ public abstract class BaseServiceTest {
 		return mailBoxDTO;
 	}
 
+    public ReviseProcessorRequestDTO constructReviseProcessorDTO(String guid, MailBoxDTO mbxDTO) throws IOException {
+
+        ReviseProcessorRequestDTO procRequestDTO = new ReviseProcessorRequestDTO();
+        ProcessorDTO procDTO = setProcessorDTO(guid, mbxDTO);
+        constructProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+
 	/**
      * Construct dummy mailbox DTO for testing.
      *
@@ -241,6 +251,7 @@ public abstract class BaseServiceTest {
 	 * @throws IOException
      */
     public AddProcessorToMailboxRequestDTO constructDummyProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) throws IOException {
+
         AddProcessorToMailboxRequestDTO procRequestDTO = new AddProcessorToMailboxRequestDTO();
         ProcessorDTO procDTO = setProcessorDTO(mailboxGuid, mbxDTO);
         constructProcessorProperties(procDTO);
@@ -249,18 +260,19 @@ public abstract class BaseServiceTest {
     }
 
     private ProcessorDTO setProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) {
+
         ProcessorDTO procDTO = new ProcessorDTO();
         procDTO.setMailboxName(mbxDTO.getName());
         procDTO.setLinkedMailboxId(mailboxGuid);
         procDTO.setName("testProcessor" + System.currentTimeMillis());
         procDTO.setStatus("ACTIVE");
         procDTO.setType("REMOTEDOWNLOADER");
-        procDTO.setJavaScriptURI("ftp://test:6060");
         procDTO.setProtocol("FTP");
         return procDTO;
     }
 
     private void constructProcessorProperties(ProcessorDTO procDTO) throws IOException {
+
         ProcessorPropertyUITemplateDTO propDTO = new ProcessorPropertyUITemplateDTO();
         List<ProcessorPropertyDTO> staticProperties = new ArrayList<ProcessorPropertyDTO>();
         List<ProcessorFolderPropertyDTO> folderProperties = new ArrayList<ProcessorFolderPropertyDTO>();
@@ -278,6 +290,7 @@ public abstract class BaseServiceTest {
     }
 
     private ProcessorPropertyDTO setProcessorURLPropertyDTO(ValidationRulesDTO validationRules) {
+
         ProcessorPropertyDTO procPropDTO = new ProcessorPropertyDTO();
         procPropDTO.setName("url");
         procPropDTO.setDisplayName("URL");
@@ -293,6 +306,7 @@ public abstract class BaseServiceTest {
     }
 
     private ProcessorFolderPropertyDTO setProcessorFolderPropertyDTO() {
+
         ProcessorFolderPropertyDTO procPropDTO = new ProcessorFolderPropertyDTO();
         FolderValidationRulesDTO validationRules = setFolderValidationRulesDTO();
         procPropDTO.setFolderURI("ftp://test:6060");
@@ -307,6 +321,7 @@ public abstract class BaseServiceTest {
     }
 
     private ProcessorCredentialPropertyDTO setProcessorCredentialPropertyDTO() {
+
         ProcessorCredentialPropertyDTO procCredentialPropDTO = new ProcessorCredentialPropertyDTO();
         procCredentialPropDTO.setCredentialURI("");
         procCredentialPropDTO.setCredentialType("LOGIN_CREDENTIAL");
@@ -320,6 +335,7 @@ public abstract class BaseServiceTest {
     }
 
     private FolderValidationRulesDTO setFolderValidationRulesDTO() {
+
         FolderValidationRulesDTO validationRules = new FolderValidationRulesDTO();
         validationRules.setFolderDescPattern("");
         validationRules.setFolderDescPattern("");
@@ -329,6 +345,7 @@ public abstract class BaseServiceTest {
     }
 
     private ValidationRulesDTO setValidationRules() {
+
         ValidationRulesDTO validationRules = new ValidationRulesDTO();
         validationRules.setPattern("");
         validationRules.setMaxLength("");
@@ -347,6 +364,19 @@ public abstract class BaseServiceTest {
     	ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setName("PROFILE_TEST" + uniqueValue);
 		return profileDTO;
+    }
+
+    /**
+     * Construct dummy profile DTO for testing.
+     *
+     * @param uniqueValue
+     * @return profileDTO
+     */
+    public ProfileDTO constructDummyProfileDTO(Long uniqueValue) {
+
+       ProfileDTO profileDTO = new ProfileDTO();
+       profileDTO.setName("PROFILE_TEST" + uniqueValue);
+       return profileDTO;
     }
 
 }
