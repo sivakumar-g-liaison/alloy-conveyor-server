@@ -1,9 +1,16 @@
 package com.liaison.mailbox.service.integration.test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.gson.Gson;
+import com.liaison.mailbox.dtdm.dao.FilterObject;
 import com.liaison.mailbox.service.base.test.BaseServiceTest;
 import com.liaison.mailbox.service.base.test.InitInitialDualDBContext;
 import com.liaison.mailbox.service.core.ProfileConfigurationService;
@@ -13,7 +20,7 @@ import com.liaison.mailbox.service.dto.configuration.request.ReviseProfileReques
 import com.liaison.mailbox.service.dto.configuration.response.AddProfileResponseDTO;
 import com.liaison.mailbox.service.dto.configuration.response.ReviseProfileResponseDTO;
 import com.liaison.mailbox.service.dto.ui.GetProfileByNameResponseDTO;
-import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesException;
+import com.liaison.mailbox.service.dto.ui.GetProfileResponseDTO;
 
 /**
  * Test class to test profile configuration service.
@@ -21,6 +28,10 @@ import com.liaison.mailbox.service.exception.MailBoxConfigurationServicesExcepti
  * @author OFS
  */
 public class ProfileConfigurationServiceIT extends BaseServiceTest {
+	
+	private static final String PAGE = "1";
+	
+	private static final String PAGE_SIZE = "25";
 	
 	/**
 	 * @throws Exception
@@ -77,11 +88,9 @@ public class ProfileConfigurationServiceIT extends BaseServiceTest {
 	
 	/**
 	 * Method to retrieve the non-existing profile.
-	 * 
-	 * @throws MailBoxConfigurationServicesException
 	 */
 	@Test
-	public void testRetrieveNonExistingProfile() throws MailBoxConfigurationServicesException {
+	public void testRetrieveNonExistingProfile() {
 		
 		AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
 		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
@@ -123,6 +132,62 @@ public class ProfileConfigurationServiceIT extends BaseServiceTest {
 		// Assertion checking
 		Assert.assertEquals(SUCCESS, reviseResponse.getResponse().getStatus());
 		Assert.assertNotEquals(createdProfile, reviseResponseDTO.getProfile().getName());
+		
+	}
+	
+	/**
+	 * Method to create already existing profile
+	 */
+	@Test
+	public void testCreateDuplicateProfile() {
+		
+		//Adding a profile
+		AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
+		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+		requestDTO.setProfile(profileDTO);
+		
+		ProfileConfigurationService service = new ProfileConfigurationService();
+		AddProfileResponseDTO response = service.createProfile(requestDTO);
+		
+		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+		
+		//Adding the profile which is created above
+		AddProfileResponseDTO profileResponse = service.createProfile(requestDTO);
+		
+		Assert.assertEquals(FAILURE, profileResponse.getResponse().getStatus());
+
+	}
+	
+	/**
+	 * Method to search a profile
+	 */
+	@Test
+	public void testSearchProfile() {
+		
+		//Adding a profile
+		AddProfileRequestDTO requestDTO = new AddProfileRequestDTO();
+		ProfileDTO profileDTO = constructDummyProfileDTO(System.currentTimeMillis());
+		requestDTO.setProfile(profileDTO);
+		
+		ProfileConfigurationService service = new ProfileConfigurationService();
+		AddProfileResponseDTO response = service.createProfile(requestDTO);
+		
+		Assert.assertEquals(SUCCESS, response.getResponse().getStatus());
+
+		//search the created profile
+		Map<String, List<FilterObject>> searchObjectList = new HashMap<>();
+		List<FilterObject> objectList = new ArrayList<FilterObject>();
+		FilterObject object = new FilterObject();
+		object.setField("name");
+		object.setText(profileDTO.getName());
+		objectList.add(object);
+		searchObjectList.put("filterText", objectList);
+		Gson gsonObject = new Gson();
+
+		String searchText = gsonObject.toJson(searchObjectList);
+		GetProfileResponseDTO profileResponse = service.getProfiles(PAGE, PAGE_SIZE, "", searchText);
+		
+		Assert.assertEquals(SUCCESS, profileResponse.getResponse().getStatus());
 		
 	}
 	
