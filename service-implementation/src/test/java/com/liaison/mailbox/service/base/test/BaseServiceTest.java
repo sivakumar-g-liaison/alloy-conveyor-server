@@ -15,6 +15,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
@@ -31,7 +33,17 @@ import com.liaison.framework.util.ServiceUtils;
 import com.liaison.mailbox.enums.EntityStatus;
 import com.liaison.mailbox.enums.Messages;
 import com.liaison.mailbox.service.dto.configuration.MailBoxDTO;
+import com.liaison.mailbox.service.dto.configuration.ProcessorDTO;
+import com.liaison.mailbox.service.dto.configuration.ProfileDTO;
 import com.liaison.mailbox.service.dto.configuration.PropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.FolderValidationRulesDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorCredentialPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorFolderPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ProcessorPropertyUITemplateDTO;
+import com.liaison.mailbox.service.dto.configuration.processor.properties.ValidationRulesDTO;
+import com.liaison.mailbox.service.dto.configuration.request.AddProcessorToMailboxRequestDTO;
+import com.liaison.mailbox.service.dto.configuration.request.ReviseProcessorRequestDTO;
 
 /**
  * Base Test class for initial setup and cleanup.
@@ -44,7 +56,7 @@ public abstract class BaseServiceTest {
 	private ByteArrayOutputStream output;
 	private static String BASE_URL;
 	private static String KMS_BASE_URL;
-	private static String BASE_URL_DROPBOX;
+    private static String BASE_URL_DROPBOX;
 
 	public static final String SUCCESS = Messages.SUCCESS.value();
 	public static final String FAILURE = Messages.FAILURE.value();
@@ -221,5 +233,137 @@ public abstract class BaseServiceTest {
 		mailBoxDTO.getProperties().add(property);
 		return mailBoxDTO;
 	}
+
+    public ReviseProcessorRequestDTO constructReviseProcessorDTO(String guid, MailBoxDTO mbxDTO) throws IOException {
+
+        ReviseProcessorRequestDTO procRequestDTO = new ReviseProcessorRequestDTO();
+        ProcessorDTO procDTO = setProcessorDTO(guid, mbxDTO);
+        constructProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+
+	/**
+     * Construct dummy mailbox DTO for testing.
+     *
+     * @param uniqueValue
+     * @return
+	 * @throws IOException
+     */
+    public AddProcessorToMailboxRequestDTO constructDummyProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) throws IOException {
+
+        AddProcessorToMailboxRequestDTO procRequestDTO = new AddProcessorToMailboxRequestDTO();
+        ProcessorDTO procDTO = setProcessorDTO(mailboxGuid, mbxDTO);
+        constructProcessorProperties(procDTO);
+        procRequestDTO.setProcessor(procDTO);
+        return procRequestDTO;
+    }
+
+    private ProcessorDTO setProcessorDTO(String mailboxGuid, MailBoxDTO mbxDTO) {
+
+        ProcessorDTO procDTO = new ProcessorDTO();
+        procDTO.setMailboxName(mbxDTO.getName());
+        procDTO.setLinkedMailboxId(mailboxGuid);
+        procDTO.setName("testProcessor" + System.currentTimeMillis());
+        procDTO.setStatus("ACTIVE");
+        procDTO.setType("REMOTEDOWNLOADER");
+        procDTO.setProtocol("FTP");
+        return procDTO;
+    }
+
+    private void constructProcessorProperties(ProcessorDTO procDTO) throws IOException {
+
+        ProcessorPropertyUITemplateDTO propDTO = new ProcessorPropertyUITemplateDTO();
+        List<ProcessorPropertyDTO> staticProperties = new ArrayList<ProcessorPropertyDTO>();
+        List<ProcessorFolderPropertyDTO> folderProperties = new ArrayList<ProcessorFolderPropertyDTO>();
+        List<ProcessorCredentialPropertyDTO> procCredentialPropDTO = new ArrayList<ProcessorCredentialPropertyDTO>();
+        ValidationRulesDTO validationRules = setValidationRules();
+        ProcessorPropertyDTO procURLPropDTO = setProcessorURLPropertyDTO(validationRules);
+        ProcessorFolderPropertyDTO procFolderPropDTO = setProcessorFolderPropertyDTO();
+        setProcessorCredentialPropertyDTO();
+        folderProperties.add(procFolderPropDTO);
+        staticProperties.add(procURLPropDTO);
+        propDTO.setStaticProperties(staticProperties);
+        propDTO.setFolderProperties(folderProperties);
+        propDTO.setCredentialProperties(procCredentialPropDTO);
+        procDTO.setProcessorPropertiesInTemplateJson(propDTO);
+    }
+
+    private ProcessorPropertyDTO setProcessorURLPropertyDTO(ValidationRulesDTO validationRules) {
+
+        ProcessorPropertyDTO procPropDTO = new ProcessorPropertyDTO();
+        procPropDTO.setName("url");
+        procPropDTO.setDisplayName("URL");
+        procPropDTO.setType("textarea");
+        procPropDTO.setReadOnly(false);
+        procPropDTO.setValue("20");
+        procPropDTO.setMandatory(true);
+        procPropDTO.setDynamic(false);
+        procPropDTO.setValueProvided(true);
+        procPropDTO.setDefaultValue("21");
+        procPropDTO.setValidationRules(validationRules);
+        return procPropDTO;
+    }
+
+    private ProcessorFolderPropertyDTO setProcessorFolderPropertyDTO() {
+
+        ProcessorFolderPropertyDTO procPropDTO = new ProcessorFolderPropertyDTO();
+        FolderValidationRulesDTO validationRules = setFolderValidationRulesDTO();
+        procPropDTO.setFolderURI("ftp://test:6060");
+        procPropDTO.setFolderDisplayType("Remote Payload Location");
+        procPropDTO.setFolderType("PAYLOAD_LOCATION");
+        procPropDTO.setFolderDesc("test folder desc");
+        procPropDTO.setMandatory(false);
+        procPropDTO.setReadOnly(false);
+        procPropDTO.setValueProvided(true);
+        procPropDTO.setValidationRules(validationRules);
+        return procPropDTO;
+    }
+
+    private ProcessorCredentialPropertyDTO setProcessorCredentialPropertyDTO() {
+
+        ProcessorCredentialPropertyDTO procCredentialPropDTO = new ProcessorCredentialPropertyDTO();
+        procCredentialPropDTO.setCredentialURI("");
+        procCredentialPropDTO.setCredentialType("LOGIN_CREDENTIAL");
+        procCredentialPropDTO.setCredentialDisplayType("Login Credential");
+        procCredentialPropDTO.setUserId("");
+        procCredentialPropDTO.setPassword("");
+        procCredentialPropDTO.setIdpType("");
+        procCredentialPropDTO.setIdpURI("");
+        procCredentialPropDTO.setValueProvided(false);
+        return procCredentialPropDTO;
+    }
+
+    private FolderValidationRulesDTO setFolderValidationRulesDTO() {
+
+        FolderValidationRulesDTO validationRules = new FolderValidationRulesDTO();
+        validationRules.setFolderDescPattern("");
+        validationRules.setFolderDescPattern("");
+        validationRules.setMinLength("");
+        validationRules.setMaxLength("");
+        return validationRules;
+    }
+
+    private ValidationRulesDTO setValidationRules() {
+
+        ValidationRulesDTO validationRules = new ValidationRulesDTO();
+        validationRules.setPattern("");
+        validationRules.setMaxLength("");
+        validationRules.setMinLength("");
+        return validationRules;
+    }
+    
+    /**
+     * Construct dummy profile DTO for testing.
+     * 
+     * @param uniqueValue
+     * @return profileDTO
+     */
+    public ProfileDTO constructDummyProfileDTO(Long uniqueValue) {
+    	
+    	ProfileDTO profileDTO = new ProfileDTO();
+        profileDTO.setName("PROFILE_TEST" + uniqueValue);
+		return profileDTO;
+    }
 
 }

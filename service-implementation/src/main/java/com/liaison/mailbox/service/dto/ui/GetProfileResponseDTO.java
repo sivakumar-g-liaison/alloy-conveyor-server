@@ -32,6 +32,7 @@ public class GetProfileResponseDTO extends CommonResponseDTO {
 	private static final long serialVersionUID = 1L;
 
 	private List<ProfileDTO> profiles;
+	private ProfileDTO profile;
 
 	private long totalItems = 0L;
 
@@ -54,4 +55,13 @@ public class GetProfileResponseDTO extends CommonResponseDTO {
 	public void setProfiles(List<ProfileDTO> profiles) {
 		this.profiles = profiles;
 	}
+
+	public ProfileDTO getProfile() {
+		return profile;
+	}
+
+	public void setProfile(ProfileDTO profile) {
+		this.profile = profile;
+	}
+
 }
