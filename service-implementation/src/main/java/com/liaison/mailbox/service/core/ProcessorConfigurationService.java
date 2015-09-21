@@ -982,4 +982,48 @@ public class ProcessorConfigurationService {
 		}
 		return null;
 	}
+
+	/**
+	 * Get the Processor details using guid.
+	 *
+	 * @param processorGuid The pguid of the processor
+	 * @return serviceResponse GetProcessorResponseDTO
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws IOException
+	 */
+	public GetProcessorResponseDTO getProcessor(String processorGuid) {
+
+		GetProcessorResponseDTO serviceResponse = new GetProcessorResponseDTO();
+
+		try {
+
+			LOGGER.debug("Entering into get processor.");
+			LOGGER.info("The retrieve guid is {} ", processorGuid);
+
+			ProcessorConfigurationDAO config = new ProcessorConfigurationDAOBase();
+			Processor processor = config.find(Processor.class, processorGuid);
+
+			if (processor == null) {
+				throw new MailBoxConfigurationServicesException(Messages.PROCESSOR_DOES_NOT_EXIST, processorGuid, Response.Status.BAD_REQUEST);
+			}
+
+			ProcessorDTO dto = new ProcessorDTO();
+			dto.copyFromEntity(processor, true);
+
+			serviceResponse.setProcessor(dto);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_SUCCESSFUL, MailBoxConstants.MAILBOX_PROCESSOR, Messages.SUCCESS));
+			LOGGER.debug("Exit from get processor.");
+			return serviceResponse;
+
+		} catch (Exception e) {
+
+			LOGGER.error(Messages.READ_OPERATION_FAILED.name(), e);
+			serviceResponse.setResponse(new ResponseDTO(Messages.READ_OPERATION_FAILED, MailBoxConstants.MAILBOX_PROCESSOR, Messages.FAILURE,
+					e.getMessage()));
+			return serviceResponse;
+		}
+	}
 }
